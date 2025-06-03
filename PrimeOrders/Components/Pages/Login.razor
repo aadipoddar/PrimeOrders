@@ -2,10 +2,258 @@
 
 <PageTitle>Login - Prime Orders</PageTitle>
 
-<div>
-	<SfOtpInput Type="OtpInputType.Number"
-				OnInput="CheckPasscode"
-				Value="@_passcode"
-				Placeholder="CODE"
-				CssClass="otp-input" />
+<div class="login-container">
+	<div class="login-card">
+		<div class="login-header">
+			<img src="images/order.gif" alt="Prime Orders Logo" class="login-logo" />
+			<h1 class="login-title">Prime Orders</h1>
+			<p class="login-subtitle">Enter your access code</p>
+		</div>
+
+		<div class="otp-container">
+			<SfOtpInput Type="OtpInputType.Number"
+						OnInput="CheckPasscode"
+						Value="@_passcode"
+						Placeholder="CODE"
+						CssClass="otp-input" />
+		</div>
+
+		<div class="login-footer">
+			@if (IsVerifying)
+			{
+				<div class="loader-container">
+					<div class="circular-dots-loader">
+						<span class="dot dot-1"></span>
+						<span class="dot dot-2"></span>
+						<span class="dot dot-3"></span>
+					</div>
+					<p class="loading-text">Verifying access code...</p>
+				</div>
+			}
+			else
+			{
+				<div class="login-dots">
+					<span class="dot dot1"></span>
+					<span class="dot dot2"></span>
+					<span class="dot dot3"></span>
+				</div>
+				<p class="login-hint">Enter your 4-digit access code to continue</p>
+			}
+		</div>
+	</div>
 </div>
+
+<style>
+	:root {
+		--dotnet-primary: #512BD4;
+		--dotnet-secondary: #68217A;
+		--dotnet-accent: #00A4EF;
+		--dotnet-light: #F7F7F7;
+		--dotnet-dark: #1E1E1E;
+	}
+
+	body {
+		background-color: var(--dotnet-light);
+		margin: 0;
+		padding: 0;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.login-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+		background: linear-gradient(135deg, var(--dotnet-primary) 0%, var(--dotnet-secondary) 100%);
+	}
+
+	.login-card {
+		background-color: white;
+		border-radius: 20px;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+		padding: 40px;
+		width: 90%;
+		max-width: 400px;
+		text-align: center;
+		animation: fadeIn 0.5s ease-in;
+	}
+
+	.login-logo {
+		width: 100px;
+		height: 100px;
+		margin: 0 auto 15px;
+		display: block;
+		border-radius: 50%;
+		box-shadow: 0 5px 15px rgba(81, 43, 212, 0.2);
+		background-color: white;
+		padding: 5px;
+	}
+
+	.login-title {
+		color: var(--dotnet-primary);
+		font-size: 32px;
+		margin-bottom: 5px;
+		font-weight: 700;
+	}
+
+	.login-subtitle {
+		color: var(--dotnet-dark);
+		font-size: 16px;
+		margin-bottom: 30px;
+		opacity: 0.8;
+	}
+
+	.otp-container {
+		margin: 30px 0;
+	}
+
+	:deep(.otp-input) {
+		width: 100%;
+		justify-content: center;
+	}
+
+	:deep(.otp-input .e-control-wrapper .e-input-group) {
+		margin: 0 8px;
+	}
+
+	:deep(.otp-input .e-control-wrapper .e-input-group input) {
+		width: 50px !important;
+		height: 50px !important;
+		font-size: 24px;
+		font-weight: 700;
+		border: 2px solid var(--dotnet-primary);
+		border-radius: 10px;
+		background-color: rgba(81, 43, 212, 0.05);
+		color: var(--dotnet-dark);
+	}
+
+	:deep(.otp-input .e-control-wrapper .e-input-group input:focus) {
+		box-shadow: 0 0 0 3px rgba(81, 43, 212, 0.2);
+	}
+
+	.login-footer {
+		margin-top: 30px;
+		min-height: 90px;
+	}
+
+	.login-hint {
+		color: #666;
+		font-size: 14px;
+	}
+
+	.login-dots {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 15px;
+	}
+
+	.dot {
+		height: 10px;
+		width: 10px;
+		background-color: #ddd;
+		border-radius: 50%;
+		margin: 0 5px;
+		display: inline-block;
+	}
+
+	.dot1 {
+		background-color: var(--dotnet-primary);
+		animation: pulse 1.5s infinite;
+	}
+
+	.dot2 {
+		background-color: var(--dotnet-accent);
+		animation: pulse 1.5s infinite 0.2s;
+	}
+
+	.dot3 {
+		background-color: var(--dotnet-secondary);
+		animation: pulse 1.5s infinite 0.4s;
+	}
+
+	/* Circular dots loader animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		animation: fadeIn 0.3s ease-in;
+		margin-top: 50px; /* Moves the animation lower */
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--dotnet-primary);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--dotnet-accent);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--dotnet-secondary);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--dotnet-dark);
+		font-size: 14px;
+		margin-top: 10px;
+	}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	@@keyframes pulse {
+		0% {
+			transform: scale(1);
+			opacity: 1;
+		}
+
+		50% {
+			transform: scale(1.2);
+			opacity: 0.7;
+		}
+
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	@@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>

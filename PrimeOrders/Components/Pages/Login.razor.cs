@@ -8,6 +8,7 @@ public partial class Login
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private string _passcode = "";
+	private bool IsVerifying { get; set; } = false;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -19,11 +20,24 @@ public partial class Login
 
 		if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(passcode))
 		{
+			IsVerifying = true;
+			StateHasChanged();
+
 			var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-			if (user is null) return;
+			if (user is null)
+			{
+				IsVerifying = false;
+				StateHasChanged();
+				return;
+			}
 
 			if (BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), passcode))
 				NavManager.NavigateTo("/Dashboard");
+			else
+			{
+				IsVerifying = false;
+				StateHasChanged();
+			}
 		}
 	}
 
@@ -32,12 +46,37 @@ public partial class Login
 		_passcode = e.Value?.ToString() ?? string.Empty;
 		if (_passcode.Length != 4) return;
 
-		var user = await UserData.LoadUserByPasscode(_passcode);
-		if (user is null || !user.Status) return;
+		// Show loading animation
+		IsVerifying = true;
+		StateHasChanged();
 
-		await JS.InvokeVoidAsync("setCookie", "UserId", user.Id, 1);
-		await JS.InvokeVoidAsync("setCookie", "Passcode", BCrypt.Net.BCrypt.EnhancedHashPassword(user.Passcode.ToString(), 13), 1);
+		// Add a small delay to ensure the UI updates before potentially redirecting
+		await Task.Delay(100);
 
-		NavManager.NavigateTo("/Dashboard");
+		try
+		{
+			var user = await UserData.LoadUserByPasscode(_passcode);
+
+			// Simulate longer loading for demo purposes if needed (remove in production)
+			// await Task.Delay(1500);
+
+			if (user is null || !user.Status)
+			{
+				IsVerifying = false;
+				StateHasChanged();
+				return;
+			}
+
+			await JS.InvokeVoidAsync("setCookie", "UserId", user.Id, 1);
+			await JS.InvokeVoidAsync("setCookie", "Passcode", BCrypt.Net.BCrypt.EnhancedHashPassword(user.Passcode.ToString(), 13), 1);
+
+			NavManager.NavigateTo("/Dashboard");
+		}
+		catch
+		{
+			// Handle any exceptions that might occur during verification
+			IsVerifying = false;
+			StateHasChanged();
+		}
 	}
 }
