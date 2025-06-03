@@ -32,7 +32,7 @@ public partial class Login
 			}
 
 			if (BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), passcode))
-				NavManager.NavigateTo("/Dashboard");
+				NavManager.NavigateTo("/");
 			else
 			{
 				IsVerifying = false;
@@ -44,7 +44,7 @@ public partial class Login
 	private async Task CheckPasscode(OtpInputEventArgs e)
 	{
 		_passcode = e.Value?.ToString() ?? string.Empty;
-		if (_passcode.Length != 4) return;
+		if (_passcode.Length != 4 || IsVerifying) return;
 
 		// Show loading animation
 		IsVerifying = true;
@@ -57,9 +57,6 @@ public partial class Login
 		{
 			var user = await UserData.LoadUserByPasscode(_passcode);
 
-			// Simulate longer loading for demo purposes if needed (remove in production)
-			// await Task.Delay(1500);
-
 			if (user is null || !user.Status)
 			{
 				IsVerifying = false;
@@ -70,7 +67,7 @@ public partial class Login
 			await JS.InvokeVoidAsync("setCookie", "UserId", user.Id, 1);
 			await JS.InvokeVoidAsync("setCookie", "Passcode", BCrypt.Net.BCrypt.EnhancedHashPassword(user.Passcode.ToString(), 13), 1);
 
-			NavManager.NavigateTo("/Dashboard");
+			NavManager.NavigateTo("/");
 		}
 		catch
 		{

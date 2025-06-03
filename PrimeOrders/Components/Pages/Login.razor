@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/Login"
 
 <PageTitle>Login - Prime Orders</PageTitle>
 
@@ -39,6 +39,10 @@
 				</div>
 				<p class="login-hint">Enter your 4-digit access code to continue</p>
 			}
+		</div>
+		
+		<div class="copyright-footer">
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
 		</div>
 	</div>
 </div>
@@ -140,6 +144,25 @@
 	.login-hint {
 		color: #666;
 		font-size: 14px;
+	}
+	
+	.copyright-footer {
+		margin-top: 15px;
+		text-align: center;
+		font-size: 13px;
+		color: #666;
+	}
+	
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+	
+	.footer-link:hover {
+		color: var(--dotnet-secondary);
+		text-decoration: underline;
 	}
 
 	.login-dots {
