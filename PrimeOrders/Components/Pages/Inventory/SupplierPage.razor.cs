@@ -12,7 +12,7 @@ public partial class SupplierPage
 
 	private bool IsLoading { get; set; } = true;
 
-	private SupplierModel _supplierModel = new();
+	private SupplierModel _supplierModel = new() { Status = true };
 
 	private List<SupplierModel> _suppliers;
 
@@ -85,7 +85,6 @@ public partial class SupplierPage
 		await SupplierData.InsertSupplier(_supplierModel);
 
 		await _sfToast.ShowAsync();
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>
