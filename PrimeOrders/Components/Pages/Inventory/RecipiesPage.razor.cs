@@ -46,6 +46,9 @@ public partial class RecipiesPage
 
 		IsLoading = false;
 		StateHasChanged();
+
+		if (firstRender)
+			await LoadRecipe();
 	}
 
 	private async Task<bool> ValidatePassword()
@@ -77,6 +80,8 @@ public partial class RecipiesPage
 
 		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
 		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
+
+		await LoadRecipe();
 	}
 
 	private async void RawMaterialCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, RawMaterialCategoryModel> args)
@@ -102,10 +107,13 @@ public partial class RecipiesPage
 
 	private async Task LoadRecipe()
 	{
+		if (_sfGrid is null)
+			return;
+
 		_rawMaterialRecipies.Clear();
 		await _sfGrid.Refresh();
 
-		_recipe = await RecipeData.LoadRecipeByProduct((int)_selectedProductId);
+		_recipe = await RecipeData.LoadRecipeByProduct(_selectedProductId);
 		if (_recipe is null)
 			return;
 
@@ -129,7 +137,7 @@ public partial class RecipiesPage
 		}
 
 		await _sfUpdateToast.ShowAsync();
-		await _sfGrid.Refresh();
+		await _sfGrid?.Refresh();
 		StateHasChanged();
 	}
 
@@ -207,4 +215,7 @@ public partial class RecipiesPage
 
 	public void ClosedHandler(ToastCloseArgs args) =>
 		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+
+	private void NavigateTo(string route) =>
+		NavManager.NavigateTo(route);
 }
