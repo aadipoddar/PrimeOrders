@@ -1,0 +1,50 @@
+﻿@page "/Inventory/Supplier"
+
+<PageTitle>Suppliers - Prime Orders</PageTitle>
+
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Title="Success"
+		 Content="Supplier Saved successfully."
+		 Timeout="5000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastEvents Closed="@ClosedHandler" />
+</SfToast>
+
+<SfToast @ref="_sfUpdateToast"
+		 ID="toast_update"
+		 Title="Supplier Found"
+		 Content="Supplier found. Please update the information."
+		 Timeout="5000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-info">
+	<ToastPosition X="Right" Y="Top" />
+</SfToast>
+
+<SfTextBox @bind-Value="_supplierModel.Name" Placeholder="Enter Supplier Name" FloatLabelType='@FloatLabelType.Auto' />
+<SfTextBox @bind-Value="_supplierModel.Code" Placeholder="Enter Supplier Code" FloatLabelType='@FloatLabelType.Auto' />
+<SfTextBox @bind-Value="_supplierModel.GSTNo" Placeholder="Enter GST Number" FloatLabelType='@FloatLabelType.Auto' />
+<SfTextBox @bind-Value="_supplierModel.Phone" Placeholder="Enter Phone Number" FloatLabelType='@FloatLabelType.Auto' Type="InputType.Number" />
+<SfTextBox @bind-Value="_supplierModel.Email" Placeholder="Enter Email Address" FloatLabelType='@FloatLabelType.Auto' />
+<SfTextBox @bind-Value="_supplierModel.Address" Placeholder="Enter Address" FloatLabelType='@FloatLabelType.Auto' />
+
+<SfCheckBox @bind-Checked="_supplierModel.Status" Label="Active Status" />
+
+<SfButton OnClick="OnSaveClick" Content="Save Supplier" />
+
+<SfGrid DataSource="@_suppliers" ID="_sfGrid" @ref="_sfGrid"
+		AllowSorting="true" AllowFiltering="true" AllowResizing="true">
+	<GridEvents RowSelected="RowSelectHandler" TValue="SupplierModel" />
+	<GridColumns>
+		<GridColumn Field=@nameof(SupplierModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+		<GridColumn Field=@nameof(SupplierModel.Name) HeaderText="Name" Width="180" />
+		<GridColumn Field=@nameof(SupplierModel.GSTNo) HeaderText="GST No." Width="180" />
+		<GridColumn Field=@nameof(SupplierModel.Code) HeaderText="Code" Width="180" />
+		<GridColumn Field=@nameof(SupplierModel.Phone) HeaderText="Phone" Width="140" />
+		<GridColumn Field=@nameof(SupplierModel.Email) HeaderText="Email" Width="180" />
+		<GridColumn Field=@nameof(SupplierModel.Address) HeaderText="Address" Width="200" />
+		<GridColumn Field=@nameof(SupplierModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
+	</GridColumns>
+</SfGrid>

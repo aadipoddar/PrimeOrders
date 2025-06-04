@@ -11,6 +11,7 @@ public static class TableNames
 	public static string RawMaterial => "RawMaterial";
 	public static string Recipe => "Recipe";
 	public static string RecipeDetail => "RecipeDetail";
+	public static string Supplier => "Supplier";
 }
 
 public static class StoredProcedureNames
@@ -40,6 +41,8 @@ public static class StoredProcedureNames
 
 	public static string InsertRecipe => "Insert_Recipe";
 	public static string InsertRecipeDetail => "Insert_RecipeDetail";
+
+	public static string InsertSupplier => "Insert_Supplier";
 
 }
 

@@ -99,6 +99,8 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Load_Recipe_By_Product.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_RecipeDetail_By_Recipe.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_ProductCategory.sql" />
+    <Build Include="Tables\Inventory\Supplier.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_Supplier.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

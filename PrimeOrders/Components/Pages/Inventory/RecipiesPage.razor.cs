@@ -12,7 +12,6 @@ public partial class RecipiesPage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
-	private UserModel _user;
 	private bool IsLoading { get; set; } = true;
 
 	private int _selectedProductCategoryId = 0;
@@ -39,7 +38,8 @@ public partial class RecipiesPage
 	{
 		IsLoading = true;
 
-		if (firstRender && !await ValidatePassword()) NavManager.NavigateTo("/Login");
+		if (firstRender && !await ValidatePassword())
+			NavManager.NavigateTo("/Login");
 
 		if (firstRender)
 			await LoadComboBox();
@@ -63,7 +63,6 @@ public partial class RecipiesPage
 		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
 			return false;
 
-		_user = user;
 		return true;
 	}
 
