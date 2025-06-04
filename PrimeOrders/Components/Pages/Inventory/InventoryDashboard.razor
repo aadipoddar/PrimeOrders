@@ -1,10 +1,6 @@
-﻿@page "/"
+﻿@page "/Inventory-Dashboard"
 
-<PageTitle>Dashboard - Prime Orders</PageTitle>
-
-<HeadContent>
-	<link rel="stylesheet" href="css/dashboard.css" />
-</HeadContent>
+<PageTitle>Inventory Dashboard - Prime Orders</PageTitle>
 
 @if (IsLoading)
 {
@@ -14,7 +10,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading dashboard...</p>
+		<p class="loading-text">Loading inventory dashboard...</p>
 	</div>
 }
 else
@@ -34,46 +30,31 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Welcome, @(_user?.Name ?? "User")!</h2>
-			<p>Select an option below to continue</p>
+			<h2>Inventory Management</h2>
+			<p>Select an option below to manage purchases and receipts</p>
+			<button @onclick='() => NavigateTo("/")' class="back-button">
+				<span class="back-icon">←</span> Back to Dashboard
+			</button>
 		</div>
 
 		<div class="dashboard-cards">
-			@if (_user?.Inventory == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory-Dashboard")'>
-					<div class="card-icon inventory-icon">📦</div>
-					<h3>Inventory</h3>
-					<p>Manage inventory and stock levels</p>
-				</div>
-			}
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/New-Purchase")'>
+				<div class="card-icon purchase-icon">🛒</div>
+				<h3>New Purchase</h3>
+				<p>Create a new purchase order</p>
+			</div>
 
-			@if (_user?.Admin == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin")'>
-					<div class="card-icon admin-icon">⚙️</div>
-					<h3>Admin</h3>
-					<p>System administration and settings</p>
-				</div>
-			}
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Purchase-History")'>
+				<div class="card-icon history-icon">📜</div>
+				<h3>Purchase History</h3>
+				<p>View past purchase records</p>
+			</div>
 
-			@if (_user?.Sales == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Sales")'>
-					<div class="card-icon sales-icon">📈</div>
-					<h3>Sales</h3>
-					<p>View and manage sales information</p>
-				</div>
-			}
-
-			@if (_user?.Order == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Orders")'>
-					<div class="card-icon order-icon">📋</div>
-					<h3>Orders</h3>
-					<p>Process and track customer orders</p>
-				</div>
-			}
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Recipies")'>
+				<div class="card-icon receipt-icon">🧾</div>
+				<h3>Recipies</h3>
+				<p>Manage and view purchase receipts</p>
+			</div>
 		</div>
 
 		<div class="dashboard-footer">
@@ -190,7 +171,69 @@ else
 			opacity: 0.7;
 		}
 
-	/* Dashboard Cards */
+	/* Custom icons for this page */
+	.purchase-icon {
+		background-color: rgba(0, 164, 239, 0.1);
+		color: var(--dotnet-accent);
+	}
+
+	.history-icon {
+		background-color: rgba(104, 33, 122, 0.1);
+		color: var(--dotnet-secondary);
+	}
+
+	.receipt-icon {
+		background-color: rgba(81, 43, 212, 0.1);
+		color: var(--dotnet-primary);
+	}
+
+	/* Back button styles */
+	.back-button {
+		background-color: transparent;
+		border: 2px solid var(--dotnet-secondary);
+		color: var(--dotnet-secondary);
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+		margin-top: 15px;
+	}
+
+		.back-button:hover {
+			background-color: var(--dotnet-secondary);
+			color: white;
+		}
+
+	.back-icon {
+		font-size: 16px;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: #666;
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--dotnet-secondary);
+			text-decoration: underline;
+		}
+
+	/* Dashboard cards - these styles should match with dashboard.css */
 	.dashboard-cards {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -229,28 +272,8 @@ else
 		border-radius: 50%;
 	}
 
-	.inventory-icon {
-		background-color: rgba(81, 43, 212, 0.1);
-		color: var(--dotnet-primary);
-	}
-
-	.admin-icon {
-		background-color: rgba(104, 33, 122, 0.1);
-		color: var(--dotnet-secondary);
-	}
-
-	.sales-icon {
-		background-color: rgba(0, 164, 239, 0.1);
-		color: var(--dotnet-accent);
-	}
-
-	.order-icon {
-		background-color: rgba(128, 128, 128, 0.1);
-		color: #444;
-	}
-
 	.dashboard-card h3 {
-		color: var(--dotnet-dark);
+		color: var(--dotnet-dark, #1E1E1E);
 		margin-bottom: 10px;
 		font-size: 20px;
 	}
@@ -259,27 +282,6 @@ else
 		color: #666;
 		font-size: 14px;
 		margin: 0;
-	}
-
-	/* Footer */
-	.dashboard-footer {
-		margin-top: auto;
-		text-align: center;
-		padding: 20px;
-		color: #666;
-		font-size: 14px;
-	}
-	
-	.footer-link {
-		color: var(--dotnet-primary);
-		text-decoration: none;
-		font-weight: 600;
-		transition: color 0.2s ease;
-	}
-	
-	.footer-link:hover {
-		color: var(--dotnet-secondary);
-		text-decoration: underline;
 	}
 
 	/* Loading Animation */

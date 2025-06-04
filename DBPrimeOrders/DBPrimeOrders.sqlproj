@@ -61,20 +61,49 @@
     <Folder Include="StoredProcedures" />
     <Folder Include="StoredProcedures\LoadData" />
     <Folder Include="StoredProcedures\LoadData\Common" />
-    <Folder Include="StoredProcedures\LoadData\Insert" />
     <Folder Include="PublishLocations\" />
+    <Folder Include="Tables\Inventory" />
+    <Folder Include="Tables\Products" />
+    <Folder Include="Tables\Common" />
+    <Folder Include="StoredProcedures\Insert" />
+    <Folder Include="StoredProcedures\Insert\Inventory" />
+    <Folder Include="StoredProcedures\Insert\Common" />
+    <Folder Include="StoredProcedures\Insert\Products" />
+    <Folder Include="StoredProcedures\LoadData\Inventory" />
+    <Folder Include="StoredProcedures\LoadData\Product" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Tables\User.sql" />
-    <Build Include="Tables\Location.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Status.sql" />
-    <Build Include="StoredProcedures\LoadData\Insert\Insert_Location.sql" />
-    <Build Include="StoredProcedures\LoadData\Insert\Insert_User.sql" />
     <Build Include="StoredProcedures\LoadData\Load_User_By_Passcode.sql" />
+    <Build Include="Tables\Inventory\RawMaterial.sql" />
+    <Build Include="Tables\Products\Product.sql" />
+    <Build Include="Tables\Products\ProductCategory.sql" />
+    <Build Include="Tables\Products\Tax.sql" />
+    <Build Include="Tables\Common\Location.sql" />
+    <Build Include="Tables\Common\User.sql" />
+    <Build Include="Tables\Inventory\RawMaterialCategory.sql" />
+    <Build Include="Tables\Inventory\Recipe.sql" />
+    <Build Include="Tables\Inventory\RecipeDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_RawMaterial.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_RawMaterialCategory.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_Recipe.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_RecipeDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Common\Insert_Location.sql" />
+    <Build Include="StoredProcedures\Insert\Common\Insert_User.sql" />
+    <Build Include="StoredProcedures\Insert\Products\Insert_Product.sql" />
+    <Build Include="StoredProcedures\Insert\Products\Insert_ProductCategory.sql" />
+    <Build Include="StoredProcedures\Insert\Products\Insert_Tax.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_RawMaterial_By_RawMaterialCategory.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_Recipe_By_Product.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_RecipeDetail_By_Recipe.sql" />
+    <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_ProductCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="DBPrimeOrders.refactorlog" />
   </ItemGroup>
 </Project>

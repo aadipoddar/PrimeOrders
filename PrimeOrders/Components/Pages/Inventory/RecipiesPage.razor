@@ -1,0 +1,84 @@
+﻿@page "/Inventory/Recipies"
+
+<PageTitle>Recipies - Prime Orders</PageTitle>
+
+<SfComboBox TValue="int"
+			TItem="ProductCategoryModel"
+			Placeholder="Select a Product Category"
+			DataSource="@_productCategories"
+			@bind-Value="_selectedProductCategoryId"
+			PopupWidth="100%"
+			FloatLabelType="FloatLabelType.Auto">
+	<ComboBoxFieldSettings Value="Id" Text="Name" />
+	<ComboBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="@ProductCategoryComboBoxValueChangeHandler" />
+</SfComboBox>
+
+<SfComboBox TValue="int"
+			TItem="ProductModel"
+			Placeholder="Select a Product"
+			DataSource="@_products"
+			@bind-Value="_selectedProductId"
+			PopupWidth="100%"
+			FloatLabelType="FloatLabelType.Auto">
+	<ComboBoxFieldSettings Value="Id" Text="Name" />
+	<ComboBoxEvents TItem="ProductModel" TValue="int" ValueChange="@ProductComboBoxValueChangeHandler" />
+</SfComboBox>
+
+<SfComboBox TValue="int"
+			TItem="RawMaterialCategoryModel"
+			Placeholder="Select a Raw Material Category"
+			DataSource="@_rawMaterialCategories"
+			@bind-Value="_selectedRawMaterialCategoryId"
+			PopupWidth="100%"
+			FloatLabelType="FloatLabelType.Auto">
+	<ComboBoxFieldSettings Value="Id" Text="Name" />
+	<ComboBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="@RawMaterialCategoryComboBoxValueChangeHandler" />
+</SfComboBox>
+
+<SfComboBox TValue="int"
+			TItem="RawMaterialModel"
+			Placeholder="Select a Raw Material"
+			DataSource="@_rawMaterials"
+			@bind-Value="_selectedRawMaterialId"
+			PopupWidth="100%"
+			FloatLabelType="FloatLabelType.Auto">
+	<ComboBoxFieldSettings Value="Id" Text="Name" />
+</SfComboBox>
+
+<SfNumericTextBox TValue="double"
+				  Decimals=3
+				  Min=1
+				  Placeholder="Enter Quantity"
+				  @bind-Value="@_selectedRawMaterialQuantity"
+				  FloatLabelType="FloatLabelType.Auto" />
+
+<SfButton Content="Add" OnClick="OnAddButtonClick" />
+
+<SfGrid DataSource="@_rawMaterialRecipies"
+		ID="_sfGrid"
+		@ref="_sfGrid">
+	<GridEvents RowSelected="RowSelectHandler" TValue="RawMaterialRecipeModel" />
+	<GridColumns>
+		<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialCategoryId)" Visible=false />
+		<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialId)" Visible=false />
+		<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialName)" HeaderText="Raw Material" />
+		<GridColumn Field="@nameof(RawMaterialRecipeModel.Quantity)" HeaderText="Quantity" />
+	</GridColumns>
+</SfGrid>
+
+<SfButton Content="Save" OnClick="OnSaveButtonClick" />
+
+<SfToast @ref="_sfToast"
+		 Timeout="1000"
+		 Title="Success"
+		 Content="Recipe saved successfully.">
+	<ToastPosition X="Center" Y="Center" />
+	<ToastEvents Closed="@ClosedHandler" />
+</SfToast>
+
+<SfToast @ref="_sfUpdateToast"
+		 Timeout="1000"
+		 Title="Recipe Found"
+		 Content="Recipe found for the Product Please Update it.">
+	<ToastPosition X="Center" Y="Center" />
+</SfToast>

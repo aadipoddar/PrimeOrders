@@ -9,8 +9,11 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="29.2.8" />
-    <PackageReference Include="Syncfusion.Blazor.Core" Version="29.2.8" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="29.2.8" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="29.2.8" />
     <PackageReference Include="Syncfusion.Blazor.Inputs" Version="29.2.8" />
+    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="29.2.8" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="29.2.8" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="29.2.8" />
   </ItemGroup>
 
@@ -24,6 +27,8 @@
     <Using Include="PrimeOrdersLibrary.Data" />
     <Using Include="PrimeOrdersLibrary.DataAccess" />
     <Using Include="PrimeOrdersLibrary.Models" />
+    <Using Include="PrimeOrdersLibrary.Models.Inventory" />
+    <Using Include="PrimeOrdersLibrary.Models.Product" />
   </ItemGroup>
 
 </Project>
