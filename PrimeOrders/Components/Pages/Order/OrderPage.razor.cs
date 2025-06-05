@@ -1,6 +1,6 @@
-namespace PrimeOrders.Components.Pages.Inventory;
+namespace PrimeOrders.Components.Pages.Order;
 
-public partial class InventoryDashboard
+public partial class OrderPage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }

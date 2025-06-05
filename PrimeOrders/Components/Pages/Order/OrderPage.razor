@@ -1,6 +1,6 @@
-﻿@page "/Inventory-Dashboard"
+﻿@page "/Order-Dashboard"
 
-<PageTitle>Inventory Dashboard - Prime Orders</PageTitle>
+<PageTitle>Order Dashboard - Prime Orders</PageTitle>
 
 @if (_isLoading)
 {
@@ -10,7 +10,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading inventory dashboard...</p>
+		<p class="loading-text">Loading order dashboard...</p>
 	</div>
 }
 else
@@ -30,36 +30,24 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Inventory Management</h2>
-			<p>Select an option below to manage purchases and receipts</p>
+			<h2>Order Management</h2>
+			<p>Select an option below to manage orders</p>
 			<button @onclick='() => NavigateTo("/")' class="back-button">
 				<span class="back-icon">←</span> Back to Dashboard
 			</button>
 		</div>
 
 		<div class="dashboard-cards">
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Purchase")'>
-				<div class="card-icon purchase-icon">🛒</div>
-				<h3>New Purchase</h3>
-				<p>Create a new purchase order</p>
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Order/Place")'>
+				<div class="card-icon place-order-icon">📝</div>
+				<h3>Place Order</h3>
+				<p>Create a new customer order</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Purchase-History")'>
-				<div class="card-icon history-icon">📜</div>
-				<h3>Purchase History</h3>
-				<p>View past purchase records</p>
-			</div>
-
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Recipies")'>
-				<div class="card-icon receipt-icon">🧾</div>
-				<h3>Recipies</h3>
-				<p>Manage and view purchase receipts</p>
-			</div>
-
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Supplier")'>
-				<div class="card-icon supplier-icon">👥</div>
-				<h3>Suppliers</h3>
-				<p>Add and manage your suppliers</p>
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Order/History")'>
+				<div class="card-icon order-history-icon">📊</div>
+				<h3>Order History</h3>
+				<p>View and manage previous orders</p>
 			</div>
 		</div>
 
@@ -177,25 +165,15 @@ else
 			opacity: 0.7;
 		}
 
-	/* Custom icons for this page */
-	.purchase-icon {
+	/* Custom icons for order page */
+	.place-order-icon {
 		background-color: rgba(0, 164, 239, 0.1);
 		color: var(--dotnet-accent);
 	}
 
-	.history-icon {
+	.order-history-icon {
 		background-color: rgba(104, 33, 122, 0.1);
 		color: var(--dotnet-secondary);
-	}
-
-	.receipt-icon {
-		background-color: rgba(81, 43, 212, 0.1);
-		color: var(--dotnet-primary);
-	}
-
-	.supplier-icon {
-		background-color: rgba(46, 196, 134, 0.1);
-		color: #2EC486;
 	}
 
 	/* Back button styles */
