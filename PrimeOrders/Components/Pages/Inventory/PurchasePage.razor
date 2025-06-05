@@ -1,8 +1,23 @@
 ﻿@page "/Inventory/Purchase"
+@using Syncfusion.Blazor.Navigations
 
 <PageTitle>Purchase - Prime Orders</PageTitle>
 
-<SfToast @ref="_sfToast"
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Title="Error"
+		 Content="@_errorMessage"
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfSuccessToast"
 		 ID="toast_success"
 		 Title="Success"
 		 Content="Purchase saved successfully."
@@ -11,90 +26,231 @@
 		 CssClass="e-toast-success">
 	<ToastPosition X="Right" Y="Top" />
 	<ToastEvents Closed="@ClosedHandler" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
 </SfToast>
 
-<SfAccordion>
-	<AccordionItems>
-		<AccordionItem Header="Supplier Details">
-			<ContentTemplate>
-				<SfComboBox TValue="int"
-							TItem="SupplierModel"
-							Placeholder="Select a Supplier"
-							DataSource="@_suppliers"
-							@bind-Value="_supplier.Id">
-					<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="@OnSupplierChanged" />
-					<ComboBoxFieldSettings Value="Id" Text="Name" />
-				</SfComboBox>
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading purchase page...</p>
+	</div>
+}
+else
+{
+	<div class="purchase-container">
+		<div class="page-header">
+			<h1 class="page-title">Purchase Management</h1>
+			<button @onclick='() => NavigateTo("/Inventory-Dashboard")' class="back-button">
+				<span class="back-icon">←</span> Back to Inventory
+			</button>
+		</div>
 
-				<SfTextBox @bind-Value="_supplier.GSTNo" Placeholder="Supplier GSTNo" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-				<SfTextBox @bind-Value="_supplier.Address" Placeholder="Supplier Address" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-				<SfTextBox @bind-Value="_supplier.Phone" Placeholder="Supplier Phone" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-				<SfTextBox @bind-Value="_supplier.Email" Placeholder="Supplier Email" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-			</ContentTemplate>
-		</AccordionItem>
+		<div class="purchase-content">
+			<div class="purchase-main">
+				<div class="combined-materials-card card">
+					<div class="card-header">
+						<h2>Raw Materials Selection</h2>
+						<p class="card-info">Select category and click on a material to add to cart</p>
+					</div>
+					<div class="card-body materials-container">
+						<div class="categories-panel">
+							<label>Categories</label>
+							<SfListBox TValue="int"
+									   AllowFiltering="true"
+									   TItem="RawMaterialCategoryModel"
+									   DataSource="@_rawMaterialCategories"
+									   @bind-Value="_selectedRawMaterialCategoryId"
+									   CssClass="category-listbox">
+								<ListBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="RawMatrialCategoryChanged" />
+								<ListBoxFieldSettings Value="Id" Text="Name" />
+							</SfListBox>
+						</div>
 
-		<AccordionItem Header="Adjustments">
-			<ContentTemplate>
-				<SfNumericTextBox TValue="decimal" Value="_purchase.CDPercent" ValueChanged="CashDiscountPercentValueChanged" Max="100" Min="0" Placeholder="Cash Discount Percentage" FloatLabelType="FloatLabelType.Auto" />
-				<SfNumericTextBox @bind-Value="_purchase.CDAmount" Placeholder="Cash Discount Amount" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-			</ContentTemplate>
-		</AccordionItem>
+						<div class="materials-panel">
+							<label>Materials</label>
+							<SfGrid DataSource="@_rawMaterials"
+									ID="_sfRawMaterialGrid"
+									@ref="_sfRawMaterialGrid"
+									AllowSorting="true"
+									AllowFiltering="true"
+									AllowResizing="true"
+									Height="300px"
+									CssClass="materials-grid">
+								<GridEvents RowSelected="RawMaterialRowSelectHandler" TValue="RawMaterialModel" />
+								<GridColumns>
+									<GridColumn Field=@nameof(RawMaterialModel.Name) HeaderText="Name" Width="180" />
+									<GridColumn Field=@nameof(RawMaterialModel.MRP) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+								</GridColumns>
+							</SfGrid>
+						</div>
+					</div>
+				</div>
 
-		<AccordionItem Header="Bill Details">
-			<ContentTemplate>
-				<SfTextBox @bind-Value="_purchase.BillNo" Placeholder="Bill No." FloatLabelType="FloatLabelType.Auto" />
-				<SfDatePicker @bind-Value="_purchase.BillDate" Placeholder="Purchase Bill Date" FloatLabelType="FloatLabelType.Auto" />
-				<SfTextBox @bind-Value="_purchase.Remarks" Placeholder="Purchase Remarks" FloatLabelType="FloatLabelType.Auto" />
-				<SfNumericTextBox @bind-Value="_baseTotal" Placeholder="Base Total" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-				<SfNumericTextBox @bind-Value="_afterDiscounts" Placeholder="After Discounts" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-				<SfNumericTextBox @bind-Value="_subTotal" Placeholder="Sub Total" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
-				<SfNumericTextBox @bind-Value="_total" Placeholder="Total" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<div class="card cart-card">
+					<div class="card-header">
+						<h2>Purchase Cart</h2>
+						<p class="card-info">Click on a row to edit details</p>
+					</div>
+					<div class="card-body">
+						<SfGrid DataSource="@_purchaseRawMaterialCarts"
+								ID="_sfRawMaterialCartGrid"
+								@ref="_sfRawMaterialCartGrid"
+								Height="350px"
+								CssClass="cart-grid">
+							<GridEvents RowSelected="RawMaterialCartRowSelectHandler" TValue="PurchaseRawMaterialCartModel" />
+							<GridColumns>
+								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.RawMaterialName) HeaderText="Material" Width="180" />
+								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.DiscPercent) HeaderText="Disc %" Width="80" Format="N2" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							</GridColumns>
+						</SfGrid>
+					</div>
+				</div>
+			</div>
 
-				<SfButton Content="Save Purchase" OnClick="OnSavePurchaseClick" />
-			</ContentTemplate>
-		</AccordionItem>
-	</AccordionItems>
-</SfAccordion>
+			<div class="purchase-sidebar">
+				<div class="card totals-card">
+					<div class="card-header">
+						<h2>Order Summary</h2>
+					</div>
+					<div class="card-body">
+						<div class="summary-row">
+							<span>Base Total:</span>
+							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row">
+							<span>After Discounts:</span>
+							<span class="amount">@_afterDiscounts.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row">
+							<span>Sub Total:</span>
+							<span class="amount">@_subTotal.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row total-row">
+							<span>Grand Total:</span>
+							<span class="total-amount">@_total.FormatIndianCurrency()</span>
+						</div>
 
-<SfListBox TValue="int"
-		   AllowFiltering="true"
-		   TItem="RawMaterialCategoryModel"
-		   DataSource="@_rawMaterialCategories"
-		   @bind-Value="_selectedRawMaterialCategoryId">
-	<ListBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="RawMatrialCategoryChanged" />
-	<ListBoxFieldSettings Value="Id" Text="Name" />
-</SfListBox>
+						<SfButton CssClass="save-button" Content="Save Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick">
+							<span class="save-icon">💾</span> Save Purchase
+						</SfButton>
+					</div>
+				</div>
 
-<SfGrid DataSource="@_rawMaterials"
-		ID="_sfRawMaterialGrid"
-		@ref="_sfRawMaterialGrid"
-		AllowSorting="true"
-		AllowFiltering="true"
-		AllowResizing="true">
-	<GridEvents RowSelected="RawMaterialRowSelectHandler" TValue="RawMaterialModel" />
-	<GridColumns>
-		<GridColumn Field=@nameof(RawMaterialModel.Name) HeaderText="Name" Width="180" />
-		<GridColumn Field=@nameof(RawMaterialModel.MRP) HeaderText="MRP" Width="180" Format="N2" />
-	</GridColumns>
-</SfGrid>
+				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
+					<AccordionItems>
+						<AccordionItem Header="Supplier Details" Expanded="true">
+							<ContentTemplate>
+								<div class="accordion-content">
+									<SfComboBox TValue="int"
+												TItem="SupplierModel"
+												Placeholder="Select a Supplier"
+												DataSource="@_suppliers"
+												@bind-Value="_supplier.Id"
+												CssClass="supplier-combo">
+										<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="@OnSupplierChanged" />
+										<ComboBoxFieldSettings Value="Id" Text="Name" />
+									</SfComboBox>
 
-<SfGrid DataSource="@_purchaseRawMaterialCarts"
-		ID="_sfRawMaterialCartGrid"
-		@ref="_sfRawMaterialCartGrid"
-		AllowSorting="true"
-		AllowFiltering="true"
-		AllowResizing="true">
-	<GridEvents RowSelected="RawMaterialCartRowSelectHandler" TValue="PurchaseRawMaterialCartModel" />
-	<GridColumns>
-		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.RawMaterialName) HeaderText="Name" Width="180" />
-		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Quantity) HeaderText="Quantity" Width="180" />
-		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Rate) HeaderText="Rate" Width="180" Format="N2" />
-		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Total) HeaderText="Rate" Width="180" Format="N2" />
-	</GridColumns>
-</SfGrid>
+									<div class="supplier-details">
+										<div class="detail-row">
+											<span class="detail-label">GST No:</span>
+											<span class="detail-value">@_supplier.GSTNo</span>
+										</div>
+										<div class="detail-row">
+											<span class="detail-label">Phone:</span>
+											<span class="detail-value">@_supplier.Phone</span>
+										</div>
+										<div class="detail-row">
+											<span class="detail-label">Email:</span>
+											<span class="detail-value">@_supplier.Email</span>
+										</div>
+										<div class="detail-row">
+											<span class="detail-label">Address:</span>
+											<span class="detail-value">@_supplier.Address</span>
+										</div>
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+
+						<AccordionItem Header="Bill Details">
+							<ContentTemplate>
+								<div class="accordion-content form-grid">
+									<div class="form-group">
+										<label>Bill Number</label>
+										<SfTextBox @bind-Value="_purchase.BillNo"
+												   Placeholder="Enter Bill No"
+												   CssClass="form-control" />
+									</div>
+
+									<div class="form-group">
+										<label>Bill Date</label>
+										<SfDatePicker @bind-Value="_purchase.BillDate"
+													  Placeholder="Select Date"
+													  CssClass="form-control" />
+									</div>
+
+									<div class="form-group full-width">
+										<label>Remarks</label>
+										<SfTextBox @bind-Value="_purchase.Remarks"
+												   Placeholder="Add remarks (optional)"
+												   Multiline="true"
+												   CssClass="form-control" />
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+
+						<AccordionItem Header="Adjustments">
+							<ContentTemplate>
+								<div class="accordion-content form-grid">
+									<div class="form-group">
+										<label>Cash Discount %</label>
+										<SfNumericTextBox TValue="decimal"
+														  Value="_purchase.CDPercent"
+														  ValueChanged="CashDiscountPercentValueChanged"
+														  Max="100"
+														  Min="0"
+														  Format="N2"
+														  CssClass="form-control" />
+									</div>
+
+									<div class="form-group">
+										<label>Cash Discount Amount</label>
+										<SfNumericTextBox @bind-Value="_purchase.CDAmount"
+														  Format="N2"
+														  Readonly="true"
+														  CssClass="form-control" />
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+					</AccordionItems>
+				</SfAccordion>
+			</div>
+		</div>
+
+		<div class="dashboard-footer">
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+		</div>
+	</div>
+}
 
 <SfDialog ID="_sfRawMaterialManageDialog"
 		  @ref="_sfRawMaterialManageDialog"
+		  Width="1000px"
+		  Height="800px"
 		  AllowDragging="true"
 		  EnableResize="true"
 		  @bind-Visible="_dialogVisible"
@@ -102,29 +258,1017 @@
 	<DialogPositionData X="Center" Y="Center" />
 	<DialogTemplates>
 		<Header>
-			Manage Raw Material
+			<div class="dialog-header">
+				<span>Manage Raw Material: </span>
+				<span class="material-name">@_selectedRawMaterialCart.RawMaterialName</span>
+			</div>
 		</Header>
 
 		<Content>
-			<SfTextBox @bind-Value="_selectedRawMaterialCart.RawMaterialName" Placeholder="Raw Material Name" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.Rate" ValueChanged="DialogRateValueChanged" Placeholder="Raw Material Rate" FloatLabelType="FloatLabelType.Auto" />
-			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.Quantity" ValueChanged="DialogQuantityValueChanged" Placeholder="Enter Quantity" FloatLabelType="FloatLabelType.Auto" />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.BaseTotal" Placeholder="Base Total" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.DiscPercent" ValueChanged="DialogDiscPercentValueChanged" Max="100" Min="0" Placeholder="Discount Percent" FloatLabelType="FloatLabelType.Auto" />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.DiscAmount" Placeholder="Discount Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.AfterDiscount" Placeholder="After Discount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.CGSTPercent" ValueChanged="DialogCGSTPercentValueChanged" Max="100" Min="0" Placeholder="CGST Percent" FloatLabelType="FloatLabelType.Auto" />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.CGSTAmount" Placeholder="CGST Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.SGSTPercent" ValueChanged="DialogSGSTPercentValueChanged" Max="100" Min="0" Placeholder="SGST Percent" FloatLabelType="FloatLabelType.Auto" />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.SGSTAmount" Placeholder="SGST Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.IGSTPercent" ValueChanged="DialogIGSTPercentValueChanged" Max="100" Min="0" Placeholder="IGST Percent" FloatLabelType="FloatLabelType.Auto" />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.IGSTAmount" Placeholder="IGST Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
-			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.Total" Placeholder="Final Total" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<div class="dialog-content">
+				<!-- Summary Panel above the tabs -->
+				<div class="material-summary-panel">
+					<div class="summary-highlights">
+						<div class="highlight-item">
+							<div class="highlight-label">Quantity</div>
+							<div class="highlight-value">@_selectedRawMaterialCart.Quantity.ToString("N2")</div>
+						</div>
+						<div class="highlight-item">
+							<div class="highlight-label">Base Total</div>
+							<div class="highlight-value">@_selectedRawMaterialCart.BaseTotal.FormatIndianCurrency()</div>
+						</div>
+						<div class="highlight-item">
+							<div class="highlight-label">Discount</div>
+							<div class="highlight-value">@_selectedRawMaterialCart.DiscAmount.FormatIndianCurrency()</div>
+						</div>
+						<div class="highlight-item">
+							<div class="highlight-label">Tax Total</div>
+							<div class="highlight-value">@((_selectedRawMaterialCart.CGSTAmount + _selectedRawMaterialCart.SGSTAmount + _selectedRawMaterialCart.IGSTAmount).FormatIndianCurrency())</div>
+						</div>
+						<div class="highlight-item final">
+							<div class="highlight-label">Final Total</div>
+							<div class="highlight-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</div>
+						</div>
+					</div>
+				</div>
+
+				<SfTab CssClass="material-tab">
+					<TabItems>
+						<TabItem>
+							<ChildContent>
+								<TabHeader Text="Basic Info" />
+							</ChildContent>
+							<ContentTemplate>
+								<div class="tab-content">
+									<div class="form-row">
+										<div class="form-group">
+											<label>Rate</label>
+											<SfNumericTextBox TValue="decimal"
+															  Value="_selectedRawMaterialCart.Rate"
+															  ValueChanged="DialogRateValueChanged"
+															  CssClass="form-control" />
+										</div>
+
+										<div class="form-group">
+											<label>Quantity</label>
+											<SfNumericTextBox TValue="decimal"
+															  Value="_selectedRawMaterialCart.Quantity"
+															  ValueChanged="DialogQuantityValueChanged"
+															  Min="0"
+															  Format="N2"
+															  CssClass="form-control" />
+										</div>
+									</div>
+
+									<div class="tab-summary">
+										<div class="tab-summary-title">Summary</div>
+										<div class="tab-summary-content">
+											<div class="summary-item">
+												<span class="summary-label">Base Amount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.BaseTotal.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-divider"></div>
+											<div class="summary-item final-total">
+												<span class="summary-label">Final Total:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</ContentTemplate>
+						</TabItem>
+
+						<TabItem>
+							<ChildContent>
+								<TabHeader Text="Discount" />
+							</ChildContent>
+							<ContentTemplate>
+								<div class="tab-content">
+									<div class="form-row">
+										<div class="form-group">
+											<label>Discount %</label>
+											<SfNumericTextBox TValue="decimal"
+															  Value="_selectedRawMaterialCart.DiscPercent"
+															  ValueChanged="DialogDiscPercentValueChanged"
+															  Max="100"
+															  Min="0"
+															  Format="N2"
+															  CssClass="form-control" />
+										</div>
+
+										<div class="form-group">
+											<label>Discount Amount</label>
+											<div class="readonly-currency">@_selectedRawMaterialCart.DiscAmount.FormatIndianCurrency()</div>
+										</div>
+									</div>
+
+									<div class="tab-summary">
+										<div class="tab-summary-title">Discount Summary</div>
+										<div class="tab-summary-content">
+											<div class="summary-item">
+												<span class="summary-label">Base Amount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.BaseTotal.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-item">
+												<span class="summary-label">Discount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.DiscAmount.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-item">
+												<span class="summary-label">After Discount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.AfterDiscount.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-divider"></div>
+											<div class="summary-item final-total">
+												<span class="summary-label">Final Total:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</ContentTemplate>
+						</TabItem>
+
+						<TabItem>
+							<ChildContent>
+								<TabHeader Text="Tax Details" />
+							</ChildContent>
+							<ContentTemplate>
+								<div class="tab-content">
+									<div class="tax-grid">
+										<div class="tax-row">
+											<div class="tax-column">
+												<label>CGST %</label>
+												<SfNumericTextBox TValue="decimal"
+																  Value="_selectedRawMaterialCart.CGSTPercent"
+																  ValueChanged="DialogCGSTPercentValueChanged"
+																  Max="100"
+																  Min="0"
+																  Format="N2"
+																  CssClass="form-control" />
+											</div>
+											<div class="tax-column">
+												<label>CGST Amount</label>
+												<div class="readonly-currency">@_selectedRawMaterialCart.CGSTAmount.FormatIndianCurrency()</div>
+											</div>
+										</div>
+
+										<div class="tax-row">
+											<div class="tax-column">
+												<label>SGST %</label>
+												<SfNumericTextBox TValue="decimal"
+																  Value="_selectedRawMaterialCart.SGSTPercent"
+																  ValueChanged="DialogSGSTPercentValueChanged"
+																  Max="100"
+																  Min="0"
+																  Format="N2"
+																  CssClass="form-control" />
+											</div>
+											<div class="tax-column">
+												<label>SGST Amount</label>
+												<div class="readonly-currency">@_selectedRawMaterialCart.SGSTAmount.FormatIndianCurrency()</div>
+											</div>
+										</div>
+
+										<div class="tax-row">
+											<div class="tax-column">
+												<label>IGST %</label>
+												<SfNumericTextBox TValue="decimal"
+																  Value="_selectedRawMaterialCart.IGSTPercent"
+																  ValueChanged="DialogIGSTPercentValueChanged"
+																  Max="100"
+																  Min="0"
+																  Format="N2"
+																  CssClass="form-control" />
+											</div>
+											<div class="tax-column">
+												<label>IGST Amount</label>
+												<div class="readonly-currency">@_selectedRawMaterialCart.IGSTAmount.FormatIndianCurrency()</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="tab-summary">
+										<div class="tab-summary-title">Tax Summary</div>
+										<div class="tab-summary-content">
+											<div class="summary-item">
+												<span class="summary-label">CGST Amount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.CGSTAmount.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-item">
+												<span class="summary-label">SGST Amount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.SGSTAmount.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-item">
+												<span class="summary-label">IGST Amount:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.IGSTAmount.FormatIndianCurrency()</span>
+											</div>
+											<div class="summary-item">
+												<span class="summary-label">Total Tax:</span>
+												<span class="summary-value">@((_selectedRawMaterialCart.CGSTAmount + _selectedRawMaterialCart.SGSTAmount + _selectedRawMaterialCart.IGSTAmount).FormatIndianCurrency())</span>
+											</div>
+											<div class="summary-divider"></div>
+											<div class="summary-item final-total">
+												<span class="summary-label">Final Total:</span>
+												<span class="summary-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</ContentTemplate>
+						</TabItem>
+					</TabItems>
+				</SfTab>
+			</div>
 		</Content>
 
 		<FooterTemplate>
-			<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveRawMaterialManageClick" />
-			<SfButton Content="Cancel" OnClick="OnCancelRawMaterialManageClick" />
+			<div class="dialog-footer">
+				<div class="footer-total">
+					<span class="footer-total-label">Final Total:</span>
+					<span class="footer-total-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+				</div>
+				<div class="footer-buttons">
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveRawMaterialManageClick" CssClass="dialog-button" />
+					<SfButton Content="Cancel" OnClick="OnCancelRawMaterialManageClick" CssClass="dialog-button" />
+				</div>
+			</div>
 		</FooterTemplate>
 	</DialogTemplates>
 </SfDialog>
+
+<style>
+	:root {
+		--dotnet-primary: #512BD4;
+		--dotnet-secondary: #68217A;
+		--dotnet-accent: #00A4EF;
+		--dotnet-light: #F7F7F7;
+		--dotnet-dark: #1E1E1E;
+		--dotnet-border: rgba(0, 0, 0, 0.1);
+	}
+
+	/* General Layout */
+	.purchase-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		padding: 20px;
+		background: linear-gradient(135deg, rgba(81, 43, 212, 0.05) 0%, rgba(104, 33, 122, 0.05) 100%);
+	}
+
+	/* Page Header */
+	.page-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 25px;
+	}
+
+	.page-title {
+		color: var(--dotnet-secondary);
+		font-size: 28px;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	.back-button {
+		background-color: transparent;
+		border: 2px solid var(--dotnet-secondary);
+		color: var(--dotnet-secondary);
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+	}
+
+		.back-button:hover {
+			background-color: var(--dotnet-secondary);
+			color: white;
+		}
+
+	.back-icon {
+		font-size: 16px;
+	}
+
+	/* Content layout */
+	.purchase-content {
+		display: grid;
+		grid-template-columns: 3fr 1fr;
+		gap: 25px;
+		margin-bottom: 30px;
+	}
+
+	.purchase-main {
+		display: flex;
+		flex-direction: column;
+		gap: 25px;
+	}
+
+	.purchase-sidebar {
+		display: flex;
+		flex-direction: column;
+		gap: 25px;
+	}
+
+	/* Materials container */
+	.materials-container {
+		display: grid;
+		grid-template-columns: 250px 1fr;
+		gap: 20px;
+	}
+
+	.categories-panel, .materials-panel {
+		display: flex;
+		flex-direction: column;
+	}
+
+		.categories-panel label, .materials-panel label {
+			font-weight: 600;
+			margin-bottom: 10px;
+			color: var(--dotnet-secondary);
+		}
+
+	/* Material Summary Panel - Added for improved overview */
+	.material-summary-panel {
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		padding: 15px;
+		margin-bottom: 15px;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+	.summary-highlights {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 10px;
+	}
+
+	.highlight-item {
+		flex: 1;
+		min-width: 100px;
+		text-align: center;
+		padding: 8px;
+		border-radius: 6px;
+		background-color: white;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+	}
+
+	.highlight-label {
+		font-size: 12px;
+		color: #666;
+		margin-bottom: 5px;
+	}
+
+	.highlight-value {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		font-size: 16px;
+	}
+
+	.highlight-item.final {
+		background-color: var(--dotnet-primary);
+	}
+
+		.highlight-item.final .highlight-label,
+		.highlight-item.final .highlight-value {
+			color: white;
+		}
+
+	/* Responsive adjustments for the summary panel */
+	@@media (max-width: 768px) {
+		.summary-highlights {
+			flex-direction: column;
+		}
+
+		.highlight-item {
+			width: 100%;
+		}
+	}
+
+	/* Cards */
+	.card {
+		background-color: white;
+		border-radius: 15px;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	.combined-materials-card {
+		flex-grow: 0;
+	}
+
+	.cart-card {
+		flex-grow: 1;
+	}
+
+	.card-header {
+		background-color: var(--dotnet-light);
+		padding: 15px 20px;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+		.card-header h2 {
+			margin: 0;
+			color: var(--dotnet-secondary);
+			font-size: 20px;
+			font-weight: 600;
+		}
+
+	.card-info {
+		margin: 5px 0 0 0;
+		color: #666;
+		font-size: 14px;
+		font-style: italic;
+	}
+
+	.card-body {
+		padding: 20px;
+	}
+
+	/* Material Categories and Material List */
+	.category-listbox {
+		height: 300px;
+		width: 100%;
+	}
+
+	.materials-grid, .cart-grid {
+		border-radius: 8px;
+		overflow: hidden;
+	}
+
+	/* Supplier Details */
+	.supplier-combo {
+		width: 100%;
+		margin-bottom: 15px;
+	}
+
+	.supplier-details {
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		padding: 15px;
+		margin-top: 10px;
+	}
+
+	.detail-row {
+		display: flex;
+		margin-bottom: 8px;
+		font-size: 14px;
+	}
+
+	.detail-label {
+		font-weight: 600;
+		min-width: 80px;
+		color: var(--dotnet-secondary);
+	}
+
+	.detail-value {
+		color: var(--dotnet-dark);
+	}
+
+	/* Order Summary */
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+	.total-row {
+		border-bottom: none;
+		font-weight: 700;
+		font-size: 18px;
+		margin-top: 10px;
+		padding-top: 15px;
+		border-top: 2px solid var(--dotnet-border);
+	}
+
+	.total-amount {
+		color: var(--dotnet-secondary);
+	}
+
+	.amount {
+		font-weight: 500;
+	}
+
+	/* Accordion */
+	.sidebar-accordion {
+		width: 100%;
+	}
+
+	.accordion-content {
+		padding: 15px 0;
+	}
+
+	/* Forms */
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 15px;
+	}
+
+	.form-group {
+		margin-bottom: 15px;
+	}
+
+	.full-width {
+		grid-column: 1 / -1;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 8px;
+		font-weight: 500;
+		color: var(--dotnet-dark);
+	}
+
+	.form-control {
+		width: 100%;
+		border-radius: 6px;
+	}
+
+	/* Tab Summary Styling */
+	.tab-summary {
+		margin-top: 25px;
+		border-top: 1px solid var(--dotnet-border);
+		padding-top: 15px;
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		padding: 15px;
+	}
+
+	.tab-summary-title {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		margin-bottom: 10px;
+		font-size: 16px;
+	}
+
+	.tab-summary-content {
+		background-color: white;
+		border-radius: 6px;
+		padding: 12px;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+	}
+
+	.summary-item {
+		display: flex;
+		justify-content: space-between;
+		padding: 8px 0;
+	}
+
+	.summary-label {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+	}
+
+	.summary-value {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+	}
+
+	.summary-divider {
+		height: 1px;
+		background-color: var(--dotnet-border);
+		margin: 8px 0;
+	}
+
+	.final-total {
+		font-size: 18px;
+		font-weight: 700;
+		margin-top: 8px;
+	}
+
+		.final-total .summary-value {
+			color: var(--dotnet-primary);
+		}
+
+	/* Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.material-name {
+		color: var(--dotnet-primary);
+		font-weight: 700;
+	}
+
+	.dialog-content {
+		padding: 0;
+	}
+
+	.tab-content {
+		padding: 20px 10px;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		margin-bottom: 15px;
+	}
+
+	/* Tax Tab Styling */
+	.tax-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+	}
+
+	.tax-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+	}
+
+	.tax-column {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.tab-summary {
+		margin-top: 25px;
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		padding: 15px;
+	}
+
+	.tax-summary-row {
+		display: flex;
+		justify-content: space-between;
+		font-weight: 600;
+		font-size: 16px;
+		color: var(--dotnet-secondary);
+	}
+
+	/* Summary Tab Styling */
+	.summary-tab {
+		padding: 10px;
+	}
+
+	.summary-card {
+		background-color: var(--dotnet-light);
+		border-radius: 10px;
+		padding: 15px;
+	}
+
+	.summary-item {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 0;
+	}
+
+	.summary-label {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+	}
+
+	.summary-value {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+	}
+
+	.summary-divider {
+		height: 1px;
+		background-color: var(--dotnet-border);
+		margin: 8px 0;
+	}
+
+	.final-total {
+		font-size: 18px;
+		font-weight: 700;
+		margin-top: 8px;
+	}
+
+		.final-total .summary-value {
+			color: var(--dotnet-primary);
+		}
+
+
+	.highlight-total {
+		font-weight: 700;
+		font-size: 18px;
+		color: var(--dotnet-primary);
+	}
+
+	.dialog-footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 10px;
+	}
+
+	/* Button Styling */
+	.save-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		width: 100%;
+		margin-top: 20px;
+		background-color: var(--dotnet-primary);
+		color: white;
+		padding: 12px;
+		border-radius: 8px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+		.save-button:hover {
+			background-color: #4311a8;
+			transform: translateY(-2px);
+		}
+
+	.save-icon {
+		font-size: 18px;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: #666;
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--dotnet-secondary);
+			text-decoration: underline;
+		}
+
+	/* Material Tab Styling */
+	.material-tab {
+		width: 100%;
+		height: 100%;
+	}
+
+	.e-tab .e-tab-header {
+		background-color: var(--dotnet-light);
+		border-radius: 8px 8px 0 0;
+	}
+
+		.e-tab .e-tab-header .e-toolbar-item.e-active .e-tab-text {
+			color: var(--dotnet-primary);
+			font-weight: 600;
+		}
+
+		.e-tab .e-tab-header .e-toolbar-item .e-tab-text {
+			color: var(--dotnet-dark);
+		}
+
+	.e-tab .e-content .e-item {
+		padding: 0;
+	}
+
+	/* Currency Display */
+	.readonly-currency {
+		padding: 8px 12px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background-color: var(--dotnet-light);
+		font-weight: 500;
+		color: var(--dotnet-secondary);
+	}
+
+		.readonly-currency.highlight-total {
+			font-weight: 700;
+			font-size: 18px;
+			color: var(--dotnet-primary);
+		}
+
+	/* Dialog Footer Redesign */
+	.dialog-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+	.footer-total {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.footer-total-label {
+		font-weight: 600;
+		font-size: 18px;
+		color: var(--dotnet-secondary);
+	}
+
+	.footer-total-value {
+		font-weight: 700;
+		font-size: 20px;
+		color: var(--dotnet-primary);
+	}
+
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Make dialog buttons the same height */
+	.dialog-button {
+		border-radius: 6px;
+		padding: 8px 16px;
+		height: 38px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 500;
+	}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--dotnet-primary);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--dotnet-accent);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--dotnet-secondary);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--dotnet-dark);
+		font-size: 16px;
+		margin-top: 10px;
+	}
+
+	.tax-grid {
+		margin-bottom: 15px;
+	}
+
+	/* Animations */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Dialog button styles */
+	.dialog-button {
+		border-radius: 6px;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 1200px) {
+		.purchase-content {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@@media (max-width: 992px) {
+		.materials-container {
+			grid-template-columns: 1fr;
+		}
+
+		.category-listbox {
+			height: 150px;
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.page-header {
+			flex-direction: column;
+			gap: 15px;
+			align-items: flex-start;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+
+		.tax-row {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+	}
+
+	/* Toast Styling */
+	::deep .e-toast-container {
+		z-index: 1000;
+	}
+
+		::deep .e-toast-container .e-toast {
+			border: 0;
+			border-radius: 8px;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	/* Success Toast */
+	::deep .e-toast-success {
+		background-color: #ebf7ee;
+		border-left: 4px solid #4CAF50;
+		color: #2E7D32;
+	}
+
+		::deep .e-toast-success .e-toast-title {
+			color: #2E7D32;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-success .e-toast-content {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success .e-toast-close-icon {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success::before {
+			content: "✓";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Error Toast */
+	::deep .e-toast-danger {
+		background-color: #fdeeee;
+		border-left: 4px solid #F44336;
+		color: #C62828;
+	}
+
+		::deep .e-toast-danger .e-toast-title {
+			color: #C62828;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-danger .e-toast-content {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger .e-toast-close-icon {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger::before {
+			content: "⚠";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Toast Animation */
+	::deep .e-toast-container .e-toast {
+		padding: 10px 10px 10px 40px;
+		position: relative;
+		animation-fill-mode: both;
+	}
+</style>

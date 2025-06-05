@@ -14,6 +14,8 @@ public partial class PurchasePage
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 
+	private string _errorMessage = "";
+
 	private decimal _baseTotal = 0;
 	private decimal _afterDiscounts = 0;
 	private decimal _subTotal = 0;
@@ -36,7 +38,8 @@ public partial class PurchasePage
 	private SfGrid<PurchaseRawMaterialCartModel> _sfRawMaterialCartGrid;
 
 	private SfDialog _sfRawMaterialManageDialog;
-	private SfToast _sfToast;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	#region LoadData
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -277,24 +280,32 @@ public partial class PurchasePage
 	{
 		if (_purchaseRawMaterialCarts.Count == 0 || _purchaseRawMaterialCarts is null)
 		{
-			await _sfToast.ShowAsync(new ToastModel { Title = "Failed", Content = "Please add at least one raw material to the purchase.", CssClass = "e-toast-error" });
+			_errorMessage = "Please add at least one raw material to the purchase.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 
 		if (_purchase.SupplierId == 0)
 		{
-			await _sfToast.ShowAsync(new ToastModel { Title = "Failed", Content = "Please select a supplier.", CssClass = "e-toast-error" });
+			_errorMessage = "Please select a supplier.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(_purchase.BillNo))
 		{
-			await _sfToast.ShowAsync(new ToastModel { Title = "Failed", Content = "Bill No is required.", CssClass = "e-toast-error" });
+			_errorMessage = "Bill No is required.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 		if (_purchase.UserId == 0)
 		{
-			await _sfToast.ShowAsync(new ToastModel { Title = "Failed", Content = "User is required.", CssClass = "e-toast-error" });
+			_errorMessage = "User is required.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 		return true;
@@ -310,7 +321,9 @@ public partial class PurchasePage
 		int purchaseId = await PurchaseData.InsertPurchase(_purchase);
 		if (purchaseId <= 0)
 		{
-			await _sfToast.ShowAsync(new ToastModel { Title = "Failed", Content = "Failed to save purchase.", CssClass = "e-toast-error" });
+			_errorMessage = "Failed to save purchase.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
 			return;
 		}
 
@@ -336,7 +349,7 @@ public partial class PurchasePage
 				Status = true
 			});
 
-		await _sfToast.ShowAsync(new ToastModel { Title = "Success", Content = "Purchase saved successfully.", CssClass = "e-toast-success" });
+		await _sfSuccessToast.ShowAsync();
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>
