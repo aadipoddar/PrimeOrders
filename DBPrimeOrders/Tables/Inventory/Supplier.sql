@@ -7,5 +7,7 @@
     [Phone] VARCHAR(20) NOT NULL, 
     [Email] VARCHAR(100) NOT NULL, 
     [Address] VARCHAR(500) NOT NULL, 
-    [Status] BIT NOT NULL DEFAULT 1
+    [StateId] INT NOT NULL, 
+    [Status] BIT NOT NULL DEFAULT 1, 
+    CONSTRAINT [FK_Supplier_ToState] FOREIGN KEY (StateId) REFERENCES [State](Id)
 )

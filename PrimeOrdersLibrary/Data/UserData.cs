@@ -1,4 +1,6 @@
-﻿namespace PrimeOrdersLibrary.Data;
+﻿using PrimeOrdersLibrary.Models.Common;
+
+namespace PrimeOrdersLibrary.Data;
 
 public static class UserData
 {

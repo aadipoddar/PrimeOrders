@@ -1,4 +1,5 @@
 using PrimeOrdersLibrary.Data.Inventory;
+using PrimeOrdersLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -15,6 +16,7 @@ public partial class SupplierPage
 	private SupplierModel _supplierModel = new() { Status = true };
 
 	private List<SupplierModel> _suppliers;
+	private List<StateModel> _states;
 
 	private SfGrid<SupplierModel> _sfGrid;
 	private SfToast _sfToast;
@@ -31,7 +33,7 @@ public partial class SupplierPage
 		StateHasChanged();
 
 		if (firstRender)
-			await LoadSuppliers();
+			await LoadComboBox();
 	}
 
 	private async Task<bool> ValidatePassword()
@@ -49,9 +51,11 @@ public partial class SupplierPage
 		return true;
 	}
 
-	private async Task LoadSuppliers()
+	private async Task LoadComboBox()
 	{
 		_suppliers = await CommonData.LoadTableData<SupplierModel>(TableNames.Supplier);
+		_states = await CommonData.LoadTableData<StateModel>(TableNames.State);
+		_supplierModel.StateId = _states.FirstOrDefault()?.Id ?? 0;
 		_sfGrid?.Refresh();
 		StateHasChanged();
 	}

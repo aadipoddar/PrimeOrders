@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Models.Common;
+
 namespace PrimeOrders.Components.Pages.Inventory;
 
 public partial class InventoryDashboard

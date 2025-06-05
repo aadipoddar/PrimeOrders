@@ -93,14 +93,27 @@ else
 						</div>
 
 						<div class="form-group">
+							<label>State</label>
+							<SfComboBox TValue="int"
+										TItem="StateModel"
+										Placeholder="Select a State"
+										DataSource="@_states"
+										@bind-Value="_supplierModel.StateId"
+										PopupWidth="100%"
+										CssClass="form-control">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+					</div>
+
+					<div class="form-row">
+						<div class="form-group">
 							<label>Status</label>
 							<div class="checkbox-container">
 								<SfCheckBox @bind-Checked="_supplierModel.Status" Label="Active" CssClass="form-checkbox" />
 							</div>
 						</div>
-					</div>
 
-					<div class="form-row">
 						<div class="form-group full-width">
 							<label>Address</label>
 							<SfTextBox @bind-Value="_supplierModel.Address"

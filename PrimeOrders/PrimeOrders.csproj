@@ -27,6 +27,7 @@
     <Using Include="PrimeOrdersLibrary.Data" />
     <Using Include="PrimeOrdersLibrary.DataAccess" />
     <Using Include="PrimeOrdersLibrary.Models" />
+    <Using Include="PrimeOrdersLibrary.Models.Common" />
     <Using Include="PrimeOrdersLibrary.Models.Inventory" />
     <Using Include="PrimeOrdersLibrary.Models.Product" />
   </ItemGroup>

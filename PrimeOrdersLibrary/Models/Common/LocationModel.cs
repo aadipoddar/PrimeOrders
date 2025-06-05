@@ -1,4 +1,4 @@
-﻿namespace PrimeOrdersLibrary.Models;
+﻿namespace PrimeOrdersLibrary.Models.Common;
 
 public class LocationModel
 {

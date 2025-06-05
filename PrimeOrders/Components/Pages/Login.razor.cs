@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Models.Common;
+
 using Syncfusion.Blazor.Inputs;
 
 namespace PrimeOrders.Components.Pages;

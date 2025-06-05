@@ -101,6 +101,7 @@
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_ProductCategory.sql" />
     <Build Include="Tables\Inventory\Supplier.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_Supplier.sql" />
+    <Build Include="Tables\Common\State.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

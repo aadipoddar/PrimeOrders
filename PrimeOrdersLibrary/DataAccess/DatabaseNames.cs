@@ -4,6 +4,7 @@ public static class TableNames
 {
 	public static string User => "User";
 	public static string Location => "Location";
+	public static string State => "State";
 	public static string Tax => "Tax";
 	public static string ProductCategory => "ProductCategory";
 	public static string Product => "Product";
