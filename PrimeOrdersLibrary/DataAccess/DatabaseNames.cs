@@ -13,6 +13,8 @@ public static class TableNames
 	public static string Recipe => "Recipe";
 	public static string RecipeDetail => "RecipeDetail";
 	public static string Supplier => "Supplier";
+	public static string Purchase => "Purchase";
+	public static string PurchaseDetail => "PurchaseDetail";
 }
 
 public static class StoredProcedureNames
@@ -28,6 +30,7 @@ public static class StoredProcedureNames
 	public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
 
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
+	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
@@ -44,7 +47,9 @@ public static class StoredProcedureNames
 	public static string InsertRecipeDetail => "Insert_RecipeDetail";
 
 	public static string InsertSupplier => "Insert_Supplier";
-
+	
+	public static string InsertPurchase => "Insert_Purchase";
+	public static string InsertPurchaseDetail => "Insert_PurchaseDetail";
 }
 
 public static class ViewNames

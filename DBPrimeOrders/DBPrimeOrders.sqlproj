@@ -102,6 +102,11 @@
     <Build Include="Tables\Inventory\Supplier.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_Supplier.sql" />
     <Build Include="Tables\Common\State.sql" />
+    <Build Include="Tables\Inventory\Purchase.sql" />
+    <Build Include="Tables\Inventory\PurchaseDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_PurchaseDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_Purchase.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_PurchaseDetail_By_Purchase.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

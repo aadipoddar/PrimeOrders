@@ -1,6 +1,3 @@
-using PrimeOrdersLibrary.Data.Inventory;
-using PrimeOrdersLibrary.Models.Common;
-
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 

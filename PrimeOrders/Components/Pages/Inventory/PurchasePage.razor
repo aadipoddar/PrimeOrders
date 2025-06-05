@@ -1,5 +1,130 @@
-﻿<h3>PurchasePage</h3>
+﻿@page "/Inventory/Purchase"
 
-@code {
+<PageTitle>Purchase - Prime Orders</PageTitle>
 
-}
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Title="Success"
+		 Content="Purchase saved successfully."
+		 Timeout="1000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastEvents Closed="@ClosedHandler" />
+</SfToast>
+
+<SfAccordion>
+	<AccordionItems>
+		<AccordionItem Header="Supplier Details">
+			<ContentTemplate>
+				<SfComboBox TValue="int"
+							TItem="SupplierModel"
+							Placeholder="Select a Supplier"
+							DataSource="@_suppliers"
+							@bind-Value="_supplier.Id">
+					<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="@OnSupplierChanged" />
+					<ComboBoxFieldSettings Value="Id" Text="Name" />
+				</SfComboBox>
+
+				<SfTextBox @bind-Value="_supplier.GSTNo" Placeholder="Supplier GSTNo" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<SfTextBox @bind-Value="_supplier.Address" Placeholder="Supplier Address" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<SfTextBox @bind-Value="_supplier.Phone" Placeholder="Supplier Phone" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<SfTextBox @bind-Value="_supplier.Email" Placeholder="Supplier Email" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+			</ContentTemplate>
+		</AccordionItem>
+
+		<AccordionItem Header="Adjustments">
+			<ContentTemplate>
+				<SfNumericTextBox TValue="decimal" Value="_purchase.CDPercent" ValueChanged="CashDiscountPercentValueChanged" Max="100" Min="0" Placeholder="Cash Discount Percentage" FloatLabelType="FloatLabelType.Auto" />
+				<SfNumericTextBox @bind-Value="_purchase.CDAmount" Placeholder="Cash Discount Amount" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+			</ContentTemplate>
+		</AccordionItem>
+
+		<AccordionItem Header="Bill Details">
+			<ContentTemplate>
+				<SfTextBox @bind-Value="_purchase.BillNo" Placeholder="Bill No." FloatLabelType="FloatLabelType.Auto" />
+				<SfDatePicker @bind-Value="_purchase.BillDate" Placeholder="Purchase Bill Date" FloatLabelType="FloatLabelType.Auto" />
+				<SfTextBox @bind-Value="_purchase.Remarks" Placeholder="Purchase Remarks" FloatLabelType="FloatLabelType.Auto" />
+				<SfNumericTextBox @bind-Value="_baseTotal" Placeholder="Base Total" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<SfNumericTextBox @bind-Value="_afterDiscounts" Placeholder="After Discounts" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<SfNumericTextBox @bind-Value="_subTotal" Placeholder="Sub Total" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+				<SfNumericTextBox @bind-Value="_total" Placeholder="Total" FloatLabelType="FloatLabelType.Auto" Readonly="true" />
+
+				<SfButton Content="Save Purchase" OnClick="OnSavePurchaseClick" />
+			</ContentTemplate>
+		</AccordionItem>
+	</AccordionItems>
+</SfAccordion>
+
+<SfListBox TValue="int"
+		   AllowFiltering="true"
+		   TItem="RawMaterialCategoryModel"
+		   DataSource="@_rawMaterialCategories"
+		   @bind-Value="_selectedRawMaterialCategoryId">
+	<ListBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="RawMatrialCategoryChanged" />
+	<ListBoxFieldSettings Value="Id" Text="Name" />
+</SfListBox>
+
+<SfGrid DataSource="@_rawMaterials"
+		ID="_sfRawMaterialGrid"
+		@ref="_sfRawMaterialGrid"
+		AllowSorting="true"
+		AllowFiltering="true"
+		AllowResizing="true">
+	<GridEvents RowSelected="RawMaterialRowSelectHandler" TValue="RawMaterialModel" />
+	<GridColumns>
+		<GridColumn Field=@nameof(RawMaterialModel.Name) HeaderText="Name" Width="180" />
+		<GridColumn Field=@nameof(RawMaterialModel.MRP) HeaderText="MRP" Width="180" Format="N2" />
+	</GridColumns>
+</SfGrid>
+
+<SfGrid DataSource="@_purchaseRawMaterialCarts"
+		ID="_sfRawMaterialCartGrid"
+		@ref="_sfRawMaterialCartGrid"
+		AllowSorting="true"
+		AllowFiltering="true"
+		AllowResizing="true">
+	<GridEvents RowSelected="RawMaterialCartRowSelectHandler" TValue="PurchaseRawMaterialCartModel" />
+	<GridColumns>
+		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.RawMaterialName) HeaderText="Name" Width="180" />
+		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Quantity) HeaderText="Quantity" Width="180" />
+		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Rate) HeaderText="Rate" Width="180" Format="N2" />
+		<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Total) HeaderText="Rate" Width="180" Format="N2" />
+	</GridColumns>
+</SfGrid>
+
+<SfDialog ID="_sfRawMaterialManageDialog"
+		  @ref="_sfRawMaterialManageDialog"
+		  AllowDragging="true"
+		  EnableResize="true"
+		  @bind-Visible="_dialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			Manage Raw Material
+		</Header>
+
+		<Content>
+			<SfTextBox @bind-Value="_selectedRawMaterialCart.RawMaterialName" Placeholder="Raw Material Name" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.Rate" ValueChanged="DialogRateValueChanged" Placeholder="Raw Material Rate" FloatLabelType="FloatLabelType.Auto" />
+			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.Quantity" ValueChanged="DialogQuantityValueChanged" Placeholder="Enter Quantity" FloatLabelType="FloatLabelType.Auto" />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.BaseTotal" Placeholder="Base Total" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.DiscPercent" ValueChanged="DialogDiscPercentValueChanged" Max="100" Min="0" Placeholder="Discount Percent" FloatLabelType="FloatLabelType.Auto" />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.DiscAmount" Placeholder="Discount Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.AfterDiscount" Placeholder="After Discount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.CGSTPercent" ValueChanged="DialogCGSTPercentValueChanged" Max="100" Min="0" Placeholder="CGST Percent" FloatLabelType="FloatLabelType.Auto" />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.CGSTAmount" Placeholder="CGST Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.SGSTPercent" ValueChanged="DialogSGSTPercentValueChanged" Max="100" Min="0" Placeholder="SGST Percent" FloatLabelType="FloatLabelType.Auto" />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.SGSTAmount" Placeholder="SGST Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox TValue="decimal" Value="_selectedRawMaterialCart.IGSTPercent" ValueChanged="DialogIGSTPercentValueChanged" Max="100" Min="0" Placeholder="IGST Percent" FloatLabelType="FloatLabelType.Auto" />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.IGSTAmount" Placeholder="IGST Amount" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+			<SfNumericTextBox @bind-Value="_selectedRawMaterialCart.Total" Placeholder="Final Total" FloatLabelType="FloatLabelType.Auto" Readonly=true />
+		</Content>
+
+		<FooterTemplate>
+			<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveRawMaterialManageClick" />
+			<SfButton Content="Cancel" OnClick="OnCancelRawMaterialManageClick" />
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>

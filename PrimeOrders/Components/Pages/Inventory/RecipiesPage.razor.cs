@@ -1,6 +1,4 @@
-using PrimeOrdersLibrary.Data.Inventory;
 using PrimeOrdersLibrary.Data.Product;
-using PrimeOrdersLibrary.Models.Common;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;

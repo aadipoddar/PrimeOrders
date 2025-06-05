@@ -1,5 +1,3 @@
-using PrimeOrdersLibrary.Models.Common;
-
 namespace PrimeOrders.Components.Pages;
 
 public partial class Dashboard
@@ -12,6 +10,9 @@ public partial class Dashboard
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (firstRender)
+			Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
 		IsLoading = true;
 
 		if (firstRender && !await ValidatePassword()) NavManager.NavigateTo("/Login");

@@ -1,5 +1,3 @@
-using PrimeOrdersLibrary.Models.Common;
-
 using Syncfusion.Blazor.Inputs;
 
 namespace PrimeOrders.Components.Pages;
@@ -14,9 +12,6 @@ public partial class Login
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (firstRender)
-			Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
 		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
 		var passcode = await JS.InvokeAsync<string>("getCookie", "Passcode");
 
