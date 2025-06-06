@@ -15,6 +15,8 @@ public static class TableNames
 	public static string Supplier => "Supplier";
 	public static string Purchase => "Purchase";
 	public static string PurchaseDetail => "PurchaseDetail";
+	public static string Order => "Order";
+	public static string OrderDetail => "OrderDetail";
 }
 
 public static class StoredProcedureNames
@@ -32,6 +34,8 @@ public static class StoredProcedureNames
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 
+	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
+
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
 
@@ -47,9 +51,12 @@ public static class StoredProcedureNames
 	public static string InsertRecipeDetail => "Insert_RecipeDetail";
 
 	public static string InsertSupplier => "Insert_Supplier";
-	
+
 	public static string InsertPurchase => "Insert_Purchase";
 	public static string InsertPurchaseDetail => "Insert_PurchaseDetail";
+
+	public static string InsertOrder => "Insert_Order";
+	public static string InsertOrderDetail => "Insert_OrderDetail";
 }
 
 public static class ViewNames

@@ -1,4 +1,4 @@
-﻿namespace PrimeOrdersLibrary.Data;
+﻿namespace PrimeOrdersLibrary.Data.Common;
 
 public static class CommonData
 {

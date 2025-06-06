@@ -1,6 +1,6 @@
 namespace PrimeOrders.Components.Pages.Order;
 
-public partial class OrderPage
+public partial class OrderDashboard
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }

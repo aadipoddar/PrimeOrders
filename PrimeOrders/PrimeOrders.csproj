@@ -26,11 +26,15 @@
     <Using Include="Microsoft.AspNetCore.Components" />
     <Using Include="Microsoft.JSInterop" />
     <Using Include="PrimeOrdersLibrary.Data" />
+    <Using Include="PrimeOrdersLibrary.Data.Common" />
     <Using Include="PrimeOrdersLibrary.Data.Inventory" />
+    <Using Include="PrimeOrdersLibrary.Data.Order" />
+    <Using Include="PrimeOrdersLibrary.Data.Product" />
     <Using Include="PrimeOrdersLibrary.DataAccess" />
     <Using Include="PrimeOrdersLibrary.Models" />
     <Using Include="PrimeOrdersLibrary.Models.Common" />
     <Using Include="PrimeOrdersLibrary.Models.Inventory" />
+    <Using Include="PrimeOrdersLibrary.Models.Order" />
     <Using Include="PrimeOrdersLibrary.Models.Product" />
   </ItemGroup>
 

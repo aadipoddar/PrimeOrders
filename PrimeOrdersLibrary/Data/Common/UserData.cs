@@ -1,6 +1,6 @@
 ﻿using PrimeOrdersLibrary.Models.Common;
 
-namespace PrimeOrdersLibrary.Data;
+namespace PrimeOrdersLibrary.Data.Common;
 
 public static class UserData
 {

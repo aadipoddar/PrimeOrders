@@ -27,7 +27,7 @@ public partial class PurchasePage
 	private PurchaseRawMaterialCartModel _selectedRawMaterialCart = new();
 
 	private SupplierModel _supplier = new();
-	private PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true };
+	private readonly PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true };
 
 	private List<SupplierModel> _suppliers;
 	private List<RawMaterialCategoryModel> _rawMaterialCategories;
@@ -353,7 +353,7 @@ public partial class PurchasePage
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>
-	NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
 
 	private void NavigateTo(string route) =>
 		NavManager.NavigateTo(route);
