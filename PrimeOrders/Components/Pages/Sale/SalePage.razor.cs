@@ -1,0 +1,439 @@
+using PrimeOrdersLibrary.Data.Sale;
+
+using Syncfusion.Blazor.DropDowns;
+using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
+
+namespace PrimeOrders.Components.Pages.Sale;
+
+public partial class SalePage
+{
+	[Inject] public NavigationManager NavManager { get; set; }
+	[Inject] public IJSRuntime JS { get; set; }
+
+	private UserModel _user;
+	private bool _isLoading = true;
+	private bool _dialogVisible = false;
+
+	private string _errorMessage = "";
+
+	private decimal _baseTotal = 0;
+	private decimal _discountAmount = 0;
+	private decimal _afterDiscounts = 0;
+	private decimal _subTotal = 0;
+	private decimal _total = 0;
+
+	private int _selectedProductCategoryId = 0;
+	private int _selectedProductId = 0;
+	private int _selectedPaymentModeId = 0;
+
+	private SaleProductCartModel _selectedProductCart = new();
+
+	private readonly SaleModel _sale = new() { DiscReason = "", Remarks = "", Status = true };
+
+	private List<PaymentModeModel> _paymentModes;
+	private List<OrderModel> _orders;
+	private List<LocationModel> _parties;
+	private List<ProductCategoryModel> _productCategories;
+	private List<ProductModel> _products;
+	private readonly List<SaleProductCartModel> _saleProductCart = [];
+
+	private SfGrid<ProductModel> _sfProductGrid;
+	private SfGrid<SaleProductCartModel> _sfProductCartGrid;
+
+	private SfDialog _sfProductManageDialog;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
+
+	#region LoadData
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		_isLoading = true;
+
+		if (firstRender && !await ValidatePassword())
+			NavManager.NavigateTo("/Login");
+
+		_isLoading = false;
+		StateHasChanged();
+
+		if (firstRender)
+			await LoadComboBox();
+	}
+
+	private async Task<bool> ValidatePassword()
+	{
+		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
+		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
+
+		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
+			return false;
+
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
+		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
+			return false;
+
+		_user = user;
+
+		return true;
+	}
+
+	private async Task LoadComboBox()
+	{
+		_orders = await OrderData.LoadOrderByCompleted(false);
+		_parties = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		_paymentModes = PaymentModeData.GetPaymentModes();
+
+		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
+
+		_parties.Remove(_parties.FirstOrDefault(c => c.Id == _user.LocationId));
+
+		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
+		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
+
+		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Purchase Details Events
+	private async void OnOrderChanged(ChangeEventArgs<int, OrderModel> args)
+	{
+		if (args.Value > 0)
+		{
+			_sale.OrderId = args.Value;
+
+			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
+			var orderDetails = await OrderData.LoadOrderDetailByOrder(_sale.OrderId.Value);
+			_sale.PartyId = order.LocationId;
+
+			_saleProductCart.Clear();
+
+			foreach (var item in orderDetails)
+			{
+				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+				if (product is not null)
+				{
+					var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
+
+					_saleProductCart.Add(new()
+					{
+						ProductId = product.Id,
+						ProductName = product.Name,
+						Quantity = item.Quantity,
+						Rate = product.Rate,
+						DiscPercent = _sale.DiscPercent,
+						CGSTPercent = productTax.CGST,
+						SGSTPercent = productTax.SGST,
+						IGSTPercent = productTax.IGST
+						// Rest handled in the UpdateFinancialDetails()
+					});
+				}
+			}
+		}
+		else
+		{
+			_sale.OrderId = null;
+			_sale.PartyId = null;
+			_saleProductCart.Clear();
+		}
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private void OnPartyChanged(ChangeEventArgs<int?, LocationModel> args)
+	{
+		if (args.Value > 0)
+			_sale.PartyId = args.Value;
+		else
+			_sale.PartyId = null;
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private void SaleDiscountPercentValueChanged(decimal args)
+	{
+		_sale.DiscPercent = args;
+
+		foreach (var item in _saleProductCart)
+			item.DiscPercent = args;
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private void UpdateFinancialDetails()
+	{
+		_sale.UserId = _user?.Id ?? 0;
+		_sale.LocationId = _user?.LocationId ?? 0;
+		_sale.SaleDateTime = DateTime.Now;
+
+		foreach (var item in _saleProductCart)
+		{
+			item.BaseTotal = item.Rate * item.Quantity;
+			item.DiscAmount = item.BaseTotal * (item.DiscPercent / 100);
+			item.AfterDiscount = item.BaseTotal - item.DiscAmount;
+			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
+			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
+			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
+			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+		}
+
+		_baseTotal = _saleProductCart.Sum(c => c.BaseTotal);
+		_afterDiscounts = _saleProductCart.Sum(c => c.AfterDiscount);
+		_discountAmount = _baseTotal - _afterDiscounts;
+		_subTotal = _saleProductCart.Sum(c => c.Total);
+		_total = _subTotal - (_subTotal * (_sale.DiscPercent / 100));
+
+		switch (_selectedPaymentModeId)
+		{
+			case 1:
+				_sale.Cash = _total;
+				_sale.Card = 0;
+				_sale.UPI = 0;
+				_sale.Credit = 0;
+				break;
+			case 2:
+				_sale.Cash = 0;
+				_sale.Card = _total;
+				_sale.UPI = 0;
+				_sale.Credit = 0;
+				break;
+			case 3:
+				_sale.Cash = 0;
+				_sale.Card = 0;
+				_sale.UPI = _total;
+				_sale.Credit = 0;
+				break;
+			case 4:
+				_sale.Cash = 0;
+				_sale.Card = 0;
+				_sale.UPI = 0;
+				_sale.Credit = _total;
+				break;
+			default:
+				break;
+		}
+
+		_sfProductGrid?.Refresh();
+		_sfProductCartGrid?.Refresh();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Products
+	private async void ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
+	{
+		_selectedProductId = args.Value;
+		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+
+		await _sfProductGrid?.Refresh();
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	public async void ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
+	{
+		_selectedProductId = args.Data.Id;
+		var product = args.Data;
+
+		var existingProduct = _saleProductCart.FirstOrDefault(c => c.ProductId == product.Id);
+
+		if (existingProduct is not null)
+			existingProduct.Quantity++;
+
+		else
+		{
+			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
+
+			_saleProductCart.Add(new()
+			{
+				ProductId = product.Id,
+				ProductName = product.Name,
+				Quantity = 1,
+				Rate = product.Rate,
+				DiscPercent = _sale.DiscPercent,
+				CGSTPercent = productTax.CGST,
+				SGSTPercent = productTax.SGST,
+				IGSTPercent = productTax.IGST,
+				// Rest handled in the UpdateFinancialDetails()
+			});
+		}
+
+		_selectedProductId = 0;
+		await _sfProductCartGrid?.Refresh();
+		await _sfProductGrid?.Refresh();
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	public void ProductCartRowSelectHandler(RowSelectEventArgs<SaleProductCartModel> args)
+	{
+		_selectedProductCart = args.Data;
+		_dialogVisible = true;
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Dialog Events
+	private void DialogRateValueChanged(decimal args)
+	{
+		_selectedProductCart.Rate = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void DialogQuantityValueChanged(decimal args)
+	{
+		_selectedProductCart.Quantity = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void DialogDiscPercentValueChanged(decimal args)
+	{
+		_selectedProductCart.DiscPercent = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void DialogCGSTPercentValueChanged(decimal args)
+	{
+		_selectedProductCart.CGSTPercent = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void DialogSGSTPercentValueChanged(decimal args)
+	{
+		_selectedProductCart.SGSTPercent = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void DialogIGSTPercentValueChanged(decimal args)
+	{
+		_selectedProductCart.IGSTPercent = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void UpdateModalFinancialDetails()
+	{
+		_selectedProductCart.BaseTotal = _selectedProductCart.Rate * _selectedProductCart.Quantity;
+		_selectedProductCart.DiscAmount = _selectedProductCart.BaseTotal * (_selectedProductCart.DiscPercent / 100);
+		_selectedProductCart.AfterDiscount = _selectedProductCart.BaseTotal - _selectedProductCart.DiscAmount;
+		_selectedProductCart.CGSTAmount = _selectedProductCart.AfterDiscount * (_selectedProductCart.CGSTPercent / 100);
+		_selectedProductCart.SGSTAmount = _selectedProductCart.AfterDiscount * (_selectedProductCart.SGSTPercent / 100);
+		_selectedProductCart.IGSTAmount = _selectedProductCart.AfterDiscount * (_selectedProductCart.IGSTPercent / 100);
+		_selectedProductCart.Total = _selectedProductCart.AfterDiscount + _selectedProductCart.CGSTAmount + _selectedProductCart.SGSTAmount + _selectedProductCart.IGSTAmount;
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private async void OnSaveProductManageClick()
+	{
+		UpdateModalFinancialDetails();
+
+		_saleProductCart.Remove(_saleProductCart.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
+
+		if (_selectedProductCart.Quantity > 0)
+			_saleProductCart.Add(_selectedProductCart);
+
+		_dialogVisible = false;
+		await _sfProductCartGrid?.Refresh();
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private async void OnCancelProductManageClick()
+	{
+		_dialogVisible = false;
+		await _sfProductCartGrid?.Refresh();
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Saving
+	private async Task<bool> ValidateForm()
+	{
+		if (_saleProductCart.Count == 0 || _saleProductCart is null)
+		{
+			_errorMessage = "Please add at least one Product to the Sale.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
+
+		if (_sale.UserId == 0 || _sale.LocationId == 0)
+		{
+			_errorMessage = "User and Location is required.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
+		return true;
+	}
+
+	private async void OnSaveSaleClick()
+	{
+		UpdateFinancialDetails();
+
+		if (!await ValidateForm())
+			return;
+
+		int saleId = await SaleData.InsertSale(_sale);
+		if (saleId <= 0)
+		{
+			_errorMessage = "Failed to save Sale.";
+			StateHasChanged();
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		foreach (var item in _saleProductCart)
+			await SaleData.InsertSaleDetail(new()
+			{
+				Id = 0,
+				SaleId = saleId,
+				ProductId = item.ProductId,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				BaseTotal = item.BaseTotal,
+				DiscPercent = item.DiscPercent,
+				DiscAmount = item.DiscAmount,
+				AfterDiscount = item.AfterDiscount,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = item.CGSTAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = item.SGSTAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = item.IGSTAmount,
+				Total = item.Total,
+				Status = true
+			});
+
+		if (_sale.OrderId is not null)
+		{
+			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
+			if (order is not null && order.Status)
+			{
+				order.Completed = true;
+				await OrderData.InsertOrder(order);
+			}
+		}
+
+		await _sfSuccessToast.ShowAsync();
+	}
+
+	public void ClosedHandler(ToastCloseArgs args) =>
+		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+
+	private void NavigateTo(string route) =>
+		NavManager.NavigateTo(route);
+	#endregion
+}

@@ -21,7 +21,7 @@ public partial class PlaceOrderPage
 
 	private OrderProductCartModel _selectedProductCart = new();
 
-	private readonly OrderModel _order = new() { Id = 0, OrderDate = DateOnly.FromDateTime(DateTime.Now), Status = true };
+	private readonly OrderModel _order = new() { Id = 0, OrderDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Completed = false };
 
 	private List<ProductCategoryModel> _productCategories;
 	private List<ProductModel> _products;

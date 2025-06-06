@@ -8,6 +8,7 @@ public class OrderModel
 	public int LocationId { get; set; }
 	public int UserId { get; set; }
 	public string Remarks { get; set; }
+	public bool Completed { get; set; }
 	public bool Status { get; set; }
 }
 

@@ -74,12 +74,14 @@
     <Folder Include="Tables\Order" />
     <Folder Include="StoredProcedures\Insert\Order" />
     <Folder Include="StoredProcedures\LoadData\Order" />
+    <Folder Include="Tables\Sales" />
+    <Folder Include="StoredProcedures\Insert\Sale" />
+    <Folder Include="StoredProcedures\LoadData\Sale" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Status.sql" />
-    <Build Include="StoredProcedures\LoadData\Load_User_By_Passcode.sql" />
     <Build Include="Tables\Inventory\RawMaterial.sql" />
     <Build Include="Tables\Products\Product.sql" />
     <Build Include="Tables\Products\ProductCategory.sql" />
@@ -115,6 +117,13 @@
     <Build Include="StoredProcedures\Insert\Order\Insert_OrderDetail.sql" />
     <Build Include="StoredProcedures\Insert\Order\Insert_Order.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_OrderDetail_By_Order.sql" />
+    <Build Include="Tables\Sales\Sale.sql" />
+    <Build Include="Tables\Sales\SaleDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Sale\Insert_Sale.sql" />
+    <Build Include="StoredProcedures\Insert\Sale\Insert_SaleDetail.sql" />
+    <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Passcode.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleDetail_By_Sale.sql" />
+    <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Completed.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

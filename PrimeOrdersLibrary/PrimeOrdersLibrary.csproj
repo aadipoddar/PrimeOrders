@@ -14,6 +14,7 @@
   <ItemGroup>
     <Using Include="PrimeOrdersLibrary.DataAccess" />
     <Using Include="PrimeOrdersLibrary.Models" />
+    <Using Include="PrimeOrdersLibrary.Models.Common" />
     <Using Include="PrimeOrdersLibrary.Models.Order" />
   </ItemGroup>
 

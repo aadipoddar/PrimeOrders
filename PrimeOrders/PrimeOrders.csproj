@@ -36,6 +36,7 @@
     <Using Include="PrimeOrdersLibrary.Models.Inventory" />
     <Using Include="PrimeOrdersLibrary.Models.Order" />
     <Using Include="PrimeOrdersLibrary.Models.Product" />
+    <Using Include="PrimeOrdersLibrary.Models.Sale" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
-﻿@page "/Inventory/Purchase"
+﻿@page "/Sale"
 
-<PageTitle>Purchase - Prime Orders</PageTitle>
+<PageTitle>Sale - Prime Orders</PageTitle>
 
 <SfToast @ref="_sfErrorToast"
 		 ID="toast_error"
@@ -19,7 +19,7 @@
 <SfToast @ref="_sfSuccessToast"
 		 ID="toast_success"
 		 Title="Success"
-		 Content="Purchase saved successfully."
+		 Content="Sale saved successfully."
 		 Timeout="1000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-success">
@@ -39,16 +39,16 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading purchase page...</p>
+		<p class="loading-text">Loading sale page...</p>
 	</div>
 }
 else
 {
 	<div class="purchase-container">
 		<div class="page-header">
-			<h1 class="page-title">Purchase Management</h1>
-			<button @onclick='() => NavigateTo("/Inventory-Dashboard")' class="back-button">
-				<span class="back-icon">←</span> Back to Inventory
+			<h1 class="page-title">Sale Management</h1>
+			<button @onclick='() => NavigateTo("/")' class="back-button">
+				<span class="back-icon">←</span> Back to Dashboard
 			</button>
 		</div>
 
@@ -56,37 +56,37 @@ else
 			<div class="purchase-main">
 				<div class="combined-materials-card card">
 					<div class="card-header">
-						<h2>Raw Materials Selection</h2>
-						<p class="card-info">Select category and click on a material to add to cart</p>
+						<h2>Products Selection</h2>
+						<p class="card-info">Select category and click on a product to add to cart</p>
 					</div>
 					<div class="card-body materials-container">
 						<div class="categories-panel">
 							<label>Categories</label>
 							<SfListBox TValue="int"
 									   AllowFiltering="true"
-									   TItem="RawMaterialCategoryModel"
-									   DataSource="@_rawMaterialCategories"
-									   @bind-Value="_selectedRawMaterialCategoryId"
+									   TItem="ProductCategoryModel"
+									   DataSource="@_productCategories"
+									   @bind-Value="_selectedProductCategoryId"
 									   CssClass="category-listbox">
-								<ListBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="RawMatrialCategoryChanged" />
+								<ListBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="ProductCategoryChanged" />
 								<ListBoxFieldSettings Value="Id" Text="Name" />
 							</SfListBox>
 						</div>
 
 						<div class="materials-panel">
-							<label>Materials</label>
-							<SfGrid DataSource="@_rawMaterials"
-									ID="_sfRawMaterialGrid"
-									@ref="_sfRawMaterialGrid"
+							<label>Products</label>
+							<SfGrid DataSource="@_products"
+									ID="_sfProductGrid"
+									@ref="_sfProductGrid"
 									AllowSorting="true"
 									AllowFiltering="true"
 									AllowResizing="true"
 									Height="300px"
 									CssClass="materials-grid">
-								<GridEvents RowSelected="RawMaterialRowSelectHandler" TValue="RawMaterialModel" />
+								<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
 								<GridColumns>
-									<GridColumn Field=@nameof(RawMaterialModel.Name) HeaderText="Name" Width="180" />
-									<GridColumn Field=@nameof(RawMaterialModel.MRP) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+									<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
+									<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
 								</GridColumns>
 							</SfGrid>
 						</div>
@@ -95,22 +95,22 @@ else
 
 				<div class="card cart-card">
 					<div class="card-header">
-						<h2>Purchase Cart</h2>
+						<h2>Sale Cart</h2>
 						<p class="card-info">Click on a row to edit details</p>
 					</div>
 					<div class="card-body">
-						<SfGrid DataSource="@_purchaseRawMaterialCarts"
-								ID="_sfRawMaterialCartGrid"
-								@ref="_sfRawMaterialCartGrid"
+						<SfGrid DataSource="@_saleProductCart"
+								ID="_sfProductCartGrid"
+								@ref="_sfProductCartGrid"
 								Height="350px"
 								CssClass="cart-grid">
-							<GridEvents RowSelected="RawMaterialCartRowSelectHandler" TValue="PurchaseRawMaterialCartModel" />
+							<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="SaleProductCartModel" />
 							<GridColumns>
-								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.RawMaterialName) HeaderText="Material" Width="180" />
-								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
-								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
-								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.DiscPercent) HeaderText="Disc %" Width="80" Format="N2" TextAlign="TextAlign.Right" />
-								<GridColumn Field=@nameof(PurchaseRawMaterialCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(SaleProductCartModel.ProductName) HeaderText="Product" Width="180" />
+								<GridColumn Field=@nameof(SaleProductCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(SaleProductCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(SaleProductCartModel.DiscPercent) HeaderText="Disc %" Width="80" Format="N2" TextAlign="TextAlign.Right" />
+								<GridColumn Field=@nameof(SaleProductCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
 							</GridColumns>
 						</SfGrid>
 					</div>
@@ -120,7 +120,7 @@ else
 			<div class="purchase-sidebar">
 				<div class="card totals-card">
 					<div class="card-header">
-						<h2>Order Summary</h2>
+						<h2>Sale Summary</h2>
 					</div>
 					<div class="card-body">
 						<div class="summary-row">
@@ -140,85 +140,42 @@ else
 							<span class="total-amount">@_total.FormatIndianCurrency()</span>
 						</div>
 
-						<SfButton CssClass="save-button" Content="Save Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick">
-							<span class="save-icon">💾</span> Save Purchase
+						<div class="form-group">
+							<label>Remarks</label>
+							<SfTextBox @bind-Value="_sale.Remarks"
+									   Placeholder="Add remarks (optional)"
+									   Multiline="true"
+									   CssClass="form-control" />
+						</div>
+
+						<div class="form-group">
+							<label>Payment Mode</label>
+							<SfComboBox TValue="int"
+										TItem="PaymentModeModel"
+										Placeholder="Select a Payment Mode"
+										DataSource="@_paymentModes"
+										@bind-Value="_selectedPaymentModeId"
+										CssClass="form-control">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+
+						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick">
+							<span class="save-icon">💾</span> Complete Sale
 						</SfButton>
 					</div>
 				</div>
 
 				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
 					<AccordionItems>
-						<AccordionItem Header="Supplier Details" Expanded="true">
-							<ContentTemplate>
-								<div class="accordion-content">
-									<SfComboBox TValue="int"
-												TItem="SupplierModel"
-												Placeholder="Select a Supplier"
-												DataSource="@_suppliers"
-												@bind-Value="_supplier.Id"
-												CssClass="supplier-combo">
-										<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="@OnSupplierChanged" />
-										<ComboBoxFieldSettings Value="Id" Text="Name" />
-									</SfComboBox>
-
-									<div class="supplier-details">
-										<div class="detail-row">
-											<span class="detail-label">GST No:</span>
-											<span class="detail-value">@_supplier.GSTNo</span>
-										</div>
-										<div class="detail-row">
-											<span class="detail-label">Phone:</span>
-											<span class="detail-value">@_supplier.Phone</span>
-										</div>
-										<div class="detail-row">
-											<span class="detail-label">Email:</span>
-											<span class="detail-value">@_supplier.Email</span>
-										</div>
-										<div class="detail-row">
-											<span class="detail-label">Address:</span>
-											<span class="detail-value">@_supplier.Address</span>
-										</div>
-									</div>
-								</div>
-							</ContentTemplate>
-						</AccordionItem>
-
-						<AccordionItem Header="Bill Details">
+						<AccordionItem Header="Discount Details" Expanded="true">
 							<ContentTemplate>
 								<div class="accordion-content form-grid">
 									<div class="form-group">
-										<label>Bill Number</label>
-										<SfTextBox @bind-Value="_purchase.BillNo"
-												   Placeholder="Enter Bill No"
-												   CssClass="form-control" />
-									</div>
-
-									<div class="form-group">
-										<label>Bill Date</label>
-										<SfDatePicker @bind-Value="_purchase.BillDate"
-													  Placeholder="Select Date"
-													  CssClass="form-control" />
-									</div>
-
-									<div class="form-group full-width">
-										<label>Remarks</label>
-										<SfTextBox @bind-Value="_purchase.Remarks"
-												   Placeholder="Add remarks (optional)"
-												   Multiline="true"
-												   CssClass="form-control" />
-									</div>
-								</div>
-							</ContentTemplate>
-						</AccordionItem>
-
-						<AccordionItem Header="Adjustments">
-							<ContentTemplate>
-								<div class="accordion-content form-grid">
-									<div class="form-group">
-										<label>Cash Discount %</label>
+										<label>Discount %</label>
 										<SfNumericTextBox TValue="decimal"
-														  Value="_purchase.CDPercent"
-														  ValueChanged="CashDiscountPercentValueChanged"
+														  Value="_sale.DiscPercent"
+														  ValueChanged="SaleDiscountPercentValueChanged"
 														  Max="100"
 														  Min="0"
 														  Format="N2"
@@ -226,11 +183,47 @@ else
 									</div>
 
 									<div class="form-group">
-										<label>Cash Discount Amount</label>
-										<SfNumericTextBox @bind-Value="_purchase.CDAmount"
-														  Format="N2"
-														  Readonly="true"
-														  CssClass="form-control" />
+										<label>Discount Amount</label>
+										<div class="readonly-currency">@_discountAmount.FormatIndianCurrency()</div>
+									</div>
+
+									<div class="form-group full-width">
+										<label>Discount Reason</label>
+										<SfTextBox @bind-Value="_sale.DiscReason"
+												   Placeholder="Add Discount Reason (optional)"
+												   Multiline="true"
+												   CssClass="form-control" />
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+
+						<AccordionItem Header="Order & Party Details">
+							<ContentTemplate>
+								<div class="accordion-content">
+									<div class="form-group">
+										<label>Order</label>
+										<SfComboBox TValue="int"
+													TItem="OrderModel"
+													Placeholder="Select an Order"
+													DataSource="@_orders"
+													CssClass="form-control">
+											<ComboBoxEvents TItem="OrderModel" TValue="int" ValueChange="@OnOrderChanged" />
+											<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
+										</SfComboBox>
+									</div>
+
+									<div class="form-group">
+										<label>Party</label>
+										<SfComboBox TValue="int?"
+													TItem="LocationModel"
+													Placeholder="Select a Party"
+													DataSource="@_parties"
+													CssClass="form-control"
+													Value="_sale.PartyId">
+											<ComboBoxEvents TItem="LocationModel" TValue="int?" ValueChange="@OnPartyChanged" />
+											<ComboBoxFieldSettings Value="Id" Text="Name" />
+										</SfComboBox>
 									</div>
 								</div>
 							</ContentTemplate>
@@ -246,8 +239,8 @@ else
 	</div>
 }
 
-<SfDialog ID="_sfRawMaterialManageDialog"
-		  @ref="_sfRawMaterialManageDialog"
+<SfDialog ID="_sfProductManageDialog"
+		  @ref="_sfProductManageDialog"
 		  Width="1000px"
 		  Height="800px"
 		  AllowDragging="true"
@@ -258,8 +251,8 @@ else
 	<DialogTemplates>
 		<Header>
 			<div class="dialog-header">
-				<span>Manage Raw Material: </span>
-				<span class="material-name">@_selectedRawMaterialCart.RawMaterialName</span>
+				<span>Manage Product: </span>
+				<span class="material-name">@_selectedProductCart.ProductName</span>
 			</div>
 		</Header>
 
@@ -270,23 +263,23 @@ else
 					<div class="summary-highlights">
 						<div class="highlight-item">
 							<div class="highlight-label">Quantity</div>
-							<div class="highlight-value">@_selectedRawMaterialCart.Quantity.ToString("N2")</div>
+							<div class="highlight-value">@_selectedProductCart.Quantity.ToString("N2")</div>
 						</div>
 						<div class="highlight-item">
 							<div class="highlight-label">Base Total</div>
-							<div class="highlight-value">@_selectedRawMaterialCart.BaseTotal.FormatIndianCurrency()</div>
+							<div class="highlight-value">@_selectedProductCart.BaseTotal.FormatIndianCurrency()</div>
 						</div>
 						<div class="highlight-item">
 							<div class="highlight-label">Discount</div>
-							<div class="highlight-value">@_selectedRawMaterialCart.DiscAmount.FormatIndianCurrency()</div>
+							<div class="highlight-value">@_selectedProductCart.DiscAmount.FormatIndianCurrency()</div>
 						</div>
 						<div class="highlight-item">
 							<div class="highlight-label">Tax Total</div>
-							<div class="highlight-value">@((_selectedRawMaterialCart.CGSTAmount + _selectedRawMaterialCart.SGSTAmount + _selectedRawMaterialCart.IGSTAmount).FormatIndianCurrency())</div>
+							<div class="highlight-value">@((_selectedProductCart.CGSTAmount + _selectedProductCart.SGSTAmount + _selectedProductCart.IGSTAmount).FormatIndianCurrency())</div>
 						</div>
 						<div class="highlight-item final">
 							<div class="highlight-label">Final Total</div>
-							<div class="highlight-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</div>
+							<div class="highlight-value">@_selectedProductCart.Total.FormatIndianCurrency()</div>
 						</div>
 					</div>
 				</div>
@@ -303,7 +296,7 @@ else
 										<div class="form-group">
 											<label>Rate</label>
 											<SfNumericTextBox TValue="decimal"
-															  Value="_selectedRawMaterialCart.Rate"
+															  Value="_selectedProductCart.Rate"
 															  ValueChanged="DialogRateValueChanged"
 															  CssClass="form-control" />
 										</div>
@@ -311,7 +304,7 @@ else
 										<div class="form-group">
 											<label>Quantity</label>
 											<SfNumericTextBox TValue="decimal"
-															  Value="_selectedRawMaterialCart.Quantity"
+															  Value="_selectedProductCart.Quantity"
 															  ValueChanged="DialogQuantityValueChanged"
 															  Min="0"
 															  Format="N2"
@@ -324,12 +317,12 @@ else
 										<div class="tab-summary-content">
 											<div class="summary-item">
 												<span class="summary-label">Base Amount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.BaseTotal.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.BaseTotal.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-divider"></div>
 											<div class="summary-item final-total">
 												<span class="summary-label">Final Total:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.Total.FormatIndianCurrency()</span>
 											</div>
 										</div>
 									</div>
@@ -347,7 +340,7 @@ else
 										<div class="form-group">
 											<label>Discount %</label>
 											<SfNumericTextBox TValue="decimal"
-															  Value="_selectedRawMaterialCart.DiscPercent"
+															  Value="_selectedProductCart.DiscPercent"
 															  ValueChanged="DialogDiscPercentValueChanged"
 															  Max="100"
 															  Min="0"
@@ -357,7 +350,7 @@ else
 
 										<div class="form-group">
 											<label>Discount Amount</label>
-											<div class="readonly-currency">@_selectedRawMaterialCart.DiscAmount.FormatIndianCurrency()</div>
+											<div class="readonly-currency">@_selectedProductCart.DiscAmount.FormatIndianCurrency()</div>
 										</div>
 									</div>
 
@@ -366,20 +359,20 @@ else
 										<div class="tab-summary-content">
 											<div class="summary-item">
 												<span class="summary-label">Base Amount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.BaseTotal.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.BaseTotal.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-item">
 												<span class="summary-label">Discount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.DiscAmount.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.DiscAmount.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-item">
 												<span class="summary-label">After Discount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.AfterDiscount.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.AfterDiscount.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-divider"></div>
 											<div class="summary-item final-total">
 												<span class="summary-label">Final Total:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.Total.FormatIndianCurrency()</span>
 											</div>
 										</div>
 									</div>
@@ -398,7 +391,7 @@ else
 											<div class="tax-column">
 												<label>CGST %</label>
 												<SfNumericTextBox TValue="decimal"
-																  Value="_selectedRawMaterialCart.CGSTPercent"
+																  Value="_selectedProductCart.CGSTPercent"
 																  ValueChanged="DialogCGSTPercentValueChanged"
 																  Max="100"
 																  Min="0"
@@ -407,7 +400,7 @@ else
 											</div>
 											<div class="tax-column">
 												<label>CGST Amount</label>
-												<div class="readonly-currency">@_selectedRawMaterialCart.CGSTAmount.FormatIndianCurrency()</div>
+												<div class="readonly-currency">@_selectedProductCart.CGSTAmount.FormatIndianCurrency()</div>
 											</div>
 										</div>
 
@@ -415,7 +408,7 @@ else
 											<div class="tax-column">
 												<label>SGST %</label>
 												<SfNumericTextBox TValue="decimal"
-																  Value="_selectedRawMaterialCart.SGSTPercent"
+																  Value="_selectedProductCart.SGSTPercent"
 																  ValueChanged="DialogSGSTPercentValueChanged"
 																  Max="100"
 																  Min="0"
@@ -424,7 +417,7 @@ else
 											</div>
 											<div class="tax-column">
 												<label>SGST Amount</label>
-												<div class="readonly-currency">@_selectedRawMaterialCart.SGSTAmount.FormatIndianCurrency()</div>
+												<div class="readonly-currency">@_selectedProductCart.SGSTAmount.FormatIndianCurrency()</div>
 											</div>
 										</div>
 
@@ -432,7 +425,7 @@ else
 											<div class="tax-column">
 												<label>IGST %</label>
 												<SfNumericTextBox TValue="decimal"
-																  Value="_selectedRawMaterialCart.IGSTPercent"
+																  Value="_selectedProductCart.IGSTPercent"
 																  ValueChanged="DialogIGSTPercentValueChanged"
 																  Max="100"
 																  Min="0"
@@ -441,7 +434,7 @@ else
 											</div>
 											<div class="tax-column">
 												<label>IGST Amount</label>
-												<div class="readonly-currency">@_selectedRawMaterialCart.IGSTAmount.FormatIndianCurrency()</div>
+												<div class="readonly-currency">@_selectedProductCart.IGSTAmount.FormatIndianCurrency()</div>
 											</div>
 										</div>
 									</div>
@@ -451,24 +444,24 @@ else
 										<div class="tab-summary-content">
 											<div class="summary-item">
 												<span class="summary-label">CGST Amount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.CGSTAmount.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.CGSTAmount.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-item">
 												<span class="summary-label">SGST Amount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.SGSTAmount.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.SGSTAmount.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-item">
 												<span class="summary-label">IGST Amount:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.IGSTAmount.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.IGSTAmount.FormatIndianCurrency()</span>
 											</div>
 											<div class="summary-item">
 												<span class="summary-label">Total Tax:</span>
-												<span class="summary-value">@((_selectedRawMaterialCart.CGSTAmount + _selectedRawMaterialCart.SGSTAmount + _selectedRawMaterialCart.IGSTAmount).FormatIndianCurrency())</span>
+												<span class="summary-value">@((_selectedProductCart.CGSTAmount + _selectedProductCart.SGSTAmount + _selectedProductCart.IGSTAmount).FormatIndianCurrency())</span>
 											</div>
 											<div class="summary-divider"></div>
 											<div class="summary-item final-total">
 												<span class="summary-label">Final Total:</span>
-												<span class="summary-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+												<span class="summary-value">@_selectedProductCart.Total.FormatIndianCurrency()</span>
 											</div>
 										</div>
 									</div>
@@ -484,11 +477,11 @@ else
 			<div class="dialog-footer">
 				<div class="footer-total">
 					<span class="footer-total-label">Final Total:</span>
-					<span class="footer-total-value">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+					<span class="footer-total-value">@_selectedProductCart.Total.FormatIndianCurrency()</span>
 				</div>
 				<div class="footer-buttons">
-					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveRawMaterialManageClick" CssClass="dialog-button" />
-					<SfButton Content="Cancel" OnClick="OnCancelRawMaterialManageClick" CssClass="dialog-button" />
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" />
+					<SfButton Content="Cancel" OnClick="OnCancelProductManageClick" CssClass="dialog-button" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -590,7 +583,7 @@ else
 			color: var(--dotnet-secondary);
 		}
 
-	/* Material Summary Panel - Added for improved overview */
+	/* Material Summary Panel */
 	.material-summary-panel {
 		background-color: var(--dotnet-light);
 		border-radius: 8px;
@@ -637,17 +630,6 @@ else
 			color: white;
 		}
 
-	/* Responsive adjustments for the summary panel */
-	@@media (max-width: 768px) {
-		.summary-highlights {
-			flex-direction: column;
-		}
-
-		.highlight-item {
-			width: 100%;
-		}
-	}
-
 	/* Cards */
 	.card {
 		background-color: white;
@@ -688,7 +670,7 @@ else
 		padding: 20px;
 	}
 
-	/* Material Categories and Material List */
+	/* Category and Product lists */
 	.category-listbox {
 		height: 300px;
 		width: 100%;
@@ -697,69 +679,6 @@ else
 	.materials-grid, .cart-grid {
 		border-radius: 8px;
 		overflow: hidden;
-	}
-
-	/* Supplier Details */
-	.supplier-combo {
-		width: 100%;
-		margin-bottom: 15px;
-	}
-
-	.supplier-details {
-		background-color: var(--dotnet-light);
-		border-radius: 8px;
-		padding: 15px;
-		margin-top: 10px;
-	}
-
-	.detail-row {
-		display: flex;
-		margin-bottom: 8px;
-		font-size: 14px;
-	}
-
-	.detail-label {
-		font-weight: 600;
-		min-width: 80px;
-		color: var(--dotnet-secondary);
-	}
-
-	.detail-value {
-		color: var(--dotnet-dark);
-	}
-
-	/* Order Summary */
-	.summary-row {
-		display: flex;
-		justify-content: space-between;
-		padding: 10px 0;
-		border-bottom: 1px solid var(--dotnet-border);
-	}
-
-	.total-row {
-		border-bottom: none;
-		font-weight: 700;
-		font-size: 18px;
-		margin-top: 10px;
-		padding-top: 15px;
-		border-top: 2px solid var(--dotnet-border);
-	}
-
-	.total-amount {
-		color: var(--dotnet-secondary);
-	}
-
-	.amount {
-		font-weight: 500;
-	}
-
-	/* Accordion */
-	.sidebar-accordion {
-		width: 100%;
-	}
-
-	.accordion-content {
-		padding: 15px 0;
 	}
 
 	/* Forms */
@@ -789,61 +708,30 @@ else
 		border-radius: 6px;
 	}
 
-	/* Tab Summary Styling */
-	.tab-summary {
-		margin-top: 25px;
-		border-top: 1px solid var(--dotnet-border);
-		padding-top: 15px;
-		background-color: var(--dotnet-light);
-		border-radius: 8px;
-		padding: 15px;
-	}
-
-	.tab-summary-title {
-		font-weight: 600;
-		color: var(--dotnet-secondary);
-		margin-bottom: 10px;
-		font-size: 16px;
-	}
-
-	.tab-summary-content {
-		background-color: white;
-		border-radius: 6px;
-		padding: 12px;
-		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-	}
-
-	.summary-item {
+	/* Button Styling */
+	.save-button {
 		display: flex;
-		justify-content: space-between;
-		padding: 8px 0;
-	}
-
-	.summary-label {
-		font-weight: 500;
-		color: var(--dotnet-dark);
-	}
-
-	.summary-value {
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		width: 100%;
+		margin-top: 20px;
+		background-color: var(--dotnet-primary);
+		color: white;
+		padding: 12px;
+		border-radius: 8px;
 		font-weight: 600;
-		color: var(--dotnet-secondary);
+		transition: all 0.2s ease;
 	}
 
-	.summary-divider {
-		height: 1px;
-		background-color: var(--dotnet-border);
-		margin: 8px 0;
-	}
-
-	.final-total {
-		font-size: 18px;
-		font-weight: 700;
-		margin-top: 8px;
-	}
-
-		.final-total .summary-value {
-			color: var(--dotnet-primary);
+		.save-button:hover {
+			background-color: #4311a8;
+			transform: translateY(-2px);
 		}
+
+	.save-icon {
+		font-size: 18px;
+	}
 
 	/* Dialog Styling */
 	.dialog-header {
@@ -900,29 +788,24 @@ else
 		padding: 15px;
 	}
 
-	.tax-summary-row {
-		display: flex;
-		justify-content: space-between;
+	.tab-summary-title {
 		font-weight: 600;
-		font-size: 16px;
 		color: var(--dotnet-secondary);
+		margin-bottom: 10px;
+		font-size: 16px;
 	}
 
-	/* Summary Tab Styling */
-	.summary-tab {
-		padding: 10px;
-	}
-
-	.summary-card {
-		background-color: var(--dotnet-light);
-		border-radius: 10px;
-		padding: 15px;
+	.tab-summary-content {
+		background-color: white;
+		border-radius: 6px;
+		padding: 12px;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 	}
 
 	.summary-item {
 		display: flex;
 		justify-content: space-between;
-		padding: 10px 0;
+		padding: 8px 0;
 	}
 
 	.summary-label {
@@ -951,89 +834,6 @@ else
 			color: var(--dotnet-primary);
 		}
 
-
-	.highlight-total {
-		font-weight: 700;
-		font-size: 18px;
-		color: var(--dotnet-primary);
-	}
-
-	.dialog-footer {
-		display: flex;
-		justify-content: flex-end;
-		gap: 10px;
-	}
-
-	/* Button Styling */
-	.save-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		width: 100%;
-		margin-top: 20px;
-		background-color: var(--dotnet-primary);
-		color: white;
-		padding: 12px;
-		border-radius: 8px;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
-
-		.save-button:hover {
-			background-color: #4311a8;
-			transform: translateY(-2px);
-		}
-
-	.save-icon {
-		font-size: 18px;
-	}
-
-	/* Footer */
-	.dashboard-footer {
-		margin-top: auto;
-		text-align: center;
-		padding: 20px;
-		color: #666;
-		font-size: 14px;
-	}
-
-	.footer-link {
-		color: var(--dotnet-primary);
-		text-decoration: none;
-		font-weight: 600;
-		transition: color 0.2s ease;
-	}
-
-		.footer-link:hover {
-			color: var(--dotnet-secondary);
-			text-decoration: underline;
-		}
-
-	/* Material Tab Styling */
-	.material-tab {
-		width: 100%;
-		height: 100%;
-	}
-
-	.e-tab .e-tab-header {
-		background-color: var(--dotnet-light);
-		border-radius: 8px 8px 0 0;
-	}
-
-		.e-tab .e-tab-header .e-toolbar-item.e-active .e-tab-text {
-			color: var(--dotnet-primary);
-			font-weight: 600;
-		}
-
-		.e-tab .e-tab-header .e-toolbar-item .e-tab-text {
-			color: var(--dotnet-dark);
-		}
-
-	.e-tab .e-content .e-item {
-		padding: 0;
-	}
-
 	/* Currency Display */
 	.readonly-currency {
 		padding: 8px 12px;
@@ -1044,13 +844,7 @@ else
 		color: var(--dotnet-secondary);
 	}
 
-		.readonly-currency.highlight-total {
-			font-weight: 700;
-			font-size: 18px;
-			color: var(--dotnet-primary);
-		}
-
-	/* Dialog Footer Redesign */
+	/* Dialog Footer */
 	.dialog-footer {
 		display: flex;
 		justify-content: space-between;
@@ -1083,7 +877,7 @@ else
 		gap: 10px;
 	}
 
-	/* Make dialog buttons the same height */
+	/* Dialog buttons */
 	.dialog-button {
 		border-radius: 6px;
 		padding: 8px 16px;
@@ -1092,6 +886,67 @@ else
 		align-items: center;
 		justify-content: center;
 		font-weight: 500;
+	}
+
+	/* Order Summary */
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+	.total-row {
+		border-bottom: none;
+		font-weight: 700;
+		font-size: 18px;
+		margin-top: 10px;
+		padding-top: 15px;
+		border-top: 2px solid var(--dotnet-border);
+	}
+
+	.total-amount {
+		color: var(--dotnet-secondary);
+	}
+
+	.amount {
+		font-weight: 500;
+	}
+
+	/* Accordion */
+	.sidebar-accordion {
+		width: 100%;
+	}
+
+	.accordion-content {
+		padding: 15px 0;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: #666;
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--dotnet-secondary);
+			text-decoration: underline;
+		}
+
+	/* Material Tab Styling */
+	.material-tab {
+		width: 100%;
+		height: 100%;
 	}
 
 	/* Loading Animation */
@@ -1139,10 +994,6 @@ else
 		margin-top: 10px;
 	}
 
-	.tax-grid {
-		margin-bottom: 15px;
-	}
-
 	/* Animations */
 	@@keyframes rotate {
 		0% {
@@ -1152,11 +1003,6 @@ else
 		100% {
 			transform: rotate(360deg) translate(-24px) rotate(-360deg);
 		}
-	}
-
-	/* Dialog button styles */
-	.dialog-button {
-		border-radius: 6px;
 	}
 
 	/* Responsive Design */

@@ -1,0 +1,21 @@
+﻿CREATE TABLE [dbo].[Sale]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [DiscPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    [DiscReason] VARCHAR(250) NOT NULL, 
+    [Remarks] VARCHAR(250) NOT NULL, 
+    [UserId] INT NOT NULL, 
+    [LocationId] INT NOT NULL, 
+    [SaleDateTime] DATETIME NOT NULL DEFAULT (((getdate() AT TIME ZONE 'UTC') AT TIME ZONE 'India Standard Time')), 
+    [PartyId] INT NULL, 
+    [OrderId] INT NULL, 
+    [Cash] MONEY NOT NULL DEFAULT 0, 
+    [Card] MONEY NOT NULL DEFAULT 0, 
+    [UPI] MONEY NOT NULL DEFAULT 0, 
+    [Credit] MONEY NOT NULL DEFAULT 0, 
+    [Status] BIT NOT NULL DEFAULT 1, 
+    CONSTRAINT [FK_Sale_ToUser] FOREIGN KEY (UserId) REFERENCES [User](Id), 
+    CONSTRAINT [FK_Sale_ToLocation] FOREIGN KEY (LocationId) REFERENCES [Location](Id), 
+    CONSTRAINT [FK_Sale_ToLocationParty] FOREIGN KEY (PartyId) REFERENCES [Location](Id), 
+    CONSTRAINT [FK_Sale_ToOrder] FOREIGN KEY (OrderId) REFERENCES [Order](Id), 
+)

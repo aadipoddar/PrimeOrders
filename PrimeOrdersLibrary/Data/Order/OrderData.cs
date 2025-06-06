@@ -10,4 +10,7 @@ public static class OrderData
 
 	public static async Task<List<OrderDetailModel>> LoadOrderDetailByOrder(int OrderId) =>
 		await SqlDataAccess.LoadData<OrderDetailModel, dynamic>(StoredProcedureNames.LoadOrderDetailByOrder, new { OrderId });
+
+	public static async Task<List<OrderModel>> LoadOrderByCompleted(bool Completed = true) =>
+		await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByCompleted, new { Completed });
 }

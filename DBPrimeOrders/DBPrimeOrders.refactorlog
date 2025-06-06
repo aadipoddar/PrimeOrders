@@ -42,4 +42,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="Remarks" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b722ccca-4983-40a0-a6d8-2999fef6d1df" ChangeDateTime="06/06/2025 10:31:49">
+    <Property Name="ElementName" Value="[dbo].[Sale].[Locationid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Sale]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="LocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5da9cbd6-3e36-4ed7-9198-699962ca2a81" ChangeDateTime="06/06/2025 10:59:47">
+    <Property Name="ElementName" Value="[dbo].[Sale].[Partyid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Sale]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="PartyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c12799ae-87e7-40fa-b9d5-5293bb661bb5" ChangeDateTime="06/06/2025 11:09:01">
+    <Property Name="ElementName" Value="[dbo].[Sale].[CreditSale]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Sale]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Credit" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8fdfec26-e387-4f53-8db6-02c15bd25b3f" ChangeDateTime="06/06/2025 11:19:01">
+    <Property Name="ElementName" Value="[dbo].[Sale].[DiscountPercent]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Sale]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[DiscPercent]" />
+  </Operation>
 </Operations>
