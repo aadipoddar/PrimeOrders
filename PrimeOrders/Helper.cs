@@ -26,4 +26,7 @@ public static class Helper
 		var hindi = new CultureInfo("hi-IN");
 		return string.Format(hindi, "{0:C}", rate);
 	}
+
+	public static string FormatDecimalWithTwoDigits(this decimal value) =>
+		value.ToString("0.00", CultureInfo.InvariantCulture);
 }

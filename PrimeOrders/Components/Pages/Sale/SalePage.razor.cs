@@ -20,7 +20,6 @@ public partial class SalePage
 
 	private decimal _baseTotal = 0;
 	private decimal _discountAmount = 0;
-	private decimal _afterDiscounts = 0;
 	private decimal _subTotal = 0;
 	private decimal _total = 0;
 
@@ -185,10 +184,9 @@ public partial class SalePage
 		}
 
 		_baseTotal = _saleProductCart.Sum(c => c.BaseTotal);
-		_afterDiscounts = _saleProductCart.Sum(c => c.AfterDiscount);
-		_discountAmount = _baseTotal - _afterDiscounts;
-		_subTotal = _saleProductCart.Sum(c => c.Total);
-		_total = _subTotal - (_subTotal * (_sale.DiscPercent / 100));
+		_subTotal = _saleProductCart.Sum(c => c.AfterDiscount);
+		_discountAmount = _baseTotal - _subTotal;
+		_total = _saleProductCart.Sum(c => c.Total);
 
 		switch (_selectedPaymentModeId)
 		{
@@ -386,8 +384,8 @@ public partial class SalePage
 		if (!await ValidateForm())
 			return;
 
-		int saleId = await SaleData.InsertSale(_sale);
-		if (saleId <= 0)
+		_sale.Id = await SaleData.InsertSale(_sale);
+		if (_sale.Id <= 0)
 		{
 			_errorMessage = "Failed to save Sale.";
 			StateHasChanged();
@@ -399,7 +397,7 @@ public partial class SalePage
 			await SaleData.InsertSaleDetail(new()
 			{
 				Id = 0,
-				SaleId = saleId,
+				SaleId = _sale.Id,
 				ProductId = item.ProductId,
 				Quantity = item.Quantity,
 				Rate = item.Rate,
@@ -426,6 +424,9 @@ public partial class SalePage
 				await OrderData.InsertOrder(order);
 			}
 		}
+
+		var content = await PrintBill.PrintThermalBill(_sale);
+		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
 
 		await _sfSuccessToast.ShowAsync();
 	}

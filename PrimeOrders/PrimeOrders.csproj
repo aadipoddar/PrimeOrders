@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="NumericWordsConversion" Version="2.1.1" />
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="29.2.9" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="29.2.9" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="29.2.9" />
