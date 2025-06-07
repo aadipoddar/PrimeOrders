@@ -469,7 +469,7 @@ public partial class SalePage
 				RawMaterialId = rawMaterial.ItemId,
 				Quantity = rawMaterial.Quantity,
 				BillId = _sale.Id,
-				Type = StockType.Sale.ToString(),
+				Type = StockType.Purchase.ToString(),
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
 				LocationId = _sale.PartyId.Value
 			});
