@@ -1,5 +1,3 @@
-using PrimeOrdersLibrary.Data.Product;
-
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;

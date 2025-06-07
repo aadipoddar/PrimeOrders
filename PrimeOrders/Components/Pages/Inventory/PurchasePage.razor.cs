@@ -318,8 +318,8 @@ public partial class PurchasePage
 		if (!await ValidateForm())
 			return;
 
-		int purchaseId = await PurchaseData.InsertPurchase(_purchase);
-		if (purchaseId <= 0)
+		_purchase.Id = await PurchaseData.InsertPurchase(_purchase);
+		if (_purchase.Id <= 0)
 		{
 			_errorMessage = "Failed to save purchase.";
 			StateHasChanged();
@@ -327,11 +327,19 @@ public partial class PurchasePage
 			return;
 		}
 
+		await InsertPurchaseDetail();
+		await InsertStock();
+
+		await _sfSuccessToast.ShowAsync();
+	}
+
+	private async Task InsertPurchaseDetail()
+	{
 		foreach (var item in _purchaseRawMaterialCarts)
 			await PurchaseData.InsertPurchaseDetail(new()
 			{
 				Id = 0,
-				PurchaseId = purchaseId,
+				PurchaseId = _purchase.Id,
 				RawMaterialId = item.RawMaterialId,
 				Quantity = item.Quantity,
 				Rate = item.Rate,
@@ -348,8 +356,21 @@ public partial class PurchasePage
 				Total = item.Total,
 				Status = true
 			});
+	}
 
-		await _sfSuccessToast.ShowAsync();
+	private async Task InsertStock()
+	{
+		foreach (var item in _purchaseRawMaterialCarts)
+			await StockData.InsertStock(new()
+			{
+				Id = 0,
+				RawMaterialId = item.RawMaterialId,
+				Quantity = item.Quantity,
+				Type = StockType.Purchase.ToString(),
+				BillId = _purchase.Id,
+				TransactionDate = _purchase.BillDate,
+				LocationId = _user.LocationId
+			});
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>

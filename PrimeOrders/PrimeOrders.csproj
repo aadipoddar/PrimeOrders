@@ -31,6 +31,7 @@
     <Using Include="PrimeOrdersLibrary.Data.Inventory" />
     <Using Include="PrimeOrdersLibrary.Data.Order" />
     <Using Include="PrimeOrdersLibrary.Data.Product" />
+    <Using Include="PrimeOrdersLibrary.Data.Sale" />
     <Using Include="PrimeOrdersLibrary.DataAccess" />
     <Using Include="PrimeOrdersLibrary.Models" />
     <Using Include="PrimeOrdersLibrary.Models.Common" />

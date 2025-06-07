@@ -1,5 +1,3 @@
-using PrimeOrdersLibrary.Data.Sale;
-
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -29,7 +27,7 @@ public partial class SalePage
 
 	private SaleProductCartModel _selectedProductCart = new();
 
-	private readonly SaleModel _sale = new() { DiscReason = "", Remarks = "", Status = true };
+	private readonly SaleModel _sale = new() { SaleDateTime = DateTime.Now, DiscReason = "", Remarks = "", Status = true };
 
 	private List<PaymentModeModel> _paymentModes;
 	private List<OrderModel> _orders;
@@ -393,6 +391,16 @@ public partial class SalePage
 			return;
 		}
 
+		await InsertSaleDetail();
+		await UpdateOrder();
+		await InsertStock();
+		await PrintThermalBill();
+
+		await _sfSuccessToast.ShowAsync();
+	}
+
+	private async Task InsertSaleDetail()
+	{
 		foreach (var item in _saleProductCart)
 			await SaleData.InsertSaleDetail(new()
 			{
@@ -414,21 +422,73 @@ public partial class SalePage
 				Total = item.Total,
 				Status = true
 			});
+	}
 
-		if (_sale.OrderId is not null)
+	private async Task UpdateOrder()
+	{
+		if (_sale.OrderId is null)
+			return;
+
+		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
+		if (order is not null && order.Status)
 		{
-			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
-			if (order is not null && order.Status)
+			order.Completed = true;
+			await OrderData.InsertOrder(order);
+		}
+	}
+
+	private async Task PrintThermalBill()
+	{
+		var content = await PrintBill.PrintThermalBill(_sale);
+		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
+	}
+
+	private async Task InsertStock()
+	{
+		var rawMaterialQuantities = await GetRawMaterialQuantities();
+
+		foreach (var rawMaterial in rawMaterialQuantities)
+			await StockData.InsertStock(new()
 			{
-				order.Completed = true;
-				await OrderData.InsertOrder(order);
+				Id = 0,
+				RawMaterialId = rawMaterial.ItemId,
+				Quantity = -rawMaterial.Quantity,
+				BillId = _sale.Id,
+				Type = StockType.Sale.ToString(),
+				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
+				LocationId = _sale.LocationId
+			});
+	}
+
+	private async Task<List<ItemQantityModel>> GetRawMaterialQuantities()
+	{
+		List<ItemQantityModel> rawMaterialQuantities = [];
+
+		foreach (var item in _saleProductCart)
+		{
+			var itemRecipe = await RecipeData.LoadRecipeByProduct(item.ProductId);
+
+			if (itemRecipe is null)
+				continue;
+
+			var recipeDetails = await RecipeData.LoadRecipeDetailByRecipe(itemRecipe.Id);
+
+			foreach (var recipeDetail in recipeDetails)
+			{
+				var existingItem = rawMaterialQuantities.FirstOrDefault(c => c.ItemId == recipeDetail.RawMaterialId);
+				if (existingItem is not null)
+					existingItem.Quantity += recipeDetail.Quantity * item.Quantity;
+
+				else
+					rawMaterialQuantities.Add(new()
+					{
+						ItemId = recipeDetail.RawMaterialId,
+						Quantity = recipeDetail.Quantity * item.Quantity
+					});
 			}
 		}
 
-		var content = await PrintBill.PrintThermalBill(_sale);
-		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
-
-		await _sfSuccessToast.ShowAsync();
+		return rawMaterialQuantities;
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>

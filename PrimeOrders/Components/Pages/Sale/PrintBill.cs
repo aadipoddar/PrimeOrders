@@ -2,8 +2,6 @@
 
 using NumericWordsConversion;
 
-using PrimeOrdersLibrary.Data.Sale;
-
 namespace PrimeOrders.Components.Pages.Sale;
 
 internal static class PrintBill

@@ -124,6 +124,8 @@
     <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Passcode.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleDetail_By_Sale.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Completed.sql" />
+    <Build Include="Tables\Inventory\Stock.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_Stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

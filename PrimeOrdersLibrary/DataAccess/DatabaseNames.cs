@@ -15,6 +15,7 @@ public static class TableNames
 	public static string Supplier => "Supplier";
 	public static string Purchase => "Purchase";
 	public static string PurchaseDetail => "PurchaseDetail";
+	public static string Stock => "Stock";
 	public static string Order => "Order";
 	public static string OrderDetail => "OrderDetail";
 	public static string Sale => "Sale";
@@ -59,6 +60,8 @@ public static class StoredProcedureNames
 
 	public static string InsertPurchase => "Insert_Purchase";
 	public static string InsertPurchaseDetail => "Insert_PurchaseDetail";
+
+	public static string InsertStock => "Insert_Stock";
 
 	public static string InsertOrder => "Insert_Order";
 	public static string InsertOrderDetail => "Insert_OrderDetail";
