@@ -12,4 +12,7 @@ public static class SaleData
 
 	public static async Task<List<SaleDetailModel>> LoadSaleDetailBySale(int SaleId) =>
 		await SqlDataAccess.LoadData<SaleDetailModel, dynamic>(StoredProcedureNames.LoadSaleDetailBySale, new { SaleId });
+
+	public static async Task<List<SaleOverviewModel>> LoadSaleDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<SaleOverviewModel, dynamic>(StoredProcedureNames.LoadSaleDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
 }

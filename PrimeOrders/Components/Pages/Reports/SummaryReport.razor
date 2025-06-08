@@ -1,0 +1,86 @@
+﻿@page "/Reports/Summary"
+
+<PageTitle>Summary Report - Prime Orders</PageTitle>
+
+<SfDateRangePicker Placeholder="Select date range"
+				   FloatLabelType='@FloatLabelType.Auto'
+				   StartDate="_startDate"
+				   EndDate="_endDate">
+	<DateRangePickerEvents TValue="DateOnly" ValueChange="DateRangeChanged" />
+</SfDateRangePicker>
+
+<SfButton Content="Print PDF" />
+<SfButton Content="Detailed Report" />
+
+<SfAccordion>
+	<AccordionItems>
+		@foreach (var location in _locations)
+		{
+			<AccordionItem>
+				<HeaderTemplate>
+					@location.Name
+					<SfButton OnClick='() => NavigateTo($"/Reports/Detailed/{location.Id}")' Content="Detailed" />
+
+					<SfTextBox Placeholder="Amount Collected" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.Total).FormatIndianCurrency())" Readonly=true />
+				</HeaderTemplate>
+
+				<ContentTemplate>
+					<SfTextBox Placeholder="Amount Collected" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.Total).FormatIndianCurrency())" Readonly=true />
+
+					<SfTextBox Placeholder="Cash" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.Cash).FormatIndianCurrency())" Readonly=true />
+					<SfTextBox Placeholder="Card" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.Card).FormatIndianCurrency())" Readonly=true />
+					<SfTextBox Placeholder="UPI" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.UPI).FormatIndianCurrency())" Readonly=true />
+					<SfTextBox Placeholder="Credit" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.Credit).FormatIndianCurrency())" Readonly=true />
+
+					<SfTextBox Placeholder="Base Total" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.BaseTotal).FormatIndianCurrency())" Readonly=true />
+
+					<SfTextBox Placeholder="Discount" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.DiscountAmount).FormatIndianCurrency())" Readonly=true />
+
+					<SfTextBox Placeholder="Total Tax" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.TotalTaxAmount).FormatIndianCurrency())" Readonly=true />
+
+					<SfTextBox Placeholder="SGST" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.SGSTAmount).FormatIndianCurrency())" Readonly=true />
+					<SfTextBox Placeholder="IGST" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.IGSTAmount).FormatIndianCurrency())" Readonly=true />
+					<SfTextBox Placeholder="CGST" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.CGSTAmount).FormatIndianCurrency())" Readonly=true />
+
+					<SfTextBox Placeholder="Products" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.TotalProducts).FormatIndianCurrency())" Readonly=true />
+					<SfTextBox Placeholder="Quantity" Value="@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.TotalQuantity).FormatIndianCurrency())" Readonly=true />
+				</ContentTemplate>
+			</AccordionItem>
+		}
+	</AccordionItems>
+</SfAccordion>
+
+<SfAccordion>
+	<AccordionItems>
+		<AccordionItem>
+			<HeaderTemplate>
+				Grand Total
+				<SfButton Content="Print PDF" />
+
+				<SfTextBox Placeholder="Amount Collected" Value="@(_saleOverviews.Sum(_ => _.Total).FormatIndianCurrency())" Readonly=true />
+			</HeaderTemplate>
+
+			<ContentTemplate>
+				<SfTextBox Placeholder="Amount Collected" Value="@(_saleOverviews.Sum(_ => _.Total).FormatIndianCurrency())" Readonly=true />
+
+				<SfTextBox Placeholder="Cash" Value="@(_saleOverviews.Sum(_ => _.Cash).FormatIndianCurrency())" Readonly=true />
+				<SfTextBox Placeholder="Card" Value="@(_saleOverviews.Sum(_ => _.Card).FormatIndianCurrency())" Readonly=true />
+				<SfTextBox Placeholder="UPI" Value="@(_saleOverviews.Sum(_ => _.UPI).FormatIndianCurrency())" Readonly=true />
+				<SfTextBox Placeholder="Credit" Value="@(_saleOverviews.Sum(_ => _.Credit).FormatIndianCurrency())" Readonly=true />
+
+				<SfTextBox Placeholder="Discount" Value="@(_saleOverviews.Sum(_ => _.DiscountAmount).FormatIndianCurrency())" Readonly=true />
+
+				<SfTextBox Placeholder="Total Tax" Value="@(_saleOverviews.Sum(_ => _.TotalTaxAmount).FormatIndianCurrency())" Readonly=true />
+
+				<SfTextBox Placeholder="Total Tax" Value="@(_saleOverviews.Sum(_ => _.TotalTaxAmount).FormatIndianCurrency())" Readonly=true />
+
+				<SfTextBox Placeholder="SGST" Value="@(_saleOverviews.Sum(_ => _.SGSTAmount).FormatIndianCurrency())" Readonly=true />
+				<SfTextBox Placeholder="IGST" Value="@(_saleOverviews.Sum(_ => _.IGSTAmount).FormatIndianCurrency())" Readonly=true />
+				<SfTextBox Placeholder="CGST" Value="@(_saleOverviews.Sum(_ => _.CGSTAmount).FormatIndianCurrency())" Readonly=true />
+
+				<SfTextBox Placeholder="Products" Value="@(_saleOverviews.Sum(_ => _.TotalProducts).FormatIndianCurrency())" Readonly=true />
+				<SfTextBox Placeholder="Quantity" Value="@(_saleOverviews.Sum(_ => _.TotalQuantity).FormatIndianCurrency())" Readonly=true />
+			</ContentTemplate>
+		</AccordionItem>
+	</AccordionItems>
+</SfAccordion>

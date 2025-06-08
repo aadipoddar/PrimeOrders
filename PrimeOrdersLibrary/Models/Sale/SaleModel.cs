@@ -57,3 +57,37 @@ public class SaleProductCartModel
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
 }
+
+public class SaleOverviewModel
+{
+	public int SaleId { get; set; }
+	public int UserId { get; set; }
+	public string UserName { get; set; }
+	public int LocationId { get; set; }
+	public string LocationName { get; set; }
+	public DateTime SaleDateTime { get; set; }
+	public int PartyId { get; set; }
+	public string PartyName { get; set; }
+	public int OrderId { get; set; }
+	public string OrderNo { get; set; }
+	public string Remarks { get; set; }
+	public decimal DiscountPercent { get; set; }
+	public string DiscountReason { get; set; }
+	public int TotalProducts { get; set; }
+	public decimal TotalQuantity { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal DiscountAmount { get; set; }
+	public decimal TotalTaxAmount { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal SubTotal { get; set; }
+	public decimal Total { get; set; }
+	public decimal Cash { get; set; }
+	public decimal Card { get; set; }
+	public decimal UPI { get; set; }
+	public decimal Credit { get; set; }
+}

@@ -27,7 +27,7 @@ public partial class PurchasePage
 	private PurchaseRawMaterialCartModel _selectedRawMaterialCart = new();
 
 	private SupplierModel _supplier = new();
-	private readonly PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true };
+	private readonly PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Remarks = "" };
 
 	private List<SupplierModel> _suppliers;
 	private List<RawMaterialCategoryModel> _rawMaterialCategories;

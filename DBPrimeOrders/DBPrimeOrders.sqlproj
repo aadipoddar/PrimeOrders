@@ -77,6 +77,7 @@
     <Folder Include="Tables\Sales" />
     <Folder Include="StoredProcedures\Insert\Sale" />
     <Folder Include="StoredProcedures\LoadData\Sale" />
+    <Folder Include="StoredProcedures\Reports" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
@@ -126,6 +127,8 @@
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Completed.sql" />
     <Build Include="Tables\Inventory\Stock.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_Stock.sql" />
+    <Build Include="StoredProcedures\Reports\Load_SaleDetails_By_Date_LocationId.sql" />
+    <Build Include="Views\Sale_Overview.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
