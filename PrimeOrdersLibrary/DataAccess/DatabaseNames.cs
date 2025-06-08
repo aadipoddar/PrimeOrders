@@ -43,6 +43,7 @@ public static class StoredProcedureNames
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
+	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
@@ -75,4 +76,5 @@ public static class StoredProcedureNames
 public static class ViewNames
 {
 	public static string SaleOverview => "Sale_Overview";
+	public static string ProductOverview => "Product_Overview";
 }

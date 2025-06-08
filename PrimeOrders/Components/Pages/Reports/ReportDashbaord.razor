@@ -50,9 +50,15 @@ else
 				<p>Analyze in-depth business data and trends</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Item")'>
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/ProductSummary")'>
+				<div class="card-icon item-summary-icon">📋</div>
+				<h3>Product Summary Report</h3>
+				<p>View aggregated product sales analytics</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/ProductDetail")'>
 				<div class="card-icon item-report-icon">📦</div>
-				<h3>Item Reports</h3>
+				<h3>Product Detailed Reports</h3>
 				<p>Track individual product performance</p>
 			</div>
 
@@ -196,6 +202,11 @@ else
 	.stock-report-icon {
 		background-color: rgba(46, 196, 134, 0.1);
 		color: #2EC486;
+	}
+
+	.item-summary-icon {
+		background-color: rgba(255, 153, 0, 0.1);
+		color: #FF9900;
 	}
 
 	/* Back button styles */
@@ -342,35 +353,29 @@ else
 
 	/* Animations */
 	@@keyframes rotate {
-		0%
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
 
-	{
-		transform: rotate(0deg) translate(-24px) rotate(0deg);
-	}
-
-	100% {
-		transform: rotate(360deg) translate(-24px) rotate(-360deg);
-	}
-
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
 	}
 
 	/* Responsive Design */
 	@@media (max-width: 768px) {
-		.dashboard-header
+		.dashboard-header {
+			flex-direction: column;
+			gap: 15px;
+			padding: 15px;
+		}
 
-	{
-		flex-direction: column;
-		gap: 15px;
-		padding: 15px;
-	}
+		.dashboard-cards {
+			grid-template-columns: 1fr;
+		}
 
-	.dashboard-cards {
-		grid-template-columns: 1fr;
-	}
-
-	.dashboard-card {
-		min-height: 180px;
-	}
-
+		.dashboard-card {
+			min-height: 180px;
+		}
 	}
 </style>

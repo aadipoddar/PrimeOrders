@@ -12,4 +12,7 @@ public static class ProductData
 
 	public static async Task<List<ProductModel>> LoadProductByProductCategory(int ProductCategoryId) =>
 			await SqlDataAccess.LoadData<ProductModel, dynamic>(StoredProcedureNames.LoadProductByProductCategory, new { ProductCategoryId });
+
+	public static async Task<List<ProductOverviewModel>> LoadProductDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<ProductOverviewModel, dynamic>(StoredProcedureNames.LoadProductDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
 }
