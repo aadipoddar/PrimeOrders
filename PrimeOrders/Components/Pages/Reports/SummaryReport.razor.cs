@@ -66,4 +66,67 @@ public partial class SummaryReport
 
 		StateHasChanged();
 	}
+
+	private async Task Logout()
+	{
+		await JS.InvokeVoidAsync("deleteCookie", "UserId");
+		await JS.InvokeVoidAsync("deleteCookie", "Passcode");
+		NavManager.NavigateTo("/Login");
+	}
+
+	private List<PaymentMethodData> GetPaymentMethodsData()
+	{
+		var paymentData = new List<PaymentMethodData>
+		{
+			new() { PaymentMethod = "Cash", Amount = _saleOverviews.Sum(s => s.Cash) },
+			new() { PaymentMethod = "Card", Amount = _saleOverviews.Sum(s => s.Card) },
+			new() { PaymentMethod = "UPI", Amount = _saleOverviews.Sum(s => s.UPI) },
+			new() { PaymentMethod = "Credit", Amount = _saleOverviews.Sum(s => s.Credit) }
+		};
+
+		return [.. paymentData.Where(p => p.Amount > 0)];
+	}
+
+	private List<LocationSalesData> GetLocationSalesData()
+	{
+		return [.. _locations
+			.Select(location => new LocationSalesData
+			{
+				LocationName = location.Name,
+				Amount = _saleOverviews.Where(s => s.LocationId == location.Id).Sum(s => s.Total)
+			})
+			.Where(data => data.Amount > 0)];
+	}
+
+	private List<PaymentMethodData> GetLocationPaymentData(int locationId)
+	{
+		var locationSales = _saleOverviews.Where(s => s.LocationId == locationId).ToList();
+
+		var paymentData = new List<PaymentMethodData>
+		{
+			new() { PaymentMethod = "Cash", Amount = locationSales.Sum(s => s.Cash) },
+			new() { PaymentMethod = "Card", Amount = locationSales.Sum(s => s.Card) },
+			new() { PaymentMethod = "UPI", Amount = locationSales.Sum(s => s.UPI) },
+			new() { PaymentMethod = "Credit", Amount = locationSales.Sum(s => s.Credit) }
+		};
+
+		return [.. paymentData.Where(p => p.Amount > 0)];
+	}
+
+	private async Task ExportReport()
+	{
+		await JS.InvokeVoidAsync("alert", "PDF Export functionality will be implemented here");
+	}
+
+	public class PaymentMethodData
+	{
+		public string PaymentMethod { get; set; }
+		public decimal Amount { get; set; }
+	}
+
+	public class LocationSalesData
+	{
+		public string LocationName { get; set; }
+		public decimal Amount { get; set; }
+	}
 }
