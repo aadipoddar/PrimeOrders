@@ -61,6 +61,12 @@ else
 				<h3>Suppliers</h3>
 				<p>Add and manage your suppliers</p>
 			</div>
+
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/StockAdjustment")'>
+				<div class="card-icon stock-icon">📊</div>
+				<h3>Stock Adjustment</h3>
+				<p>Adjust and manage stock levels</p>
+			</div>
 		</div>
 
 		<div class="dashboard-footer">
@@ -196,6 +202,11 @@ else
 	.supplier-icon {
 		background-color: rgba(46, 196, 134, 0.1);
 		color: #2EC486;
+	}
+
+	.stock-icon {
+		background-color: rgba(255, 153, 0, 0.1);
+		color: #FF9900;
 	}
 
 	/* Back button styles */

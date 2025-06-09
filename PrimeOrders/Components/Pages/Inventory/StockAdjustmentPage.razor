@@ -1,0 +1,559 @@
+﻿@page "/Inventory/StockAdjustment"
+
+<PageTitle>Stock Adjustment - Prime Orders</PageTitle>
+
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Title="Error"
+		 Content="No raw materials added for stock adjustment."
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfSuccessToast"
+		 ID="toast_success"
+		 Title="Success"
+		 Content="Stock adjustment saved successfully."
+		 Timeout="1000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastEvents Closed="ClosedHandler" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading stock adjustment...</p>
+	</div>
+}
+else
+{
+	<div class="adjustment-container">
+		<div class="page-header">
+			<h1 class="page-title">Stock Adjustment</h1>
+			<button @onclick='() => NavigateTo("/Inventory-Dashboard")' class="back-button">
+				<span class="back-icon">←</span> Back to Inventory
+			</button>
+		</div>
+
+		<div class="adjustment-content">
+			<div class="combined-materials-card card">
+				<div class="card-header">
+					<h2>Current Stock Details</h2>
+					<p class="card-info">View current stock levels before making adjustments</p>
+				</div>
+				<div class="card-body">
+					@if (_user?.LocationId == 1)
+					{
+						<div class="location-selector">
+							<label>Select Location</label>
+							<SfComboBox TValue="int"
+										TItem="LocationModel"
+										Placeholder="Select a Location"
+										DataSource="_locations"
+										Value="_selectedLocationId"
+										CssClass="form-control">
+								<ComboBoxEvents TItem="LocationModel" TValue="int" ValueChange="OnLocationChanged" />
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+					}
+
+					<SfGrid ID="_sfStockGrid"
+							@ref="_sfStockGrid"
+							DataSource="_stockDetails"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowResizing="true"
+							AllowPaging="true"
+							AllowExcelExport="true"
+							AllowPdfExport="true"
+							Height="350px"
+							CssClass="stock-grid">
+						<GridPageSettings PageSize="10"></GridPageSettings>
+						<GridColumns>
+							<GridColumn Field="@nameof(StockDetailModel.RawMaterialCode)" HeaderText="Code" Width="100" />
+							<GridColumn Field="@nameof(StockDetailModel.RawMaterialName)" HeaderText="Item Name" Width="180" />
+							<GridColumn Field="@nameof(StockDetailModel.RawMaterialCategoryName)" HeaderText="Category" Width="150" />
+							<GridColumn Field="@nameof(StockDetailModel.ClosingStock)" HeaderText="Closing Stock" Width="110" TextAlign="TextAlign.Right" />
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+
+			<div class="adjustment-card card">
+				<div class="card-header">
+					<h2>Stock Adjustment</h2>
+					<p class="card-info">Add materials for stock adjustment</p>
+				</div>
+				<div class="card-body">
+					<div class="form-row">
+						<div class="form-group">
+							<label>Raw Material Category</label>
+							<SfComboBox TValue="int"
+										TItem="RawMaterialCategoryModel"
+										Placeholder="Select a Raw Material Category"
+										DataSource="@_rawMaterialCategories"
+										@bind-Value="_selectedRawMaterialCategoryId"
+										PopupWidth="100%"
+										CssClass="form-control">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+								<ComboBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="@RawMaterialCategoryComboBoxValueChangeHandler" />
+							</SfComboBox>
+						</div>
+
+						<div class="form-group">
+							<label>Raw Material</label>
+							<SfComboBox TValue="int"
+										TItem="RawMaterialModel"
+										Placeholder="Select a Raw Material"
+										DataSource="@_rawMaterials"
+										@bind-Value="_selectedRawMaterialId"
+										PopupWidth="100%"
+										CssClass="form-control">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+
+						<div class="form-group">
+							<label>Quantity</label>
+							<SfNumericTextBox TValue="double"
+											  Decimals=3
+											  Min=1
+											  Placeholder="Enter Quantity"
+											  @bind-Value="@_selectedRawMaterialQuantity"
+											  CssClass="form-control" />
+						</div>
+
+						<div class="form-group action-group">
+							<button @onclick="OnAddButtonClick" class="add-button">
+								<span class="add-icon">+</span> Add Material
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="adjustment-grid-card card">
+				<div class="card-header">
+					<h2>Adjustment Items</h2>
+					<p class="card-info">Click on a row to remove an item</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_newStockRawMaterials"
+							ID="_sfNewStockGrid"
+							@ref="_sfNewStockGrid"
+							Height="300px"
+							CssClass="adjustment-grid">
+						<GridEvents RowSelected="RowSelectHandler" TValue="RawMaterialRecipeModel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialCategoryId)" Visible=false />
+							<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialId)" Visible=false />
+							<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialName)" HeaderText="Raw Material" Width="180" />
+							<GridColumn Field="@nameof(RawMaterialRecipeModel.Quantity)" HeaderText="Quantity" Width="120" TextAlign="TextAlign.Right" />
+						</GridColumns>
+					</SfGrid>
+
+					<div class="save-container">
+						<button @onclick="OnSaveButtonClick" class="save-button">
+							<span class="save-icon">💾</span> Save Adjustment
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="dashboard-footer">
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--dotnet-primary: #512BD4;
+		--dotnet-secondary: #68217A;
+		--dotnet-accent: #00A4EF;
+		--dotnet-light: #F7F7F7;
+		--dotnet-dark: #1E1E1E;
+		--dotnet-border: rgba(0, 0, 0, 0.1);
+	}
+
+	/* General Layout */
+	.adjustment-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		padding: 20px;
+		background: linear-gradient(135deg, rgba(81, 43, 212, 0.05) 0%, rgba(104, 33, 122, 0.05) 100%);
+	}
+
+	/* Page Header */
+	.page-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 25px;
+	}
+
+	.page-title {
+		color: var(--dotnet-secondary);
+		font-size: 28px;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	.back-button {
+		background-color: transparent;
+		border: 2px solid var(--dotnet-secondary);
+		color: var(--dotnet-secondary);
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+	}
+
+		.back-button:hover {
+			background-color: var(--dotnet-secondary);
+			color: white;
+		}
+
+	.back-icon {
+		font-size: 16px;
+	}
+
+	/* Content layout */
+	.adjustment-content {
+		display: flex;
+		flex-direction: column;
+		gap: 25px;
+		margin-bottom: 30px;
+	}
+
+	/* Cards */
+	.card {
+		background-color: white;
+		border-radius: 15px;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+		overflow: hidden;
+	}
+
+	.card-header {
+		background-color: var(--dotnet-light);
+		padding: 15px 20px;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+		.card-header h2 {
+			margin: 0;
+			color: var(--dotnet-secondary);
+			font-size: 20px;
+			font-weight: 600;
+		}
+
+	.card-info {
+		margin: 5px 0 0 0;
+		color: #666;
+		font-size: 14px;
+		font-style: italic;
+	}
+
+	.card-body {
+		padding: 20px;
+	}
+
+	/* Location selector */
+	.location-selector {
+		margin-bottom: 20px;
+	}
+
+		.location-selector label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: var(--dotnet-dark);
+		}
+
+	/* Form Layout */
+	.form-row {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 20px;
+	}
+
+	.form-group {
+		margin-bottom: 10px;
+	}
+
+		.form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: var(--dotnet-dark);
+		}
+
+	.form-control {
+		width: 100%;
+		border-radius: 6px;
+	}
+
+	/* Buttons */
+	.action-group {
+		display: flex;
+		align-items: flex-end;
+	}
+
+	.add-button {
+		background-color: var(--dotnet-accent);
+		color: white;
+		border: none;
+		padding: 10px 18px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+		margin-top: 24px;
+	}
+
+		.add-button:hover {
+			background-color: #0078d4;
+			transform: translateY(-2px);
+		}
+
+	.add-icon {
+		font-size: 18px;
+	}
+
+	.save-container {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 20px;
+	}
+
+	.save-button {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: none;
+		padding: 12px 24px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+	}
+
+		.save-button:hover {
+			background-color: #4311a8;
+			transform: translateY(-2px);
+		}
+
+	.save-icon {
+		font-size: 18px;
+	}
+
+	/* Grid Styling */
+	.stock-grid, .adjustment-grid {
+		width: 100%;
+		border-radius: 8px;
+		overflow: hidden;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: #666;
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--dotnet-secondary);
+			text-decoration: underline;
+		}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--dotnet-primary);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--dotnet-accent);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--dotnet-secondary);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--dotnet-dark);
+		font-size: 16px;
+		margin-top: 10px;
+	}
+
+	/* Animations */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Toast Styling */
+	::deep .e-toast-container {
+		z-index: 1000;
+	}
+
+		::deep .e-toast-container .e-toast {
+			border: 0;
+			border-radius: 8px;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	/* Success Toast */
+	::deep .e-toast-success {
+		background-color: #ebf7ee;
+		border-left: 4px solid #4CAF50;
+		color: #2E7D32;
+	}
+
+		::deep .e-toast-success .e-toast-title {
+			color: #2E7D32;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-success .e-toast-content {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success .e-toast-close-icon {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success::before {
+			content: "✓";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Error Toast */
+	::deep .e-toast-danger {
+		background-color: #fdeeee;
+		border-left: 4px solid #F44336;
+		color: #C62828;
+	}
+
+		::deep .e-toast-danger .e-toast-title {
+			color: #C62828;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-danger .e-toast-content {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger .e-toast-close-icon {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger::before {
+			content: "⚠";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Toast Animation */
+	::deep .e-toast-container .e-toast {
+		padding: 10px 10px 10px 40px;
+		position: relative;
+		animation-fill-mode: both;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 992px) {
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.page-header {
+			flex-direction: column;
+			gap: 15px;
+			align-items: flex-start;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

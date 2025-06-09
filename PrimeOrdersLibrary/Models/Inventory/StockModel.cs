@@ -15,7 +15,8 @@ public enum StockType
 {
 	Purchase,
 	PurchaseReturn,
-	Sale
+	Sale,
+	Adjustment,
 }
 
 public class ItemQantityModel
