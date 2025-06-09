@@ -1,4 +1,4 @@
-using Syncfusion.Blazor.Calendars;
+﻿using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 
@@ -157,10 +157,193 @@ public partial class ProductDetail
 
 	private async Task ExportToExcel()
 	{
-		if (_sfGrid != null)
+		if (_filteredProductOverviews is null || _filteredProductOverviews.Count == 0)
 		{
-			await _sfGrid.ExportToExcelAsync();
+			await JS.InvokeVoidAsync("alert", "No data to export");
+			return;
 		}
+
+		// Create summary items dictionary
+		Dictionary<string, object> summaryItems = new()
+		{
+			{ "Total Sales", _filteredProductOverviews.Sum(p => p.TotalAmount) },
+			{ "Total Products", _filteredProductOverviews.Select(p => p.ProductId).Distinct().Count() },
+			{ "Total Quantity", _filteredProductOverviews.Sum(p => p.QuantitySold) },
+			{ "Total Discount", _filteredProductOverviews.Sum(p => p.DiscountAmount) },
+			{ "Total Tax", _filteredProductOverviews.Sum(p => p.TotalTaxAmount) },
+			{ "Transactions", _filteredProductOverviews.Select(p => p.SaleId).Distinct().Count() }
+		};
+
+		// Add product-specific info if a product is selected
+		if (_selectedProductId > 0 && _selectedProduct is not null)
+		{
+			summaryItems.Add("Product Code", _selectedProduct.Code);
+			summaryItems.Add("MRP", _selectedProduct.Rate);
+			summaryItems.Add("Average Selling Price", _filteredProductOverviews.Average(p => p.AveragePrice));
+
+			var categoryName = _productCategories.FirstOrDefault(c => c.Id == _selectedProduct.ProductCategoryId)?.Name;
+			if (!string.IsNullOrEmpty(categoryName))
+				summaryItems.Add("Category", categoryName);
+		}
+
+		// Define the column order for better readability
+		List<string> columnOrder = [
+				nameof(ProductOverviewModel.ProductName),
+				nameof(ProductOverviewModel.ProductCode),
+				nameof(ProductOverviewModel.ProductCategoryName),
+				nameof(ProductOverviewModel.SaleId),
+				nameof(ProductOverviewModel.BillDateTime),
+				nameof(ProductOverviewModel.QuantitySold),
+				nameof(ProductOverviewModel.AveragePrice),
+				nameof(ProductOverviewModel.BaseTotal),
+				nameof(ProductOverviewModel.DiscountAmount),
+				nameof(ProductOverviewModel.TotalTaxAmount),
+				nameof(ProductOverviewModel.TotalAmount),
+				nameof(ProductOverviewModel.SGSTAmount),
+				nameof(ProductOverviewModel.CGSTAmount),
+				nameof(ProductOverviewModel.IGSTAmount)
+			];
+
+		// Define custom column settings
+		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		{
+			[nameof(ProductOverviewModel.ProductCode)] = new()
+			{
+				DisplayName = "Product Code",
+				Width = 12
+			},
+			[nameof(ProductOverviewModel.ProductName)] = new()
+			{
+				DisplayName = "Product Name",
+				Width = 25,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(ProductOverviewModel.ProductCategoryName)] = new()
+			{
+				DisplayName = "Category",
+				Width = 18,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(ProductOverviewModel.SaleId)] = new()
+			{
+				DisplayName = "Bill No",
+				Width = 10
+			},
+			[nameof(ProductOverviewModel.BillDateTime)] = new()
+			{
+				DisplayName = "Date & Time",
+				Format = "dd-MMM-yyyy hh:mm tt",
+				Width = 20
+			},
+			[nameof(ProductOverviewModel.QuantitySold)] = new()
+			{
+				DisplayName = "Quantity",
+				Format = "#,##0.00",
+				Width = 12,
+				IncludeInTotal = true
+			},
+			[nameof(ProductOverviewModel.AveragePrice)] = new()
+			{
+				DisplayName = "Rate",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true
+			},
+			[nameof(ProductOverviewModel.BaseTotal)] = new()
+			{
+				DisplayName = "Base Total",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				IncludeInTotal = true
+			},
+			[nameof(ProductOverviewModel.DiscountAmount)] = new()
+			{
+				DisplayName = "Discount",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				IncludeInTotal = true
+			},
+			[nameof(ProductOverviewModel.TotalTaxAmount)] = new()
+			{
+				DisplayName = "Total Tax",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				IncludeInTotal = true
+			},
+			[nameof(ProductOverviewModel.SGSTAmount)] = new()
+			{
+				DisplayName = "SGST",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true
+			},
+			[nameof(ProductOverviewModel.CGSTAmount)] = new()
+			{
+				DisplayName = "CGST",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true
+			},
+			[nameof(ProductOverviewModel.IGSTAmount)] = new()
+			{
+				DisplayName = "IGST",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true
+			},
+			[nameof(ProductOverviewModel.TotalAmount)] = new()
+			{
+				DisplayName = "Total",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				HighlightNegative = true
+			}
+		};
+
+		// Generate title based on selected filters
+		string reportTitle = "Product Detail Report";
+
+		if (_selectedProduct is not null)
+			reportTitle = $"Detail Report - {_selectedProduct.Name}";
+
+		else if (_selectedCategoryId > 0)
+		{
+			var category = _productCategories.FirstOrDefault(c => c.Id == _selectedCategoryId);
+			if (category != null)
+				reportTitle = $"Product Detail Report - {category.Name} Category";
+		}
+
+		string worksheetName = "Product Details";
+
+		var memoryStream = ExcelExportUtil.ExportToExcel(
+			_filteredProductOverviews,
+			reportTitle,
+			worksheetName,
+			_startDate,
+			_endDate,
+			summaryItems,
+			columnSettings,
+			columnOrder);
+
+		// Generate filename based on selected product/category
+		string filenameSuffix = string.Empty;
+		if (_selectedProduct is not null)
+			filenameSuffix = $"_{_selectedProduct.Name}";
+
+		else if (_selectedCategoryId > 0)
+		{
+			var category = _productCategories.FirstOrDefault(c => c.Id == _selectedCategoryId);
+			if (category is not null)
+				filenameSuffix = $"_{category.Name}";
+		}
+
+		var fileName = $"Product_Detail{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
+		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
 	#region Chart Data Methods

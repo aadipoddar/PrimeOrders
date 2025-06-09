@@ -101,8 +101,198 @@ public partial class StockReport
 
 	private async Task ExportToExcel()
 	{
-		if (_sfGrid is not null)
-			await _sfGrid.ExportToExcelAsync();
+		if (_stockDetails is null || _stockDetails.Count == 0)
+		{
+			await JS.InvokeVoidAsync("alert", "No data to export");
+			return;
+		}
+
+		// Create summary items dictionary with key stock metrics
+		Dictionary<string, object> summaryItems = new()
+		{
+			{ "Total Stock Items", _stockDetails.Count },
+			{ "Opening Stock", _stockDetails.Sum(s => s.OpeningStock) },
+			{ "Total Purchases", _stockDetails.Sum(s => s.PurchaseStock) },
+			{ "Total Sales", _stockDetails.Sum(s => s.SaleStock) },
+			{ "Monthly Stock", _stockDetails.Sum(s => s.MonthlyStock) },
+			{ "Closing Stock", _stockDetails.Sum(s => s.ClosingStock) },
+			{ "Stock Movement", _stockDetails.Sum(s => s.PurchaseStock + s.SaleStock) },
+			{ "Net Stock Change", _stockDetails.Sum(s => s.ClosingStock - s.OpeningStock) }
+		};
+
+		// Add top categories summary data
+		var topCategories = _stockDetails
+			.GroupBy(s => s.RawMaterialCategoryName)
+			.OrderByDescending(g => g.Sum(s => s.ClosingStock))
+			.Take(3)
+			.ToList();
+
+		foreach (var category in topCategories)
+			summaryItems.Add($"Category: {category.Key}", category.Sum(s => s.ClosingStock));
+
+		// Define the column order for better readability
+		List<string> columnOrder = [
+			nameof(StockDetailModel.RawMaterialCode),
+			nameof(StockDetailModel.RawMaterialName),
+			nameof(StockDetailModel.RawMaterialCategoryName),
+			nameof(StockDetailModel.OpeningStock),
+			nameof(StockDetailModel.PurchaseStock),
+			nameof(StockDetailModel.SaleStock),
+			nameof(StockDetailModel.MonthlyStock),
+			nameof(StockDetailModel.ClosingStock)
+		];
+
+		// Define custom column settings
+		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		{
+			[nameof(StockDetailModel.RawMaterialCode)] = new()
+			{
+				DisplayName = "Item Code",
+				Width = 12,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(StockDetailModel.RawMaterialName)] = new()
+			{
+				DisplayName = "Item Name",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(StockDetailModel.RawMaterialCategoryName)] = new()
+			{
+				DisplayName = "Category",
+				Width = 20,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(StockDetailModel.OpeningStock)] = new()
+			{
+				DisplayName = "Opening Stock",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value == null) return null;
+					var stockValue = Convert.ToDecimal(value);
+					return new ExcelExportUtil.FormatInfo
+					{
+						Bold = stockValue <= 0,
+						FontColor = stockValue <= 0 ? Syncfusion.Drawing.Color.FromArgb(198, 40, 40) : null
+					};
+				}
+			},
+			[nameof(StockDetailModel.PurchaseStock)] = new()
+			{
+				DisplayName = "Purchases",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value == null) return null;
+					var stockValue = Convert.ToDecimal(value);
+					return new ExcelExportUtil.FormatInfo
+					{
+						Bold = stockValue > 0,
+						FontColor = stockValue > 0 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
+					};
+				}
+			},
+			[nameof(StockDetailModel.SaleStock)] = new()
+			{
+				DisplayName = "Sales",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value == null) return null;
+					var stockValue = Convert.ToDecimal(value);
+					return new ExcelExportUtil.FormatInfo
+					{
+						Bold = stockValue > 0,
+						FontColor = stockValue > 0 ? Syncfusion.Drawing.Color.FromArgb(239, 108, 0) : null
+					};
+				}
+			},
+			[nameof(StockDetailModel.MonthlyStock)] = new()
+			{
+				DisplayName = "Monthly Stock",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(StockDetailModel.ClosingStock)] = new()
+			{
+				DisplayName = "Closing Stock",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				HighlightNegative = true,
+				FormatCallback = (value) =>
+				{
+					if (value is null) return null;
+
+					var stockValue = Convert.ToDecimal(value);
+					if (stockValue <= 0)
+					{
+						return new ExcelExportUtil.FormatInfo
+						{
+							Bold = true,
+							FontColor = Syncfusion.Drawing.Color.FromArgb(198, 40, 40)
+						};
+					}
+					else if (stockValue <= 5)
+					{
+						return new ExcelExportUtil.FormatInfo
+						{
+							Bold = true,
+							FontColor = Syncfusion.Drawing.Color.FromArgb(239, 108, 0)
+						};
+					}
+
+					return null;
+				}
+			}
+		};
+
+		// Generate title based on location if selected
+		string reportTitle = "Stock Report";
+
+		if (_selectedLocationId > 0)
+		{
+			var location = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
+			if (location != null)
+				reportTitle = $"Stock Report - {location.Name}";
+		}
+
+		string worksheetName = "Stock Details";
+
+		var memoryStream = ExcelExportUtil.ExportToExcel(
+			_stockDetails,
+			reportTitle,
+			worksheetName,
+			_startDate,
+			_endDate,
+			summaryItems,
+			columnSettings,
+			columnOrder);
+
+		// Generate filename with location information if applicable
+		string locationSuffix = string.Empty;
+		if (_selectedLocationId > 0)
+		{
+			var location = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
+			if (location is not null)
+				locationSuffix = $"_{location.Name}";
+		}
+
+		var fileName = $"Stock_Report{locationSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
+		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
 	// Chart data methods

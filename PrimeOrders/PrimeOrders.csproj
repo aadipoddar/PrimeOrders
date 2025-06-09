@@ -19,6 +19,7 @@
     <PackageReference Include="Syncfusion.Blazor.Notifications" Version="29.2.9" />
     <PackageReference Include="Syncfusion.Blazor.Popups" Version="29.2.9" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="29.2.9" />
+    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="29.2.9" />
   </ItemGroup>
 
   <ItemGroup>
