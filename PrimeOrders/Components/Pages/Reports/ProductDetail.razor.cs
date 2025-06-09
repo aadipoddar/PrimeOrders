@@ -19,7 +19,7 @@ public partial class ProductDetail
 	private int _selectedProductId = 0;
 	private ProductModel _selectedProduct;
 
-	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30)); // Default to last 30 days
+	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
 	private List<LocationModel> _locations = [];
@@ -36,38 +36,45 @@ public partial class ProductDetail
 		_isLoading = true;
 
 		if (!await ValidatePassword())
-		{
 			NavManager.NavigateTo("/Login");
-			return;
-		}
 
 		await LoadInitialData();
 
-		// Check if ProductId parameter was provided
 		if (ProductId.HasValue && ProductId.Value > 0)
-		{
 			_selectedProductId = ProductId.Value;
-		}
 
 		await ApplyFilters();
 		_isLoading = false;
 	}
 
+	private async Task<bool> ValidatePassword()
+	{
+		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
+		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
+
+		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
+			return false;
+
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
+		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
+			return false;
+
+		_user = user;
+		return true;
+	}
+
 	private async Task LoadInitialData()
 	{
-		// Load all required data
 		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory, true);
 		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product, true);
-		_filteredProducts = _products.ToList(); // Initially show all products
+		_filteredProducts = [.. _products];
 
-		// Set location based on user permissions
-		if (_user.LocationId != 1) // Admin has LocationId = 1
+		if (_user.LocationId != 1)
 		{
 			_selectedLocationId = _user.LocationId;
 		}
 
-		// Load product overviews
 		await LoadProductOverviews();
 	}
 
@@ -85,53 +92,23 @@ public partial class ProductDetail
 
 	private async Task ApplyFilters()
 	{
-		// Filter product dropdown based on selected category
 		if (_selectedCategoryId > 0)
-		{
-			_filteredProducts = _products.Where(p => p.ProductCategoryId == _selectedCategoryId).ToList();
-		}
+			_filteredProducts = [.. _products.Where(p => p.ProductCategoryId == _selectedCategoryId)];
 		else
-		{
-			_filteredProducts = _products.ToList();
-		}
+			_filteredProducts = [.. _products];
 
-		// Filter product overviews based on selected filters
 		_filteredProductOverviews = _productOverviews;
 
 		if (_selectedCategoryId > 0)
-		{
-			_filteredProductOverviews = _filteredProductOverviews
-				.Where(p => p.ProductCategoryId == _selectedCategoryId)
-				.ToList();
-		}
+			_filteredProductOverviews = [.. _filteredProductOverviews.Where(p => p.ProductCategoryId == _selectedCategoryId)];
 
 		if (_selectedProductId > 0)
 		{
-			_filteredProductOverviews = _filteredProductOverviews
-				.Where(p => p.ProductId == _selectedProductId)
-				.ToList();
-
-			// Load selected product details
+			_filteredProductOverviews = [.. _filteredProductOverviews.Where(p => p.ProductId == _selectedProductId)];
 			_selectedProduct = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, _selectedProductId);
 		}
 
 		StateHasChanged();
-	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
 	}
 
 	private void NavigateTo(string route) =>
@@ -160,7 +137,7 @@ public partial class ProductDetail
 	private async Task OnCategoryChanged(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
 		_selectedCategoryId = args.Value;
-		_selectedProductId = 0; // Reset product selection when category changes
+		_selectedProductId = 0;
 		await ApplyFilters();
 	}
 
@@ -222,9 +199,9 @@ public partial class ProductDetail
 	private List<LocationSalesData> GetLocationSalesData()
 	{
 		if (_locations == null || !_locations.Any() || _filteredProductOverviews == null || !_filteredProductOverviews.Any())
-			return new List<LocationSalesData>();
+			return [];
 
-		return _filteredProductOverviews
+		return [.. _filteredProductOverviews
 			.GroupBy(s => s.LocationId)
 			.Select(group => new LocationSalesData
 			{
@@ -233,29 +210,28 @@ public partial class ProductDetail
 				Amount = group.Sum(s => s.TotalAmount)
 			})
 			.OrderByDescending(l => l.Amount)
-			.Take(10)
-			.ToList();
+			.Take(10)];
 	}
 
 	private List<TaxComponentData> GetTaxDistributionData()
 	{
 		if (_filteredProductOverviews == null || !_filteredProductOverviews.Any())
-			return new List<TaxComponentData>();
+			return [];
 
 		decimal totalTax = _filteredProductOverviews.Sum(p => p.TotalTaxAmount);
 		if (totalTax <= 0)
-			return new List<TaxComponentData>();
+			return [];
 
 		decimal sgst = _filteredProductOverviews.Sum(p => p.SGSTAmount);
 		decimal cgst = _filteredProductOverviews.Sum(p => p.CGSTAmount);
 		decimal igst = _filteredProductOverviews.Sum(p => p.IGSTAmount);
 
-		return new List<TaxComponentData>
+		return [.. new List<TaxComponentData>
 		{
 			new() { Component = "SGST", Amount = sgst },
 			new() { Component = "CGST", Amount = cgst },
 			new() { Component = "IGST", Amount = igst }
-		}.Where(t => t.Amount > 0).ToList();
+		}.Where(t => t.Amount > 0)];
 	}
 
 	#endregion

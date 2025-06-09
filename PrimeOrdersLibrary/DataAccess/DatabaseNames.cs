@@ -44,6 +44,7 @@ public static class StoredProcedureNames
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
+	public static string LoadStockDetailsByDateLocationId => "Load_StockDetails_By_Date_LocationId";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";

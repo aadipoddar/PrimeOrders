@@ -105,7 +105,7 @@ public partial class ProductSummary
 	// Chart data methods
 	private List<TopProductData> GetTopProductsData()
 	{
-		return _productOverviews
+		return [.. _productOverviews
 			.GroupBy(p => new { p.ProductId, p.ProductName })
 			.Select(g => new TopProductData
 			{
@@ -113,13 +113,12 @@ public partial class ProductSummary
 				Amount = g.Sum(p => p.TotalAmount)
 			})
 			.OrderByDescending(p => p.Amount)
-			.Take(5)
-			.ToList();
+			.Take(5)];
 	}
 
 	private List<CategorySalesData> GetCategorySalesData()
 	{
-		return _productOverviews
+		return [.. _productOverviews
 			.GroupBy(p => new { p.ProductCategoryId, p.ProductCategoryName })
 			.Select(g => new CategorySalesData
 			{
@@ -128,8 +127,7 @@ public partial class ProductSummary
 				Amount = g.Sum(p => p.TotalAmount)
 			})
 			.OrderByDescending(p => p.Amount)
-			.Take(8) // Top 8 categories
-			.ToList();
+			.Take(8)];
 	}
 
 	private List<MonthlySalesData> GetMonthlySalesData()
@@ -137,20 +135,19 @@ public partial class ProductSummary
 		var startDate = _startDate.AddMonths(-12); // Go back 12 months from selected date
 		var endDate = _endDate;
 
-		return _productOverviews
+		return [.. _productOverviews
 			.GroupBy(p => new { Month = p.BillDateTime.ToString("MMM yyyy") })
 			.Select(g => new MonthlySalesData
 			{
 				Month = g.Key.Month,
 				Amount = g.Sum(p => p.TotalAmount)
 			})
-			.OrderBy(d => DateTime.ParseExact(d.Month, "MMM yyyy", null))
-			.ToList();
+			.OrderBy(d => DateTime.ParseExact(d.Month, "MMM yyyy", null))];
 	}
 
 	private List<ProductQuantityRevenueData> GetQuantityRevenueData()
 	{
-		return _productOverviews
+		return [.. _productOverviews
 			.GroupBy(p => new { p.ProductId, p.ProductName })
 			.Select(g => new ProductQuantityRevenueData
 			{
@@ -159,13 +156,12 @@ public partial class ProductSummary
 				Quantity = g.Sum(p => p.QuantitySold)
 			})
 			.OrderByDescending(p => p.Amount)
-			.Take(5)
-			.ToList();
+			.Take(5)];
 	}
 
 	private List<TopProductData> GetTopProductsByCategoryData(int categoryId)
 	{
-		return _productOverviews
+		return [.. _productOverviews
 			.Where(p => p.ProductCategoryId == categoryId)
 			.GroupBy(p => new { p.ProductId, p.ProductName })
 			.Select(g => new TopProductData
@@ -174,8 +170,7 @@ public partial class ProductSummary
 				Amount = g.Sum(p => p.TotalAmount)
 			})
 			.OrderByDescending(p => p.Amount)
-			.Take(5)
-			.ToList();
+			.Take(5)];
 	}
 
 	// Helper methods for category data
