@@ -15,4 +15,7 @@ public static class SaleData
 
 	public static async Task<List<SaleOverviewModel>> LoadSaleDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
 		await SqlDataAccess.LoadData<SaleOverviewModel, dynamic>(StoredProcedureNames.LoadSaleDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+
+	public static async Task<SaleModel> LoadLastSaleByLocation(int LocationId) =>
+		(await SqlDataAccess.LoadData<SaleModel, dynamic>(StoredProcedureNames.LoadLastSaleByLocation, new { LocationId })).FirstOrDefault();
 }

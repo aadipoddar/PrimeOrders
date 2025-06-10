@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[Sale]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [BillNo] VARCHAR(20) NOT NULL UNIQUE, 
     [DiscPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0,
     [DiscReason] VARCHAR(250) NOT NULL, 
     [Remarks] VARCHAR(250) NOT NULL, 

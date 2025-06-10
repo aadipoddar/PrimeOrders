@@ -2,6 +2,7 @@
 	AS
 	SELECT
 		[s].[Id] AS SaleId,
+		[s].[BillNo],
 		[s].[UserId],
 		[u].[Name] AS UserName,
 		[s].[LocationId],
@@ -56,6 +57,7 @@
 
 	GROUP BY
 		[s].[Id],
+		[s].[BillNo],
 		[s].[UserId],
 		[u].[Name],
 		[s].[LocationId],

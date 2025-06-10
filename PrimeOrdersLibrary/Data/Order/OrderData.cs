@@ -16,4 +16,7 @@ public static class OrderData
 
 	public static async Task<List<OrderModel>> LoadOrderByLocation(int LocationId) =>
 		await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByLocation, new { LocationId });
+
+	public static async Task<OrderModel> LoadLastOrderByLocation(int LocationId) =>
+		(await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadLastOrderByLocation, new { LocationId })).FirstOrDefault();
 }

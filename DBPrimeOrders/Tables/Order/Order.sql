@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[Order]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [OrderNo] VARCHAR(50) NOT NULL, 
+    [OrderNo] VARCHAR(20) NOT NULL UNIQUE, 
     [OrderDate] DATE NOT NULL, 
     [LocationId] INT NOT NULL, 
     [UserId] INT NOT NULL, 

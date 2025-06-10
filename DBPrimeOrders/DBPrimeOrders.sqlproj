@@ -136,6 +136,8 @@
     <Build Include="Views\Purchase_Overview.sql" />
     <Build Include="StoredProcedures\Reports\Load_PurchaseDetails_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Location.sql" />
+    <Build Include="StoredProcedures\LoadData\Order\Load_LastOrder_By_Location.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_LastSale_By_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

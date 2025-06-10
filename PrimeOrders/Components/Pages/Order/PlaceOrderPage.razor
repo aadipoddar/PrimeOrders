@@ -137,8 +137,9 @@ else
 
 						<div class="form-group">
 							<label>Order Number</label>
-							<SfTextBox @bind-Value="_order.OrderNo"
+							<SfTextBox Value="@_order.OrderNo"
 									   Placeholder="Enter Order No"
+									   Readonly=true
 									   CssClass="form-control" />
 						</div>
 

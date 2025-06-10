@@ -91,6 +91,8 @@ public partial class PlaceOrderPage
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
+		_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order.LocationId);
+
 		StateHasChanged();
 	}
 	#endregion
@@ -176,13 +178,6 @@ public partial class PlaceOrderPage
 			return false;
 		}
 
-		if (string.IsNullOrWhiteSpace(_order.OrderNo))
-		{
-			_sfErrorToast.Content = "Order number is required.";
-			await _sfErrorToast.ShowAsync();
-			return false;
-		}
-
 		return true;
 	}
 
@@ -191,8 +186,10 @@ public partial class PlaceOrderPage
 		if (!await ValidateForm())
 			return;
 
-		int orderId = await OrderData.InsertOrder(_order);
-		if (orderId <= 0)
+		_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order.LocationId);
+
+		_order.Id = await OrderData.InsertOrder(_order);
+		if (_order.Id <= 0)
 		{
 			_sfErrorToast.Content = "Failed to save the order. Please try again.";
 			StateHasChanged();
@@ -204,7 +201,7 @@ public partial class PlaceOrderPage
 			await OrderData.InsertOrderDetail(new OrderDetailModel()
 			{
 				Id = 0,
-				OrderId = orderId,
+				OrderId = _order.Id,
 				ProductId = cartItem.ProductId,
 				Quantity = cartItem.Quantity,
 				Status = true

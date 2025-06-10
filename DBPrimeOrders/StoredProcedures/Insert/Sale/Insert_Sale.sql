@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Sale]
 	@Id INT OUTPUT,
+	@BillNo VARCHAR(20),
 	@DiscPercent DECIMAL(5, 2),
 	@DiscReason VARCHAR(250),
 	@Remarks VARCHAR(250),
@@ -18,15 +19,16 @@ BEGIN
 	IF @Id = 0
 	BEGIN
 		INSERT INTO [dbo].[Sale] 
-			([DiscPercent], DiscReason, Remarks, UserId, LocationId, PartyId, OrderId, Cash, Card, UPI, Credit, Status)
+			([BillNo], [DiscPercent], DiscReason, Remarks, UserId, LocationId, PartyId, OrderId, Cash, Card, UPI, Credit, Status)
 		VALUES 
-			(@DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @Status);
+			(@BillNo, @DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
 	BEGIN
 		UPDATE [dbo].[Sale]
 		SET
+			[BillNo] = @BillNo,
 			[DiscPercent] = @DiscPercent,
 			DiscReason = @DiscReason,
 			Remarks = @Remarks,

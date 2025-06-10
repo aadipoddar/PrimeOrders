@@ -90,6 +90,9 @@ public partial class SalePage
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
+		_sale.LocationId = _user?.LocationId ?? 0;
+		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale.LocationId);
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}
@@ -392,6 +395,8 @@ public partial class SalePage
 
 		if (!await ValidateForm())
 			return;
+
+		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale.LocationId);
 
 		_sale.Id = await SaleData.InsertSale(_sale);
 		if (_sale.Id <= 0)

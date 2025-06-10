@@ -3,6 +3,7 @@
 public class SaleModel
 {
 	public int Id { get; set; }
+	public string BillNo { get; set; }
 	public decimal DiscPercent { get; set; }
 	public string DiscReason { get; set; }
 	public string Remarks { get; set; }
@@ -61,6 +62,7 @@ public class SaleProductCartModel
 public class SaleOverviewModel
 {
 	public int SaleId { get; set; }
+	public string BillNo { get; set; }
 	public int UserId { get; set; }
 	public string UserName { get; set; }
 	public int LocationId { get; set; }
