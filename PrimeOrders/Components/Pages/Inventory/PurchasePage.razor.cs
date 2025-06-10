@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.Spreadsheet;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -9,6 +11,8 @@ public partial class PurchasePage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
+
+	[Parameter] public int? PurchaseId { get; set; }
 
 	private UserModel _user;
 	private bool _isLoading = true;
@@ -27,7 +31,7 @@ public partial class PurchasePage
 	private PurchaseRawMaterialCartModel _selectedRawMaterialCart = new();
 
 	private SupplierModel _supplier = new();
-	private readonly PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Remarks = "" };
+	private PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Remarks = "" };
 
 	private List<SupplierModel> _suppliers;
 	private List<RawMaterialCategoryModel> _rawMaterialCategories;
@@ -85,6 +89,48 @@ public partial class PurchasePage
 		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
+		if (PurchaseId.HasValue && PurchaseId.Value > 0)
+			await LoadPurchase();
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private async Task LoadPurchase()
+	{
+		_purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, PurchaseId.Value);
+
+		if (_purchase is null)
+			NavManager.NavigateTo("/Inventory-Dashboard");
+
+		_purchaseRawMaterialCarts.Clear();
+
+		var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(_purchase.Id);
+		foreach (var item in purchaseDetails)
+		{
+			var product = await CommonData.LoadTableDataById<RawMaterialCategoryModel>(TableNames.RawMaterial, item.RawMaterialId);
+
+			_purchaseRawMaterialCarts.Add(new()
+			{
+				RawMaterialId = item.RawMaterialId,
+				RawMaterialName = product.Name,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				BaseTotal = item.BaseTotal,
+				DiscPercent = item.DiscPercent,
+				DiscAmount = item.DiscAmount,
+				AfterDiscount = item.AfterDiscount,
+				CGSTPercent = item.CGSTPercent,
+				SGSTPercent = item.SGSTPercent,
+				IGSTPercent = item.IGSTPercent,
+				CGSTAmount = item.CGSTAmount,
+				SGSTAmount = item.SGSTAmount,
+				IGSTAmount = item.IGSTAmount,
+				Total = item.Total,
+			});
+		}
+
+		await _sfRawMaterialCartGrid?.Refresh();
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}
@@ -111,12 +157,25 @@ public partial class PurchasePage
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 		_purchase.UserId = _user?.Id ?? 0;
 
+		foreach (var item in _purchaseRawMaterialCarts)
+		{
+			item.BaseTotal = item.Rate * item.Quantity;
+			item.DiscAmount = item.BaseTotal * (item.DiscPercent / 100);
+			item.AfterDiscount = item.BaseTotal - item.DiscAmount;
+			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
+			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
+			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
+			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+		}
+
 		_baseTotal = _purchaseRawMaterialCarts.Sum(c => c.BaseTotal);
 		_afterDiscounts = _purchaseRawMaterialCarts.Sum(c => c.AfterDiscount);
 		_subTotal = _purchaseRawMaterialCarts.Sum(c => c.Total);
 		_purchase.CDAmount = _subTotal * (_purchase.CDPercent / 100);
 		_total = _subTotal - _purchase.CDAmount;
 
+		_sfRawMaterialCartGrid?.Refresh();
+		_sfRawMaterialGrid?.Refresh();
 		StateHasChanged();
 	}
 	#endregion
@@ -140,31 +199,11 @@ public partial class PurchasePage
 		var existingProduct = _purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == rawMaterial.Id);
 
 		if (existingProduct is not null)
-		{
 			existingProduct.Quantity++;
-
-			existingProduct.BaseTotal = existingProduct.Rate * existingProduct.Quantity;
-			existingProduct.DiscAmount = existingProduct.BaseTotal * (existingProduct.DiscPercent / 100);
-			existingProduct.AfterDiscount = existingProduct.BaseTotal - existingProduct.DiscAmount;
-
-			existingProduct.CGSTAmount = existingProduct.AfterDiscount * (existingProduct.CGSTPercent / 100);
-			existingProduct.SGSTAmount = existingProduct.AfterDiscount * (existingProduct.SGSTPercent / 100);
-			existingProduct.IGSTAmount = existingProduct.AfterDiscount * (existingProduct.IGSTPercent / 100);
-
-			existingProduct.Total = existingProduct.AfterDiscount + existingProduct.CGSTAmount + existingProduct.SGSTAmount + existingProduct.IGSTAmount;
-		}
 
 		else
 		{
 			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, rawMaterial.TaxId);
-
-			var discountPercent = 0;
-			var discountAmount = rawMaterial.MRP * (discountPercent / 100);
-			var afterDiscount = rawMaterial.MRP - discountAmount;
-			var cgstAmount = afterDiscount * (productTax.CGST / 100);
-			var sgstAmount = afterDiscount * (productTax.SGST / 100);
-			var igstAmount = afterDiscount * (productTax.IGST / 100);
-			var total = afterDiscount + cgstAmount + sgstAmount + igstAmount;
 
 			_purchaseRawMaterialCarts.Add(new()
 			{
@@ -173,16 +212,11 @@ public partial class PurchasePage
 				Quantity = 1,
 				Rate = rawMaterial.MRP,
 				BaseTotal = rawMaterial.MRP,
-				DiscPercent = discountPercent,
-				DiscAmount = discountAmount,
-				AfterDiscount = afterDiscount,
+				DiscPercent = 0,
 				CGSTPercent = productTax.CGST,
-				CGSTAmount = cgstAmount,
 				SGSTPercent = productTax.SGST,
-				SGSTAmount = sgstAmount,
 				IGSTPercent = productTax.IGST,
-				IGSTAmount = igstAmount,
-				Total = total,
+				// Rest handled in the UpdateFinancialDetails()
 			});
 		}
 
@@ -327,14 +361,58 @@ public partial class PurchasePage
 			return;
 		}
 
-		await InsertPurchaseDetail();
 		await InsertStock();
+		await InsertPurchaseDetail();
 
 		await _sfSuccessToast.ShowAsync();
 	}
 
+	private async Task InsertStock()
+	{
+		if (PurchaseId.HasValue && PurchaseId.Value > 0)
+		{
+			var existingPurchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(PurchaseId.Value);
+
+			foreach (var item in existingPurchaseDetails)
+				await StockData.InsertStock(new()
+				{
+					Id = 0,
+					RawMaterialId = item.RawMaterialId,
+					Quantity = -item.Quantity, // Deducting stock for existing purchase
+					Type = StockType.PurchaseUpdate.ToString(),
+					BillId = _purchase.Id,
+					TransactionDate = _purchase.BillDate,
+					LocationId = _user.LocationId
+				});
+		}
+
+		foreach (var item in _purchaseRawMaterialCarts)
+			await StockData.InsertStock(new()
+			{
+				Id = 0,
+				RawMaterialId = item.RawMaterialId,
+				Quantity = item.Quantity,
+				Type = StockType.Purchase.ToString(),
+				BillId = _purchase.Id,
+				TransactionDate = _purchase.BillDate,
+				LocationId = _user.LocationId
+			});
+	}
+
 	private async Task InsertPurchaseDetail()
 	{
+		if (PurchaseId.HasValue && PurchaseId.Value > 0)
+		{
+			var existingPurchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(PurchaseId.Value);
+
+			if (existingPurchaseDetails is not null)
+				foreach (var item in existingPurchaseDetails)
+				{
+					item.Status = false;
+					await PurchaseData.InsertPurchaseDetail(item);
+				}
+		}
+
 		foreach (var item in _purchaseRawMaterialCarts)
 			await PurchaseData.InsertPurchaseDetail(new()
 			{
@@ -358,23 +436,8 @@ public partial class PurchasePage
 			});
 	}
 
-	private async Task InsertStock()
-	{
-		foreach (var item in _purchaseRawMaterialCarts)
-			await StockData.InsertStock(new()
-			{
-				Id = 0,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = item.Quantity,
-				Type = StockType.Purchase.ToString(),
-				BillId = _purchase.Id,
-				TransactionDate = _purchase.BillDate,
-				LocationId = _user.LocationId
-			});
-	}
-
 	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+		NavManager.NavigateTo("/Inventory/Purchase", forceLoad: true);
 
 	private void NavigateTo(string route) =>
 		NavManager.NavigateTo(route);
