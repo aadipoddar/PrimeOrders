@@ -52,3 +52,30 @@ public class PurchaseRawMaterialCartModel
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
 }
+
+public class PurchaseOverviewModel
+{
+	public int PurchaseId { get; set; }
+	public int UserId { get; set; }
+	public string UserName { get; set; }
+	public int SupplierId { get; set; }
+	public string SupplierName { get; set; }
+	public string BillNo { get; set; }
+	public DateOnly BillDate { get; set; }
+	public string Remarks { get; set; }
+	public decimal CashDiscountPercent { get; set; }
+	public decimal CashDiscountAmount { get; set; }
+	public int TotalItems { get; set; }
+	public decimal TotalQuantity { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal DiscountAmount { get; set; }
+	public decimal TotalTaxAmount { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal SubTotal { get; set; }
+	public decimal Total { get; set; }
+}
