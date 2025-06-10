@@ -133,10 +133,14 @@ public partial class PlaceOrderPage
 		StateHasChanged();
 	}
 
-	private async void OnCancelProductManageClick()
+	private async void OnRemoveFromCartProductManageClick()
 	{
+		_selectedProductCart.Quantity = 0;
+		_orderProductCarts.Remove(_orderProductCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
+
 		_dialogVisible = false;
 		await _sfProductCartGrid?.Refresh();
+
 		StateHasChanged();
 	}
 	#endregion

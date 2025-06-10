@@ -9,8 +9,17 @@ public partial class SupplierPage
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private bool IsLoading { get; set; } = true;
+	private string _errorMessage = "";
 
-	private SupplierModel _supplierModel = new() { Status = true };
+	private SupplierModel _supplierModel = new()
+	{
+		Address = "",
+		Email = "",
+		Phone = "",
+		GSTNo = "",
+		Code = "",
+		Status = true
+	};
 
 	private List<SupplierModel> _suppliers;
 	private List<StateModel> _states;
@@ -18,6 +27,7 @@ public partial class SupplierPage
 	private SfGrid<SupplierModel> _sfGrid;
 	private SfToast _sfToast;
 	private SfToast _sfUpdateToast;
+	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -66,15 +76,27 @@ public partial class SupplierPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (string.IsNullOrWhiteSpace(_supplierModel.Name) || string.IsNullOrWhiteSpace(_supplierModel.Code))
+		if (string.IsNullOrWhiteSpace(_supplierModel.Name))
 		{
-			await _sfToast.ShowAsync(new()
-			{
-				Title = "Validation Error",
-				Content = "Name and Code are required.",
-			});
+			_errorMessage = "Supplier name is required.";
+			await _sfErrorToast.ShowAsync();
 			return false;
 		}
+
+		if (string.IsNullOrWhiteSpace(_supplierModel.Code))
+		{
+			_errorMessage = "Supplier code is required.";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
+
+		if (string.IsNullOrWhiteSpace(_supplierModel.GSTNo))
+		{
+			_errorMessage = "GST Number is required.";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
+
 		return true;
 	}
 
@@ -84,7 +106,6 @@ public partial class SupplierPage
 			return;
 
 		await SupplierData.InsertSupplier(_supplierModel);
-
 		await _sfToast.ShowAsync();
 	}
 

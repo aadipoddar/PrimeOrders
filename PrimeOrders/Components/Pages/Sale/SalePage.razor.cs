@@ -344,8 +344,11 @@ public partial class SalePage
 		StateHasChanged();
 	}
 
-	private async void OnCancelProductManageClick()
+	private async void OnRemoveFromCartProductManageClick()
 	{
+		_selectedProductCart.Quantity = 0;
+		_saleProductCart.Remove(_saleProductCart.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
+
 		_dialogVisible = false;
 		await _sfProductCartGrid?.Refresh();
 

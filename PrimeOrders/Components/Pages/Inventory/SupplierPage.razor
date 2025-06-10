@@ -2,6 +2,20 @@
 
 <PageTitle>Suppliers - Prime Orders</PageTitle>
 
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Title="Error"
+		 Content="@_errorMessage"
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
 <SfToast @ref="_sfToast"
 		 ID="toast_success"
 		 Title="Success"
@@ -11,6 +25,10 @@
 		 CssClass="e-toast-success">
 	<ToastPosition X="Right" Y="Top" />
 	<ToastEvents Closed="@ClosedHandler" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
 </SfToast>
 
 <SfToast @ref="_sfUpdateToast"
@@ -21,6 +39,10 @@
 		 ShowCloseButton="true"
 		 CssClass="e-toast-info">
 	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
 </SfToast>
 
 @if (IsLoading)
@@ -173,6 +195,7 @@ else
 		--dotnet-accent: #00A4EF;
 		--dotnet-light: #F7F7F7;
 		--dotnet-dark: #1E1E1E;
+		--dotnet-border: rgba(0, 0, 0, 0.1);
 	}
 
 	/* General Layout */
@@ -401,17 +424,112 @@ else
 		margin-top: 10px;
 	}
 
-	/* Toast styling */
-	.e-toast-container {
+	/* Toast Styling */
+	::deep .e-toast-container {
 		z-index: 1000;
 	}
 
-	.e-toast-success {
-		border-left: 5px solid var(--dotnet-primary);
+		::deep .e-toast-container .e-toast {
+			border: 0;
+			border-radius: 8px;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	/* Success Toast */
+	::deep .e-toast-success {
+		background-color: #ebf7ee;
+		border-left: 4px solid #4CAF50;
+		color: #2E7D32;
 	}
 
-	.e-toast-info {
-		border-left: 5px solid var(--dotnet-accent);
+		::deep .e-toast-success .e-toast-title {
+			color: #2E7D32;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-success .e-toast-content {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success .e-toast-close-icon {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success::before {
+			content: "✓";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Info Toast */
+	::deep .e-toast-info {
+		background-color: #e3f2fd;
+		border-left: 4px solid #2196F3;
+		color: #0d47a1;
+	}
+
+		::deep .e-toast-info .e-toast-title {
+			color: #0d47a1;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-info .e-toast-content {
+			color: #0d47a1;
+		}
+
+		::deep .e-toast-info .e-toast-close-icon {
+			color: #0d47a1;
+		}
+
+		::deep .e-toast-info::before {
+			content: "ℹ";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Error Toast */
+	::deep .e-toast-danger {
+		background-color: #fdeeee;
+		border-left: 4px solid #F44336;
+		color: #C62828;
+	}
+
+		::deep .e-toast-danger .e-toast-title {
+			color: #C62828;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-danger .e-toast-content {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger .e-toast-close-icon {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger::before {
+			content: "⚠";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Toast Animation */
+	::deep .e-toast-container .e-toast {
+		padding: 10px 10px 10px 40px;
+		position: relative;
+		animation-fill-mode: both;
 	}
 
 	/* Animations */

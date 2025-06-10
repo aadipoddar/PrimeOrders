@@ -300,10 +300,14 @@ public partial class PurchasePage
 		StateHasChanged();
 	}
 
-	private async void OnCancelRawMaterialManageClick()
+	private async void OnRemoveFromCartRawMaterialManageClick()
 	{
+		_selectedRawMaterialCart.Quantity = 0;
+		_purchaseRawMaterialCarts.Remove(_purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
+
 		_dialogVisible = false;
 		await _sfRawMaterialCartGrid?.Refresh();
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}

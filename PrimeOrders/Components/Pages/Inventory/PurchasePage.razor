@@ -119,34 +119,6 @@ else
 			</div>
 
 			<div class="purchase-sidebar">
-				<div class="card totals-card">
-					<div class="card-header">
-						<h2>Order Summary</h2>
-					</div>
-					<div class="card-body">
-						<div class="summary-row">
-							<span>Base Total:</span>
-							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row">
-							<span>After Discounts:</span>
-							<span class="amount">@_afterDiscounts.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row">
-							<span>Sub Total:</span>
-							<span class="amount">@_subTotal.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row total-row">
-							<span>Grand Total:</span>
-							<span class="total-amount">@_total.FormatIndianCurrency()</span>
-						</div>
-
-						<SfButton CssClass="save-button" Content="Save Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick">
-							<span class="save-icon">💾</span> Save Purchase
-						</SfButton>
-					</div>
-				</div>
-
 				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
 					<AccordionItems>
 						<AccordionItem Header="Supplier Details" Expanded="true">
@@ -238,6 +210,34 @@ else
 						</AccordionItem>
 					</AccordionItems>
 				</SfAccordion>
+
+				<div class="card totals-card">
+					<div class="card-header">
+						<h2>Order Summary</h2>
+					</div>
+					<div class="card-body">
+						<div class="summary-row">
+							<span>Base Total:</span>
+							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row">
+							<span>After Discounts:</span>
+							<span class="amount">@_afterDiscounts.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row">
+							<span>Sub Total:</span>
+							<span class="amount">@_subTotal.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row total-row">
+							<span>Grand Total:</span>
+							<span class="total-amount">@_total.FormatIndianCurrency()</span>
+						</div>
+
+						<SfButton CssClass="save-button" Content="Save Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick">
+							<span class="save-icon">💾</span> Save Purchase
+						</SfButton>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -292,7 +292,7 @@ else
 					</div>
 				</div>
 
-				<SfTab CssClass="material-tab">
+				<SfTab CssClass="material-tab" SwipeMode="~TabSwipeMode.Touch & ~TabSwipeMode.Mouse">
 					<TabItems>
 						<TabItem>
 							<ChildContent>
@@ -489,7 +489,7 @@ else
 				</div>
 				<div class="footer-buttons">
 					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveRawMaterialManageClick" CssClass="dialog-button" />
-					<SfButton Content="Cancel" OnClick="OnCancelRawMaterialManageClick" CssClass="dialog-button" />
+					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartRawMaterialManageClick" CssClass="dialog-button remove-button" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -989,6 +989,19 @@ else
 	.save-icon {
 		font-size: 18px;
 	}
+
+	/* New Remove Button Styling */
+	.remove-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		transition: all 0.2s ease;
+	}
+
+		.remove-button:hover {
+			background-color: #d32f2f;
+			transform: translateY(-2px);
+		}
 
 	/* Footer */
 	.dashboard-footer {

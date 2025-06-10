@@ -280,7 +280,7 @@ else
 					</div>
 				</div>
 
-				<SfTab CssClass="material-tab">
+				<SfTab CssClass="material-tab" SwipeMode="~TabSwipeMode.Touch & ~TabSwipeMode.Mouse">
 					<TabItems>
 						<TabItem>
 							<ChildContent>
@@ -477,7 +477,7 @@ else
 				</div>
 				<div class="footer-buttons">
 					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" />
-					<SfButton Content="Cancel" OnClick="OnCancelProductManageClick" CssClass="dialog-button" />
+					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartProductManageClick" CssClass="dialog-button remove-button" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -728,6 +728,19 @@ else
 	.save-icon {
 		font-size: 18px;
 	}
+
+	/* New Remove Button Styling */
+	.remove-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		transition: all 0.2s ease;
+	}
+
+		.remove-button:hover {
+			background-color: #d32f2f;
+			transform: translateY(-2px);
+		}
 
 	/* Dialog Styling */
 	.dialog-header {
