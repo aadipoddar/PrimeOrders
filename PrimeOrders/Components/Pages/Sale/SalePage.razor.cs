@@ -110,8 +110,10 @@ public partial class SalePage
 			_sale.OrderId = null;
 			_sale.PartyId = null;
 			_sale.DiscPercent = 0;
-			_saleProductCart.Clear();
 		}
+
+		foreach (var item in _saleProductCart)
+			item.DiscPercent = _sale.DiscPercent;
 
 		UpdateFinancialDetails();
 		StateHasChanged();
