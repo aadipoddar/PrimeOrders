@@ -121,7 +121,35 @@ else
 			<div class="purchase-sidebar">
 				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
 					<AccordionItems>
-						<AccordionItem Header="Supplier Details" Expanded="true">
+						<AccordionItem Header="Bill Details" Expanded="true">
+							<ContentTemplate>
+								<div class="accordion-content form-grid">
+									<div class="form-group">
+										<label>Bill Number</label>
+										<SfTextBox @bind-Value="_purchase.BillNo"
+												   Placeholder="Enter Bill No"
+												   CssClass="form-control" />
+									</div>
+
+									<div class="form-group">
+										<label>Bill Date</label>
+										<SfDatePicker @bind-Value="_purchase.BillDate"
+													  Placeholder="Select Date"
+													  CssClass="form-control" />
+									</div>
+
+									<div class="form-group full-width">
+										<label>Remarks</label>
+										<SfTextBox @bind-Value="_purchase.Remarks"
+												   Placeholder="Add remarks (optional)"
+												   Multiline="true"
+												   CssClass="form-control" />
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+
+						<AccordionItem Header="Supplier Details">
 							<ContentTemplate>
 								<div class="accordion-content">
 									<SfComboBox TValue="int"
@@ -151,34 +179,6 @@ else
 											<span class="detail-label">Address:</span>
 											<span class="detail-value">@_supplier.Address</span>
 										</div>
-									</div>
-								</div>
-							</ContentTemplate>
-						</AccordionItem>
-
-						<AccordionItem Header="Bill Details">
-							<ContentTemplate>
-								<div class="accordion-content form-grid">
-									<div class="form-group">
-										<label>Bill Number</label>
-										<SfTextBox @bind-Value="_purchase.BillNo"
-												   Placeholder="Enter Bill No"
-												   CssClass="form-control" />
-									</div>
-
-									<div class="form-group">
-										<label>Bill Date</label>
-										<SfDatePicker @bind-Value="_purchase.BillDate"
-													  Placeholder="Select Date"
-													  CssClass="form-control" />
-									</div>
-
-									<div class="form-group full-width">
-										<label>Remarks</label>
-										<SfTextBox @bind-Value="_purchase.Remarks"
-												   Placeholder="Add remarks (optional)"
-												   Multiline="true"
-												   CssClass="form-control" />
 									</div>
 								</div>
 							</ContentTemplate>

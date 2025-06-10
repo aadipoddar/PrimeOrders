@@ -21,7 +21,7 @@ public partial class StockAdjustmentPage
 
 	private List<LocationModel> _locations = [];
 	private List<StockDetailModel> _stockDetails = [];
-	private List<RawMaterialRecipeModel> _newStockRawMaterials = [];
+	private readonly List<RawMaterialRecipeModel> _newStockRawMaterials = [];
 	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
 	private List<RawMaterialModel> _rawMaterials = [];
 

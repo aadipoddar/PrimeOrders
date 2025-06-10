@@ -45,6 +45,7 @@
     <DefineTrace>true</DefineTrace>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
   </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
@@ -134,6 +135,7 @@
     <Build Include="StoredProcedures\Reports\Load_StockDetails_By_Date_LocationId.sql" />
     <Build Include="Views\Purchase_Overview.sql" />
     <Build Include="StoredProcedures\Reports\Load_PurchaseDetails_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

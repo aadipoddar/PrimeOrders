@@ -33,7 +33,7 @@ BEGIN
 			CGSTPercent,
 			CGSTAmount,
 			SGSTPercent,
-			SGStAmount,
+			SGSTAmount,
 			IGSTPercent,
 			IGSTAmount,
 			Total,

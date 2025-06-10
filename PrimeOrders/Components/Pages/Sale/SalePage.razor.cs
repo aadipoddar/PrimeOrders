@@ -77,7 +77,6 @@ public partial class SalePage
 
 	private async Task LoadComboBox()
 	{
-		_orders = await OrderData.LoadOrderByCompleted(false);
 		_parties = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 		_paymentModes = PaymentModeData.GetPaymentModes();
 
@@ -97,15 +96,34 @@ public partial class SalePage
 	#endregion
 
 	#region Purchase Details Events
-	private async void OnOrderChanged(ChangeEventArgs<int, OrderModel> args)
+	private async void OnPartyChanged(ChangeEventArgs<int?, LocationModel> args)
 	{
-		if (args.Value > 0)
+		if (args.Value.HasValue && args.Value.Value > 0)
+		{
+			_sale.PartyId = args.Value.Value;
+			_sale.DiscPercent = args.ItemData.Discount;
+			_orders = await OrderData.LoadOrderByLocation(args.Value.Value);
+		}
+
+		else
+		{
+			_sale.OrderId = null;
+			_sale.PartyId = null;
+			_sale.DiscPercent = 0;
+			_saleProductCart.Clear();
+		}
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private async void OnOrderChanged(ChangeEventArgs<int?, OrderModel> args)
+	{
+		if (args.Value.HasValue && args.Value.Value > 0)
 		{
 			_sale.OrderId = args.Value;
 
-			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
 			var orderDetails = await OrderData.LoadOrderDetailByOrder(_sale.OrderId.Value);
-			_sale.PartyId = order.LocationId;
 
 			_saleProductCart.Clear();
 
@@ -134,20 +152,8 @@ public partial class SalePage
 		else
 		{
 			_sale.OrderId = null;
-			_sale.PartyId = null;
 			_saleProductCart.Clear();
 		}
-
-		UpdateFinancialDetails();
-		StateHasChanged();
-	}
-
-	private void OnPartyChanged(ChangeEventArgs<int?, LocationModel> args)
-	{
-		if (args.Value > 0)
-			_sale.PartyId = args.Value;
-		else
-			_sale.PartyId = null;
 
 		UpdateFinancialDetails();
 		StateHasChanged();

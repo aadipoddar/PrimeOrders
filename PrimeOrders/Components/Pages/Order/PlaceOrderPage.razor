@@ -5,7 +5,7 @@
 <SfToast @ref="_sfErrorToast"
 		 ID="toast_error"
 		 Title="Error"
-		 Content="@_errorMessage"
+		 Content="Some Error Message"
 		 Timeout="3000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-danger">
@@ -120,6 +120,21 @@ else
 						<h2>Order Details</h2>
 					</div>
 					<div class="card-body">
+						@if (_user.Admin)
+						{
+							<div class="form-group">
+								<label>Location</label>
+								<SfComboBox TValue="int"
+											TItem="LocationModel"
+											Placeholder="Select a Location"
+											DataSource="_locations"
+											CssClass="filter-control"
+											@bind-Value="_order.LocationId">
+									<ComboBoxFieldSettings Value="Id" Text="Name" />
+								</SfComboBox>
+							</div>
+						}
+
 						<div class="form-group">
 							<label>Order Number</label>
 							<SfTextBox @bind-Value="_order.OrderNo"

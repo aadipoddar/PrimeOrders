@@ -381,7 +381,7 @@ public partial class ProductDetail
 
 	private List<LocationSalesData> GetLocationSalesData()
 	{
-		if (_locations == null || !_locations.Any() || _filteredProductOverviews == null || !_filteredProductOverviews.Any())
+		if (_locations is null || _locations.Count == 0 || _filteredProductOverviews is null || _filteredProductOverviews.Count == 0)
 			return [];
 
 		return [.. _filteredProductOverviews
@@ -398,7 +398,7 @@ public partial class ProductDetail
 
 	private List<TaxComponentData> GetTaxDistributionData()
 	{
-		if (_filteredProductOverviews == null || !_filteredProductOverviews.Any())
+		if (_filteredProductOverviews is null || _filteredProductOverviews.Count == 0)
 			return [];
 
 		decimal totalTax = _filteredProductOverviews.Sum(p => p.TotalTaxAmount);

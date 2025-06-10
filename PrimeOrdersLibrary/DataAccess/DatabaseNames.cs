@@ -39,6 +39,7 @@ public static class StoredProcedureNames
 
 	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
 	public static string LoadOrderByCompleted => "Load_Order_By_Completed";
+	public static string LoadOrderByLocation => "Load_Order_By_Location";
 
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 

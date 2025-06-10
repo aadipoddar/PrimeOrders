@@ -14,15 +14,21 @@ public partial class PlaceOrderPage
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 
-	private string _errorMessage = "";
-
 	private int _selectedProductCategoryId = 0;
 	private int _selectedProductId = 0;
 
 	private OrderProductCartModel _selectedProductCart = new();
 
-	private readonly OrderModel _order = new() { Id = 0, OrderDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Completed = false, Remarks = "" };
+	private readonly OrderModel _order = new()
+	{
+		Id = 0,
+		OrderDate = DateOnly.FromDateTime(DateTime.Now),
+		Remarks = "",
+		Completed = false,
+		Status = true
+	};
 
+	private List<LocationModel> _locations;
 	private List<ProductCategoryModel> _productCategories;
 	private List<ProductModel> _products;
 	private readonly List<OrderProductCartModel> _orderProductCarts = [];
@@ -76,6 +82,9 @@ public partial class PlaceOrderPage
 
 	private async Task LoadComboBox()
 	{
+		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		_order.LocationId = _user.LocationId;
+
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
 		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
 
@@ -148,21 +157,28 @@ public partial class PlaceOrderPage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
-		_order.LocationId = _user.LocationId;
 		_order.UserId = _user.Id;
+
+		if (!_user.Admin)
+			_order.LocationId = _user.LocationId;
+
+		if (_order.LocationId <= 0)
+		{
+			_sfErrorToast.Content = "Please Select a Location for the Order";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
 
 		if (_orderProductCarts.Count == 0)
 		{
-			_errorMessage = "Please add at least one product to the order.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Please add at least one product to the order.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(_order.OrderNo))
 		{
-			_errorMessage = "Order number is required.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Order number is required.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
@@ -178,7 +194,7 @@ public partial class PlaceOrderPage
 		int orderId = await OrderData.InsertOrder(_order);
 		if (orderId <= 0)
 		{
-			_errorMessage = "Failed to save the order. Please try again.";
+			_sfErrorToast.Content = "Failed to save the order. Please try again.";
 			StateHasChanged();
 			await _sfErrorToast.ShowAsync();
 			return;
