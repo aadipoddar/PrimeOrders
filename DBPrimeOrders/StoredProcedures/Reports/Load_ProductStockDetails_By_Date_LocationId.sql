@@ -1,29 +1,29 @@
-﻿CREATE PROCEDURE [dbo].[Load_StockDetails_By_Date_LocationId]
+﻿CREATE PROCEDURE [dbo].[Load_ProductStockDetails_By_Date_LocationId]
 	@FromDate DATETIME,
 	@ToDate DATETIME,
 	@LocationId INT
 AS
 BEGIN
 	SELECT
-        s.RawMaterialId,
-        r.[Name] RawMaterialName,
-        r.Code RawMaterialCode,
-        r.RawMaterialCategoryId,
-        rc.[Name] RawMaterialCategoryName,
+        s.ProductId,
+        p.[Name] AS ProductName,
+        p.Code AS ProductCode,
+        p.ProductCategoryId,
+        pc.[Name] ProductCategoryName,
 
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM Stock
-            WHERE     RawMaterialId = s.RawMaterialId
+            FROM [ProductStock]
+            WHERE     ProductId = s.ProductId
                   AND TransactionDate < @FromDate
                   AND LocationId = @LocationId),
            0) AS OpeningStock,
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM Stock
-            WHERE     RawMaterialId = s.RawMaterialId
+            FROM [ProductStock]
+            WHERE     ProductId = s.ProductId
                   AND TransactionDate >= @FromDate
                   AND TransactionDate < @ToDate
                   AND Type = 'Purchase'
@@ -32,8 +32,8 @@ BEGIN
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM Stock
-            WHERE     RawMaterialId = s.RawMaterialId
+            FROM [ProductStock]
+            WHERE     ProductId = s.ProductId
                   AND TransactionDate >= @FromDate
                   AND TransactionDate < @ToDate
                   AND Type = 'Sale'
@@ -42,8 +42,8 @@ BEGIN
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM Stock
-            WHERE     RawMaterialId = s.RawMaterialId
+            FROM [ProductStock]
+            WHERE     ProductId = s.ProductId
                   AND TransactionDate >= @FromDate
                   AND TransactionDate < @ToDate
                   AND LocationId = @LocationId),
@@ -51,31 +51,31 @@ BEGIN
         (  ISNULL
            (
               (SELECT SUM (Quantity)
-               FROM Stock
-               WHERE     RawMaterialId = s.RawMaterialId
+               FROM [ProductStock]
+               WHERE     ProductId = s.ProductId
                      AND TransactionDate < @FromDate
                      AND LocationId = @LocationId),
               0)
          + ISNULL
            (
               (SELECT SUM (Quantity)
-               FROM Stock
-               WHERE     RawMaterialId = s.RawMaterialId
+               FROM [ProductStock]
+               WHERE     ProductId = s.ProductId
                      AND TransactionDate >= @FromDate
                      AND TransactionDate < @ToDate
                      AND LocationId = @LocationId),
               0)) AS ClosingStock
     FROM
-        Stock s
+        [ProductStock] s
 
     LEFT JOIN
-        dbo.RawMaterial r ON r.Id = s.RawMaterialId
+        dbo.Product p ON p.Id = s.ProductId
     LEFT JOIN
-        dbo.RawMaterialCategory rc ON rc.Id = r.RawMaterialCategoryId
+        dbo.ProductCategory pc ON pc.Id = p.ProductCategoryId
 
-    GROUP BY s.RawMaterialId,
-            r.[Name],
-            r.Code,
-            r.RawMaterialCategoryId,
-            rc.Name;
+    GROUP BY s.ProductId,
+            p.[Name],
+            p.Code,
+            p.ProductCategoryId,
+            pc.Name;
 END

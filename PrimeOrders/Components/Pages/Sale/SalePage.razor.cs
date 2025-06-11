@@ -373,17 +373,17 @@ public partial class SalePage
 	{
 		if (_saleProductCart.Count == 0 || _saleProductCart is null)
 		{
-			_errorMessage = "Please add at least one Product to the Sale.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Please add at least one Product to the Sale.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return false;
 		}
 
 		if (_sale.UserId == 0 || _sale.LocationId == 0)
 		{
-			_errorMessage = "User and Location is required.";
-			StateHasChanged();
+			_sfErrorToast.Content = "User and Location is required.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return false;
 		}
 		return true;
@@ -401,9 +401,9 @@ public partial class SalePage
 		_sale.Id = await SaleData.InsertSale(_sale);
 		if (_sale.Id <= 0)
 		{
-			_errorMessage = "Failed to save Sale.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Failed to save Sale.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return;
 		}
 
@@ -461,14 +461,12 @@ public partial class SalePage
 
 	private async Task InsertStock()
 	{
-		var rawMaterialQuantities = await GetRawMaterialQuantities();
-
-		foreach (var rawMaterial in rawMaterialQuantities)
-			await StockData.InsertStock(new()
+		foreach (var product in _saleProductCart)
+			await StockData.InsertProductStock(new()
 			{
 				Id = 0,
-				RawMaterialId = rawMaterial.ItemId,
-				Quantity = -rawMaterial.Quantity,
+				ProductId = product.ProductId,
+				Quantity = -product.Quantity,
 				BillId = _sale.Id,
 				Type = StockType.Sale.ToString(),
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
@@ -478,48 +476,17 @@ public partial class SalePage
 		if (_sale.PartyId is null || _sale.PartyId <= 0)
 			return;
 
-		foreach (var rawMaterial in rawMaterialQuantities)
-			await StockData.InsertStock(new()
+		foreach (var product in _saleProductCart)
+			await StockData.InsertProductStock(new()
 			{
 				Id = 0,
-				RawMaterialId = rawMaterial.ItemId,
-				Quantity = rawMaterial.Quantity,
+				ProductId = product.ProductId,
+				Quantity = product.Quantity,
 				BillId = _sale.Id,
 				Type = StockType.Purchase.ToString(),
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
 				LocationId = _sale.PartyId.Value
 			});
-	}
-
-	private async Task<List<ItemQantityModel>> GetRawMaterialQuantities()
-	{
-		List<ItemQantityModel> rawMaterialQuantities = [];
-
-		foreach (var item in _saleProductCart)
-		{
-			var itemRecipe = await RecipeData.LoadRecipeByProduct(item.ProductId);
-
-			if (itemRecipe is null)
-				continue;
-
-			var recipeDetails = await RecipeData.LoadRecipeDetailByRecipe(itemRecipe.Id);
-
-			foreach (var recipeDetail in recipeDetails)
-			{
-				var existingItem = rawMaterialQuantities.FirstOrDefault(c => c.ItemId == recipeDetail.RawMaterialId);
-				if (existingItem is not null)
-					existingItem.Quantity += recipeDetail.Quantity * item.Quantity;
-
-				else
-					rawMaterialQuantities.Add(new()
-					{
-						ItemId = recipeDetail.RawMaterialId,
-						Quantity = recipeDetail.Quantity * item.Quantity
-					});
-			}
-		}
-
-		return rawMaterialQuantities;
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>

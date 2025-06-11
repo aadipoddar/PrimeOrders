@@ -21,14 +21,15 @@ public partial class KitchenIssuePage
 	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
 	private List<RawMaterialModel> _rawMaterials = [];
 
-	private readonly List<RawMaterialRecipeModel> _rawMaterialCart = [];
+	private readonly List<ItemRecipeModel> _rawMaterialCart = [];
 
-	private KitchenIssueModel _kitchenIssue = new();
+	private readonly KitchenIssueModel _kitchenIssue = new();
 
-	private SfGrid<RawMaterialRecipeModel> _sfGrid;
+	private SfGrid<ItemRecipeModel> _sfGrid;
 	private SfToast _sfSuccessToast;
 	private SfToast _sfErrorToast;
 
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		_isLoading = true;
@@ -70,7 +71,9 @@ public partial class KitchenIssuePage
 		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
 		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
 	}
+	#endregion
 
+	#region Raw Material
 	private async void RawMaterialCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, RawMaterialCategoryModel> args)
 	{
 		_selectedRawMaterialCategoryId = args.Value;
@@ -80,16 +83,16 @@ public partial class KitchenIssuePage
 
 	private async Task OnAddButtonClick()
 	{
-		var existingRecipe = _rawMaterialCart.FirstOrDefault(r => r.RawMaterialId == _selectedRawMaterialId && r.RawMaterialCategoryId == _selectedRawMaterialCategoryId);
+		var existingRecipe = _rawMaterialCart.FirstOrDefault(r => r.ItemId == _selectedRawMaterialId && r.ItemCategoryId == _selectedRawMaterialCategoryId);
 		if (existingRecipe is not null)
 			existingRecipe.Quantity += (decimal)_selectedRawMaterialQuantity;
 
 		else
 			_rawMaterialCart.Add(new()
 			{
-				RawMaterialCategoryId = _selectedRawMaterialCategoryId,
-				RawMaterialId = _selectedRawMaterialId,
-				RawMaterialName = (await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, _selectedRawMaterialId)).Name,
+				ItemCategoryId = _selectedRawMaterialCategoryId,
+				ItemId = _selectedRawMaterialId,
+				ItemName = (await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, _selectedRawMaterialId)).Name,
 				Quantity = (decimal)_selectedRawMaterialQuantity,
 			});
 
@@ -97,7 +100,7 @@ public partial class KitchenIssuePage
 		StateHasChanged();
 	}
 
-	public void RowSelectHandler(RowSelectEventArgs<RawMaterialRecipeModel> args)
+	public void RowSelectHandler(RowSelectEventArgs<ItemRecipeModel> args)
 	{
 		if (args.Data is not null)
 			_rawMaterialCart.Remove(args.Data);
@@ -105,7 +108,9 @@ public partial class KitchenIssuePage
 		_sfGrid.Refresh();
 		StateHasChanged();
 	}
+	#endregion
 
+	#region Saving
 	private async Task<bool> ValidateForm()
 	{
 		_kitchenIssue.UserId = _user.Id;
@@ -158,7 +163,7 @@ public partial class KitchenIssuePage
 			{
 				Id = 0,
 				KitchenIssueId = _kitchenIssue.Id,
-				RawMaterialId = item.RawMaterialId,
+				RawMaterialId = item.ItemId,
 				Quantity = item.Quantity,
 				Status = true
 			});
@@ -167,10 +172,10 @@ public partial class KitchenIssuePage
 	private async Task InsertStock()
 	{
 		foreach (var item in _rawMaterialCart)
-			await StockData.InsertStock(new()
+			await StockData.InsertRawMaterialStock(new()
 			{
 				Id = 0,
-				RawMaterialId = item.RawMaterialId,
+				RawMaterialId = item.ItemId,
 				Quantity = -item.Quantity,
 				BillId = _kitchenIssue.Id,
 				TransactionDate = DateOnly.FromDateTime(DateTime.Now),
@@ -180,8 +185,9 @@ public partial class KitchenIssuePage
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo("/Inventory/Purchase", forceLoad: true);
+		NavManager.NavigateTo("/Inventory-Dashboard", forceLoad: true);
 
 	private void NavigateTo(string route) =>
 		NavManager.NavigateTo(route);
+	#endregion
 }

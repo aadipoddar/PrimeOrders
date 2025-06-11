@@ -18,9 +18,9 @@ public partial class StockReport
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
 	private List<LocationModel> _locations = [];
-	private List<StockDetailModel> _stockDetails = [];
+	private List<RawMaterialStockDetailModel> _stockDetails = [];
 
-	private SfGrid<StockDetailModel> _sfGrid;
+	private SfGrid<RawMaterialStockDetailModel> _sfGrid;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -64,7 +64,7 @@ public partial class StockReport
 	{
 		int locationId = _user?.LocationId == 1 ? _selectedLocationId : _user.LocationId;
 
-		_stockDetails = await StockData.LoadStockDetailsByDateLocationId(
+		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(
 			_startDate.ToDateTime(new TimeOnly(0, 0)),
 			_endDate.ToDateTime(new TimeOnly(23, 59)),
 			locationId);
@@ -132,38 +132,38 @@ public partial class StockReport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-			nameof(StockDetailModel.RawMaterialCode),
-			nameof(StockDetailModel.RawMaterialName),
-			nameof(StockDetailModel.RawMaterialCategoryName),
-			nameof(StockDetailModel.OpeningStock),
-			nameof(StockDetailModel.PurchaseStock),
-			nameof(StockDetailModel.SaleStock),
-			nameof(StockDetailModel.MonthlyStock),
-			nameof(StockDetailModel.ClosingStock)
+			nameof(RawMaterialStockDetailModel.RawMaterialCode),
+			nameof(RawMaterialStockDetailModel.RawMaterialName),
+			nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
+			nameof(RawMaterialStockDetailModel.OpeningStock),
+			nameof(RawMaterialStockDetailModel.PurchaseStock),
+			nameof(RawMaterialStockDetailModel.SaleStock),
+			nameof(RawMaterialStockDetailModel.MonthlyStock),
+			nameof(RawMaterialStockDetailModel.ClosingStock)
 		];
 
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
-			[nameof(StockDetailModel.RawMaterialCode)] = new()
+			[nameof(RawMaterialStockDetailModel.RawMaterialCode)] = new()
 			{
 				DisplayName = "Item Code",
 				Width = 12,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(StockDetailModel.RawMaterialName)] = new()
+			[nameof(RawMaterialStockDetailModel.RawMaterialName)] = new()
 			{
 				DisplayName = "Item Name",
 				Width = 30,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(StockDetailModel.RawMaterialCategoryName)] = new()
+			[nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)] = new()
 			{
 				DisplayName = "Category",
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(StockDetailModel.OpeningStock)] = new()
+			[nameof(RawMaterialStockDetailModel.OpeningStock)] = new()
 			{
 				DisplayName = "Opening Stock",
 				Format = "#,##0.00",
@@ -181,7 +181,7 @@ public partial class StockReport
 					};
 				}
 			},
-			[nameof(StockDetailModel.PurchaseStock)] = new()
+			[nameof(RawMaterialStockDetailModel.PurchaseStock)] = new()
 			{
 				DisplayName = "Purchases",
 				Format = "#,##0.00",
@@ -199,7 +199,7 @@ public partial class StockReport
 					};
 				}
 			},
-			[nameof(StockDetailModel.SaleStock)] = new()
+			[nameof(RawMaterialStockDetailModel.SaleStock)] = new()
 			{
 				DisplayName = "Sales",
 				Format = "#,##0.00",
@@ -217,7 +217,7 @@ public partial class StockReport
 					};
 				}
 			},
-			[nameof(StockDetailModel.MonthlyStock)] = new()
+			[nameof(RawMaterialStockDetailModel.MonthlyStock)] = new()
 			{
 				DisplayName = "Monthly Stock",
 				Format = "#,##0.00",
@@ -225,7 +225,7 @@ public partial class StockReport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(StockDetailModel.ClosingStock)] = new()
+			[nameof(RawMaterialStockDetailModel.ClosingStock)] = new()
 			{
 				DisplayName = "Closing Stock",
 				Format = "#,##0.00",

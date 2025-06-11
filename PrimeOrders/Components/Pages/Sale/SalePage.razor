@@ -118,58 +118,6 @@ else
 			</div>
 
 			<div class="purchase-sidebar">
-				<div class="card totals-card">
-					<div class="card-header">
-						<h2>Sale Summary</h2>
-					</div>
-					<div class="card-body">
-						<div class="form-group">
-							<label>Bill Number</label>
-							<SfTextBox Value="@_sale.BillNo"
-									   Placeholder="Bill Number"
-									   Readonly=true
-									   CssClass="form-control" />
-						</div>
-
-						<div class="summary-row">
-							<span>Base Total:</span>
-							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row">
-							<span>Sub Total:</span>
-							<span class="amount">@_subTotal.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row total-row">
-							<span>Grand Total:</span>
-							<span class="total-amount">@_total.FormatIndianCurrency()</span>
-						</div>
-
-						<div class="form-group">
-							<label>Remarks</label>
-							<SfTextBox @bind-Value="_sale.Remarks"
-									   Placeholder="Add remarks (optional)"
-									   Multiline="true"
-									   CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>Payment Mode</label>
-							<SfComboBox TValue="int"
-										TItem="PaymentModeModel"
-										Placeholder="Select a Payment Mode"
-										DataSource="@_paymentModes"
-										@bind-Value="_selectedPaymentModeId"
-										CssClass="form-control">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
-
-						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick">
-							<span class="save-icon">💾</span> Complete Sale
-						</SfButton>
-					</div>
-				</div>
-
 				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
 					<AccordionItems>
 						<AccordionItem Header="Discount Details" Expanded="true">
@@ -234,6 +182,58 @@ else
 						</AccordionItem>
 					</AccordionItems>
 				</SfAccordion>
+
+				<div class="card totals-card">
+					<div class="card-header">
+						<h2>Sale Summary</h2>
+					</div>
+					<div class="card-body">
+						<div class="form-group">
+							<label>Bill Number</label>
+							<SfTextBox Value="@_sale.BillNo"
+									   Placeholder="Bill Number"
+									   Readonly=true
+									   CssClass="form-control" />
+						</div>
+
+						<div class="summary-row">
+							<span>Base Total:</span>
+							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row">
+							<span>Sub Total:</span>
+							<span class="amount">@_subTotal.FormatIndianCurrency()</span>
+						</div>
+						<div class="summary-row total-row">
+							<span>Grand Total:</span>
+							<span class="total-amount">@_total.FormatIndianCurrency()</span>
+						</div>
+
+						<div class="form-group">
+							<label>Remarks</label>
+							<SfTextBox @bind-Value="_sale.Remarks"
+									   Placeholder="Add remarks (optional)"
+									   Multiline="true"
+									   CssClass="form-control" />
+						</div>
+
+						<div class="form-group">
+							<label>Payment Mode</label>
+							<SfComboBox TValue="int"
+										TItem="PaymentModeModel"
+										Placeholder="Select a Payment Mode"
+										DataSource="@_paymentModes"
+										@bind-Value="_selectedPaymentModeId"
+										CssClass="form-control">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+
+						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick">
+							<span class="save-icon">💾</span> Complete Sale
+						</SfButton>
+					</div>
+				</div>
 			</div>
 		</div>
 

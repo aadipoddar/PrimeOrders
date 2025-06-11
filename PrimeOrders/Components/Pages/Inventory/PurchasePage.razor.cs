@@ -379,7 +379,7 @@ public partial class PurchasePage
 			var existingPurchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(PurchaseId.Value);
 
 			foreach (var item in existingPurchaseDetails)
-				await StockData.InsertStock(new()
+				await StockData.InsertRawMaterialStock(new()
 				{
 					Id = 0,
 					RawMaterialId = item.RawMaterialId,
@@ -392,7 +392,7 @@ public partial class PurchasePage
 		}
 
 		foreach (var item in _purchaseRawMaterialCarts)
-			await StockData.InsertStock(new()
+			await StockData.InsertRawMaterialStock(new()
 			{
 				Id = 0,
 				RawMaterialId = item.RawMaterialId,

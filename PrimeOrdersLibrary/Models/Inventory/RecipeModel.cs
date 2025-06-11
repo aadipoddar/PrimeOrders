@@ -16,10 +16,10 @@ public class RecipeDetailModel
 	public bool Status { get; set; }
 }
 
-public class RawMaterialRecipeModel
+public class ItemRecipeModel
 {
-	public int RawMaterialId { get; set; }
-	public int RawMaterialCategoryId { get; set; }
-	public string RawMaterialName { get; set; }
+	public int ItemId { get; set; }
+	public int ItemCategoryId { get; set; }
+	public string ItemName { get; set; }
 	public decimal Quantity { get; set; }
 }

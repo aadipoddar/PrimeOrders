@@ -139,12 +139,12 @@ else
 							@ref="_sfGrid"
 							Height="350px"
 							CssClass="cart-grid">
-						<GridEvents RowSelected="RowSelectHandler" TValue="RawMaterialRecipeModel" />
+						<GridEvents RowSelected="RowSelectHandler" TValue="ItemRecipeModel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialCategoryId)" Visible=false />
-							<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialId)" Visible=false />
-							<GridColumn Field="@nameof(RawMaterialRecipeModel.RawMaterialName)" HeaderText="Raw Material" Width="180" />
-							<GridColumn Field="@nameof(RawMaterialRecipeModel.Quantity)" HeaderText="Quantity" Width="120" Format="N3" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(ItemRecipeModel.ItemCategoryId)" Visible=false />
+							<GridColumn Field="@nameof(ItemRecipeModel.ItemId)" Visible=false />
+							<GridColumn Field="@nameof(ItemRecipeModel.ItemName)" HeaderText="Raw Material" Width="180" />
+							<GridColumn Field="@nameof(ItemRecipeModel.Quantity)" HeaderText="Quantity" Width="120" Format="N3" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
 

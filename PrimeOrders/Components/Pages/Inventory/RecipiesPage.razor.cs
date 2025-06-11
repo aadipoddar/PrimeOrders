@@ -23,11 +23,11 @@ public partial class RecipiesPage
 	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
 	private List<RawMaterialModel> _rawMaterials = [];
 
-	private readonly List<RawMaterialRecipeModel> _rawMaterialRecipies = [];
+	private readonly List<ItemRecipeModel> _rawMaterialRecipies = [];
 
 	private RecipeModel _recipe;
 
-	private SfGrid<RawMaterialRecipeModel> _sfGrid;
+	private SfGrid<ItemRecipeModel> _sfGrid;
 	private SfToast _sfToast;
 	private SfToast _sfUpdateToast;
 
@@ -123,11 +123,11 @@ public partial class RecipiesPage
 		{
 			var rawMaterial = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, detail.RawMaterialId);
 
-			_rawMaterialRecipies.Add(new RawMaterialRecipeModel()
+			_rawMaterialRecipies.Add(new ItemRecipeModel()
 			{
-				RawMaterialId = detail.RawMaterialId,
-				RawMaterialName = rawMaterial.Name,
-				RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
+				ItemId = detail.RawMaterialId,
+				ItemName = rawMaterial.Name,
+				ItemCategoryId = rawMaterial.RawMaterialCategoryId,
 				Quantity = detail.Quantity
 			});
 		}
@@ -139,16 +139,16 @@ public partial class RecipiesPage
 
 	private async void OnAddButtonClick()
 	{
-		var existingRecipe = _rawMaterialRecipies.FirstOrDefault(r => r.RawMaterialId == _selectedRawMaterialId && r.RawMaterialCategoryId == _selectedRawMaterialCategoryId);
+		var existingRecipe = _rawMaterialRecipies.FirstOrDefault(r => r.ItemId == _selectedRawMaterialId && r.ItemCategoryId == _selectedRawMaterialCategoryId);
 		if (existingRecipe is not null)
 			existingRecipe.Quantity += (decimal)_selectedRawMaterialQuantity;
 
 		else
 			_rawMaterialRecipies.Add(new()
 			{
-				RawMaterialCategoryId = _selectedRawMaterialCategoryId,
-				RawMaterialId = _selectedRawMaterialId,
-				RawMaterialName = (await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, _selectedRawMaterialId)).Name,
+				ItemCategoryId = _selectedRawMaterialCategoryId,
+				ItemId = _selectedRawMaterialId,
+				ItemName = (await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, _selectedRawMaterialId)).Name,
 				Quantity = (decimal)_selectedRawMaterialQuantity,
 			});
 
@@ -156,7 +156,7 @@ public partial class RecipiesPage
 		StateHasChanged();
 	}
 
-	public void RowSelectHandler(RowSelectEventArgs<RawMaterialRecipeModel> args)
+	public void RowSelectHandler(RowSelectEventArgs<ItemRecipeModel> args)
 	{
 		if (args.Data is not null)
 			_rawMaterialRecipies.Remove(args.Data);
@@ -201,7 +201,7 @@ public partial class RecipiesPage
 			{
 				Id = 0,
 				RecipeId = recipeId,
-				RawMaterialId = rawMaterialRecipe.RawMaterialId,
+				RawMaterialId = rawMaterialRecipe.ItemId,
 				Quantity = rawMaterialRecipe.Quantity,
 				Status = true,
 			});

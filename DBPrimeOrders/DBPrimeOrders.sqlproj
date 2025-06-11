@@ -126,13 +126,13 @@
     <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Passcode.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleDetail_By_Sale.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Completed.sql" />
-    <Build Include="Tables\Inventory\Stock.sql" />
-    <Build Include="StoredProcedures\Insert\Inventory\Insert_Stock.sql" />
+    <Build Include="Tables\Inventory\ProductStock.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_ProductStock.sql" />
     <Build Include="StoredProcedures\Reports\Load_SaleDetails_By_Date_LocationId.sql" />
     <Build Include="Views\Sale_Overview.sql" />
     <Build Include="Views\Product_Overview.sql" />
     <Build Include="StoredProcedures\Reports\Load_ProductDetails_By_Date_LocationId.sql" />
-    <Build Include="StoredProcedures\Reports\Load_StockDetails_By_Date_LocationId.sql" />
+    <Build Include="StoredProcedures\Reports\Load_RawMaterialStockDetails_By_Date_LocationId.sql" />
     <Build Include="Views\Purchase_Overview.sql" />
     <Build Include="StoredProcedures\Reports\Load_PurchaseDetails_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Location.sql" />
@@ -143,6 +143,13 @@
     <Build Include="Tables\Inventory\KitchenIssueDetail.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenIssue.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenIssueDetail.sql" />
+    <Build Include="Tables\Inventory\RawMaterialStock.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_RawMaterialStock.sql" />
+    <Build Include="StoredProcedures\Reports\Load_ProductStockDetails_By_Date_LocationId.sql" />
+    <Build Include="Tables\Inventory\KitchenProduction.sql" />
+    <Build Include="Tables\Inventory\KitchenProductionDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenProduction.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenProductionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[Insert_Stock]
+﻿CREATE PROCEDURE [dbo].[Insert_ProductStock]
 	@Id INT,
-	@RawMaterialId INT, 
+	@ProductId INT, 
 	@Quantity DECIMAL(7, 3), 
 	@Type VARCHAR(20), 
 	@BillId INT, 
@@ -10,9 +10,9 @@ AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Stock] 
+		INSERT INTO [dbo].[ProductStock] 
 		(
-			[RawMaterialId], 
+			[ProductId], 
 			[Quantity], 
 			[Type], 
 			[BillId], 
@@ -21,7 +21,7 @@ BEGIN
 		)
 		VALUES
 		(
-			@RawMaterialId, 
+			@ProductId, 
 			@Quantity, 
 			@Type, 
 			@BillId, 
@@ -32,9 +32,9 @@ BEGIN
 	ELSE
 
 	BEGIN
-		UPDATE [dbo].[Stock]
+		UPDATE [dbo].[ProductStock]
 		SET 
-			[RawMaterialId] = @RawMaterialId, 
+			[ProductId] = @ProductId, 
 			[Quantity] = @Quantity, 
 			[Type] = @Type, 
 			[BillId] = @BillId, 

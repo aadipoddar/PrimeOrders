@@ -1,12 +1,10 @@
-
-
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
 namespace PrimeOrders.Components.Pages.Inventory;
 
-public partial class StockAdjustmentPage
+public partial class ProductStockAdjustmentPage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }
@@ -15,21 +13,22 @@ public partial class StockAdjustmentPage
 	private bool _isLoading = true;
 
 	private int _selectedLocationId = 1;
-	private int _selectedRawMaterialCategoryId = 0;
-	private int _selectedRawMaterialId = 0;
-	private double _selectedRawMaterialQuantity = 1;
+	private int _selectedProductCategoryId = 0;
+	private int _selectedProductId = 0;
+	private double _selectedProductQuantity = 1;
 
 	private List<LocationModel> _locations = [];
-	private List<StockDetailModel> _stockDetails = [];
-	private readonly List<RawMaterialRecipeModel> _newStockRawMaterials = [];
-	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
-	private List<RawMaterialModel> _rawMaterials = [];
+	private List<ProductStockDetailModel> _stockDetails = [];
+	private readonly List<ItemRecipeModel> _newStockProducts = [];
+	private List<ProductCategoryModel> _productCategories = [];
+	private List<ProductModel> _products = [];
 
-	private SfGrid<StockDetailModel> _sfStockGrid;
-	private SfGrid<RawMaterialRecipeModel> _sfNewStockGrid;
+	private SfGrid<ProductStockDetailModel> _sfStockGrid;
+	private SfGrid<ItemRecipeModel> _sfNewStockGrid;
 	private SfToast _sfSuccessToast;
 	private SfToast _sfErrorToast;
 
+	#region LoadData
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		_isLoading = true;
@@ -66,11 +65,11 @@ public partial class StockAdjustmentPage
 		if (_user.LocationId != 1)
 			_selectedLocationId = _user.LocationId;
 
-		_rawMaterialCategories = await CommonData.LoadTableData<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
-		_selectedRawMaterialCategoryId = _rawMaterialCategories.Count > 0 ? _rawMaterialCategories[0].Id : 0;
+		_productCategories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.RawMaterialCategory);
+		_selectedProductCategoryId = _productCategories.Count > 0 ? _productCategories[0].Id : 0;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
-		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
+		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_selectedProductId = _products.Count > 0 ? _products[0].Id : 0;
 
 		StateHasChanged();
 		await LoadStockDetails();
@@ -86,7 +85,7 @@ public partial class StockAdjustmentPage
 	{
 		int locationId = _user?.LocationId == 1 ? _selectedLocationId : _user.LocationId;
 
-		_stockDetails = await StockData.LoadStockDetailsByDateLocationId(
+		_stockDetails = await StockData.LoadProductStockDetailsByDateLocationId(
 			DateTime.Now.AddDays(-1),
 			DateTime.Now.AddDays(1),
 			locationId);
@@ -94,57 +93,61 @@ public partial class StockAdjustmentPage
 		await _sfStockGrid?.Refresh();
 		StateHasChanged();
 	}
+	#endregion
 
-	private async void RawMaterialCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, RawMaterialCategoryModel> args)
+	#region Product
+	private async void ProductCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
-		_selectedRawMaterialCategoryId = args.Value;
-		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
-		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
+		_selectedProductCategoryId = args.Value;
+		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_selectedProductId = _products.Count > 0 ? _products[0].Id : 0;
 		StateHasChanged();
 	}
 
 	private async void OnAddButtonClick()
 	{
-		var existingRawMaterial = _newStockRawMaterials.FirstOrDefault(r => r.RawMaterialId == _selectedRawMaterialId && r.RawMaterialCategoryId == _selectedRawMaterialCategoryId);
-		if (existingRawMaterial is not null)
-			existingRawMaterial.Quantity += (decimal)_selectedRawMaterialQuantity;
+		var existingProduct = _newStockProducts.FirstOrDefault(r => r.ItemId == _selectedProductId && r.ItemCategoryId == _selectedProductCategoryId);
+		if (existingProduct is not null)
+			existingProduct.Quantity += (decimal)_selectedProductQuantity;
 		else
-			_newStockRawMaterials.Add(new RawMaterialRecipeModel
+			_newStockProducts.Add(new ItemRecipeModel
 			{
-				RawMaterialId = _selectedRawMaterialId,
-				RawMaterialName = _rawMaterials.FirstOrDefault(r => r.Id == _selectedRawMaterialId)?.Name ?? "Unknown",
-				RawMaterialCategoryId = _selectedRawMaterialCategoryId,
-				Quantity = (decimal)_selectedRawMaterialQuantity
+				ItemId = _selectedProductId,
+				ItemName = _products.FirstOrDefault(r => r.Id == _selectedProductId)?.Name ?? "Unknown",
+				ItemCategoryId = _selectedProductCategoryId,
+				Quantity = (decimal)_selectedProductQuantity
 			});
 
 		await _sfNewStockGrid.Refresh();
 		StateHasChanged();
 	}
 
-	public void RowSelectHandler(RowSelectEventArgs<RawMaterialRecipeModel> args)
+	public void RowSelectHandler(RowSelectEventArgs<ItemRecipeModel> args)
 	{
 		if (args.Data is not null)
-			_newStockRawMaterials.Remove(args.Data);
+			_newStockProducts.Remove(args.Data);
 
 		_sfNewStockGrid.Refresh();
 		StateHasChanged();
 	}
+	#endregion
 
+	#region Saving
 	private async void OnSaveButtonClick()
 	{
 		await _sfNewStockGrid.Refresh();
 
-		if (_newStockRawMaterials.Count == 0)
+		if (_newStockProducts.Count == 0)
 		{
 			await _sfErrorToast.ShowAsync();
 			return;
 		}
 
-		foreach (var item in _newStockRawMaterials)
+		foreach (var item in _newStockProducts)
 		{
 			decimal quantity = 0;
 
-			var existingStock = _stockDetails.FirstOrDefault(s => s.RawMaterialId == item.RawMaterialId);
+			var existingStock = _stockDetails.FirstOrDefault(s => s.ProductId == item.ItemId);
 
 			if (existingStock is null)
 				quantity = item.Quantity;
@@ -152,10 +155,10 @@ public partial class StockAdjustmentPage
 			else
 				quantity = item.Quantity - existingStock.ClosingStock;
 
-			await StockData.InsertStock(new()
+			await StockData.InsertProductStock(new()
 			{
 				Id = 0,
-				RawMaterialId = item.RawMaterialId,
+				ProductId = item.ItemId,
 				BillId = 0,
 				LocationId = _selectedLocationId,
 				Quantity = quantity,
@@ -172,4 +175,5 @@ public partial class StockAdjustmentPage
 
 	private void NavigateTo(string route) =>
 		NavManager.NavigateTo(route);
+	#endregion
 }

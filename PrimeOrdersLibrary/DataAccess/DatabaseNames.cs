@@ -15,7 +15,8 @@ public static class TableNames
 	public static string Supplier => "Supplier";
 	public static string Purchase => "Purchase";
 	public static string PurchaseDetail => "PurchaseDetail";
-	public static string Stock => "Stock";
+	public static string ProductStock => "ProductStock";
+	public static string RawMaterialStock => "RawMaterialStock";
 	public static string Order => "Order";
 	public static string OrderDetail => "OrderDetail";
 	public static string Sale => "Sale";
@@ -50,7 +51,8 @@ public static class StoredProcedureNames
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
-	public static string LoadStockDetailsByDateLocationId => "Load_StockDetails_By_Date_LocationId";
+	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
+	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
 	public static string LoadPurchaseDetailsByDate => "Load_PurchaseDetails_By_Date";
 
 	public static string InsertUser => "Insert_User";
@@ -72,7 +74,8 @@ public static class StoredProcedureNames
 	public static string InsertPurchase => "Insert_Purchase";
 	public static string InsertPurchaseDetail => "Insert_PurchaseDetail";
 
-	public static string InsertStock => "Insert_Stock";
+	public static string InsertProductStock => "Insert_ProductStock";
+	public static string InsertRawMaterialStock => "Insert_RawMaterialStock";
 
 	public static string InsertOrder => "Insert_Order";
 	public static string InsertOrderDetail => "Insert_OrderDetail";
@@ -82,6 +85,8 @@ public static class StoredProcedureNames
 
 	public static string InsertKitchenIssue => "Insert_KitchenIssue";
 	public static string InsertKitchenIssueDetail => "Insert_KitchenIssueDetail";
+	public static string InsertKitchenProduction => "Insert_KitchenProduction";
+	public static string InsertKitchenProductionDetail => "Insert_KitchenProductionDetail";
 }
 
 public static class ViewNames
