@@ -318,15 +318,16 @@ public partial class PurchasePage
 	{
 		if (_purchaseRawMaterialCarts.Count == 0 || _purchaseRawMaterialCarts is null)
 		{
-			_errorMessage = "Please add at least one raw material to the purchase.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Please add at least one raw material to the purchase.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return false;
 		}
 
 		if (_purchase.SupplierId == 0)
 		{
-			_errorMessage = "Please select a supplier.";
+			_sfErrorToast.Content = "Please select a supplier.";
+			await _sfErrorToast.ShowAsync();
 			StateHasChanged();
 			await _sfErrorToast.ShowAsync();
 			return false;
@@ -334,16 +335,16 @@ public partial class PurchasePage
 
 		if (string.IsNullOrWhiteSpace(_purchase.BillNo))
 		{
-			_errorMessage = "Bill No is required.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Bill No is required.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return false;
 		}
 		if (_purchase.UserId == 0)
 		{
-			_errorMessage = "User is required.";
-			StateHasChanged();
+			_sfErrorToast.Content = "User is required.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return false;
 		}
 		return true;
@@ -359,9 +360,9 @@ public partial class PurchasePage
 		_purchase.Id = await PurchaseData.InsertPurchase(_purchase);
 		if (_purchase.Id <= 0)
 		{
-			_errorMessage = "Failed to save purchase.";
-			StateHasChanged();
+			_sfErrorToast.Content = "Failed to save purchase.";
 			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
 			return;
 		}
 

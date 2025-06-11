@@ -20,6 +20,9 @@ public static class TableNames
 	public static string OrderDetail => "OrderDetail";
 	public static string Sale => "Sale";
 	public static string SaleDetail => "SaleDetail";
+	public static string Kitchen => "Kitchen";
+	public static string KitchenIssue => "KitchenIssue";
+	public static string KitchenIssueDetail => "KitchenIssueDetail";
 }
 
 public static class StoredProcedureNames
@@ -76,6 +79,9 @@ public static class StoredProcedureNames
 
 	public static string InsertSale => "Insert_Sale";
 	public static string InsertSaleDetail => "Insert_SaleDetail";
+
+	public static string InsertKitchenIssue => "Insert_KitchenIssue";
+	public static string InsertKitchenIssueDetail => "Insert_KitchenIssueDetail";
 }
 
 public static class ViewNames

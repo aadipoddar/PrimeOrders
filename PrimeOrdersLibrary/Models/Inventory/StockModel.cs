@@ -18,6 +18,7 @@ public enum StockType
 	PurchaseUpdate,
 	Sale,
 	Adjustment,
+	KitchenIssue,
 }
 
 public class ItemQantityModel

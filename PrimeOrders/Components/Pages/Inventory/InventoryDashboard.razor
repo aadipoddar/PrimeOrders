@@ -67,6 +67,12 @@ else
 				<h3>Stock Adjustment</h3>
 				<p>Adjust and manage stock levels</p>
 			</div>
+
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Kitchen-Issue")'>
+				<div class="card-icon kitchen-icon">👨‍🍳</div>
+				<h3>Kitchen Issue</h3>
+				<p>Manage items issued to kitchen</p>
+			</div>
 		</div>
 
 		<div class="dashboard-footer">
@@ -207,6 +213,11 @@ else
 	.stock-icon {
 		background-color: rgba(255, 153, 0, 0.1);
 		color: #FF9900;
+	}
+
+	.kitchen-icon {
+		background-color: rgba(220, 53, 69, 0.1);
+		color: #DC3545;
 	}
 
 	/* Back button styles */

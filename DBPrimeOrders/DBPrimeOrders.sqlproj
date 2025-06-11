@@ -138,6 +138,11 @@
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_LastOrder_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_LastSale_By_Location.sql" />
+    <Build Include="Tables\Inventory\Kitchen.sql" />
+    <Build Include="Tables\Inventory\KitchenIssue.sql" />
+    <Build Include="Tables\Inventory\KitchenIssueDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenIssue.sql" />
+    <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenIssueDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
