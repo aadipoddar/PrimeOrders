@@ -5,7 +5,7 @@ using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Order;
 
-public partial class PlaceOrderPage
+public partial class OrderPage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }
