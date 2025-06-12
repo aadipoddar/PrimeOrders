@@ -60,6 +60,7 @@ else
 									TItem="LocationModel"
 									Placeholder="Select a Location"
 									DataSource="_locations"
+									Value="_selectedLocationId"
 									CssClass="filter-control">
 							<ComboBoxEvents TItem="LocationModel" TValue="int" ValueChange="OnLocationChanged" />
 							<ComboBoxFieldSettings Value="Id" Text="Name" />
@@ -123,9 +124,8 @@ else
 						AllowPdfExport="true">
 					<GridPageSettings PageSize="10"></GridPageSettings>
 					<GridColumns>
-						<GridColumn Field="@nameof(SaleOverviewModel.SaleId)" HeaderText="Sale ID" Width="90" TextAlign="TextAlign.Center" />
+						<GridColumn Field="@nameof(SaleOverviewModel.BillNo)" HeaderText="Bill No" Width="90" TextAlign="TextAlign.Center" />
 						<GridColumn Field="@nameof(SaleOverviewModel.SaleDateTime)" HeaderText="Date & Time" Width="160" Format="dd/MM/yyyy hh:mm tt" />
-						<GridColumn Field="@nameof(SaleOverviewModel.LocationName)" HeaderText="Location" Width="150" />
 						<GridColumn Field="@nameof(SaleOverviewModel.UserName)" HeaderText="Cashier" Width="130" />
 						<GridColumn Field="@nameof(SaleOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />

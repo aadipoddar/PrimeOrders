@@ -45,7 +45,7 @@ internal static class PrintBill
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, sale.UserId);
 
 		content.AppendLine("<div class='bill-details'>");
-		content.AppendLine($"<div class='detail-row'><span class='detail-label'>Bill No:</span> <span class='detail-value'>{sale.Id}</span></div>");
+		content.AppendLine($"<div class='detail-row'><span class='detail-label'>Bill No:</span> <span class='detail-value'>{sale.BillNo}</span></div>");
 		content.AppendLine($"<div class='detail-row'><span class='detail-label'>Date:</span> <span class='detail-value'>{sale.SaleDateTime:dd/MM/yy HH:mm}</span></div>");
 		content.AppendLine($"<div class='detail-row'><span class='detail-label'>User:</span> <span class='detail-value'>{user.Name}</span></div>");
 

@@ -6,7 +6,9 @@
     [ProductCategoryId] INT NOT NULL, 
     [Rate] MONEY NOT NULL, 
     [TaxId] INT NOT NULL, 
+    [LocationId] INT NOT NULL DEFAULT 1, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Item_ToItemCategory] FOREIGN KEY ([ProductCategoryId]) REFERENCES [ProductCategory](Id), 
-    CONSTRAINT [FK_Item_ToTax] FOREIGN KEY (TaxId) REFERENCES [Tax](Id)
+    CONSTRAINT [FK_Item_ToTax] FOREIGN KEY (TaxId) REFERENCES [Tax](Id), 
+    CONSTRAINT [FK_Product_ToLocation] FOREIGN KEY (LocationId) REFERENCES [Location](Id)
 )

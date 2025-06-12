@@ -25,23 +25,22 @@ public partial class DetailedReport
 
 	private SfGrid<SaleOverviewModel> _sfGrid;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		_isLoading = true;
 
-		if (!await ValidatePassword())
-		{
+		if (firstRender && !await ValidatePassword())
 			NavManager.NavigateTo("/Login");
-			return;
-		}
 
-		if (LocationId.HasValue && LocationId.Value > 0)
-		{
+		if (LocationId.HasValue && LocationId.Value > 0 && _user.LocationId == 1)
 			_selectedLocationId = LocationId.Value;
-		}
 
-		await LoadData();
 		_isLoading = false;
+
+		StateHasChanged();
+
+		if (firstRender)
+			await LoadData();
 	}
 
 	private async Task<bool> ValidatePassword()

@@ -20,7 +20,11 @@ public partial class SummaryReport
 	{
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword()) NavManager.NavigateTo("/Login");
+		if (firstRender && !await ValidatePassword())
+			NavManager.NavigateTo("/Login");
+
+		if (_user.LocationId != 1)
+			NavManager.NavigateTo("/Report-Dashboard");
 
 		_isLoading = false;
 

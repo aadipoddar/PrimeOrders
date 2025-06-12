@@ -71,28 +71,36 @@ public partial class OrderPage
 		return true;
 	}
 
-	private async void ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
-	{
-		_selectedProductCategoryId = args.Value;
-		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
-
-		await _sfProductGrid.Refresh();
-		StateHasChanged();
-	}
-
 	private async Task LoadComboBox()
 	{
 		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-		_order.LocationId = _user.LocationId;
+		_locations.Remove(_locations.FirstOrDefault(c => c.Id == 1));
+		if (_user.LocationId == 1)
+			_order.LocationId = _locations.FirstOrDefault()?.Id ?? 0;
+		else
+			_order.LocationId = _user.LocationId;
 
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
+		_productCategories.Remove(_productCategories.FirstOrDefault(c => c.LocationId != 1));
 		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
 
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1));
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
 		_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order.LocationId);
 
+		StateHasChanged();
+	}
+
+	private async void ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
+	{
+		_selectedProductCategoryId = args.Value;
+
+		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1));
+
+		await _sfProductGrid.Refresh();
 		StateHasChanged();
 	}
 	#endregion
@@ -161,7 +169,7 @@ public partial class OrderPage
 	{
 		_order.UserId = _user.Id;
 
-		if (!_user.Admin)
+		if (!_user.Admin || _user.LocationId != 1)
 			_order.LocationId = _user.LocationId;
 
 		if (_order.LocationId <= 0)

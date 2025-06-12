@@ -150,36 +150,39 @@ else
 							</ContentTemplate>
 						</AccordionItem>
 
-						<AccordionItem Header="Order & Party Details">
-							<ContentTemplate>
-								<div class="accordion-content">
-									<div class="form-group">
-										<label>Party</label>
-										<SfComboBox TValue="int?"
-													TItem="LocationModel"
-													Placeholder="Select a Party"
-													DataSource="@_parties"
-													CssClass="form-control"
-													Value="_sale.PartyId">
-											<ComboBoxEvents TItem="LocationModel" TValue="int?" ValueChange="@OnPartyChanged" />
-											<ComboBoxFieldSettings Value="Id" Text="Name" />
-										</SfComboBox>
-									</div>
+						@if (_user?.LocationId == 1)
+						{
+							<AccordionItem Header="Order & Party Details">
+								<ContentTemplate>
+									<div class="accordion-content">
+										<div class="form-group">
+											<label>Party</label>
+											<SfComboBox TValue="int?"
+														TItem="LocationModel"
+														Placeholder="Select a Party"
+														DataSource="@_parties"
+														CssClass="form-control"
+														Value="_sale.PartyId">
+												<ComboBoxEvents TItem="LocationModel" TValue="int?" ValueChange="@OnPartyChanged" />
+												<ComboBoxFieldSettings Value="Id" Text="Name" />
+											</SfComboBox>
+										</div>
 
-									<div class="form-group">
-										<label>Order</label>
-										<SfComboBox TValue="int?"
-													TItem="OrderModel"
-													Placeholder="Select an Order"
-													DataSource="@_orders"
-													CssClass="form-control">
-											<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="@OnOrderChanged" />
-											<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
-										</SfComboBox>
+										<div class="form-group">
+											<label>Order</label>
+											<SfComboBox TValue="int?"
+														TItem="OrderModel"
+														Placeholder="Select an Order"
+														DataSource="@_orders"
+														CssClass="form-control">
+												<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="@OnOrderChanged" />
+												<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
+											</SfComboBox>
+										</div>
 									</div>
-								</div>
-							</ContentTemplate>
-						</AccordionItem>
+								</ContentTemplate>
+							</AccordionItem>
+						}
 					</AccordionItems>
 				</SfAccordion>
 

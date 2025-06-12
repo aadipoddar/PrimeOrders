@@ -8,6 +8,7 @@ public class ProductModel
 	public int ProductCategoryId { get; set; }
 	public decimal Rate { get; set; }
 	public int TaxId { get; set; }
+	public int LocationId { get; set; }
 	public bool Status { get; set; }
 }
 

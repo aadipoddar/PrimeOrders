@@ -78,16 +78,17 @@ public partial class SalePage
 	private async Task LoadComboBox()
 	{
 		_parties = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-		_paymentModes = PaymentModeData.GetPaymentModes();
-
-		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
-
 		_parties.Remove(_parties.FirstOrDefault(c => c.Id == _user.LocationId));
 
+		_paymentModes = PaymentModeData.GetPaymentModes();
+		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
+
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
+		_productCategories.Remove(_productCategories.FirstOrDefault(c => c.LocationId != 1 && c.LocationId != _user.LocationId));
 		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
 
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1 && c.LocationId != _user.LocationId));
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
 		_sale.LocationId = _user?.LocationId ?? 0;
@@ -238,6 +239,7 @@ public partial class SalePage
 	{
 		_selectedProductId = args.Value;
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1 && c.LocationId != _user.LocationId));
 
 		await _sfProductGrid?.Refresh();
 		UpdateFinancialDetails();
@@ -462,6 +464,11 @@ public partial class SalePage
 	private async Task InsertStock()
 	{
 		foreach (var product in _saleProductCart)
+		{
+			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
+			if (item.LocationId != 1)
+				continue;
+
 			await StockData.InsertProductStock(new()
 			{
 				Id = 0,
@@ -472,6 +479,7 @@ public partial class SalePage
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
 				LocationId = _sale.LocationId
 			});
+		}
 
 		if (_sale.PartyId is null || _sale.PartyId <= 0)
 			return;

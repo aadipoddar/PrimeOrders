@@ -120,7 +120,7 @@ else
 						<h2>Order Details</h2>
 					</div>
 					<div class="card-body">
-						@if (_user.Admin)
+						@if (_user.Admin && _user.LocationId == 1)
 						{
 							<div class="form-group">
 								<label>Location</label>

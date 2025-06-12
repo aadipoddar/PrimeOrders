@@ -31,20 +31,24 @@ public partial class ProductDetail
 
 	private SfGrid<ProductOverviewModel> _sfGrid;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		_isLoading = true;
 
-		if (!await ValidatePassword())
+		if (firstRender && !await ValidatePassword())
 			NavManager.NavigateTo("/Login");
 
-		await LoadInitialData();
+		_isLoading = false;
+
+		StateHasChanged();
+
+		if (firstRender)
+			await LoadInitialData();
 
 		if (ProductId.HasValue && ProductId.Value > 0)
 			_selectedProductId = ProductId.Value;
 
 		await ApplyFilters();
-		_isLoading = false;
 	}
 
 	private async Task<bool> ValidatePassword()
@@ -66,14 +70,14 @@ public partial class ProductDetail
 	private async Task LoadInitialData()
 	{
 		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
+		_selectedLocationId = _locations.FirstOrDefault()?.Id ?? 0;
+
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory, true);
 		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product, true);
 		_filteredProducts = [.. _products];
 
 		if (_user.LocationId != 1)
-		{
 			_selectedLocationId = _user.LocationId;
-		}
 
 		await LoadProductOverviews();
 	}

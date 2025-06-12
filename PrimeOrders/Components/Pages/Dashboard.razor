@@ -39,7 +39,7 @@ else
 		</div>
 
 		<div class="dashboard-cards">
-			@if (_user?.Inventory == true)
+			@if (_user?.Inventory == true && _user?.LocationId == 1)
 			{
 				<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory-Dashboard")'>
 					<div class="card-icon inventory-icon">📦</div>
