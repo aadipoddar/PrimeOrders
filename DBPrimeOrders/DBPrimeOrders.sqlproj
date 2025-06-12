@@ -79,6 +79,7 @@
     <Folder Include="StoredProcedures\Insert\Sale" />
     <Folder Include="StoredProcedures\LoadData\Sale" />
     <Folder Include="StoredProcedures\Reports" />
+    <Folder Include="StoredProcedures\Delete" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
@@ -125,7 +126,6 @@
     <Build Include="StoredProcedures\Insert\Sale\Insert_SaleDetail.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Passcode.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleDetail_By_Sale.sql" />
-    <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Completed.sql" />
     <Build Include="Tables\Inventory\ProductStock.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_ProductStock.sql" />
     <Build Include="StoredProcedures\Reports\Load_SaleDetails_By_Date_LocationId.sql" />
@@ -152,6 +152,10 @@
     <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenProductionDetail.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_LastKitchenIssue_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_LastKitchenProduction_By_Location.sql" />
+    <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\Delete\Delete_RawMaterialStock_By_TransactionNo.sql" />
+    <Build Include="Views\Order_Overview.sql" />
+    <Build Include="StoredProcedures\Reports\Load_OrderDetails_By_Date_LocationId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

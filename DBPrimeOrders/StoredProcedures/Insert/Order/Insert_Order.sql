@@ -5,14 +5,14 @@
 	@LocationId INT,
 	@UserId INT,
 	@Remarks VARCHAR(250),
-	@Completed BIT,
+	@SaleId INT = NULL,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Order] ([OrderNo], [OrderDate], [LocationId], [UserId], [Remarks], [Completed], [Status])
-		VALUES (@OrderNo, @OrderDate, @LocationId, @UserId, @Remarks, @Completed, @Status);
+		INSERT INTO [dbo].[Order] ([OrderNo], [OrderDate], [LocationId], [UserId], [Remarks], [SaleId], [Status])
+		VALUES (@OrderNo, @OrderDate, @LocationId, @UserId, @Remarks, @SaleId, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
@@ -24,7 +24,7 @@ BEGIN
 			LocationId = @LocationId,
 			UserId = @UserId,
 			Remarks = @Remarks,
-			Completed = @Completed,
+			SaleId = @SaleId,
 			Status = @Status
 		WHERE Id = @Id;
 	END

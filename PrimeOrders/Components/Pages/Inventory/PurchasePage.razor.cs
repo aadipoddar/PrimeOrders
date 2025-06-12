@@ -18,8 +18,6 @@ public partial class PurchasePage
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 
-	private string _errorMessage = "";
-
 	private decimal _baseTotal = 0;
 	private decimal _afterDiscounts = 0;
 	private decimal _subTotal = 0;
@@ -108,7 +106,7 @@ public partial class PurchasePage
 		var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(_purchase.Id);
 		foreach (var item in purchaseDetails)
 		{
-			var product = await CommonData.LoadTableDataById<RawMaterialCategoryModel>(TableNames.RawMaterial, item.RawMaterialId);
+			var product = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, item.RawMaterialId);
 
 			_purchaseRawMaterialCarts.Add(new()
 			{
@@ -350,7 +348,7 @@ public partial class PurchasePage
 		return true;
 	}
 
-	private async void OnSavePurchaseClick()
+	private async Task OnSavePurchaseClick()
 	{
 		UpdateFinancialDetails();
 
@@ -366,42 +364,10 @@ public partial class PurchasePage
 			return;
 		}
 
-		await InsertStock();
 		await InsertPurchaseDetail();
+		await InsertStock();
 
 		await _sfSuccessToast.ShowAsync();
-	}
-
-	private async Task InsertStock()
-	{
-		if (PurchaseId.HasValue && PurchaseId.Value > 0)
-		{
-			var existingPurchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(PurchaseId.Value);
-
-			foreach (var item in existingPurchaseDetails)
-				await StockData.InsertRawMaterialStock(new()
-				{
-					Id = 0,
-					RawMaterialId = item.RawMaterialId,
-					Quantity = -item.Quantity, // Deducting stock for existing purchase
-					Type = StockType.PurchaseUpdate.ToString(),
-					BillId = _purchase.Id,
-					TransactionDate = _purchase.BillDate,
-					LocationId = _user.LocationId
-				});
-		}
-
-		foreach (var item in _purchaseRawMaterialCarts)
-			await StockData.InsertRawMaterialStock(new()
-			{
-				Id = 0,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = item.Quantity,
-				Type = StockType.Purchase.ToString(),
-				BillId = _purchase.Id,
-				TransactionDate = _purchase.BillDate,
-				LocationId = _user.LocationId
-			});
 	}
 
 	private async Task InsertPurchaseDetail()
@@ -438,6 +404,24 @@ public partial class PurchasePage
 				IGSTAmount = item.IGSTAmount,
 				Total = item.Total,
 				Status = true
+			});
+	}
+
+	private async Task InsertStock()
+	{
+		if (PurchaseId.HasValue && PurchaseId.Value > 0)
+			await StockData.DeleteRawMaterialStockByTransactionNo(_purchase.BillNo);
+
+		foreach (var item in _purchaseRawMaterialCarts)
+			await StockData.InsertRawMaterialStock(new()
+			{
+				Id = 0,
+				RawMaterialId = item.RawMaterialId,
+				Quantity = item.Quantity,
+				Type = StockType.Purchase.ToString(),
+				TransactionNo = _purchase.BillNo,
+				TransactionDate = _purchase.BillDate,
+				LocationId = _user.LocationId
 			});
 	}
 

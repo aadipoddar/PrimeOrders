@@ -184,7 +184,7 @@ public partial class KitchenProductionPage
 				Id = 0,
 				ProductId = item.ItemId,
 				Quantity = item.Quantity,
-				BillId = _kitchenProduction.Id,
+				TransactionNo = _kitchenProduction.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(DateTime.Now),
 				Type = StockType.KitchenProduction.ToString(),
 				LocationId = _user.LocationId,

@@ -159,11 +159,11 @@ public partial class RawMaterialStockAdjustmentPage
 			{
 				Id = 0,
 				RawMaterialId = item.ItemId,
-				BillId = 0,
-				LocationId = _selectedLocationId,
 				Quantity = quantity,
+				Type = StockType.Adjustment.ToString(),
+				TransactionNo = "",
 				TransactionDate = DateOnly.FromDateTime(DateTime.Now),
-				Type = StockType.Adjustment.ToString()
+				LocationId = _selectedLocationId,
 			});
 		}
 

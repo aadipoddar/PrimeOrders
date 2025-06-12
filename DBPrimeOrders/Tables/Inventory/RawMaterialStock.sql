@@ -4,7 +4,7 @@
     [RawMaterialId] INT NOT NULL ,
     [Quantity] DECIMAL(7, 3) NOT NULL,
     [Type] VARCHAR(20) NOT NULL, 
-    [BillId] INT NOT NULL, 
+    [TransactionNo] VARCHAR(20) NOT NULL, 
     [TransactionDate] DATE NOT NULL, 
     [LocationId] INT NOT NULL, 
     CONSTRAINT [FK_RawMaterialStock_ToRawMaterial] FOREIGN KEY (RawMaterialId) REFERENCES [RawMaterial](Id), 

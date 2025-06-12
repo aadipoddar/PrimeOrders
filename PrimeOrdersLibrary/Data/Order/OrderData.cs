@@ -11,12 +11,12 @@ public static class OrderData
 	public static async Task<List<OrderDetailModel>> LoadOrderDetailByOrder(int OrderId) =>
 		await SqlDataAccess.LoadData<OrderDetailModel, dynamic>(StoredProcedureNames.LoadOrderDetailByOrder, new { OrderId });
 
-	public static async Task<List<OrderModel>> LoadOrderByCompleted(bool Completed = true) =>
-		await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByCompleted, new { Completed });
-
 	public static async Task<List<OrderModel>> LoadOrderByLocation(int LocationId) =>
 		await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByLocation, new { LocationId });
 
 	public static async Task<OrderModel> LoadLastOrderByLocation(int LocationId) =>
 		(await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadLastOrderByLocation, new { LocationId })).FirstOrDefault();
+
+	public static async Task<List<OrderOverviewModel>> LoadOrderDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<OrderOverviewModel, dynamic>(StoredProcedureNames.LoadOrderDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
 }

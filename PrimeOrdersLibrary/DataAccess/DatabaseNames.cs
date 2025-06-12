@@ -42,7 +42,6 @@ public static class StoredProcedureNames
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 
 	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
-	public static string LoadOrderByCompleted => "Load_Order_By_Completed";
 	public static string LoadOrderByLocation => "Load_Order_By_Location";
 	public static string LoadLastOrderByLocation => "Load_LastOrder_By_Location";
 
@@ -53,6 +52,7 @@ public static class StoredProcedureNames
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
+	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
 	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
 	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
@@ -91,11 +91,15 @@ public static class StoredProcedureNames
 
 	public static string InsertKitchenProduction => "Insert_KitchenProduction";
 	public static string InsertKitchenProductionDetail => "Insert_KitchenProductionDetail";
+
+	public static string DeleteProductStockByTransactionNo => "Delete_ProductStock_By_TransactionNo";
+	public static string DeleteRawMaterialStockByTransactionNo => "Delete_RawMaterialStock_By_TransactionNo";
 }
 
 public static class ViewNames
 {
 	public static string SaleOverview => "Sale_Overview";
+	public static string OrderOverview => "Order_Overview";
 	public static string ProductOverview => "Product_Overview";
 	public static string PurchaseOverview => "Purchase_Overview";
 }

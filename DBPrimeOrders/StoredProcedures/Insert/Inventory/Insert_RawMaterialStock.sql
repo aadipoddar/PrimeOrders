@@ -3,7 +3,7 @@
 	@RawMaterialId INT, 
 	@Quantity DECIMAL(7, 3), 
 	@Type VARCHAR(20), 
-	@BillId INT, 
+	@TransactionNo VARCHAR(20),
 	@TransactionDate DATE, 
 	@LocationId INT
 AS
@@ -15,7 +15,7 @@ BEGIN
 			[RawMaterialId], 
 			[Quantity], 
 			[Type], 
-			[BillId], 
+			[TransactionNo],
 			[TransactionDate], 
 			[LocationId]
 		)
@@ -24,7 +24,7 @@ BEGIN
 			@RawMaterialId, 
 			@Quantity, 
 			@Type, 
-			@BillId, 
+			@TransactionNo,
 			@TransactionDate, 
 			@LocationId
 		);
@@ -37,7 +37,7 @@ BEGIN
 			[RawMaterialId] = @RawMaterialId, 
 			[Quantity] = @Quantity, 
 			[Type] = @Type, 
-			[BillId] = @BillId, 
+			[TransactionNo] = @TransactionNo,
 			[TransactionDate] = @TransactionDate, 
 			[LocationId] = @LocationId
 		WHERE [Id] = @Id;

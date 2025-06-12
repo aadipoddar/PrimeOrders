@@ -6,6 +6,6 @@ BEGIN
 		*
 	FROM [dbo].[Order] o
 	WHERE o.LocationId = @LocationId
-		AND o.Completed = 0
+		AND o.SaleId IS NULL
 		AND o.Status = 1
 END

@@ -3,7 +3,7 @@
 	@ProductId INT, 
 	@Quantity DECIMAL(7, 3), 
 	@Type VARCHAR(20), 
-	@BillId INT, 
+	@TransactionNo VARCHAR(20),
 	@TransactionDate DATE, 
 	@LocationId INT
 AS
@@ -15,16 +15,16 @@ BEGIN
 			[ProductId], 
 			[Quantity], 
 			[Type], 
-			[BillId], 
+			[TransactionNo],
 			[TransactionDate], 
 			[LocationId]
 		)
 		VALUES
 		(
 			@ProductId, 
-			@Quantity, 
+			@Quantity,
 			@Type, 
-			@BillId, 
+			@TransactionNo,
 			@TransactionDate, 
 			@LocationId
 		);
@@ -37,7 +37,7 @@ BEGIN
 			[ProductId] = @ProductId, 
 			[Quantity] = @Quantity, 
 			[Type] = @Type, 
-			[BillId] = @BillId, 
+			[TransactionNo] = @TransactionNo,
 			[TransactionDate] = @TransactionDate, 
 			[LocationId] = @LocationId
 		WHERE [Id] = @Id;

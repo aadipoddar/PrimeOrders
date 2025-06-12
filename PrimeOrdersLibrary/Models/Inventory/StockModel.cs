@@ -6,7 +6,7 @@ public class RawMaterialStockModel
 	public int RawMaterialId { get; set; }
 	public decimal Quantity { get; set; }
 	public string Type { get; set; }
-	public int BillId { get; set; }
+	public string TransactionNo { get; set; }
 	public DateOnly TransactionDate { get; set; }
 	public int LocationId { get; set; }
 }
@@ -17,7 +17,7 @@ public class ProductStockModel
 	public int ProductId { get; set; }
 	public decimal Quantity { get; set; }
 	public string Type { get; set; }
-	public int BillId { get; set; }
+	public string TransactionNo { get; set; }
 	public DateOnly TransactionDate { get; set; }
 	public int LocationId { get; set; }
 }
@@ -26,7 +26,6 @@ public enum StockType
 {
 	Purchase,
 	PurchaseReturn,
-	PurchaseUpdate,
 	Sale,
 	Adjustment,
 	KitchenIssue,

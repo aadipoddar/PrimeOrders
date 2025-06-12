@@ -10,6 +10,8 @@ public partial class OrderPage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }
 
+	[Parameter] public int? OrderId { get; set; }
+
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
@@ -19,12 +21,12 @@ public partial class OrderPage
 
 	private OrderProductCartModel _selectedProductCart = new();
 
-	private readonly OrderModel _order = new()
+	private OrderModel _order = new()
 	{
 		Id = 0,
 		OrderDate = DateOnly.FromDateTime(DateTime.Now),
 		Remarks = "",
-		Completed = false,
+		SaleId = null,
 		Status = true
 	};
 
@@ -91,6 +93,35 @@ public partial class OrderPage
 
 		_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
 
+		if (OrderId.HasValue && OrderId > 0)
+			await LoadOrder();
+
+		StateHasChanged();
+	}
+
+	private async Task LoadOrder()
+	{
+		_order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, OrderId.Value);
+
+		if (_order is null)
+			NavManager.NavigateTo("/");
+
+		_orderProductCarts.Clear();
+
+		var orderDetails = await OrderData.LoadOrderDetailByOrder(_order.Id);
+		foreach (var detail in orderDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+
+			_orderProductCarts.Add(new OrderProductCartModel()
+			{
+				ProductId = product.Id,
+				ProductName = product.Name,
+				Quantity = detail.Quantity
+			});
+		}
+
+		await _sfProductCartGrid?.Refresh();
 		StateHasChanged();
 	}
 	#endregion
@@ -195,7 +226,8 @@ public partial class OrderPage
 		if (!await ValidateForm())
 			return;
 
-		_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
+		if (OrderId is null)
+			_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
 
 		_order.Id = await OrderData.InsertOrder(_order);
 		if (_order.Id <= 0)
@@ -204,6 +236,23 @@ public partial class OrderPage
 			StateHasChanged();
 			await _sfErrorToast.ShowAsync();
 			return;
+		}
+
+		await InsertOrderDetails();
+
+		await _sfSuccessToast.ShowAsync();
+	}
+
+	private async Task InsertOrderDetails()
+	{
+		if (OrderId.HasValue && OrderId > 0)
+		{
+			var existingOrderDetails = await OrderData.LoadOrderDetailByOrder(_order.Id);
+			foreach (var existingDetail in existingOrderDetails)
+			{
+				existingDetail.Status = false;
+				await OrderData.InsertOrderDetail(existingDetail);
+			}
 		}
 
 		foreach (var cartItem in _orderProductCarts)
@@ -215,12 +264,10 @@ public partial class OrderPage
 				Quantity = cartItem.Quantity,
 				Status = true
 			});
-
-		await _sfSuccessToast.ShowAsync();
 	}
 
 	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+		NavManager.NavigateTo("/Order", forceLoad: true);
 
 	private void NavigateTo(string route) =>
 		NavManager.NavigateTo(route);

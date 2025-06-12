@@ -53,11 +53,11 @@ else
 		        </div>
 		    }
 		        
-		        <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Detailed")'>
-		            <div class="card-icon detailed-report-icon">📈</div>
-		            <h3>Detailed Reports</h3>
-		            <p>View comprehensive sales and transaction details</p>
-		        </div>
+		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Detailed")'>
+		        <div class="card-icon detailed-report-icon">📈</div>
+		        <h3>Detailed Reports</h3>
+		        <p>View comprehensive sales and transaction details</p>
+		    </div>
 		
 		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/ProductDetail")'>
 		        <div class="card-icon item-report-icon">📦</div>
@@ -70,6 +70,12 @@ else
 		        <h3>Stock Reports</h3>
 		        <p>Monitor inventory levels and stock status</p>
 		    </div>
+
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/OrderHistory")'>
+				<div class="card-icon order-history-icon">📜</div>
+				<h3>Order History</h3>
+				<p>Track and analyze customer order records</p>
+			</div>
 		</div>
 
 		<div class="dashboard-footer">
@@ -210,6 +216,11 @@ else
 	.item-summary-icon {
 		background-color: rgba(255, 153, 0, 0.1);
 		color: #FF9900;
+	}
+
+	.order-history-icon {
+		background-color: rgba(255, 87, 51, 0.1);
+		color: #FF5733;
 	}
 
 	/* Back button styles */

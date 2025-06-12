@@ -182,7 +182,7 @@ public partial class KitchenIssuePage
 				Id = 0,
 				RawMaterialId = item.ItemId,
 				Quantity = -item.Quantity,
-				BillId = _kitchenIssue.Id,
+				TransactionNo = _kitchenIssue.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(DateTime.Now),
 				Type = StockType.KitchenIssue.ToString(),
 				LocationId = _user.LocationId,

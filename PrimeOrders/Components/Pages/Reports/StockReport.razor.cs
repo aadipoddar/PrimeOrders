@@ -22,16 +22,19 @@ public partial class StockReport
 
 	private SfGrid<RawMaterialStockDetailModel> _sfGrid;
 
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		_isLoading = true;
 
-		if (!await ValidatePassword())
+		if (firstRender && !await ValidatePassword())
 			NavManager.NavigateTo("/Login");
 
-		await LoadInitialData();
-
 		_isLoading = false;
+
+		StateHasChanged();
+
+		if (firstRender)
+			await LoadInitialData();
 	}
 
 	private async Task<bool> ValidatePassword()

@@ -448,7 +448,7 @@ public partial class SalePage
 		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
 		if (order is not null && order.Status)
 		{
-			order.Completed = true;
+			order.SaleId = _sale.Id;
 			await OrderData.InsertOrder(order);
 		}
 	}
@@ -472,7 +472,7 @@ public partial class SalePage
 				Id = 0,
 				ProductId = product.ProductId,
 				Quantity = -product.Quantity,
-				BillId = _sale.Id,
+				TransactionNo = _sale.BillNo,
 				Type = StockType.Sale.ToString(),
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
 				LocationId = _sale.LocationId
@@ -488,8 +488,8 @@ public partial class SalePage
 				Id = 0,
 				ProductId = product.ProductId,
 				Quantity = product.Quantity,
-				BillId = _sale.Id,
 				Type = StockType.Purchase.ToString(),
+				TransactionNo = _sale.BillNo,
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
 				LocationId = _sale.PartyId.Value
 			});
