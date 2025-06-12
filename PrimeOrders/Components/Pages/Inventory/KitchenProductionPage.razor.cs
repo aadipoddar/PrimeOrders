@@ -23,7 +23,7 @@ public partial class KitchenProductionPage
 
 	private readonly List<ItemRecipeModel> _productCart = [];
 
-	private readonly KitchenProductionModel _kitchenProduction = new();
+	private readonly KitchenProductionModel _kitchenProduction = new() { ProductionDate = DateTime.Now };
 
 	private SfGrid<ItemRecipeModel> _sfGrid;
 	private SfToast _sfSuccessToast;
@@ -62,22 +62,29 @@ public partial class KitchenProductionPage
 
 	private async Task LoadComboBox()
 	{
+		_kitchenProduction.UserId = _user.Id;
+		_kitchenProduction.LocationId = _user.LocationId;
+		_kitchenProduction.TransactionNo = await GenerateBillNo.GenerateKitchenProductionTransactionNo(_kitchenProduction);
+
 		_kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen);
 		_kitchenProduction.KitchenId = _kitchens.Count > 0 ? _kitchens[0].Id : 0;
 
 		_productCategories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.ProductCategory);
+		_productCategories.RemoveAll(r => r.LocationId != 1);
 		_selectedProductCategoryId = _productCategories.Count > 0 ? _productCategories[0].Id : 0;
 
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products.RemoveAll(r => r.LocationId != 1);
 		_selectedProductId = _products.Count > 0 ? _products[0].Id : 0;
 	}
 	#endregion
 
 	#region Product
-	private async void ProductCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, ProductCategoryModel> args)
+	private async Task ProductCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
 		_selectedProductCategoryId = args.Value;
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products.RemoveAll(r => r.LocationId != 1);
 		_selectedProductId = _products.Count > 0 ? _products[0].Id : 0;
 	}
 
@@ -114,9 +121,9 @@ public partial class KitchenProductionPage
 	private async Task<bool> ValidateForm()
 	{
 		_kitchenProduction.UserId = _user.Id;
-		_kitchenProduction.ProductionDate = DateTime.Now;
-		_kitchenProduction.Status = true;
 		_kitchenProduction.LocationId = _user.LocationId;
+		_kitchenProduction.Status = true;
+		_kitchenProduction.TransactionNo = await GenerateBillNo.GenerateKitchenProductionTransactionNo(_kitchenProduction);
 		await _sfGrid.Refresh();
 
 		if (_kitchenProduction.KitchenId <= 0)

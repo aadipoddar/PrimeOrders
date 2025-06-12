@@ -150,6 +150,8 @@
     <Build Include="Tables\Inventory\KitchenProductionDetail.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenProduction.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_KitchenProductionDetail.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_LastKitchenIssue_By_Location.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_LastKitchenProduction_By_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

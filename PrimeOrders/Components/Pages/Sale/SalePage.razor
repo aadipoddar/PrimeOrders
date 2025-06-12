@@ -5,7 +5,7 @@
 <SfToast @ref="_sfErrorToast"
 		 ID="toast_error"
 		 Title="Error"
-		 Content="@_errorMessage"
+		 Content="Some Error Message"
 		 Timeout="3000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-danger">
@@ -120,6 +120,27 @@ else
 			<div class="purchase-sidebar">
 				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
 					<AccordionItems>
+						<AccordionItem Header="Bill Details" Expanded="true">
+							<ContentTemplate>
+								<div class="accordion-content">
+									<div class="form-group full-width">
+										<label>Bill Number</label>
+										<SfTextBox Value="@_sale.BillNo"
+												   Placeholder="Bill Number"
+												   Readonly=true
+												   CssClass="form-control" />
+									</div>
+
+									<div class="form-group full-width">
+										<label>Bill Date</label>
+										<SfDatePicker Placeholder="Select Sale Date"
+													  @bind-Value="_sale.SaleDateTime"
+													  CssClass="form-control" />
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+
 						<AccordionItem Header="Discount Details" Expanded="true">
 							<ContentTemplate>
 								<div class="accordion-content form-grid">
@@ -191,14 +212,6 @@ else
 						<h2>Sale Summary</h2>
 					</div>
 					<div class="card-body">
-						<div class="form-group">
-							<label>Bill Number</label>
-							<SfTextBox Value="@_sale.BillNo"
-									   Placeholder="Bill Number"
-									   Readonly=true
-									   CssClass="form-control" />
-						</div>
-
 						<div class="summary-row">
 							<span>Base Total:</span>
 							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>

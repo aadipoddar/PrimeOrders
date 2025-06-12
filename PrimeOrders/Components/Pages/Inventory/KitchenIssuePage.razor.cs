@@ -23,7 +23,7 @@ public partial class KitchenIssuePage
 
 	private readonly List<ItemRecipeModel> _rawMaterialCart = [];
 
-	private readonly KitchenIssueModel _kitchenIssue = new();
+	private readonly KitchenIssueModel _kitchenIssue = new() { IssueDate = DateTime.Now };
 
 	private SfGrid<ItemRecipeModel> _sfGrid;
 	private SfToast _sfSuccessToast;
@@ -62,6 +62,11 @@ public partial class KitchenIssuePage
 
 	private async Task LoadComboBox()
 	{
+		_kitchenIssue.UserId = _user.Id;
+		_kitchenIssue.LocationId = _user.LocationId;
+
+		_kitchenIssue.TransactionNo = await GenerateBillNo.GenerateKitchenIssueTransactionNo(_kitchenIssue);
+
 		_kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen);
 		_kitchenIssue.KitchenId = _kitchens.Count > 0 ? _kitchens[0].Id : 0;
 
@@ -114,9 +119,9 @@ public partial class KitchenIssuePage
 	private async Task<bool> ValidateForm()
 	{
 		_kitchenIssue.UserId = _user.Id;
-		_kitchenIssue.IssueDate = DateTime.Now;
-		_kitchenIssue.Status = true;
 		_kitchenIssue.LocationId = _user.LocationId;
+		_kitchenIssue.Status = true;
+		_kitchenIssue.TransactionNo = await GenerateBillNo.GenerateKitchenIssueTransactionNo(_kitchenIssue);
 		await _sfGrid.Refresh();
 
 		if (_kitchenIssue.KitchenId <= 0)

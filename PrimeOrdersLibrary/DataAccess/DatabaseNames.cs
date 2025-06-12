@@ -49,6 +49,9 @@ public static class StoredProcedureNames
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 	public static string LoadLastSaleByLocation => "Load_LastSale_By_Location";
 
+	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
+	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
+
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
 	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
@@ -85,6 +88,7 @@ public static class StoredProcedureNames
 
 	public static string InsertKitchenIssue => "Insert_KitchenIssue";
 	public static string InsertKitchenIssueDetail => "Insert_KitchenIssueDetail";
+
 	public static string InsertKitchenProduction => "Insert_KitchenProduction";
 	public static string InsertKitchenProductionDetail => "Insert_KitchenProductionDetail";
 }

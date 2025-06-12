@@ -14,8 +14,6 @@ public partial class SalePage
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 
-	private string _errorMessage = "";
-
 	private decimal _baseTotal = 0;
 	private decimal _discountAmount = 0;
 	private decimal _subTotal = 0;
@@ -84,23 +82,23 @@ public partial class SalePage
 		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
 
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.Remove(_productCategories.FirstOrDefault(c => c.LocationId != 1 && c.LocationId != _user.LocationId));
+		_productCategories.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
 		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
 
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
-		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1 && c.LocationId != _user.LocationId));
+		_products.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
 		_sale.LocationId = _user?.LocationId ?? 0;
-		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale.LocationId);
+		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 	#endregion
 
 	#region Purchase Details Events
-	private async void OnPartyChanged(ChangeEventArgs<int?, LocationModel> args)
+	private async Task OnPartyChanged(ChangeEventArgs<int?, LocationModel> args)
 	{
 		if (args.Value.HasValue && args.Value.Value > 0)
 		{
@@ -119,11 +117,11 @@ public partial class SalePage
 		foreach (var item in _saleProductCart)
 			item.DiscPercent = _sale.DiscPercent;
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	private async void OnOrderChanged(ChangeEventArgs<int?, OrderModel> args)
+	private async Task OnOrderChanged(ChangeEventArgs<int?, OrderModel> args)
 	{
 		if (args.Value.HasValue && args.Value.Value > 0)
 		{
@@ -161,26 +159,26 @@ public partial class SalePage
 			_saleProductCart.Clear();
 		}
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	private void SaleDiscountPercentValueChanged(decimal args)
+	private async Task SaleDiscountPercentValueChanged(decimal args)
 	{
 		_sale.DiscPercent = args;
 
 		foreach (var item in _saleProductCart)
 			item.DiscPercent = args;
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	private void UpdateFinancialDetails()
+	private async Task UpdateFinancialDetails()
 	{
 		_sale.UserId = _user?.Id ?? 0;
 		_sale.LocationId = _user?.LocationId ?? 0;
-		_sale.SaleDateTime = DateTime.Now;
+		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
 
 		foreach (var item in _saleProductCart)
 		{
@@ -235,18 +233,18 @@ public partial class SalePage
 	#endregion
 
 	#region Products
-	private async void ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
+	private async Task ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
 	{
 		_selectedProductId = args.Value;
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
-		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1 && c.LocationId != _user.LocationId));
+		_products.RemoveAll(c => c.LocationId != 1 && c.LocationId != _user.LocationId);
 
 		await _sfProductGrid?.Refresh();
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	public async void ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
+	public async Task ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
 	{
 		_selectedProductId = args.Data.Id;
 		var product = args.Data;
@@ -277,57 +275,57 @@ public partial class SalePage
 		_selectedProductId = 0;
 		await _sfProductCartGrid?.Refresh();
 		await _sfProductGrid?.Refresh();
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	public void ProductCartRowSelectHandler(RowSelectEventArgs<SaleProductCartModel> args)
+	public async Task ProductCartRowSelectHandler(RowSelectEventArgs<SaleProductCartModel> args)
 	{
 		_selectedProductCart = args.Data;
 		_dialogVisible = true;
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 	#endregion
 
 	#region Dialog Events
-	private void DialogRateValueChanged(decimal args)
+	private async Task DialogRateValueChanged(decimal args)
 	{
 		_selectedProductCart.Rate = args;
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 	}
 
-	private void DialogQuantityValueChanged(decimal args)
+	private async Task DialogQuantityValueChanged(decimal args)
 	{
 		_selectedProductCart.Quantity = args;
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 	}
 
-	private void DialogDiscPercentValueChanged(decimal args)
+	private async Task DialogDiscPercentValueChanged(decimal args)
 	{
 		_selectedProductCart.DiscPercent = args;
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 	}
 
-	private void DialogCGSTPercentValueChanged(decimal args)
+	private async Task DialogCGSTPercentValueChanged(decimal args)
 	{
 		_selectedProductCart.CGSTPercent = args;
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 	}
 
-	private void DialogSGSTPercentValueChanged(decimal args)
+	private async Task DialogSGSTPercentValueChanged(decimal args)
 	{
 		_selectedProductCart.SGSTPercent = args;
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 	}
 
-	private void DialogIGSTPercentValueChanged(decimal args)
+	private async Task DialogIGSTPercentValueChanged(decimal args)
 	{
 		_selectedProductCart.IGSTPercent = args;
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 	}
 
-	private void UpdateModalFinancialDetails()
+	private async Task UpdateModalFinancialDetails()
 	{
 		_selectedProductCart.BaseTotal = _selectedProductCart.Rate * _selectedProductCart.Quantity;
 		_selectedProductCart.DiscAmount = _selectedProductCart.BaseTotal * (_selectedProductCart.DiscPercent / 100);
@@ -337,13 +335,13 @@ public partial class SalePage
 		_selectedProductCart.IGSTAmount = _selectedProductCart.AfterDiscount * (_selectedProductCart.IGSTPercent / 100);
 		_selectedProductCart.Total = _selectedProductCart.AfterDiscount + _selectedProductCart.CGSTAmount + _selectedProductCart.SGSTAmount + _selectedProductCart.IGSTAmount;
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	private async void OnSaveProductManageClick()
+	private async Task OnSaveProductManageClick()
 	{
-		UpdateModalFinancialDetails();
+		await UpdateModalFinancialDetails();
 
 		_saleProductCart.Remove(_saleProductCart.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
 
@@ -353,11 +351,11 @@ public partial class SalePage
 		_dialogVisible = false;
 		await _sfProductCartGrid?.Refresh();
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	private async void OnRemoveFromCartProductManageClick()
+	private async Task OnRemoveFromCartProductManageClick()
 	{
 		_selectedProductCart.Quantity = 0;
 		_saleProductCart.Remove(_saleProductCart.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
@@ -365,7 +363,7 @@ public partial class SalePage
 		_dialogVisible = false;
 		await _sfProductCartGrid?.Refresh();
 
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 		StateHasChanged();
 	}
 	#endregion
@@ -391,14 +389,14 @@ public partial class SalePage
 		return true;
 	}
 
-	private async void OnSaveSaleClick()
+	private async Task OnSaveSaleClick()
 	{
-		UpdateFinancialDetails();
+		await UpdateFinancialDetails();
 
 		if (!await ValidateForm())
 			return;
 
-		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale.LocationId);
+		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
 
 		_sale.Id = await SaleData.InsertSale(_sale);
 		if (_sale.Id <= 0)

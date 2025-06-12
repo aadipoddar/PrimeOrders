@@ -7,7 +7,7 @@
     [Remarks] VARCHAR(250) NOT NULL, 
     [UserId] INT NOT NULL, 
     [LocationId] INT NOT NULL, 
-    [SaleDateTime] DATETIME NOT NULL DEFAULT (((getdate() AT TIME ZONE 'UTC') AT TIME ZONE 'India Standard Time')), 
+    [SaleDateTime] DATETIME NOT NULL,
     [PartyId] INT NULL, 
     [OrderId] INT NULL, 
     [Cash] MONEY NOT NULL DEFAULT 0, 

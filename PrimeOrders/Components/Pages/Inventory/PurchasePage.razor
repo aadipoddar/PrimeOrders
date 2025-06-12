@@ -124,14 +124,14 @@ else
 						<AccordionItem Header="Bill Details" Expanded="true">
 							<ContentTemplate>
 								<div class="accordion-content form-grid">
-									<div class="form-group">
+									<div class="form-group full-width">
 										<label>Bill Number</label>
 										<SfTextBox @bind-Value="_purchase.BillNo"
 												   Placeholder="Enter Bill No"
 												   CssClass="form-control" />
 									</div>
 
-									<div class="form-group">
+									<div class="form-group full-width">
 										<label>Bill Date</label>
 										<SfDatePicker @bind-Value="_purchase.BillDate"
 													  Placeholder="Select Date"

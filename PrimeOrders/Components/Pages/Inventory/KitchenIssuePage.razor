@@ -59,17 +59,34 @@ else
 					<p class="card-info">Select the kitchen to issue materials to</p>
 				</div>
 				<div class="card-body">
-					<div class="form-group">
-						<label>Kitchen</label>
-						<SfComboBox TValue="int"
-									TItem="KitchenModel"
-									Placeholder="Select a Kitchen"
-									DataSource="@_kitchens"
-									@bind-Value="_kitchenIssue.KitchenId"
-									CssClass="form-control"
-									FloatLabelType="FloatLabelType.Never">
-							<ComboBoxFieldSettings Value="Id" Text="Name" />
-						</SfComboBox>
+					<div class="form-row">
+						<div class="form-group">
+							<label>Kitchen</label>
+							<SfComboBox TValue="int"
+										TItem="KitchenModel"
+										Placeholder="Select a Kitchen"
+										DataSource="@_kitchens"
+										@bind-Value="_kitchenIssue.KitchenId"
+										CssClass="form-control"
+										FloatLabelType="FloatLabelType.Never">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+
+						<div class="form-group">
+							<label>Transaction Number</label>
+							<SfTextBox Value="@_kitchenIssue.TransactionNo"
+									   Placeholder="Transaction No"
+									   Readonly=true
+									   CssClass="form-control" />
+						</div>
+
+						<div class="form-group">
+							<label>Issue Date</label>
+							<SfDatePicker Placeholder="Select Issue Date"
+										  @bind-Value="_kitchenIssue.IssueDate"
+										  CssClass="form-control" />
+						</div>
 					</div>
 				</div>
 			</div>

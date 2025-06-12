@@ -1,18 +1,42 @@
-﻿using PrimeOrdersLibrary.Data.Order;
+﻿using PrimeOrdersLibrary.Data.Inventory;
+using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.Data.Sale;
+using PrimeOrdersLibrary.Models.Inventory;
+using PrimeOrdersLibrary.Models.Sale;
 
 namespace PrimeOrdersLibrary.Data.Common;
 
 public static class GenerateBillNo
 {
-	public static async Task<string> GenerateOrderBillNo(int locationId)
+	private static async Task<string> GetLocationPrefix(int locationId)
 	{
-		var prefix = await GetLocationPrefix(locationId);
-		var year = $"{DateTime.Now:yy}";
-		if (DateTime.Now.Month <= 3)
-			year = $"{DateTime.Now.AddYears(-1):yy}";
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, locationId);
+		if (location is null)
+			return string.Empty;
 
-		var lastOrder = await OrderData.LoadLastOrderByLocation(locationId);
+		string prefix = string.Empty;
+		string[] words = location.Name.Split([' ', '-', '_', '.'], StringSplitOptions.RemoveEmptyEntries);
+
+		foreach (var word in words)
+			if (word.Length > 1)
+			{
+				var firstLetter = word[0];
+
+				if (char.IsLetter(firstLetter) && char.IsUpper(firstLetter))
+					prefix += char.ToUpper(firstLetter);
+			}
+
+		return prefix;
+	}
+
+	public static async Task<string> GenerateOrderBillNo(OrderModel order)
+	{
+		var prefix = await GetLocationPrefix(order.LocationId);
+		var year = $"{order.OrderDate:yy}";
+		if (order.OrderDate.Month <= 3)
+			year = $"{order.OrderDate.AddYears(-1):yy}";
+
+		var lastOrder = await OrderData.LoadLastOrderByLocation(order.LocationId);
 		if (lastOrder is not null)
 		{
 			var lastOrderNo = lastOrder.OrderNo;
@@ -31,14 +55,14 @@ public static class GenerateBillNo
 		return $"{prefix}O{year}000001";
 	}
 
-	public static async Task<string> GenerateSaleBillNo(int locationId)
+	public static async Task<string> GenerateSaleBillNo(SaleModel sale)
 	{
-		var prefix = await GetLocationPrefix(locationId);
-		var year = $"{DateTime.Now:yy}";
-		if (DateTime.Now.Month <= 3)
-			year = $"{DateTime.Now.AddYears(-1):yy}";
+		var prefix = await GetLocationPrefix(sale.LocationId);
+		var year = $"{sale.SaleDateTime:yy}";
+		if (sale.SaleDateTime.Month <= 3)
+			year = $"{sale.SaleDateTime.AddYears(-1):yy}";
 
-		var lastSale = await SaleData.LoadLastSaleByLocation(locationId);
+		var lastSale = await SaleData.LoadLastSaleByLocation(sale.LocationId);
 		if (lastSale is not null)
 		{
 			var lastSaleNo = lastSale.BillNo;
@@ -57,24 +81,55 @@ public static class GenerateBillNo
 		return $"{prefix}S{year}000001";
 	}
 
-	private static async Task<string> GetLocationPrefix(int locationId)
+	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
 	{
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, locationId);
-		if (location is null)
-			return string.Empty;
+		var prefix = await GetLocationPrefix(kitchenIssue.LocationId);
+		var year = $"{kitchenIssue.IssueDate:yy}";
+		if (kitchenIssue.IssueDate.Month <= 3)
+			year = $"{kitchenIssue.IssueDate.AddYears(-1):yy}";
 
-		string suffix = string.Empty;
-		string[] words = location.Name.Split([' ', '-', '_', '.'], StringSplitOptions.RemoveEmptyEntries);
-
-		foreach (var word in words)
-			if (word.Length > 0)
+		var lastIssue = await KitchenIssueData.LoadLastKitchenIssueByLocation(kitchenIssue.LocationId);
+		if (lastIssue is not null)
+		{
+			var lastSaleNo = lastIssue.TransactionNo;
+			if (lastSaleNo.StartsWith(prefix))
 			{
-				var firstLetter = word[0];
-
-				if (char.IsLetter(firstLetter) && char.IsUpper(firstLetter) && word.Length > 1)
-					suffix += char.ToUpper(firstLetter);
+				var lastYear = lastSaleNo.Substring(prefix.Length + 1, 2);
+				if (lastYear == year)
+				{
+					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
+					int nextNumber = lastNumber + 1;
+					return $"{prefix}RM{year}{nextNumber:D6}";
+				}
 			}
+		}
 
-		return suffix;
+		return $"{prefix}RM{year}000001";
+	}
+
+	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
+	{
+		var prefix = await GetLocationPrefix(kitchenProduction.LocationId);
+		var year = $"{kitchenProduction.ProductionDate:yy}";
+		if (kitchenProduction.ProductionDate.Month <= 3)
+			year = $"{kitchenProduction.ProductionDate.AddYears(-1):yy}";
+
+		var lastProduction = await KitchenProductionData.LoadLastKitchenProductionByLocation(kitchenProduction.LocationId);
+		if (lastProduction is not null)
+		{
+			var lastSaleNo = lastProduction.TransactionNo;
+			if (lastSaleNo.StartsWith(prefix))
+			{
+				var lastYear = lastSaleNo.Substring(prefix.Length + 1, 2);
+				if (lastYear == year)
+				{
+					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
+					int nextNumber = lastNumber + 1;
+					return $"{prefix}FP{year}{nextNumber:D6}";
+				}
+			}
+		}
+
+		return $"{prefix}FP{year}000001";
 	}
 }

@@ -6,6 +6,7 @@ public class KitchenProductionModel
 	public int KitchenId { get; set; }
 	public int LocationId { get; set; }
 	public int UserId { get; set; }
+	public string TransactionNo { get; set; }
 	public DateTime ProductionDate { get; set; }
 	public bool Status { get; set; }
 }

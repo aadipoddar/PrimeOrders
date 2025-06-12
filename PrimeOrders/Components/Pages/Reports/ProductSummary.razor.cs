@@ -68,10 +68,10 @@ public partial class ProductSummary
 	private async Task LoadData()
 	{
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory, true);
-		_productCategories.Remove(_productCategories.FirstOrDefault(c => c.LocationId != 1));
+		_productCategories.RemoveAll(c => c.LocationId != 1);
 
 		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product, true);
-		_products.Remove(_products.FirstOrDefault(c => c.LocationId != 1));
+		_products.RemoveAll(r => r.LocationId != 1);
 
 		// Use the stored procedure to fetch product overview data
 		_productOverviews = await ProductData.LoadProductDetailsByDateLocationId(

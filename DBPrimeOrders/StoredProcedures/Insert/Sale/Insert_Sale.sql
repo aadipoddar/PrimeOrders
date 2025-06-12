@@ -19,9 +19,9 @@ BEGIN
 	IF @Id = 0
 	BEGIN
 		INSERT INTO [dbo].[Sale] 
-			([BillNo], [DiscPercent], DiscReason, Remarks, UserId, LocationId, PartyId, OrderId, Cash, Card, UPI, Credit, Status)
+			([BillNo], [DiscPercent], DiscReason, Remarks, UserId, LocationId, SaleDateTime, PartyId, OrderId, Cash, Card, UPI, Credit, Status)
 		VALUES 
-			(@BillNo, @DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @Status);
+			(@BillNo, @DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @SaleDateTime, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
@@ -34,6 +34,7 @@ BEGIN
 			Remarks = @Remarks,
 			UserId = @UserId,
 			LocationId = @LocationId,
+			SaleDateTime = @SaleDateTime,
 			PartyId = @PartyId,
 			OrderId = @OrderId,
 			Cash = @Cash,
