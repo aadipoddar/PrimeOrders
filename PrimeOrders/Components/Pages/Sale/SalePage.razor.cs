@@ -15,6 +15,7 @@ public partial class SalePage
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
+	private bool _isSaving = false;
 
 	private decimal _baseTotal = 0;
 	private decimal _discountAmount = 0;
@@ -455,12 +456,14 @@ public partial class SalePage
 		if (!await ValidateForm())
 			return;
 
+		_isSaving = true;
+		StateHasChanged();
+
 		_sale.Id = await SaleData.InsertSale(_sale);
 		if (_sale.Id <= 0)
 		{
 			_sfErrorToast.Content = "Failed to save Sale.";
 			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
 			return;
 		}
 

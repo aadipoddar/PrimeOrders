@@ -246,9 +246,7 @@ else
 							</SfComboBox>
 						</div>
 
-						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick">
-							<span class="save-icon">💾</span> Complete Sale
-						</SfButton>
+						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick" Disabled="@_isSaving"/>
 					</div>
 				</div>
 			</div>
@@ -743,7 +741,14 @@ else
 		border-radius: 8px;
 		font-weight: 600;
 		transition: all 0.2s ease;
+		min-height: 50px; /* Ensure consistent height */
 	}
+
+		.save-button:disabled {
+			background-color: #8e77c9;
+			cursor: not-allowed;
+			transform: none;
+		}
 
 		.save-button:hover {
 			background-color: #4311a8;
