@@ -122,7 +122,7 @@ else
 						AllowExcelExport="true"
 						AllowPdfExport="true">
 					<GridEvents RowSelected="OrderHistoryRowSelected" TValue="OrderOverviewModel" />
-					<GridPageSettings PageSize="10"></GridPageSettings>
+					<GridPageSettings PageSize="10" />
 					<GridColumns>
 						<GridColumn Field="@nameof(OrderOverviewModel.OrderNo)" HeaderText="Order #" Width="90" TextAlign="TextAlign.Center" />
 						<GridColumn Field="@nameof(OrderOverviewModel.OrderDate)" HeaderText="Order Date" Width="120" Format="dd/MM/yyyy" />

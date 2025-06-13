@@ -138,6 +138,18 @@ else
 													  CssClass="form-control" />
 									</div>
 
+									@if (PurchaseId.HasValue && PurchaseId.Value > 0)
+									{
+										<div class="form-group full-width status-checkbox-container">
+											<div class="status-toggle">
+												<SfCheckBox @bind-Checked="_purchase.Status" Label="Active" CssClass="status-checkbox"></SfCheckBox>
+												<div class="status-indicator @(_purchase.Status ? "active" : "inactive")">
+													@(_purchase.Status ? "Active" : "Inactive")
+												</div>
+											</div>
+										</div>
+									}
+
 									<div class="form-group full-width">
 										<label>Remarks</label>
 										<SfTextBox @bind-Value="_purchase.Remarks"
@@ -688,6 +700,39 @@ else
 	.card-body {
 		padding: 20px;
 	}
+
+	/* Status Checkbox Styles */
+	.status-checkbox-container {
+		margin-top: 10px;
+		margin-bottom: 15px;
+	}
+
+	.status-toggle {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+	}
+
+	.status-indicator {
+		padding: 5px 12px;
+		border-radius: 20px;
+		font-size: 14px;
+		font-weight: 500;
+		text-align: center;
+		min-width: 80px;
+	}
+
+		.status-indicator.active {
+			background-color: rgba(46, 125, 50, 0.1);
+			color: #2E7D32;
+			border: 1px solid rgba(46, 125, 50, 0.3);
+		}
+
+		.status-indicator.inactive {
+			background-color: rgba(198, 40, 40, 0.1);
+			color: #C62828;
+			border: 1px solid rgba(198, 40, 40, 0.3);
+		}
 
 	/* Material Categories and Material List */
 	.category-listbox {

@@ -57,6 +57,24 @@ else
 					<h3>Raw Material Stock Reports</h3>
 					<p>Monitor inventory levels and stock status</p>
 				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/KitchenIssue")'>
+					<div class="card-icon kitchen-issue-icon">🔔</div>
+					<h3>Kitchen Issue Report</h3>
+					<p>Track and manage kitchen-related issues and incidents</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/KitchenProduction")'>
+					<div class="card-icon kitchen-production-icon">👨‍🍳</div>
+					<h3>Kitchen Production Report</h3>
+					<p>Monitor kitchen output and production efficiency</p>
+				</div>
+				
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/PurchaseReport")'>
+					<div class="card-icon purchase-report-icon">🛒</div>
+					<h3>Purchase Report</h3>
+					<p>Track and analyze procurement activities and expenditures</p>
+				</div>
 		    }
 		        
 		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Detailed")'>
@@ -232,6 +250,21 @@ else
 	.product-stock-icon {
 		background-color: rgba(41, 128, 185, 0.1);
 		color: #2980B9;
+	}
+
+	.kitchen-issue-icon {
+		background-color: rgba(231, 76, 60, 0.1);
+		color: #E74C3C;
+	}
+
+	.kitchen-production-icon {
+		background-color: rgba(155, 89, 182, 0.1);
+		color: #9B59B6;
+	}
+	
+	.purchase-report-icon {
+		background-color: rgba(39, 174, 96, 0.1);
+		color: #27AE60;
 	}
 
 	/* Back button styles */

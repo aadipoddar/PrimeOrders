@@ -1,6 +1,6 @@
-﻿@page "/Inventory/Purchase-History"
+﻿@page "/Reports/PurchaseReport"
 
-<PageTitle>Purchase History - Prime Orders</PageTitle>
+<PageTitle>Purchase Report - Prime Orders</PageTitle>
 
 @if (_isLoading)
 {
@@ -10,7 +10,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading purchase history...</p>
+		<p class="loading-text">Loading purchase report...</p>
 	</div>
 }
 else
@@ -30,10 +30,10 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Purchase History</h2>
-			<p>View and analyze in-depth purchase records</p>
-			<button @onclick='() => NavigateTo("/Inventory-Dashboard")' class="back-button">
-				<span class="back-icon">←</span> Back to Inventory
+			<h2>Purchase Report</h2>
+			<p>View and analyze procurement activities and expenditures</p>
+			<button @onclick='() => NavigateTo("/Report-Dashboard")' class="back-button">
+				<span class="back-icon">←</span> Back to Reports
 			</button>
 		</div>
 
@@ -49,6 +49,19 @@ else
 									   CssClass="filter-control">
 						<DateRangePickerEvents TValue="DateOnly" ValueChange="DateRangeChanged" />
 					</SfDateRangePicker>
+				</div>
+
+				<div class="filter-item">
+					<label>Supplier</label>
+					<SfComboBox TValue="int"
+								TItem="SupplierModel"
+								Placeholder="Select a Supplier"
+								DataSource="_suppliers"
+								Value="_selectedSupplierId"
+								CssClass="filter-control">
+						<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="OnSupplierChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
 				</div>
 			</div>
 			<div class="action-buttons">
@@ -105,14 +118,12 @@ else
 						AllowPaging="true"
 						AllowExcelExport="true"
 						AllowPdfExport="true">
-					<GridPageSettings PageSize="10"></GridPageSettings>
+					<GridPageSettings PageSize="10" />
 					<GridEvents RowSelected="PurchaseHistoryRowSelected" TValue="PurchaseOverviewModel" />
 					<GridColumns>
-						<GridColumn Field="@nameof(PurchaseOverviewModel.PurchaseId)" HeaderText="Purchase ID" Width="90" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.BillDate)" HeaderText="Bill Date" Width="120" Format="dd/MM/yyyy" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.BillNo)" HeaderText="Bill No" Width="120" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.BillNo)" HeaderText="Invoice No" Width="120" TextAlign="TextAlign.Center" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.BillDate)" HeaderText="Date" Width="120" Format="dd/MM/yyyy" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.SupplierName)" HeaderText="Supplier" Width="150" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.UserName)" HeaderText="Created By" Width="130" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />
 
@@ -153,6 +164,41 @@ else
 						</GridColumn>
 					</GridColumns>
 				</SfGrid>
+			</div>
+		</div>
+
+		<div class="chart-grid">
+			<div class="chart-card">
+				<h3 class="chart-title">Purchase Trend</h3>
+				<SfChart Height="300px">
+					<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
+									   Title="Date"></ChartPrimaryXAxis>
+					<ChartPrimaryYAxis Title="Amount (₹)" LabelFormat="{value}"></ChartPrimaryYAxis>
+					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+					<ChartSeriesCollection>
+						<ChartSeries DataSource="@GetDailyPurchaseData()"
+									 XName="Date" YName="Amount" Type="ChartSeriesType.Line"
+									 Name="Purchases" Fill="#512BD4">
+						</ChartSeries>
+					</ChartSeriesCollection>
+				</SfChart>
+			</div>
+
+			<div class="chart-card">
+				<h3 class="chart-title">Suppliers by Purchase Value</h3>
+				<SfAccumulationChart Title="Supplier Distribution" EnableSmartLabels="true" Height="300px">
+					<AccumulationChartSeriesCollection>
+						<AccumulationChartSeries DataSource="@GetVendorDistributionData()" XName="SupplierName"
+												 YName="Amount" Name="Purchases"
+												 InnerRadius="40%" LegendShape="LegendShape.Circle">
+							<AccumulationDataLabelSettings Visible="true" Name="SupplierName"
+														   Position="AccumulationLabelPosition.Outside" />
+							<AccumulationChartAnimation Enable="true"></AccumulationChartAnimation>
+						</AccumulationChartSeries>
+					</AccumulationChartSeriesCollection>
+					<AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
+					<AccumulationChartTooltipSettings Enable="true" Format="${point.y} - ${point.percentage}%" />
+				</SfAccumulationChart>
 			</div>
 		</div>
 
@@ -481,6 +527,30 @@ else
 
 	.card-body {
 		padding: 20px;
+	}
+
+	/* Chart Grid */
+	.chart-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+		gap: 25px;
+		margin-bottom: 10px;
+	}
+
+	.chart-card {
+		background-color: white;
+		border-radius: 12px;
+		padding: 20px;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+		height: 360px; /* Fixed height for uniformity */
+	}
+
+	.chart-title {
+		color: var(--dotnet-secondary);
+		margin-top: 0;
+		margin-bottom: 15px;
+		font-size: 18px;
+		font-weight: 600;
 	}
 
 	/* Footer */
