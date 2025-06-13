@@ -9,6 +9,8 @@ public partial class KitchenProductionPage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
+	[Parameter] public int? KitchenProductionId { get; set; }
+
 	private UserModel _user;
 	private bool _isLoading = true;
 
@@ -23,7 +25,7 @@ public partial class KitchenProductionPage
 
 	private readonly List<ItemRecipeModel> _productCart = [];
 
-	private readonly KitchenProductionModel _kitchenProduction = new() { ProductionDate = DateTime.Now };
+	private KitchenProductionModel _kitchenProduction = new() { ProductionDate = DateTime.Now, Status = true };
 
 	private SfGrid<ItemRecipeModel> _sfGrid;
 	private SfToast _sfSuccessToast;
@@ -76,6 +78,36 @@ public partial class KitchenProductionPage
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
 		_products.RemoveAll(r => r.LocationId != 1);
 		_selectedProductId = _products.Count > 0 ? _products[0].Id : 0;
+
+		if (KitchenProductionId.HasValue && KitchenProductionId.Value > 0)
+			await LoadKitchenProduction();
+
+		StateHasChanged();
+	}
+
+	private async Task LoadKitchenProduction()
+	{
+		_kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, KitchenProductionId.Value);
+
+		if (_kitchenProduction is null)
+			NavManager.NavigateTo("/");
+
+		_productCart.Clear();
+
+		var kitchenProductionDetails = await KitchenProductionData.LoadKitchenProductionDetailByKitchenProduction(_kitchenProduction.Id);
+		foreach (var detail in kitchenProductionDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			_productCart.Add(new()
+			{
+				ItemCategoryId = product.ProductCategoryId,
+				ItemId = product.Id,
+				ItemName = product.Name,
+				Quantity = detail.Quantity
+			});
+		}
+
+		StateHasChanged();
 	}
 	#endregion
 
@@ -122,8 +154,10 @@ public partial class KitchenProductionPage
 	{
 		_kitchenProduction.UserId = _user.Id;
 		_kitchenProduction.LocationId = _user.LocationId;
-		_kitchenProduction.Status = true;
-		_kitchenProduction.TransactionNo = await GenerateBillNo.GenerateKitchenProductionTransactionNo(_kitchenProduction);
+
+		if (KitchenProductionId is null)
+			_kitchenProduction.TransactionNo = await GenerateBillNo.GenerateKitchenProductionTransactionNo(_kitchenProduction);
+
 		await _sfGrid.Refresh();
 
 		if (_kitchenProduction.KitchenId <= 0)
@@ -165,6 +199,16 @@ public partial class KitchenProductionPage
 
 	private async Task InsertKitchenProductionDetail()
 	{
+		if (KitchenProductionId.HasValue && KitchenProductionId.Value > 0)
+		{
+			var existingDetails = await KitchenProductionData.LoadKitchenProductionDetailByKitchenProduction(_kitchenProduction.Id);
+			foreach (var detail in existingDetails)
+			{
+				detail.Status = false;
+				await KitchenProductionData.InsertKitchenProductionDetail(detail);
+			}
+		}
+
 		foreach (var item in _productCart)
 			await KitchenProductionData.InsertKitchenProductionDetail(new()
 			{
@@ -178,6 +222,12 @@ public partial class KitchenProductionPage
 
 	private async Task InsertStock()
 	{
+		if (KitchenProductionId.HasValue && KitchenProductionId.Value > 0)
+			await StockData.DeleteProductStockByTransactionNo(_kitchenProduction.TransactionNo);
+
+		if (!_kitchenProduction.Status)
+			return;
+
 		foreach (var item in _productCart)
 			await StockData.InsertProductStock(new()
 			{

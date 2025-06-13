@@ -24,6 +24,8 @@ public static class TableNames
 	public static string Kitchen => "Kitchen";
 	public static string KitchenIssue => "KitchenIssue";
 	public static string KitchenIssueDetail => "KitchenIssueDetail";
+	public static string KitchenProduction => "KitchenProduction";
+	public static string KitchenProductionDetail => "KitchenProductionDetail";
 }
 
 public static class StoredProcedureNames

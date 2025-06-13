@@ -47,7 +47,8 @@ public partial class OrderPage
 	{
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword()) NavManager.NavigateTo("/Login");
+		if (firstRender && !await ValidatePassword())
+			NavManager.NavigateTo("/Login");
 
 		_isLoading = false;
 
@@ -113,7 +114,7 @@ public partial class OrderPage
 		{
 			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
 
-			_orderProductCarts.Add(new OrderProductCartModel()
+			_orderProductCarts.Add(new()
 			{
 				ProductId = product.Id,
 				ProductName = product.Name,
@@ -201,6 +202,9 @@ public partial class OrderPage
 	{
 		_order.UserId = _user.Id;
 
+		if (OrderId is null)
+			_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
+
 		if (!_user.Admin || _user.LocationId != 1)
 			_order.LocationId = _user.LocationId;
 
@@ -225,9 +229,6 @@ public partial class OrderPage
 	{
 		if (!await ValidateForm())
 			return;
-
-		if (OrderId is null)
-			_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
 
 		_order.Id = await OrderData.InsertOrder(_order);
 		if (_order.Id <= 0)

@@ -9,6 +9,8 @@ public partial class KitchenIssuePage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
+	[Parameter] public int? KitchenIssueId { get; set; }
+
 	private UserModel _user;
 	private bool _isLoading = true;
 
@@ -23,7 +25,7 @@ public partial class KitchenIssuePage
 
 	private readonly List<ItemRecipeModel> _rawMaterialCart = [];
 
-	private readonly KitchenIssueModel _kitchenIssue = new() { IssueDate = DateTime.Now };
+	private KitchenIssueModel _kitchenIssue = new() { IssueDate = DateTime.Now, Status = true };
 
 	private SfGrid<ItemRecipeModel> _sfGrid;
 	private SfToast _sfSuccessToast;
@@ -75,6 +77,36 @@ public partial class KitchenIssuePage
 
 		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
 		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
+
+		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
+			await LoadKitchenIssue();
+
+		StateHasChanged();
+	}
+
+	private async Task LoadKitchenIssue()
+	{
+		_kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, KitchenIssueId.Value);
+
+		if (_kitchenIssue is null)
+			NavManager.NavigateTo("/");
+
+		_rawMaterialCart.Clear();
+
+		var kitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(_kitchenIssue.Id);
+		foreach (var detail in kitchenIssueDetails)
+		{
+			var rawMaterial = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, detail.RawMaterialId);
+			_rawMaterialCart.Add(new()
+			{
+				ItemCategoryId = rawMaterial.RawMaterialCategoryId,
+				ItemId = detail.RawMaterialId,
+				ItemName = rawMaterial.Name,
+				Quantity = detail.Quantity
+			});
+		}
+
+		StateHasChanged();
 	}
 	#endregion
 
@@ -120,8 +152,10 @@ public partial class KitchenIssuePage
 	{
 		_kitchenIssue.UserId = _user.Id;
 		_kitchenIssue.LocationId = _user.LocationId;
-		_kitchenIssue.Status = true;
-		_kitchenIssue.TransactionNo = await GenerateBillNo.GenerateKitchenIssueTransactionNo(_kitchenIssue);
+
+		if (KitchenIssueId is null)
+			_kitchenIssue.TransactionNo = await GenerateBillNo.GenerateKitchenIssueTransactionNo(_kitchenIssue);
+
 		await _sfGrid.Refresh();
 
 		if (_kitchenIssue.KitchenId <= 0)
@@ -163,6 +197,16 @@ public partial class KitchenIssuePage
 
 	private async Task InsertKitchenIssueDetail()
 	{
+		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
+		{
+			var existingDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(_kitchenIssue.Id);
+			foreach (var detail in existingDetails)
+			{
+				detail.Status = false;
+				await KitchenIssueData.InsertKitchenIssueDetail(detail);
+			}
+		}
+
 		foreach (var item in _rawMaterialCart)
 			await KitchenIssueData.InsertKitchenIssueDetail(new()
 			{
@@ -176,6 +220,12 @@ public partial class KitchenIssuePage
 
 	private async Task InsertStock()
 	{
+		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
+			await StockData.DeleteRawMaterialStockByTransactionNo(_kitchenIssue.TransactionNo);
+
+		if (!_kitchenIssue.Status)
+			return;
+
 		foreach (var item in _rawMaterialCart)
 			await StockData.InsertRawMaterialStock(new()
 			{

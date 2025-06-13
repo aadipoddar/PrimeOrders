@@ -1,4 +1,5 @@
 ﻿@page "/Inventory/Kitchen-Issue"
+@page "/Inventory/Kitchen-Issue/{KitchenIssueId:int}"
 
 <PageTitle>Kitchen Issue - Prime Orders</PageTitle>
 
@@ -87,6 +88,15 @@ else
 										  @bind-Value="_kitchenIssue.IssueDate"
 										  CssClass="form-control" />
 						</div>
+
+						@if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
+						{
+							<div class="form-group">
+								<div class="status-checkbox-container">
+									<SfCheckBox @bind-Checked="_kitchenIssue.Status" Label="Active Status" CssClass="status-checkbox" />
+								</div>
+							</div>
+						}
 					</div>
 				</div>
 			</div>
@@ -357,6 +367,27 @@ else
 
 	.save-icon {
 		font-size: 18px;
+	}
+
+	/* Status Checkbox Styling */
+	.status-checkbox-container {
+		display: flex;
+		align-items: center;
+		margin: 5px 0;
+	}
+
+	::deep .status-checkbox .e-frame {
+		border-color: var(--dotnet-primary);
+	}
+
+	::deep .status-checkbox .e-check {
+		color: white;
+	}
+
+	::deep .status-checkbox .e-label {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+		margin-left: 8px;
 	}
 
 	/* Grid Styling */

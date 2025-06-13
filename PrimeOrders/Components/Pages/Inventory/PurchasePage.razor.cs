@@ -375,13 +375,11 @@ public partial class PurchasePage
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
 		{
 			var existingPurchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(PurchaseId.Value);
-
-			if (existingPurchaseDetails is not null)
-				foreach (var item in existingPurchaseDetails)
-				{
-					item.Status = false;
-					await PurchaseData.InsertPurchaseDetail(item);
-				}
+			foreach (var item in existingPurchaseDetails)
+			{
+				item.Status = false;
+				await PurchaseData.InsertPurchaseDetail(item);
+			}
 		}
 
 		foreach (var item in _purchaseRawMaterialCarts)
@@ -411,6 +409,9 @@ public partial class PurchasePage
 	{
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
 			await StockData.DeleteRawMaterialStockByTransactionNo(_purchase.BillNo);
+
+		if (!_purchase.Status)
+			return;
 
 		foreach (var item in _purchaseRawMaterialCarts)
 			await StockData.InsertRawMaterialStock(new()
