@@ -10,6 +10,8 @@ public partial class SalePage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
+	[Parameter] public int? SaleId { get; set; }
+
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
@@ -25,10 +27,16 @@ public partial class SalePage
 
 	private SaleProductCartModel _selectedProductCart = new();
 
-	private readonly SaleModel _sale = new() { SaleDateTime = DateTime.Now, DiscReason = "", Remarks = "", Status = true };
+	private SaleModel _sale = new()
+	{
+		SaleDateTime = DateTime.Now,
+		DiscReason = "",
+		Remarks = "",
+		Status = true
+	};
 
 	private List<PaymentModeModel> _paymentModes;
-	private List<OrderModel> _orders;
+	private List<OrderModel> _orders = [];
 	private List<LocationModel> _parties;
 	private List<ProductCategoryModel> _productCategories;
 	private List<ProductModel> _products;
@@ -91,6 +99,50 @@ public partial class SalePage
 
 		_sale.LocationId = _user?.LocationId ?? 0;
 		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
+
+		await UpdateFinancialDetails();
+
+		if (SaleId.HasValue && SaleId.Value > 0)
+			await LoadSale();
+
+		StateHasChanged();
+	}
+
+	private async Task LoadSale()
+	{
+		_sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, SaleId.Value);
+
+		if (_sale is null)
+			NavManager.NavigateTo("/Sale");
+
+		_saleProductCart.Clear();
+
+		var saleDetails = await SaleData.LoadSaleDetailBySale(_sale.Id);
+		foreach (var item in saleDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
+			_saleProductCart.Add(new()
+			{
+				ProductId = product.Id,
+				ProductName = product.Name,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				DiscPercent = item.DiscPercent,
+				CGSTPercent = productTax.CGST,
+				SGSTPercent = productTax.SGST,
+				IGSTPercent = productTax.IGST,
+				BaseTotal = item.BaseTotal,
+				DiscAmount = item.DiscAmount,
+				AfterDiscount = item.AfterDiscount,
+				CGSTAmount = item.CGSTAmount,
+				SGSTAmount = item.SGSTAmount,
+				IGSTAmount = item.IGSTAmount,
+				Total = item.Total
+			});
+		}
+
+		_selectedPaymentModeId = _sale.Cash > 0 ? 1 : _sale.Card > 0 ? 2 : _sale.UPI > 0 ? 3 : _sale.Credit > 0 ? 4 : 0;
 
 		await UpdateFinancialDetails();
 		StateHasChanged();
@@ -178,7 +230,9 @@ public partial class SalePage
 	{
 		_sale.UserId = _user?.Id ?? 0;
 		_sale.LocationId = _user?.LocationId ?? 0;
-		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
+
+		if (SaleId is null)
+			_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
 
 		foreach (var item in _saleProductCart)
 		{
@@ -371,7 +425,14 @@ public partial class SalePage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
-		if (_saleProductCart.Count == 0 || _saleProductCart is null)
+		await UpdateFinancialDetails();
+
+		_sale.SaleDateTime = DateOnly.FromDateTime(_sale.SaleDateTime).ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second));
+
+		if (SaleId is null)
+			_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
+
+		if (_saleProductCart?.Count == 0)
 		{
 			_sfErrorToast.Content = "Please add at least one Product to the Sale.";
 			await _sfErrorToast.ShowAsync();
@@ -391,12 +452,8 @@ public partial class SalePage
 
 	private async Task OnSaveSaleClick()
 	{
-		await UpdateFinancialDetails();
-
 		if (!await ValidateForm())
 			return;
-
-		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
 
 		_sale.Id = await SaleData.InsertSale(_sale);
 		if (_sale.Id <= 0)
@@ -408,8 +465,8 @@ public partial class SalePage
 		}
 
 		await InsertSaleDetail();
-		await UpdateOrder();
 		await InsertStock();
+		await UpdateOrder();
 		await PrintThermalBill();
 
 		await _sfSuccessToast.ShowAsync();
@@ -417,6 +474,16 @@ public partial class SalePage
 
 	private async Task InsertSaleDetail()
 	{
+		if (SaleId.HasValue && SaleId.Value > 0)
+		{
+			var existingSaleDetails = await SaleData.LoadSaleDetailBySale(_sale.Id);
+			foreach (var item in existingSaleDetails)
+			{
+				item.Status = false;
+				await SaleData.InsertSaleDetail(item);
+			}
+		}
+
 		foreach (var item in _saleProductCart)
 			await SaleData.InsertSaleDetail(new()
 			{
@@ -440,27 +507,11 @@ public partial class SalePage
 			});
 	}
 
-	private async Task UpdateOrder()
-	{
-		if (_sale.OrderId is null)
-			return;
-
-		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
-		if (order is not null && order.Status)
-		{
-			order.SaleId = _sale.Id;
-			await OrderData.InsertOrder(order);
-		}
-	}
-
-	private async Task PrintThermalBill()
-	{
-		var content = await PrintBill.PrintThermalBill(_sale);
-		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
-	}
-
 	private async Task InsertStock()
 	{
+		if (SaleId.HasValue && SaleId.Value > 0)
+			await StockData.DeleteProductStockByTransactionNo(_sale.BillNo);
+
 		foreach (var product in _saleProductCart)
 		{
 			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
@@ -495,8 +546,37 @@ public partial class SalePage
 			});
 	}
 
+	private async Task UpdateOrder()
+	{
+		if (SaleId.HasValue && SaleId.Value > 0)
+		{
+			var existingOrder = await OrderData.LoadOrderBySale(_sale.Id);
+			if (existingOrder is not null && existingOrder.Id > 0)
+			{
+				existingOrder.SaleId = null;
+				await OrderData.InsertOrder(existingOrder);
+			}
+		}
+
+		if (_sale.OrderId is null)
+			return;
+
+		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
+		if (order is not null && order.Status)
+		{
+			order.SaleId = _sale.Id;
+			await OrderData.InsertOrder(order);
+		}
+	}
+
+	private async Task PrintThermalBill()
+	{
+		var content = await PrintBill.PrintThermalBill(_sale);
+		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
+	}
+
 	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
+		NavManager.NavigateTo("/Sale", forceLoad: true);
 
 	private void NavigateTo(string route) =>
 		NavManager.NavigateTo(route);

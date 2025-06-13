@@ -162,6 +162,7 @@
     <Build Include="StoredProcedures\Reports\Load_KitchenProductionDetails_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_KitchenIssueDetail_By_KitchenIssue.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_KitchenProductionDetail_By_KitchenProduction.sql" />
+    <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Sale.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

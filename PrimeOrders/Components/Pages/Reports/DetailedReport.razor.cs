@@ -103,11 +103,11 @@ public partial class DetailedReport
 		StateHasChanged();
 	}
 
-	private async Task ExportToPdf()
-	{
-		if (_sfGrid is not null)
-			await _sfGrid.ExportToPdfAsync();
-	}
+	public void SaleHistoryRowSelected(RowSelectEventArgs<SaleOverviewModel> args) =>
+		NavigateTo($"/Sale/{args.Data.SaleId}");
+
+	private async Task ExportToPdf() =>
+			await _sfGrid?.ExportToPdfAsync();
 
 	private async Task ExportToExcel()
 	{

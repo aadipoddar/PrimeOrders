@@ -19,4 +19,7 @@ public static class OrderData
 
 	public static async Task<List<OrderOverviewModel>> LoadOrderDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
 		await SqlDataAccess.LoadData<OrderOverviewModel, dynamic>(StoredProcedureNames.LoadOrderDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+
+	public static async Task<OrderModel> LoadOrderBySale(int SaleId) =>
+		(await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderBySale, new { SaleId })).FirstOrDefault();
 }

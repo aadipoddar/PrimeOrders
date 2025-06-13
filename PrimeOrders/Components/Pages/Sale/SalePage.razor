@@ -1,4 +1,5 @@
 ﻿@page "/Sale"
+@page "/Sale/{SaleId:int}"
 
 <PageTitle>Sale - Prime Orders</PageTitle>
 
@@ -171,7 +172,7 @@ else
 							</ContentTemplate>
 						</AccordionItem>
 
-						@if (_user?.LocationId == 1)
+						@if (_user?.LocationId == 1 && (SaleId is null || _sale.OrderId is null))
 						{
 							<AccordionItem Header="Order & Party Details">
 								<ContentTemplate>
