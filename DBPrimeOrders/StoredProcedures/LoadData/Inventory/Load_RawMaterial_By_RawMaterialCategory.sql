@@ -4,5 +4,6 @@ AS
 BEGIN
 	SELECT *
 	FROM dbo.RawMaterial
-	WHERE RawMaterialCategoryId = @RawMaterialCategoryId;
+	WHERE RawMaterialCategoryId = @RawMaterialCategoryId
+		AND Status = 1
 END

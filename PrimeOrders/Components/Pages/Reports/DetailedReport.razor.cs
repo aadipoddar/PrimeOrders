@@ -95,7 +95,8 @@ public partial class DetailedReport
 		else
 			_selectedLocationId = _user.LocationId;
 
-		_saleOverviews = await SaleData.LoadSaleDetailsByDateLocationId(_startDate.ToDateTime(new TimeOnly(0, 0)),
+		_saleOverviews = await SaleData.LoadSaleDetailsByDateLocationId(
+			_startDate.ToDateTime(new TimeOnly(0, 0)),
 			_endDate.ToDateTime(new TimeOnly(23, 59)),
 			_selectedLocationId);
 

@@ -50,6 +50,8 @@ public static class StoredProcedureNames
 
 	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
+	public static string LoadKitchenIssueDetailByKitchenIssue => "Load_KitchenIssueDetail_By_KitchenIssue";
+	public static string LoadKitchenProductionDetailByKitchenProduction => "Load_KitchenProductionDetail_By_KitchenProduction";
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";
@@ -57,6 +59,8 @@ public static class StoredProcedureNames
 	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
 	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
 	public static string LoadPurchaseDetailsByDate => "Load_PurchaseDetails_By_Date";
+	public static string LoadKitcheIssueDetailsByDate => "Load_KitcheIssueDetails_By_Date";
+	public static string LoadKitchenProductionDetailsByDate => "Load_KitchenProductionDetails_By_Date";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
@@ -102,4 +106,6 @@ public static class ViewNames
 	public static string OrderOverview => "Order_Overview";
 	public static string ProductOverview => "Product_Overview";
 	public static string PurchaseOverview => "Purchase_Overview";
+	public static string KitchenIssueOverview => "KitchenIssue_Overview";
+	public static string KitchenProductionOverview => "KitchenProduction_Overview";
 }
