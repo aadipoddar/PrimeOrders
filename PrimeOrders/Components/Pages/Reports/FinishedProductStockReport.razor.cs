@@ -4,7 +4,7 @@ using Syncfusion.Blazor.Grids;
 
 namespace PrimeOrders.Components.Pages.Reports;
 
-public partial class StockReport
+public partial class FinishedProductStockReport
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }
@@ -12,15 +12,14 @@ public partial class StockReport
 	private UserModel _user;
 	private bool _isLoading = true;
 
-	private int _selectedLocationId = 0;
-
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
 	private List<LocationModel> _locations = [];
-	private List<RawMaterialStockDetailModel> _stockDetails = [];
+	private int _selectedLocationId;
+	private List<ProductStockDetailModel> _stockDetails = [];
 
-	private SfGrid<RawMaterialStockDetailModel> _sfGrid;
+	private SfGrid<ProductStockDetailModel> _sfGrid;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -34,7 +33,14 @@ public partial class StockReport
 		StateHasChanged();
 
 		if (firstRender)
-			await LoadInitialData();
+		{
+			_selectedLocationId = _user.LocationId;
+
+			if (_user.LocationId == 1)
+				_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
+
+			await LoadStockDetails();
+		}
 	}
 
 	private async Task<bool> ValidatePassword()
@@ -53,25 +59,11 @@ public partial class StockReport
 		return true;
 	}
 
-	private async Task LoadInitialData()
-	{
-		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
-
-		if (_user.LocationId != 1)
-			_selectedLocationId = _user.LocationId;
-
-		await LoadStockDetails();
-	}
-
-	private async Task LoadStockDetails()
-	{
-		int locationId = _user?.LocationId == 1 ? _selectedLocationId : _user.LocationId;
-
-		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(
+	private async Task LoadStockDetails() =>
+		_stockDetails = await StockData.LoadProductStockDetailsByDateLocationId(
 			_startDate.ToDateTime(new TimeOnly(0, 0)),
 			_endDate.ToDateTime(new TimeOnly(23, 59)),
-			locationId);
-	}
+			_selectedLocationId);
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
@@ -115,7 +107,7 @@ public partial class StockReport
 		{
 			{ "Total Stock Items", _stockDetails.Count },
 			{ "Opening Stock", _stockDetails.Sum(s => s.OpeningStock) },
-			{ "Total Purchases", _stockDetails.Sum(s => s.PurchaseStock) },
+			{ "Total Production", _stockDetails.Sum(s => s.PurchaseStock) },
 			{ "Total Sales", _stockDetails.Sum(s => s.SaleStock) },
 			{ "Monthly Stock", _stockDetails.Sum(s => s.MonthlyStock) },
 			{ "Closing Stock", _stockDetails.Sum(s => s.ClosingStock) },
@@ -125,7 +117,7 @@ public partial class StockReport
 
 		// Add top categories summary data
 		var topCategories = _stockDetails
-			.GroupBy(s => s.RawMaterialCategoryName)
+			.GroupBy(s => s.ProductCategoryName)
 			.OrderByDescending(g => g.Sum(s => s.ClosingStock))
 			.Take(3)
 			.ToList();
@@ -135,38 +127,38 @@ public partial class StockReport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-			nameof(RawMaterialStockDetailModel.RawMaterialCode),
-			nameof(RawMaterialStockDetailModel.RawMaterialName),
-			nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
-			nameof(RawMaterialStockDetailModel.OpeningStock),
-			nameof(RawMaterialStockDetailModel.PurchaseStock),
-			nameof(RawMaterialStockDetailModel.SaleStock),
-			nameof(RawMaterialStockDetailModel.MonthlyStock),
-			nameof(RawMaterialStockDetailModel.ClosingStock)
+			nameof(ProductStockDetailModel.ProductCode),
+			nameof(ProductStockDetailModel.ProductName),
+			nameof(ProductStockDetailModel.ProductCategoryName),
+			nameof(ProductStockDetailModel.OpeningStock),
+			nameof(ProductStockDetailModel.PurchaseStock),
+			nameof(ProductStockDetailModel.SaleStock),
+			nameof(ProductStockDetailModel.MonthlyStock),
+			nameof(ProductStockDetailModel.ClosingStock)
 		];
 
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
-			[nameof(RawMaterialStockDetailModel.RawMaterialCode)] = new()
+			[nameof(ProductStockDetailModel.ProductCode)] = new()
 			{
-				DisplayName = "Item Code",
+				DisplayName = "Product Code",
 				Width = 12,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(RawMaterialStockDetailModel.RawMaterialName)] = new()
+			[nameof(ProductStockDetailModel.ProductName)] = new()
 			{
-				DisplayName = "Item Name",
+				DisplayName = "Product Name",
 				Width = 30,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)] = new()
+			[nameof(ProductStockDetailModel.ProductCategoryName)] = new()
 			{
 				DisplayName = "Category",
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(RawMaterialStockDetailModel.OpeningStock)] = new()
+			[nameof(ProductStockDetailModel.OpeningStock)] = new()
 			{
 				DisplayName = "Opening Stock",
 				Format = "#,##0.00",
@@ -184,9 +176,9 @@ public partial class StockReport
 					};
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.PurchaseStock)] = new()
+			[nameof(ProductStockDetailModel.PurchaseStock)] = new()
 			{
-				DisplayName = "Purchases",
+				DisplayName = "Production",
 				Format = "#,##0.00",
 				Width = 15,
 				IncludeInTotal = true,
@@ -202,7 +194,7 @@ public partial class StockReport
 					};
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.SaleStock)] = new()
+			[nameof(ProductStockDetailModel.SaleStock)] = new()
 			{
 				DisplayName = "Sales",
 				Format = "#,##0.00",
@@ -220,7 +212,7 @@ public partial class StockReport
 					};
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.MonthlyStock)] = new()
+			[nameof(ProductStockDetailModel.MonthlyStock)] = new()
 			{
 				DisplayName = "Monthly Stock",
 				Format = "#,##0.00",
@@ -228,7 +220,7 @@ public partial class StockReport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(RawMaterialStockDetailModel.ClosingStock)] = new()
+			[nameof(ProductStockDetailModel.ClosingStock)] = new()
 			{
 				DisplayName = "Closing Stock",
 				Format = "#,##0.00",
@@ -264,16 +256,16 @@ public partial class StockReport
 		};
 
 		// Generate title based on location if selected
-		string reportTitle = "Stock Report";
+		string reportTitle = "Finished Product Stock Report";
 
-		if (_selectedLocationId > 0)
+		if (_selectedLocationId > 0 && _user.LocationId == 1)
 		{
 			var location = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
 			if (location != null)
-				reportTitle = $"Stock Report - {location.Name}";
+				reportTitle = $"Finished Product Stock Report - {location.Name}";
 		}
 
-		string worksheetName = "Stock Details";
+		string worksheetName = "Product Stock Details";
 
 		var memoryStream = ExcelExportUtil.ExportToExcel(
 			_stockDetails,
@@ -285,16 +277,7 @@ public partial class StockReport
 			columnSettings,
 			columnOrder);
 
-		// Generate filename with location information if applicable
-		string locationSuffix = string.Empty;
-		if (_selectedLocationId > 0)
-		{
-			var location = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
-			if (location is not null)
-				locationSuffix = $"_{location.Name}";
-		}
-
-		var fileName = $"Stock_Report{locationSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
+		var fileName = $"Finished_Product_Stock_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
@@ -304,7 +287,7 @@ public partial class StockReport
 		var result = new List<StockOverviewData>
 		{
 			new() { Component = "Opening Stock", Value = _stockDetails.Sum(s => s.OpeningStock) },
-			new() { Component = "Purchases", Value = _stockDetails.Sum(s => s.PurchaseStock) },
+			new() { Component = "Production", Value = _stockDetails.Sum(s => s.PurchaseStock) },
 			new() { Component = "Sales", Value = _stockDetails.Sum(s => s.SaleStock) },
 			new() { Component = "Monthly Stock", Value = _stockDetails.Sum(s => s.MonthlyStock) },
 			new() { Component = "Closing Stock", Value = _stockDetails.Sum(s => s.ClosingStock) }
@@ -316,7 +299,7 @@ public partial class StockReport
 	private List<CategoryDistributionData> GetCategoryDistributionData()
 	{
 		var result = _stockDetails
-			.GroupBy(s => s.RawMaterialCategoryName)
+			.GroupBy(s => s.ProductCategoryName)
 			.Select(group => new CategoryDistributionData
 			{
 				CategoryName = group.Key,
@@ -334,7 +317,7 @@ public partial class StockReport
 		var result = _stockDetails
 			.Select(s => new TopMovingItemsData
 			{
-				ItemName = s.RawMaterialName,
+				ItemName = s.ProductName,
 				Movement = s.PurchaseStock + s.SaleStock
 			})
 			.OrderByDescending(i => i.Movement)
@@ -349,7 +332,7 @@ public partial class StockReport
 		var result = _stockDetails
 			.Select(s => new OpeningClosingData
 			{
-				ItemName = s.RawMaterialName,
+				ItemName = s.ProductName,
 				OpeningStock = s.OpeningStock,
 				ClosingStock = s.ClosingStock
 			})

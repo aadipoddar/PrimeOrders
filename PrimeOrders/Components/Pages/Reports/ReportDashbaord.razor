@@ -51,6 +51,12 @@ else
 		            <h3>Product Summary Report</h3>
 		            <p>View aggregated product sales analytics</p>
 		        </div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/RawMaterialStockReport")'>
+					<div class="card-icon stock-report-icon">🧮</div>
+					<h3>Raw Material Stock Reports</h3>
+					<p>Monitor inventory levels and stock status</p>
+				</div>
 		    }
 		        
 		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Detailed")'>
@@ -64,17 +70,17 @@ else
 		        <h3>Product Detailed Reports</h3>
 		        <p>Track individual product performance</p>
 		    </div>
-		
-		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/StockReport")'>
-		        <div class="card-icon stock-report-icon">🧮</div>
-		        <h3>Stock Reports</h3>
-		        <p>Monitor inventory levels and stock status</p>
-		    </div>
 
 			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/OrderHistory")'>
 				<div class="card-icon order-history-icon">📜</div>
 				<h3>Order History</h3>
 				<p>Track and analyze customer order records</p>
+			</div>
+			
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/FinishedProductStockReport")'>
+				<div class="card-icon product-stock-icon">📦</div>
+				<h3>Finished Product Stock Report</h3>
+				<p>View finished product inventory levels and stock status</p>
 			</div>
 		</div>
 
@@ -221,6 +227,11 @@ else
 	.order-history-icon {
 		background-color: rgba(255, 87, 51, 0.1);
 		color: #FF5733;
+	}
+	
+	.product-stock-icon {
+		background-color: rgba(41, 128, 185, 0.1);
+		color: #2980B9;
 	}
 
 	/* Back button styles */

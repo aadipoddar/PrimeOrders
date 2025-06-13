@@ -1,4 +1,4 @@
-﻿@page "/Reports/StockReport"
+﻿@page "/Reports/RawMaterialStockReport"
 
 <PageTitle>Stock Report - Prime Orders</PageTitle>
 
@@ -50,22 +50,6 @@ else
 						<DateRangePickerEvents TValue="DateOnly" ValueChange="DateRangeChanged" />
 					</SfDateRangePicker>
 				</div>
-
-				@if (_user?.LocationId == 1)
-				{
-					<div class="filter-item">
-						<label>Location</label>
-						<SfComboBox TValue="int"
-									TItem="LocationModel"
-									Placeholder="Select a Location"
-									DataSource="_locations"
-									Value="_selectedLocationId"
-									CssClass="filter-control">
-							<ComboBoxEvents TItem="LocationModel" TValue="int" ValueChange="OnLocationChanged" />
-							<ComboBoxFieldSettings Value="Id" Text="Name" />
-						</SfComboBox>
-					</div>
-				}
 			</div>
 			<div class="action-buttons">
 				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
