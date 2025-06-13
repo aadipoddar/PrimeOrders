@@ -42,6 +42,9 @@ public partial class OrderPage
 	private SfToast _sfSuccessToast;
 	private SfToast _sfErrorToast;
 
+	private SfDialog _sfOrderConfirmDialog;
+	private bool _confirmDialogVisible = false;
+
 	#region LoadData
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -195,6 +198,12 @@ public partial class OrderPage
 
 		StateHasChanged();
 	}
+
+	private void CloseConfirmationDialog()
+	{
+		_confirmDialogVisible = false;
+		StateHasChanged();
+	}
 	#endregion
 
 	#region Saving
@@ -225,7 +234,13 @@ public partial class OrderPage
 		return true;
 	}
 
-	private async void OnSaveOrderClick()
+	private void OnSaveOrderClick()
+	{
+		_confirmDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private async Task ConfirmOrderSubmission()
 	{
 		if (!await ValidateForm())
 			return;

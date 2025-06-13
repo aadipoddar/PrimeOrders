@@ -225,6 +225,90 @@ else
 	</DialogTemplates>
 </SfDialog>
 
+<SfDialog ID="_sfOrderConfirmDialog"
+		  @ref="_sfOrderConfirmDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_confirmDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Confirm Order</span>
+			</div>
+		</Header>
+
+		<Content>
+			<div class="dialog-content confirm-order">
+				<div class="confirm-section">
+					<h3>Order Details</h3>
+					<div class="detail-item">
+						<span class="detail-label">Order Number:</span>
+						<span class="detail-value">@_order.OrderNo</span>
+					</div>
+					<div class="detail-item">
+						<span class="detail-label">Order Date:</span>
+						<span class="detail-value">@_order.OrderDate.ToShortDateString()</span>
+					</div>
+					@if (_order.LocationId > 0 && _locations.Any(l => l.Id == _order.LocationId))
+					{
+						<div class="detail-item">
+							<span class="detail-label">Location:</span>
+							<span class="detail-value">@_locations.First(l => l.Id == _order.LocationId).Name</span>
+						</div>
+					}
+					@if (!string.IsNullOrEmpty(_order.Remarks))
+					{
+						<div class="detail-item remarks">
+							<span class="detail-label">Remarks:</span>
+							<span class="detail-value">@_order.Remarks</span>
+						</div>
+					}
+				</div>
+
+				<div class="confirm-section">
+					<h3>Products</h3>
+					<div class="products-table-container">
+						<table class="products-table">
+							<thead>
+								<tr>
+									<th>Product</th>
+									<th>Quantity</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var item in _orderProductCarts)
+								{
+									<tr>
+										<td>@item.ProductName</td>
+										<td class="qty-column">@item.Quantity</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="confirm-message">
+					<p>Are you sure you want to submit this order?</p>
+				</div>
+			</div>
+		</Content>
+
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Confirm" IsPrimary="true" OnClick="ConfirmOrderSubmission" CssClass="dialog-button" />
+					<SfButton Content="Edit Order" OnClick="CloseConfirmationDialog" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -487,6 +571,98 @@ else
 		justify-content: center;
 		font-weight: 500;
 	}
+
+	/* Order Confirmation Dialog Styling */
+	.confirm-order {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.confirm-section {
+		border-bottom: 1px solid var(--dotnet-border);
+		padding-bottom: 15px;
+	}
+
+		.confirm-section:last-child {
+			border-bottom: none;
+		}
+
+		.confirm-section h3 {
+			margin: 0 0 12px 0;
+			color: var(--dotnet-secondary);
+			font-size: 18px;
+			font-weight: 600;
+		}
+
+	.detail-item {
+		display: flex;
+		margin-bottom: 8px;
+	}
+
+	.detail-label {
+		font-weight: 600;
+		min-width: 120px;
+		color: var(--dotnet-dark);
+	}
+
+	.detail-value {
+		color: #333;
+	}
+
+	.remarks .detail-value {
+		font-style: italic;
+	}
+
+	.products-table-container {
+		max-height: 200px;
+		overflow-y: auto;
+		margin: 10px 0;
+		border-radius: 6px;
+		border: 1px solid var(--dotnet-border);
+	}
+
+	.products-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+		.products-table th {
+			background-color: var(--dotnet-light);
+			padding: 10px;
+			text-align: left;
+			position: sticky;
+			top: 0;
+			z-index: 1;
+			border-bottom: 1px solid var(--dotnet-border);
+		}
+
+		.products-table td {
+			padding: 8px 10px;
+			border-bottom: 1px solid var(--dotnet-border);
+		}
+
+		.products-table tr:last-child td {
+			border-bottom: none;
+		}
+
+	.qty-column {
+		text-align: right;
+	}
+
+	.confirm-message {
+		background-color: #f9f0ff;
+		border-left: 4px solid var(--dotnet-primary);
+		padding: 10px 15px;
+		margin: 10px 0;
+		border-radius: 4px;
+	}
+
+		.confirm-message p {
+			margin: 0;
+			color: var(--dotnet-secondary);
+			font-weight: 500;
+		}
 
 	/* Footer */
 	.dashboard-footer {
