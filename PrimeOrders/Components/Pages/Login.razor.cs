@@ -52,7 +52,7 @@ public partial class Login
 
 		try
 		{
-			var user = await UserData.LoadUserByPasscode(_passcode);
+			var user = await UserData.LoadUserByPasscode(int.Parse(_passcode));
 
 			if (user is null || !user.Status)
 			{
