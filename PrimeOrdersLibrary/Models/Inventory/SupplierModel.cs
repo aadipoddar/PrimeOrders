@@ -10,5 +10,6 @@ public class SupplierModel
 	public string Email { get; set; }
 	public string Address { get; set; }
 	public int StateId { get; set; }
+	public int? LocationId { get; set; }
 	public bool Status { get; set; }
 }

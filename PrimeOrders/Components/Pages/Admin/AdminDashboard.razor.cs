@@ -1,6 +1,6 @@
-namespace PrimeOrders.Components.Pages;
+namespace PrimeOrders.Components.Pages.Admin;
 
-public partial class Dashboard
+public partial class AdminDashboard
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
@@ -10,9 +10,6 @@ public partial class Dashboard
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (firstRender)
-			Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
 		_isLoading = true;
 
 		if (firstRender && !await ValidatePassword())

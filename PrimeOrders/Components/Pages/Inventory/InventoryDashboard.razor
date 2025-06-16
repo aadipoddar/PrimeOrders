@@ -50,12 +50,6 @@ else
 				<p>Manage and view purchase receipts</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Supplier")'>
-				<div class="card-icon supplier-icon">👥</div>
-				<h3>Suppliers</h3>
-				<p>Add and manage your suppliers</p>
-			</div>
-
 			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/RawMaterialStockAdjustment")'>
 				<div class="card-icon stock-icon">📊</div>
 				<h3>Raw Material Stock Adjustment</h3>
@@ -209,11 +203,6 @@ else
 	.receipt-icon {
 		background-color: rgba(81, 43, 212, 0.1);
 		color: var(--dotnet-primary);
-	}
-
-	.supplier-icon {
-		background-color: rgba(46, 196, 134, 0.1);
-		color: #2EC486;
 	}
 
 	.stock-icon {

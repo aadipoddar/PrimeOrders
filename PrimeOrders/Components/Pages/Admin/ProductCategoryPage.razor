@@ -1,11 +1,11 @@
-﻿@page "/Inventory/Supplier"
+﻿@page "/Admin/Product-Categories"
 
-<PageTitle>Suppliers - Prime Orders</PageTitle>
+<PageTitle>Product Categories - Prime Orders</PageTitle>
 
 <SfToast @ref="_sfErrorToast"
 		 ID="toast_error"
 		 Title="Error"
-		 Content="@_errorMessage"
+		 Content="Some Error Message"
 		 Timeout="3000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-danger">
@@ -19,7 +19,7 @@
 <SfToast @ref="_sfToast"
 		 ID="toast_success"
 		 Title="Success"
-		 Content="Supplier saved successfully."
+		 Content="Product category saved successfully."
 		 Timeout="1000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-success">
@@ -33,8 +33,8 @@
 
 <SfToast @ref="_sfUpdateToast"
 		 ID="toast_update"
-		 Title="Supplier Found"
-		 Content="Supplier found. Please update the information."
+		 Title="Category Found"
+		 Content="Product category found. Please update the information."
 		 Timeout="3000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-info">
@@ -45,7 +45,7 @@
 	</ToastAnimationSettings>
 </SfToast>
 
-@if (IsLoading)
+@if (_isLoading)
 {
 	<div class="loader-container">
 		<div class="circular-dots-loader">
@@ -53,101 +53,63 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading suppliers...</p>
+		<p class="loading-text">Loading product categories...</p>
 	</div>
 }
 else
 {
-	<div class="supplier-container">
+	<div class="category-container">
 		<div class="page-header">
-			<h1 class="page-title">Supplier Management</h1>
-			<button @onclick='() => NavigateTo("/Inventory-Dashboard")' class="back-button">
-				<span class="back-icon">←</span> Back to Inventory
+			<h1 class="page-title">Product Category Management</h1>
+			<button @onclick='() => NavigateTo("/Admin-Dashboard")' class="back-button">
+				<span class="back-icon">←</span> Back to Admin
 			</button>
 		</div>
 
-		<div class="supplier-content">
+		<div class="category-content">
 			<div class="selection-card">
 				<div class="card-header">
-					<h2>Supplier Details</h2>
-					<p class="card-info">Enter or update supplier information</p>
+					<h2>Category Details</h2>
+					<p class="card-info">Enter or update product category information</p>
 				</div>
 				<div class="card-body">
 					<div class="form-row">
 						<div class="form-group">
-							<label>Supplier Name</label>
-							<SfTextBox @bind-Value="_supplierModel.Name"
-									   Placeholder="Enter Supplier Name"
+							<label>Category Name</label>
+							<SfTextBox @bind-Value="_categoryModel.Name"
+									   Placeholder="Enter Category Name"
 									   CssClass="form-control" />
 						</div>
 
-						<div class="form-group">
-							<label>Supplier Code</label>
-							<SfTextBox @bind-Value="_supplierModel.Code"
-									   Placeholder="Enter Supplier Code"
-									   CssClass="form-control" />
-						</div>
-					</div>
-
-					<div class="form-row">
-						<div class="form-group">
-							<label>GST Number</label>
-							<SfTextBox @bind-Value="_supplierModel.GSTNo"
-									   Placeholder="Enter GST Number"
-									   CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>Phone Number</label>
-							<SfTextBox @bind-Value="_supplierModel.Phone"
-									   Placeholder="Enter Phone Number"
-									   Type="InputType.Number"
-									   CssClass="form-control" />
-						</div>
-					</div>
-
-					<div class="form-row">
-						<div class="form-group">
-							<label>Email Address</label>
-							<SfTextBox @bind-Value="_supplierModel.Email"
-									   Placeholder="Enter Email Address"
-									   CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>State</label>
-							<SfComboBox TValue="int"
-										TItem="StateModel"
-										Placeholder="Select a State"
-										DataSource="@_states"
-										@bind-Value="_supplierModel.StateId"
-										PopupWidth="100%"
-										CssClass="form-control">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
+						@if (_user?.LocationId == 1)
+						{
+							<div class="form-group">
+								<label>Location</label>
+								<SfComboBox TValue="int"
+											TItem="LocationModel"
+											Placeholder="Select a Location"
+											DataSource="@_locations"
+											@bind-Value="_categoryModel.LocationId"
+											PopupWidth="100%"
+											CssClass="form-control">
+									<ComboBoxFieldSettings Value="Id" Text="Name" />
+								</SfComboBox>
+							</div>
+						}
 					</div>
 
 					<div class="form-row">
 						<div class="form-group">
 							<label>Status</label>
 							<div class="checkbox-container">
-								<SfCheckBox @bind-Checked="_supplierModel.Status" Label="Active" CssClass="form-checkbox" />
+								<SfCheckBox @bind-Checked="_categoryModel.Status" Label="Active" CssClass="form-checkbox" />
 							</div>
-						</div>
-
-						<div class="form-group full-width">
-							<label>Address</label>
-							<SfTextBox @bind-Value="_supplierModel.Address"
-									   Placeholder="Enter Full Address"
-									   Multiline="true"
-									   CssClass="form-control" />
 						</div>
 					</div>
 
 					<div class="save-container">
 						<button @onclick="OnSaveClick" class="save-button">
-							<span class="save-icon">💾</span> Save Supplier
+							<span class="save-icon">💾</span> Save Category
 						</button>
 					</div>
 				</div>
@@ -155,27 +117,23 @@ else
 
 			<div class="grid-card">
 				<div class="card-header">
-					<h2>Suppliers List</h2>
-					<p class="grid-info">Select a row to edit supplier details</p>
+					<h2>Categories List</h2>
+					<p class="grid-info">Select a row to edit category details</p>
 				</div>
 				<div class="card-body">
-					<SfGrid DataSource="@_suppliers"
+					<SfGrid DataSource="@_categories"
 							ID="_sfGrid"
 							@ref="_sfGrid"
 							AllowSorting="true"
 							AllowFiltering="true"
 							AllowResizing="true"
-							CssClass="supplier-grid">
-						<GridEvents RowSelected="RowSelectHandler" TValue="SupplierModel" />
+							CssClass="category-grid">
+						<GridEvents RowSelected="RowSelectHandler" TValue="ProductCategoryModel" />
 						<GridColumns>
-							<GridColumn Field=@nameof(SupplierModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
-							<GridColumn Field=@nameof(SupplierModel.Name) HeaderText="Name" Width="180" />
-							<GridColumn Field=@nameof(SupplierModel.GSTNo) HeaderText="GST No." Width="150" />
-							<GridColumn Field=@nameof(SupplierModel.Code) HeaderText="Code" Width="120" />
-							<GridColumn Field=@nameof(SupplierModel.Phone) HeaderText="Phone" Width="130" />
-							<GridColumn Field=@nameof(SupplierModel.Email) HeaderText="Email" Width="180" />
-							<GridColumn Field=@nameof(SupplierModel.Address) HeaderText="Address" Width="200" />
-							<GridColumn Field=@nameof(SupplierModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
+							<GridColumn Field=@nameof(ProductCategoryModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field=@nameof(ProductCategoryModel.Name) HeaderText="Name" Width="180" />
+							<GridColumn Field=@nameof(ProductCategoryModel.LocationId) HeaderText="Location ID" Width="120" />
+							<GridColumn Field=@nameof(ProductCategoryModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
 						</GridColumns>
 					</SfGrid>
 				</div>
@@ -199,7 +157,7 @@ else
 	}
 
 	/* General Layout */
-	.supplier-container {
+	.category-container {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
@@ -246,7 +204,7 @@ else
 	}
 
 	/* Content layout */
-	.supplier-content {
+	.category-content {
 		display: flex;
 		flex-direction: column;
 		gap: 25px;
@@ -352,7 +310,7 @@ else
 	}
 
 	/* Grid Styling */
-	.supplier-grid {
+	.category-grid {
 		width: 100%;
 		border-radius: 8px;
 		overflow: hidden;

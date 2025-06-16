@@ -111,10 +111,7 @@ public partial class OrderPage
 			NavManager.NavigateTo("/");
 
 		if (_order.SaleId != null && _order.SaleId > 0)
-		{
-			await JS.InvokeVoidAsync("showToast", "Order Already been Executed. Please Update Sale First");
 			NavManager.NavigateTo("/");
-		}
 
 		_orderProductCarts.Clear();
 

@@ -138,6 +138,10 @@ public partial class PurchasePage
 	private async void OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
 	{
 		_supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, args.Value);
+
+		if (_supplier is null)
+			_supplier = new SupplierModel();
+
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 		UpdateFinancialDetails();
 		StateHasChanged();
@@ -211,9 +215,9 @@ public partial class PurchasePage
 				Rate = rawMaterial.MRP,
 				BaseTotal = rawMaterial.MRP,
 				DiscPercent = 0,
-				CGSTPercent = productTax.CGST,
-				SGSTPercent = productTax.SGST,
-				IGSTPercent = productTax.IGST,
+				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
+				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
+				IGSTPercent = productTax.Extra ? productTax.IGST : 0
 				// Rest handled in the UpdateFinancialDetails()
 			});
 		}
@@ -318,15 +322,12 @@ public partial class PurchasePage
 		{
 			_sfErrorToast.Content = "Please add at least one raw material to the purchase.";
 			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
 			return false;
 		}
 
-		if (_purchase.SupplierId == 0)
+		if (_purchase.SupplierId <= 0)
 		{
 			_sfErrorToast.Content = "Please select a supplier.";
-			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
@@ -335,14 +336,12 @@ public partial class PurchasePage
 		{
 			_sfErrorToast.Content = "Bill No is required.";
 			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
 			return false;
 		}
 		if (_purchase.UserId == 0)
 		{
 			_sfErrorToast.Content = "User is required.";
 			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
 			return false;
 		}
 		return true;

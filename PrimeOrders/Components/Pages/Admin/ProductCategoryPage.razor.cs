@@ -1,46 +1,43 @@
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeOrders.Components.Pages.Inventory;
+namespace PrimeOrders.Components.Pages.Admin;
 
-public partial class SupplierPage
+public partial class ProductCategoryPage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
-	private bool IsLoading { get; set; } = true;
-	private string _errorMessage = "";
+	private bool _isLoading = true;
+	private UserModel _user;
 
-	private SupplierModel _supplierModel = new()
+	private ProductCategoryModel _categoryModel = new()
 	{
-		Address = "",
-		Email = "",
-		Phone = "",
-		GSTNo = "",
-		Code = "",
+		Name = "",
+		LocationId = 1,
 		Status = true
 	};
 
-	private List<SupplierModel> _suppliers;
-	private List<StateModel> _states;
+	private List<ProductCategoryModel> _categories = [];
+	private List<LocationModel> _locations = [];
 
-	private SfGrid<SupplierModel> _sfGrid;
+	private SfGrid<ProductCategoryModel> _sfGrid;
 	private SfToast _sfToast;
 	private SfToast _sfUpdateToast;
 	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		IsLoading = true;
+		_isLoading = true;
 
 		if (firstRender && !await ValidatePassword())
 			NavManager.NavigateTo("/Login");
 
-		IsLoading = false;
+		_isLoading = false;
 		StateHasChanged();
 
 		if (firstRender)
-			await LoadComboBox();
+			await LoadData();
 	}
 
 	private async Task<bool> ValidatePassword()
@@ -55,44 +52,45 @@ public partial class SupplierPage
 		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
 			return false;
 
+		_user = user;
 		return true;
 	}
 
-	private async Task LoadComboBox()
+	private async Task LoadData()
 	{
-		_suppliers = await CommonData.LoadTableData<SupplierModel>(TableNames.Supplier);
-		_states = await CommonData.LoadTableData<StateModel>(TableNames.State);
-		_supplierModel.StateId = _states.FirstOrDefault()?.Id ?? 0;
-		_sfGrid?.Refresh();
+		_categories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.ProductCategory);
+		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
+		_categoryModel.LocationId = _user.LocationId;
+
+		if (_user.LocationId != 1)
+			_categories = [.. _categories.Where(c => c.LocationId == _user.LocationId)];
+
+		await _sfGrid?.Refresh();
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<SupplierModel> args)
+	public async void RowSelectHandler(RowSelectEventArgs<ProductCategoryModel> args)
 	{
-		_supplierModel = args.Data;
+		_categoryModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
 		StateHasChanged();
 	}
 
 	private async Task<bool> ValidateForm()
 	{
-		if (string.IsNullOrWhiteSpace(_supplierModel.Name))
+		if (_user.LocationId != 1)
+			_categoryModel.LocationId = _user.LocationId;
+
+		if (_categoryModel.LocationId <= 0)
 		{
-			_errorMessage = "Supplier name is required.";
+			_sfErrorToast.Content = "Please select a location.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 
-		if (string.IsNullOrWhiteSpace(_supplierModel.Code))
+		if (string.IsNullOrWhiteSpace(_categoryModel.Name))
 		{
-			_errorMessage = "Supplier code is required.";
-			await _sfErrorToast.ShowAsync();
-			return false;
-		}
-
-		if (string.IsNullOrWhiteSpace(_supplierModel.GSTNo))
-		{
-			_errorMessage = "GST Number is required.";
+			_sfErrorToast.Content = "Category name is required.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
@@ -105,7 +103,7 @@ public partial class SupplierPage
 		if (!await ValidateForm())
 			return;
 
-		await SupplierData.InsertSupplier(_supplierModel);
+		await ProductData.InsertProductCategory(_categoryModel);
 		await _sfToast.ShowAsync();
 	}
 

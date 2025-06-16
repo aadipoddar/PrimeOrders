@@ -38,7 +38,7 @@ public partial class SalePage
 
 	private List<PaymentModeModel> _paymentModes;
 	private List<OrderModel> _orders = [];
-	private List<LocationModel> _parties;
+	private List<SupplierModel> _parties = [];
 	private List<ProductCategoryModel> _productCategories;
 	private List<ProductModel> _products;
 	private readonly List<SaleProductCartModel> _saleProductCart = [];
@@ -84,8 +84,8 @@ public partial class SalePage
 
 	private async Task LoadComboBox()
 	{
-		_parties = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-		_parties.Remove(_parties.FirstOrDefault(c => c.Id == _user.LocationId));
+		_parties = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier);
+		_parties.RemoveAll(p => p.LocationId == _user.LocationId);
 
 		_paymentModes = PaymentModeData.GetPaymentModes();
 		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
@@ -122,7 +122,7 @@ public partial class SalePage
 		foreach (var item in saleDetails)
 		{
 			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
-			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
+
 			_saleProductCart.Add(new()
 			{
 				ProductId = product.Id,
@@ -130,9 +130,9 @@ public partial class SalePage
 				Quantity = item.Quantity,
 				Rate = item.Rate,
 				DiscPercent = item.DiscPercent,
-				CGSTPercent = productTax.CGST,
-				SGSTPercent = productTax.SGST,
-				IGSTPercent = productTax.IGST,
+				CGSTPercent = item.CGSTPercent,
+				SGSTPercent = item.SGSTPercent,
+				IGSTPercent = item.IGSTPercent,
 				BaseTotal = item.BaseTotal,
 				DiscAmount = item.DiscAmount,
 				AfterDiscount = item.AfterDiscount,
@@ -151,13 +151,18 @@ public partial class SalePage
 	#endregion
 
 	#region Purchase Details Events
-	private async Task OnPartyChanged(ChangeEventArgs<int?, LocationModel> args)
+	private async Task OnPartyChanged(ChangeEventArgs<int?, SupplierModel> args)
 	{
 		if (args.Value.HasValue && args.Value.Value > 0)
 		{
 			_sale.PartyId = args.Value.Value;
-			_sale.DiscPercent = args.ItemData.Discount;
-			_orders = await OrderData.LoadOrderByLocation(args.Value.Value);
+
+			if (args.ItemData.LocationId is not null)
+			{
+				var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, args.ItemData.LocationId.Value);
+				_sale.DiscPercent = location.Discount;
+				_orders = await OrderData.LoadOrderByLocation(args.ItemData.LocationId.Value);
+			}
 		}
 
 		else
@@ -198,9 +203,9 @@ public partial class SalePage
 						Quantity = item.Quantity,
 						Rate = product.Rate,
 						DiscPercent = _sale.DiscPercent,
-						CGSTPercent = productTax.CGST,
-						SGSTPercent = productTax.SGST,
-						IGSTPercent = productTax.IGST
+						CGSTPercent = productTax.Extra ? productTax.CGST : 0,
+						SGSTPercent = productTax.Extra ? productTax.SGST : 0,
+						IGSTPercent = productTax.Extra ? productTax.IGST : 0
 						// Rest handled in the UpdateFinancialDetails()
 					});
 				}
@@ -320,9 +325,9 @@ public partial class SalePage
 				Quantity = 1,
 				Rate = product.Rate,
 				DiscPercent = _sale.DiscPercent,
-				CGSTPercent = productTax.CGST,
-				SGSTPercent = productTax.SGST,
-				IGSTPercent = productTax.IGST,
+				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
+				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
+				IGSTPercent = productTax.Extra ? productTax.IGST : 0
 				// Rest handled in the UpdateFinancialDetails()
 			});
 		}

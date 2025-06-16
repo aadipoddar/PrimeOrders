@@ -47,7 +47,7 @@
 	INNER JOIN
 		[dbo].[User] u ON s.UserId = u.Id
 	LEFT JOIN
-		[dbo].[Location] p ON s.PartyId = p.Id
+		[dbo].[Supplier] p ON s.PartyId = p.Id
 	LEFT JOIN
 		[dbo].[Order] o ON s.OrderId = o.Id
 

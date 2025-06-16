@@ -7,13 +7,14 @@
 	@Email VARCHAR(100),
 	@Address VARCHAR(500),
 	@StateId INT,
+	@LocationId INT = NULL,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Supplier] ([Name], [Code], [GSTNo], [Phone], [Email], [Address], [StateId], [Status])
-		VALUES (@Name, @Code, @GSTNo, @Phone, @Email, @Address, @StateId, @Status);
+		INSERT INTO [dbo].[Supplier] ([Name], [Code], [GSTNo], [Phone], [Email], [Address], [StateId], [LocationId], [Status])
+		VALUES (@Name, @Code, @GSTNo, @Phone, @Email, @Address, @StateId, @LocationId, @Status);
 	END
 
 	ELSE
@@ -27,6 +28,7 @@ BEGIN
 			Email = @Email,
 			Address = @Address,
 			StateId = @StateId,
+			LocationId = @LocationId,
 			Status = @Status
 		WHERE Id = @Id;
 	END

@@ -1,6 +1,6 @@
-﻿@page "/"
+﻿@page "/Admin-Dashboard"
 
-<PageTitle>Dashboard - Prime Orders</PageTitle>
+<PageTitle>Admin Dashboard - Prime Orders</PageTitle>
 
 @if (_isLoading)
 {
@@ -10,7 +10,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading dashboard...</p>
+		<p class="loading-text">Loading admin dashboard...</p>
 	</div>
 }
 else
@@ -30,51 +30,63 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Welcome, @(_user?.Name ?? "User")!</h2>
-			<p>Select an option below to continue</p>
+			<h2>Admin Management</h2>
+			<p>Select an option below to manage system settings</p>
+			<button @onclick='() => NavigateTo("/")' class="back-button">
+				<span class="back-icon">←</span> Back to Dashboard
+			</button>
 		</div>
 
 		<div class="dashboard-cards">
-			@if (_user?.Inventory == true && _user?.LocationId == 1)
+			@if (_user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory-Dashboard")'>
-					<div class="card-icon inventory-icon">📦</div>
-					<h3>Inventory</h3>
-					<p>Manage inventory and stock levels</p>
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/LocationManagement")'>
+					<div class="card-icon location-icon">📍</div>
+					<h3>Location Management</h3>
+					<p>Configure and manage business locations</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/RawMaterialManagement")'>
+					<div class="card-icon raw-material-icon">🧱</div>
+					<h3>Raw Material Management</h3>
+					<p>Manage raw materials used in production</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/RawMaterialCategoryManagement")'>
+					<div class="card-icon raw-material-category-icon">📋</div>
+					<h3>Raw Material Category Management</h3>
+					<p>Organize raw materials into categories</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/KitchenManagement")'>
+					<div class="card-icon kitchen-icon">👨‍🍳</div>
+					<h3>Kitchen Management</h3>
+					<p>Configure kitchen settings and operations</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/Supplier")'>
+					<div class="card-icon supplier-icon">👥</div>
+					<h3>Suppliers</h3>
+					<p>Add and manage your suppliers</p>
 				</div>
 			}
 
-			@if (_user?.Admin == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin-Dashboard")'>
-					<div class="card-icon admin-icon">⚙️</div>
-					<h3>Admin</h3>
-					<p>System administration and settings</p>
-				</div>
-			}
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/UserManagement")'>
+				<div class="card-icon user-icon">👤</div>
+				<h3>User Management</h3>
+				<p>Add and manage system users</p>
+			</div>
 
-			@if (_user?.Sales == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Sale")'>
-					<div class="card-icon sales-icon">📈</div>
-					<h3>Sales</h3>
-					<p>View and manage sales information</p>
-				</div>
-			}
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/Product")'>
+				<div class="card-icon product-icon">📦</div>
+				<h3>Product Management</h3>
+				<p>Add and configure products</p>
+			</div>
 
-			@if (_user?.Order == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Order")'>
-					<div class="card-icon order-icon">📋</div>
-					<h3>Orders</h3>
-					<p>Process and track customer orders</p>
-				</div>
-			}
-
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Report-Dashboard")'>
-				<div class="card-icon reports-icon">📊</div>
-				<h3>Reports</h3>
-				<p>View and generate business reports</p>
+			<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/Product-Categories")'>
+				<div class="card-icon product-category-icon">🏷️</div>
+				<h3>Product Category Management</h3>
+				<p>Organize products into categories</p>
 			</div>
 		</div>
 
@@ -192,7 +204,94 @@ else
 			opacity: 0.7;
 		}
 
-	/* Dashboard Cards */
+	/* Custom icons for admin page */
+	.user-icon {
+		background-color: rgba(0, 164, 239, 0.1);
+		color: var(--dotnet-accent);
+	}
+
+	.location-icon {
+		background-color: rgba(104, 33, 122, 0.1);
+		color: var(--dotnet-secondary);
+	}
+
+	.supplier-icon {
+		background-color: rgba(46, 196, 134, 0.1);
+		color: #2EC486;
+	}
+
+	.product-icon {
+		background-color: rgba(81, 43, 212, 0.1);
+		color: var(--dotnet-primary);
+	}
+
+	.product-category-icon {
+		background-color: rgba(255, 153, 0, 0.1);
+		color: #FF9900;
+	}
+
+	.raw-material-icon {
+		background-color: rgba(46, 196, 134, 0.1);
+		color: #2EC486;
+	}
+
+	.raw-material-category-icon {
+		background-color: rgba(231, 76, 60, 0.1);
+		color: #E74C3C;
+	}
+
+	.kitchen-icon {
+		background-color: rgba(155, 89, 182, 0.1);
+		color: #9B59B6;
+	}
+
+	/* Back button styles */
+	.back-button {
+		background-color: transparent;
+		border: 2px solid var(--dotnet-secondary);
+		color: var(--dotnet-secondary);
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+		margin-top: 15px;
+	}
+
+		.back-button:hover {
+			background-color: var(--dotnet-secondary);
+			color: white;
+		}
+
+	.back-icon {
+		font-size: 16px;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: #666;
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--dotnet-secondary);
+			text-decoration: underline;
+		}
+
+	/* Dashboard cards */
 	.dashboard-cards {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -231,31 +330,6 @@ else
 		border-radius: 50%;
 	}
 
-	.inventory-icon {
-		background-color: rgba(81, 43, 212, 0.1);
-		color: var(--dotnet-primary);
-	}
-
-	.admin-icon {
-		background-color: rgba(104, 33, 122, 0.1);
-		color: var(--dotnet-secondary);
-	}
-
-	.sales-icon {
-		background-color: rgba(0, 164, 239, 0.1);
-		color: var(--dotnet-accent);
-	}
-
-	.order-icon {
-		background-color: rgba(128, 128, 128, 0.1);
-		color: #444;
-	}
-
-	.reports-icon {
-		background-color: rgba(25, 170, 141, 0.1);
-		color: #19AA8D;
-	}
-
 	.dashboard-card h3 {
 		color: var(--dotnet-dark);
 		margin-bottom: 10px;
@@ -267,27 +341,6 @@ else
 		font-size: 14px;
 		margin: 0;
 	}
-
-	/* Footer */
-	.dashboard-footer {
-		margin-top: auto;
-		text-align: center;
-		padding: 20px;
-		color: #666;
-		font-size: 14px;
-	}
-
-	.footer-link {
-		color: var(--dotnet-primary);
-		text-decoration: none;
-		font-weight: 600;
-		transition: color 0.2s ease;
-	}
-
-		.footer-link:hover {
-			color: var(--dotnet-secondary);
-			text-decoration: underline;
-		}
 
 	/* Loading Animation */
 	.loader-container {
