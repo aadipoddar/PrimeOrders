@@ -62,13 +62,15 @@ public static class StoredProcedureNames
 	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
 	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
 	public static string LoadPurchaseDetailsByDate => "Load_PurchaseDetails_By_Date";
-	public static string LoadKitcheIssueDetailsByDate => "Load_KitcheIssueDetails_By_Date";
+	public static string LoadKitchenIssueDetailsByDate => "Load_KitchenIssueDetails_By_Date";
 	public static string LoadKitchenProductionDetailsByDate => "Load_KitchenProductionDetails_By_Date";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
 
 	public static string InsertTax => "Insert_Tax";
+
+	public static string InsertKitchen => "Insert_Kitchen";
 
 	public static string InsertProductCategory => "Insert_ProductCategory";
 	public static string InsertProduct => "Insert_Product";

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Load_KitcheIssueDetails_By_Date]
+﻿CREATE PROCEDURE [dbo].[Load_KitchenIssueDetails_By_Date]
 	@FromDate DATETIME,
 	@ToDate DATETIME
 AS

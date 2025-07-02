@@ -65,20 +65,12 @@ public partial class KitchenIssueReport
 
 	private async Task LoadKitchenIssueData()
 	{
-		if (_selectedKitchenId > 0)
-		{
-			_kitchenIssueOverviews = await KitchenIssueData.LoadKitcheIssueDetailsByDate(
-				_startDate.ToDateTime(new TimeOnly(0, 0)),
-				_endDate.ToDateTime(new TimeOnly(23, 59)));
+		_kitchenIssueOverviews = await KitchenIssueData.LoadKitchenIssueDetailsByDate(
+			_startDate.ToDateTime(new TimeOnly(0, 0)),
+			_endDate.ToDateTime(new TimeOnly(23, 59)));
 
+		if (_selectedKitchenId > 0)
 			_kitchenIssueOverviews = [.. _kitchenIssueOverviews.Where(i => i.KitchenId == _selectedKitchenId)];
-		}
-		else
-		{
-			_kitchenIssueOverviews = await KitchenIssueData.LoadKitcheIssueDetailsByDate(
-				_startDate.ToDateTime(new TimeOnly(0, 0)),
-				_endDate.ToDateTime(new TimeOnly(23, 59)));
-		}
 	}
 
 	private async void DateRangeChanged(RangePickerEventArgs<DateOnly> args)

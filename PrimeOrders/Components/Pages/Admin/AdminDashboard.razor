@@ -40,7 +40,7 @@ else
 		<div class="dashboard-cards">
 			@if (_user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/LocationManagement")'>
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/Location")'>
 					<div class="card-icon location-icon">📍</div>
 					<h3>Location Management</h3>
 					<p>Configure and manage business locations</p>
@@ -58,7 +58,7 @@ else
 					<p>Organize raw materials into categories</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/KitchenManagement")'>
+				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin/Kitchen")'>
 					<div class="card-icon kitchen-icon">👨‍🍳</div>
 					<h3>Kitchen Management</h3>
 					<p>Configure kitchen settings and operations</p>
