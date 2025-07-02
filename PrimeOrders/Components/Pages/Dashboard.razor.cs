@@ -10,9 +10,6 @@ public partial class Dashboard
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (firstRender)
-			Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
 		_isLoading = true;
 
 		if (firstRender && !await ValidatePassword())

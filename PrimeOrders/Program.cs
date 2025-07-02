@@ -7,10 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Secrets.SyncfusionLicense);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services.AddSyncfusionBlazor()
+	.AddRazorComponents()
 	.AddInteractiveServerComponents();
 
-builder.Services.AddSyncfusionBlazor();
+Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
 var app = builder.Build();
 
