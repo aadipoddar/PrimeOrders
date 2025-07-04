@@ -34,8 +34,8 @@ public partial class Login
 			return;
 		}
 
-		await JS.InvokeVoidAsync("setCookie", "UserId", user.Id, 1);
-		await JS.InvokeVoidAsync("setCookie", "Passcode", BCrypt.Net.BCrypt.EnhancedHashPassword(user.Passcode.ToString(), 13), 1);
+		await JS.InvokeVoidAsync("setCookie", "UserId", user.Id, 10);
+		await JS.InvokeVoidAsync("setCookie", "Passcode", BCrypt.Net.BCrypt.EnhancedHashPassword(user.Passcode.ToString(), 13), 10);
 
 		NavManager.NavigateTo("/");
 	}

@@ -103,12 +103,25 @@ public partial class UserPage
 			return false;
 		}
 
-		if (await UserData.LoadUserByPasscode(_userModel.Passcode) is not null)
+		if (_userModel.Id > 0)
 		{
-			_sfErrorToast.Content = "Passcode Already Present. Try a Different one";
-			await _sfErrorToast.ShowAsync();
-			return false;
+			var users = await CommonData.LoadTableData<UserModel>(TableNames.User);
+
+			if (users.Any(u => u.Id != _userModel.Id && u.Passcode == _userModel.Passcode))
+			{
+				_sfErrorToast.Content = "Passcode Already Present. Try a Different one";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
 		}
+
+		else if (_userModel.Id <= 0)
+			if (await UserData.LoadUserByPasscode(_userModel.Passcode) is not null)
+			{
+				_sfErrorToast.Content = "Passcode Already Present. Try a Different one";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
 
 		return true;
 	}
