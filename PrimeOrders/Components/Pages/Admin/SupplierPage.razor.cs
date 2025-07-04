@@ -81,13 +81,6 @@ public partial class SupplierPage
 			return false;
 		}
 
-		if (string.IsNullOrWhiteSpace(_supplierModel.GSTNo))
-		{
-			_sfErrorToast.Content = "GST Number is required.";
-			await _sfErrorToast.ShowAsync();
-			return false;
-		}
-
 		if (_supplierModel.StateId <= 0)
 		{
 			_sfErrorToast.Content = "Please select a state.";
