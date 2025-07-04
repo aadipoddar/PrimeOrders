@@ -148,13 +148,16 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn HeaderText="Action" Width="120" TextAlign="TextAlign.Center">
-							<Template>
-								@{
-									var order = (context as OrderOverviewModel);
-									<SfButton CssClass="view-button" OnClick="@(() => ViewOrderDetails(order.OrderId))">View</SfButton>
-								}
-							</Template>
+						<GridColumn HeaderText="Action" Width="180" TextAlign="TextAlign.Center">
+						    <Template>
+						        @{
+						            var order = (context as OrderOverviewModel);
+						            <div class="button-group">
+						                <SfButton CssClass="view-button" OnClick="@(() => ViewOrderDetails(order.OrderId))">View</SfButton>
+						                <SfButton CssClass="challan-button" OnClick="@(() => ExportOrderChallan(order.OrderId))">Export Challan</SfButton>
+						            </div>
+						        }
+						    </Template>
 						</GridColumn>
 					</GridColumns>
 				</SfGrid>
@@ -451,6 +454,27 @@ else
 
 	.export-icon, .excel-icon {
 		font-size: 16px;
+	}
+
+	.button-group {
+	    display: flex;
+	    gap: 5px;
+	    justify-content: center;
+	}
+	
+	.challan-button {
+	    background-color: #ff9800;
+	    color: white;
+	    border: none;
+	    padding: 4px 10px;
+	    border-radius: 6px;
+	    font-size: 12px;
+	    font-weight: 500;
+	    transition: all 0.2s ease;
+	}
+	
+	.challan-button:hover {
+	    background-color: #f57c00;
 	}
 
 	/* Overview Cards */

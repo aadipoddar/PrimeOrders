@@ -393,6 +393,97 @@ public partial class OrderHistoryPage
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
+	private async Task ExportOrderChallan(int orderId)
+	{
+		// Load order details
+		var orderDetails = await OrderData.LoadOrderDetailByOrder(orderId);
+		var order = _orderOverviews.FirstOrDefault(o => o.OrderId == orderId);
+
+		if (order == null || orderDetails == null || !orderDetails.Any())
+		{
+			await JS.InvokeVoidAsync("alert", "No order details found to export");
+			return;
+		}
+
+		// Create a list to hold challan items
+		var challanItems = new List<ChallanItemModel>();
+
+		// Load product details for each order item
+		foreach (var detail in orderDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			if (product != null)
+			{
+				challanItems.Add(new ChallanItemModel
+				{
+					ProductCode = product.Code,
+					ProductName = product.Name,
+					Quantity = detail.Quantity
+				});
+			}
+		}
+
+		// Create summary items for the challan
+		Dictionary<string, object> summaryItems = new()
+		{
+			{ "Order Number", order.OrderNo },
+			{ "Order Date", order.OrderDate.ToString("dd-MMM-yyyy") },
+			{ "Location", order.LocationName },
+			{ "Created By", order.UserName },
+			{ "Total Products", challanItems.Count },
+			{ "Total Quantity", challanItems.Sum(c => c.Quantity) }
+		};
+
+		// Define column order for better readability
+		List<string> columnOrder = [
+			nameof(ChallanItemModel.ProductCode),
+			nameof(ChallanItemModel.ProductName),
+			nameof(ChallanItemModel.Quantity)
+		];
+
+		// Define custom column settings
+		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		{
+			[nameof(ChallanItemModel.ProductCode)] = new()
+			{
+				DisplayName = "Product Code",
+				Width = 15,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(ChallanItemModel.ProductName)] = new()
+			{
+				DisplayName = "Product Name",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(ChallanItemModel.Quantity)] = new()
+			{
+				DisplayName = "Quantity",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			}
+		};
+
+		// Generate the Excel file
+		string reportTitle = $"Delivery Challan - Order #{order.OrderNo}";
+		string worksheetName = "Challan Items";
+
+		var memoryStream = ExcelExportUtil.ExportToExcel(
+			challanItems,
+			reportTitle,
+			worksheetName,
+			order.OrderDate,
+			order.OrderDate,
+			summaryItems,
+			columnSettings,
+			columnOrder);
+
+		var fileName = $"Challan_Order_{order.OrderNo}_{order.OrderDate:yyyy-MM-dd}.xlsx";
+		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
+	}
+
 	// Chart data methods
 	private List<ChartData> GetDailyOrdersData()
 	{
@@ -459,5 +550,12 @@ public partial class OrderHistoryPage
 		public int OrdersAppeared => OrderIds.Count;  // Number of distinct orders this product appears in
 		public decimal TotalQuantity { get; set; }  // Total quantity ordered across all orders
 		public decimal TotalValue => ProductRate * TotalQuantity;  // Calculated total value
+	}
+
+	public class ChallanItemModel
+	{
+		public string ProductCode { get; set; }
+		public string ProductName { get; set; }
+		public decimal Quantity { get; set; }
 	}
 }
