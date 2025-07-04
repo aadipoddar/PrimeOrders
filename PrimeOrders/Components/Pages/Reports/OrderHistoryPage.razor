@@ -68,8 +68,8 @@ else
 				}
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
 				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
+				<SfButton CssClass="products-button" IconCss="products-icon" Content="Export Pending Order Products Excel" OnClick="@(() => ExportToProductsExcel())" />
 			</div>
 		</div>
 
@@ -412,6 +412,25 @@ else
 
 		.excel-button:hover {
 			background-color: #1e5f3e;
+			transform: translateY(-2px);
+		}
+
+	.products-button {
+		background-color: #8e44ad;
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+	}
+
+		.products-button:hover {
+			background-color: #6c3483;
 			transform: translateY(-2px);
 		}
 
