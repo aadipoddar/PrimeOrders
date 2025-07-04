@@ -51,6 +51,18 @@ else
 					</SfDateRangePicker>
 				</div>
 
+				<div class="filter-item">
+					<label>Status</label>
+					<SfComboBox TValue="string"
+								TItem="string"
+								Placeholder="Select Status"
+								DataSource="@(new List<string> { "All", "Pending", "Sold" })"
+								Value="@_selectedStatusFilter"
+								CssClass="filter-control">
+						<ComboBoxEvents TItem="string" TValue="string" ValueChange="OnStatusFilterChanged" />
+					</SfComboBox>
+				</div>
+
 				@if (_user?.LocationId == 1)
 				{
 					<div class="filter-item">
@@ -149,15 +161,15 @@ else
 							</Template>
 						</GridColumn>
 						<GridColumn HeaderText="Action" Width="180" TextAlign="TextAlign.Center">
-						    <Template>
-						        @{
-						            var order = (context as OrderOverviewModel);
-						            <div class="button-group">
-						                <SfButton CssClass="view-button" OnClick="@(() => ViewOrderDetails(order.OrderId))">View</SfButton>
-						                <SfButton CssClass="challan-button" OnClick="@(() => ExportOrderChallan(order.OrderId))">Export Challan</SfButton>
-						            </div>
-						        }
-						    </Template>
+							<Template>
+								@{
+									var order = (context as OrderOverviewModel);
+									<div class="button-group">
+										<SfButton CssClass="view-button" OnClick="@(() => ViewOrderDetails(order.OrderId))">View</SfButton>
+										<SfButton CssClass="challan-button" OnClick="@(() => ExportOrderChallan(order.OrderId))">Export Challan</SfButton>
+									</div>
+								}
+							</Template>
 						</GridColumn>
 					</GridColumns>
 				</SfGrid>
@@ -457,25 +469,25 @@ else
 	}
 
 	.button-group {
-	    display: flex;
-	    gap: 5px;
-	    justify-content: center;
+		display: flex;
+		gap: 5px;
+		justify-content: center;
 	}
-	
+
 	.challan-button {
-	    background-color: #ff9800;
-	    color: white;
-	    border: none;
-	    padding: 4px 10px;
-	    border-radius: 6px;
-	    font-size: 12px;
-	    font-weight: 500;
-	    transition: all 0.2s ease;
+		background-color: #ff9800;
+		color: white;
+		border: none;
+		padding: 4px 10px;
+		border-radius: 6px;
+		font-size: 12px;
+		font-weight: 500;
+		transition: all 0.2s ease;
 	}
-	
-	.challan-button:hover {
-	    background-color: #f57c00;
-	}
+
+		.challan-button:hover {
+			background-color: #f57c00;
+		}
 
 	/* Overview Cards */
 	.overview-cards {

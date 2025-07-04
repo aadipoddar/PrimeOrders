@@ -11,6 +11,8 @@ public partial class OrderHistoryPage
 	private UserModel _user;
 	private bool _isLoading = true;
 
+	private string _selectedStatusFilter = "All";
+
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
@@ -63,12 +65,26 @@ public partial class OrderHistoryPage
 		await LoadData();
 	}
 
+	private async Task OnStatusFilterChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+	{
+		_selectedStatusFilter = args.Value;
+		await LoadData();
+	}
+
 	private async Task LoadData()
 	{
-		_orderOverviews = await OrderData.LoadOrderDetailsByDateLocationId(
-			_startDate.ToDateTime(new TimeOnly(0, 0)),
-			_endDate.ToDateTime(new TimeOnly(23, 59)),
-			_selectedLocationId);
+		var orders = await OrderData.LoadOrderDetailsByDateLocationId(
+		_startDate.ToDateTime(new TimeOnly(0, 0)),
+		_endDate.ToDateTime(new TimeOnly(23, 59)),
+		_selectedLocationId);
+
+		// Apply status filtering
+		_orderOverviews = _selectedStatusFilter switch
+		{
+			"Pending" => orders.Where(o => !o.SaleId.HasValue).ToList(),
+			"Sold" => orders.Where(o => o.SaleId.HasValue).ToList(),
+			_ => orders // "All" or any other value
+		};
 
 		StateHasChanged();
 	}
@@ -399,7 +415,7 @@ public partial class OrderHistoryPage
 		var orderDetails = await OrderData.LoadOrderDetailByOrder(orderId);
 		var order = _orderOverviews.FirstOrDefault(o => o.OrderId == orderId);
 
-		if (order == null || orderDetails == null || !orderDetails.Any())
+		if (order == null || orderDetails == null || orderDetails.Count == 0)
 		{
 			await JS.InvokeVoidAsync("alert", "No order details found to export");
 			return;
