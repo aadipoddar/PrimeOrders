@@ -113,7 +113,8 @@ public partial class OrderPage
 			});
 		}
 
-		await _sfProductCartGrid?.Refresh();
+		if (_sfProductCartGrid is not null)
+			await _sfProductCartGrid.Refresh();
 		StateHasChanged();
 	}
 	#endregion
