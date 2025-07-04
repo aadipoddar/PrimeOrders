@@ -23,40 +23,27 @@ public partial class FinishedProductStockReport
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager)).User) is not null))
+			return;
+
+		await LoadLocations();
+		await LoadStockDetails();
 
 		_isLoading = false;
-
 		StateHasChanged();
-
-		if (firstRender)
-		{
-			_selectedLocationId = _user.LocationId;
-
-			if (_user.LocationId == 1)
-				_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
-
-			await LoadStockDetails();
-		}
 	}
 
-	private async Task<bool> ValidatePassword()
+	private async Task LoadLocations()
 	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
+		_selectedLocationId = _user.LocationId;
 
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
+		if (_user.LocationId == 1)
+			_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 	}
 
 	private async Task LoadStockDetails() =>
@@ -76,16 +63,6 @@ public partial class FinishedProductStockReport
 	{
 		_selectedLocationId = args.Value;
 		await LoadStockDetails();
-	}
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("deleteCookie", "UserId");
-		await JS.InvokeVoidAsync("deleteCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
 	}
 
 	private async Task ExportToPdf()

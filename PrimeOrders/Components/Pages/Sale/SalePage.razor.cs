@@ -53,36 +53,21 @@ public partial class SalePage
 	#region LoadData
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Sales)).User) is not null))
+			return;
+
+		await LoadData();
 
 		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadComboBox();
 	}
 
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-
-		return true;
-	}
-
-	private async Task LoadComboBox()
+	private async Task LoadData()
 	{
 		_parties = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier);
 		_parties.RemoveAll(p => p.LocationId == _user.LocationId);
@@ -582,11 +567,5 @@ public partial class SalePage
 		var content = await PrintBill.PrintThermalBill(_sale);
 		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
 	}
-
-	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo("/Sale", forceLoad: true);
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 	#endregion
 }

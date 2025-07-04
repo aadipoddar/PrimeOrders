@@ -24,7 +24,7 @@
 		 ShowCloseButton="true"
 		 CssClass="e-toast-success">
 	<ToastPosition X="Right" Y="Top" />
-	<ToastEvents Closed="@ClosedHandler" />
+	<ToastEvents Closed="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)" />
 	<ToastAnimationSettings>
 		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
 		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
@@ -61,7 +61,7 @@ else
 	<div class="location-container">
 		<div class="page-header">
 			<h1 class="page-title">Location Management</h1>
-			<button @onclick='() => NavigateTo("/Admin-Dashboard")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/Admin-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Admin
 			</button>
 		</div>

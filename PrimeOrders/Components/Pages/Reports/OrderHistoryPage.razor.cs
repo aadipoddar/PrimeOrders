@@ -22,36 +22,19 @@ public partial class OrderHistoryPage
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Order)).User) is not null))
+			return;
+
+		await LoadLocations();
+		await LoadData();
 
 		_isLoading = false;
-
 		StateHasChanged();
-
-		if (firstRender)
-		{
-			await LoadLocations();
-			await LoadData();
-		}
-	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
 	}
 
 	private async Task LoadLocations()
@@ -94,7 +77,7 @@ public partial class OrderHistoryPage
 		ViewOrderDetails(args.Data.OrderId);
 
 	private void ViewOrderDetails(int orderId) =>
-		NavigateTo($"/Order/{orderId}");
+		NavManager.NavigateTo($"/Order/{orderId}");
 
 	private async Task ExportToPdf() =>
 		await _sfGrid?.ExportToPdfAsync();
@@ -139,7 +122,7 @@ public partial class OrderHistoryPage
 			_startDate,
 			_endDate,
 			summaryItems,
-			new(),
+			[],
 			columnOrder);
 
 		var fileName = $"Order_History_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
@@ -150,7 +133,7 @@ public partial class OrderHistoryPage
 	private List<ChartData> GetDailyOrdersData()
 	{
 		var result = new List<ChartData>();
-		if (_orderOverviews == null || !_orderOverviews.Any())
+		if (_orderOverviews == null || _orderOverviews.Count == 0)
 			return result;
 
 		var groupedByDate = _orderOverviews
@@ -173,7 +156,7 @@ public partial class OrderHistoryPage
 	private List<StatusData> GetOrderStatusData()
 	{
 		var result = new List<StatusData>();
-		if (_orderOverviews == null || !_orderOverviews.Any())
+		if (_orderOverviews == null || _orderOverviews.Count == 0)
 			return result;
 
 		int pendingCount = _orderOverviews.Count(o => o.SaleId is null);
@@ -183,16 +166,6 @@ public partial class OrderHistoryPage
 		result.Add(new StatusData { Status = "Completed", Count = completedCount });
 
 		return result;
-	}
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("deleteCookie", "UserId");
-		await JS.InvokeVoidAsync("deleteCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
 	}
 
 	// Chart data classes

@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -32,7 +32,7 @@ else
 		<div class="welcome-section">
 			<h2>Kitchen Production Report</h2>
 			<p>Track and analyze kitchen production efficiency and output</p>
-			<button @onclick='() => NavigateTo("/Report-Dashboard")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/Report-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Reports
 			</button>
 		</div>
@@ -113,7 +113,7 @@ else
 					<ChartPrimaryYAxis Title="Quantity" LabelFormat="{value}"></ChartPrimaryYAxis>
 					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
 					<ChartSeriesCollection>
-						<ChartSeries DataSource="@GetKitchenWiseData()"
+						<ChartSeries DataSource="GetKitchenWiseData()"
 									 XName="KitchenName" YName="TotalQuantity" Type="ChartSeriesType.Column"
 									 Name="Total Quantity" Fill="#512BD4">
 						</ChartSeries>
@@ -125,7 +125,7 @@ else
 				<h3 class="chart-title">Production Distribution</h3>
 				<SfAccumulationChart Title="Production by Kitchen" EnableSmartLabels="true" Height="300px">
 					<AccumulationChartSeriesCollection>
-						<AccumulationChartSeries DataSource="@GetKitchenDistributionData()" XName="KitchenName"
+						<AccumulationChartSeries DataSource="GetKitchenWiseData()" XName="KitchenName"
 												 YName="TotalQuantity" Name="Production"
 												 InnerRadius="40%" LegendShape="LegendShape.Circle">
 							<AccumulationDataLabelSettings Visible="true" Name="KitchenName"
@@ -168,7 +168,7 @@ else
 								@{
 									var production = (context as KitchenProductionOverviewModel);
 									<div class="action-buttons grid-actions">
-										<button @onclick="() => NavigateToKitchenProductionPage(production.KitchenProductionId)" class="view-button">Edit</button>
+										<button @onclick='() => NavManager.NavigateTo($"/Inventory/Kitchen-Production/{production.KitchenProductionId}")' class="view-button">Edit</button>
 									</div>
 								}
 							</Template>

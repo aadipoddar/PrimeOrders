@@ -12,3 +12,16 @@ public class UserModel
 	public bool Admin { get; set; }
 	public bool Status { get; set; }
 }
+
+public enum UserRoles
+{
+	Admin,
+	Sales,
+	Order,
+	Inventory
+}
+
+public record AuthenticationResult(
+	bool IsAuthenticated,
+	UserModel User = null,
+	string ErrorMessage = null);

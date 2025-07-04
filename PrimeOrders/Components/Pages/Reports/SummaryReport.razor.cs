@@ -18,40 +18,19 @@ public partial class SummaryReport
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, primaryLocationRequirement: true)).User) is not null))
+			return;
 
-		if (_user.LocationId != 1)
-			NavManager.NavigateTo("/Report-Dashboard");
+		await LoadData();
 
 		_isLoading = false;
-
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadData();
 	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
-	}
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
@@ -69,13 +48,6 @@ public partial class SummaryReport
 			0);
 
 		StateHasChanged();
-	}
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("deleteCookie", "UserId");
-		await JS.InvokeVoidAsync("deleteCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
 	}
 
 	private List<PaymentMethodData> GetPaymentMethodsData()
@@ -117,10 +89,8 @@ public partial class SummaryReport
 		return [.. paymentData.Where(p => p.Amount > 0)];
 	}
 
-	private async Task ExportReport()
-	{
+	private async Task ExportReport() =>
 		await JS.InvokeVoidAsync("alert", "PDF Export functionality will be implemented here");
-	}
 
 	public class PaymentMethodData
 	{

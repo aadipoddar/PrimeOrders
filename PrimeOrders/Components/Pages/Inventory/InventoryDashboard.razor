@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -32,43 +32,43 @@ else
 		<div class="welcome-section">
 			<h2>Inventory Management</h2>
 			<p>Select an option below to manage purchases and receipts</p>
-			<button @onclick='() => NavigateTo("/")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
 				<span class="back-icon">←</span> Back to Dashboard
 			</button>
 		</div>
 
 		<div class="dashboard-cards">
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Purchase")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Purchase")'>
 				<div class="card-icon purchase-icon">🛒</div>
 				<h3>New Purchase</h3>
 				<p>Create a new purchase order</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Recipies")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Recipies")'>
 				<div class="card-icon receipt-icon">🧾</div>
 				<h3>Recipies</h3>
 				<p>Manage and view purchase receipts</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/RawMaterialStockAdjustment")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/RawMaterialStockAdjustment")'>
 				<div class="card-icon stock-icon">📊</div>
 				<h3>Raw Material Stock Adjustment</h3>
 				<p>Adjust and manage raw material stock levels</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/ProductStockAdjustment")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/ProductStockAdjustment")'>
 				<div class="card-icon product-stock-icon">📦</div>
 				<h3>Finished Product Stock Adjustment</h3>
 				<p>Adjust and manage finished product inventory</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Kitchen-Issue")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Kitchen-Issue")'>
 				<div class="card-icon kitchen-icon">👨‍🍳</div>
 				<h3>Kitchen Issue</h3>
 				<p>Manage items issued to kitchen</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory/Kitchen-Production")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Kitchen-Production")'>
 				<div class="card-icon production-icon">🍲</div>
 				<h3>Kitchen Production</h3>
 				<p>Manage kitchen production activities</p>

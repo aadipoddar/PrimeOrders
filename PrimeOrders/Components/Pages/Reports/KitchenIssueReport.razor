@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -32,7 +32,7 @@ else
 		<div class="welcome-section">
 			<h2>Kitchen Issue Report</h2>
 			<p>Track and analyze kitchen-related raw material issues</p>
-			<button @onclick='() => NavigateTo("/Report-Dashboard")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/Report-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Reports
 			</button>
 		</div>
@@ -168,7 +168,7 @@ else
 								@{
 									var issue = (context as KitchenIssueOverviewModel);
 									<div class="action-buttons grid-actions">
-										<button @onclick="() => NavigateToKitchenIssuePage(issue.KitchenIssueId)" class="view-button">Edit</button>
+										<button @onclick='() => NavManager.NavigateTo($"/Inventory/Kitchen-Issue/{issue.KitchenIssueId}")' class="view-button">Edit</button>
 									</div>
 								}
 							</Template>

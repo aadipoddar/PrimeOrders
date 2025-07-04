@@ -24,39 +24,21 @@ public partial class PurchaseReport
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory, true)).User) is not null))
+			return;
 
-		if (_user.LocationId != 1)
-			NavManager.NavigateTo("/Report-Dashboard");
+		await LoadData();
 
 		_isLoading = false;
-
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadInitialData();
 	}
 
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
-	}
-
-	private async Task LoadInitialData()
+	private async Task LoadData()
 	{
 		_suppliers = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier, true);
 		await LoadPurchaseData();
@@ -84,16 +66,6 @@ public partial class PurchaseReport
 		return filtered;
 	}
 
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("deleteCookie", "UserId");
-		await JS.InvokeVoidAsync("deleteCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
-	}
-
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
 		_startDate = args.StartDate;
@@ -108,11 +80,11 @@ public partial class PurchaseReport
 	}
 
 	public void PurchaseHistoryRowSelected(RowSelectEventArgs<PurchaseOverviewModel> args) =>
-		NavigateTo($"/Inventory/Purchase/{args.Data.PurchaseId}");
+		NavManager.NavigateTo($"/Inventory/Purchase/{args.Data.PurchaseId}");
 
 	private async Task ExportToPdf()
 	{
-		if (_sfGrid != null)
+		if (_sfGrid is not null)
 			await _sfGrid.ExportToPdfAsync();
 	}
 

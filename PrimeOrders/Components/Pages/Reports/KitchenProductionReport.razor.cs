@@ -22,38 +22,19 @@ public partial class KitchenProductionReport
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory, primaryLocationRequirement: true)).User) is not null))
+			return;
 
-		if (_user.LocationId != 1)
-			NavManager.NavigateTo("/Report-Dashboard");
+		await LoadKitchens();
+		await LoadKitchenProductionData();
 
 		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-		{
-			await LoadKitchens();
-			await LoadKitchenProductionData();
-		}
-	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
 	}
 
 	private async Task LoadKitchens()
@@ -106,10 +87,7 @@ public partial class KitchenProductionReport
 	}
 
 	private void OnRowSelected(RowSelectEventArgs<KitchenProductionOverviewModel> args) =>
-			NavigateToKitchenProductionPage(args.Data.KitchenProductionId);
-
-	private void NavigateToKitchenProductionPage(int kitchenProductionId) =>
-		NavManager.NavigateTo($"/Inventory/Kitchen-Production/{kitchenProductionId}");
+			NavManager.NavigateTo($"/Inventory/Kitchen-Production/{args.Data.KitchenProductionId}");
 
 	// Chart data methods
 	private List<KitchenWiseData> GetKitchenWiseData() =>
@@ -122,9 +100,6 @@ public partial class KitchenProductionReport
 			})
 			.OrderByDescending(x => x.TotalQuantity)
 			.Take(10)];
-
-	private List<KitchenWiseData> GetKitchenDistributionData() =>
-		GetKitchenWiseData();
 
 	private List<DailyProductionData> GetDailyProductionData() =>
 		[.. _kitchenProductionOverviews
@@ -278,16 +253,6 @@ public partial class KitchenProductionReport
 		var fileName = $"Kitchen_Production_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("eraseCookie", "UserId");
-		await JS.InvokeVoidAsync("eraseCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
-	}
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 
 	// Data classes for charts
 	public class KitchenWiseData

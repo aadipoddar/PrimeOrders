@@ -10,7 +10,7 @@
 		 ShowCloseButton="true"
 		 CssClass="e-toast-success">
 	<ToastPosition X="Right" Y="Top" />
-	<ToastEvents Closed="@ClosedHandler" />
+	<ToastEvents Closed="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)" />
 </SfToast>
 
 <SfToast @ref="_sfUpdateToast"
@@ -23,7 +23,7 @@
 	<ToastPosition X="Right" Y="Top" />
 </SfToast>
 
-@if (IsLoading)
+@if (_isLoading)
 {
 	<div class="loader-container">
 		<div class="circular-dots-loader">
@@ -39,7 +39,7 @@ else
 	<div class="recipe-container">
 		<div class="page-header">
 			<h1 class="page-title">Recipe Management</h1>
-			<button @onclick='() => NavigateTo("/Inventory-Dashboard")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Inventory
 			</button>
 		</div>

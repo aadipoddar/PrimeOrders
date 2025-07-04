@@ -37,6 +37,7 @@
   <ItemGroup>
     <Using Include="Microsoft.AspNetCore.Components" />
     <Using Include="Microsoft.JSInterop" />
+    <Using Include="PrimeOrders.Services" />
     <Using Include="PrimeOrdersLibrary.Data" />
     <Using Include="PrimeOrdersLibrary.Data.Common" />
     <Using Include="PrimeOrdersLibrary.Data.Inventory" />

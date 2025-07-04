@@ -363,7 +363,7 @@ public static class ExcelExportUtil
 		int rows = (int)Math.Ceiling(summaryItems.Count / (double)columns);
 
 		// Calculate cell width based on spreadsheet width
-		int cellWidth = (columnCount / columns);
+		int cellWidth = columnCount / columns;
 
 		// Track current position
 		int currentItemIndex = 0;

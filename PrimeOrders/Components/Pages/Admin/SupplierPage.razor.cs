@@ -31,40 +31,30 @@ public partial class SupplierPage
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((await AuthService.ValidateUser(JS, NavManager, UserRoles.Admin, true)).User is not null))
+			return;
+
+		await LoadData();
 
 		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadComboBox();
 	}
 
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		return true;
-	}
-
-	private async Task LoadComboBox()
+	private async Task LoadData()
 	{
 		_suppliers = await CommonData.LoadTableData<SupplierModel>(TableNames.Supplier);
 		_states = await CommonData.LoadTableData<StateModel>(TableNames.State);
 		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 		_supplierModel.StateId = _states.FirstOrDefault()?.Id ?? 0;
-		_sfGrid?.Refresh();
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+
 		StateHasChanged();
 	}
 
@@ -116,10 +106,4 @@ public partial class SupplierPage
 		await SupplierData.InsertSupplier(_supplierModel);
 		await _sfToast.ShowAsync();
 	}
-
-	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 }

@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -32,7 +32,7 @@ else
 		<div class="welcome-section">
 			<h2>Item Summary Report</h2>
 			<p>View and analyze aggregated product performance metrics</p>
-			<button @onclick='() => NavigateTo("/Report-Dashboard")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/Report-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Reports
 			</button>
 		</div>
@@ -48,7 +48,7 @@ else
 
 			<div class="action-buttons">
 				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportReport())" />
-				<SfButton CssClass="detailed-button" IconCss="detailed-icon" Content="Product Details" OnClick="@(() => NavigateTo("/Reports/ProductDetail"))" />
+				<SfButton CssClass="detailed-button" IconCss="detailed-icon" Content="Product Details" OnClick="@(() => NavManager.NavigateTo("/Reports/ProductDetail"))" />
 			</div>
 		</div>
 
@@ -178,10 +178,10 @@ else
 										<span class="category-name">@category.Name</span>
 									</div>
 									<div class="header-center">
-										<span class="category-amount">@(GetCategorySalesAmount(category.Id).FormatIndianCurrency())</span>
+										<span class="category-amount">@(_productOverviews.Where(p => p.ProductCategoryId == category.Id).Sum(p => p.TotalAmount).FormatIndianCurrency())</span>
 									</div>
 									<div class="header-right">
-										<SfButton CssClass="detail-button" OnClick='() => NavigateTo($"/Reports/ProductDetail")' Content="Details" />
+										<SfButton CssClass="detail-button" OnClick='() => NavManager.NavigateTo($"/Reports/ProductDetail")' Content="Details" />
 									</div>
 								</div>
 							</HeaderTemplate>
@@ -193,11 +193,11 @@ else
 										<div class="stats-group uniform">
 											<div class="stat-item highlighted">
 												<label>Amount Collected:</label>
-												<div class="stat-value">@(GetCategorySalesAmount(category.Id).FormatIndianCurrency())</div>
+												<div class="stat-value">@(_productOverviews.Where(p => p.ProductCategoryId == category.Id).Sum(p => p.TotalAmount).FormatIndianCurrency())</div>
 											</div>
 											<div class="stat-item">
 												<label>Base Total:</label>
-												<div class="stat-value">@(GetCategoryBaseTotal(category.Id).FormatIndianCurrency())</div>
+												<div class="stat-value">@(_productOverviews.Where(p => p.ProductCategoryId == category.Id).Sum(p => p.BaseTotal).FormatIndianCurrency())</div>
 											</div>
 										</div>
 
@@ -205,19 +205,19 @@ else
 										<div class="stats-group uniform">
 											<div class="stat-item">
 												<label>Products Count:</label>
-												<div class="stat-value">@GetCategoryProductCount(category.Id)</div>
+												<div class="stat-value">@_productOverviews.Where(p => p.ProductCategoryId == category.Id).Select(p => p.ProductId).Distinct().Count()</div>
 											</div>
 											<div class="stat-item">
 												<label>Total Quantity:</label>
-												<div class="stat-value">@GetCategoryQuantity(category.Id)</div>
+												<div class="stat-value">@_productOverviews.Where(p => p.ProductCategoryId == category.Id).Sum(p => p.QuantitySold)</div>
 											</div>
 											<div class="stat-item discount">
 												<label>Total Discount:</label>
-												<div class="stat-value">@(GetCategoryDiscount(category.Id).FormatIndianCurrency())</div>
+												<div class="stat-value">@(_productOverviews.Where(p => p.ProductCategoryId == category.Id).Sum(p => p.DiscountAmount).FormatIndianCurrency())</div>
 											</div>
 											<div class="stat-item tax">
 												<label>Total Tax:</label>
-												<div class="stat-value">@(GetCategoryTax(category.Id).FormatIndianCurrency())</div>
+												<div class="stat-value">@(_productOverviews.Where(p => p.ProductCategoryId == category.Id).Sum(p => p.TotalTaxAmount).FormatIndianCurrency())</div>
 											</div>
 										</div>
 									</div>

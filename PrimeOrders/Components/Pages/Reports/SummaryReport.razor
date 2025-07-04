@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -32,7 +32,7 @@ else
 		<div class="welcome-section">
 			<h2>Summary Report</h2>
 			<p>View and analyze overall business performance metrics</p>
-			<button @onclick='() => NavigateTo("/Report-Dashboard")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/Report-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Reports
 			</button>
 		</div>
@@ -48,7 +48,7 @@ else
 
 			<div class="action-buttons">
 				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportReport())" />
-				<SfButton CssClass="detailed-button" IconCss="detailed-icon" Content="Detailed Report" OnClick="@(() => NavigateTo("/Reports/Detailed"))" />
+				<SfButton CssClass="detailed-button" IconCss="detailed-icon" Content="Detailed Report" OnClick="@(() => NavManager.NavigateTo("/Reports/Detailed"))" />
 			</div>
 		</div>
 
@@ -137,7 +137,7 @@ else
 										<span class="location-amount">@(_saleOverviews.Where(_ => _.LocationId == location.Id).Sum(_ => _.Total).FormatIndianCurrency())</span>
 									</div>
 									<div class="header-right">
-										<SfButton CssClass="detail-button" OnClick='() => NavigateTo($"/Reports/Detailed/{location.Id}")' Content="Details" />
+										<SfButton CssClass="detail-button" OnClick='() => NavManager.NavigateTo($"/Reports/Detailed/{location.Id}")' Content="Details" />
 									</div>
 								</div>
 							</HeaderTemplate>

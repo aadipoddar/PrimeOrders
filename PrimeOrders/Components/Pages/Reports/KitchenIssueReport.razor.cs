@@ -22,38 +22,19 @@ public partial class KitchenIssueReport
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory, primaryLocationRequirement: true)).User) is not null))
+			return;
 
-		if (_user.LocationId != 1)
-			NavManager.NavigateTo("/Report-Dashboard");
+		await LoadKitchens();
+		await LoadKitchenIssueData();
 
 		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-		{
-			await LoadKitchens();
-			await LoadKitchenIssueData();
-		}
-	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
 	}
 
 	private async Task LoadKitchens()
@@ -98,10 +79,7 @@ public partial class KitchenIssueReport
 	}
 
 	private void OnRowSelected(RowSelectEventArgs<KitchenIssueOverviewModel> args) =>
-			NavigateToKitchenIssuePage(args.Data.KitchenIssueId);
-
-	private void NavigateToKitchenIssuePage(int kitchenIssueId) =>
-		NavManager.NavigateTo($"/Inventory/Kitchen-Issue/{kitchenIssueId}");
+			NavManager.NavigateTo($"/Inventory/Kitchen-Issue/{args.Data.KitchenIssueId}");
 
 	// Chart data methods
 	private List<KitchenWiseData> GetKitchenWiseData()
@@ -274,16 +252,6 @@ public partial class KitchenIssueReport
 		var fileName = $"Kitchen_Issue_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("eraseCookie", "UserId");
-		await JS.InvokeVoidAsync("eraseCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
-	}
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 
 	// Data classes for charts
 	public class KitchenWiseData

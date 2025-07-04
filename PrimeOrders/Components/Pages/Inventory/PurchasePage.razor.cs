@@ -46,36 +46,21 @@ public partial class PurchasePage
 	#region LoadData
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory, true)).User) is not null))
+			return;
+
+		await LoadData();
 
 		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadComboBox();
 	}
 
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-
-		return true;
-	}
-
-	private async Task LoadComboBox()
+	private async Task LoadData()
 	{
 		_suppliers = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier);
 		_supplier = _suppliers.FirstOrDefault();
@@ -139,8 +124,7 @@ public partial class PurchasePage
 	{
 		_supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, args.Value);
 
-		if (_supplier is null)
-			_supplier = new SupplierModel();
+		_supplier ??= new SupplierModel();
 
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 		UpdateFinancialDetails();
@@ -183,7 +167,7 @@ public partial class PurchasePage
 	#endregion
 
 	#region Raw Materials
-	private async void RawMatrialCategoryChanged(ListBoxChangeEventArgs<int, RawMaterialCategoryModel> args)
+	private async void RawMaterialCategoryChanged(ListBoxChangeEventArgs<int, RawMaterialCategoryModel> args)
 	{
 		_selectedRawMaterialCategoryId = args.Value;
 		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
@@ -424,11 +408,5 @@ public partial class PurchasePage
 				LocationId = _user.LocationId
 			});
 	}
-
-	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo("/Inventory/Purchase", forceLoad: true);
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 	#endregion
 }

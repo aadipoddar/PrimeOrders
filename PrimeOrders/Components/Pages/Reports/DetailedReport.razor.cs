@@ -27,46 +27,21 @@ public partial class DetailedReport
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager)).User) is not null))
+			return;
 
 		if (LocationId.HasValue && LocationId.Value > 0 && _user.LocationId == 1)
 			_selectedLocationId = LocationId.Value;
 
+		await LoadData();
+
 		_isLoading = false;
-
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadData();
-	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
-	}
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
-
-	private async Task Logout()
-	{
-		await JS.InvokeVoidAsync("deleteCookie", "UserId");
-		await JS.InvokeVoidAsync("deleteCookie", "Passcode");
-		NavManager.NavigateTo("/Login");
 	}
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
@@ -104,10 +79,10 @@ public partial class DetailedReport
 	}
 
 	public void SaleHistoryRowSelected(RowSelectEventArgs<SaleOverviewModel> args) =>
-		NavigateTo($"/Sale/{args.Data.SaleId}");
+		NavManager.NavigateTo($"/Sale/{args.Data.SaleId}");
 
 	private async Task ExportToPdf() =>
-			await _sfGrid?.ExportToPdfAsync();
+		await _sfGrid?.ExportToPdfAsync();
 
 	private async Task ExportToExcel()
 	{

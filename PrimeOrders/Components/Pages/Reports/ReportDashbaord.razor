@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -32,7 +32,7 @@ else
 		<div class="welcome-section">
 			<h2>Reports Management</h2>
 			<p>Select an option below to view various reports</p>
-			<button @onclick='() => NavigateTo("/")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
 				<span class="back-icon">←</span> Back to Dashboard
 			</button>
 		</div>
@@ -40,62 +40,62 @@ else
 		<div class="dashboard-cards">
 		    @if (_user.LocationId == 1)
 		    {
-		        <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Summary")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/Summary")'>
 		            <div class="card-icon summary-report-icon">📊</div>
 		            <h3>Summary Reports</h3>
 		            <p>View overall business performance metrics</p>
 		        </div>
-		
-		        <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/ProductSummary")'>
+
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/ProductSummary")'>
 		            <div class="card-icon item-summary-icon">📋</div>
 		            <h3>Product Summary Report</h3>
 		            <p>View aggregated product sales analytics</p>
 		        </div>
 
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/RawMaterialStockReport")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/RawMaterialStockReport")'>
 					<div class="card-icon stock-report-icon">🧮</div>
 					<h3>Raw Material Stock Reports</h3>
 					<p>Monitor inventory levels and stock status</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/KitchenIssue")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/KitchenIssue")'>
 					<div class="card-icon kitchen-issue-icon">🔔</div>
 					<h3>Kitchen Issue Report</h3>
 					<p>Track and manage kitchen-related issues and incidents</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/KitchenProduction")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/KitchenProduction")'>
 					<div class="card-icon kitchen-production-icon">👨‍🍳</div>
 					<h3>Kitchen Production Report</h3>
 					<p>Monitor kitchen output and production efficiency</p>
 				</div>
-				
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/PurchaseReport")'>
+
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/PurchaseReport")'>
 					<div class="card-icon purchase-report-icon">🛒</div>
 					<h3>Purchase Report</h3>
 					<p>Track and analyze procurement activities and expenditures</p>
 				</div>
 		    }
-		        
-		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/Detailed")'>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/Detailed")'>
 		        <div class="card-icon detailed-report-icon">📈</div>
 		        <h3>Detailed Reports</h3>
 		        <p>View comprehensive sales and transaction details</p>
 		    </div>
-		
-		    <div class="dashboard-card" @onclick='() => NavigateTo("/Reports/ProductDetail")'>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/ProductDetail")'>
 		        <div class="card-icon item-report-icon">📦</div>
 		        <h3>Product Detailed Reports</h3>
 		        <p>Track individual product performance</p>
 		    </div>
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/OrderHistory")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/OrderHistory")'>
 				<div class="card-icon order-history-icon">📜</div>
 				<h3>Order History</h3>
 				<p>Track and analyze customer order records</p>
 			</div>
-			
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Reports/FinishedProductStockReport")'>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Reports/FinishedProductStockReport")'>
 				<div class="card-icon product-stock-icon">📦</div>
 				<h3>Finished Product Stock Report</h3>
 				<p>View finished product inventory levels and stock status</p>

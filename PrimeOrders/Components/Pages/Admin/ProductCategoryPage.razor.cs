@@ -8,8 +8,8 @@ public partial class ProductCategoryPage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
-	private bool _isLoading = true;
 	private UserModel _user;
+	private bool _isLoading = true;
 
 	private ProductCategoryModel _categoryModel = new()
 	{
@@ -28,32 +28,18 @@ public partial class ProductCategoryPage
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		if (!firstRender)
+			return;
+
 		_isLoading = true;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Admin)).User) is not null))
+			return;
+
+		await LoadData();
 
 		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadData();
-	}
-
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		_user = user;
-		return true;
 	}
 
 	private async Task LoadData()
@@ -65,7 +51,9 @@ public partial class ProductCategoryPage
 		if (_user.LocationId != 1)
 			_categories = [.. _categories.Where(c => c.LocationId == _user.LocationId)];
 
-		await _sfGrid?.Refresh();
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+
 		StateHasChanged();
 	}
 
@@ -106,10 +94,4 @@ public partial class ProductCategoryPage
 		await ProductData.InsertProductCategory(_categoryModel);
 		await _sfToast.ShowAsync();
 	}
-
-	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
 }

@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick="Logout" class="logout-button">
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
 					<span class="logout-icon">⟲</span> Logout
 				</button>
 			</div>
@@ -37,7 +37,7 @@ else
 		<div class="dashboard-cards">
 			@if (_user?.Inventory == true && _user?.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Inventory-Dashboard")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory-Dashboard")'>
 					<div class="card-icon inventory-icon">📦</div>
 					<h3>Inventory</h3>
 					<p>Manage inventory and stock levels</p>
@@ -46,7 +46,7 @@ else
 
 			@if (_user?.Admin == true)
 			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Admin-Dashboard")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Admin-Dashboard")'>
 					<div class="card-icon admin-icon">⚙️</div>
 					<h3>Admin</h3>
 					<p>System administration and settings</p>
@@ -55,7 +55,7 @@ else
 
 			@if (_user?.Sales == true)
 			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Sale")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Sale")'>
 					<div class="card-icon sales-icon">📈</div>
 					<h3>Sales</h3>
 					<p>View and manage sales information</p>
@@ -64,14 +64,14 @@ else
 
 			@if (_user?.Order == true)
 			{
-				<div class="dashboard-card" @onclick='() => NavigateTo("/Order")'>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Order")'>
 					<div class="card-icon order-icon">📋</div>
 					<h3>Orders</h3>
 					<p>Process and track customer orders</p>
 				</div>
 			}
 
-			<div class="dashboard-card" @onclick='() => NavigateTo("/Report-Dashboard")'>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Report-Dashboard")'>
 				<div class="card-icon reports-icon">📊</div>
 				<h3>Reports</h3>
 				<p>View and generate business reports</p>

@@ -9,7 +9,7 @@ public partial class RecipiesPage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
-	private bool IsLoading { get; set; } = true;
+	private bool _isLoading = true;
 
 	private int _selectedProductCategoryId = 0;
 	private int _selectedProductId = 0;
@@ -31,39 +31,25 @@ public partial class RecipiesPage
 	private SfToast _sfToast;
 	private SfToast _sfUpdateToast;
 
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		IsLoading = true;
+		if (!firstRender)
+			return;
 
-		if (firstRender && !await ValidatePassword())
-			NavManager.NavigateTo("/Login");
+		_isLoading = true;
 
-		if (firstRender)
-			await LoadComboBox();
+		if (!((await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory, true)).User is not null))
+			return;
 
-		IsLoading = false;
+		await LoadData();
+		await LoadRecipe();
+
+		_isLoading = false;
 		StateHasChanged();
-
-		if (firstRender)
-			await LoadRecipe();
 	}
 
-	private async Task<bool> ValidatePassword()
-	{
-		var userId = await JS.InvokeAsync<string>("getCookie", "UserId");
-		var password = await JS.InvokeAsync<string>("getCookie", "Passcode");
-
-		if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password))
-			return false;
-
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, int.Parse(userId));
-		if (user is null || !BCrypt.Net.BCrypt.EnhancedVerify(user.Passcode.ToString(), password))
-			return false;
-
-		return true;
-	}
-
-	private async Task LoadComboBox()
+	private async Task LoadData()
 	{
 		_productCategories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.ProductCategory);
 		_selectedProductCategoryId = _productCategories.Count > 0 ? _productCategories[0].Id : 0;
@@ -136,7 +122,9 @@ public partial class RecipiesPage
 		await _sfGrid?.Refresh();
 		StateHasChanged();
 	}
+	#endregion
 
+	#region Data Grid
 	private async void OnAddButtonClick()
 	{
 		var existingRecipe = _rawMaterialRecipies.FirstOrDefault(r => r.ItemId == _selectedRawMaterialId && r.ItemCategoryId == _selectedRawMaterialCategoryId);
@@ -164,7 +152,9 @@ public partial class RecipiesPage
 		_sfGrid.Refresh();
 		StateHasChanged();
 	}
+	#endregion
 
+	#region Saving
 	private async void OnSaveButtonClick()
 	{
 		await _sfGrid.Refresh();
@@ -208,10 +198,5 @@ public partial class RecipiesPage
 
 		await _sfToast.ShowAsync();
 	}
-
-	public void ClosedHandler(ToastCloseArgs args) =>
-		NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
-
-	private void NavigateTo(string route) =>
-		NavManager.NavigateTo(route);
+	#endregion
 }
