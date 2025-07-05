@@ -171,6 +171,10 @@
     <Build Include="StoredProcedures\LoadData\Product\Load_ProductRate_By_Product.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_LocationRate.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_RawMaterial_Rate_By_Supplier.sql" />
+    <Build Include="StoredProcedures\Insert\Sale\Insert_SaleReturn.sql" />
+    <Build Include="StoredProcedures\Insert\Sale\Insert_SaleReturnDetail.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_LastSaleReturn_By_Location.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturnDetail_By_SaleReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

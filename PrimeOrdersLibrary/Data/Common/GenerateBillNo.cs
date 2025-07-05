@@ -81,6 +81,32 @@ public static class GenerateBillNo
 		return $"{prefix}S{year}000001";
 	}
 
+	public static async Task<string> GenerateSaleReturnTransactionNo(SaleReturnModel saleReturn)
+	{
+		var prefix = await GetLocationPrefix(saleReturn.LocationId);
+		var year = $"{saleReturn.ReturnDateTime:yy}";
+		if (saleReturn.ReturnDateTime.Month <= 3)
+			year = $"{saleReturn.ReturnDateTime.AddYears(-1):yy}";
+
+		var lastSaleReturn = await SaleReturnData.LoadLastSaleReturnByLocation(saleReturn.LocationId);
+		if (lastSaleReturn is not null)
+		{
+			var lastTransactionNo = lastSaleReturn.TransactionNo;
+			if (lastTransactionNo.StartsWith(prefix))
+			{
+				var lastYear = lastTransactionNo.Substring(prefix.Length + 1, 2);
+				if (lastYear == year)
+				{
+					int lastNumber = int.Parse(lastTransactionNo[(prefix.Length + 3)..]);
+					int nextNumber = lastNumber + 1;
+					return $"{prefix}SR{year}{nextNumber:D6}";
+				}
+			}
+		}
+
+		return $"{prefix}SR{year}000001";
+	}
+
 	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
 	{
 		var prefix = await GetLocationPrefix(kitchenIssue.LocationId);

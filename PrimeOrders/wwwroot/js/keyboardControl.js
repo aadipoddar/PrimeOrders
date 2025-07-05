@@ -28,6 +28,36 @@
 	document.addEventListener('keydown', window.salePageKeyHandler);
 };
 
+window.setupSaleReturnPageKeyboardHandlers = (dotNetHelper) => {
+	// Remove existing listeners first
+	if (window.saleReturnPageKeyHandler) {
+		document.removeEventListener('keydown', window.saleReturnPageKeyHandler);
+	}
+
+	// Create new handler
+	window.saleReturnPageKeyHandler = async (event) => {
+		// Don't handle keys when typing in input fields
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+			return;
+		}
+
+		try {
+			await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut',
+				event.key);
+		} catch (error) {
+			console.error('Keyboard handler error:', error);
+		}
+
+		// Prevent default for function keys
+		if (event.key.startsWith('F') || event.ctrlKey) {
+			event.preventDefault();
+		}
+	};
+
+	// Add new listener
+	document.addEventListener('keydown', window.saleReturnPageKeyHandler);
+};
+
 window.setupOrderPageKeyboardHandlers = (dotNetHelper) => {
 	// Remove existing listeners first
 	if (window.orderPageKeyHandler) {
@@ -208,12 +238,15 @@ window.setupProductStockAdjustmentPageKeyboardHandlers = (dotNetHelper) => {
 	document.addEventListener('keydown', window.productStockAdjustmentPageKeyHandler);
 };
 
-// Product search functions for Sale, Order, Kitchen Production, and Product Stock Adjustment pages
+// Product search functions for Sale, Sale Return, Order, Kitchen Production, and Product Stock Adjustment pages
 window.showProductSearchIndicator = (searchText) => {
 	const indicator = document.getElementById('productSearchIndicator');
 	if (indicator) {
 		indicator.style.display = 'block';
-		document.getElementById('searchText').textContent = searchText;
+		const searchTextElement = document.getElementById('searchText');
+		if (searchTextElement) {
+			searchTextElement.textContent = searchText;
+		}
 	}
 };
 
@@ -225,8 +258,15 @@ window.hideProductSearchIndicator = () => {
 };
 
 window.updateProductSearchIndicator = (searchText, resultCount) => {
-	document.getElementById('searchText').textContent = searchText;
-	document.getElementById('searchResults').textContent = `${resultCount} products found`;
+	const searchTextElement = document.getElementById('searchText');
+	const searchResultsElement = document.getElementById('searchResults');
+
+	if (searchTextElement) {
+		searchTextElement.textContent = searchText;
+	}
+	if (searchResultsElement) {
+		searchResultsElement.textContent = `${resultCount} products found`;
+	}
 };
 
 // Material search functions for Purchase, Kitchen Issue, and Raw Material Stock Adjustment pages
@@ -234,7 +274,10 @@ window.showMaterialSearchIndicator = (searchText) => {
 	const indicator = document.getElementById('materialSearchIndicator');
 	if (indicator) {
 		indicator.style.display = 'block';
-		document.getElementById('searchText').textContent = searchText;
+		const searchTextElement = document.getElementById('searchText');
+		if (searchTextElement) {
+			searchTextElement.textContent = searchText;
+		}
 	}
 };
 
@@ -246,6 +289,97 @@ window.hideMaterialSearchIndicator = () => {
 };
 
 window.updateMaterialSearchIndicator = (searchText, resultCount) => {
-	document.getElementById('searchText').textContent = searchText;
-	document.getElementById('searchResults').textContent = `${resultCount} materials found`;
+	const searchTextElement = document.getElementById('searchText');
+	const searchResultsElement = document.getElementById('searchResults');
+
+	if (searchTextElement) {
+		searchTextElement.textContent = searchText;
+	}
+	if (searchResultsElement) {
+		searchResultsElement.textContent = `${resultCount} materials found`;
+	}
+};
+
+// Cleanup function to remove all event listeners when needed
+window.cleanupKeyboardHandlers = () => {
+	if (window.salePageKeyHandler) {
+		document.removeEventListener('keydown', window.salePageKeyHandler);
+		window.salePageKeyHandler = null;
+	}
+	if (window.saleReturnPageKeyHandler) {
+		document.removeEventListener('keydown', window.saleReturnPageKeyHandler);
+		window.saleReturnPageKeyHandler = null;
+	}
+	if (window.orderPageKeyHandler) {
+		document.removeEventListener('keydown', window.orderPageKeyHandler);
+		window.orderPageKeyHandler = null;
+	}
+	if (window.purchasePageKeyHandler) {
+		document.removeEventListener('keydown', window.purchasePageKeyHandler);
+		window.purchasePageKeyHandler = null;
+	}
+	if (window.kitchenIssuePageKeyHandler) {
+		document.removeEventListener('keydown', window.kitchenIssuePageKeyHandler);
+		window.kitchenIssuePageKeyHandler = null;
+	}
+	if (window.kitchenProductionPageKeyHandler) {
+		document.removeEventListener('keydown', window.kitchenProductionPageKeyHandler);
+		window.kitchenProductionPageKeyHandler = null;
+	}
+	if (window.stockAdjustmentPageKeyHandler) {
+		document.removeEventListener('keydown', window.stockAdjustmentPageKeyHandler);
+		window.stockAdjustmentPageKeyHandler = null;
+	}
+	if (window.productStockAdjustmentPageKeyHandler) {
+		document.removeEventListener('keydown', window.productStockAdjustmentPageKeyHandler);
+		window.productStockAdjustmentPageKeyHandler = null;
+	}
+};
+
+// Additional utility functions that might be needed for Blazor integration
+window.focusElement = (elementId) => {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.focus();
+	}
+};
+
+window.scrollToElement = (elementId) => {
+	const element = document.getElementById(elementId);
+	if (element) {
+		element.scrollIntoView({ behavior: 'smooth' });
+	}
+};
+
+// Print function for thermal bills (referenced in Sale Return page)
+window.printToPrinter = (content) => {
+	const printWindow = window.open('', '_blank');
+	printWindow.document.write(`
+		<html>
+			<head>
+				<title>Print</title>
+				<style>
+					body { 
+						font-family: monospace; 
+						font-size: 12px; 
+						margin: 0; 
+						padding: 10px; 
+					}
+					@media print {
+						body { margin: 0; }
+					}
+				</style>
+			</head>
+			<body>
+				<pre>${content}</pre>
+				<script>
+					window.onload = function() {
+						window.print();
+						window.close();
+					}
+				</script>
+			</body>
+		</html>
+	`);
+	printWindow.document.close();
 };

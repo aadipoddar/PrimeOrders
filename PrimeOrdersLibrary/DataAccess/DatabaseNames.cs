@@ -22,6 +22,8 @@ public static class TableNames
 	public static string OrderDetail => "OrderDetail";
 	public static string Sale => "Sale";
 	public static string SaleDetail => "SaleDetail";
+	public static string SaleReturn => "SaleReturn";
+	public static string SaleReturnDetail => "SaleReturnDetail";
 	public static string Kitchen => "Kitchen";
 	public static string KitchenIssue => "KitchenIssue";
 	public static string KitchenIssueDetail => "KitchenIssueDetail";
@@ -56,6 +58,9 @@ public static class StoredProcedureNames
 
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 	public static string LoadLastSaleByLocation => "Load_LastSale_By_Location";
+
+	public static string LoadSaleReturnDetailBySaleReturn => "Load_SaleReturnDetail_By_SaleReturn";
+	public static string LoadLastSaleReturnByLocation => "Load_LastSaleReturn_By_Location";
 
 	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
@@ -101,6 +106,8 @@ public static class StoredProcedureNames
 
 	public static string InsertSale => "Insert_Sale";
 	public static string InsertSaleDetail => "Insert_SaleDetail";
+	public static string InsertSaleReturn => "Insert_SaleReturn";
+	public static string InsertSaleReturnDetail => "Insert_SaleReturnDetail";
 
 	public static string InsertKitchenIssue => "Insert_KitchenIssue";
 	public static string InsertKitchenIssueDetail => "Insert_KitchenIssueDetail";
