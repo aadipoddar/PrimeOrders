@@ -381,7 +381,7 @@ else
 <!-- Quantity Dialog -->
 <SfDialog ID="_sfQuantityDialog"
 		  @ref="_sfQuantityDialog"
-		  Width="350px"
+		  Width="400px"
 		  Height="auto"
 		  AllowDragging="true"
 		  EnableResize="false"
@@ -398,10 +398,29 @@ else
 		<Content>
 			<div class="dialog-content">
 				<div class="form-row">
-					<div class="form-group full-width">
+					<div class="form-group">
 						<label>Quantity</label>
 						<SfNumericTextBox TValue="decimal"
 										  @bind-Value="_selectedQuantity"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+					<div class="form-group">
+						<label>Measuring Unit</label>
+						<SfDropDownList TValue="MeasurementUnit"
+										TItem="MeasurementUnit"
+										@bind-Value="_selectedMeasurementUnit"
+										DataSource="@_measurementUnits"
+										CssClass="form-control">
+						</SfDropDownList>
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group full-width">
+						<label>Rate</label>
+						<SfNumericTextBox TValue="decimal"
+										  @bind-Value="_selectedRate"
 										  Min="0"
 										  Format="N2"
 										  CssClass="form-control" />
@@ -491,6 +510,19 @@ else
 															  Min="0"
 															  Format="N2"
 															  CssClass="form-control" />
+										</div>
+									</div>
+
+									<div class="form-row">
+										<div class="form-group">
+											<label>Measuring Unit</label>
+											<SfDropDownList TValue="MeasurementUnit"
+															TItem="MeasurementUnit"
+															Value="_dialogSelectedMeasurementUnit"
+															ValueChanged="DialogMeasurementUnitValueChanged"
+															DataSource="@_measurementUnits"
+															CssClass="form-control">
+											</SfDropDownList>
 										</div>
 									</div>
 

@@ -19,6 +19,7 @@ public class PurchaseDetailModel
 	public int PurchaseId { get; set; }
 	public int RawMaterialId { get; set; }
 	public decimal Quantity { get; set; }
+	public string MeasurementUnit { get; set; }
 	public decimal Rate { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal DiscPercent { get; set; }
@@ -39,6 +40,7 @@ public class PurchaseRawMaterialCartModel
 	public int RawMaterialId { get; set; }
 	public string RawMaterialName { get; set; }
 	public decimal Quantity { get; set; }
+	public string MeasurementUnit { get; set; }
 	public decimal Rate { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal DiscPercent { get; set; }
@@ -78,4 +80,11 @@ public class PurchaseOverviewModel
 	public decimal BaseTotal { get; set; }
 	public decimal SubTotal { get; set; }
 	public decimal Total { get; set; }
+}
+
+public enum MeasurementUnit
+{
+	KiloGram,
+	Gram,
+	Litre
 }

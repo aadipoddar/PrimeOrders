@@ -28,6 +28,9 @@ public partial class PurchasePage
 	private decimal _subTotal = 0;
 	private decimal _total = 0;
 	private decimal _selectedQuantity = 1;
+	private decimal _selectedRate = 0;
+	private MeasurementUnit _selectedMeasurementUnit = MeasurementUnit.KiloGram;
+	private MeasurementUnit _dialogSelectedMeasurementUnit = MeasurementUnit.KiloGram;
 
 	private int _selectedRawMaterialId = 0;
 
@@ -46,6 +49,8 @@ public partial class PurchasePage
 	private List<SupplierModel> _suppliers;
 	private List<RawMaterialModel> _rawMaterials;
 	private readonly List<PurchaseRawMaterialCartModel> _purchaseRawMaterialCarts = [];
+
+	private readonly List<MeasurementUnit> _measurementUnits = [.. Enum.GetValues<MeasurementUnit>()];
 
 	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
 	private SfGrid<PurchaseRawMaterialCartModel> _sfRawMaterialCartGrid;
@@ -114,6 +119,7 @@ public partial class PurchasePage
 				RawMaterialId = item.RawMaterialId,
 				RawMaterialName = product.Name,
 				Quantity = item.Quantity,
+				MeasurementUnit = item.MeasurementUnit,
 				Rate = item.Rate,
 				BaseTotal = item.BaseTotal,
 				DiscPercent = item.DiscPercent,
@@ -259,7 +265,7 @@ public partial class PurchasePage
 	{
 		if (_selectedRawMaterial.Id > 0)
 		{
-			_selectedQuantity = 1;
+			SetQuantityDialogDefaults();
 			_quantityDialogVisible = true;
 			await ExitMaterialSearch();
 			StateHasChanged();
@@ -328,15 +334,29 @@ public partial class PurchasePage
 			return;
 
 		_selectedRawMaterial = material;
-		_selectedQuantity = 1;
+		SetQuantityDialogDefaults();
 		_quantityDialogVisible = true;
 		_hasAddedMaterialViaSearch = false;
 		StateHasChanged();
 	}
 
+	private void SetQuantityDialogDefaults()
+	{
+		_selectedQuantity = 1;
+		_selectedRate = _selectedRawMaterial.MRP;
+		_selectedMeasurementUnit = MeasurementUnit.KiloGram;
+	}
+
 	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<PurchaseRawMaterialCartModel> args)
 	{
 		_selectedRawMaterialCart = args.Data;
+
+		// Set dialog measurement unit from cart model
+		if (Enum.TryParse<MeasurementUnit>(_selectedRawMaterialCart.MeasurementUnit, out var unit))
+			_dialogSelectedMeasurementUnit = unit;
+		else
+			_dialogSelectedMeasurementUnit = MeasurementUnit.KiloGram;
+
 		_dialogVisible = true;
 		UpdateFinancialDetails();
 		StateHasChanged();
@@ -355,7 +375,11 @@ public partial class PurchasePage
 		var existingProduct = _purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterial.Id);
 
 		if (existingProduct is not null)
+		{
 			existingProduct.Quantity += _selectedQuantity;
+			existingProduct.Rate = _selectedRate;
+			existingProduct.MeasurementUnit = _selectedMeasurementUnit.ToString();
+		}
 		else
 		{
 			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, _selectedRawMaterial.TaxId);
@@ -365,8 +389,9 @@ public partial class PurchasePage
 				RawMaterialId = _selectedRawMaterial.Id,
 				RawMaterialName = _selectedRawMaterial.Name,
 				Quantity = _selectedQuantity,
-				Rate = _selectedRawMaterial.MRP,
-				BaseTotal = _selectedRawMaterial.MRP * _selectedQuantity,
+				Rate = _selectedRate,
+				MeasurementUnit = _selectedMeasurementUnit.ToString(),
+				BaseTotal = _selectedRate * _selectedQuantity,
 				DiscPercent = 0,
 				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
 				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
@@ -404,6 +429,13 @@ public partial class PurchasePage
 	{
 		_selectedRawMaterialCart.Quantity = args;
 		UpdateModalFinancialDetails();
+	}
+
+	private void DialogMeasurementUnitValueChanged(MeasurementUnit args)
+	{
+		_dialogSelectedMeasurementUnit = args;
+		_selectedRawMaterialCart.MeasurementUnit = args.ToString();
+		StateHasChanged();
 	}
 
 	private void DialogDiscPercentValueChanged(decimal args)
@@ -544,6 +576,7 @@ public partial class PurchasePage
 				PurchaseId = _purchase.Id,
 				RawMaterialId = item.RawMaterialId,
 				Quantity = item.Quantity,
+				MeasurementUnit = item.MeasurementUnit,
 				Rate = item.Rate,
 				BaseTotal = item.BaseTotal,
 				DiscPercent = item.DiscPercent,

@@ -4,6 +4,7 @@
     [PurchaseId] INT NOT NULL, 
     [RawMaterialId] INT NOT NULL, 
     [Quantity] DECIMAL(7, 3) NOT NULL DEFAULT 1, 
+    [MeasurementUnit] VARCHAR(10) NOT NULL, 
     [Rate] MONEY NOT NULL, 
     [BaseTotal] MONEY NOT NULL DEFAULT 0, 
     [DiscPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0, 
