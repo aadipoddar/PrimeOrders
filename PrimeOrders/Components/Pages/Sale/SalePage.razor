@@ -97,14 +97,14 @@ else
 							AllowSorting="true"
 							AllowResizing="true"
 							AllowPaging="true"
+							AllowFiltering="true"
 							Height="450px"
 							CssClass="modern-products-grid">
 						<GridPageSettings PageSize="7" />
 						<GridColumns>
-							<GridColumn Field=@nameof(ProductModel.Code) Width="auto" />
-							<GridColumn Field=@nameof(ProductModel.Name) Width="auto" />
-							<GridColumn Field=@nameof(ProductModel.Rate) Width="auto"  />
-							<GridColumn HeaderText="" Width="120" MinWidth="100" AllowSorting="false" />
+							<GridColumn Field=@nameof(ProductModel.Name) Width="100%"/>
+							<GridColumn Field=@nameof(ProductModel.Rate) AllowFiltering="false" />
+							<GridColumn AllowFiltering="false" />
 						</GridColumns>
 						<GridTemplates>
 							<RowTemplate>
@@ -113,11 +113,6 @@ else
 									var isSelected = _isProductSearchActive && product?.Id == _selectedProduct.Id;
 								}
 								<tr class="product-row @(isSelected ? "selected-product-row" : "")">
-									<td class="product-code">
-										<div class="code-wrapper">
-											<span class="code-badge">@product?.Code</span>
-										</div>
-									</td>
 									<td class="product-name">
 										<div class="name-wrapper">
 											<span class="name-text" title="@product?.Name">@product?.Name</span>
@@ -821,41 +816,6 @@ else
 				background-color: white !important;
 				transform: scale(1.1) !important;
 			}
-
-	/* Product Code Cell */
-	.product-code {
-		padding: 15px 12px;
-		vertical-align: middle;
-		width: 150px;
-	}
-
-	.code-wrapper {
-		display: flex;
-		align-items: center;
-	}
-
-	.code-badge {
-		background-color: var(--dotnet-light);
-		color: var(--dotnet-secondary);
-		padding: 8px 14px;
-		border-radius: 20px;
-		font-weight: 600;
-		font-size: 13px;
-		border: 1px solid var(--product-grid-border);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		transition: all 0.2s ease;
-		width: 100%;
-		text-align: center;
-		display: block;
-	}
-
-	.product-row:hover .code-badge {
-		background-color: var(--dotnet-primary);
-		color: white;
-		border-color: var(--dotnet-primary);
-		transform: scale(1.05);
-	}
 
 	/* Product Name Cell - Enhanced for better text display */
 	.product-name {

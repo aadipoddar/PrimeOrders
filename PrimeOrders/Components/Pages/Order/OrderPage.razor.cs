@@ -26,6 +26,7 @@ public partial class OrderPage
 	private int _selectedProductIndex = -1;
 	private List<ProductModel> _filteredProducts = [];
 	private bool _isProductSearchActive = false;
+	private bool _hasAddedProductViaSearch = true;
 
 	private OrderProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
@@ -66,7 +67,7 @@ public partial class OrderPage
 			return;
 
 		await LoadData();
-		await JS.InvokeVoidAsync("setupSalePageKeyboardHandlers", DotNetObjectReference.Create(this));
+		await JS.InvokeVoidAsync("setupOrderPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
 		_isLoading = false;
 		StateHasChanged();
@@ -192,10 +193,11 @@ public partial class OrderPage
 
 	private async Task StartProductSearch()
 	{
+		_hasAddedProductViaSearch = true;
 		_isProductSearchActive = true;
 		_productSearchText = "";
 		_selectedProductIndex = 0;
-		_filteredProducts = _products.ToList();
+		_filteredProducts = [.. _products];
 
 		if (_filteredProducts.Count > 0)
 			_selectedProduct = _filteredProducts[0];
@@ -275,6 +277,7 @@ public partial class OrderPage
 		_selectedProduct = product;
 		_selectedQuantity = 1;
 		_quantityDialogVisible = true;
+		_hasAddedProductViaSearch = false;
 		StateHasChanged();
 	}
 
@@ -314,7 +317,9 @@ public partial class OrderPage
 		await _sfProductCartGrid?.Refresh();
 		await _sfProductGrid?.Refresh();
 
-		await StartProductSearch();
+		if (_hasAddedProductViaSearch)
+			await StartProductSearch();
+
 		StateHasChanged();
 	}
 

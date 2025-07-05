@@ -18,6 +18,10 @@ public partial class PurchasePage
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
+	private bool _billDetailsDialogVisible = false;
+	private bool _supplierDialogVisible = false;
+	private bool _adjustmentsDialogVisible = false;
+	private bool _purchaseSummaryDialogVisible = false;
 
 	private decimal _baseTotal = 0;
 	private decimal _afterDiscounts = 0;
@@ -26,6 +30,12 @@ public partial class PurchasePage
 	private decimal _selectedQuantity = 1;
 
 	private int _selectedRawMaterialId = 0;
+
+	private string _materialSearchText = "";
+	private int _selectedMaterialIndex = -1;
+	private List<RawMaterialModel> _filteredRawMaterials = [];
+	private bool _isMaterialSearchActive = false;
+	private bool _hasAddedMaterialViaSearch = true;
 
 	private PurchaseRawMaterialCartModel _selectedRawMaterialCart = new();
 	private RawMaterialModel _selectedRawMaterial = new();
@@ -40,6 +50,10 @@ public partial class PurchasePage
 	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
 	private SfGrid<PurchaseRawMaterialCartModel> _sfRawMaterialCartGrid;
 
+	private SfDialog _sfBillDetailsDialog;
+	private SfDialog _sfSupplierDialog;
+	private SfDialog _sfAdjustmentsDialog;
+	private SfDialog _sfPurchaseSummaryDialog;
 	private SfDialog _sfRawMaterialManageDialog;
 	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;
@@ -57,6 +71,7 @@ public partial class PurchasePage
 			return;
 
 		await LoadData();
+		await JS.InvokeVoidAsync("setupPurchasePageKeyboardHandlers", DotNetObjectReference.Create(this));
 
 		_isLoading = false;
 		StateHasChanged();
@@ -70,6 +85,8 @@ public partial class PurchasePage
 
 		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
+
+		_filteredRawMaterials = [.. _rawMaterials];
 
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
 			await LoadPurchase();
@@ -118,11 +135,150 @@ public partial class PurchasePage
 	}
 	#endregion
 
+	#region Keyboard Navigation Methods
+	[JSInvokable]
+	public async Task HandleKeyboardShortcut(string key)
+	{
+		if (_isMaterialSearchActive)
+		{
+			await HandleMaterialSearchKeyboard(key);
+			return;
+		}
+
+		switch (key.ToLower())
+		{
+			case "f2":
+				await StartMaterialSearch();
+				break;
+
+			case "escape":
+				await HandleEscape();
+				break;
+		}
+	}
+
+	private async Task HandleMaterialSearchKeyboard(string key)
+	{
+		switch (key.ToLower())
+		{
+			case "escape":
+				await ExitMaterialSearch();
+				break;
+
+			case "enter":
+				await SelectCurrentMaterial();
+				break;
+
+			case "arrowdown":
+				NavigateMaterialSelection(1);
+				break;
+
+			case "arrowup":
+				NavigateMaterialSelection(-1);
+				break;
+
+			case "backspace":
+				if (_materialSearchText.Length > 0)
+				{
+					_materialSearchText = _materialSearchText[..^1];
+					await FilterMaterials();
+				}
+				break;
+
+			default:
+				// Add character to search if it's alphanumeric or space
+				if (key.Length == 1 && (char.IsLetterOrDigit(key[0]) || key == " "))
+				{
+					_materialSearchText += key.ToUpper();
+					await FilterMaterials();
+				}
+				break;
+		}
+
+		StateHasChanged();
+	}
+
+	private async Task StartMaterialSearch()
+	{
+		_hasAddedMaterialViaSearch = true;
+		_isMaterialSearchActive = true;
+		_materialSearchText = "";
+		_selectedMaterialIndex = 0;
+		_filteredRawMaterials = [.. _rawMaterials];
+
+		if (_filteredRawMaterials.Count > 0)
+			_selectedRawMaterial = _filteredRawMaterials[0];
+
+		StateHasChanged();
+		await JS.InvokeVoidAsync("showMaterialSearchIndicator", _materialSearchText);
+	}
+
+	private async Task ExitMaterialSearch()
+	{
+		_isMaterialSearchActive = false;
+		_materialSearchText = "";
+		_selectedMaterialIndex = -1;
+		StateHasChanged();
+		await JS.InvokeVoidAsync("hideMaterialSearchIndicator");
+	}
+
+	private async Task FilterMaterials()
+	{
+		if (string.IsNullOrEmpty(_materialSearchText))
+			_filteredRawMaterials = [.. _rawMaterials];
+		else
+			_filteredRawMaterials = [.. _rawMaterials.Where(m =>
+				m.Name.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase) ||
+				(m.Code != null && m.Code.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase))
+			)];
+
+		_selectedMaterialIndex = 0;
+		if (_filteredRawMaterials.Count > 0)
+			_selectedRawMaterial = _filteredRawMaterials[0];
+
+		await JS.InvokeVoidAsync("updateMaterialSearchIndicator", _materialSearchText, _filteredRawMaterials.Count);
+		StateHasChanged();
+	}
+
+	private void NavigateMaterialSelection(int direction)
+	{
+		if (_filteredRawMaterials.Count == 0) return;
+
+		_selectedMaterialIndex += direction;
+
+		if (_selectedMaterialIndex < 0)
+			_selectedMaterialIndex = _filteredRawMaterials.Count - 1;
+		else if (_selectedMaterialIndex >= _filteredRawMaterials.Count)
+			_selectedMaterialIndex = 0;
+
+		_selectedRawMaterial = _filteredRawMaterials[_selectedMaterialIndex];
+		StateHasChanged();
+	}
+
+	private async Task SelectCurrentMaterial()
+	{
+		if (_selectedRawMaterial.Id > 0)
+		{
+			_selectedQuantity = 1;
+			_quantityDialogVisible = true;
+			await ExitMaterialSearch();
+			StateHasChanged();
+		}
+	}
+
+	private async Task HandleEscape()
+	{
+		if (_isMaterialSearchActive)
+			await ExitMaterialSearch();
+
+		StateHasChanged();
+	}
+	#endregion
+
 	#region Purchase Details Events
 	private async void OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
 	{
 		_supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, args.Value);
-
 		_supplier ??= new SupplierModel();
 
 		_purchase.SupplierId = _supplier?.Id ?? 0;
@@ -166,11 +322,15 @@ public partial class PurchasePage
 	#endregion
 
 	#region Raw Materials
-	public void RawMaterialRowSelectHandler(RowSelectEventArgs<RawMaterialModel> args)
+	private void OnAddToCartButtonClick(RawMaterialModel material)
 	{
-		_selectedRawMaterial = args.Data;
+		if (material is null || material.Id <= 0)
+			return;
+
+		_selectedRawMaterial = material;
 		_selectedQuantity = 1;
 		_quantityDialogVisible = true;
+		_hasAddedMaterialViaSearch = false;
 		StateHasChanged();
 	}
 
@@ -220,6 +380,10 @@ public partial class PurchasePage
 		await _sfRawMaterialCartGrid?.Refresh();
 		await _sfRawMaterialGrid?.Refresh();
 		UpdateFinancialDetails();
+
+		if (_hasAddedMaterialViaSearch)
+			await StartMaterialSearch();
+
 		StateHasChanged();
 	}
 
@@ -357,6 +521,7 @@ public partial class PurchasePage
 		await InsertPurchaseDetail();
 		await InsertStock();
 
+		_purchaseSummaryDialogVisible = false;
 		await _sfSuccessToast.ShowAsync();
 	}
 

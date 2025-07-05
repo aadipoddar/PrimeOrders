@@ -35,6 +35,7 @@ public partial class SalePage
 	private int _selectedProductIndex = -1;
 	private List<ProductModel> _filteredProducts = [];
 	private bool _isProductSearchActive = false;
+	private bool _hasAddedProductViaSearch = true;
 
 	private SaleProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
@@ -213,6 +214,7 @@ public partial class SalePage
 
 	private async Task StartProductSearch()
 	{
+		_hasAddedProductViaSearch = true;
 		_isProductSearchActive = true;
 		_productSearchText = "";
 		_selectedProductIndex = 0;
@@ -449,6 +451,7 @@ public partial class SalePage
 		_selectedProduct = product;
 		_selectedQuantity = 1;
 		_quantityDialogVisible = true;
+		_hasAddedProductViaSearch = false;
 		StateHasChanged();
 	}
 	#endregion
@@ -491,7 +494,9 @@ public partial class SalePage
 		await _sfProductGrid?.Refresh();
 		await UpdateFinancialDetails();
 
-		await StartProductSearch();
+		if (_hasAddedProductViaSearch)
+			await StartProductSearch();
+
 		StateHasChanged();
 	}
 
