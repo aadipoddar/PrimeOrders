@@ -45,7 +45,20 @@
 }
 else
 {
-	<div class="purchase-container">
+	<div class="purchase-container" tabindex="0">
+		<!-- Product Search Indicator -->
+		<div id="productSearchIndicator" class="product-search-indicator" style="display: none;">
+			<div class="search-header">
+				<span class="search-icon">🔍</span>
+				<span>Product Search: </span>
+				<span id="searchText" class="search-text"></span>
+			</div>
+			<div id="searchResults" class="search-results"></div>
+			<div class="search-help">
+				<span>↑↓ Navigate • Enter Select • Esc Cancel</span>
+			</div>
+		</div>
+
 		<div class="page-header">
 			<h1 class="page-title">Order Management</h1>
 			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
@@ -53,116 +66,95 @@ else
 			</button>
 		</div>
 
-		<div class="purchase-content">
-			<div class="purchase-main">
-				<div class="combined-materials-card card">
-					<div class="card-header">
-						<h2>Products Selection</h2>
-						<p class="card-info">Click on a product to add to cart</p>
-					</div>
-					<div class="card-body materials-container">
-						<div class="materials-panel">
-							<SfGrid DataSource="@_products"
-									ID="_sfProductGrid"
-									@ref="_sfProductGrid"
-									AllowSorting="true"
-									AllowFiltering="true"
-									AllowResizing="true"
-									AllowPaging="true"
-									Height="230px"
-									CssClass="materials-grid">
-								<GridPageSettings PageSize="5" />
-								<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
-								<GridColumns>
-									<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
-									<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Code" Width="120" />
-								</GridColumns>
-							</SfGrid>
-						</div>
-					</div>
-				</div>
+		<div class="action-buttons">
+			<button @onclick="() => _orderDetailsDialogVisible = true" class="action-button">
+				<span class="action-icon">📄</span> Order Details
+			</button>
+			@if (_user.Admin && _user.LocationId == 1)
+			{
+				<button @onclick="() => _locationDialogVisible = true" class="action-button">
+					<span class="action-icon">🏢</span> Location
+				</button>
+			}
+			<button @onclick="() => _orderSummaryDialogVisible = true" class="action-button action-button-primary">
+				<span class="action-icon">📊</span> Submit Order
+			</button>
+		</div>
 
-				<div class="card cart-card">
-					<div class="card-header">
-						<h2>Order Cart</h2>
-						<p class="card-info">Click on a row to edit details</p>
-					</div>
-					<div class="card-body">
-						<SfGrid DataSource="@_orderProductCarts"
-								ID="_sfProductCartGrid"
-								@ref="_sfProductCartGrid"
-								AllowSorting="true"
-								AllowFiltering="true"
-								AllowResizing="true"
-								Height="350px"
-								CssClass="cart-grid">
-							<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="OrderProductCartModel" />
-							<GridColumns>
-								<GridColumn Field=@nameof(OrderProductCartModel.ProductName) HeaderText="Product" Width="180" AllowEditing="false" />
-								<GridColumn Field=@nameof(OrderProductCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
-							</GridColumns>
-						</SfGrid>
-					</div>
+		<div class="main-content">
+			<div class="card products-card">
+				<div class="card-header">
+					<h2>Products Selection</h2>
+					<p class="card-info">Press <kbd>F2</kbd> to search products, click Add to Cart or row to add to cart</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@(_isProductSearchActive? _filteredProducts : _products)"
+							ID="_sfProductGrid"
+							@ref="_sfProductGrid"
+							AllowSorting="true"
+							AllowResizing="true"
+							AllowPaging="true"
+							Height="450px"
+							CssClass="modern-products-grid">
+						<GridPageSettings PageSize="7" />
+						<GridColumns>
+							<GridColumn Field=@nameof(ProductModel.Code) Width="auto" />
+							<GridColumn Field=@nameof(ProductModel.Name) Width="auto" />
+							<GridColumn HeaderText="" Width="120" MinWidth="100" AllowSorting="false" />
+						</GridColumns>
+						<GridTemplates>
+							<RowTemplate>
+								@{
+									var product = (context as ProductModel);
+									var isSelected = _isProductSearchActive && product?.Id == _selectedProduct.Id;
+								}
+								<tr class="product-row @(isSelected ? "selected-product-row" : "")">
+									<td class="product-code">
+										<div class="code-wrapper">
+											<span class="code-badge">@product?.Code</span>
+										</div>
+									</td>
+									<td class="product-name">
+										<div class="name-wrapper">
+											<span class="name-text" title="@product?.Name">@product?.Name</span>
+										</div>
+									</td>
+									<td class="product-action">
+										<button class="add-to-cart-btn"
+												@onclick="() => OnAddToCartButtonClick(product)"
+												@onclick:stopPropagation="true"
+												title="Add to Cart">
+											<span class="cart-icon">🛒</span>
+											<span class="cart-text">Add</span>
+										</button>
+									</td>
+								</tr>
+							</RowTemplate>
+						</GridTemplates>
+					</SfGrid>
 				</div>
 			</div>
 
-			<div class="purchase-sidebar">
-				<div class="card totals-card">
-					<div class="card-header">
-						<h2>Order Details</h2>
-					</div>
-					<div class="card-body">
-						@if (_user.Admin && _user.LocationId == 1)
-						{
-							<div class="form-group">
-								<label>Location</label>
-								<SfComboBox TValue="int"
-											TItem="LocationModel"
-											Placeholder="Select a Location"
-											DataSource="_locations"
-											CssClass="filter-control"
-											@bind-Value="_order.LocationId">
-									<ComboBoxFieldSettings Value="Id" Text="Name" />
-								</SfComboBox>
-							</div>
-						}
-
-						<div class="form-group">
-							<label>Order Number</label>
-							<SfTextBox Value="@_order.OrderNo"
-									   Placeholder="Enter Order No"
-									   Readonly=true
-									   CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>Order Date</label>
-							<SfDatePicker @bind-Value="_order.OrderDate"
-										  Placeholder="Select Order Date"
-										  CssClass="form-control" />
-						</div>
-
-						<div class="form-group full-width">
-							<label>Remarks</label>
-							<SfTextBox @bind-Value="_order.Remarks"
-									   Placeholder="Add remarks (optional)"
-									   Multiline="true"
-									   CssClass="form-control" />
-						</div>
-
-						@if (OrderId.HasValue && OrderId > 0)
-						{
-							<div class="form-group">
-								<div class="status-checkbox-container">
-									<SfCheckBox @bind-Checked="_order.Status" Label="Active Status" CssClass="status-checkbox" />
-								</div>
-							</div>
-						}
-
-						<SfButton CssClass="save-button" Content="Save Order" IsPrimary="true" OnClick="OnSaveOrderClick">
-							<span class="save-icon">💾</span> Save Order
-						</SfButton>
-					</div>
+			<div class="card cart-card">
+				<div class="card-header">
+					<h2>Order Cart</h2>
+					<p class="card-info">Click on a row to edit details</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_orderProductCarts"
+							ID="_sfProductCartGrid"
+							@ref="_sfProductCartGrid"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowResizing="true"
+							Height="450px"
+							CssClass="cart-grid">
+						<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="OrderProductCartModel" />
+						<GridColumns>
+							<GridColumn Field=@nameof(OrderProductCartModel.ProductName) HeaderText="Product" Width="200" />
+							<GridColumn Field=@nameof(OrderProductCartModel.Quantity) HeaderText="Qty" Width="150" TextAlign="TextAlign.Right" />
+						</GridColumns>
+					</SfGrid>
 				</div>
 			</div>
 		</div>
@@ -173,67 +165,122 @@ else
 	</div>
 }
 
-<SfDialog ID="_sfProductManageDialog"
-		  @ref="_sfProductManageDialog"
-		  Width="300px"
-		  Height="350px"
+<!-- Order Details Dialog -->
+<SfDialog ID="_sfOrderDetailsDialog"
+		  @ref="_sfOrderDetailsDialog"
+		  Width="500px"
+		  Height="auto"
 		  AllowDragging="true"
-		  EnableResize="true"
-		  @bind-Visible="_dialogVisible"
+		  EnableResize="false"
+		  @bind-Visible="_orderDetailsDialogVisible"
 		  IsModal="true">
 	<DialogPositionData X="Center" Y="Center" />
 	<DialogTemplates>
 		<Header>
 			<div class="dialog-header">
-				<span>Manage Product: </span>
-				<span class="material-name">@_selectedProductCart.ProductName</span>
+				<span>Order Details</span>
 			</div>
 		</Header>
-
 		<Content>
 			<div class="dialog-content">
-				<div class="form-row">
-					<div class="form-group">
-						<label>Quantity</label>
-						<SfNumericTextBox TValue="decimal"
-										  @bind-Value="_selectedProductCart.Quantity"
-										  Min="0"
-										  Format="N2"
-										  CssClass="form-control" />
-					</div>
+				<div class="form-group">
+					<label>Order Number</label>
+					<SfTextBox Value="@_order.OrderNo"
+							   Placeholder="Order Number"
+							   Readonly=true
+							   CssClass="form-control" />
 				</div>
+
+				<div class="form-group">
+					<label>Order Date</label>
+					<SfDatePicker @bind-Value="_order.OrderDate"
+								  Placeholder="Select Order Date"
+								  CssClass="form-control" />
+				</div>
+
+				<div class="form-group full-width">
+					<label>Remarks</label>
+					<SfTextBox @bind-Value="_order.Remarks"
+							   Placeholder="Add remarks (optional)"
+							   Multiline="true"
+							   CssClass="form-control" />
+				</div>
+
+				@if (OrderId.HasValue && OrderId > 0)
+				{
+					<div class="form-group">
+						<div class="status-checkbox-container">
+							<SfCheckBox @bind-Checked="_order.Status" Label="Active Status" CssClass="status-checkbox" />
+						</div>
+					</div>
+				}
 			</div>
 		</Content>
-
 		<FooterTemplate>
 			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" />
-					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartProductManageClick" CssClass="dialog-button remove-button" />
-				</div>
+				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" />
 			</div>
 		</FooterTemplate>
 	</DialogTemplates>
 </SfDialog>
 
-<SfDialog ID="_sfOrderConfirmDialog"
-		  @ref="_sfOrderConfirmDialog"
+<!-- Location Dialog -->
+<SfDialog ID="_sfLocationDialog"
+		  @ref="_sfLocationDialog"
 		  Width="500px"
 		  Height="auto"
 		  AllowDragging="true"
 		  EnableResize="false"
-		  @bind-Visible="_confirmDialogVisible"
+		  @bind-Visible="_locationDialogVisible"
 		  IsModal="true">
 	<DialogPositionData X="Center" Y="Center" />
 	<DialogTemplates>
 		<Header>
 			<div class="dialog-header">
-				<span>Confirm Order</span>
+				<span>Location Details</span>
 			</div>
 		</Header>
-
 		<Content>
-			<div class="dialog-content confirm-order">
+			<div class="dialog-content">
+				<div class="form-group">
+					<label>Location</label>
+					<SfComboBox TValue="int"
+								TItem="LocationModel"
+								Placeholder="Select a Location"
+								DataSource="_locations"
+								CssClass="form-control"
+								@bind-Value="_order.LocationId">
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _locationDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Order Summary Dialog -->
+<SfDialog ID="_sfOrderSummaryDialog"
+		  @ref="_sfOrderSummaryDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_orderSummaryDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Order Summary</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
 				<div class="confirm-section">
 					<h3>Order Details</h3>
 					<div class="detail-item">
@@ -288,12 +335,97 @@ else
 				</div>
 			</div>
 		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Submit Order" IsPrimary="true" OnClick="ConfirmOrderSubmission" CssClass="save-button-dialog" />
+					<SfButton Content="Edit Order" OnClick="() => _orderSummaryDialogVisible = false" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Quantity Dialog -->
+<SfDialog ID="_sfQuantityDialog"
+		  @ref="_sfQuantityDialog"
+		  Width="350px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_quantityDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Select Quantity: </span>
+				<span class="material-name">@_selectedProduct.Name</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group full-width">
+						<label>Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  @bind-Value="_selectedQuantity"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Add to Cart" IsPrimary="true" OnClick="OnAddToCartClick" CssClass="dialog-button" />
+					<SfButton Content="Cancel" OnClick="OnCancelQuantityDialogClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Product Manage Dialog -->
+<SfDialog ID="_sfProductManageDialog"
+		  @ref="_sfProductManageDialog"
+		  Width="400px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="true"
+		  @bind-Visible="_dialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Manage Product: </span>
+				<span class="material-name">@_selectedProductCart.ProductName</span>
+			</div>
+		</Header>
+
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group full-width">
+						<label>Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  @bind-Value="_selectedProductCart.Quantity"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+				</div>
+			</div>
+		</Content>
 
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton Content="Confirm" IsPrimary="true" OnClick="ConfirmOrderSubmission" CssClass="dialog-button" />
-					<SfButton Content="Edit Order" OnClick="CloseConfirmationDialog" CssClass="dialog-button" />
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" />
+					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartProductManageClick" CssClass="dialog-button remove-button" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -308,7 +440,274 @@ else
 		--dotnet-light: #F7F7F7;
 		--dotnet-dark: #1E1E1E;
 		--dotnet-border: rgba(0, 0, 0, 0.1);
+		--product-grid-border: #e1e5e9;
+		--product-grid-hover: rgba(81, 43, 212, 0.08);
+		--product-grid-selected: var(--dotnet-primary);
 	}
+
+	/* Keyboard key styling */
+	kbd {
+		background-color: #f8f9fa;
+		border: 1px solid #ced4da;
+		border-radius: 3px;
+		color: #495057;
+		font-family: Monaco, Consolas, monospace;
+		font-size: 10px;
+		padding: 2px 4px;
+		box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	/* Product Search Indicator */
+	.product-search-indicator {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: var(--dotnet-primary);
+		color: white;
+		padding: 20px;
+		border-radius: 12px;
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+		z-index: 10000;
+		min-width: 300px;
+		text-align: center;
+	}
+
+	.search-header {
+		font-size: 18px;
+		font-weight: 600;
+		margin-bottom: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+
+	.search-icon {
+		font-size: 20px;
+	}
+
+	.search-text {
+		background: rgba(255, 255, 255, 0.2);
+		padding: 4px 8px;
+		border-radius: 4px;
+		min-width: 100px;
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.search-results {
+		font-size: 14px;
+		opacity: 0.9;
+		margin: 10px 0;
+	}
+
+	.search-help {
+		font-size: 12px;
+		opacity: 0.8;
+		border-top: 1px solid rgba(255, 255, 255, 0.3);
+		padding-top: 10px;
+		margin-top: 10px;
+	}
+
+	/* Modern Products Grid Styling */
+	.modern-products-grid {
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--product-grid-border);
+	}
+
+	#_sfProductGrid.e-grid .e-gridheader .e-columnheader {
+		display: none;
+	}
+
+	/* Custom Row Template Styling */
+	.product-row {
+		transition: all 0.2s ease;
+		border-bottom: 1px solid var(--product-grid-border);
+		cursor: pointer;
+	}
+
+		.product-row:hover {
+			background-color: var(--product-grid-hover);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+
+		.product-row:last-child {
+			border-bottom: none;
+		}
+
+	/* Selected product row highlighting */
+	.selected-product-row {
+		background: linear-gradient(135deg, var(--dotnet-primary) 0%, var(--dotnet-secondary) 100%) !important;
+		color: white !important;
+		font-weight: 600 !important;
+		box-shadow: 0 4px 15px rgba(81, 43, 212, 0.3);
+		transform: translateY(-2px);
+	}
+
+		.selected-product-row .code-badge {
+			background-color: rgba(255, 255, 255, 0.2) !important;
+			color: white !important;
+			border-color: rgba(255, 255, 255, 0.3) !important;
+		}
+
+		.selected-product-row .name-text {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-product-row .add-to-cart-btn {
+			background-color: rgba(255, 255, 255, 0.9) !important;
+			color: var(--dotnet-primary) !important;
+			border-color: rgba(255, 255, 255, 0.9) !important;
+		}
+
+			.selected-product-row .add-to-cart-btn:hover {
+				background-color: white !important;
+				transform: scale(1.1) !important;
+			}
+
+	/* Product Code Cell */
+	.product-code {
+		padding: 15px 12px;
+		vertical-align: middle;
+		width: 150px;
+	}
+
+	.code-wrapper {
+		display: flex;
+		align-items: center;
+	}
+
+	.code-badge {
+		background-color: var(--dotnet-light);
+		color: var(--dotnet-secondary);
+		padding: 8px 14px;
+		border-radius: 20px;
+		font-weight: 600;
+		font-size: 13px;
+		border: 1px solid var(--product-grid-border);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		transition: all 0.2s ease;
+		width: 100%;
+		text-align: center;
+		display: block;
+	}
+
+	.product-row:hover .code-badge {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border-color: var(--dotnet-primary);
+		transform: scale(1.05);
+	}
+
+	/* Product Name Cell - Enhanced for better text display */
+	.product-name {
+		padding: 15px 12px;
+		vertical-align: middle;
+		width: auto;
+		min-width: 300px;
+	}
+
+	.name-wrapper {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.name-text {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+		font-size: 15px;
+		line-height: 1.4;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+	}
+
+	.product-row:hover .name-text {
+		color: var(--dotnet-primary);
+		font-weight: 600;
+		white-space: normal;
+		overflow: visible;
+		text-overflow: initial;
+	}
+
+	/* Product Action Cell */
+	.product-action {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: center;
+		width: 120px;
+	}
+
+	.add-to-cart-btn {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: 2px solid var(--dotnet-primary);
+		padding: 8px 12px;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 12px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+		.add-to-cart-btn:hover {
+			background-color: #4311a8;
+			border-color: #4311a8;
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(81, 43, 212, 0.3);
+		}
+
+		.add-to-cart-btn:active {
+			transform: scale(0.95);
+		}
+
+	.cart-icon {
+		font-size: 14px;
+	}
+
+	.cart-text {
+		font-weight: 700;
+	}
+
+	/* Grid Pagination Styling */
+	.modern-products-grid ::deep .e-grid .e-pager {
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--product-grid-border);
+		padding: 12px;
+	}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-pagercontainer {
+			background-color: transparent;
+		}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-numericitem {
+			border-radius: 6px;
+			margin: 0 2px;
+			font-weight: 500;
+			transition: all 0.2s ease;
+		}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-currentitem {
+			background-color: var(--dotnet-primary);
+			color: white;
+			font-weight: 600;
+		}
 
 	/* General Layout */
 	.purchase-container {
@@ -324,7 +723,7 @@ else
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 25px;
+		margin-bottom: 20px;
 	}
 
 	.page-title {
@@ -357,42 +756,57 @@ else
 		font-size: 16px;
 	}
 
-	/* Content layout */
-	.purchase-content {
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 15px;
+		margin-bottom: 25px;
+		flex-wrap: wrap;
+	}
+
+	.action-button {
+		background-color: white;
+		border: none;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+		color: var(--dotnet-secondary);
+		padding: 12px 20px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		transition: all 0.2s ease;
+		flex: 1;
+		min-width: 150px;
+		justify-content: center;
+	}
+
+		.action-button:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	.action-icon {
+		font-size: 18px;
+	}
+
+	.action-button-primary {
+		background-color: var(--dotnet-primary);
+		color: white;
+	}
+
+		.action-button-primary:hover {
+			background-color: #4311a8;
+		}
+
+	/* Main Content */
+	.main-content {
 		display: grid;
-		grid-template-columns: 3fr 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: 25px;
 		margin-bottom: 30px;
 	}
-
-	.purchase-main {
-		display: flex;
-		flex-direction: column;
-		gap: 25px;
-	}
-
-	.purchase-sidebar {
-		display: flex;
-		flex-direction: column;
-		gap: 25px;
-	}
-
-	/* Materials container */
-	.materials-container {
-		display: grid;
-		gap: 20px;
-	}
-
-	.materials-panel {
-		display: flex;
-		flex-direction: column;
-	}
-
-		.materials-panel label {
-			font-weight: 600;
-			margin-bottom: 10px;
-			color: var(--dotnet-secondary);
-		}
 
 	/* Cards */
 	.card {
@@ -400,14 +814,9 @@ else
 		border-radius: 15px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
-	}
-
-	.combined-materials-card {
-		flex-grow: 0;
-	}
-
-	.cart-card {
-		flex-grow: 1;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.card-header {
@@ -432,13 +841,37 @@ else
 
 	.card-body {
 		padding: 20px;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
-	/* Materials grid */
-	.materials-grid, .cart-grid {
+	/* Cart Grid - keep existing styling */
+	.cart-grid {
 		border-radius: 8px;
 		overflow: hidden;
+		flex-grow: 1;
 	}
+
+		.cart-grid ::deep .e-grid .e-gridheader,
+		.cart-grid ::deep .e-grid .e-gridheader {
+			padding: 0;
+			border-top: none;
+		}
+
+		.cart-grid ::deep .e-grid .e-rowcell {
+			padding: 6px 8px;
+			height: 36px;
+		}
+
+		.cart-grid ::deep .e-grid .e-headercell {
+			padding: 8px 8px;
+			height: 40px;
+		}
+
+		.cart-grid ::deep .e-grid .e-pager {
+			padding: 4px;
+		}
 
 	/* Forms */
 	.form-grid {
@@ -468,31 +901,20 @@ else
 	}
 
 	/* Button Styling */
-	.save-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		width: 100%;
-		margin-top: 20px;
+	.save-button-dialog {
 		background-color: var(--dotnet-primary);
 		color: white;
-		padding: 12px;
+		padding: 10px 20px;
 		border-radius: 8px;
 		font-weight: 600;
 		transition: all 0.2s ease;
 	}
 
-		.save-button:hover {
+		.save-button-dialog:hover {
 			background-color: #4311a8;
-			transform: translateY(-2px);
 		}
 
-	.save-icon {
-		font-size: 18px;
-	}
-
-	/* New Remove Button Styling */
+	/* Remove Button Styling */
 	.remove-button {
 		background-color: #f44336;
 		color: white;
@@ -502,7 +924,6 @@ else
 
 		.remove-button:hover {
 			background-color: #d32f2f;
-			transform: translateY(-2px);
 		}
 
 	/* Dialog Styling */
@@ -526,7 +947,7 @@ else
 
 	.form-row {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: 20px;
 		margin-bottom: 15px;
 	}
@@ -546,7 +967,7 @@ else
 		gap: 10px;
 	}
 
-	/* Make dialog buttons the same height */
+	/* Dialog buttons */
 	.dialog-button {
 		border-radius: 6px;
 		padding: 8px 16px;
@@ -557,16 +978,11 @@ else
 		font-weight: 500;
 	}
 
-	/* Order Confirmation Dialog Styling */
-	.confirm-order {
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-
+	/* Order Confirmation styles */
 	.confirm-section {
 		border-bottom: 1px solid var(--dotnet-border);
 		padding-bottom: 15px;
+		margin-bottom: 20px;
 	}
 
 		.confirm-section:last-child {
@@ -727,9 +1143,17 @@ else
 	}
 
 	/* Responsive Design */
-	@@media (max-width: 1200px) {
-		.purchase-content {
+	@@media (max-width: 992px) {
+		.main-content {
 			grid-template-columns: 1fr;
+		}
+
+		.action-buttons {
+			flex-direction: row;
+		}
+
+		.action-button {
+			flex-basis: calc(50% - 10px);
 		}
 	}
 
@@ -742,6 +1166,10 @@ else
 
 		.form-row {
 			grid-template-columns: 1fr;
+		}
+
+		.action-button {
+			flex-basis: 100%;
 		}
 	}
 
@@ -842,5 +1270,21 @@ else
 		padding: 10px 10px 10px 40px;
 		position: relative;
 		animation-fill-mode: both;
+	}
+
+	/* Focus styles for better keyboard navigation */
+	.purchase-container:focus {
+		outline: 2px solid var(--dotnet-primary);
+		outline-offset: 2px;
+	}
+
+	/* Enhanced grid row hover and selection for cart grid */
+	.cart-grid ::deep .e-grid .e-row:hover {
+		background-color: rgba(81, 43, 212, 0.1);
+	}
+
+	.cart-grid ::deep .e-grid .e-rowselect {
+		background-color: var(--dotnet-primary);
+		color: white;
 	}
 </style>

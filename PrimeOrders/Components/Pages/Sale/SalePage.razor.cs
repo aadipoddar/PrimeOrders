@@ -490,6 +490,8 @@ public partial class SalePage
 		await _sfProductCartGrid?.Refresh();
 		await _sfProductGrid?.Refresh();
 		await UpdateFinancialDetails();
+
+		await StartProductSearch();
 		StateHasChanged();
 	}
 
