@@ -140,4 +140,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="LocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d28c2d5f-b188-4312-acc4-94f09f5dfd37" ChangeDateTime="07/05/2025 04:38:24">
+    <Property Name="ElementName" Value="[dbo].[SaleReturn].[BillNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[SaleReturn]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="TransactionNo" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e6061be0-ef0d-44df-934a-fd97a6307ade" ChangeDateTime="07/05/2025 04:39:39">
+    <Property Name="ElementName" Value="[dbo].[SaleReturn].[ReturnDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[SaleReturn]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ReturnDateTime" />
+  </Operation>
 </Operations>

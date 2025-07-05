@@ -55,42 +55,29 @@ else
 
 		<div class="purchase-content">
 			<div class="purchase-main">
-				<div class="combined-materials-card card">
+				<div class="card products-card">
 					<div class="card-header">
 						<h2>Products Selection</h2>
-						<p class="card-info">Select category and click on a product to add to cart</p>
+						<p class="card-info">Click on a product to add to cart</p>
 					</div>
-					<div class="card-body materials-container">
-						<div class="categories-panel">
-							<label>Categories</label>
-							<SfListBox TValue="int"
-									   AllowFiltering="true"
-									   TItem="ProductCategoryModel"
-									   DataSource="@_productCategories"
-									   @bind-Value="_selectedProductCategoryId"
-									   CssClass="category-listbox">
-								<ListBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="ProductCategoryChanged" />
-								<ListBoxFieldSettings Value="Id" Text="Name" />
-							</SfListBox>
-						</div>
-
-						<div class="materials-panel">
-							<label>Products</label>
-							<SfGrid DataSource="@_products"
-									ID="_sfProductGrid"
-									@ref="_sfProductGrid"
-									AllowSorting="true"
-									AllowFiltering="true"
-									AllowResizing="true"
-									Height="300px"
-									CssClass="materials-grid">
-								<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
-								<GridColumns>
-									<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
-									<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-								</GridColumns>
-							</SfGrid>
-						</div>
+					<div class="card-body">
+						<SfGrid DataSource="@_products"
+								ID="_sfProductGrid"
+								@ref="_sfProductGrid"
+								AllowSorting="true"
+								AllowFiltering="true"
+								AllowResizing="true"
+								AllowPaging="true"
+								Height="230px"
+								CssClass="materials-grid">
+							<GridPageSettings PageSize="5" />
+							<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
+							<GridColumns>
+								<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Code" Width="100" />
+								<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
+								<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							</GridColumns>
+						</SfGrid>
 					</div>
 				</div>
 
@@ -103,6 +90,9 @@ else
 						<SfGrid DataSource="@_saleProductCart"
 								ID="_sfProductCartGrid"
 								@ref="_sfProductCartGrid"
+								AllowSorting="true"
+								AllowFiltering="true"
+								AllowResizing="true"
 								Height="350px"
 								CssClass="cart-grid">
 							<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="SaleProductCartModel" />
@@ -110,7 +100,6 @@ else
 								<GridColumn Field=@nameof(SaleProductCartModel.ProductName) HeaderText="Product" Width="180" />
 								<GridColumn Field=@nameof(SaleProductCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
 								<GridColumn Field=@nameof(SaleProductCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
-								<GridColumn Field=@nameof(SaleProductCartModel.DiscPercent) HeaderText="Disc %" Width="80" Format="N2" TextAlign="TextAlign.Right" />
 								<GridColumn Field=@nameof(SaleProductCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
 							</GridColumns>
 						</SfGrid>
@@ -246,7 +235,7 @@ else
 							</SfComboBox>
 						</div>
 
-						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick" Disabled="@_isSaving"/>
+						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick" Disabled="@_isSaving" />
 					</div>
 				</div>
 			</div>
@@ -257,6 +246,49 @@ else
 		</div>
 	</div>
 }
+
+<SfDialog ID="_sfQuantityDialog"
+		  @ref="_sfQuantityDialog"
+		  Width="350px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_quantityDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Select Quantity: </span>
+				<span class="material-name">@_selectedProduct.Name</span>
+			</div>
+		</Header>
+
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group full-width">
+						<label>Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  @bind-Value="_selectedQuantity"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+				</div>
+			</div>
+		</Content>
+
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Add to Cart" IsPrimary="true" OnClick="OnAddToCartClick" CssClass="dialog-button" />
+					<SfButton Content="Cancel" OnClick="OnCancelQuantityDialogClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
 
 <SfDialog ID="_sfProductManageDialog"
 		  @ref="_sfProductManageDialog"
@@ -689,16 +721,35 @@ else
 		padding: 20px;
 	}
 
-	/* Category and Product lists */
-	.category-listbox {
-		height: 300px;
-		width: 100%;
-	}
-
+	/* Product lists */
 	.materials-grid, .cart-grid {
 		border-radius: 8px;
 		overflow: hidden;
 	}
+
+		/* Adding these CSS rules to the existing style section */
+		.materials-grid ::deep .e-grid .e-gridheader,
+		.cart-grid ::deep .e-grid .e-gridheader {
+			padding: 0;
+			border-top: none;
+		}
+
+		.materials-grid ::deep .e-grid .e-rowcell,
+		.cart-grid ::deep .e-grid .e-rowcell {
+			padding: 6px 8px;
+			height: 36px;
+		}
+
+		.materials-grid ::deep .e-grid .e-headercell,
+		.cart-grid ::deep .e-grid .e-headercell {
+			padding: 8px 8px;
+			height: 40px;
+		}
+
+		.materials-grid ::deep .e-grid .e-pager,
+		.cart-grid ::deep .e-grid .e-pager {
+			padding: 4px;
+		}
 
 	/* Forms */
 	.form-grid {

@@ -62,6 +62,15 @@ else
 				</div>
 			}
 
+			@if (_user?.Sales == true)
+			{
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/SaleReturn")'>
+					<div class="card-icon return-icon">↩️</div>
+					<h3>Sale Returns</h3>
+					<p>Process and manage product returns</p>
+				</div>
+			}
+
 			@if (_user?.Order == true)
 			{
 				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Order")'>
@@ -244,6 +253,11 @@ else
 	.sales-icon {
 		background-color: rgba(0, 164, 239, 0.1);
 		color: var(--dotnet-accent);
+	}
+
+	.return-icon {
+		background-color: rgba(220, 53, 69, 0.1);
+		color: #dc3545;
 	}
 
 	.order-icon {

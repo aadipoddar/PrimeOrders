@@ -58,32 +58,20 @@ else
 				<div class="combined-materials-card card">
 					<div class="card-header">
 						<h2>Products Selection</h2>
-						<p class="card-info">Select category and click on a product to add to cart</p>
+						<p class="card-info">Click on a product to add to cart</p>
 					</div>
 					<div class="card-body materials-container">
-						<div class="categories-panel">
-							<label>Categories</label>
-							<SfListBox TValue="int"
-									   AllowFiltering="true"
-									   TItem="ProductCategoryModel"
-									   DataSource="@_productCategories"
-									   @bind-Value="_selectedProductCategoryId"
-									   CssClass="category-listbox">
-								<ListBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="ProductCategoryChanged" />
-								<ListBoxFieldSettings Value="Id" Text="Name" />
-							</SfListBox>
-						</div>
-
 						<div class="materials-panel">
-							<label>Products</label>
 							<SfGrid DataSource="@_products"
 									ID="_sfProductGrid"
 									@ref="_sfProductGrid"
 									AllowSorting="true"
 									AllowFiltering="true"
 									AllowResizing="true"
-									Height="300px"
+									AllowPaging="true"
+									Height="230px"
 									CssClass="materials-grid">
+								<GridPageSettings PageSize="5" />
 								<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
 								<GridColumns>
 									<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
@@ -103,6 +91,9 @@ else
 						<SfGrid DataSource="@_orderProductCarts"
 								ID="_sfProductCartGrid"
 								@ref="_sfProductCartGrid"
+								AllowSorting="true"
+								AllowFiltering="true"
+								AllowResizing="true"
 								Height="350px"
 								CssClass="cart-grid">
 							<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="OrderProductCartModel" />
@@ -389,16 +380,15 @@ else
 	/* Materials container */
 	.materials-container {
 		display: grid;
-		grid-template-columns: 250px 1fr;
 		gap: 20px;
 	}
 
-	.categories-panel, .materials-panel {
+	.materials-panel {
 		display: flex;
 		flex-direction: column;
 	}
 
-		.categories-panel label, .materials-panel label {
+		.materials-panel label {
 			font-weight: 600;
 			margin-bottom: 10px;
 			color: var(--dotnet-secondary);
@@ -444,12 +434,7 @@ else
 		padding: 20px;
 	}
 
-	/* Category and Product lists */
-	.category-listbox {
-		height: 300px;
-		width: 100%;
-	}
-
+	/* Materials grid */
 	.materials-grid, .cart-grid {
 		border-radius: 8px;
 		overflow: hidden;
@@ -745,16 +730,6 @@ else
 	@@media (max-width: 1200px) {
 		.purchase-content {
 			grid-template-columns: 1fr;
-		}
-	}
-
-	@@media (max-width: 992px) {
-		.materials-container {
-			grid-template-columns: 1fr;
-		}
-
-		.category-listbox {
-			height: 150px;
 		}
 	}
 

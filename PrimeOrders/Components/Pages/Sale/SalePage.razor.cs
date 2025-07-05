@@ -15,19 +15,20 @@ public partial class SalePage
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
+	private bool _quantityDialogVisible = false;
 	private bool _isSaving = false;
 
+	private decimal _selectedQuantity = 1;
 	private decimal _baseTotal = 0;
 	private decimal _discountAmount = 0;
 	private decimal _subTotal = 0;
 	private decimal _total = 0;
 
-	private int _selectedProductCategoryId = 0;
 	private int _selectedProductId = 0;
 	private int _selectedPaymentModeId = 0;
 
 	private SaleProductCartModel _selectedProductCart = new();
-
+	private ProductModel _selectedProduct = new();
 	private SaleModel _sale = new()
 	{
 		SaleDateTime = DateTime.Now,
@@ -39,7 +40,6 @@ public partial class SalePage
 	private List<PaymentModeModel> _paymentModes;
 	private List<OrderModel> _orders = [];
 	private List<SupplierModel> _parties = [];
-	private List<ProductCategoryModel> _productCategories;
 	private List<ProductModel> _products;
 	private readonly List<SaleProductCartModel> _saleProductCart = [];
 
@@ -47,6 +47,7 @@ public partial class SalePage
 	private SfGrid<SaleProductCartModel> _sfProductCartGrid;
 
 	private SfDialog _sfProductManageDialog;
+	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;
 	private SfToast _sfErrorToast;
 
@@ -75,11 +76,7 @@ public partial class SalePage
 		_paymentModes = PaymentModeData.GetPaymentModes();
 		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
 
-		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
-		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
-
-		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
 		_products.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
@@ -135,7 +132,7 @@ public partial class SalePage
 	}
 	#endregion
 
-	#region Purchase Details Events
+	#region Sale Details Events
 	private async Task OnPartyChanged(ChangeEventArgs<int?, SupplierModel> args)
 	{
 		if (args.Value.HasValue && args.Value.Value > 0)
@@ -278,49 +275,11 @@ public partial class SalePage
 	#endregion
 
 	#region Products
-	private async Task ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
+	private void ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
 	{
-		_selectedProductId = args.Value;
-		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
-		_products.RemoveAll(c => c.LocationId != 1 && c.LocationId != _user.LocationId);
-
-		await _sfProductGrid?.Refresh();
-		await UpdateFinancialDetails();
-		StateHasChanged();
-	}
-
-	public async Task ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
-	{
-		_selectedProductId = args.Data.Id;
-		var product = args.Data;
-
-		var existingProduct = _saleProductCart.FirstOrDefault(c => c.ProductId == product.Id);
-
-		if (existingProduct is not null)
-			existingProduct.Quantity++;
-
-		else
-		{
-			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
-
-			_saleProductCart.Add(new()
-			{
-				ProductId = product.Id,
-				ProductName = product.Name,
-				Quantity = 1,
-				Rate = product.Rate,
-				DiscPercent = _sale.DiscPercent,
-				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
-				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
-				IGSTPercent = productTax.Extra ? productTax.IGST : 0
-				// Rest handled in the UpdateFinancialDetails()
-			});
-		}
-
-		_selectedProductId = 0;
-		await _sfProductCartGrid?.Refresh();
-		await _sfProductGrid?.Refresh();
-		await UpdateFinancialDetails();
+		_selectedProduct = args.Data;
+		_selectedQuantity = 1;
+		_quantityDialogVisible = true;
 		StateHasChanged();
 	}
 
@@ -334,6 +293,52 @@ public partial class SalePage
 	#endregion
 
 	#region Dialog Events
+	private async Task OnAddToCartClick()
+	{
+		if (_selectedQuantity <= 0)
+		{
+			OnCancelQuantityDialogClick();
+			return;
+		}
+
+		var existingProduct = _saleProductCart.FirstOrDefault(c => c.ProductId == _selectedProduct.Id);
+
+		if (existingProduct is not null)
+			existingProduct.Quantity += _selectedQuantity;
+
+		else
+		{
+			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, _selectedProduct.TaxId);
+
+			_saleProductCart.Add(new()
+			{
+				ProductId = _selectedProduct.Id,
+				ProductName = _selectedProduct.Name,
+				Quantity = _selectedQuantity,
+				Rate = _selectedProduct.Rate,
+				DiscPercent = _sale.DiscPercent,
+				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
+				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
+				IGSTPercent = productTax.Extra ? productTax.IGST : 0
+				// Rest handled in the UpdateFinancialDetails()
+			});
+		}
+
+		_quantityDialogVisible = false;
+		_selectedProduct = new();
+		await _sfProductCartGrid?.Refresh();
+		await _sfProductGrid?.Refresh();
+		await UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private void OnCancelQuantityDialogClick()
+	{
+		_quantityDialogVisible = false;
+		_selectedProduct = new();
+		StateHasChanged();
+	}
+
 	private async Task DialogRateValueChanged(decimal args)
 	{
 		_selectedProductCart.Rate = args;

@@ -1,4 +1,3 @@
-using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -16,7 +15,6 @@ public partial class OrderPage
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 
-	private int _selectedProductCategoryId = 0;
 	private int _selectedProductId = 0;
 
 	private OrderProductCartModel _selectedProductCart = new();
@@ -31,7 +29,6 @@ public partial class OrderPage
 	};
 
 	private List<LocationModel> _locations;
-	private List<ProductCategoryModel> _productCategories;
 	private List<ProductModel> _products;
 	private readonly List<OrderProductCartModel> _orderProductCarts = [];
 
@@ -72,11 +69,7 @@ public partial class OrderPage
 		else
 			_order.LocationId = _user.LocationId;
 
-		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.RemoveAll(r => r.LocationId != 1);
-		_selectedProductCategoryId = _productCategories.FirstOrDefault()?.Id ?? 0;
-
-		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
+		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
 		_products.RemoveAll(r => r.LocationId != 1);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
@@ -120,28 +113,12 @@ public partial class OrderPage
 	#endregion
 
 	#region Products
-	private async void ProductCategoryChanged(ListBoxChangeEventArgs<int, ProductCategoryModel> args)
-	{
-		_selectedProductCategoryId = args.Value;
-
-		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
-		_products.RemoveAll(r => r.LocationId != 1);
-
-		await _sfProductGrid.Refresh();
-		StateHasChanged();
-	}
-
 	public async void ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
 	{
 		_selectedProductId = args.Data.Id;
 		var product = args.Data;
 
-		var existingProduct = _orderProductCarts.FirstOrDefault(p => p.ProductId == _selectedProductId);
-
-		if (existingProduct is not null)
-			existingProduct.Quantity += 1;
-
-		else
+		if (_orderProductCarts.FirstOrDefault(p => p.ProductId == _selectedProductId) is null)
 			_orderProductCarts.Add(new()
 			{
 				ProductId = product.Id,
@@ -149,9 +126,13 @@ public partial class OrderPage
 				Quantity = 1
 			});
 
-		_selectedProductId = 0;
 		await _sfProductCartGrid?.Refresh();
 		await _sfProductGrid?.Refresh();
+
+		_selectedProductCart = _orderProductCarts.FirstOrDefault(p => p.ProductId == _selectedProductId);
+		_selectedProductId = 0;
+		_dialogVisible = true;
+
 		StateHasChanged();
 	}
 

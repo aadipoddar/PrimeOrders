@@ -164,6 +164,8 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Load_KitchenProductionDetail_By_KitchenProduction.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Sale.sql" />
     <Build Include="StoredProcedures\Insert\Inventory\Insert_Kitchen.sql" />
+    <Build Include="Tables\Sales\SaleReturn.sql" />
+    <Build Include="Tables\Sales\SaleReturnDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
