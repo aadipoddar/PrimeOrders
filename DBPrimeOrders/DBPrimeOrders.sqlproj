@@ -170,6 +170,7 @@
     <Build Include="StoredProcedures\Insert\Products\Insert_ProductRate.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_ProductRate_By_Product.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_LocationRate.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_RawMaterial_Rate_By_Supplier.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

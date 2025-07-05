@@ -81,7 +81,7 @@ public partial class KitchenIssuePage
 		_kitchen = _kitchens.FirstOrDefault();
 		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
 
-		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(0);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		_filteredRawMaterials = [.. _rawMaterials];

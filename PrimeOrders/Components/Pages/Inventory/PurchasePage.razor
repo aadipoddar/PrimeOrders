@@ -251,9 +251,9 @@ else
 								TItem="SupplierModel"
 								Placeholder="Select a Supplier"
 								DataSource="@_suppliers"
-								@bind-Value="_supplier.Id"
+								@bind-Value="_purchase.SupplierId"
 								CssClass="form-control">
-						<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="@OnSupplierChanged" />
+						<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="OnSupplierChanged" />
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
 				</div>

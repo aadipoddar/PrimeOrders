@@ -88,9 +88,8 @@ public partial class PurchasePage
 		_supplier = _suppliers.FirstOrDefault();
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 
-		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(_purchase.SupplierId);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
-
 		_filteredRawMaterials = [.. _rawMaterials];
 
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
@@ -107,7 +106,12 @@ public partial class PurchasePage
 		if (_purchase is null)
 			NavManager.NavigateTo("/Inventory-Dashboard");
 
+		_supplier = _suppliers.FirstOrDefault(s => s.Id == _purchase.SupplierId);
 		_purchaseRawMaterialCarts.Clear();
+
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(_purchase.SupplierId);
+		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
+		_filteredRawMaterials = [.. _rawMaterials];
 
 		var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(_purchase.Id);
 		foreach (var item in purchaseDetails)
@@ -286,10 +290,16 @@ public partial class PurchasePage
 	#region Purchase Details Events
 	private async void OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
 	{
-		_supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, args.Value);
-		_supplier ??= new SupplierModel();
+		_purchase.SupplierId = args.Value;
+		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new SupplierModel();
 
-		_purchase.SupplierId = _supplier?.Id ?? 0;
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(_purchase.SupplierId);
+		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
+		_filteredRawMaterials = [.. _rawMaterials];
+
+		if (_sfRawMaterialGrid is not null)
+			await _sfRawMaterialGrid.Refresh();
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}
