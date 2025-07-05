@@ -27,7 +27,12 @@ public partial class ProductPage
 	private List<LocationModel> _locations = [];
 	private List<TaxModel> _taxTypes = [];
 
+	private List<ProductRateModel> _productRates = [];
+	private int _newLocationRateId = 0;
+	private decimal _newLocationRate = 0;
+
 	private SfGrid<ProductModel> _sfGrid;
+	private SfGrid<ProductRateModel> _sfRatesGrid;
 	private SfToast _sfToast;
 	private SfToast _sfUpdateToast;
 	private SfToast _sfErrorToast;
@@ -69,6 +74,9 @@ public partial class ProductPage
 		if (_taxTypes.Count > 0)
 			_productModel.TaxId = _taxTypes[0].Id;
 
+		if (_locations.Count > 0 && _newLocationRateId == 0)
+			_newLocationRateId = _locations[0].Id;
+
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 
@@ -78,8 +86,83 @@ public partial class ProductPage
 	public async void RowSelectHandler(RowSelectEventArgs<ProductModel> args)
 	{
 		_productModel = args.Data;
+		await LoadProductRates();
 		await _sfUpdateToast.ShowAsync();
 		StateHasChanged();
+	}
+
+	private async Task LoadProductRates()
+	{
+		if (_productModel.Id > 0)
+		{
+			_productRates = await ProductData.LoadProductRateByProduct(_productModel.Id);
+
+			if (_user.LocationId != 1)
+				_productRates = [.. _productRates.Where(r => r.LocationId == _user.LocationId)];
+
+			if (_sfRatesGrid is not null)
+				await _sfRatesGrid.Refresh();
+		}
+
+		else
+			_productRates.Clear();
+	}
+
+	public List<LocationModel> GetAvailableLocations()
+	{
+		var locationsWithRates = _productRates.Select(r => r.LocationId).ToList();
+		return [.. _locations.Where(l => l.Status && !locationsWithRates.Contains(l.Id))];
+	}
+
+	private async Task DeleteProductRate(int productRateId)
+	{
+		if (productRateId > 0)
+		{
+			var productRate = _productRates.FirstOrDefault(r => r.Id == productRateId);
+			await ProductData.InsertProductRate(new ProductRateModel
+			{
+				Id = productRateId,
+				ProductId = _productModel.Id,
+				LocationId = productRate.LocationId,
+				Rate = productRate.Rate,
+				Status = false
+			});
+		}
+
+		await LoadProductRates();
+		GetAvailableLocations();
+		StateHasChanged();
+	}
+
+	public async Task AddLocationRate()
+	{
+		if (_productModel.Id <= 0)
+		{
+			_sfErrorToast.Content = "Please save the product first before adding location rates.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		if (_newLocationRateId <= 0)
+		{
+			_sfErrorToast.Content = "Please select a location.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		await ProductData.InsertProductRate(new()
+		{
+			Id = 0,
+			ProductId = _productModel.Id,
+			LocationId = _newLocationRateId,
+			Rate = _newLocationRate > 0 ? _newLocationRate : _productModel.Rate,
+			Status = true
+		});
+
+		_newLocationRateId = _locations.FirstOrDefault()?.Id ?? 0;
+		_newLocationRate = 0;
+
+		await LoadProductRates();
 	}
 
 	private async Task<bool> ValidateForm()

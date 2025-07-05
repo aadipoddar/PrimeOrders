@@ -166,6 +166,10 @@
     <Build Include="StoredProcedures\Insert\Inventory\Insert_Kitchen.sql" />
     <Build Include="Tables\Sales\SaleReturn.sql" />
     <Build Include="Tables\Sales\SaleReturnDetail.sql" />
+    <Build Include="Tables\Products\ProductRate.sql" />
+    <Build Include="StoredProcedures\Insert\Products\Insert_ProductRate.sql" />
+    <Build Include="StoredProcedures\LoadData\Product\Load_ProductRate_By_Product.sql" />
+    <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_LocationRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

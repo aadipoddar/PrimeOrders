@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrimeOrdersLibrary", "Prime
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DBPrimeOrders", "DBPrimeOrders\DBPrimeOrders.sqlproj", "{01F82FF2-E208-44F2-8128-741A89385C1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelImportProduct", "ExcelImportProduct\ExcelImportProduct.csproj", "{C9ACBB7D-B8F0-405C-9601-9DB18FF86816}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,10 +29,6 @@ Global
 		{01F82FF2-E208-44F2-8128-741A89385C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01F82FF2-E208-44F2-8128-741A89385C1D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{01F82FF2-E208-44F2-8128-741A89385C1D}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{C9ACBB7D-B8F0-405C-9601-9DB18FF86816}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9ACBB7D-B8F0-405C-9601-9DB18FF86816}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9ACBB7D-B8F0-405C-9601-9DB18FF86816}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9ACBB7D-B8F0-405C-9601-9DB18FF86816}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

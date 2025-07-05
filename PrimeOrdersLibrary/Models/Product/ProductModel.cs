@@ -33,3 +33,12 @@ public class ProductOverviewModel
 	public decimal TotalTaxAmount { get; set; }
 	public decimal TotalAmount { get; set; }
 }
+
+public class ProductRateModel
+{
+	public int Id { get; set; }
+	public int ProductId { get; set; }
+	public decimal Rate { get; set; }
+	public int LocationId { get; set; }
+	public bool Status { get; set; }
+}

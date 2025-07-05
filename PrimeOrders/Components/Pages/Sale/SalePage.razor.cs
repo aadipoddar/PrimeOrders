@@ -76,7 +76,7 @@ public partial class SalePage
 		_paymentModes = PaymentModeData.GetPaymentModes();
 		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 0;
 
-		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
+		_products = await ProductData.LoadProductByLocationRate(_user.LocationId);
 		_products.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
@@ -174,6 +174,8 @@ public partial class SalePage
 			foreach (var item in orderDetails)
 			{
 				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+				product.Rate = (await ProductData.LoadProductByLocationRate(_user.LocationId)).FirstOrDefault(p => p.Id == product.Id)?.Rate ?? 0;
+
 				if (product is not null)
 				{
 					var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);

@@ -104,10 +104,10 @@ else
 						</div>
 
 						<div class="form-group">
-							<label>Rate (MRP)</label>
+							<label>Base Rate (MRP)</label>
 							<SfNumericTextBox @bind-Value="_productModel.Rate"
 											  Format="N2"
-											  Placeholder="Enter Rate"
+											  Placeholder="Enter Base Rate"
 											  Min="0"
 											  CssClass="form-control" />
 						</div>
@@ -130,7 +130,7 @@ else
 						@if (_user?.LocationId == 1)
 						{
 							<div class="form-group">
-								<label>Location</label>
+								<label>Primary Location</label>
 								<SfComboBox TValue="int"
 											TItem="LocationModel"
 											Placeholder="Select a Location"
@@ -161,6 +161,85 @@ else
 				</div>
 			</div>
 
+			<!-- New section for Location Rates -->
+			@if (_productModel.Id > 0)
+			{
+				<div class="location-rates-card">
+					<div class="card-header">
+						<h2>Location-wise Rates</h2>
+						<p class="card-info">View product rates for different locations</p>
+					</div>
+					<div class="card-body">
+						<div class="location-rates-grid">
+							<SfGrid DataSource="@_productRates"
+									ID="_sfRatesGrid"
+									@ref="_sfRatesGrid"
+									AllowSorting="true"
+									Height="300px"
+									AllowResizing="true"
+									CssClass="rates-grid">
+								<GridColumns>
+									<GridColumn Field=@nameof(ProductRateModel.LocationId) HeaderText="Location" Width="200">
+										<Template>
+											@{
+												var locationRate = (context as ProductRateModel);
+												var locationName = _locations.FirstOrDefault(l => l.Id == locationRate.LocationId)?.Name ?? "Unknown";
+												<span>@locationName</span>
+											}
+										</Template>
+									</GridColumn>
+									<GridColumn Field=@nameof(ProductRateModel.Rate) HeaderText="Rate" Width="150" Format="N2" TextAlign="TextAlign.Right" />
+									<GridColumn Field=@nameof(ProductRateModel.Status) HeaderText="Active" Width="120" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
+									<GridColumn HeaderText="Action" Width="100" TextAlign="TextAlign.Center">
+										<Template>
+											@{
+												var productRate = (context as ProductRateModel);
+												<button @onclick="() => DeleteProductRate(productRate.Id)" class="delete-button" title="Delete Rate">
+													<span class="delete-icon">🗑️</span>
+												</button>
+											}
+										</Template>
+									</GridColumn>
+								</GridColumns>
+							</SfGrid>
+
+							<!-- Add new location rate section -->
+							@if (_user?.LocationId == 1 && _locations.Count > 0)
+							{
+								<div class="add-location-rate">
+									<h3>Add Location Rate</h3>
+									<div class="add-rate-form">
+										<div class="form-group">
+											<label>Location</label>
+											<SfComboBox TValue="int"
+														TItem="LocationModel"
+														Placeholder="Select a Location"
+														DataSource="@GetAvailableLocations()"
+														@bind-Value="_newLocationRateId"
+														PopupWidth="100%"
+														CssClass="form-control">
+												<ComboBoxFieldSettings Value="Id" Text="Name" />
+											</SfComboBox>
+										</div>
+										<div class="form-group">
+											<label>Rate</label>
+											<SfNumericTextBox @bind-Value="_newLocationRate"
+															  Format="N2"
+															  Placeholder="Enter Rate"
+															  Min="0"
+															  CssClass="form-control" />
+										</div>
+										<button @onclick="AddLocationRate" class="add-rate-button">
+											<span class="add-icon">+</span> Add Rate
+										</button>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+
 			<div class="grid-card">
 				<div class="card-header">
 					<h2>Products List</h2>
@@ -182,7 +261,7 @@ else
 							<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="200" />
 							<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Code" Width="120" />
 							<GridColumn Field=@nameof(ProductModel.ProductCategoryId) HeaderText="Category ID" Width="120" />
-							<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="100" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="Base MRP" Width="100" Format="N2" TextAlign="TextAlign.Right" />
 							<GridColumn Field=@nameof(ProductModel.TaxId) HeaderText="Tax ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(ProductModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
 						</GridColumns>
@@ -263,7 +342,7 @@ else
 	}
 
 	/* Cards */
-	.selection-card, .grid-card {
+	.selection-card, .grid-card, .location-rates-card {
 		background-color: white;
 		border-radius: 15px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -360,8 +439,105 @@ else
 		font-size: 18px;
 	}
 
+	/* Location Rates Styling */
+	.location-rates-grid {
+		margin-top: 10px;
+	}
+
+	.add-location-rate {
+		margin-top: 25px;
+		padding-top: 20px;
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+		.add-location-rate h3 {
+			color: var(--dotnet-secondary);
+			margin-top: 0;
+			margin-bottom: 15px;
+			font-size: 18px;
+		}
+
+	.add-rate-form {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 20px;
+		align-items: end;
+	}
+
+	.add-rate-button {
+		background-color: var(--dotnet-accent);
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 5px;
+		transition: all 0.2s ease;
+		height: 42px;
+	}
+
+		.add-rate-button:hover {
+			background-color: #0078d4;
+			transform: translateY(-2px);
+		}
+
+	.add-icon {
+		font-size: 16px;
+		font-weight: bold;
+	}
+
+	.mini-button {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: none;
+		padding: 5px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.mini-button:hover {
+			background-color: #4311a8;
+			transform: translateY(-2px);
+		}
+
+	.rate-input {
+		width: 100%;
+		border-radius: 4px;
+	}
+
+	/* Add this to your style section in ProductPage.razor */
+	.delete-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		padding: 5px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.delete-button:hover {
+			background-color: #d32f2f;
+			transform: translateY(-2px);
+		}
+
+	.delete-icon {
+		font-size: 14px;
+	}
+
 	/* Grid Styling */
-	.product-grid {
+	.product-grid, .rates-grid {
 		width: 100%;
 		border-radius: 8px;
 		overflow: hidden;
@@ -561,6 +737,10 @@ else
 		}
 
 		.form-row {
+			grid-template-columns: 1fr;
+		}
+
+		.add-rate-form {
 			grid-template-columns: 1fr;
 		}
 	}
