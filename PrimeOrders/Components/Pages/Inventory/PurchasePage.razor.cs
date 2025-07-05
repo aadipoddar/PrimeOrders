@@ -17,22 +17,23 @@ public partial class PurchasePage
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
+	private bool _quantityDialogVisible = false;
 
 	private decimal _baseTotal = 0;
 	private decimal _afterDiscounts = 0;
 	private decimal _subTotal = 0;
 	private decimal _total = 0;
+	private decimal _selectedQuantity = 1;
 
-	private int _selectedRawMaterialCategoryId = 0;
 	private int _selectedRawMaterialId = 0;
 
 	private PurchaseRawMaterialCartModel _selectedRawMaterialCart = new();
+	private RawMaterialModel _selectedRawMaterial = new();
 
 	private SupplierModel _supplier = new();
 	private PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Remarks = "" };
 
 	private List<SupplierModel> _suppliers;
-	private List<RawMaterialCategoryModel> _rawMaterialCategories;
 	private List<RawMaterialModel> _rawMaterials;
 	private readonly List<PurchaseRawMaterialCartModel> _purchaseRawMaterialCarts = [];
 
@@ -40,6 +41,7 @@ public partial class PurchasePage
 	private SfGrid<PurchaseRawMaterialCartModel> _sfRawMaterialCartGrid;
 
 	private SfDialog _sfRawMaterialManageDialog;
+	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;
 	private SfToast _sfErrorToast;
 
@@ -66,10 +68,7 @@ public partial class PurchasePage
 		_supplier = _suppliers.FirstOrDefault();
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 
-		_rawMaterialCategories = await CommonData.LoadTableDataByStatus<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
-		_selectedRawMaterialCategoryId = _rawMaterialCategories.FirstOrDefault()?.Id ?? 0;
-
-		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
+		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
@@ -167,49 +166,11 @@ public partial class PurchasePage
 	#endregion
 
 	#region Raw Materials
-	private async void RawMaterialCategoryChanged(ListBoxChangeEventArgs<int, RawMaterialCategoryModel> args)
+	public void RawMaterialRowSelectHandler(RowSelectEventArgs<RawMaterialModel> args)
 	{
-		_selectedRawMaterialCategoryId = args.Value;
-		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
-
-		await _sfRawMaterialGrid.Refresh();
-		UpdateFinancialDetails();
-		StateHasChanged();
-	}
-
-	public async void RawMaterialRowSelectHandler(RowSelectEventArgs<RawMaterialModel> args)
-	{
-		_selectedRawMaterialId = args.Data.Id;
-		var rawMaterial = args.Data;
-
-		var existingProduct = _purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == rawMaterial.Id);
-
-		if (existingProduct is not null)
-			existingProduct.Quantity++;
-
-		else
-		{
-			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, rawMaterial.TaxId);
-
-			_purchaseRawMaterialCarts.Add(new()
-			{
-				RawMaterialId = rawMaterial.Id,
-				RawMaterialName = rawMaterial.Name,
-				Quantity = 1,
-				Rate = rawMaterial.MRP,
-				BaseTotal = rawMaterial.MRP,
-				DiscPercent = 0,
-				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
-				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
-				IGSTPercent = productTax.Extra ? productTax.IGST : 0
-				// Rest handled in the UpdateFinancialDetails()
-			});
-		}
-
-		_selectedRawMaterialId = 0;
-		await _sfRawMaterialCartGrid?.Refresh();
-		await _sfRawMaterialGrid?.Refresh();
-		UpdateFinancialDetails();
+		_selectedRawMaterial = args.Data;
+		_selectedQuantity = 1;
+		_quantityDialogVisible = true;
 		StateHasChanged();
 	}
 
@@ -223,6 +184,52 @@ public partial class PurchasePage
 	#endregion
 
 	#region Dialog Events
+	private async Task OnAddToCartClick()
+	{
+		if (_selectedQuantity <= 0)
+		{
+			OnCancelQuantityDialogClick();
+			return;
+		}
+
+		var existingProduct = _purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterial.Id);
+
+		if (existingProduct is not null)
+			existingProduct.Quantity += _selectedQuantity;
+		else
+		{
+			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, _selectedRawMaterial.TaxId);
+
+			_purchaseRawMaterialCarts.Add(new()
+			{
+				RawMaterialId = _selectedRawMaterial.Id,
+				RawMaterialName = _selectedRawMaterial.Name,
+				Quantity = _selectedQuantity,
+				Rate = _selectedRawMaterial.MRP,
+				BaseTotal = _selectedRawMaterial.MRP * _selectedQuantity,
+				DiscPercent = 0,
+				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
+				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
+				IGSTPercent = productTax.Extra ? productTax.IGST : 0
+				// Rest handled in the UpdateFinancialDetails()
+			});
+		}
+
+		_quantityDialogVisible = false;
+		_selectedRawMaterial = new();
+		await _sfRawMaterialCartGrid?.Refresh();
+		await _sfRawMaterialGrid?.Refresh();
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private void OnCancelQuantityDialogClick()
+	{
+		_quantityDialogVisible = false;
+		_selectedRawMaterial = new();
+		StateHasChanged();
+	}
+
 	private void DialogRateValueChanged(decimal args)
 	{
 		_selectedRawMaterialCart.Rate = args;
