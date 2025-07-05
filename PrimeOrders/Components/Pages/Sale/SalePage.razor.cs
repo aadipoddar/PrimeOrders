@@ -17,6 +17,10 @@ public partial class SalePage
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
 	private bool _isSaving = false;
+	private bool _billDetailsDialogVisible = false;
+	private bool _discountDialogVisible = false;
+	private bool _orderPartyDialogVisible = false;
+	private bool _saleSummaryDialogVisible = false;
 
 	private decimal _selectedQuantity = 1;
 	private decimal _baseTotal = 0;
@@ -46,6 +50,10 @@ public partial class SalePage
 	private SfGrid<ProductModel> _sfProductGrid;
 	private SfGrid<SaleProductCartModel> _sfProductCartGrid;
 
+	private SfDialog _sfBillDetailsDialog;
+	private SfDialog _sfDiscountDialog;
+	private SfDialog _sfOrderPartyDialog;
+	private SfDialog _sfSaleSummaryDialog;
 	private SfDialog _sfProductManageDialog;
 	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;

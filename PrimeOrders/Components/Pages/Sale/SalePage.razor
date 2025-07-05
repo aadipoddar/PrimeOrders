@@ -53,190 +53,73 @@ else
 			</button>
 		</div>
 
-		<div class="purchase-content">
-			<div class="purchase-main">
-				<div class="card products-card">
-					<div class="card-header">
-						<h2>Products Selection</h2>
-						<p class="card-info">Click on a product to add to cart</p>
-					</div>
-					<div class="card-body">
-						<SfGrid DataSource="@_products"
-								ID="_sfProductGrid"
-								@ref="_sfProductGrid"
-								AllowSorting="true"
-								AllowFiltering="true"
-								AllowResizing="true"
-								AllowPaging="true"
-								Height="230px"
-								CssClass="materials-grid">
-							<GridPageSettings PageSize="5" />
-							<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
-							<GridColumns>
-								<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Code" Width="100" />
-								<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
-								<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-							</GridColumns>
-						</SfGrid>
-					</div>
-				</div>
+		<div class="action-buttons">
+			<button @onclick="() => _billDetailsDialogVisible = true" class="action-button">
+				<span class="action-icon">📄</span> Bill Details
+			</button>
+			<button @onclick="() => _discountDialogVisible = true" class="action-button">
+				<span class="action-icon">💰</span> Discount
+			</button>
+			@if (_user?.LocationId == 1 && (SaleId is null || _sale.OrderId is null))
+			{
+				<button @onclick="() => _orderPartyDialogVisible = true" class="action-button">
+					<span class="action-icon">🏢</span> Order & Party
+				</button>
+			}
+			<button @onclick="() => _saleSummaryDialogVisible = true" class="action-button action-button-primary">
+				<span class="action-icon">📊</span> Bill
+			</button>
+		</div>
 
-				<div class="card cart-card">
-					<div class="card-header">
-						<h2>Sale Cart</h2>
-						<p class="card-info">Click on a row to edit details</p>
-					</div>
-					<div class="card-body">
-						<SfGrid DataSource="@_saleProductCart"
-								ID="_sfProductCartGrid"
-								@ref="_sfProductCartGrid"
-								AllowSorting="true"
-								AllowFiltering="true"
-								AllowResizing="true"
-								Height="350px"
-								CssClass="cart-grid">
-							<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="SaleProductCartModel" />
-							<GridColumns>
-								<GridColumn Field=@nameof(SaleProductCartModel.ProductName) HeaderText="Product" Width="180" />
-								<GridColumn Field=@nameof(SaleProductCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
-								<GridColumn Field=@nameof(SaleProductCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
-								<GridColumn Field=@nameof(SaleProductCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-							</GridColumns>
-						</SfGrid>
-					</div>
+		<div class="main-content">
+			<div class="card products-card">
+				<div class="card-header">
+					<h2>Products Selection</h2>
+					<p class="card-info">Click on a product to add to cart</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_products"
+							ID="_sfProductGrid"
+							@ref="_sfProductGrid"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowResizing="true"
+							AllowPaging="true"
+							Height="450px"
+							CssClass="materials-grid">
+						<GridPageSettings PageSize="10" />
+						<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
+						<GridColumns>
+							<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Code" Width="100" />
+							<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
+							<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						</GridColumns>
+					</SfGrid>
 				</div>
 			</div>
 
-			<div class="purchase-sidebar">
-				<SfAccordion ExpandMode="ExpandMode.Multiple" CssClass="sidebar-accordion">
-					<AccordionItems>
-						<AccordionItem Header="Bill Details" Expanded="true">
-							<ContentTemplate>
-								<div class="accordion-content">
-									<div class="form-group full-width">
-										<label>Bill Number</label>
-										<SfTextBox Value="@_sale.BillNo"
-												   Placeholder="Bill Number"
-												   Readonly=true
-												   CssClass="form-control" />
-									</div>
-
-									<div class="form-group full-width">
-										<label>Bill Date</label>
-										<SfDatePicker Placeholder="Select Sale Date"
-													  @bind-Value="_sale.SaleDateTime"
-													  CssClass="form-control" />
-									</div>
-								</div>
-							</ContentTemplate>
-						</AccordionItem>
-
-						<AccordionItem Header="Discount Details" Expanded="true">
-							<ContentTemplate>
-								<div class="accordion-content form-grid">
-									<div class="form-group">
-										<label>Discount %</label>
-										<SfNumericTextBox TValue="decimal"
-														  Value="_sale.DiscPercent"
-														  ValueChanged="SaleDiscountPercentValueChanged"
-														  Max="100"
-														  Min="0"
-														  Format="N2"
-														  CssClass="form-control" />
-									</div>
-
-									<div class="form-group">
-										<label>Discount Amount</label>
-										<div class="readonly-currency">@_discountAmount.FormatIndianCurrency()</div>
-									</div>
-
-									<div class="form-group full-width">
-										<label>Discount Reason</label>
-										<SfTextBox @bind-Value="_sale.DiscReason"
-												   Placeholder="Add Discount Reason (optional)"
-												   Multiline="true"
-												   CssClass="form-control" />
-									</div>
-								</div>
-							</ContentTemplate>
-						</AccordionItem>
-
-						@if (_user?.LocationId == 1 && (SaleId is null || _sale.OrderId is null))
-						{
-							<AccordionItem Header="Order & Party Details">
-								<ContentTemplate>
-									<div class="accordion-content">
-										<div class="form-group">
-											<label>Party</label>
-											<SfComboBox TValue="int?"
-														TItem="SupplierModel"
-														Placeholder="Select a Party"
-														DataSource="@_parties"
-														CssClass="form-control"
-														Value="_sale.PartyId">
-												<ComboBoxEvents TItem="SupplierModel" TValue="int?" ValueChange="@OnPartyChanged" />
-												<ComboBoxFieldSettings Value="Id" Text="Name" />
-											</SfComboBox>
-										</div>
-
-										<div class="form-group">
-											<label>Order</label>
-											<SfComboBox TValue="int?"
-														TItem="OrderModel"
-														Placeholder="Select an Order"
-														DataSource="@_orders"
-														CssClass="form-control">
-												<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="@OnOrderChanged" />
-												<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
-											</SfComboBox>
-										</div>
-									</div>
-								</ContentTemplate>
-							</AccordionItem>
-						}
-					</AccordionItems>
-				</SfAccordion>
-
-				<div class="card totals-card">
-					<div class="card-header">
-						<h2>Sale Summary</h2>
-					</div>
-					<div class="card-body">
-						<div class="summary-row">
-							<span>Base Total:</span>
-							<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row">
-							<span>Sub Total:</span>
-							<span class="amount">@_subTotal.FormatIndianCurrency()</span>
-						</div>
-						<div class="summary-row total-row">
-							<span>Grand Total:</span>
-							<span class="total-amount">@_total.FormatIndianCurrency()</span>
-						</div>
-
-						<div class="form-group">
-							<label>Remarks</label>
-							<SfTextBox @bind-Value="_sale.Remarks"
-									   Placeholder="Add remarks (optional)"
-									   Multiline="true"
-									   CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>Payment Mode</label>
-							<SfComboBox TValue="int"
-										TItem="PaymentModeModel"
-										Placeholder="Select a Payment Mode"
-										DataSource="@_paymentModes"
-										@bind-Value="_selectedPaymentModeId"
-										CssClass="form-control">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
-
-						<SfButton CssClass="save-button" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick" Disabled="@_isSaving" />
-					</div>
+			<div class="card cart-card">
+				<div class="card-header">
+					<h2>Sale Cart</h2>
+					<p class="card-info">Click on a row to edit details</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_saleProductCart"
+							ID="_sfProductCartGrid"
+							@ref="_sfProductCartGrid"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowResizing="true"
+							Height="450px"
+							CssClass="cart-grid">
+						<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="SaleProductCartModel" />
+						<GridColumns>
+							<GridColumn Field=@nameof(SaleProductCartModel.ProductName) HeaderText="Product" Width="180" />
+							<GridColumn Field=@nameof(SaleProductCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(SaleProductCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(SaleProductCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						</GridColumns>
+					</SfGrid>
 				</div>
 			</div>
 		</div>
@@ -247,6 +130,217 @@ else
 	</div>
 }
 
+<!-- Bill Details Dialog -->
+<SfDialog ID="_sfBillDetailsDialog"
+		  @ref="_sfBillDetailsDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_billDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Bill Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-group">
+					<label>Bill Number</label>
+					<SfTextBox Value="@_sale.BillNo"
+							   Placeholder="Bill Number"
+							   Readonly=true
+							   CssClass="form-control" />
+				</div>
+
+				<div class="form-group">
+					<label>Bill Date</label>
+					<SfDatePicker Placeholder="Select Sale Date"
+								  @bind-Value="_sale.SaleDateTime"
+								  CssClass="form-control" />
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _billDetailsDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Discount Dialog -->
+<SfDialog ID="_sfDiscountDialog"
+		  @ref="_sfDiscountDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_discountDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Discount Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content form-grid">
+				<div class="form-group">
+					<label>Discount %</label>
+					<SfNumericTextBox TValue="decimal"
+									  Value="_sale.DiscPercent"
+									  ValueChanged="SaleDiscountPercentValueChanged"
+									  Max="100"
+									  Min="0"
+									  Format="N2"
+									  CssClass="form-control" />
+				</div>
+
+				<div class="form-group">
+					<label>Discount Amount</label>
+					<div class="readonly-currency">@_discountAmount.FormatIndianCurrency()</div>
+				</div>
+
+				<div class="form-group full-width">
+					<label>Discount Reason</label>
+					<SfTextBox @bind-Value="_sale.DiscReason"
+							   Placeholder="Add Discount Reason (optional)"
+							   Multiline="true"
+							   CssClass="form-control" />
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _discountDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Order & Party Dialog -->
+<SfDialog ID="_sfOrderPartyDialog"
+		  @ref="_sfOrderPartyDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_orderPartyDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Order & Party Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-group">
+					<label>Party</label>
+					<SfComboBox TValue="int?"
+								TItem="SupplierModel"
+								Placeholder="Select a Party"
+								DataSource="@_parties"
+								CssClass="form-control"
+								Value="_sale.PartyId">
+						<ComboBoxEvents TItem="SupplierModel" TValue="int?" ValueChange="@OnPartyChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
+				</div>
+
+				<div class="form-group">
+					<label>Order</label>
+					<SfComboBox TValue="int?"
+								TItem="OrderModel"
+								Placeholder="Select an Order"
+								DataSource="@_orders"
+								CssClass="form-control">
+						<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="@OnOrderChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
+					</SfComboBox>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _orderPartyDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Sale Summary Dialog -->
+<SfDialog ID="_sfSaleSummaryDialog"
+		  @ref="_sfSaleSummaryDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_saleSummaryDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Sale Summary</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="summary-section">
+					<div class="summary-row">
+						<span>Base Total:</span>
+						<span class="amount">@_baseTotal.FormatIndianCurrency()</span>
+					</div>
+					<div class="summary-row">
+						<span>Sub Total:</span>
+						<span class="amount">@_subTotal.FormatIndianCurrency()</span>
+					</div>
+					<div class="summary-row total-row">
+						<span>Grand Total:</span>
+						<span class="total-amount">@_total.FormatIndianCurrency()</span>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label>Remarks</label>
+					<SfTextBox @bind-Value="_sale.Remarks"
+							   Placeholder="Add remarks (optional)"
+							   Multiline="true"
+							   CssClass="form-control" />
+				</div>
+
+				<div class="form-group">
+					<label>Payment Mode</label>
+					<SfComboBox TValue="int"
+								TItem="PaymentModeModel"
+								Placeholder="Select a Payment Mode"
+								DataSource="@_paymentModes"
+								@bind-Value="_selectedPaymentModeId"
+								CssClass="form-control">
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton CssClass="save-button-dialog" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick" Disabled="@_isSaving" />
+					<SfButton Content="Close" OnClick="() => _saleSummaryDialogVisible = false" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Quantity Dialog -->
 <SfDialog ID="_sfQuantityDialog"
 		  @ref="_sfQuantityDialog"
 		  Width="350px"
@@ -263,7 +357,6 @@ else
 				<span class="material-name">@_selectedProduct.Name</span>
 			</div>
 		</Header>
-
 		<Content>
 			<div class="dialog-content">
 				<div class="form-row">
@@ -278,7 +371,6 @@ else
 				</div>
 			</div>
 		</Content>
-
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
@@ -290,6 +382,7 @@ else
 	</DialogTemplates>
 </SfDialog>
 
+<!-- Product Manage Dialog -->
 <SfDialog ID="_sfProductManageDialog"
 		  @ref="_sfProductManageDialog"
 		  Width="1000px"
@@ -306,7 +399,6 @@ else
 				<span class="material-name">@_selectedProductCart.ProductName</span>
 			</div>
 		</Header>
-
 		<Content>
 			<div class="dialog-content">
 				<!-- Summary Panel above the tabs -->
@@ -523,7 +615,6 @@ else
 				</SfTab>
 			</div>
 		</Content>
-
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-total">
@@ -563,7 +654,7 @@ else
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 25px;
+		margin-bottom: 20px;
 	}
 
 	.page-title {
@@ -596,90 +687,57 @@ else
 		font-size: 16px;
 	}
 
-	/* Content layout */
-	.purchase-content {
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 15px;
+		margin-bottom: 25px;
+		flex-wrap: wrap;
+	}
+
+	.action-button {
+		background-color: white;
+		border: none;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+		color: var(--dotnet-secondary);
+		padding: 12px 20px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		transition: all 0.2s ease;
+		flex: 1;
+		min-width: 150px;
+		justify-content: center;
+	}
+
+		.action-button:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	.action-icon {
+		font-size: 18px;
+	}
+
+	.action-button-primary {
+		background-color: var(--dotnet-primary);
+		color: white;
+	}
+
+		.action-button-primary:hover {
+			background-color: #4311a8;
+		}
+
+	/* Main Content */
+	.main-content {
 		display: grid;
-		grid-template-columns: 3fr 1fr;
+		grid-template-columns: 1fr 1fr;
 		gap: 25px;
 		margin-bottom: 30px;
 	}
-
-	.purchase-main {
-		display: flex;
-		flex-direction: column;
-		gap: 25px;
-	}
-
-	.purchase-sidebar {
-		display: flex;
-		flex-direction: column;
-		gap: 25px;
-	}
-
-	/* Materials container */
-	.materials-container {
-		display: grid;
-		grid-template-columns: 250px 1fr;
-		gap: 20px;
-	}
-
-	.categories-panel, .materials-panel {
-		display: flex;
-		flex-direction: column;
-	}
-
-		.categories-panel label, .materials-panel label {
-			font-weight: 600;
-			margin-bottom: 10px;
-			color: var(--dotnet-secondary);
-		}
-
-	/* Material Summary Panel */
-	.material-summary-panel {
-		background-color: var(--dotnet-light);
-		border-radius: 8px;
-		padding: 15px;
-		margin-bottom: 15px;
-		border-bottom: 1px solid var(--dotnet-border);
-	}
-
-	.summary-highlights {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		gap: 10px;
-	}
-
-	.highlight-item {
-		flex: 1;
-		min-width: 100px;
-		text-align: center;
-		padding: 8px;
-		border-radius: 6px;
-		background-color: white;
-		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-	}
-
-	.highlight-label {
-		font-size: 12px;
-		color: #666;
-		margin-bottom: 5px;
-	}
-
-	.highlight-value {
-		font-weight: 600;
-		color: var(--dotnet-secondary);
-		font-size: 16px;
-	}
-
-	.highlight-item.final {
-		background-color: var(--dotnet-primary);
-	}
-
-		.highlight-item.final .highlight-label,
-		.highlight-item.final .highlight-value {
-			color: white;
-		}
 
 	/* Cards */
 	.card {
@@ -687,14 +745,9 @@ else
 		border-radius: 15px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
-	}
-
-	.combined-materials-card {
-		flex-grow: 0;
-	}
-
-	.cart-card {
-		flex-grow: 1;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.card-header {
@@ -719,12 +772,16 @@ else
 
 	.card-body {
 		padding: 20px;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
 	/* Product lists */
 	.materials-grid, .cart-grid {
 		border-radius: 8px;
 		overflow: hidden;
+		flex-grow: 1;
 	}
 
 		/* Adding these CSS rules to the existing style section */
@@ -779,36 +836,24 @@ else
 	}
 
 	/* Button Styling */
-	.save-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		width: 100%;
-		margin-top: 20px;
+	.save-button-dialog {
 		background-color: var(--dotnet-primary);
 		color: white;
-		padding: 12px;
+		padding: 10px 20px;
 		border-radius: 8px;
 		font-weight: 600;
 		transition: all 0.2s ease;
-		min-height: 50px; /* Ensure consistent height */
 	}
 
-		.save-button:disabled {
+		.save-button-dialog:disabled {
 			background-color: #8e77c9;
 			cursor: not-allowed;
 			transform: none;
 		}
 
-		.save-button:hover {
+		.save-button-dialog:hover {
 			background-color: #4311a8;
-			transform: translateY(-2px);
 		}
-
-	.save-icon {
-		font-size: 18px;
-	}
 
 	/* New Remove Button Styling */
 	.remove-button {
@@ -820,7 +865,6 @@ else
 
 		.remove-button:hover {
 			background-color: #d32f2f;
-			transform: translateY(-2px);
 		}
 
 	/* Dialog Styling */
@@ -839,7 +883,15 @@ else
 	}
 
 	.dialog-content {
-		padding: 0;
+		padding: 20px;
+	}
+
+	.summary-section {
+		margin-bottom: 20px;
+		border: 1px solid var(--dotnet-border);
+		border-radius: 8px;
+		padding: 15px;
+		background-color: var(--dotnet-light);
 	}
 
 	.tab-content {
@@ -1003,13 +1055,57 @@ else
 		font-weight: 500;
 	}
 
-	/* Accordion */
-	.sidebar-accordion {
-		width: 100%;
+	/* Material Summary Panel */
+	.material-summary-panel {
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		padding: 15px;
+		margin-bottom: 15px;
+		border-bottom: 1px solid var(--dotnet-border);
 	}
 
-	.accordion-content {
-		padding: 15px 0;
+	.summary-highlights {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 10px;
+	}
+
+	.highlight-item {
+		flex: 1;
+		min-width: 100px;
+		text-align: center;
+		padding: 8px;
+		border-radius: 6px;
+		background-color: white;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+	}
+
+	.highlight-label {
+		font-size: 12px;
+		color: #666;
+		margin-bottom: 5px;
+	}
+
+	.highlight-value {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		font-size: 16px;
+	}
+
+	.highlight-item.final {
+		background-color: var(--dotnet-primary);
+	}
+
+		.highlight-item.final .highlight-label,
+		.highlight-item.final .highlight-value {
+			color: white;
+		}
+
+	/* Material Tab Styling */
+	.material-tab {
+		width: 100%;
+		height: 100%;
 	}
 
 	/* Footer */
@@ -1032,12 +1128,6 @@ else
 			color: var(--dotnet-secondary);
 			text-decoration: underline;
 		}
-
-	/* Material Tab Styling */
-	.material-tab {
-		width: 100%;
-		height: 100%;
-	}
 
 	/* Loading Animation */
 	.loader-container {
@@ -1096,19 +1186,17 @@ else
 	}
 
 	/* Responsive Design */
-	@@media (max-width: 1200px) {
-		.purchase-content {
-			grid-template-columns: 1fr;
-		}
-	}
-
 	@@media (max-width: 992px) {
-		.materials-container {
+		.main-content {
 			grid-template-columns: 1fr;
 		}
 
-		.category-listbox {
-			height: 150px;
+		.action-buttons {
+			flex-direction: row;
+		}
+
+		.action-button {
+			flex-basis: calc(50% - 10px);
 		}
 	}
 
@@ -1126,6 +1214,10 @@ else
 		.tax-row {
 			grid-template-columns: 1fr;
 			gap: 15px;
+		}
+
+		.action-button {
+			flex-basis: 100%;
 		}
 	}
 

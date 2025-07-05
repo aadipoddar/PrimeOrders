@@ -9,9 +9,11 @@ namespace PrimeOrdersLibrary.DataAccess;
 
 public static class SqlDataAccess
 {
+	private static readonly string _databaseConnection = ConnectionStrings.Azure;
+
 	public static async Task<List<T>> LoadData<T, U>(string storedProcedure, U parameters)
 	{
-		using IDbConnection connection = new SqlConnection(ConnectionStrings.Local);
+		using IDbConnection connection = new SqlConnection(_databaseConnection);
 
 		List<T> rows = [.. await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure)];
 
@@ -20,7 +22,7 @@ public static class SqlDataAccess
 
 	public static async Task SaveData<T>(string storedProcedure, T parameters)
 	{
-		using IDbConnection connection = new SqlConnection(ConnectionStrings.Local);
+		using IDbConnection connection = new SqlConnection(_databaseConnection);
 
 		await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
 	}
