@@ -33,3 +33,12 @@ public class KitchenIssueOverviewModel
 	public decimal TotalQuantity { get; set; }
 	public bool Status { get; set; }
 }
+
+public class KitchenIssueRawMaterialCartModel
+{
+	public int RawMaterialId { get; set; }
+	public string RawMaterialName { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
+}

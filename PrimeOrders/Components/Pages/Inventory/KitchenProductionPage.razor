@@ -20,7 +20,7 @@
 <SfToast @ref="_sfSuccessToast"
 		 ID="toast_success"
 		 Title="Success"
-		 Content="Kitchen Production saved successfully."
+		 Content="Kitchen production saved successfully."
 		 Timeout="1000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-success">
@@ -40,12 +40,25 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading Kitchen Production page...</p>
+		<p class="loading-text">Loading kitchen production page...</p>
 	</div>
 }
 else
 {
-	<div class="kitchen-issue-container">
+	<div class="kitchen-production-container" tabindex="0">
+		<!-- Product Search Indicator -->
+		<div id="productSearchIndicator" class="product-search-indicator" style="display: none;">
+			<div class="search-header">
+				<span class="search-icon">🔍</span>
+				<span>Product Search: </span>
+				<span id="searchText" class="search-text"></span>
+			</div>
+			<div id="searchResults" class="search-results"></div>
+			<div class="search-help">
+				<span>↑↓ Navigate • Enter Select • Esc Cancel</span>
+			</div>
+		</div>
+
 		<div class="page-header">
 			<h1 class="page-title">Kitchen Production Management</h1>
 			<button @onclick='() => NavManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
@@ -53,133 +66,96 @@ else
 			</button>
 		</div>
 
-		<div class="kitchen-issue-content">
-			<div class="selection-card card">
+		<div class="action-buttons">
+			<button @onclick="() => _billDetailsDialogVisible = true" class="action-button">
+				<span class="action-icon">📄</span> Transaction Details
+			</button>
+			<button @onclick="() => _kitchenDialogVisible = true" class="action-button">
+				<span class="action-icon">👨‍🍳</span> Kitchen
+			</button>
+			<button @onclick="() => _kitchenProductionSummaryDialogVisible = true" class="action-button action-button-primary">
+				<span class="action-icon">📊</span> Complete Production
+			</button>
+		</div>
+
+		<div class="main-content">
+			<div class="card products-card">
 				<div class="card-header">
-					<h2>Kitchen Selection</h2>
-					<p class="card-info">Select the kitchen for Products Production</p>
+					<h2>Products Selection</h2>
+					<p class="card-info">Press <kbd>F2</kbd> to search products, click Add to Cart or row to add to cart</p>
 				</div>
 				<div class="card-body">
-					<div class="form-row">
-						<div class="form-group">
-							<label>Kitchen</label>
-							<SfComboBox TValue="int"
-										TItem="KitchenModel"
-										Placeholder="Select a Kitchen"
-										DataSource="@_kitchens"
-										@bind-Value="_kitchenProduction.KitchenId"
-										CssClass="form-control"
-										FloatLabelType="FloatLabelType.Never">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
-
-						<div class="form-group">
-							<label>Transaction Number</label>
-							<SfTextBox Value="@_kitchenProduction.TransactionNo"
-									   Placeholder="Transaction No"
-									   Readonly=true
-									   CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>Issue Date</label>
-							<SfDatePicker Placeholder="Select Production Date"
-										  @bind-Value="_kitchenProduction.ProductionDate"
-										  CssClass="form-control" />
-						</div>
-
-						@if (KitchenProductionId.HasValue && KitchenProductionId.Value > 0)
-						{
-							<div class="form-group">
-								<div class="status-checkbox-container">
-									<SfCheckBox @bind-Checked="_kitchenProduction.Status" Label="Active Status" CssClass="status-checkbox" />
-								</div>
-							</div>
-						}
-					</div>
-				</div>
-			</div>
-
-			<div class="materials-selection-card card">
-				<div class="card-header">
-					<h2>Product Selection</h2>
-					<p class="card-info">Select materials Produced from the kitchen</p>
-				</div>
-				<div class="card-body">
-					<div class="form-row">
-						<div class="form-group">
-							<label>Product Category</label>
-							<SfComboBox TValue="int"
-										TItem="ProductCategoryModel"
-										Placeholder="Select a Product Category"
-										DataSource="_productCategories"
-										@bind-Value="_selectedProductCategoryId"
-										CssClass="form-control"
-										FloatLabelType="FloatLabelType.Never">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-								<ComboBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="ProductCategoryComboBoxValueChangeHandler" />
-							</SfComboBox>
-						</div>
-
-						<div class="form-group">
-							<label>Product</label>
-							<SfComboBox TValue="int"
-										TItem="ProductModel"
-										Placeholder="Select a Product"
-										DataSource="_products"
-										@bind-Value="_selectedProductId"
-										CssClass="form-control"
-										FloatLabelType="FloatLabelType.Never">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
-
-						<div class="form-group">
-							<label>Quantity</label>
-							<SfNumericTextBox TValue="double"
-											  Decimals=3
-											  Min=1
-											  Placeholder="Enter Quantity"
-											  @bind-Value="_selectedProductQuantity"
-											  CssClass="form-control"
-											  FloatLabelType="FloatLabelType.Never" />
-						</div>
-
-						<div class="form-group action-group">
-							<button @onclick="OnAddButtonClick" class="add-button">
-								<span class="add-icon">+</span> Add Material
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="cart-card card">
-				<div class="card-header">
-					<h2>product Production List</h2>
-					<p class="card-info">Click on a row to remove an item</p>
-				</div>
-				<div class="card-body">
-					<SfGrid DataSource="_productCart"
-							ID="_sfGrid"
-							@ref="_sfGrid"
-							Height="350px"
-							CssClass="cart-grid">
-						<GridEvents RowSelected="RowSelectHandler" TValue="ItemRecipeModel" />
+					<SfGrid DataSource="@(_isProductSearchActive? _filteredProducts : _products)"
+							ID="_sfProductGrid"
+							@ref="_sfProductGrid"
+							AllowSorting="true"
+							AllowResizing="true"
+							AllowPaging="true"
+							AllowFiltering="true"
+							Height="450px"
+							CssClass="modern-products-grid">
+						<GridPageSettings PageSize="10" />
 						<GridColumns>
-							<GridColumn Field="@nameof(ItemRecipeModel.ItemCategoryId)" Visible=false />
-							<GridColumn Field="@nameof(ItemRecipeModel.ItemId)" Visible=false />
-							<GridColumn Field="@nameof(ItemRecipeModel.ItemName)" HeaderText="Product" Width="180" />
-							<GridColumn Field="@nameof(ItemRecipeModel.Quantity)" HeaderText="Quantity" Width="120" Format="N3" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(ProductModel.Name) Width="100%" />
+							<GridColumn Field=@nameof(ProductModel.Rate) />
+							<GridColumn AllowFiltering="false" />
+						</GridColumns>
+						<GridTemplates>
+							<RowTemplate>
+								@{
+									var product = (context as ProductModel);
+									var isSelected = _isProductSearchActive && product?.Id == _selectedProduct.Id;
+								}
+								<tr class="product-row @(isSelected ? "selected-product-row" : "")">
+									<td class="product-name">
+										<div class="name-wrapper">
+											<span class="name-text" title="@product?.Name">@product?.Name</span>
+										</div>
+									</td>
+									<td class="product-rate">
+										<div class="rate-wrapper">
+											<span class="currency-symbol">₹</span>
+											<span class="rate-value">@product?.Rate.ToString("N2")</span>
+										</div>
+									</td>
+									<td class="product-action">
+										<button class="add-to-cart-btn"
+												@onclick="() => OnAddToCartButtonClick(product)"
+												@onclick:stopPropagation="true"
+												title="Add to Cart">
+											<span class="cart-icon">🛒</span>
+											<span class="cart-text">Add</span>
+										</button>
+									</td>
+								</tr>
+							</RowTemplate>
+						</GridTemplates>
+					</SfGrid>
+				</div>
+			</div>
+
+			<div class="card cart-card">
+				<div class="card-header">
+					<h2>Production Cart</h2>
+					<p class="card-info">Click on a row to edit details</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_kitchenProductionProductCarts"
+							ID="_sfProductCartGrid"
+							@ref="_sfProductCartGrid"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowResizing="true"
+							Height="450px"
+							CssClass="cart-grid">
+						<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="KitchenProductionProductCartModel" />
+						<GridColumns>
+							<GridColumn Field=@nameof(KitchenProductionProductCartModel.ProductName) HeaderText="Product" Width="200" />
+							<GridColumn Field=@nameof(KitchenProductionProductCartModel.Quantity) HeaderText="Qty" Width="100" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(KitchenProductionProductCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(KitchenProductionProductCartModel.Total) HeaderText="Total" Width="150" Format="N2" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
-
-					<div class="save-container">
-						<button @onclick="OnSaveButtonClick" class="save-button">
-							<span class="save-icon">💾</span> Submit Kitchen Production
-						</button>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -190,6 +166,246 @@ else
 	</div>
 }
 
+<!-- Transaction Details Dialog -->
+<SfDialog ID="_sfBillDetailsDialog"
+		  @ref="_sfBillDetailsDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_billDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Transaction Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-group">
+					<label>Transaction Number</label>
+					<SfTextBox Value="@_kitchenProduction.TransactionNo"
+							   Placeholder="Transaction No"
+							   Readonly=true
+							   CssClass="form-control" />
+				</div>
+
+				<div class="form-group">
+					<label>Production Date</label>
+					<SfDatePicker @bind-Value="_kitchenProduction.ProductionDate"
+								  Placeholder="Select Date"
+								  CssClass="form-control" />
+				</div>
+
+				@if (KitchenProductionId.HasValue && KitchenProductionId.Value > 0)
+				{
+					<div class="form-group">
+						<div class="status-checkbox-container">
+							<SfCheckBox @bind-Checked="_kitchenProduction.Status" Label="Active Status" CssClass="status-checkbox" />
+						</div>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _billDetailsDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Kitchen Dialog -->
+<SfDialog ID="_sfKitchenDialog"
+		  @ref="_sfKitchenDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_kitchenDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Kitchen Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-group">
+					<label>Kitchen</label>
+					<SfComboBox TValue="int"
+								TItem="KitchenModel"
+								Placeholder="Select a Kitchen"
+								DataSource="@_kitchens"
+								@bind-Value="_kitchen.Id"
+								CssClass="form-control">
+						<ComboBoxEvents TItem="KitchenModel" TValue="int" ValueChange="@OnKitchenChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
+				</div>
+
+				<div class="kitchen-details">
+					<div class="detail-row">
+						<span class="detail-label">Name:</span>
+						<span class="detail-value">@_kitchen?.Name</span>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _kitchenDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Kitchen Production Summary Dialog -->
+<SfDialog ID="_sfKitchenProductionSummaryDialog"
+		  @ref="_sfKitchenProductionSummaryDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_kitchenProductionSummaryDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Kitchen Production Summary</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="summary-section">
+					<div class="summary-row">
+						<span>Total Items:</span>
+						<span class="amount">@_kitchenProductionProductCarts.Count</span>
+					</div>
+					<div class="summary-row">
+						<span>Total Quantity:</span>
+						<span class="amount">@_kitchenProductionProductCarts.Sum(c => c.Quantity).ToString("N2")</span>
+					</div>
+					<div class="summary-row total-row">
+						<span>Total Value:</span>
+						<span class="total-amount">@_total.FormatIndianCurrency()</span>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton CssClass="save-button-dialog" Content="Complete Kitchen Production" IsPrimary="true" OnClick="OnSaveKitchenProductionClick" />
+					<SfButton Content="Close" OnClick="() => _kitchenProductionSummaryDialogVisible = false" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Quantity Dialog -->
+<SfDialog ID="_sfQuantityDialog"
+		  @ref="_sfQuantityDialog"
+		  Width="350px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_quantityDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Select Quantity: </span>
+				<span class="product-name">@_selectedProduct.Name</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group full-width">
+						<label>Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  @bind-Value="_selectedQuantity"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Add to Cart" IsPrimary="true" OnClick="OnAddToCartClick" CssClass="dialog-button" />
+					<SfButton Content="Cancel" OnClick="OnCancelQuantityDialogClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Product Manage Dialog -->
+<SfDialog ID="_sfProductManageDialog"
+		  @ref="_sfProductManageDialog"
+		  Width="600px"
+		  Height="400px"
+		  AllowDragging="true"
+		  EnableResize="true"
+		  @bind-Visible="_dialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Manage Product: </span>
+				<span class="product-name">@_selectedProductCart.ProductName</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group">
+						<label>Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  Value="_selectedProductCart.Quantity"
+										  ValueChanged="DialogQuantityValueChanged"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+
+					<div class="form-group">
+						<label>Rate</label>
+						<div class="readonly-currency">@_selectedProductCart.Rate.FormatIndianCurrency()</div>
+					</div>
+				</div>
+
+				<div class="summary-section">
+					<div class="summary-row">
+						<span>Total:</span>
+						<span class="total-amount">@_selectedProductCart.Total.FormatIndianCurrency()</span>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" />
+					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartProductManageClick" CssClass="dialog-button remove-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -198,10 +414,295 @@ else
 		--dotnet-light: #F7F7F7;
 		--dotnet-dark: #1E1E1E;
 		--dotnet-border: rgba(0, 0, 0, 0.1);
+		--product-grid-border: #e1e5e9;
+		--product-grid-hover: rgba(81, 43, 212, 0.08);
+		--product-grid-selected: var(--dotnet-primary);
 	}
 
+	/* Keyboard key styling */
+	kbd {
+		background-color: #f8f9fa;
+		border: 1px solid #ced4da;
+		border-radius: 3px;
+		color: #495057;
+		font-family: Monaco, Consolas, monospace;
+		font-size: 10px;
+		padding: 2px 4px;
+		box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	/* Product Search Indicator */
+	.product-search-indicator {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: var(--dotnet-primary);
+		color: white;
+		padding: 20px;
+		border-radius: 12px;
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+		z-index: 10000;
+		min-width: 300px;
+		text-align: center;
+	}
+
+	.search-header {
+		font-size: 18px;
+		font-weight: 600;
+		margin-bottom: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+
+	.search-icon {
+		font-size: 20px;
+	}
+
+	.search-text {
+		background: rgba(255, 255, 255, 0.2);
+		padding: 4px 8px;
+		border-radius: 4px;
+		min-width: 100px;
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.search-results {
+		font-size: 14px;
+		opacity: 0.9;
+		margin: 10px 0;
+	}
+
+	.search-help {
+		font-size: 12px;
+		opacity: 0.8;
+		border-top: 1px solid rgba(255, 255, 255, 0.3);
+		padding-top: 10px;
+		margin-top: 10px;
+	}
+
+	/* Modern Products Grid Styling */
+	.modern-products-grid {
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--product-grid-border);
+	}
+
+	#_sfProductGrid.e-grid .e-gridheader .e-columnheader {
+		display: none;
+	}
+
+	/* Custom Row Template Styling */
+	.product-row {
+		transition: all 0.2s ease;
+		border-bottom: 1px solid var(--product-grid-border);
+		cursor: pointer;
+	}
+
+		.product-row:hover {
+			background-color: var(--product-grid-hover);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+
+		.product-row:last-child {
+			border-bottom: none;
+		}
+
+	/* Selected product row highlighting */
+	.selected-product-row {
+		background: linear-gradient(135deg, var(--dotnet-primary) 0%, var(--dotnet-secondary) 100%) !important;
+		color: white !important;
+		font-weight: 600 !important;
+		box-shadow: 0 4px 15px rgba(81, 43, 212, 0.3);
+		transform: translateY(-2px);
+	}
+
+		.selected-product-row .rate-wrapper {
+			background-color: rgba(255, 255, 255, 0.2) !important;
+			color: white !important;
+			border-color: rgba(255, 255, 255, 0.3) !important;
+		}
+
+		.selected-product-row .name-text {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-product-row .currency-symbol,
+		.selected-product-row .rate-value {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-product-row .add-to-cart-btn {
+			background-color: rgba(255, 255, 255, 0.9) !important;
+			color: var(--dotnet-primary) !important;
+			border-color: rgba(255, 255, 255, 0.9) !important;
+		}
+
+			.selected-product-row .add-to-cart-btn:hover {
+				background-color: white !important;
+				transform: scale(1.1) !important;
+			}
+
+	/* Product Name Cell */
+	.product-name {
+		padding: 15px 12px;
+		vertical-align: middle;
+		width: auto;
+		min-width: 300px;
+	}
+
+	.name-wrapper {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.name-text {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+		font-size: 15px;
+		line-height: 1.4;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+	}
+
+	.product-row:hover .name-text {
+		color: var(--dotnet-primary);
+		font-weight: 600;
+		white-space: normal;
+		overflow: visible;
+		text-overflow: initial;
+	}
+
+	/* Product Rate Cell */
+	.product-rate {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: right;
+		width: 180px;
+	}
+
+	.rate-wrapper {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background-color: var(--dotnet-light);
+		padding: 10px 16px;
+		border-radius: 8px;
+		border: 1px solid var(--product-grid-border);
+		transition: all 0.2s ease;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.product-row:hover .rate-wrapper {
+		background-color: var(--dotnet-primary);
+		border-color: var(--dotnet-primary);
+		transform: scale(1.05);
+		box-shadow: 0 2px 8px rgba(81, 43, 212, 0.2);
+	}
+
+	.currency-symbol {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		font-size: 14px;
+		transition: color 0.2s ease;
+	}
+
+	.rate-value {
+		font-weight: 700;
+		color: var(--dotnet-secondary);
+		font-size: 15px;
+		transition: color 0.2s ease;
+	}
+
+	.product-row:hover .currency-symbol,
+	.product-row:hover .rate-value {
+		color: white;
+	}
+
+	/* Product Action Cell */
+	.product-action {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: center;
+		width: 120px;
+	}
+
+	.add-to-cart-btn {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: 2px solid var(--dotnet-primary);
+		padding: 8px 12px;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 12px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+		.add-to-cart-btn:hover {
+			background-color: #4311a8;
+			border-color: #4311a8;
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(81, 43, 212, 0.3);
+		}
+
+		.add-to-cart-btn:active {
+			transform: scale(0.95);
+		}
+
+	.cart-icon {
+		font-size: 14px;
+	}
+
+	.cart-text {
+		font-weight: 700;
+	}
+
+	/* Grid Pagination Styling */
+	.modern-products-grid ::deep .e-grid .e-pager {
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--product-grid-border);
+		padding: 12px;
+	}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-pagercontainer {
+			background-color: transparent;
+		}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-numericitem {
+			border-radius: 6px;
+			margin: 0 2px;
+			font-weight: 500;
+			transition: all 0.2s ease;
+		}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-currentitem {
+			background-color: var(--dotnet-primary);
+			color: white;
+			font-weight: 600;
+		}
+
 	/* General Layout */
-	.kitchen-issue-container {
+	.kitchen-production-container {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
@@ -214,7 +715,7 @@ else
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 25px;
+		margin-bottom: 20px;
 	}
 
 	.page-title {
@@ -247,10 +748,54 @@ else
 		font-size: 16px;
 	}
 
-	/* Content layout */
-	.kitchen-issue-content {
+	/* Action Buttons */
+	.action-buttons {
 		display: flex;
-		flex-direction: column;
+		gap: 15px;
+		margin-bottom: 25px;
+		flex-wrap: wrap;
+	}
+
+	.action-button {
+		background-color: white;
+		border: none;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+		color: var(--dotnet-secondary);
+		padding: 12px 20px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		transition: all 0.2s ease;
+		flex: 1;
+		min-width: 150px;
+		justify-content: center;
+	}
+
+		.action-button:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	.action-icon {
+		font-size: 18px;
+	}
+
+	.action-button-primary {
+		background-color: var(--dotnet-primary);
+		color: white;
+	}
+
+		.action-button-primary:hover {
+			background-color: #4311a8;
+		}
+
+	/* Main Content */
+	.main-content {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		gap: 25px;
 		margin-bottom: 30px;
 	}
@@ -261,6 +806,9 @@ else
 		border-radius: 15px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.card-header {
@@ -285,88 +833,201 @@ else
 
 	.card-body {
 		padding: 20px;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
-	/* Form Layout */
-	.form-row {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 20px;
+	/* Cart Grid */
+	.cart-grid {
+		border-radius: 8px;
+		overflow: hidden;
+		flex-grow: 1;
 	}
 
+		.cart-grid ::deep .e-grid .e-gridheader,
+		.cart-grid ::deep .e-grid .e-gridheader {
+			padding: 0;
+			border-top: none;
+		}
+
+		.cart-grid ::deep .e-grid .e-rowcell {
+			padding: 6px 8px;
+			height: 36px;
+		}
+
+		.cart-grid ::deep .e-grid .e-headercell {
+			padding: 8px 8px;
+			height: 40px;
+		}
+
+		.cart-grid ::deep .e-grid .e-pager {
+			padding: 4px;
+		}
+
+	/* Kitchen Details */
+	.kitchen-details {
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		padding: 15px;
+		margin-top: 10px;
+	}
+
+	.detail-row {
+		display: flex;
+		margin-bottom: 8px;
+		font-size: 14px;
+	}
+
+	.detail-label {
+		font-weight: 600;
+		min-width: 80px;
+		color: var(--dotnet-secondary);
+	}
+
+	.detail-value {
+		color: var(--dotnet-dark);
+	}
+
+	/* Forms */
 	.form-group {
 		margin-bottom: 15px;
 	}
 
-		.form-group label {
-			display: block;
-			margin-bottom: 8px;
-			font-weight: 500;
-			color: var(--dotnet-dark);
-		}
+	.full-width {
+		grid-column: 1 / -1;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 8px;
+		font-weight: 500;
+		color: var(--dotnet-dark);
+	}
 
 	.form-control {
 		width: 100%;
 		border-radius: 6px;
 	}
 
-	/* Buttons */
-	.action-group {
-		display: flex;
-		align-items: flex-end;
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		margin-bottom: 15px;
 	}
 
-	.add-button {
-		background-color: var(--dotnet-accent);
-		color: white;
-		border: none;
-		padding: 10px 18px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.2s ease;
-		margin-top: 24px;
-	}
-
-		.add-button:hover {
-			background-color: #0078d4;
-			transform: translateY(-2px);
-		}
-
-	.add-icon {
-		font-size: 18px;
-	}
-
-	.save-container {
-		display: flex;
-		justify-content: flex-end;
-		margin-top: 20px;
-	}
-
-	.save-button {
+	/* Button Styling */
+	.save-button-dialog {
 		background-color: var(--dotnet-primary);
 		color: white;
-		border: none;
-		padding: 12px 24px;
+		padding: 10px 20px;
 		border-radius: 8px;
-		cursor: pointer;
 		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
 		transition: all 0.2s ease;
 	}
 
-		.save-button:hover {
+		.save-button-dialog:hover {
 			background-color: #4311a8;
-			transform: translateY(-2px);
 		}
 
-	.save-icon {
+	/* Remove Button Styling */
+	.remove-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		transition: all 0.2s ease;
+	}
+
+		.remove-button:hover {
+			background-color: #d32f2f;
+		}
+
+	/* Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.product-name {
+		color: var(--dotnet-primary);
+		font-weight: 700;
+	}
+
+	.dialog-content {
+		padding: 20px;
+	}
+
+	.summary-section {
+		margin-bottom: 20px;
+		border: 1px solid var(--dotnet-border);
+		border-radius: 8px;
+		padding: 15px;
+		background-color: var(--dotnet-light);
+	}
+
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+	.total-row {
+		border-bottom: none;
+		font-weight: 700;
 		font-size: 18px;
+		margin-top: 10px;
+		padding-top: 15px;
+		border-top: 2px solid var(--dotnet-border);
+	}
+
+	.total-amount {
+		color: var(--dotnet-secondary);
+	}
+
+	.amount {
+		font-weight: 500;
+	}
+
+	/* Currency Display */
+	.readonly-currency {
+		padding: 8px 12px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background-color: var(--dotnet-light);
+		font-weight: 500;
+		color: var(--dotnet-secondary);
+	}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Dialog buttons */
+	.dialog-button {
+		border-radius: 6px;
+		padding: 8px 16px;
+		height: 38px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 500;
 	}
 
 	/* Status Checkbox Styling */
@@ -388,13 +1049,6 @@ else
 		font-weight: 500;
 		color: var(--dotnet-dark);
 		margin-left: 8px;
-	}
-
-	/* Grid Styling */
-	.cart-grid {
-		width: 100%;
-		border-radius: 8px;
-		overflow: hidden;
 	}
 
 	/* Footer */
@@ -475,15 +1129,17 @@ else
 	}
 
 	/* Responsive Design */
-	@@media (max-width: 1200px) {
-		.kitchen-issue-content {
+	@@media (max-width: 992px) {
+		.main-content {
 			grid-template-columns: 1fr;
 		}
-	}
 
-	@@media (max-width: 992px) {
-		.materials-container {
-			grid-template-columns: 1fr;
+		.action-buttons {
+			flex-direction: row;
+		}
+
+		.action-button {
+			flex-basis: calc(50% - 10px);
 		}
 	}
 
@@ -496,6 +1152,10 @@ else
 
 		.form-row {
 			grid-template-columns: 1fr;
+		}
+
+		.action-button {
+			flex-basis: 100%;
 		}
 	}
 
@@ -575,5 +1235,21 @@ else
 		padding: 10px 10px 10px 40px;
 		position: relative;
 		animation-fill-mode: both;
+	}
+
+	/* Focus styles for better keyboard navigation */
+	.kitchen-production-container:focus {
+		outline: 2px solid var(--dotnet-primary);
+		outline-offset: 2px;
+	}
+
+	/* Enhanced grid row hover and selection for cart grid */
+	.cart-grid ::deep .e-grid .e-row:hover {
+		background-color: rgba(81, 43, 212, 0.1);
+	}
+
+	.cart-grid ::deep .e-grid .e-rowselect {
+		background-color: var(--dotnet-primary);
+		color: white;
 	}
 </style>

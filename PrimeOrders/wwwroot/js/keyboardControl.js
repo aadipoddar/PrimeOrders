@@ -88,6 +88,66 @@ window.setupPurchasePageKeyboardHandlers = (dotNetHelper) => {
 	document.addEventListener('keydown', window.purchasePageKeyHandler);
 };
 
+window.setupKitchenIssuePageKeyboardHandlers = (dotNetHelper) => {
+	// Remove existing listeners first
+	if (window.kitchenIssuePageKeyHandler) {
+		document.removeEventListener('keydown', window.kitchenIssuePageKeyHandler);
+	}
+
+	// Create new handler
+	window.kitchenIssuePageKeyHandler = async (event) => {
+		// Don't handle keys when typing in input fields
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+			return;
+		}
+
+		try {
+			await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut',
+				event.key);
+		} catch (error) {
+			console.error('Keyboard handler error:', error);
+		}
+
+		// Prevent default for function keys
+		if (event.key.startsWith('F') || event.ctrlKey) {
+			event.preventDefault();
+		}
+	};
+
+	// Add new listener
+	document.addEventListener('keydown', window.kitchenIssuePageKeyHandler);
+};
+
+window.setupKitchenProductionPageKeyboardHandlers = (dotNetHelper) => {
+	// Remove existing listeners first
+	if (window.kitchenProductionPageKeyHandler) {
+		document.removeEventListener('keydown', window.kitchenProductionPageKeyHandler);
+	}
+
+	// Create new handler
+	window.kitchenProductionPageKeyHandler = async (event) => {
+		// Don't handle keys when typing in input fields
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+			return;
+		}
+
+		try {
+			await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut',
+				event.key);
+		} catch (error) {
+			console.error('Keyboard handler error:', error);
+		}
+
+		// Prevent default for function keys
+		if (event.key.startsWith('F') || event.ctrlKey) {
+			event.preventDefault();
+		}
+	};
+
+	// Add new listener
+	document.addEventListener('keydown', window.kitchenProductionPageKeyHandler);
+};
+
 // Product search functions for Sale and Order pages
 window.showProductSearchIndicator = (searchText) => {
 	const indicator = document.getElementById('productSearchIndicator');
@@ -109,7 +169,7 @@ window.updateProductSearchIndicator = (searchText, resultCount) => {
 	document.getElementById('searchResults').textContent = `${resultCount} products found`;
 };
 
-// Material search functions for Purchase page
+// Material search functions for Purchase and Kitchen Issue pages
 window.showMaterialSearchIndicator = (searchText) => {
 	const indicator = document.getElementById('materialSearchIndicator');
 	if (indicator) {
