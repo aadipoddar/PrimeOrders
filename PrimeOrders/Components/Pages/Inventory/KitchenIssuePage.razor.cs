@@ -121,7 +121,9 @@ public partial class KitchenIssuePage
 			});
 		}
 
-		await _sfRawMaterialCartGrid?.Refresh();
+		if (_sfRawMaterialCartGrid is not null)
+			await _sfRawMaterialCartGrid.Refresh();
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}

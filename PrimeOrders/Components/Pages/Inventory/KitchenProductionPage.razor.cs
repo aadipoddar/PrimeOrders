@@ -122,7 +122,9 @@ public partial class KitchenProductionPage
 			});
 		}
 
-		await _sfProductCartGrid?.Refresh();
+		if (_sfProductCartGrid is not null)
+			await _sfProductCartGrid.Refresh();
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}
