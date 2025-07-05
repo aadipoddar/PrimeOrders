@@ -31,6 +31,11 @@ public partial class SalePage
 	private int _selectedProductId = 0;
 	private int _selectedPaymentModeId = 0;
 
+	private string _productSearchText = "";
+	private int _selectedProductIndex = -1;
+	private List<ProductModel> _filteredProducts = [];
+	private bool _isProductSearchActive = false;
+
 	private SaleProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
 	private SaleModel _sale = new()
@@ -71,6 +76,7 @@ public partial class SalePage
 			return;
 
 		await LoadData();
+		await JS.InvokeVoidAsync("setupSalePageKeyboardHandlers", DotNetObjectReference.Create(this));
 
 		_isLoading = false;
 		StateHasChanged();
@@ -87,6 +93,8 @@ public partial class SalePage
 		_products = await ProductData.LoadProductByLocationRate(_user.LocationId);
 		_products.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
+
+		_filteredProducts = [.. _products];
 
 		_sale.LocationId = _user?.LocationId ?? 0;
 		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
@@ -136,6 +144,146 @@ public partial class SalePage
 		_selectedPaymentModeId = _sale.Cash > 0 ? 1 : _sale.Card > 0 ? 2 : _sale.UPI > 0 ? 3 : _sale.Credit > 0 ? 4 : 0;
 
 		await UpdateFinancialDetails();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Keyboard Navigation Methods
+	[JSInvokable]
+	public async Task HandleKeyboardShortcut(string key)
+	{
+		if (_isProductSearchActive)
+		{
+			await HandleProductSearchKeyboard(key);
+			return;
+		}
+
+		switch (key.ToLower())
+		{
+			case "f2":
+				await StartProductSearch();
+				break;
+
+			case "escape":
+				await HandleEscape();
+				break;
+		}
+	}
+
+	private async Task HandleProductSearchKeyboard(string key)
+	{
+		switch (key.ToLower())
+		{
+			case "escape":
+				await ExitProductSearch();
+				break;
+
+			case "enter":
+				await SelectCurrentProduct();
+				break;
+
+			case "arrowdown":
+				NavigateProductSelection(1);
+				break;
+
+			case "arrowup":
+				NavigateProductSelection(-1);
+				break;
+
+			case "backspace":
+				if (_productSearchText.Length > 0)
+				{
+					_productSearchText = _productSearchText[..^1];
+					await FilterProducts();
+				}
+				break;
+
+			default:
+				// Add character to search if it's alphanumeric or space
+				if (key.Length == 1 && (char.IsLetterOrDigit(key[0]) || key == " "))
+				{
+					_productSearchText += key.ToUpper();
+					await FilterProducts();
+				}
+				break;
+		}
+
+		StateHasChanged();
+	}
+
+	private async Task StartProductSearch()
+	{
+		_isProductSearchActive = true;
+		_productSearchText = "";
+		_selectedProductIndex = 0;
+		_filteredProducts = _products.ToList();
+
+		if (_filteredProducts.Count > 0)
+			_selectedProduct = _filteredProducts[0];
+
+		StateHasChanged();
+		await JS.InvokeVoidAsync("showProductSearchIndicator", _productSearchText);
+	}
+
+	private async Task ExitProductSearch()
+	{
+		_isProductSearchActive = false;
+		_productSearchText = "";
+		_selectedProductIndex = -1;
+		StateHasChanged();
+		await JS.InvokeVoidAsync("hideProductSearchIndicator");
+	}
+
+	private async Task FilterProducts()
+	{
+		if (string.IsNullOrEmpty(_productSearchText))
+			_filteredProducts = [.. _products];
+
+		else
+			_filteredProducts = [.. _products.Where(p =>
+				p.Name.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase) ||
+				p.Code.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase)
+			)];
+
+		_selectedProductIndex = 0;
+		if (_filteredProducts.Count > 0)
+			_selectedProduct = _filteredProducts[0];
+
+		await JS.InvokeVoidAsync("updateProductSearchIndicator", _productSearchText, _filteredProducts.Count);
+		StateHasChanged();
+	}
+
+	private void NavigateProductSelection(int direction)
+	{
+		if (_filteredProducts.Count == 0) return;
+
+		_selectedProductIndex += direction;
+
+		if (_selectedProductIndex < 0)
+			_selectedProductIndex = _filteredProducts.Count - 1;
+		else if (_selectedProductIndex >= _filteredProducts.Count)
+			_selectedProductIndex = 0;
+
+		_selectedProduct = _filteredProducts[_selectedProductIndex];
+		StateHasChanged();
+	}
+
+	private async Task SelectCurrentProduct()
+	{
+		if (_selectedProduct.Id > 0)
+		{
+			_selectedQuantity = 1;
+			_quantityDialogVisible = true;
+			await ExitProductSearch();
+			StateHasChanged();
+		}
+	}
+
+	private async Task HandleEscape()
+	{
+		if (_isProductSearchActive)
+			await ExitProductSearch();
+
 		StateHasChanged();
 	}
 	#endregion
@@ -285,19 +433,22 @@ public partial class SalePage
 	#endregion
 
 	#region Products
-	private void ProductRowSelectHandler(RowSelectEventArgs<ProductModel> args)
-	{
-		_selectedProduct = args.Data;
-		_selectedQuantity = 1;
-		_quantityDialogVisible = true;
-		StateHasChanged();
-	}
-
 	public async Task ProductCartRowSelectHandler(RowSelectEventArgs<SaleProductCartModel> args)
 	{
 		_selectedProductCart = args.Data;
 		_dialogVisible = true;
 		await UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private void OnAddToCartButtonClick(ProductModel product)
+	{
+		if (product is null || product.Id <= 0)
+			return;
+
+		_selectedProduct = product;
+		_selectedQuantity = 1;
+		_quantityDialogVisible = true;
 		StateHasChanged();
 	}
 	#endregion

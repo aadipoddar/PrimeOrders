@@ -45,7 +45,20 @@
 }
 else
 {
-	<div class="purchase-container">
+	<div class="purchase-container" tabindex="0">
+		<!-- Product Search Indicator -->
+		<div id="productSearchIndicator" class="product-search-indicator" style="display: none;">
+			<div class="search-header">
+				<span class="search-icon">🔍</span>
+				<span>Product Search: </span>
+				<span id="searchText" class="search-text"></span>
+			</div>
+			<div id="searchResults" class="search-results"></div>
+			<div class="search-help">
+				<span>↑↓ Navigate • Enter Select • Esc Cancel</span>
+			</div>
+		</div>
+
 		<div class="page-header">
 			<h1 class="page-title">Sale Management</h1>
 			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
@@ -75,25 +88,59 @@ else
 			<div class="card products-card">
 				<div class="card-header">
 					<h2>Products Selection</h2>
-					<p class="card-info">Click on a product to add to cart</p>
+					<p class="card-info">Press <kbd>F2</kbd> to search products, click Add to Cart or row to add to cart</p>
 				</div>
 				<div class="card-body">
-					<SfGrid DataSource="@_products"
+					<SfGrid DataSource="@(_isProductSearchActive? _filteredProducts : _products)"
 							ID="_sfProductGrid"
 							@ref="_sfProductGrid"
 							AllowSorting="true"
-							AllowFiltering="true"
 							AllowResizing="true"
 							AllowPaging="true"
 							Height="450px"
-							CssClass="materials-grid">
+							CssClass="modern-products-grid">
 						<GridPageSettings PageSize="10" />
-						<GridEvents RowSelected="ProductRowSelectHandler" TValue="ProductModel" />
 						<GridColumns>
-							<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Code" Width="100" />
-							<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Name" Width="180" />
-							<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(ProductModel.Code) HeaderText="Product Code" Width="150" MinWidth="120" />
+							<GridColumn Field=@nameof(ProductModel.Name) HeaderText="Product Name" Width="auto" MinWidth="300" />
+							<GridColumn Field=@nameof(ProductModel.Rate) HeaderText="MRP (₹)" Width="180" MinWidth="150" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn HeaderText="Action" Width="120" MinWidth="100" AllowSorting="false" />
 						</GridColumns>
+						<GridTemplates>
+							<RowTemplate>
+								@{
+									var product = (context as ProductModel);
+									var isSelected = _isProductSearchActive && product?.Id == _selectedProduct.Id;
+								}
+								<tr class="product-row @(isSelected ? "selected-product-row" : "")">
+									<td class="product-code">
+										<div class="code-wrapper">
+											<span class="code-badge">@product?.Code</span>
+										</div>
+									</td>
+									<td class="product-name">
+										<div class="name-wrapper">
+											<span class="name-text" title="@product?.Name">@product?.Name</span>
+										</div>
+									</td>
+									<td class="product-rate">
+										<div class="rate-wrapper">
+											<span class="currency-symbol">₹</span>
+											<span class="rate-value">@product?.Rate.ToString("N2")</span>
+										</div>
+									</td>
+									<td class="product-action">
+										<button class="add-to-cart-btn"
+												@onclick="() => OnAddToCartButtonClick(product)"
+												@onclick:stopPropagation="true"
+												title="Add to Cart">
+											<span class="cart-icon">🛒</span>
+											<span class="cart-text">Add</span>
+										</button>
+									</td>
+								</tr>
+							</RowTemplate>
+						</GridTemplates>
 					</SfGrid>
 				</div>
 			</div>
@@ -114,10 +161,10 @@ else
 							CssClass="cart-grid">
 						<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="SaleProductCartModel" />
 						<GridColumns>
-							<GridColumn Field=@nameof(SaleProductCartModel.ProductName) HeaderText="Product" Width="180" />
-							<GridColumn Field=@nameof(SaleProductCartModel.Quantity) HeaderText="Qty" Width="80" TextAlign="TextAlign.Right" />
-							<GridColumn Field=@nameof(SaleProductCartModel.Rate) HeaderText="Rate" Width="100" Format="N2" TextAlign="TextAlign.Right" />
-							<GridColumn Field=@nameof(SaleProductCartModel.Total) HeaderText="Total" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(SaleProductCartModel.ProductName) HeaderText="Product" Width="200" />
+							<GridColumn Field=@nameof(SaleProductCartModel.Quantity) HeaderText="Qty" Width="100" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(SaleProductCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(SaleProductCartModel.Total) HeaderText="Total" Width="150" Format="N2" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
 				</div>
@@ -630,6 +677,58 @@ else
 	</DialogTemplates>
 </SfDialog>
 
+<script>
+	window.setupSalePageKeyboardHandlers = (dotNetHelper) => {
+		// Remove existing listeners first
+		if (window.salePageKeyHandler) {
+			document.removeEventListener('keydown', window.salePageKeyHandler);
+		}
+
+		// Create new handler
+		window.salePageKeyHandler = async (event) => {
+			// Don't handle keys when typing in input fields
+			if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+				return;
+			}
+
+			try {
+				await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut',
+					event.key);
+			} catch (error) {
+				console.error('Keyboard handler error:', error);
+			}
+
+			// Prevent default for function keys
+			if (event.key.startsWith('F') || event.ctrlKey) {
+				event.preventDefault();
+			}
+		};
+
+		// Add new listener
+		document.addEventListener('keydown', window.salePageKeyHandler);
+	};
+
+	window.showProductSearchIndicator = (searchText) => {
+		const indicator = document.getElementById('productSearchIndicator');
+		if (indicator) {
+			indicator.style.display = 'block';
+			document.getElementById('searchText').textContent = searchText;
+		}
+	};
+
+	window.hideProductSearchIndicator = () => {
+		const indicator = document.getElementById('productSearchIndicator');
+		if (indicator) {
+			indicator.style.display = 'none';
+		}
+	};
+
+	window.updateProductSearchIndicator = (searchText, resultCount) => {
+		document.getElementById('searchText').textContent = searchText;
+		document.getElementById('searchResults').textContent = `${resultCount} products found`;
+	};
+</script>
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -638,7 +737,328 @@ else
 		--dotnet-light: #F7F7F7;
 		--dotnet-dark: #1E1E1E;
 		--dotnet-border: rgba(0, 0, 0, 0.1);
+		--product-grid-border: #e1e5e9;
+		--product-grid-hover: rgba(81, 43, 212, 0.08);
+		--product-grid-selected: var(--dotnet-primary);
 	}
+
+	/* Keyboard key styling */
+	kbd {
+		background-color: #f8f9fa;
+		border: 1px solid #ced4da;
+		border-radius: 3px;
+		color: #495057;
+		font-family: Monaco, Consolas, monospace;
+		font-size: 10px;
+		padding: 2px 4px;
+		box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	/* Product Search Indicator */
+	.product-search-indicator {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: var(--dotnet-primary);
+		color: white;
+		padding: 20px;
+		border-radius: 12px;
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+		z-index: 10000;
+		min-width: 300px;
+		text-align: center;
+	}
+
+	.search-header {
+		font-size: 18px;
+		font-weight: 600;
+		margin-bottom: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+
+	.search-icon {
+		font-size: 20px;
+	}
+
+	.search-text {
+		background: rgba(255, 255, 255, 0.2);
+		padding: 4px 8px;
+		border-radius: 4px;
+		min-width: 100px;
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.search-results {
+		font-size: 14px;
+		opacity: 0.9;
+		margin: 10px 0;
+	}
+
+	.search-help {
+		font-size: 12px;
+		opacity: 0.8;
+		border-top: 1px solid rgba(255, 255, 255, 0.3);
+		padding-top: 10px;
+		margin-top: 10px;
+	}
+
+	/* Modern Products Grid Styling */
+	.modern-products-grid {
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--product-grid-border);
+	}
+
+	#_sfProductGrid.e-grid .e-gridheader .e-columnheader {
+		display: none;
+	}
+
+	/* Custom Row Template Styling */
+	.product-row {
+		transition: all 0.2s ease;
+		border-bottom: 1px solid var(--product-grid-border);
+		cursor: pointer;
+	}
+
+		.product-row:hover {
+			background-color: var(--product-grid-hover);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+
+		.product-row:last-child {
+			border-bottom: none;
+		}
+
+	/* Selected product row highlighting */
+	.selected-product-row {
+		background: linear-gradient(135deg, var(--dotnet-primary) 0%, var(--dotnet-secondary) 100%) !important;
+		color: white !important;
+		font-weight: 600 !important;
+		box-shadow: 0 4px 15px rgba(81, 43, 212, 0.3);
+		transform: translateY(-2px);
+	}
+
+		.selected-product-row .rate-wrapper,
+		.selected-product-row .code-badge {
+			background-color: rgba(255, 255, 255, 0.2) !important;
+			color: white !important;
+			border-color: rgba(255, 255, 255, 0.3) !important;
+		}
+
+		.selected-product-row .name-text {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-product-row .currency-symbol,
+		.selected-product-row .rate-value {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-product-row .add-to-cart-btn {
+			background-color: rgba(255, 255, 255, 0.9) !important;
+			color: var(--dotnet-primary) !important;
+			border-color: rgba(255, 255, 255, 0.9) !important;
+		}
+
+			.selected-product-row .add-to-cart-btn:hover {
+				background-color: white !important;
+				transform: scale(1.1) !important;
+			}
+
+	/* Product Code Cell */
+	.product-code {
+		padding: 15px 12px;
+		vertical-align: middle;
+		width: 150px;
+	}
+
+	.code-wrapper {
+		display: flex;
+		align-items: center;
+	}
+
+	.code-badge {
+		background-color: var(--dotnet-light);
+		color: var(--dotnet-secondary);
+		padding: 8px 14px;
+		border-radius: 20px;
+		font-weight: 600;
+		font-size: 13px;
+		border: 1px solid var(--product-grid-border);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		transition: all 0.2s ease;
+		width: 100%;
+		text-align: center;
+		display: block;
+	}
+
+	.product-row:hover .code-badge {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border-color: var(--dotnet-primary);
+		transform: scale(1.05);
+	}
+
+	/* Product Name Cell - Enhanced for better text display */
+	.product-name {
+		padding: 15px 12px;
+		vertical-align: middle;
+		width: auto;
+		min-width: 300px;
+	}
+
+	.name-wrapper {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.name-text {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+		font-size: 15px;
+		line-height: 1.4;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+	}
+
+	.product-row:hover .name-text {
+		color: var(--dotnet-primary);
+		font-weight: 600;
+		white-space: normal;
+		overflow: visible;
+		text-overflow: initial;
+	}
+
+	/* Product Rate Cell */
+	.product-rate {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: right;
+		width: 180px;
+	}
+
+	.rate-wrapper {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background-color: var(--dotnet-light);
+		padding: 10px 16px;
+		border-radius: 8px;
+		border: 1px solid var(--product-grid-border);
+		transition: all 0.2s ease;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.product-row:hover .rate-wrapper {
+		background-color: var(--dotnet-primary);
+		border-color: var(--dotnet-primary);
+		transform: scale(1.05);
+		box-shadow: 0 2px 8px rgba(81, 43, 212, 0.2);
+	}
+
+	.currency-symbol {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		font-size: 14px;
+		transition: color 0.2s ease;
+	}
+
+	.rate-value {
+		font-weight: 700;
+		color: var(--dotnet-secondary);
+		font-size: 15px;
+		transition: color 0.2s ease;
+	}
+
+	.product-row:hover .currency-symbol,
+	.product-row:hover .rate-value {
+		color: white;
+	}
+
+	/* Product Action Cell */
+	.product-action {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: center;
+		width: 120px;
+	}
+
+	.add-to-cart-btn {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: 2px solid var(--dotnet-primary);
+		padding: 8px 12px;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 12px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+		.add-to-cart-btn:hover {
+			background-color: #4311a8;
+			border-color: #4311a8;
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(81, 43, 212, 0.3);
+		}
+
+		.add-to-cart-btn:active {
+			transform: scale(0.95);
+		}
+
+	.cart-icon {
+		font-size: 14px;
+	}
+
+	.cart-text {
+		font-weight: 700;
+	}
+
+	/* Grid Pagination Styling */
+	.modern-products-grid ::deep .e-grid .e-pager {
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--product-grid-border);
+		padding: 12px;
+	}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-pagercontainer {
+			background-color: transparent;
+		}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-numericitem {
+			border-radius: 6px;
+			margin: 0 2px;
+			font-weight: 500;
+			transition: all 0.2s ease;
+		}
+
+		.modern-products-grid ::deep .e-grid .e-pager .e-currentitem {
+			background-color: var(--dotnet-primary);
+			color: white;
+			font-weight: 600;
+		}
 
 	/* General Layout */
 	.purchase-container {
@@ -777,33 +1197,29 @@ else
 		flex-direction: column;
 	}
 
-	/* Product lists */
-	.materials-grid, .cart-grid {
+	/* Cart Grid - keep existing styling */
+	.cart-grid {
 		border-radius: 8px;
 		overflow: hidden;
 		flex-grow: 1;
 	}
 
-		/* Adding these CSS rules to the existing style section */
-		.materials-grid ::deep .e-grid .e-gridheader,
+		.cart-grid ::deep .e-grid .e-gridheader,
 		.cart-grid ::deep .e-grid .e-gridheader {
 			padding: 0;
 			border-top: none;
 		}
 
-		.materials-grid ::deep .e-grid .e-rowcell,
 		.cart-grid ::deep .e-grid .e-rowcell {
 			padding: 6px 8px;
 			height: 36px;
 		}
 
-		.materials-grid ::deep .e-grid .e-headercell,
 		.cart-grid ::deep .e-grid .e-headercell {
 			padding: 8px 8px;
 			height: 40px;
 		}
 
-		.materials-grid ::deep .e-grid .e-pager,
 		.cart-grid ::deep .e-grid .e-pager {
 			padding: 4px;
 		}
@@ -855,7 +1271,7 @@ else
 			background-color: #4311a8;
 		}
 
-	/* New Remove Button Styling */
+	/* Remove Button Styling */
 	.remove-button {
 		background-color: #f44336;
 		color: white;
@@ -1198,6 +1614,14 @@ else
 		.action-button {
 			flex-basis: calc(50% - 10px);
 		}
+
+		.keyboard-shortcuts-panel {
+			position: relative;
+			top: auto;
+			right: auto;
+			margin-bottom: 20px;
+			max-width: none;
+		}
 	}
 
 	@@media (max-width: 768px) {
@@ -1218,6 +1642,11 @@ else
 
 		.action-button {
 			flex-basis: 100%;
+		}
+
+		.shortcuts-content {
+			flex-direction: column;
+			align-items: flex-start;
 		}
 	}
 
@@ -1274,28 +1703,44 @@ else
 			font-weight: 700;
 		}
 
-		::deep .e-toast-danger .e-toast-content {
-			color: #C62828;
-		}
+	.e-toast-danger .e-toast-content {
+		color: #C62828;
+	}
 
-		::deep .e-toast-danger .e-toast-close-icon {
-			color: #C62828;
-		}
+	::deep .e-toast-danger .e-toast-close-icon {
+		color: #C62828;
+	}
 
-		::deep .e-toast-danger::before {
-			content: "⚠";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
+	::deep .e-toast-danger::before {
+		content: "⚠";
+		font-size: 18px;
+		font-weight: bold;
+		position: absolute;
+		left: 15px;
+		top: 50%;
+		transform: translateY(-50);
+	}
 
 	/* Toast Animation */
 	::deep .e-toast-container .e-toast {
 		padding: 10px 10px 10px 40px;
 		position: relative;
 		animation-fill-mode: both;
+	}
+
+	/* Focus styles for better keyboard navigation */
+	.purchase-container:focus {
+		outline: 2px solid var(--dotnet-primary);
+		outline-offset: 2px;
+	}
+
+	/* Enhanced grid row hover and selection for cart grid */
+	.cart-grid ::deep .e-grid .e-row:hover {
+		background-color: rgba(81, 43, 212, 0.1);
+	}
+
+	.cart-grid ::deep .e-grid .e-rowselect {
+		background-color: var(--dotnet-primary);
+		color: white;
 	}
 </style>
