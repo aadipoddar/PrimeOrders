@@ -65,3 +65,21 @@ public class ProductStockDetailModel
 	public decimal MonthlyStock { get; set; }
 	public decimal ClosingStock { get; set; }
 }
+
+public class StockAdjustmentRawMaterialCartModel
+{
+	public int RawMaterialId { get; set; }
+	public string RawMaterialName { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
+}
+
+public class ProductStockAdjustmentCartModel
+{
+	public int ProductId { get; set; }
+	public string ProductName { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
+}

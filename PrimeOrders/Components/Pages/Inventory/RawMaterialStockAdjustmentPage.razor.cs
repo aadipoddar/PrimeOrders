@@ -1,30 +1,50 @@
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Inventory;
 
 public partial class RawMaterialStockAdjustmentPage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
-	[Inject] private IJSRuntime JS { get; set; }
+	[Inject] public IJSRuntime JS { get; set; }
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _dialogVisible = false;
+	private bool _quantityDialogVisible = false;
+	private bool _stockDetailsDialogVisible = false;
+	private bool _adjustmentSummaryDialogVisible = false;
+
+	private decimal _baseTotal = 0;
+	private decimal _total = 0;
+	private decimal _selectedQuantity = 1;
 
 	private int _selectedLocationId = 1;
-	private int _selectedRawMaterialCategoryId = 0;
 	private int _selectedRawMaterialId = 0;
-	private double _selectedRawMaterialQuantity = 1;
 
-	private List<LocationModel> _locations = [];
+	private string _materialSearchText = "";
+	private int _selectedMaterialIndex = -1;
+	private List<RawMaterialModel> _filteredRawMaterials = [];
+	private bool _isMaterialSearchActive = false;
+	private bool _hasAddedMaterialViaSearch = true;
+
+	private StockAdjustmentRawMaterialCartModel _selectedRawMaterialCart = new();
+	private RawMaterialModel _selectedRawMaterial = new();
+
 	private List<RawMaterialStockDetailModel> _stockDetails = [];
-	private readonly List<ItemRecipeModel> _newStockRawMaterials = [];
-	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
 	private List<RawMaterialModel> _rawMaterials = [];
+	private readonly List<StockAdjustmentRawMaterialCartModel> _stockAdjustmentRawMaterialCarts = [];
 
+	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
+	private SfGrid<StockAdjustmentRawMaterialCartModel> _sfRawMaterialCartGrid;
 	private SfGrid<RawMaterialStockDetailModel> _sfStockGrid;
-	private SfGrid<ItemRecipeModel> _sfNewStockGrid;
+
+	private SfDialog _sfStockDetailsDialog;
+	private SfDialog _sfAdjustmentSummaryDialog;
+	private SfDialog _sfRawMaterialManageDialog;
+	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;
 	private SfToast _sfErrorToast;
 
@@ -40,6 +60,7 @@ public partial class RawMaterialStockAdjustmentPage
 			return;
 
 		await LoadData();
+		await JS.InvokeVoidAsync("setupStockAdjustmentPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
 		_isLoading = false;
 		StateHasChanged();
@@ -47,18 +68,16 @@ public partial class RawMaterialStockAdjustmentPage
 
 	private async Task LoadData()
 	{
-		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
-		if (_user.LocationId != 1)
-			_selectedLocationId = _user.LocationId;
+		_selectedLocationId = 1;
 
-		_rawMaterialCategories = await CommonData.LoadTableData<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
-		_selectedRawMaterialCategoryId = _rawMaterialCategories.Count > 0 ? _rawMaterialCategories[0].Id : 0;
+		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
+		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
-		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
+		_filteredRawMaterials = [.. _rawMaterials];
 
-		StateHasChanged();
 		await LoadStockDetails();
+		UpdateFinancialDetails();
+		StateHasChanged();
 	}
 
 	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
@@ -83,79 +102,330 @@ public partial class RawMaterialStockAdjustmentPage
 	}
 	#endregion
 
-	#region RawMaterial
-	private async void RawMaterialCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, RawMaterialCategoryModel> args)
+	#region Keyboard Navigation Methods
+	[JSInvokable]
+	public async Task HandleKeyboardShortcut(string key)
 	{
-		_selectedRawMaterialCategoryId = args.Value;
-		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
-		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
+		if (_isMaterialSearchActive)
+		{
+			await HandleMaterialSearchKeyboard(key);
+			return;
+		}
+
+		switch (key.ToLower())
+		{
+			case "f2":
+				await StartMaterialSearch();
+				break;
+
+			case "escape":
+				await HandleEscape();
+				break;
+		}
+	}
+
+	private async Task HandleMaterialSearchKeyboard(string key)
+	{
+		switch (key.ToLower())
+		{
+			case "escape":
+				await ExitMaterialSearch();
+				break;
+
+			case "enter":
+				await SelectCurrentMaterial();
+				break;
+
+			case "arrowdown":
+				NavigateMaterialSelection(1);
+				break;
+
+			case "arrowup":
+				NavigateMaterialSelection(-1);
+				break;
+
+			case "backspace":
+				if (_materialSearchText.Length > 0)
+				{
+					_materialSearchText = _materialSearchText[..^1];
+					await FilterMaterials();
+				}
+				break;
+
+			default:
+				// Add character to search if it's alphanumeric or space
+				if (key.Length == 1 && (char.IsLetterOrDigit(key[0]) || key == " "))
+				{
+					_materialSearchText += key.ToUpper();
+					await FilterMaterials();
+				}
+				break;
+		}
+
 		StateHasChanged();
 	}
 
-	private async void OnAddButtonClick()
+	private async Task StartMaterialSearch()
 	{
-		var existingRawMaterial = _newStockRawMaterials.FirstOrDefault(r => r.ItemId == _selectedRawMaterialId && r.ItemCategoryId == _selectedRawMaterialCategoryId);
-		if (existingRawMaterial is not null)
-			existingRawMaterial.Quantity += (decimal)_selectedRawMaterialQuantity;
+		_hasAddedMaterialViaSearch = true;
+		_isMaterialSearchActive = true;
+		_materialSearchText = "";
+		_selectedMaterialIndex = 0;
+		_filteredRawMaterials = [.. _rawMaterials];
+
+		if (_filteredRawMaterials.Count > 0)
+			_selectedRawMaterial = _filteredRawMaterials[0];
+
+		StateHasChanged();
+		await JS.InvokeVoidAsync("showMaterialSearchIndicator", _materialSearchText);
+	}
+
+	private async Task ExitMaterialSearch()
+	{
+		_isMaterialSearchActive = false;
+		_materialSearchText = "";
+		_selectedMaterialIndex = -1;
+		StateHasChanged();
+		await JS.InvokeVoidAsync("hideMaterialSearchIndicator");
+	}
+
+	private async Task FilterMaterials()
+	{
+		if (string.IsNullOrEmpty(_materialSearchText))
+			_filteredRawMaterials = [.. _rawMaterials];
 		else
-			_newStockRawMaterials.Add(new ItemRecipeModel
-			{
-				ItemId = _selectedRawMaterialId,
-				ItemName = _rawMaterials.FirstOrDefault(r => r.Id == _selectedRawMaterialId)?.Name ?? "Unknown",
-				ItemCategoryId = _selectedRawMaterialCategoryId,
-				Quantity = (decimal)_selectedRawMaterialQuantity
-			});
+			_filteredRawMaterials = [.. _rawMaterials.Where(m =>
+				m.Name.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase) ||
+				(m.Code != null && m.Code.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase))
+			)];
 
-		await _sfNewStockGrid.Refresh();
+		_selectedMaterialIndex = 0;
+		if (_filteredRawMaterials.Count > 0)
+			_selectedRawMaterial = _filteredRawMaterials[0];
+
+		await JS.InvokeVoidAsync("updateMaterialSearchIndicator", _materialSearchText, _filteredRawMaterials.Count);
 		StateHasChanged();
 	}
 
-	public void RowSelectHandler(RowSelectEventArgs<ItemRecipeModel> args)
+	private void NavigateMaterialSelection(int direction)
 	{
-		if (args.Data is not null)
-			_newStockRawMaterials.Remove(args.Data);
+		if (_filteredRawMaterials.Count == 0) return;
 
-		_sfNewStockGrid.Refresh();
+		_selectedMaterialIndex += direction;
+
+		if (_selectedMaterialIndex < 0)
+			_selectedMaterialIndex = _filteredRawMaterials.Count - 1;
+		else if (_selectedMaterialIndex >= _filteredRawMaterials.Count)
+			_selectedMaterialIndex = 0;
+
+		_selectedRawMaterial = _filteredRawMaterials[_selectedMaterialIndex];
+		StateHasChanged();
+	}
+
+	private async Task SelectCurrentMaterial()
+	{
+		if (_selectedRawMaterial.Id > 0)
+		{
+			_selectedQuantity = 1;
+			_quantityDialogVisible = true;
+			await ExitMaterialSearch();
+			StateHasChanged();
+		}
+	}
+
+	private async Task HandleEscape()
+	{
+		if (_isMaterialSearchActive)
+			await ExitMaterialSearch();
+
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Stock Adjustment Details Events
+	private void UpdateFinancialDetails()
+	{
+		foreach (var item in _stockAdjustmentRawMaterialCarts)
+		{
+			item.Total = item.Rate * item.Quantity;
+		}
+
+		_baseTotal = _stockAdjustmentRawMaterialCarts.Sum(c => c.Total);
+		_total = _baseTotal;
+
+		_sfRawMaterialCartGrid?.Refresh();
+		_sfRawMaterialGrid?.Refresh();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Raw Materials
+	private void OnAddToCartButtonClick(RawMaterialModel material)
+	{
+		if (material is null || material.Id <= 0)
+			return;
+
+		_selectedRawMaterial = material;
+		_selectedQuantity = 1;
+		_quantityDialogVisible = true;
+		_hasAddedMaterialViaSearch = false;
+		StateHasChanged();
+	}
+
+	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<StockAdjustmentRawMaterialCartModel> args)
+	{
+		_selectedRawMaterialCart = args.Data;
+		_dialogVisible = true;
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Dialog Events
+	private async Task OnAddToCartClick()
+	{
+		if (_selectedQuantity <= 0)
+		{
+			OnCancelQuantityDialogClick();
+			return;
+		}
+
+		var existingMaterial = _stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterial.Id);
+
+		if (existingMaterial is not null)
+			existingMaterial.Quantity = _selectedQuantity; // For stock adjustment, we set the target quantity, not add to it
+		else
+		{
+			_stockAdjustmentRawMaterialCarts.Add(new()
+			{
+				RawMaterialId = _selectedRawMaterial.Id,
+				RawMaterialName = _selectedRawMaterial.Name,
+				Quantity = _selectedQuantity,
+				Rate = _selectedRawMaterial.MRP,
+				Total = _selectedQuantity * _selectedRawMaterial.MRP
+			});
+		}
+
+		_quantityDialogVisible = false;
+		_selectedRawMaterial = new();
+		await _sfRawMaterialCartGrid?.Refresh();
+		await _sfRawMaterialGrid?.Refresh();
+		UpdateFinancialDetails();
+
+		if (_hasAddedMaterialViaSearch)
+			await StartMaterialSearch();
+
+		StateHasChanged();
+	}
+
+	private void OnCancelQuantityDialogClick()
+	{
+		_quantityDialogVisible = false;
+		_selectedRawMaterial = new();
+		StateHasChanged();
+	}
+
+	private void DialogQuantityValueChanged(decimal args)
+	{
+		_selectedRawMaterialCart.Quantity = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void UpdateModalFinancialDetails()
+	{
+		_selectedRawMaterialCart.Total = _selectedRawMaterialCart.Rate * _selectedRawMaterialCart.Quantity;
+		StateHasChanged();
+	}
+
+	private async void OnSaveRawMaterialManageClick()
+	{
+		_stockAdjustmentRawMaterialCarts.Remove(_stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
+
+		if (_selectedRawMaterialCart.Quantity > 0)
+			_stockAdjustmentRawMaterialCarts.Add(_selectedRawMaterialCart);
+
+		_dialogVisible = false;
+		await _sfRawMaterialCartGrid?.Refresh();
+
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private async void OnRemoveFromCartRawMaterialManageClick()
+	{
+		_selectedRawMaterialCart.Quantity = 0;
+		_stockAdjustmentRawMaterialCarts.Remove(_stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
+
+		_dialogVisible = false;
+		await _sfRawMaterialCartGrid?.Refresh();
+
+		UpdateFinancialDetails();
 		StateHasChanged();
 	}
 	#endregion
 
 	#region Saving
-	private async void OnSaveButtonClick()
+	private async Task<bool> ValidateForm()
 	{
-		await _sfNewStockGrid.Refresh();
-
-		if (_newStockRawMaterials.Count == 0)
+		if (_stockAdjustmentRawMaterialCarts.Count == 0 || _stockAdjustmentRawMaterialCarts is null)
 		{
+			_sfErrorToast.Content = "Please add at least one raw material for stock adjustment.";
 			await _sfErrorToast.ShowAsync();
-			return;
+			return false;
 		}
 
-		foreach (var item in _newStockRawMaterials)
+		if (_selectedLocationId <= 0)
 		{
-			decimal quantity = 0;
+			_sfErrorToast.Content = "Please select a location.";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
 
-			var existingStock = _stockDetails.FirstOrDefault(s => s.RawMaterialId == item.ItemId);
+		return true;
+	}
+
+	private async Task OnSaveStockAdjustmentClick()
+	{
+		UpdateFinancialDetails();
+
+		if (!await ValidateForm())
+			return;
+
+		await InsertStockAdjustment();
+
+		_adjustmentSummaryDialogVisible = false;
+		await _sfSuccessToast.ShowAsync();
+	}
+
+	private async Task InsertStockAdjustment()
+	{
+		foreach (var item in _stockAdjustmentRawMaterialCarts)
+		{
+			decimal adjustmentQuantity = 0;
+			var existingStock = _stockDetails.FirstOrDefault(s => s.RawMaterialId == item.RawMaterialId);
 
 			if (existingStock is null)
-				quantity = item.Quantity;
-
+				adjustmentQuantity = item.Quantity;
 			else
-				quantity = item.Quantity - existingStock.ClosingStock;
+				adjustmentQuantity = item.Quantity - existingStock.ClosingStock;
 
-			await StockData.InsertRawMaterialStock(new()
+			if (adjustmentQuantity != 0) // Only create stock entry if there's an actual adjustment
 			{
-				Id = 0,
-				RawMaterialId = item.ItemId,
-				Quantity = quantity,
-				Type = StockType.Adjustment.ToString(),
-				TransactionNo = "",
-				TransactionDate = DateOnly.FromDateTime(DateTime.Now),
-				LocationId = _selectedLocationId,
-			});
+				await StockData.InsertRawMaterialStock(new()
+				{
+					Id = 0,
+					RawMaterialId = item.RawMaterialId,
+					Quantity = adjustmentQuantity,
+					Type = StockType.Adjustment.ToString(),
+					TransactionNo = $"ADJ-{DateTime.Now:yyyyMMddHHmmss}",
+					TransactionDate = DateOnly.FromDateTime(DateTime.Now),
+					LocationId = _selectedLocationId
+				});
+			}
 		}
 
-		await _sfSuccessToast.ShowAsync();
+		// Refresh stock details after adjustment
+		await LoadStockDetails();
 	}
 	#endregion
 }

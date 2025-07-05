@@ -1,11 +1,11 @@
 ﻿@page "/Inventory/RawMaterialStockAdjustment"
 
-<PageTitle>Stock Adjustment - Prime Orders</PageTitle>
+<PageTitle>Raw Material Stock Adjustment - Prime Orders</PageTitle>
 
 <SfToast @ref="_sfErrorToast"
 		 ID="toast_error"
 		 Title="Error"
-		 Content="No raw materials added for stock adjustment."
+		 Content="Some Error Message"
 		 Timeout="3000"
 		 ShowCloseButton="true"
 		 CssClass="e-toast-danger">
@@ -24,7 +24,7 @@
 		 ShowCloseButton="true"
 		 CssClass="e-toast-success">
 	<ToastPosition X="Right" Y="Top" />
-	<ToastEvents Closed="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)" />
+	<ToastEvents Closed='() => NavManager.NavigateTo("/Inventory/RawMaterialStockAdjustment", forceLoad: true)' />
 	<ToastAnimationSettings>
 		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
 		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
@@ -39,142 +39,119 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading stock adjustment...</p>
+		<p class="loading-text">Loading stock adjustment page...</p>
 	</div>
 }
 else
 {
-	<div class="adjustment-container">
+	<div class="stock-adjustment-container" tabindex="0">
+		<!-- Raw Material Search Indicator -->
+		<div id="materialSearchIndicator" class="material-search-indicator" style="display: none;">
+			<div class="search-header">
+				<span class="search-icon">🔍</span>
+				<span>Material Search: </span>
+				<span id="searchText" class="search-text"></span>
+			</div>
+			<div id="searchResults" class="search-results"></div>
+			<div class="search-help">
+				<span>↑↓ Navigate • Enter Select • Esc Cancel</span>
+			</div>
+		</div>
+
 		<div class="page-header">
-			<h1 class="page-title">Stock Adjustment</h1>
+			<h1 class="page-title">Raw Material Stock Adjustment</h1>
 			<button @onclick='() => NavManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Inventory
 			</button>
 		</div>
 
-		<div class="adjustment-content">
-			<div class="combined-materials-card card">
+		<div class="action-buttons">
+			<button @onclick="() => _stockDetailsDialogVisible = true" class="action-button">
+				<span class="action-icon">📊</span> Current Stock
+			</button>
+			<button @onclick="() => _adjustmentSummaryDialogVisible = true" class="action-button action-button-primary">
+				<span class="action-icon">💾</span> Complete Adjustment
+			</button>
+		</div>
+
+		<div class="main-content">
+			<div class="card materials-card">
 				<div class="card-header">
-					<h2>Current Stock Details</h2>
-					<p class="card-info">View current stock levels before making adjustments</p>
+					<h2>Raw Materials Selection</h2>
+					<p class="card-info">Press <kbd>F2</kbd> to search materials, click Add to Cart or row to add to cart</p>
 				</div>
 				<div class="card-body">
-					@if (_user?.LocationId == 1)
-					{
-						<div class="location-selector">
-							<label>Select Location</label>
-							<SfComboBox TValue="int"
-										TItem="LocationModel"
-										Placeholder="Select a Location"
-										DataSource="_locations"
-										Value="_selectedLocationId"
-										CssClass="form-control">
-								<ComboBoxEvents TItem="LocationModel" TValue="int" ValueChange="OnLocationChanged" />
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
-					}
+					<SfGrid DataSource="@(_isMaterialSearchActive? _filteredRawMaterials : _rawMaterials)"
+							ID="_sfRawMaterialGrid"
+							@ref="_sfRawMaterialGrid"
+							AllowSorting="true"
+							AllowResizing="true"
+							AllowPaging="true"
+							AllowFiltering="true"
+							Height="450px"
+							CssClass="modern-materials-grid">
+						<GridPageSettings PageSize="10" />
+						<GridColumns>
+							<GridColumn Field=@nameof(RawMaterialModel.Name) Width="100%" />
+							<GridColumn Field=@nameof(RawMaterialModel.MRP) />
+							<GridColumn AllowFiltering="false" />
+						</GridColumns>
+						<GridTemplates>
+							<RowTemplate>
+								@{
+									var material = (context as RawMaterialModel);
+									var isSelected = _isMaterialSearchActive && material?.Id == _selectedRawMaterial.Id;
+								}
+								<tr class="material-row @(isSelected ? "selected-material-row" : "")">
+									<td class="material-name">
+										<div class="name-wrapper">
+											<span class="name-text" title="@material?.Name">@material?.Name</span>
+										</div>
+									</td>
+									<td class="material-rate">
+										<div class="rate-wrapper">
+											<span class="currency-symbol">₹</span>
+											<span class="rate-value">@material?.MRP.ToString("N2")</span>
+										</div>
+									</td>
+									<td class="material-action">
+										<button class="add-to-cart-btn"
+												@onclick="() => OnAddToCartButtonClick(material)"
+												@onclick:stopPropagation="true"
+												title="Add to Cart">
+											<span class="cart-icon">🛒</span>
+											<span class="cart-text">Add</span>
+										</button>
+									</td>
+								</tr>
+							</RowTemplate>
+						</GridTemplates>
+					</SfGrid>
+				</div>
+			</div>
 
-					<SfGrid ID="_sfStockGrid"
-							@ref="_sfStockGrid"
-							DataSource="_stockDetails"
+			<div class="card cart-card">
+				<div class="card-header">
+					<h2>Adjustment Cart</h2>
+					<p class="card-info">Click on a row to edit details</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_stockAdjustmentRawMaterialCarts"
+							ID="_sfRawMaterialCartGrid"
+							@ref="_sfRawMaterialCartGrid"
 							AllowSorting="true"
 							AllowFiltering="true"
 							AllowResizing="true"
-							AllowPaging="true"
-							AllowExcelExport="true"
-							AllowPdfExport="true"
-							Height="350px"
-							CssClass="stock-grid">
-						<GridPageSettings PageSize="10"></GridPageSettings>
+							Height="450px"
+							CssClass="cart-grid">
+						<GridEvents RowSelected="RawMaterialCartRowSelectHandler" TValue="StockAdjustmentRawMaterialCartModel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCode)" HeaderText="Code" Width="100" />
-							<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialName)" HeaderText="Item Name" Width="180" />
-							<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)" HeaderText="Category" Width="150" />
-							<GridColumn Field="@nameof(RawMaterialStockDetailModel.ClosingStock)" HeaderText="Closing Stock" Width="110" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.RawMaterialName) HeaderText="Material" Width="200" />
+							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.Quantity) HeaderText="Target Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.Total) HeaderText="Value" Width="150" Format="N2" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
-				</div>
-			</div>
-
-			<div class="adjustment-card card">
-				<div class="card-header">
-					<h2>Stock Adjustment</h2>
-					<p class="card-info">Add materials for stock adjustment</p>
-				</div>
-				<div class="card-body">
-					<div class="form-row">
-						<div class="form-group">
-							<label>Raw Material Category</label>
-							<SfComboBox TValue="int"
-										TItem="RawMaterialCategoryModel"
-										Placeholder="Select a Raw Material Category"
-										DataSource="@_rawMaterialCategories"
-										@bind-Value="_selectedRawMaterialCategoryId"
-										PopupWidth="100%"
-										CssClass="form-control">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-								<ComboBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="@RawMaterialCategoryComboBoxValueChangeHandler" />
-							</SfComboBox>
-						</div>
-
-						<div class="form-group">
-							<label>Raw Material</label>
-							<SfComboBox TValue="int"
-										TItem="RawMaterialModel"
-										Placeholder="Select a Raw Material"
-										DataSource="@_rawMaterials"
-										@bind-Value="_selectedRawMaterialId"
-										PopupWidth="100%"
-										CssClass="form-control">
-								<ComboBoxFieldSettings Value="Id" Text="Name" />
-							</SfComboBox>
-						</div>
-
-						<div class="form-group">
-							<label>Quantity</label>
-							<SfNumericTextBox TValue="double"
-											  Decimals=3
-											  Min=1
-											  Placeholder="Enter Quantity"
-											  @bind-Value="@_selectedRawMaterialQuantity"
-											  CssClass="form-control" />
-						</div>
-
-						<div class="form-group action-group">
-							<button @onclick="OnAddButtonClick" class="add-button">
-								<span class="add-icon">+</span> Add Material
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="adjustment-grid-card card">
-				<div class="card-header">
-					<h2>Adjustment Items</h2>
-					<p class="card-info">Click on a row to remove an item</p>
-				</div>
-				<div class="card-body">
-					<SfGrid DataSource="@_newStockRawMaterials"
-							ID="_sfNewStockGrid"
-							@ref="_sfNewStockGrid"
-							Height="300px"
-							CssClass="adjustment-grid">
-						<GridEvents RowSelected="RowSelectHandler" TValue="ItemRecipeModel" />
-						<GridColumns>
-							<GridColumn Field="@nameof(ItemRecipeModel.ItemCategoryId)" Visible=false />
-							<GridColumn Field="@nameof(ItemRecipeModel.ItemId)" Visible=false />
-							<GridColumn Field="@nameof(ItemRecipeModel.ItemName)" HeaderText="Raw Material" Width="180" />
-							<GridColumn Field="@nameof(ItemRecipeModel.Quantity)" HeaderText="Quantity" Width="120" TextAlign="TextAlign.Right" />
-						</GridColumns>
-					</SfGrid>
-
-					<div class="save-container">
-						<button @onclick="OnSaveButtonClick" class="save-button">
-							<span class="save-icon">💾</span> Save Adjustment
-						</button>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -185,6 +162,195 @@ else
 	</div>
 }
 
+<!-- Current Stock Details Dialog -->
+<SfDialog ID="_sfStockDetailsDialog"
+		  @ref="_sfStockDetailsDialog"
+		  Width="800px"
+		  Height="600px"
+		  AllowDragging="true"
+		  EnableResize="true"
+		  @bind-Visible="_stockDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Current Stock Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<SfGrid ID="_sfStockGrid"
+						@ref="_sfStockGrid"
+						DataSource="_stockDetails"
+						AllowSorting="true"
+						AllowFiltering="true"
+						AllowResizing="true"
+						AllowPaging="true"
+						AllowExcelExport="true"
+						AllowPdfExport="true"
+						Height="450px"
+						CssClass="stock-grid">
+					<GridPageSettings PageSize="10" />
+					<GridColumns>
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCode)" HeaderText="Code" Width="100" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialName)" HeaderText="Material Name" Width="200" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)" HeaderText="Category" Width="150" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.ClosingStock)" HeaderText="Current Stock" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _stockDetailsDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Stock Adjustment Summary Dialog -->
+<SfDialog ID="_sfAdjustmentSummaryDialog"
+		  @ref="_sfAdjustmentSummaryDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_adjustmentSummaryDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Stock Adjustment Summary</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="summary-section">
+					<div class="summary-row">
+						<span>Total Items:</span>
+						<span class="amount">@_stockAdjustmentRawMaterialCarts.Count</span>
+					</div>
+					<div class="summary-row">
+						<span>Total Quantity:</span>
+						<span class="amount">@_stockAdjustmentRawMaterialCarts.Sum(c => c.Quantity).ToString("N2")</span>
+					</div>
+					<div class="summary-row total-row">
+						<span>Total Value:</span>
+						<span class="total-amount">@_total.FormatIndianCurrency()</span>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton CssClass="save-button-dialog" Content="Complete Stock Adjustment" IsPrimary="true" OnClick="OnSaveStockAdjustmentClick" />
+					<SfButton Content="Close" OnClick="() => _adjustmentSummaryDialogVisible = false" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Quantity Dialog -->
+<SfDialog ID="_sfQuantityDialog"
+		  @ref="_sfQuantityDialog"
+		  Width="350px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_quantityDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Set Target Quantity: </span>
+				<span class="material-name">@_selectedRawMaterial.Name</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group full-width">
+						<label>Target Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  @bind-Value="_selectedQuantity"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Add to Cart" IsPrimary="true" OnClick="OnAddToCartClick" CssClass="dialog-button" />
+					<SfButton Content="Cancel" OnClick="OnCancelQuantityDialogClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Raw Material Manage Dialog -->
+<SfDialog ID="_sfRawMaterialManageDialog"
+		  @ref="_sfRawMaterialManageDialog"
+		  Width="600px"
+		  Height="400px"
+		  AllowDragging="true"
+		  EnableResize="true"
+		  @bind-Visible="_dialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span>Manage Material: </span>
+				<span class="material-name">@_selectedRawMaterialCart.RawMaterialName</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-row">
+					<div class="form-group">
+						<label>Target Quantity</label>
+						<SfNumericTextBox TValue="decimal"
+										  Value="_selectedRawMaterialCart.Quantity"
+										  ValueChanged="DialogQuantityValueChanged"
+										  Min="0"
+										  Format="N2"
+										  CssClass="form-control" />
+					</div>
+
+					<div class="form-group">
+						<label>Rate</label>
+						<div class="readonly-currency">@_selectedRawMaterialCart.Rate.FormatIndianCurrency()</div>
+					</div>
+				</div>
+
+				<div class="summary-section">
+					<div class="summary-row">
+						<span>Total Value:</span>
+						<span class="total-amount">@_selectedRawMaterialCart.Total.FormatIndianCurrency()</span>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveRawMaterialManageClick" CssClass="dialog-button" />
+					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartRawMaterialManageClick" CssClass="dialog-button remove-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -193,10 +359,295 @@ else
 		--dotnet-light: #F7F7F7;
 		--dotnet-dark: #1E1E1E;
 		--dotnet-border: rgba(0, 0, 0, 0.1);
+		--material-grid-border: #e1e5e9;
+		--material-grid-hover: rgba(81, 43, 212, 0.08);
+		--material-grid-selected: var(--dotnet-primary);
 	}
 
+	/* Keyboard key styling */
+	kbd {
+		background-color: #f8f9fa;
+		border: 1px solid #ced4da;
+		border-radius: 3px;
+		color: #495057;
+		font-family: Monaco, Consolas, monospace;
+		font-size: 10px;
+		padding: 2px 4px;
+		box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+	}
+
+	/* Material Search Indicator */
+	.material-search-indicator {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: var(--dotnet-primary);
+		color: white;
+		padding: 20px;
+		border-radius: 12px;
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+		z-index: 10000;
+		min-width: 300px;
+		text-align: center;
+	}
+
+	.search-header {
+		font-size: 18px;
+		font-weight: 600;
+		margin-bottom: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+	}
+
+	.search-icon {
+		font-size: 20px;
+	}
+
+	.search-text {
+		background: rgba(255, 255, 255, 0.2);
+		padding: 4px 8px;
+		border-radius: 4px;
+		min-width: 100px;
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.search-results {
+		font-size: 14px;
+		opacity: 0.9;
+		margin: 10px 0;
+	}
+
+	.search-help {
+		font-size: 12px;
+		opacity: 0.8;
+		border-top: 1px solid rgba(255, 255, 255, 0.3);
+		padding-top: 10px;
+		margin-top: 10px;
+	}
+
+	/* Modern Materials Grid Styling */
+	.modern-materials-grid {
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+		border: 1px solid var(--material-grid-border);
+	}
+
+	#_sfRawMaterialGrid.e-grid .e-gridheader .e-columnheader {
+		display: none;
+	}
+
+	/* Custom Row Template Styling */
+	.material-row {
+		transition: all 0.2s ease;
+		border-bottom: 1px solid var(--material-grid-border);
+		cursor: pointer;
+	}
+
+		.material-row:hover {
+			background-color: var(--material-grid-hover);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		}
+
+		.material-row:last-child {
+			border-bottom: none;
+		}
+
+	/* Selected material row highlighting */
+	.selected-material-row {
+		background: linear-gradient(135deg, var(--dotnet-primary) 0%, var(--dotnet-secondary) 100%) !important;
+		color: white !important;
+		font-weight: 600 !important;
+		box-shadow: 0 4px 15px rgba(81, 43, 212, 0.3);
+		transform: translateY(-2px);
+	}
+
+		.selected-material-row .rate-wrapper {
+			background-color: rgba(255, 255, 255, 0.2) !important;
+			color: white !important;
+			border-color: rgba(255, 255, 255, 0.3) !important;
+		}
+
+		.selected-material-row .name-text {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-material-row .currency-symbol,
+		.selected-material-row .rate-value {
+			color: white !important;
+			font-weight: 700 !important;
+		}
+
+		.selected-material-row .add-to-cart-btn {
+			background-color: rgba(255, 255, 255, 0.9) !important;
+			color: var(--dotnet-primary) !important;
+			border-color: rgba(255, 255, 255, 0.9) !important;
+		}
+
+			.selected-material-row .add-to-cart-btn:hover {
+				background-color: white !important;
+				transform: scale(1.1) !important;
+			}
+
+	/* Material Name Cell */
+	.material-name {
+		padding: 15px 12px;
+		vertical-align: middle;
+		width: auto;
+		min-width: 300px;
+	}
+
+	.name-wrapper {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		overflow: hidden;
+	}
+
+	.name-text {
+		font-weight: 500;
+		color: var(--dotnet-dark);
+		font-size: 15px;
+		line-height: 1.4;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+	}
+
+	.material-row:hover .name-text {
+		color: var(--dotnet-primary);
+		font-weight: 600;
+		white-space: normal;
+		overflow: visible;
+		text-overflow: initial;
+	}
+
+	/* Material Rate Cell */
+	.material-rate {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: right;
+		width: 180px;
+	}
+
+	.rate-wrapper {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background-color: var(--dotnet-light);
+		padding: 10px 16px;
+		border-radius: 8px;
+		border: 1px solid var(--material-grid-border);
+		transition: all 0.2s ease;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.material-row:hover .rate-wrapper {
+		background-color: var(--dotnet-primary);
+		border-color: var(--dotnet-primary);
+		transform: scale(1.05);
+		box-shadow: 0 2px 8px rgba(81, 43, 212, 0.2);
+	}
+
+	.currency-symbol {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		font-size: 14px;
+		transition: color 0.2s ease;
+	}
+
+	.rate-value {
+		font-weight: 700;
+		color: var(--dotnet-secondary);
+		font-size: 15px;
+		transition: color 0.2s ease;
+	}
+
+	.material-row:hover .currency-symbol,
+	.material-row:hover .rate-value {
+		color: white;
+	}
+
+	/* Material Action Cell */
+	.material-action {
+		padding: 15px 12px;
+		vertical-align: middle;
+		text-align: center;
+		width: 120px;
+	}
+
+	.add-to-cart-btn {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: 2px solid var(--dotnet-primary);
+		padding: 8px 12px;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 12px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+		.add-to-cart-btn:hover {
+			background-color: #4311a8;
+			border-color: #4311a8;
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(81, 43, 212, 0.3);
+		}
+
+		.add-to-cart-btn:active {
+			transform: scale(0.95);
+		}
+
+	.cart-icon {
+		font-size: 14px;
+	}
+
+	.cart-text {
+		font-weight: 700;
+	}
+
+	/* Grid Pagination Styling */
+	.modern-materials-grid ::deep .e-grid .e-pager {
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--material-grid-border);
+		padding: 12px;
+	}
+
+		.modern-materials-grid ::deep .e-grid .e-pager .e-pagercontainer {
+			background-color: transparent;
+		}
+
+		.modern-materials-grid ::deep .e-grid .e-pager .e-numericitem {
+			border-radius: 6px;
+			margin: 0 2px;
+			font-weight: 500;
+			transition: all 0.2s ease;
+		}
+
+		.modern-materials-grid ::deep .e-grid .e-pager .e-currentitem {
+			background-color: var(--dotnet-primary);
+			color: white;
+			font-weight: 600;
+		}
+
 	/* General Layout */
-	.adjustment-container {
+	.stock-adjustment-container {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
@@ -209,7 +660,7 @@ else
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 25px;
+		margin-bottom: 20px;
 	}
 
 	.page-title {
@@ -242,10 +693,54 @@ else
 		font-size: 16px;
 	}
 
-	/* Content layout */
-	.adjustment-content {
+	/* Action Buttons */
+	.action-buttons {
 		display: flex;
-		flex-direction: column;
+		gap: 15px;
+		margin-bottom: 25px;
+		flex-wrap: wrap;
+	}
+
+	.action-button {
+		background-color: white;
+		border: none;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+		color: var(--dotnet-secondary);
+		padding: 12px 20px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		transition: all 0.2s ease;
+		flex: 1;
+		min-width: 150px;
+		justify-content: center;
+	}
+
+		.action-button:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	.action-icon {
+		font-size: 18px;
+	}
+
+	.action-button-primary {
+		background-color: var(--dotnet-primary);
+		color: white;
+	}
+
+		.action-button-primary:hover {
+			background-color: #4311a8;
+		}
+
+	/* Main Content */
+	.main-content {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		gap: 25px;
 		margin-bottom: 30px;
 	}
@@ -256,6 +751,9 @@ else
 		border-radius: 15px;
 		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 		overflow: hidden;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.card-header {
@@ -280,6 +778,9 @@ else
 
 	.card-body {
 		padding: 20px;
+		flex-grow: 1;
+		display: flex;
+		flex-direction: column;
 	}
 
 	/* Location selector */
@@ -294,93 +795,172 @@ else
 			color: var(--dotnet-dark);
 		}
 
-	/* Form Layout */
-	.form-row {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 20px;
+	/* Cart Grid */
+	.cart-grid, .stock-grid {
+		border-radius: 8px;
+		overflow: hidden;
+		flex-grow: 1;
 	}
 
-	.form-group {
-		margin-bottom: 10px;
-	}
-
-		.form-group label {
-			display: block;
-			margin-bottom: 8px;
-			font-weight: 500;
-			color: var(--dotnet-dark);
+		.cart-grid ::deep .e-grid .e-gridheader,
+		.cart-grid ::deep .e-grid .e-gridheader {
+			padding: 0;
+			border-top: none;
 		}
+
+		.cart-grid ::deep .e-grid .e-rowcell {
+			padding: 6px 8px;
+			height: 36px;
+		}
+
+		.cart-grid ::deep .e-grid .e-headercell {
+			padding: 8px 8px;
+			height: 40px;
+		}
+
+		.cart-grid ::deep .e-grid .e-pager {
+			padding: 4px;
+		}
+
+	/* Forms */
+	.form-group {
+		margin-bottom: 15px;
+	}
+
+	.full-width {
+		grid-column: 1 / -1;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 8px;
+		font-weight: 500;
+		color: var(--dotnet-dark);
+	}
 
 	.form-control {
 		width: 100%;
 		border-radius: 6px;
 	}
 
-	/* Buttons */
-	.action-group {
-		display: flex;
-		align-items: flex-end;
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		margin-bottom: 15px;
 	}
 
-	.add-button {
-		background-color: var(--dotnet-accent);
-		color: white;
-		border: none;
-		padding: 10px 18px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.2s ease;
-		margin-top: 24px;
-	}
-
-		.add-button:hover {
-			background-color: #0078d4;
-			transform: translateY(-2px);
-		}
-
-	.add-icon {
-		font-size: 18px;
-	}
-
-	.save-container {
-		display: flex;
-		justify-content: flex-end;
-		margin-top: 20px;
-	}
-
-	.save-button {
+	/* Button Styling */
+	.save-button-dialog {
 		background-color: var(--dotnet-primary);
 		color: white;
-		border: none;
-		padding: 12px 24px;
+		padding: 10px 20px;
 		border-radius: 8px;
-		cursor: pointer;
 		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
 		transition: all 0.2s ease;
 	}
 
-		.save-button:hover {
+		.save-button-dialog:hover {
 			background-color: #4311a8;
-			transform: translateY(-2px);
 		}
 
-	.save-icon {
-		font-size: 18px;
+	/* Remove Button Styling */
+	.remove-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		transition: all 0.2s ease;
 	}
 
-	/* Grid Styling */
-	.stock-grid, .adjustment-grid {
-		width: 100%;
+		.remove-button:hover {
+			background-color: #d32f2f;
+		}
+
+	/* Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.material-name {
+		color: var(--dotnet-primary);
+		font-weight: 700;
+	}
+
+	.dialog-content {
+		padding: 20px;
+	}
+
+	.summary-section {
+		margin-bottom: 20px;
+		border: 1px solid var(--dotnet-border);
 		border-radius: 8px;
-		overflow: hidden;
+		padding: 15px;
+		background-color: var(--dotnet-light);
+	}
+
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+	.total-row {
+		border-bottom: none;
+		font-weight: 700;
+		font-size: 18px;
+		margin-top: 10px;
+		padding-top: 15px;
+		border-top: 2px solid var(--dotnet-border);
+	}
+
+	.total-amount {
+		color: var(--dotnet-secondary);
+	}
+
+	.amount {
+		font-weight: 500;
+	}
+
+	/* Currency Display */
+	.readonly-currency {
+		padding: 8px 12px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background-color: var(--dotnet-light);
+		font-weight: 500;
+		color: var(--dotnet-secondary);
+	}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Dialog buttons */
+	.dialog-button {
+		border-radius: 6px;
+		padding: 8px 16px;
+		height: 38px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 500;
 	}
 
 	/* Footer */
@@ -457,6 +1037,37 @@ else
 
 		100% {
 			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 992px) {
+		.main-content {
+			grid-template-columns: 1fr;
+		}
+
+		.action-buttons {
+			flex-direction: row;
+		}
+
+		.action-button {
+			flex-basis: calc(50% - 10px);
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.page-header {
+			flex-direction: column;
+			gap: 15px;
+			align-items: flex-start;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+
+		.action-button {
+			flex-basis: 100%;
 		}
 	}
 
@@ -538,22 +1149,19 @@ else
 		animation-fill-mode: both;
 	}
 
-	/* Responsive Design */
-	@@media (max-width: 992px) {
-		.form-row {
-			grid-template-columns: 1fr;
-		}
+	/* Focus styles for better keyboard navigation */
+	.stock-adjustment-container:focus {
+		outline: 2px solid var(--dotnet-primary);
+		outline-offset: 2px;
 	}
 
-	@@media (max-width: 768px) {
-		.page-header {
-			flex-direction: column;
-			gap: 15px;
-			align-items: flex-start;
-		}
+	/* Enhanced grid row hover and selection for cart grid */
+	.cart-grid ::deep .e-grid .e-row:hover {
+		background-color: rgba(81, 43, 212, 0.1);
+	}
 
-		.form-row {
-			grid-template-columns: 1fr;
-		}
+	.cart-grid ::deep .e-grid .e-rowselect {
+		background-color: var(--dotnet-primary);
+		color: white;
 	}
 </style>

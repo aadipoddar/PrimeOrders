@@ -505,13 +505,3 @@ public partial class KitchenProductionPage
 	}
 	#endregion
 }
-
-// Kitchen Production Product Cart Model
-public class KitchenProductionProductCartModel
-{
-	public int ProductId { get; set; }
-	public string ProductName { get; set; }
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal Total { get; set; }
-}

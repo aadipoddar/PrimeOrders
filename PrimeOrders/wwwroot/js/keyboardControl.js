@@ -148,7 +148,67 @@ window.setupKitchenProductionPageKeyboardHandlers = (dotNetHelper) => {
 	document.addEventListener('keydown', window.kitchenProductionPageKeyHandler);
 };
 
-// Product search functions for Sale and Order pages
+window.setupStockAdjustmentPageKeyboardHandlers = (dotNetHelper) => {
+	// Remove existing listeners first
+	if (window.stockAdjustmentPageKeyHandler) {
+		document.removeEventListener('keydown', window.stockAdjustmentPageKeyHandler);
+	}
+
+	// Create new handler
+	window.stockAdjustmentPageKeyHandler = async (event) => {
+		// Don't handle keys when typing in input fields
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+			return;
+		}
+
+		try {
+			await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut',
+				event.key);
+		} catch (error) {
+			console.error('Keyboard handler error:', error);
+		}
+
+		// Prevent default for function keys
+		if (event.key.startsWith('F') || event.ctrlKey) {
+			event.preventDefault();
+		}
+	};
+
+	// Add new listener
+	document.addEventListener('keydown', window.stockAdjustmentPageKeyHandler);
+};
+
+window.setupProductStockAdjustmentPageKeyboardHandlers = (dotNetHelper) => {
+	// Remove existing listeners first
+	if (window.productStockAdjustmentPageKeyHandler) {
+		document.removeEventListener('keydown', window.productStockAdjustmentPageKeyHandler);
+	}
+
+	// Create new handler
+	window.productStockAdjustmentPageKeyHandler = async (event) => {
+		// Don't handle keys when typing in input fields
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+			return;
+		}
+
+		try {
+			await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut',
+				event.key);
+		} catch (error) {
+			console.error('Keyboard handler error:', error);
+		}
+
+		// Prevent default for function keys
+		if (event.key.startsWith('F') || event.ctrlKey) {
+			event.preventDefault();
+		}
+	};
+
+	// Add new listener
+	document.addEventListener('keydown', window.productStockAdjustmentPageKeyHandler);
+};
+
+// Product search functions for Sale, Order, Kitchen Production, and Product Stock Adjustment pages
 window.showProductSearchIndicator = (searchText) => {
 	const indicator = document.getElementById('productSearchIndicator');
 	if (indicator) {
@@ -169,7 +229,7 @@ window.updateProductSearchIndicator = (searchText, resultCount) => {
 	document.getElementById('searchResults').textContent = `${resultCount} products found`;
 };
 
-// Material search functions for Purchase and Kitchen Issue pages
+// Material search functions for Purchase, Kitchen Issue, and Raw Material Stock Adjustment pages
 window.showMaterialSearchIndicator = (searchText) => {
 	const indicator = document.getElementById('materialSearchIndicator');
 	if (indicator) {
