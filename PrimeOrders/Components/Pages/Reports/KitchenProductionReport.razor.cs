@@ -1,5 +1,7 @@
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports;
 
@@ -10,15 +12,21 @@ public partial class KitchenProductionReport
 
 	private bool _isLoading = true;
 	private UserModel _user;
+	private bool _deleteConfirmationDialogVisible = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 	private int _selectedKitchenId = 0;
+	private int _kitchenProductionToDeleteId = 0;
+	private string _kitchenProductionToDeleteTransactionNo = "";
 
 	private List<KitchenProductionOverviewModel> _kitchenProductionOverviews = [];
 	private List<KitchenModel> _kitchens = [];
 
 	private SfGrid<KitchenProductionOverviewModel> _sfGrid;
+	private SfDialog _sfDeleteConfirmationDialog;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -88,6 +96,51 @@ public partial class KitchenProductionReport
 
 	private void OnRowSelected(RowSelectEventArgs<KitchenProductionOverviewModel> args) =>
 			NavManager.NavigateTo($"/Inventory/Kitchen-Production/{args.Data.KitchenProductionId}");
+
+	private void ShowDeleteConfirmation(int kitchenProductionId, string transactionNo)
+	{
+		if (!_user.Admin)
+		{
+			_sfErrorToast.Content = "Only administrators can delete records.";
+			_sfErrorToast.ShowAsync();
+			return;
+		}
+
+		_kitchenProductionToDeleteId = kitchenProductionId;
+		_kitchenProductionToDeleteTransactionNo = transactionNo;
+		_deleteConfirmationDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private async Task ConfirmDeleteKitchenProduction()
+	{
+		var kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, _kitchenProductionToDeleteId);
+		if (kitchenProduction is null)
+		{
+			_sfErrorToast.Content = "Kitchen production not found.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		kitchenProduction.Status = false;
+		await KitchenProductionData.InsertKitchenProduction(kitchenProduction);
+		await StockData.DeleteProductStockByTransactionNo(kitchenProduction.TransactionNo);
+
+		_sfSuccessToast.Content = "Kitchen production deleted successfully.";
+		await _sfSuccessToast.ShowAsync();
+
+		await LoadKitchenProductionData();
+		_deleteConfirmationDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private void CancelDelete()
+	{
+		_deleteConfirmationDialogVisible = false;
+		_kitchenProductionToDeleteId = 0;
+		_kitchenProductionToDeleteTransactionNo = "";
+		StateHasChanged();
+	}
 
 	// Chart data methods
 	private List<KitchenWiseData> GetKitchenWiseData() =>

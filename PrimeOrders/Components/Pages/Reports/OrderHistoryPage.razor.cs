@@ -620,8 +620,8 @@ public partial class OrderHistoryPage
 		public string CategoryName { get; set; }
 		public decimal ProductRate { get; set; }
 		public int OrderCount { get; set; }  // Number of times this product appears in orders
-		public List<int> OrderIds { get; set; } = new List<int>();  // Track which orders this product appears in
-		public List<string> OrderNumbers { get; set; } = new List<string>();  // Track order numbers
+		public List<int> OrderIds { get; set; } = [];  // Track which orders this product appears in
+		public List<string> OrderNumbers { get; set; } = [];  // Track order numbers
 		public string OrderNumbersList => string.Join(", ", OrderNumbers);  // For Excel display
 		public int OrdersAppeared => OrderIds.Count;  // Number of distinct orders this product appears in
 		public decimal TotalQuantity { get; set; }  // Total quantity ordered across all orders
