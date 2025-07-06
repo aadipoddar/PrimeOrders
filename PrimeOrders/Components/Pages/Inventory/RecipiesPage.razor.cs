@@ -66,14 +66,14 @@ public partial class RecipiesPage
 		await LoadRecipe();
 	}
 
-	private async void RawMaterialCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, RawMaterialCategoryModel> args)
+	private async Task RawMaterialCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, RawMaterialCategoryModel> args)
 	{
 		_selectedRawMaterialCategoryId = args.Value;
 		_rawMaterials = await RawMaterialData.LoadRawMaterialByRawMaterialCategory(_selectedRawMaterialCategoryId);
 		_selectedRawMaterialId = _rawMaterials.Count > 0 ? _rawMaterials[0].Id : 0;
 	}
 
-	private async void ProductCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, ProductCategoryModel> args)
+	private async Task ProductCategoryComboBoxValueChangeHandler(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
 		_selectedRawMaterialId = args.Value;
 		_products = await ProductData.LoadProductByProductCategory(_selectedProductCategoryId);
@@ -81,7 +81,7 @@ public partial class RecipiesPage
 		await LoadRecipe();
 	}
 
-	private async void ProductComboBoxValueChangeHandler(ChangeEventArgs<int, ProductModel> args)
+	private async Task ProductComboBoxValueChangeHandler(ChangeEventArgs<int, ProductModel> args)
 	{
 		_selectedProductId = args.Value;
 		await LoadRecipe();
@@ -125,7 +125,7 @@ public partial class RecipiesPage
 	#endregion
 
 	#region Data Grid
-	private async void OnAddButtonClick()
+	private async Task OnAddButtonClick()
 	{
 		var existingRecipe = _rawMaterialRecipies.FirstOrDefault(r => r.ItemId == _selectedRawMaterialId && r.ItemCategoryId == _selectedRawMaterialCategoryId);
 		if (existingRecipe is not null)
@@ -155,7 +155,7 @@ public partial class RecipiesPage
 	#endregion
 
 	#region Saving
-	private async void OnSaveButtonClick()
+	private async Task OnSaveButtonClick()
 	{
 		await _sfGrid.Refresh();
 

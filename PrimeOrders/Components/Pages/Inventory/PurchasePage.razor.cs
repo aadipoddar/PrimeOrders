@@ -288,7 +288,7 @@ public partial class PurchasePage
 	#endregion
 
 	#region Purchase Details Events
-	private async void OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
+	private async Task OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
 	{
 		_purchase.SupplierId = args.Value;
 		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new SupplierModel();
@@ -487,7 +487,7 @@ public partial class PurchasePage
 		StateHasChanged();
 	}
 
-	private async void OnSaveRawMaterialManageClick()
+	private async Task OnSaveRawMaterialManageClick()
 	{
 		_purchaseRawMaterialCarts.Remove(_purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
 
@@ -501,7 +501,7 @@ public partial class PurchasePage
 		StateHasChanged();
 	}
 
-	private async void OnRemoveFromCartRawMaterialManageClick()
+	private async Task OnRemoveFromCartRawMaterialManageClick()
 	{
 		_selectedRawMaterialCart.Quantity = 0;
 		_purchaseRawMaterialCarts.Remove(_purchaseRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));

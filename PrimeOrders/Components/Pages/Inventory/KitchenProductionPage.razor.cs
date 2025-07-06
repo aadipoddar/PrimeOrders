@@ -271,7 +271,7 @@ public partial class KitchenProductionPage
 	#endregion
 
 	#region Kitchen Production Details Events
-	private async void OnKitchenChanged(ChangeEventArgs<int, KitchenModel> args)
+	private async Task OnKitchenChanged(ChangeEventArgs<int, KitchenModel> args)
 	{
 		_kitchen = await CommonData.LoadTableDataById<KitchenModel>(TableNames.Kitchen, args.Value);
 		_kitchen ??= new KitchenModel();
@@ -379,7 +379,7 @@ public partial class KitchenProductionPage
 		StateHasChanged();
 	}
 
-	private async void OnSaveProductManageClick()
+	private async Task OnSaveProductManageClick()
 	{
 		_kitchenProductionProductCarts.Remove(_kitchenProductionProductCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
 
@@ -393,7 +393,7 @@ public partial class KitchenProductionPage
 		StateHasChanged();
 	}
 
-	private async void OnRemoveFromCartProductManageClick()
+	private async Task OnRemoveFromCartProductManageClick()
 	{
 		_selectedProductCart.Quantity = 0;
 		_kitchenProductionProductCarts.Remove(_kitchenProductionProductCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));

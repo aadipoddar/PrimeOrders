@@ -57,7 +57,7 @@ public partial class ProductCategoryPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<ProductCategoryModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<ProductCategoryModel> args)
 	{
 		_categoryModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
@@ -86,7 +86,7 @@ public partial class ProductCategoryPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;

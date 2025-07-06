@@ -49,7 +49,7 @@ public partial class RawMaterialCategoryPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<RawMaterialCategoryModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<RawMaterialCategoryModel> args)
 	{
 		_categoryModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
@@ -68,7 +68,7 @@ public partial class RawMaterialCategoryPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;

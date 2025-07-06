@@ -328,7 +328,7 @@ public partial class RawMaterialStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	private async void OnSaveRawMaterialManageClick()
+	private async Task OnSaveRawMaterialManageClick()
 	{
 		_stockAdjustmentRawMaterialCarts.Remove(_stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
 
@@ -342,7 +342,7 @@ public partial class RawMaterialStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	private async void OnRemoveFromCartRawMaterialManageClick()
+	private async Task OnRemoveFromCartRawMaterialManageClick()
 	{
 		_selectedRawMaterialCart.Quantity = 0;
 		_stockAdjustmentRawMaterialCarts.Remove(_stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));

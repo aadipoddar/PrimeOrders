@@ -1,5 +1,7 @@
 ﻿using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports;
 
@@ -10,8 +12,11 @@ public partial class OrderHistoryPage
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _deleteConfirmationDialogVisible = false;
 
 	private string _selectedStatusFilter = "All";
+	private int _orderToDeleteId = 0;
+	private string _orderToDeleteNo = "";
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
@@ -21,6 +26,9 @@ public partial class OrderHistoryPage
 	private int _selectedLocationId = 0;
 
 	private SfGrid<OrderOverviewModel> _sfGrid;
+	private SfDialog _sfDeleteConfirmationDialog;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -94,6 +102,51 @@ public partial class OrderHistoryPage
 
 	private void ViewOrderDetails(int orderId) =>
 		NavManager.NavigateTo($"/Order/{orderId}");
+
+	private void ShowDeleteConfirmation(int orderId, string orderNo)
+	{
+		_orderToDeleteId = orderId;
+		_orderToDeleteNo = orderNo;
+		_deleteConfirmationDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private async Task ConfirmDeleteOrder()
+	{
+		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _orderToDeleteId);
+		if (order == null)
+		{
+			_sfErrorToast.Content = "Order not found.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		var orderOverview = _orderOverviews.FirstOrDefault(o => o.OrderId == _orderToDeleteId);
+		if (orderOverview?.SaleId.HasValue == true)
+		{
+			_sfErrorToast.Content = "Cannot delete completed orders. Only pending orders can be deleted.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		order.Status = false;
+		await OrderData.InsertOrder(order);
+
+		_sfSuccessToast.Content = "Order deleted successfully.";
+		await _sfSuccessToast.ShowAsync();
+
+		await LoadData();
+		_deleteConfirmationDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private void CancelDelete()
+	{
+		_deleteConfirmationDialogVisible = false;
+		_orderToDeleteId = 0;
+		_orderToDeleteNo = "";
+		StateHasChanged();
+	}
 
 	private async Task ExportToProductsExcel()
 	{

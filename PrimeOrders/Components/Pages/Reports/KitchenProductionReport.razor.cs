@@ -62,14 +62,14 @@ public partial class KitchenProductionReport
 		}
 	}
 
-	private async void DateRangeChanged(RangePickerEventArgs<DateOnly> args)
+	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
 		_startDate = args.StartDate;
 		_endDate = args.EndDate;
 		await RefreshData();
 	}
 
-	private async void OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, KitchenModel> args)
+	private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, KitchenModel> args)
 	{
 		_selectedKitchenId = args.Value;
 		await RefreshData();

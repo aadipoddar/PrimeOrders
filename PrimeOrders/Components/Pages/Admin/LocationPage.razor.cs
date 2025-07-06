@@ -50,7 +50,7 @@ public partial class LocationPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<LocationModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<LocationModel> args)
 	{
 		_locationModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
@@ -76,7 +76,7 @@ public partial class LocationPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;

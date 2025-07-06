@@ -83,7 +83,7 @@ public partial class ProductPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<ProductModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<ProductModel> args)
 	{
 		_productModel = args.Data;
 		await LoadProductRates();
@@ -208,7 +208,7 @@ public partial class ProductPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;

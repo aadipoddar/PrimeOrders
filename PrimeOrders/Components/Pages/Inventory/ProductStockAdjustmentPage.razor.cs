@@ -340,7 +340,7 @@ public partial class ProductStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	private async void OnSaveProductManageClick()
+	private async Task OnSaveProductManageClick()
 	{
 		_productStockAdjustmentCarts.Remove(_productStockAdjustmentCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
 
@@ -354,7 +354,7 @@ public partial class ProductStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	private async void OnRemoveFromCartProductManageClick()
+	private async Task OnRemoveFromCartProductManageClick()
 	{
 		_selectedProductCart.Quantity = 0;
 		_productStockAdjustmentCarts.Remove(_productStockAdjustmentCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));

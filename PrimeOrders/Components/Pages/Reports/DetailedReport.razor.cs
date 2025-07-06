@@ -59,7 +59,7 @@ public partial class DetailedReport
 		await LoadData();
 	}
 
-	private async void OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
+	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
 	{
 		_selectedLocationId = args.Value;
 		await LoadData();

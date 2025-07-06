@@ -58,7 +58,7 @@ public partial class SupplierPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<SupplierModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<SupplierModel> args)
 	{
 		_supplierModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
@@ -91,7 +91,7 @@ public partial class SupplierPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;

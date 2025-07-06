@@ -63,7 +63,7 @@ public partial class UserPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<UserModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<UserModel> args)
 	{
 		_userModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
@@ -126,7 +126,7 @@ public partial class UserPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;

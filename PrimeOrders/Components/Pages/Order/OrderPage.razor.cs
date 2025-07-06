@@ -330,7 +330,7 @@ public partial class OrderPage
 		StateHasChanged();
 	}
 
-	private async void OnSaveProductManageClick()
+	private async Task OnSaveProductManageClick()
 	{
 		_orderProductCarts.Remove(_orderProductCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
 
@@ -343,7 +343,7 @@ public partial class OrderPage
 		StateHasChanged();
 	}
 
-	private async void OnRemoveFromCartProductManageClick()
+	private async Task OnRemoveFromCartProductManageClick()
 	{
 		_selectedProductCart.Quantity = 0;
 		_orderProductCarts.Remove(_orderProductCarts.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));

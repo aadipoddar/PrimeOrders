@@ -49,7 +49,7 @@ public partial class KitchenPage
 		StateHasChanged();
 	}
 
-	public async void RowSelectHandler(RowSelectEventArgs<KitchenModel> args)
+	public async Task RowSelectHandler(RowSelectEventArgs<KitchenModel> args)
 	{
 		_kitchenModel = args.Data;
 		await _sfUpdateToast.ShowAsync();
@@ -68,7 +68,7 @@ public partial class KitchenPage
 		return true;
 	}
 
-	private async void OnSaveClick()
+	private async Task OnSaveClick()
 	{
 		if (!await ValidateForm())
 			return;
