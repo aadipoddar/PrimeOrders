@@ -348,7 +348,7 @@ internal static class PrintA4BillPdf
 			// Right side details
 			detailY = currentY + 35;
 			graphics.DrawString("Date: ", normalFont, PdfBrushes.Black, new PointF(rightX, detailY));
-			graphics.DrawString($"{sale.SaleDateTime:dddd, MMMM dd, yyyy HH:mm}", boldFont, new PdfSolidBrush(SecondaryColor), new PointF(rightX + 35, detailY));
+			graphics.DrawString($"{sale.SaleDateTime:dddd, MMMM dd, yyyy hh:mm tt}", boldFont, new PdfSolidBrush(SecondaryColor), new PointF(rightX + 35, detailY));
 
 			return currentY + 80;
 		}

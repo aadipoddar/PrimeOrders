@@ -792,7 +792,7 @@ public partial class SalePage
 
 	private async Task PrintThermalBill()
 	{
-		var content = await PrintBill.PrintThermalBill(_sale);
+		var content = await Sale.PrintThermalBill.GenerateThermalBill(_sale);
 		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
 	}
 

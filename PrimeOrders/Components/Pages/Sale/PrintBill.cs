@@ -4,9 +4,9 @@ using NumericWordsConversion;
 
 namespace PrimeOrders.Components.Pages.Sale;
 
-internal static class PrintBill
+internal static class PrintThermalBill
 {
-	internal static async Task<StringBuilder> PrintThermalBill(SaleModel sale)
+	internal static async Task<StringBuilder> GenerateThermalBill(SaleModel sale)
 	{
 		StringBuilder content = new();
 
