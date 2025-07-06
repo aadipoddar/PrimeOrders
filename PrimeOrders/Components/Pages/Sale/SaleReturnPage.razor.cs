@@ -1,3 +1,5 @@
+using Syncfusion.Blazor.Calendars;
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -18,10 +20,11 @@ public partial class SaleReturnPage
 	private bool _isSaving = false;
 	private bool _returnDetailsDialogVisible = false;
 	private bool _returnSummaryDialogVisible = false;
-	private bool _locationDialogVisible = false;
+	private bool _billSelectionDialogVisible = false;
 
 	private decimal _selectedQuantity = 1;
-	private int _selectedProductId = 0;
+	private readonly int _selectedProductId = 0;
+	private int _selectedSaleId = 0;
 
 	private string _productSearchText = "";
 	private int _selectedProductIndex = -1;
@@ -29,8 +32,12 @@ public partial class SaleReturnPage
 	private bool _isProductSearchActive = false;
 	private bool _hasAddedProductViaSearch = true;
 
+	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
+	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
+
 	private SaleReturnProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
+	private SaleModel _selectedSale = new();
 	private SaleReturnModel _saleReturn = new()
 	{
 		ReturnDateTime = DateTime.Now,
@@ -40,6 +47,8 @@ public partial class SaleReturnPage
 
 	private List<ProductModel> _products;
 	private List<LocationModel> _locations = [];
+	private List<SaleOverviewModel> _availableSales = [];
+	private readonly List<SaleReturnProductCartModel> _availableSaleProducts = [];
 	private readonly List<SaleReturnProductCartModel> _saleReturnProductCart = [];
 
 	private SfGrid<ProductModel> _sfProductGrid;
@@ -47,7 +56,7 @@ public partial class SaleReturnPage
 
 	private SfDialog _sfReturnDetailsDialog;
 	private SfDialog _sfReturnSummaryDialog;
-	private SfDialog _sfLocationDialog;
+	private SfDialog _sfBillSelectionDialog;
 	private SfDialog _sfProductManageDialog;
 	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;
@@ -73,22 +82,13 @@ public partial class SaleReturnPage
 
 	private async Task LoadData()
 	{
-		// Load locations for main location users
 		await LoadLocations();
+		await LoadAvailableSales();
 
-		_products = await ProductData.LoadProductByLocationRate(_user.LocationId);
-		_products.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
-		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
-
-		_filteredProducts = [.. _products];
-
-		// Set default location based on user's role
 		if (_user.LocationId == 1)
 			_saleReturn.LocationId = _locations.FirstOrDefault()?.Id ?? _user.LocationId;
 		else
 			_saleReturn.LocationId = _user.LocationId;
-
-		_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
 
 		if (SaleReturnId.HasValue && SaleReturnId.Value > 0)
 			await LoadSaleReturn();
@@ -101,9 +101,30 @@ public partial class SaleReturnPage
 		if (_user.LocationId == 1)
 		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-			// Remove main location from the list as we want to select other locations
 			_locations.RemoveAll(l => l.Id == 1);
 		}
+	}
+
+	private async Task LoadAvailableSales()
+	{
+		_availableSales = await SaleData.LoadSaleDetailsByDateLocationId(
+			_startDate.ToDateTime(new TimeOnly(0, 0)),
+			_endDate.ToDateTime(new TimeOnly(23, 59)),
+			1);
+
+		var filteredSales = new List<SaleOverviewModel>();
+
+		foreach (var sale in _availableSales)
+			if (sale.PartyId.HasValue && sale.PartyId > 0)
+			{
+				var supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, sale.PartyId.Value);
+				if (supplier?.LocationId == _saleReturn.LocationId)
+					filteredSales.Add(sale);
+			}
+
+		_availableSales = filteredSales;
+
+		StateHasChanged();
 	}
 
 	private async Task LoadSaleReturn()
@@ -113,21 +134,107 @@ public partial class SaleReturnPage
 		if (_saleReturn is null)
 			NavManager.NavigateTo("/SaleReturn");
 
+		if (_saleReturn.SaleId > 0)
+			await LoadSaleForReturn(_saleReturn.SaleId);
+
 		_saleReturnProductCart.Clear();
 
 		var saleReturnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(_saleReturn.Id);
 		foreach (var item in saleReturnDetails)
 		{
 			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+			var cartItem = _availableSaleProducts.FirstOrDefault(p => p.ProductId == item.ProductId);
 
 			_saleReturnProductCart.Add(new()
 			{
 				ProductId = product.Id,
 				ProductName = product.Name,
-				Quantity = item.Quantity
+				Quantity = item.Quantity,
+				MaxQuantity = cartItem?.SoldQuantity ?? 0,
+				SoldQuantity = cartItem?.SoldQuantity ?? 0,
+				AlreadyReturnedQuantity = cartItem?.AlreadyReturnedQuantity ?? 0
 			});
 		}
 
+		StateHasChanged();
+	}
+
+	private async Task LoadSaleForReturn(int saleId)
+	{
+		_selectedSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);
+		_selectedSaleId = saleId;
+		_saleReturn.SaleId = saleId;
+
+		if (_selectedSale is not null)
+		{
+			_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
+
+			var saleDetails = await SaleData.LoadSaleDetailBySale(saleId);
+			var existingReturns = await SaleReturnData.LoadSaleReturnBySale(saleId);
+
+			_availableSaleProducts.Clear();
+
+			foreach (var detail in saleDetails)
+			{
+				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+
+				decimal alreadyReturnedQty = 0;
+				foreach (var returnRecord in existingReturns.Where(r => r.Status))
+				{
+					var returnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(returnRecord.Id);
+					alreadyReturnedQty += returnDetails.Where(rd => rd.ProductId == detail.ProductId && rd.Status).Sum(rd => rd.Quantity);
+				}
+
+				decimal maxReturnableQty = detail.Quantity - alreadyReturnedQty;
+
+				if (maxReturnableQty > 0)
+				{
+					_availableSaleProducts.Add(new()
+					{
+						ProductId = product.Id,
+						ProductName = product.Name,
+						Quantity = 0,
+						MaxQuantity = maxReturnableQty,
+						SoldQuantity = detail.Quantity,
+						AlreadyReturnedQuantity = alreadyReturnedQty
+					});
+				}
+			}
+
+			_products = [];
+			foreach (var availableProduct in _availableSaleProducts)
+			{
+				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, availableProduct.ProductId);
+				_products.Add(product);
+			}
+
+			_filteredProducts = [.. _products];
+		}
+
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Date Range and Bill Selection
+	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
+	{
+		_startDate = args.StartDate;
+		_endDate = args.EndDate;
+		await LoadAvailableSales();
+	}
+
+	private async Task OnSaleSelected(ChangeEventArgs<int, SaleOverviewModel> args)
+	{
+		if (args.Value > 0)
+		{
+			await LoadSaleForReturn(args.Value);
+			_billSelectionDialogVisible = false;
+		}
+	}
+
+	private void OnBillSelectionClick()
+	{
+		_billSelectionDialogVisible = true;
 		StateHasChanged();
 	}
 	#endregion
@@ -136,8 +243,11 @@ public partial class SaleReturnPage
 	private async Task OnLocationChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, LocationModel> args)
 	{
 		_saleReturn.LocationId = args.Value;
-		// Regenerate transaction number when location changes
-		_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
+
+		if (_selectedSaleId > 0)
+			_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
+
+		await LoadAvailableSales();
 		StateHasChanged();
 	}
 	#endregion
@@ -207,6 +317,13 @@ public partial class SaleReturnPage
 
 	private async Task StartProductSearch()
 	{
+		if (_selectedSaleId == 0)
+		{
+			_sfErrorToast.Content = "Please select a sale first to search products.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
 		_hasAddedProductViaSearch = true;
 		_isProductSearchActive = true;
 		_productSearchText = "";
@@ -266,10 +383,8 @@ public partial class SaleReturnPage
 	{
 		if (_selectedProduct.Id > 0)
 		{
-			_selectedQuantity = 1;
-			_quantityDialogVisible = true;
+			await OnAddToCartButtonClick(_selectedProduct);
 			await ExitProductSearch();
-			StateHasChanged();
 		}
 	}
 
@@ -283,10 +398,32 @@ public partial class SaleReturnPage
 	#endregion
 
 	#region Products
-	private void OnAddToCartButtonClick(ProductModel product)
+	private async Task OnAddToCartButtonClick(ProductModel product)
 	{
 		if (product is null || product.Id <= 0)
 			return;
+
+		if (_selectedSaleId == 0)
+		{
+			_sfErrorToast.Content = "Please select a sale first.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == product.Id);
+		if (availableProduct is null)
+		{
+			_sfErrorToast.Content = "This product is not available for return from the selected sale.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		if (availableProduct.MaxQuantity <= 0)
+		{
+			_sfErrorToast.Content = "No quantity available for return for this product.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
 
 		_selectedProduct = product;
 		_selectedQuantity = 1;
@@ -312,19 +449,37 @@ public partial class SaleReturnPage
 			return;
 		}
 
-		var existingProduct = _saleReturnProductCart.FirstOrDefault(c => c.ProductId == _selectedProduct.Id);
-
-		if (existingProduct is not null)
-			existingProduct.Quantity += _selectedQuantity;
-		else
+		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProduct.Id);
+		if (availableProduct is null)
 		{
+			_sfErrorToast.Content = "Product not found in the selected sale.";
+			await _sfErrorToast.ShowAsync();
+			OnCancelQuantityDialogClick();
+			return;
+		}
+
+		var existingCartItem = _saleReturnProductCart.FirstOrDefault(c => c.ProductId == _selectedProduct.Id);
+		decimal currentCartQuantity = existingCartItem?.Quantity ?? 0;
+
+		if (currentCartQuantity + _selectedQuantity > availableProduct.MaxQuantity)
+		{
+			_sfErrorToast.Content = $"Cannot return more than {availableProduct.MaxQuantity} units. Currently in cart: {currentCartQuantity}";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		if (existingCartItem is not null)
+			existingCartItem.Quantity += _selectedQuantity;
+		else
 			_saleReturnProductCart.Add(new()
 			{
 				ProductId = _selectedProduct.Id,
 				ProductName = _selectedProduct.Name,
-				Quantity = _selectedQuantity
+				Quantity = _selectedQuantity,
+				MaxQuantity = availableProduct.MaxQuantity,
+				SoldQuantity = availableProduct.SoldQuantity,
+				AlreadyReturnedQuantity = availableProduct.AlreadyReturnedQuantity
 			});
-		}
 
 		_quantityDialogVisible = false;
 		_selectedProduct = new();
@@ -346,6 +501,14 @@ public partial class SaleReturnPage
 
 	private async Task OnSaveProductManageClick()
 	{
+		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProductCart.ProductId);
+		if (availableProduct != null && _selectedProductCart.Quantity > availableProduct.MaxQuantity)
+		{
+			_sfErrorToast.Content = $"Cannot return more than {availableProduct.MaxQuantity} units.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
 		_saleReturnProductCart.Remove(_saleReturnProductCart.FirstOrDefault(c => c.ProductId == _selectedProductCart.ProductId));
 
 		if (_selectedProductCart.Quantity > 0)
@@ -374,9 +537,17 @@ public partial class SaleReturnPage
 	{
 		_saleReturn.UserId = _user.Id;
 
-		// Don't override LocationId if user is from main location and has selected a specific location
 		if (_user.LocationId != 1)
 			_saleReturn.LocationId = _user.LocationId;
+
+		if (_selectedSaleId == 0)
+		{
+			_sfErrorToast.Content = "Please select a sale to return products from.";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
+
+		_saleReturn.SaleId = _selectedSaleId;
 
 		if (SaleReturnId is null)
 			_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);

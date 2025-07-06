@@ -175,6 +175,7 @@
     <Build Include="StoredProcedures\Insert\Sale\Insert_SaleReturnDetail.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_LastSaleReturn_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturnDetail_By_SaleReturn.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_Sale.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

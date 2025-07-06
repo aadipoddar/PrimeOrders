@@ -3,6 +3,7 @@
 public class SaleReturnModel
 {
 	public int Id { get; set; }
+	public int SaleId { get; set; }
 	public string TransactionNo { get; set; }
 	public string Remarks { get; set; }
 	public int UserId { get; set; }
@@ -25,4 +26,7 @@ public class SaleReturnProductCartModel
 	public int ProductId { get; set; }
 	public string ProductName { get; set; }
 	public decimal Quantity { get; set; }
+	public decimal MaxQuantity { get; set; }
+	public decimal SoldQuantity { get; set; }
+	public decimal AlreadyReturnedQuantity { get; set; }
 }

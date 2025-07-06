@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_SaleReturn]
 	@Id INT OUTPUT,
+	@SaleId INT,
 	@TransactionNo VARCHAR(20),
 	@Remarks VARCHAR(250),
 	@UserId INT,
@@ -11,9 +12,9 @@ BEGIN
 	IF @Id = 0
 	BEGIN
 		INSERT INTO [dbo].[SaleReturn] 
-			([TransactionNo], [Remarks], [UserId], [LocationId], [ReturnDateTime], [Status])
+			([SaleId], [TransactionNo], [Remarks], [UserId], [LocationId], [ReturnDateTime], [Status])
 		VALUES 
-			(@TransactionNo, @Remarks, @UserId, @LocationId, @ReturnDateTime, @Status);
+			(@SaleId, @TransactionNo, @Remarks, @UserId, @LocationId, @ReturnDateTime, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 
@@ -21,6 +22,7 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[SaleReturn]
 		SET
+			[SaleId] = @SaleId,
 			[TransactionNo] = @TransactionNo,
 			[Remarks] = @Remarks,
 			[UserId] = @UserId,

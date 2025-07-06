@@ -68,10 +68,10 @@ public class SaleOverviewModel
 	public int LocationId { get; set; }
 	public string LocationName { get; set; }
 	public DateTime SaleDateTime { get; set; }
-	public int PartyId { get; set; }
-	public string PartyName { get; set; }
-	public int OrderId { get; set; }
-	public string OrderNo { get; set; }
+	public int? PartyId { get; set; }
+	public string? PartyName { get; set; }
+	public int? OrderId { get; set; }
+	public string? OrderNo { get; set; }
 	public string Remarks { get; set; }
 	public decimal DiscountPercent { get; set; }
 	public string DiscountReason { get; set; }
