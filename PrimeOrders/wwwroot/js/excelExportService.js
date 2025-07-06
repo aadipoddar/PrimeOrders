@@ -25,3 +25,13 @@ window.saveAs = function (base64String, filename) {
 		URL.revokeObjectURL(link.href);
 	}, 100);
 };
+
+// Add this to your main JavaScript file or in a script tag
+window.downloadPdf = (base64String, fileName) => {
+	const link = document.createElement('a');
+	link.href = 'data:application/pdf;base64,' + base64String;
+	link.download = fileName;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+};

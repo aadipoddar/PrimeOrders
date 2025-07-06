@@ -586,7 +586,7 @@ public partial class SalePage
 	}
 	#endregion
 
-	#region Saving
+	#region Saving Methods
 	private async Task<bool> ValidateForm()
 	{
 		await UpdateFinancialDetails();
@@ -614,7 +614,26 @@ public partial class SalePage
 		return true;
 	}
 
-	private async Task OnSaveSaleClick()
+	private async Task<bool> SaveSale()
+	{
+		_sale.Id = await SaleData.InsertSale(_sale);
+		if (_sale.Id <= 0)
+		{
+			_sfErrorToast.Content = "Failed to save Sale.";
+			await _sfErrorToast.ShowAsync();
+			_isSaving = false;
+			StateHasChanged();
+			return false;
+		}
+
+		await InsertSaleDetail();
+		await InsertStock();
+		await UpdateOrder();
+		return true;
+	}
+
+	// Button 1: Save Only
+	private async Task OnSaveOnlyClick()
 	{
 		if (!await ValidateForm())
 			return;
@@ -622,20 +641,54 @@ public partial class SalePage
 		_isSaving = true;
 		StateHasChanged();
 
-		_sale.Id = await SaleData.InsertSale(_sale);
-		if (_sale.Id <= 0)
+		if (await SaveSale())
 		{
-			_sfErrorToast.Content = "Failed to save Sale.";
-			await _sfErrorToast.ShowAsync();
-			return;
+			_sfSuccessToast.Content = "Sale saved successfully.";
+			await _sfSuccessToast.ShowAsync();
 		}
 
-		await InsertSaleDetail();
-		await InsertStock();
-		await UpdateOrder();
-		await PrintThermalBill();
+		_isSaving = false;
+		StateHasChanged();
+	}
 
-		await _sfSuccessToast.ShowAsync();
+	// Button 2: Save and Thermal Print
+	private async Task OnSaveAndThermalPrintClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SaveSale())
+		{
+			await PrintThermalBill();
+			_sfSuccessToast.Content = "Sale saved and thermal bill printed successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_isSaving = false;
+		StateHasChanged();
+	}
+
+	// Button 3: Save and A4 Print
+	private async Task OnSaveAndA4PrintClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SaveSale())
+		{
+			await PrintA4Bill();
+			_sfSuccessToast.Content = "Sale saved and A4 bill generated successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_isSaving = false;
+		StateHasChanged();
 	}
 
 	private async Task InsertSaleDetail()
@@ -699,17 +752,19 @@ public partial class SalePage
 		if (_sale.PartyId is null || _sale.PartyId <= 0)
 			return;
 
-		foreach (var product in _saleProductCart)
-			await StockData.InsertProductStock(new()
-			{
-				Id = 0,
-				ProductId = product.ProductId,
-				Quantity = product.Quantity,
-				Type = StockType.Purchase.ToString(),
-				TransactionNo = _sale.BillNo,
-				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-				LocationId = _sale.PartyId.Value
-			});
+		var supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, _sale.PartyId.Value);
+		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
+			foreach (var product in _saleProductCart)
+				await StockData.InsertProductStock(new()
+				{
+					Id = 0,
+					ProductId = product.ProductId,
+					Quantity = product.Quantity,
+					Type = StockType.Purchase.ToString(),
+					TransactionNo = _sale.BillNo,
+					TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
+					LocationId = supplier.LocationId.Value
+				});
 	}
 
 	private async Task UpdateOrder()
@@ -739,6 +794,14 @@ public partial class SalePage
 	{
 		var content = await PrintBill.PrintThermalBill(_sale);
 		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
+	}
+
+	private async Task PrintA4Bill()
+	{
+		var pdfBytes = await PrintA4BillPdf.GenerateA4SaleBill(_sale, _saleProductCart);
+		var fileName = $"Sale_Bill_{_sale.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+		await JS.InvokeVoidAsync("downloadPdf", Convert.ToBase64String(pdfBytes), fileName);
 	}
 	#endregion
 }

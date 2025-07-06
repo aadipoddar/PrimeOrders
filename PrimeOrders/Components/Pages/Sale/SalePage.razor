@@ -102,7 +102,7 @@ else
 							CssClass="modern-products-grid">
 						<GridPageSettings PageSize="7" />
 						<GridColumns>
-							<GridColumn Field=@nameof(ProductModel.Name) Width="100%"/>
+							<GridColumn Field=@nameof(ProductModel.Name) Width="100%" />
 							<GridColumn Field=@nameof(ProductModel.Rate) AllowFiltering="false" />
 							<GridColumn AllowFiltering="false" />
 						</GridColumns>
@@ -374,7 +374,9 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton CssClass="save-button-dialog" Content="Complete Sale" IsPrimary="true" OnClick="OnSaveSaleClick" Disabled="@_isSaving" />
+					<SfButton CssClass="save-button-dialog" Content="Save Only" OnClick="OnSaveOnlyClick" Disabled="@_isSaving" />
+					<SfButton CssClass="save-thermal-button-dialog" Content="Save & Thermal Print" IsPrimary="true" OnClick="OnSaveAndThermalPrintClick" Disabled="@_isSaving" />
+					<SfButton CssClass="save-a4-button-dialog" Content="Save & A4 Print" OnClick="OnSaveAndA4PrintClick" Disabled="@_isSaving" />
 					<SfButton Content="Close" OnClick="() => _saleSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>
@@ -683,6 +685,8 @@ else
 		--product-grid-border: #e1e5e9;
 		--product-grid-hover: rgba(81, 43, 212, 0.08);
 		--product-grid-selected: var(--dotnet-primary);
+		--thermal-color: #FF8C00;
+		--a4-color: #228B22;
 	}
 
 	/* Keyboard key styling */
@@ -1161,7 +1165,7 @@ else
 
 	/* Button Styling */
 	.save-button-dialog {
-		background-color: var(--dotnet-primary);
+		background-color: var(--dotnet-secondary);
 		color: white;
 		padding: 10px 20px;
 		border-radius: 8px;
@@ -1170,13 +1174,51 @@ else
 	}
 
 		.save-button-dialog:disabled {
-			background-color: #8e77c9;
+			background-color: #a583c3;
 			cursor: not-allowed;
 			transform: none;
 		}
 
-		.save-button-dialog:hover {
-			background-color: #4311a8;
+		.save-button-dialog:hover:not(:disabled) {
+			background-color: #571f7e;
+		}
+
+	.save-thermal-button-dialog {
+		background-color: var(--thermal-color);
+		color: white;
+		padding: 10px 20px;
+		border-radius: 8px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+		.save-thermal-button-dialog:disabled {
+			background-color: #cc9966;
+			cursor: not-allowed;
+			transform: none;
+		}
+
+		.save-thermal-button-dialog:hover:not(:disabled) {
+			background-color: #e69500;
+		}
+
+	.save-a4-button-dialog {
+		background-color: var(--a4-color);
+		color: white;
+		padding: 10px 20px;
+		border-radius: 8px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+		.save-a4-button-dialog:disabled {
+			background-color: #6ba86b;
+			cursor: not-allowed;
+			transform: none;
+		}
+
+		.save-a4-button-dialog:hover:not(:disabled) {
+			background-color: #2e8b2e;
 		}
 
 	/* Remove Button Styling */
@@ -1341,6 +1383,7 @@ else
 	.footer-buttons {
 		display: flex;
 		gap: 10px;
+		flex-wrap: wrap;
 	}
 
 	/* Dialog buttons */
@@ -1556,6 +1599,15 @@ else
 			flex-direction: column;
 			align-items: flex-start;
 		}
+
+		.footer-buttons {
+			flex-direction: column;
+			width: 100%;
+		}
+
+			.footer-buttons .dialog-button {
+				width: 100%;
+			}
 	}
 
 	/* Toast Styling */
