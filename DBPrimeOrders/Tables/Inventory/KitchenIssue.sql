@@ -4,7 +4,7 @@
     [KitchenId] INT NOT NULL, 
     [LocationId] INT NOT NULL, 
     [UserId] INT NOT NULL, 
-    [TransactionNo] VARCHAR(20) NOT NULL, 
+    [TransactionNo] VARCHAR(20) NOT NULL UNIQUE, 
     [IssueDate] DATETIME NOT NULL, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_KitchenIssue_ToKitchen] FOREIGN KEY (KitchenId) REFERENCES [Kitchen](Id), 

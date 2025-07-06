@@ -16,6 +16,9 @@ public static class SaleReturnData
 	public static async Task<List<SaleReturnModel>> LoadSaleReturnBySale(int SaleId) =>
 		await SqlDataAccess.LoadData<SaleReturnModel, dynamic>(StoredProcedureNames.LoadSaleReturnBySale, new { SaleId });
 
+	public static async Task<List<SaleReturnOverviewModel>> LoadSaleReturnDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<SaleReturnOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+
 	public static async Task<SaleReturnModel> LoadLastSaleReturnByLocation(int LocationId) =>
 		(await SqlDataAccess.LoadData<SaleReturnModel, dynamic>(StoredProcedureNames.LoadLastSaleReturnByLocation, new { LocationId })).FirstOrDefault();
 }

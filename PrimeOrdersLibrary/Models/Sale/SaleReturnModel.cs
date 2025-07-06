@@ -30,3 +30,20 @@ public class SaleReturnProductCartModel
 	public decimal SoldQuantity { get; set; }
 	public decimal AlreadyReturnedQuantity { get; set; }
 }
+
+public class SaleReturnOverviewModel
+{
+	public int SaleReturnId { get; set; }
+	public string TransactionNo { get; set; }
+	public int SaleId { get; set; }
+	public string OriginalBillNo { get; set; }
+	public int UserId { get; set; }
+	public string UserName { get; set; }
+	public int LocationId { get; set; }
+	public string LocationName { get; set; }
+	public DateTime ReturnDateTime { get; set; }
+	public string Remarks { get; set; }
+	public bool Status { get; set; }
+	public int TotalProducts { get; set; }
+	public decimal TotalQuantity { get; set; }
+}

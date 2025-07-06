@@ -120,7 +120,7 @@ public static class GenerateBillNo
 			var lastSaleNo = lastIssue.TransactionNo;
 			if (lastSaleNo.StartsWith(prefix))
 			{
-				var lastYear = lastSaleNo.Substring(prefix.Length + 1, 2);
+				var lastYear = lastSaleNo.Substring(prefix.Length + 2, 2);
 				if (lastYear == year)
 				{
 					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
@@ -146,7 +146,7 @@ public static class GenerateBillNo
 			var lastSaleNo = lastProduction.TransactionNo;
 			if (lastSaleNo.StartsWith(prefix))
 			{
-				var lastYear = lastSaleNo.Substring(prefix.Length + 1, 2);
+				var lastYear = lastSaleNo.Substring(prefix.Length + 2, 2);
 				if (lastYear == year)
 				{
 					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
