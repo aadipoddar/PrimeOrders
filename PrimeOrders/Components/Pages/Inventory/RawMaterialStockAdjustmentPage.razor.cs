@@ -1,4 +1,3 @@
-using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -80,20 +79,12 @@ public partial class RawMaterialStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
-	{
-		_selectedLocationId = args.Value;
-		await LoadStockDetails();
-	}
-
 	private async Task LoadStockDetails()
 	{
-		int locationId = _user?.LocationId == 1 ? _selectedLocationId : _user.LocationId;
-
 		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(
 			DateTime.Now.AddDays(-1),
 			DateTime.Now.AddDays(1),
-			locationId);
+			1);
 
 		if (_sfStockGrid is not null)
 			await _sfStockGrid.Refresh();

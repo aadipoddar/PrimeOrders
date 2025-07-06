@@ -59,7 +59,7 @@ BEGIN
          + ISNULL
            (
               (SELECT SUM (Quantity)
-               FROM [ProductStock]
+               FROM [RawMaterialStock]
                WHERE     RawMaterialId = s.RawMaterialId
                      AND TransactionDate >= @FromDate
                      AND TransactionDate < @ToDate
@@ -72,6 +72,8 @@ BEGIN
         dbo.RawMaterial r ON r.Id = s.RawMaterialId
     LEFT JOIN
         dbo.RawMaterialCategory rc ON rc.Id = r.RawMaterialCategoryId
+    
+    WHERE s.LocationId = @LocationId
 
     GROUP BY s.RawMaterialId,
             r.[Name],

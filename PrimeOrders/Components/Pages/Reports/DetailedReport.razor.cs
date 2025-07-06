@@ -2,6 +2,8 @@ using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports;
 
@@ -14,8 +16,11 @@ public partial class DetailedReport
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _deleteConfirmationDialogVisible = false;
 
 	private int _selectedLocationId = 0;
+	private int _saleToDeleteId = 0;
+	private string _saleToDeleteBillNo = "";
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
@@ -24,6 +29,9 @@ public partial class DetailedReport
 	private List<SaleOverviewModel> _saleOverviews = [];
 
 	private SfGrid<SaleOverviewModel> _sfGrid;
+	private SfDialog _sfDeleteConfirmationDialog;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -81,6 +89,43 @@ public partial class DetailedReport
 	public void SaleHistoryRowSelected(RowSelectEventArgs<SaleOverviewModel> args) =>
 		NavManager.NavigateTo($"/Sale/{args.Data.SaleId}");
 
+	private void ShowDeleteConfirmation(int saleId, string billNo)
+	{
+		_saleToDeleteId = saleId;
+		_saleToDeleteBillNo = billNo;
+		_deleteConfirmationDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private async Task ConfirmDeleteSale()
+	{
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, _saleToDeleteId);
+		if (sale is null)
+		{
+			_sfErrorToast.Content = "Sale not found.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		sale.Status = false;
+		await SaleData.InsertSale(sale);
+		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
+
+		_sfSuccessToast.Content = "Sale Deleted Successfully.";
+		await _sfSuccessToast.ShowAsync();
+
+		await LoadData();
+		_deleteConfirmationDialogVisible = false;
+		StateHasChanged();
+	}
+	private void CancelDelete()
+	{
+		_deleteConfirmationDialogVisible = false;
+		_saleToDeleteId = 0;
+		_saleToDeleteBillNo = "";
+		StateHasChanged();
+	}
+
 	private async Task ExportToPdf() =>
 		await _sfGrid?.ExportToPdfAsync();
 
@@ -121,7 +166,8 @@ public partial class DetailedReport
 					nameof(SaleOverviewModel.Cash),
 					nameof(SaleOverviewModel.Card),
 					nameof(SaleOverviewModel.UPI),
-					nameof(SaleOverviewModel.Credit)
+					nameof(SaleOverviewModel.Credit),
+					nameof(SaleOverviewModel.PartyName)
 			];
 
 		// Create a customized column settings for the report
