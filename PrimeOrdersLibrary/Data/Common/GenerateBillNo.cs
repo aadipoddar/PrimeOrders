@@ -94,7 +94,7 @@ public static class GenerateBillNo
 			var lastTransactionNo = lastSaleReturn.TransactionNo;
 			if (lastTransactionNo.StartsWith(prefix))
 			{
-				var lastYear = lastTransactionNo.Substring(prefix.Length + , 2);
+				var lastYear = lastTransactionNo.Substring(prefix.Length + 2, 2);
 				if (lastYear == year)
 				{
 					int lastNumber = int.Parse(lastTransactionNo[(prefix.Length + 3)..]);
