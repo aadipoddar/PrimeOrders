@@ -350,36 +350,3 @@ window.scrollToElement = (elementId) => {
 		element.scrollIntoView({ behavior: 'smooth' });
 	}
 };
-
-// Print function for thermal bills (referenced in Sale Return page)
-window.printToPrinter = (content) => {
-	const printWindow = window.open('', '_blank');
-	printWindow.document.write(`
-		<html>
-			<head>
-				<title>Print</title>
-				<style>
-					body { 
-						font-family: monospace; 
-						font-size: 12px; 
-						margin: 0; 
-						padding: 10px; 
-					}
-					@media print {
-						body { margin: 0; }
-					}
-				</style>
-			</head>
-			<body>
-				<pre>${content}</pre>
-				<script>
-					window.onload = function() {
-						window.print();
-						window.close();
-					}
-				</script>
-			</body>
-		</html>
-	`);
-	printWindow.document.close();
-};
