@@ -1,5 +1,7 @@
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports;
 
@@ -10,15 +12,21 @@ public partial class KitchenIssueReport
 
 	private bool _isLoading = true;
 	private UserModel _user;
+	private bool _deleteConfirmationDialogVisible = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 	private int _selectedKitchenId = 0;
+	private int _kitchenIssueToDeleteId = 0;
+	private string _kitchenIssueToDeleteTransactionNo = "";
 
 	private List<KitchenIssueOverviewModel> _kitchenIssueOverviews = [];
 	private List<KitchenModel> _kitchens = [];
 
 	private SfGrid<KitchenIssueOverviewModel> _sfGrid;
+	private SfDialog _sfDeleteConfirmationDialog;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -40,7 +48,6 @@ public partial class KitchenIssueReport
 	private async Task LoadKitchens()
 	{
 		_kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen);
-		// Add "All Kitchens" option
 		_kitchens.Insert(0, new KitchenModel { Id = 0, Name = "All Kitchens" });
 	}
 
@@ -80,6 +87,51 @@ public partial class KitchenIssueReport
 
 	private void OnRowSelected(RowSelectEventArgs<KitchenIssueOverviewModel> args) =>
 			NavManager.NavigateTo($"/Inventory/Kitchen-Issue/{args.Data.KitchenIssueId}");
+
+	private void ShowDeleteConfirmation(int kitchenIssueId, string transactionNo)
+	{
+		if (!_user.Admin)
+		{
+			_sfErrorToast.Content = "Only administrators can delete records.";
+			_sfErrorToast.ShowAsync();
+			return;
+		}
+
+		_kitchenIssueToDeleteId = kitchenIssueId;
+		_kitchenIssueToDeleteTransactionNo = transactionNo;
+		_deleteConfirmationDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private async Task ConfirmDeleteKitchenIssue()
+	{
+		var kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, _kitchenIssueToDeleteId);
+		if (kitchenIssue is null)
+		{
+			_sfErrorToast.Content = "Kitchen issue not found.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		kitchenIssue.Status = false;
+		await KitchenIssueData.InsertKitchenIssue(kitchenIssue);
+		await StockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+
+		_sfSuccessToast.Content = "Kitchen issue deleted successfully.";
+		await _sfSuccessToast.ShowAsync();
+
+		await LoadKitchenIssueData();
+		_deleteConfirmationDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private void CancelDelete()
+	{
+		_deleteConfirmationDialogVisible = false;
+		_kitchenIssueToDeleteId = 0;
+		_kitchenIssueToDeleteTransactionNo = "";
+		StateHasChanged();
+	}
 
 	// Chart data methods
 	private List<KitchenWiseData> GetKitchenWiseData()

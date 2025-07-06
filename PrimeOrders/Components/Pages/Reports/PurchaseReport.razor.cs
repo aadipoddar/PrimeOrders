@@ -24,9 +24,9 @@ public partial class PurchaseReport
 	private string _purchaseToDeleteBillNo = "";
 
 	private SfGrid<PurchaseOverviewModel> _sfGrid;
-	private readonly SfDialog _sfDeleteConfirmationDialog;
-	private readonly SfToast _sfSuccessToast;
-	private readonly SfToast _sfErrorToast;
+	private SfDialog _sfDeleteConfirmationDialog;
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
