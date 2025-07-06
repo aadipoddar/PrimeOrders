@@ -89,8 +89,8 @@ public partial class OrderHistoryPage
 		// Apply status filtering
 		_orderOverviews = _selectedStatusFilter switch
 		{
-			"Pending" => orders.Where(o => !o.SaleId.HasValue).ToList(),
-			"Sold" => orders.Where(o => o.SaleId.HasValue).ToList(),
+			"Pending" => [.. orders.Where(o => !o.SaleId.HasValue)],
+			"Sold" => [.. orders.Where(o => o.SaleId.HasValue)],
 			_ => orders // "All" or any other value
 		};
 
@@ -105,6 +105,13 @@ public partial class OrderHistoryPage
 
 	private void ShowDeleteConfirmation(int orderId, string orderNo)
 	{
+		if (!_user.Admin)
+		{
+			_sfErrorToast.Content = "Only administrators can delete records.";
+			_sfErrorToast.ShowAsync();
+			return;
+		}
+
 		_orderToDeleteId = orderId;
 		_orderToDeleteNo = orderNo;
 		_deleteConfirmationDialogVisible = true;

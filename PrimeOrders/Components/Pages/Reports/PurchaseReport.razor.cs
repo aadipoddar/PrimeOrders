@@ -1,6 +1,7 @@
 ﻿using Syncfusion.Blazor.Calendars;
-using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports;
 
@@ -11,16 +12,21 @@ public partial class PurchaseReport
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _deleteConfirmationDialogVisible = false;
 
-	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30)); // Default to last 30 days
+	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
 	private List<SupplierModel> _suppliers = [];
-	private int _selectedSupplierId;
 	private List<PurchaseOverviewModel> _purchaseOverviews = [];
-	private List<PurchaseOverviewModel> _filteredPurchaseOverviews => ApplyFilters();
+	private int _selectedSupplierId = 0;
+	private int _purchaseToDeleteId = 0;
+	private string _purchaseToDeleteBillNo = "";
 
 	private SfGrid<PurchaseOverviewModel> _sfGrid;
+	private readonly SfDialog _sfDeleteConfirmationDialog;
+	private readonly SfToast _sfSuccessToast;
+	private readonly SfToast _sfErrorToast;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -29,68 +35,107 @@ public partial class PurchaseReport
 
 		_isLoading = true;
 
-		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory, true)).User) is not null))
+		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory)).User) is not null))
 			return;
 
+		await LoadSuppliers();
 		await LoadData();
 
 		_isLoading = false;
 		StateHasChanged();
 	}
 
-	private async Task LoadData()
+	private async Task LoadSuppliers()
 	{
 		_suppliers = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier, true);
-		await LoadPurchaseData();
-	}
-
-	private async Task LoadPurchaseData()
-	{
-		_purchaseOverviews = await PurchaseData.LoadPurchaseDetailsByDate(
-			_startDate.ToDateTime(new TimeOnly(0, 0)),
-			_endDate.ToDateTime(new TimeOnly(23, 59)));
-
-		StateHasChanged();
-	}
-
-	private List<PurchaseOverviewModel> ApplyFilters()
-	{
-		if (_purchaseOverviews is null)
-			return [];
-
-		var filtered = _purchaseOverviews;
-
-		if (_selectedSupplierId > 0)
-			filtered = [.. filtered.Where(p => p.SupplierId == _selectedSupplierId)];
-
-		return filtered;
+		_suppliers.Insert(0, new SupplierModel { Id = 0, Name = "All Suppliers" });
+		_selectedSupplierId = 0;
 	}
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
 		_startDate = args.StartDate;
 		_endDate = args.EndDate;
-		await LoadPurchaseData();
+		await LoadData();
 	}
 
-	private void OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
+	private async Task OnSupplierChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, SupplierModel> args)
 	{
 		_selectedSupplierId = args.Value;
+		await LoadData();
+	}
+
+	private async Task LoadData()
+	{
+		var allPurchases = await PurchaseData.LoadPurchaseDetailsByDate(
+			_startDate.ToDateTime(new TimeOnly(0, 0)),
+			_endDate.ToDateTime(new TimeOnly(23, 59)));
+
+		if (_selectedSupplierId > 0)
+			_purchaseOverviews = [.. allPurchases.Where(p => p.SupplierId == _selectedSupplierId)];
+		else
+			_purchaseOverviews = allPurchases;
+
 		StateHasChanged();
 	}
 
 	public void PurchaseHistoryRowSelected(RowSelectEventArgs<PurchaseOverviewModel> args) =>
-		NavManager.NavigateTo($"/Inventory/Purchase/{args.Data.PurchaseId}");
+		ViewPurchaseDetails(args.Data.PurchaseId);
 
-	private async Task ExportToPdf()
+	private void ViewPurchaseDetails(int purchaseId) =>
+		NavManager.NavigateTo($"/Purchase/{purchaseId}");
+
+	private void ShowDeleteConfirmation(int purchaseId, string billNo)
 	{
-		if (_sfGrid is not null)
-			await _sfGrid.ExportToPdfAsync();
+		if (!_user.Admin)
+		{
+			_sfErrorToast.Content = "Only administrators can delete records.";
+			_sfErrorToast.ShowAsync();
+			return;
+		}
+
+		_purchaseToDeleteId = purchaseId;
+		_purchaseToDeleteBillNo = billNo;
+		_deleteConfirmationDialogVisible = true;
+		StateHasChanged();
 	}
+
+	private async Task ConfirmDeletePurchase()
+	{
+		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, _purchaseToDeleteId);
+		if (purchase is null)
+		{
+			_sfErrorToast.Content = "Purchase not found.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		purchase.Status = false;
+		await PurchaseData.InsertPurchase(purchase);
+		await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
+
+		_sfSuccessToast.Content = "Purchase deactivated successfully.";
+		await _sfSuccessToast.ShowAsync();
+
+		await LoadData();
+		_deleteConfirmationDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private void CancelDelete()
+	{
+		_deleteConfirmationDialogVisible = false;
+		_purchaseToDeleteId = 0;
+		_purchaseToDeleteBillNo = "";
+		StateHasChanged();
+	}
+
+	private async Task ExportToPdf() =>
+		await _sfGrid?.ExportToPdfAsync();
 
 	private async Task ExportToExcel()
 	{
-		if (_filteredPurchaseOverviews == null || _filteredPurchaseOverviews.Count == 0)
+		if (_purchaseOverviews is null || _purchaseOverviews.Count == 0)
 		{
 			await JS.InvokeVoidAsync("alert", "No data to export");
 			return;
@@ -99,38 +144,52 @@ public partial class PurchaseReport
 		// Create summary items dictionary
 		Dictionary<string, object> summaryItems = new()
 		{
-			{ "Total Purchases", _filteredPurchaseOverviews.Sum(p => p.Total) },
-			{ "Total Transactions", _filteredPurchaseOverviews.Count },
-			{ "Total Items", _filteredPurchaseOverviews.Sum(p => p.TotalItems) },
-			{ "Total Quantity", _filteredPurchaseOverviews.Sum(p => p.TotalQuantity) },
-			{ "Total Discount", _filteredPurchaseOverviews.Sum(p => p.DiscountAmount) },
-			{ "Total Tax", _filteredPurchaseOverviews.Sum(p => p.TotalTaxAmount) }
+			{ "Total Purchases", _purchaseOverviews.Sum(p => p.Total) },
+			{ "Total Transactions", _purchaseOverviews.Count },
+			{ "Total Items", _purchaseOverviews.Sum(p => p.TotalItems) },
+			{ "Total Quantity", _purchaseOverviews.Sum(p => p.TotalQuantity) },
+			{ "Total Discount", _purchaseOverviews.Sum(p => p.DiscountAmount) },
+			{ "Total Tax", _purchaseOverviews.Sum(p => p.TotalTaxAmount) },
+			{ "Base Total", _purchaseOverviews.Sum(p => p.BaseTotal) },
+			{ "Sub Total", _purchaseOverviews.Sum(p => p.SubTotal) }
 		};
+
+		// Add supplier filter info if specific supplier is selected
+		if (_selectedSupplierId > 0)
+		{
+			var supplierName = _suppliers.FirstOrDefault(s => s.Id == _selectedSupplierId)?.Name ?? "Unknown";
+			summaryItems.Add("Filtered by Supplier", supplierName);
+		}
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
 			nameof(PurchaseOverviewModel.BillNo),
 			nameof(PurchaseOverviewModel.BillDate),
 			nameof(PurchaseOverviewModel.SupplierName),
+			nameof(PurchaseOverviewModel.UserName),
 			nameof(PurchaseOverviewModel.TotalItems),
 			nameof(PurchaseOverviewModel.TotalQuantity),
 			nameof(PurchaseOverviewModel.BaseTotal),
 			nameof(PurchaseOverviewModel.DiscountAmount),
 			nameof(PurchaseOverviewModel.TotalTaxAmount),
-			nameof(PurchaseOverviewModel.Total)
+			nameof(PurchaseOverviewModel.SubTotal),
+			nameof(PurchaseOverviewModel.CashDiscountAmount),
+			nameof(PurchaseOverviewModel.Total),
+			nameof(PurchaseOverviewModel.Remarks)
 		];
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
 		{
 			[nameof(PurchaseOverviewModel.BillNo)] = new()
 			{
 				DisplayName = "Invoice No",
-				Width = 15
+				Width = 15,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
 			[nameof(PurchaseOverviewModel.BillDate)] = new()
 			{
-				DisplayName = "Purchase Date",
+				DisplayName = "Date",
 				Format = "dd-MMM-yyyy",
 				Width = 15
 			},
@@ -140,19 +199,27 @@ public partial class PurchaseReport
 				Width = 25,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
+			[nameof(PurchaseOverviewModel.UserName)] = new()
+			{
+				DisplayName = "Created By",
+				Width = 20,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
 			[nameof(PurchaseOverviewModel.TotalItems)] = new()
 			{
-				DisplayName = "Items Count",
+				DisplayName = "Items",
 				Format = "#,##0",
 				Width = 12,
-				IncludeInTotal = true
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
 			[nameof(PurchaseOverviewModel.TotalQuantity)] = new()
 			{
-				DisplayName = "Total Quantity",
+				DisplayName = "Quantity",
 				Format = "#,##0.00",
 				Width = 15,
-				IncludeInTotal = true
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
 			[nameof(PurchaseOverviewModel.BaseTotal)] = new()
 			{
@@ -160,7 +227,8 @@ public partial class PurchaseReport
 				Format = "₹#,##0.00",
 				Width = 15,
 				IsCurrency = true,
-				IncludeInTotal = true
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
 			[nameof(PurchaseOverviewModel.DiscountAmount)] = new()
 			{
@@ -168,15 +236,35 @@ public partial class PurchaseReport
 				Format = "₹#,##0.00",
 				Width = 15,
 				IsCurrency = true,
-				IncludeInTotal = true
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
 			[nameof(PurchaseOverviewModel.TotalTaxAmount)] = new()
 			{
-				DisplayName = "Total Tax",
+				DisplayName = "Tax",
 				Format = "₹#,##0.00",
 				Width = 15,
 				IsCurrency = true,
-				IncludeInTotal = true
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(PurchaseOverviewModel.SubTotal)] = new()
+			{
+				DisplayName = "Sub Total",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(PurchaseOverviewModel.CashDiscountAmount)] = new()
+			{
+				DisplayName = "Cash Discount",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
 			[nameof(PurchaseOverviewModel.Total)] = new()
 			{
@@ -185,24 +273,32 @@ public partial class PurchaseReport
 				Width = 15,
 				IsCurrency = true,
 				IncludeInTotal = true,
-				HighlightNegative = true
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value == null) return null;
+					var amount = Convert.ToDecimal(value);
+					return new ExcelExportUtil.FormatInfo
+					{
+						Bold = amount > 10000,
+						FontColor = amount > 50000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
+					};
+				}
+			},
+			[nameof(PurchaseOverviewModel.Remarks)] = new()
+			{
+				DisplayName = "Remarks",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			}
 		};
 
-		// Generate title based on selected filters
+		// Generate the Excel file
 		string reportTitle = "Purchase Report";
-
-		if (_selectedSupplierId > 0)
-		{
-			var supplier = _suppliers.FirstOrDefault(s => s.Id == _selectedSupplierId);
-			if (supplier != null)
-				reportTitle = $"Purchase Report - {supplier.Name}";
-		}
-
 		string worksheetName = "Purchase Details";
 
 		var memoryStream = ExcelExportUtil.ExportToExcel(
-			_filteredPurchaseOverviews,
+			_purchaseOverviews,
 			reportTitle,
 			worksheetName,
 			_startDate,
@@ -215,60 +311,62 @@ public partial class PurchaseReport
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
-	#region Chart Data Methods
-
+	// Chart data methods
 	private List<DailyPurchaseData> GetDailyPurchaseData()
 	{
-		if (_filteredPurchaseOverviews == null || _filteredPurchaseOverviews.Count == 0)
-			return [];
+		var result = new List<DailyPurchaseData>();
+		if (_purchaseOverviews == null || _purchaseOverviews.Count == 0)
+			return result;
 
-		var result = _filteredPurchaseOverviews
+		var groupedByDate = _purchaseOverviews
 			.GroupBy(p => p.BillDate)
-			.Select(group => new DailyPurchaseData
-			{
-				Date = group.Key.ToString("dd/MM"),
-				Amount = group.Sum(p => p.Total)
-			})
-			.OrderBy(d => DateTime.ParseExact(d.Date, "dd/MM", null))
+			.OrderBy(g => g.Key)
 			.ToList();
+
+		foreach (var group in groupedByDate)
+		{
+			result.Add(new DailyPurchaseData
+			{
+				Date = group.Key.ToString("dd/MM/yyyy"),
+				Amount = group.Sum(p => p.Total)
+			});
+		}
 
 		return result;
 	}
 
-	private List<SupplierDistributionData> GetVendorDistributionData()
+	private List<VendorDistributionData> GetVendorDistributionData()
 	{
-		if (_filteredPurchaseOverviews == null || _filteredPurchaseOverviews.Count == 0)
-			return [];
+		var result = new List<VendorDistributionData>();
+		if (_purchaseOverviews == null || _purchaseOverviews.Count == 0)
+			return result;
 
-		var result = _filteredPurchaseOverviews
-			.GroupBy(p => p.SupplierName)
-			.Select(group => new SupplierDistributionData
+		var groupedBySupplier = _purchaseOverviews
+			.GroupBy(p => new { p.SupplierId, p.SupplierName })
+			.Select(g => new VendorDistributionData
 			{
-				SupplierName = group.Key,
-				Amount = group.Sum(p => p.Total)
+				SupplierId = g.Key.SupplierId,
+				SupplierName = g.Key.SupplierName,
+				Amount = g.Sum(p => p.Total)
 			})
 			.OrderByDescending(v => v.Amount)
-			.Take(10) // Get top 10 suppliers
+			.Take(10) // Top 10 suppliers
 			.ToList();
 
-		return result;
+		return groupedBySupplier;
 	}
 
-	#endregion
-
-	#region Data Models
-
+	// Chart data classes
 	public class DailyPurchaseData
 	{
 		public string Date { get; set; }
 		public decimal Amount { get; set; }
 	}
 
-	public class SupplierDistributionData
+	public class VendorDistributionData
 	{
+		public int SupplierId { get; set; }
 		public string SupplierName { get; set; }
 		public decimal Amount { get; set; }
 	}
-
-	#endregion
 }

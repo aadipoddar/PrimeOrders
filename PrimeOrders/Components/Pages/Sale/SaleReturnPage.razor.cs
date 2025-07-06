@@ -328,7 +328,7 @@ public partial class SaleReturnPage
 		_isProductSearchActive = true;
 		_productSearchText = "";
 		_selectedProductIndex = 0;
-		_filteredProducts = _products.ToList();
+		_filteredProducts = [.. _products];
 
 		if (_filteredProducts.Count > 0)
 			_selectedProduct = _filteredProducts[0];

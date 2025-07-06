@@ -91,6 +91,13 @@ public partial class DetailedReport
 
 	private void ShowDeleteConfirmation(int saleId, string billNo)
 	{
+		if (!_user.Admin)
+		{
+			_sfErrorToast.Content = "Only administrators can delete records.";
+			_sfErrorToast.ShowAsync();
+			return;
+		}
+
 		_saleToDeleteId = saleId;
 		_saleToDeleteBillNo = billNo;
 		_deleteConfirmationDialogVisible = true;

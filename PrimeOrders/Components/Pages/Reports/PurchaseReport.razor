@@ -2,6 +2,34 @@
 
 <PageTitle>Purchase Report - Prime Orders</PageTitle>
 
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Title="Error"
+		 Content="Some Error Message"
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfSuccessToast"
+		 ID="toast_success"
+		 Title="Success"
+		 Content="Purchase deactivated successfully."
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
 @if (_isLoading)
 {
 	<div class="loader-container">
@@ -162,6 +190,20 @@ else
 								}
 							</Template>
 						</GridColumn>
+
+						<GridColumn HeaderText="Action" Width="100" TextAlign="TextAlign.Center" AllowFiltering="false" AllowSorting="false">
+							<Template>
+								@{
+									var purchase = (context as PurchaseOverviewModel);
+								}
+								<button @onclick="() => ShowDeleteConfirmation(purchase.PurchaseId, purchase.BillNo)"
+										@onclick:stopPropagation="true"
+										class="delete-button"
+										title="Deactivate Purchase">
+									<span class="delete-icon">🗑️</span>
+								</button>
+							</Template>
+						</GridColumn>
 					</GridColumns>
 				</SfGrid>
 			</div>
@@ -208,6 +250,68 @@ else
 	</div>
 }
 
+<!-- Delete Confirmation Dialog -->
+<SfDialog ID="_sfDeleteConfirmationDialog"
+		  @ref="_sfDeleteConfirmationDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_deleteConfirmationDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="warning-icon">⚠️</span>
+				<span>Confirm Delete Purchase</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="confirm-section">
+					<div class="warning-message">
+						<p>Are you sure you want to deactivate this purchase?</p>
+					</div>
+
+					<div class="purchase-info">
+						<div class="detail-item">
+							<span class="detail-label">Purchase ID:</span>
+							<span class="detail-value">@_purchaseToDeleteId</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">Invoice No:</span>
+							<span class="detail-value">@_purchaseToDeleteBillNo</span>
+						</div>
+					</div>
+
+					<div class="warning-note">
+						<p><strong>Note:</strong> This action will:</p>
+						<ul>
+							<li>Set the purchase status to inactive</li>
+							<li>Remove associated raw material stock entries</li>
+							<li>This action cannot be easily undone</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Yes, Delete"
+							  IsPrimary="true"
+							  OnClick="ConfirmDeletePurchase"
+							  CssClass="delete-confirm-button" />
+					<SfButton Content="Cancel"
+							  OnClick="CancelDelete"
+							  CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -224,6 +328,117 @@ else
 		--tax-color: #6c757d;
 		--excel-color: #217346;
 	}
+
+	/* Delete Button Styling */
+	.delete-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		padding: 6px 10px;
+		border-radius: 4px;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		font-size: 12px;
+	}
+
+		.delete-button:hover {
+			background-color: #d32f2f;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+		}
+
+		.delete-button:active {
+			transform: translateY(0);
+		}
+
+	.delete-icon {
+		font-size: 14px;
+	}
+
+	/* Delete Confirmation Dialog Styling */
+	.warning-icon {
+		font-size: 24px;
+		margin-right: 10px;
+	}
+
+	.warning-message {
+		background-color: #fff3cd;
+		border: 1px solid #ffeaa7;
+		border-radius: 6px;
+		padding: 15px;
+		margin-bottom: 20px;
+		text-align: center;
+	}
+
+		.warning-message p {
+			margin: 0;
+			font-weight: 600;
+			color: #856404;
+			font-size: 16px;
+		}
+
+	.purchase-info {
+		background-color: var(--dotnet-light);
+		border-radius: 6px;
+		padding: 15px;
+		margin-bottom: 20px;
+	}
+
+		.purchase-info .detail-item {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 8px;
+		}
+
+		.purchase-info .detail-label {
+			font-weight: 600;
+			color: var(--dotnet-dark);
+		}
+
+		.purchase-info .detail-value {
+			color: var(--dotnet-secondary);
+			font-weight: 500;
+		}
+
+	.warning-note {
+		background-color: #f8d7da;
+		border: 1px solid #f5c6cb;
+		border-radius: 6px;
+		padding: 15px;
+	}
+
+		.warning-note p {
+			margin: 0 0 10px 0;
+			font-weight: 600;
+			color: #721c24;
+		}
+
+		.warning-note ul {
+			margin: 0;
+			padding-left: 20px;
+			color: #721c24;
+		}
+
+		.warning-note li {
+			margin-bottom: 5px;
+		}
+
+	.delete-confirm-button {
+		background-color: #f44336;
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+		.delete-confirm-button:hover {
+			background-color: #d32f2f;
+		}
 
 	/* General Layout */
 	.dashboard-container {
@@ -617,6 +832,127 @@ else
 		color: var(--dotnet-dark);
 		font-size: 16px;
 		margin-top: 10px;
+	}
+
+	/* Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		display: flex;
+		align-items: center;
+	}
+
+	.dialog-content {
+		padding: 20px;
+	}
+
+	.confirm-section {
+		margin-bottom: 0;
+	}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Dialog buttons */
+	.dialog-button {
+		border-radius: 6px;
+		padding: 8px 16px;
+		height: 38px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 500;
+	}
+
+	/* Toast Styling */
+	::deep .e-toast-container {
+		z-index: 1000;
+	}
+
+		::deep .e-toast-container .e-toast {
+			border: 0;
+			border-radius: 8px;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	/* Success Toast */
+	::deep .e-toast-success {
+		background-color: #ebf7ee;
+		border-left: 4px solid #4CAF50;
+		color: #2E7D32;
+	}
+
+		::deep .e-toast-success .e-toast-title {
+			color: #2E7D32;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-success .e-toast-content {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success .e-toast-close-icon {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success::before {
+			content: "✓";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Error Toast */
+	::deep .e-toast-danger {
+		background-color: #fdeeee;
+		border-left: 4px solid #F44336;
+		color: #C62828;
+	}
+
+		::deep .e-toast-danger .e-toast-title {
+			color: #C62828;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-danger .e-toast-content {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger .e-toast-close-icon {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger::before {
+			content: "⚠";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Toast Animation */
+	::deep .e-toast-container .e-toast {
+		padding: 10px 10px 10px 40px;
+		position: relative;
+		animation-fill-mode: both;
 	}
 
 	/* Animations */
