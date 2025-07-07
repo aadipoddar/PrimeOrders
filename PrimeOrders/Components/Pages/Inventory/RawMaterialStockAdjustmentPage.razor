@@ -70,7 +70,7 @@ else
 				<span class="action-icon">📊</span> Current Stock
 			</button>
 			<button @onclick="() => _adjustmentSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">💾</span> Complete Adjustment
+				<span class="action-icon">💾</span> Save
 			</button>
 		</div>
 
@@ -246,7 +246,7 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton CssClass="save-button-dialog" Content="Complete Stock Adjustment" IsPrimary="true" OnClick="OnSaveStockAdjustmentClick" />
+					<SfButton CssClass="save-button-dialog" Content="Save Stock Adjustment" IsPrimary="true" OnClick="OnSaveStockAdjustmentClick" />
 					<SfButton Content="Close" OnClick="() => _adjustmentSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>

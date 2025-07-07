@@ -1,5 +1,6 @@
 ﻿@page "/Sale"
 @page "/Sale/{SaleId:int}"
+@using PrimeOrdersLibrary.Data.Common
 
 <PageTitle>Sale - Prime Orders</PageTitle>
 
@@ -80,7 +81,7 @@ else
 				</button>
 			}
 			<button @onclick="() => _saleSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">📊</span> Bill
+				<span class="action-icon">📊</span> Save
 			</button>
 		</div>
 

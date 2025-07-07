@@ -1,5 +1,6 @@
 ﻿@page "/Inventory/Purchase"
 @page "/Inventory/Purchase/{PurchaseId:int}"
+@using PrimeOrdersLibrary.Data.Common
 
 <PageTitle>Purchase - Prime Orders</PageTitle>
 
@@ -77,7 +78,7 @@ else
 				<span class="action-icon">💰</span> Adjustments
 			</button>
 			<button @onclick="() => _purchaseSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">📊</span> Complete Purchase
+				<span class="action-icon">📊</span> Save
 			</button>
 		</div>
 
@@ -370,7 +371,7 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton CssClass="save-button-dialog" Content="Complete Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick" />
+					<SfButton CssClass="save-button-dialog" Content="Save Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick" />
 					<SfButton Content="Close" OnClick="() => _purchaseSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>

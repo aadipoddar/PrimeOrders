@@ -83,7 +83,7 @@ public partial class PurchaseReport
 		ViewPurchaseDetails(args.Data.PurchaseId);
 
 	private void ViewPurchaseDetails(int purchaseId) =>
-		NavManager.NavigateTo($"/Purchase/{purchaseId}");
+		NavManager.NavigateTo($"/Inventory/Purchase/{purchaseId}");
 
 	private void ShowDeleteConfirmation(int purchaseId, string billNo)
 	{

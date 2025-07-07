@@ -1,5 +1,6 @@
 ﻿@page "/Inventory/ProductStockAdjustment"
 
+
 <PageTitle>Product Stock Adjustment - Prime Orders</PageTitle>
 
 <SfToast @ref="_sfErrorToast"
@@ -70,7 +71,7 @@ else
 				<span class="action-icon">📊</span> Current Stock
 			</button>
 			<button @onclick="() => _adjustmentSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">💾</span> Complete Adjustment
+				<span class="action-icon">💾</span> Save
 			</button>
 		</div>
 
@@ -84,10 +85,10 @@ else
 					@if (_user?.LocationId == 1)
 					{
 						<div class="location-selector">
-							<label>Select Location</label>
+							<label>Select Outlet / Franchise</label>
 							<SfComboBox TValue="int"
 										TItem="LocationModel"
-										Placeholder="Select a Location"
+										Placeholder="Select a Outlet / Franchise"
 										DataSource="_locations"
 										Value="_selectedLocationId"
 										CssClass="form-control">
@@ -262,7 +263,7 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton CssClass="save-button-dialog" Content="Complete Stock Adjustment" IsPrimary="true" OnClick="OnSaveStockAdjustmentClick" />
+					<SfButton CssClass="save-button-dialog" Content="Save Stock Adjustment" IsPrimary="true" OnClick="OnSaveStockAdjustmentClick" />
 					<SfButton Content="Close" OnClick="() => _adjustmentSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>

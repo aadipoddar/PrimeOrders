@@ -17,7 +17,6 @@ public partial class KitchenProductionPage
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
 	private bool _billDetailsDialogVisible = false;
-	private bool _kitchenDialogVisible = false;
 	private bool _kitchenProductionSummaryDialogVisible = false;
 
 	private decimal _baseTotal = 0;
@@ -82,7 +81,7 @@ public partial class KitchenProductionPage
 		_kitchenProduction.KitchenId = _kitchen?.Id ?? 0;
 
 		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
-		_products.RemoveAll(p => p.LocationId != 1); // Only products from main location
+		_products.RemoveAll(p => p.LocationId != 1);
 		_selectedProductId = _products.FirstOrDefault()?.Id ?? 0;
 
 		_filteredProducts = [.. _products];

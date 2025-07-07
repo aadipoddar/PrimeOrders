@@ -2,11 +2,15 @@
 
 using NumericWordsConversion;
 
-namespace PrimeOrders.Components.Pages.Sale;
+using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Models.Product;
+using PrimeOrdersLibrary.Models.Sale;
 
-internal static class PrintThermalBill
+namespace PrimeOrdersLibrary.Data.Sale;
+
+public class SaleThermalPrint
 {
-	internal static async Task<StringBuilder> GenerateThermalBill(SaleModel sale)
+	public static async Task<StringBuilder> GenerateThermalBill(SaleModel sale)
 	{
 		StringBuilder content = new();
 
@@ -168,13 +172,13 @@ internal static class PrintThermalBill
 
 	private static string GetPaymentMode(SaleModel sale)
 	{
-		if (sale.Cash > 0 && sale.Cash >= (sale.Card + sale.UPI + sale.Credit))
+		if (sale.Cash > 0 && sale.Cash >= sale.Card + sale.UPI + sale.Credit)
 			return "Cash";
-		else if (sale.Card > 0 && sale.Card >= (sale.Cash + sale.UPI + sale.Credit))
+		else if (sale.Card > 0 && sale.Card >= sale.Cash + sale.UPI + sale.Credit)
 			return "Card";
-		else if (sale.UPI > 0 && sale.UPI >= (sale.Cash + sale.Card + sale.Credit))
+		else if (sale.UPI > 0 && sale.UPI >= sale.Cash + sale.Card + sale.Credit)
 			return "UPI";
-		else if (sale.Credit > 0 && sale.Credit >= (sale.Cash + sale.Card + sale.UPI))
+		else if (sale.Credit > 0 && sale.Credit >= sale.Cash + sale.Card + sale.UPI)
 			return "Credit";
 		else if (sale.Cash > 0 || sale.Card > 0 || sale.UPI > 0 || sale.Credit > 0)
 			return "Multiple";

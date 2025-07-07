@@ -70,14 +70,8 @@ else
 			<button @onclick="() => _orderDetailsDialogVisible = true" class="action-button">
 				<span class="action-icon">📄</span> Order Details
 			</button>
-			@if (_user.Admin && _user.LocationId == 1)
-			{
-				<button @onclick="() => _locationDialogVisible = true" class="action-button">
-					<span class="action-icon">🏢</span> Location
-				</button>
-			}
 			<button @onclick="() => _orderSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">📊</span> Submit Order
+				<span class="action-icon">📊</span> Save
 			</button>
 		</div>
 
@@ -193,6 +187,21 @@ else
 								  CssClass="form-control" />
 				</div>
 
+				@if (_user.Admin && _user.LocationId == 1)
+				{
+					<div class="form-group">
+						<label>Outlet / Franchise</label>
+						<SfComboBox TValue="int"
+									TItem="LocationModel"
+									Placeholder="Select a Outlet / Franchise"
+									DataSource="_locations"
+									CssClass="form-control"
+									@bind-Value="_order.LocationId">
+							<ComboBoxFieldSettings Value="Id" Text="Name" />
+						</SfComboBox>
+					</div>
+				}
+
 				<div class="form-group full-width">
 					<label>Remarks</label>
 					<SfTextBox @bind-Value="_order.Remarks"
@@ -214,45 +223,6 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Location Dialog -->
-<SfDialog ID="_sfLocationDialog"
-		  @ref="_sfLocationDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_locationDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span>Location Details</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				<div class="form-group">
-					<label>Location</label>
-					<SfComboBox TValue="int"
-								TItem="LocationModel"
-								Placeholder="Select a Location"
-								DataSource="_locations"
-								CssClass="form-control"
-								@bind-Value="_order.LocationId">
-						<ComboBoxFieldSettings Value="Id" Text="Name" />
-					</SfComboBox>
-				</div>
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _locationDialogVisible = false" CssClass="dialog-button" />
 			</div>
 		</FooterTemplate>
 	</DialogTemplates>
@@ -289,7 +259,7 @@ else
 					@if (_order.LocationId > 0 && _locations.Any(l => l.Id == _order.LocationId))
 					{
 						<div class="detail-item">
-							<span class="detail-label">Location:</span>
+							<span class="detail-label">Outlet / Franchise:</span>
 							<span class="detail-value">@_locations.First(l => l.Id == _order.LocationId).Name</span>
 						</div>
 					}

@@ -17,7 +17,6 @@ public partial class KitchenIssuePage
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
 	private bool _billDetailsDialogVisible = false;
-	private bool _kitchenDialogVisible = false;
 	private bool _kitchenIssueSummaryDialogVisible = false;
 
 	private decimal _baseTotal = 0;

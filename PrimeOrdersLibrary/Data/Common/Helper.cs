@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace PrimeOrders.Services;
+namespace PrimeOrdersLibrary.Data.Common;
 
 public static class Helper
 {

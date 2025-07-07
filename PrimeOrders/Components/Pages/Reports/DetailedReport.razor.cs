@@ -125,6 +125,7 @@ public partial class DetailedReport
 		_deleteConfirmationDialogVisible = false;
 		StateHasChanged();
 	}
+
 	private void CancelDelete()
 	{
 		_deleteConfirmationDialogVisible = false;
@@ -132,9 +133,6 @@ public partial class DetailedReport
 		_saleToDeleteBillNo = "";
 		StateHasChanged();
 	}
-
-	private async Task ExportToPdf() =>
-		await _sfGrid?.ExportToPdfAsync();
 
 	private async Task ExportToExcel()
 	{
@@ -144,56 +142,7 @@ public partial class DetailedReport
 			return;
 		}
 
-		// Create summary items dictionary
-		Dictionary<string, object> summaryItems = new()
-		{
-			{ "Total Sales", _saleOverviews.Sum(s => s.Total) },
-			{ "Total Transactions", _saleOverviews.Count },
-			{ "Total Products", _saleOverviews.Sum(s => s.TotalProducts) },
-			{ "Total Quantity", _saleOverviews.Sum(s => s.TotalQuantity) },
-			{ "Discount Amount", _saleOverviews.Sum(s => s.DiscountAmount) },
-			{ "Cash", _saleOverviews.Sum(s => s.Cash) },
-			{ "Card", _saleOverviews.Sum(s => s.Card) },
-			{ "UPI", _saleOverviews.Sum(s => s.UPI) },
-			{ "Credit", _saleOverviews.Sum(s => s.Credit) }
-		};
-
-		// Define the column order for better readability
-		List<string> columnOrder = [
-					nameof(SaleOverviewModel.SaleId),
-					nameof(SaleOverviewModel.SaleDateTime),
-					nameof(SaleOverviewModel.LocationName),
-					nameof(SaleOverviewModel.UserName),
-					nameof(SaleOverviewModel.TotalProducts),
-					nameof(SaleOverviewModel.TotalQuantity),
-					nameof(SaleOverviewModel.BaseTotal),
-					nameof(SaleOverviewModel.DiscountAmount),
-					nameof(SaleOverviewModel.TotalTaxAmount),
-					nameof(SaleOverviewModel.Total),
-					nameof(SaleOverviewModel.Cash),
-					nameof(SaleOverviewModel.Card),
-					nameof(SaleOverviewModel.UPI),
-					nameof(SaleOverviewModel.Credit),
-					nameof(SaleOverviewModel.PartyName)
-			];
-
-		// Create a customized column settings for the report
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = null;
-
-		// Generate the Excel file
-		string reportTitle = "Detailed Sales Report";
-		string worksheetName = "Sales Details";
-
-		var memoryStream = ExcelExportUtil.ExportToExcel(
-			_saleOverviews,
-			reportTitle,
-			worksheetName,
-			_startDate,
-			_endDate,
-			summaryItems,
-			columnSettings,
-			columnOrder);
-
+		var memoryStream = SaleExcelExport.ExportSaleOverviewExcel(_saleOverviews, _startDate, _endDate);
 		var fileName = $"Sales_Detail_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}

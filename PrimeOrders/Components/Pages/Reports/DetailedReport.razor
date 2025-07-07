@@ -83,10 +83,11 @@ else
 				@if (_user?.LocationId == 1)
 				{
 					<div class="filter-item">
-						<label>Location</label>
+						<label>Outlet / Franchise</label>
 						<SfComboBox TValue="int"
 									TItem="LocationModel"
-									Placeholder="Select a Location"
+									Placeholder="Select a Outlet / Franchise"
+									FloatLabelType='@FloatLabelType.Auto'
 									DataSource="_locations"
 									Value="_selectedLocationId"
 									CssClass="filter-control">
@@ -97,7 +98,6 @@ else
 				}
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
 				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
 			</div>
 		</div>
@@ -201,9 +201,9 @@ else
 								@{
 									var sale = (context as SaleOverviewModel);
 								}
-								<button @onclick="() => ShowDeleteConfirmation(sale.SaleId, sale.BillNo)" 
+								<button @onclick="() => ShowDeleteConfirmation(sale.SaleId, sale.BillNo)"
 										@onclick:stopPropagation="true"
-										class="delete-button" 
+										class="delete-button"
 										title="Deactivate Sale">
 									<span class="delete-icon">🗑️</span>
 								</button>
@@ -278,7 +278,7 @@ else
 					<div class="warning-message">
 						<p>Are you sure you want to deactivate this sale?</p>
 					</div>
-					
+
 					<div class="sale-info">
 						<div class="detail-item">
 							<span class="detail-label">Sale ID:</span>
@@ -304,12 +304,12 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton Content="Yes, Delete" 
-							  IsPrimary="true" 
-							  OnClick="ConfirmDeleteSale" 
+					<SfButton Content="Yes, Delete"
+							  IsPrimary="true"
+							  OnClick="ConfirmDeleteSale"
 							  CssClass="delete-confirm-button" />
-					<SfButton Content="Cancel" 
-							  OnClick="CancelDelete" 
+					<SfButton Content="Cancel"
+							  OnClick="CancelDelete"
 							  CssClass="dialog-button" />
 				</div>
 			</div>

@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Syncfusion.Drawing;
 using Syncfusion.XlsIO;
 
-namespace PrimeOrders.Components.Pages.Reports;
+namespace PrimeOrdersLibrary.Data.Common;
 
 /// <summary>
 /// Generic Excel exporter for all report types in the application
@@ -166,8 +166,8 @@ public static class ExcelExportUtil
 		{
 			// Skip collections and complex types that don't make sense in Excel
 			if (prop.PropertyType == typeof(byte[]) ||
-				(typeof(IEnumerable<object>).IsAssignableFrom(prop.PropertyType) &&
-				prop.PropertyType != typeof(string)))
+				typeof(IEnumerable<object>).IsAssignableFrom(prop.PropertyType) &&
+				prop.PropertyType != typeof(string))
 				continue;
 
 			var setting = new ColumnSetting
@@ -218,8 +218,8 @@ public static class ExcelExportUtil
 			}
 
 			else if (propType == typeof(TimeOnly) ||
-					(propType == typeof(DateTime) &&
-					 (prop.Name.Contains("Time") || prop.Name.EndsWith("At"))))
+					propType == typeof(DateTime) &&
+					 (prop.Name.Contains("Time") || prop.Name.EndsWith("At")))
 			{
 				setting.Alignment = ExcelHAlign.HAlignCenter;
 				setting.Format = "hh:mm tt";
@@ -235,8 +235,8 @@ public static class ExcelExportUtil
 					setting.FormatCallback = (value) => new FormatInfo
 					{
 						Bold = true,
-						FontColor = ((bool)value) ? Color.FromArgb(56, 142, 60) : Color.FromArgb(198, 40, 40),
-						FormattedText = ((bool)value) ? "Active" : "Inactive"
+						FontColor = (bool)value ? Color.FromArgb(56, 142, 60) : Color.FromArgb(198, 40, 40),
+						FormattedText = (bool)value ? "Active" : "Inactive"
 					};
 				}
 			}
@@ -442,7 +442,7 @@ public static class ExcelExportUtil
 		}
 
 		// Calculate the last row used
-		int lastRowUsed = startRow + (rows * 2) - 1;
+		int lastRowUsed = startRow + rows * 2 - 1;
 
 		// Add space after summary section
 		worksheet.Range[$"A{lastRowUsed + 1}:{colLetter}{lastRowUsed + 1}"].RowHeight = 15;

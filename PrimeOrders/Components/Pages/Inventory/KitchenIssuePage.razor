@@ -70,11 +70,8 @@ else
 			<button @onclick="() => _billDetailsDialogVisible = true" class="action-button">
 				<span class="action-icon">📄</span> Transaction Details
 			</button>
-			<button @onclick="() => _kitchenDialogVisible = true" class="action-button">
-				<span class="action-icon">👨‍🍳</span> Kitchen
-			</button>
 			<button @onclick="() => _kitchenIssueSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">📊</span> Complete Issue
+				<span class="action-icon">📊</span> Save
 			</button>
 		</div>
 
@@ -199,42 +196,6 @@ else
 								  CssClass="form-control" />
 				</div>
 
-				@if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
-				{
-					<div class="form-group">
-						<div class="status-checkbox-container">
-							<SfCheckBox @bind-Checked="_kitchenIssue.Status" Label="Active Status" CssClass="status-checkbox" />
-						</div>
-					</div>
-				}
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _billDetailsDialogVisible = false" CssClass="dialog-button" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Kitchen Dialog -->
-<SfDialog ID="_sfKitchenDialog"
-		  @ref="_sfKitchenDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_kitchenDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span>Kitchen Details</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
 				<div class="form-group">
 					<label>Kitchen</label>
 					<SfComboBox TValue="int"
@@ -247,18 +208,11 @@ else
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
 				</div>
-
-				<div class="kitchen-details">
-					<div class="detail-row">
-						<span class="detail-label">Name:</span>
-						<span class="detail-value">@_kitchen?.Name</span>
-					</div>
-				</div>
 			</div>
 		</Content>
 		<FooterTemplate>
 			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _kitchenDialogVisible = false" CssClass="dialog-button" />
+				<SfButton Content="Close" OnClick="() => _billDetailsDialogVisible = false" CssClass="dialog-button" />
 			</div>
 		</FooterTemplate>
 	</DialogTemplates>
@@ -301,7 +255,7 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton CssClass="save-button-dialog" Content="Complete Kitchen Issue" IsPrimary="true" OnClick="OnSaveKitchenIssueClick" />
+					<SfButton CssClass="save-button-dialog" Content="Save Kitchen Issue" IsPrimary="true" OnClick="OnSaveKitchenIssueClick" />
 					<SfButton Content="Close" OnClick="() => _kitchenIssueSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>
@@ -881,7 +835,7 @@ else
 
 	.detail-label {
 		font-weight: 600;
-		min-width: 80px;
+		min-width: 100px;
 		color: var(--dotnet-secondary);
 	}
 

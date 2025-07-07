@@ -792,13 +792,13 @@ public partial class SalePage
 
 	private async Task PrintThermalBill()
 	{
-		var content = await Sale.PrintThermalBill.GenerateThermalBill(_sale);
+		var content = await SaleThermalPrint.GenerateThermalBill(_sale);
 		await JS.InvokeVoidAsync("printToPrinter", content.ToString());
 	}
 
 	private async Task PrintA4Bill()
 	{
-		var pdfBytes = await PrintA4BillPdf.GenerateA4SaleBill(_sale, _saleProductCart);
+		var pdfBytes = await SaleA4Print.GenerateA4SaleBill(_sale, _saleProductCart);
 		var fileName = $"Sale_Bill_{_sale.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
 
 		await JS.InvokeVoidAsync("downloadPdf", Convert.ToBase64String(pdfBytes), fileName);
