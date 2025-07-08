@@ -1,35 +1,6 @@
-﻿@page "/Reports/Detailed"
-@page "/Reports/Detailed/{LocationId:int}"
+﻿@page "/Reports/OrderHistory"
 
-<PageTitle>Detailed Report - Prime Orders</PageTitle>
-
-<SfToast @ref="_sfErrorToast"
-		 ID="toast_error"
-		 Title="Error"
-		 Content="Some Error Message"
-		 Timeout="3000"
-		 ShowCloseButton="true"
-		 CssClass="e-toast-danger">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastAnimationSettings>
-		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
-		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
-	</ToastAnimationSettings>
-</SfToast>
-
-<SfToast @ref="_sfSuccessToast"
-		 ID="toast_success"
-		 Title="Success"
-		 Content="Sale deactivated successfully."
-		 Timeout="3000"
-		 ShowCloseButton="true"
-		 CssClass="e-toast-success">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastAnimationSettings>
-		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
-		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
-	</ToastAnimationSettings>
-</SfToast>
+<PageTitle>Order History - Prime Orders</PageTitle>
 
 @if (_isLoading)
 {
@@ -39,7 +10,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading detailed report...</p>
+		<p class="loading-text">Loading order history...</p>
 	</div>
 }
 else
@@ -59,8 +30,8 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Detailed Report</h2>
-			<p>View and analyze in-depth transaction records</p>
+			<h2>Order History</h2>
+			<p>Track and analyze customer order records</p>
 			<button @onclick='() => NavManager.NavigateTo("/Report-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Reports
 			</button>
@@ -78,6 +49,19 @@ else
 									   CssClass="filter-control">
 						<DateRangePickerEvents TValue="DateOnly" ValueChange="DateRangeChanged" />
 					</SfDateRangePicker>
+				</div>
+
+				<div class="filter-item">
+					<label>Status</label>
+					<SfComboBox TValue="string"
+								TItem="string"
+								Placeholder="Select Status"
+								FloatLabelType='@FloatLabelType.Auto'
+								DataSource="@(new List<string> { "All", "Pending", "Sold" })"
+								Value="@_selectedStatusFilter"
+								CssClass="filter-control">
+						<ComboBoxEvents TItem="string" TValue="string" ValueChange="OnStatusFilterChanged" />
+					</SfComboBox>
 				</div>
 
 				@if (_user?.LocationId == 1)
@@ -98,7 +82,18 @@ else
 				}
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
+				<SfButton CssClass="excel-button" OnClick="@(() => ExportToExcel())">
+					<div class="button-content">
+						<img src="images/excel.png" alt="Excel" class="excel-icon" />
+						<span>Export Excel</span>
+					</div>
+				</SfButton>
+				<SfButton CssClass="products-button" OnClick="@(() => ExportToProductsExcel())">
+					<div class="button-content">
+						<img src="images/excel.png" alt="Excel" class="products-excel-icon" />
+						<span>Export Pending Order Products Excel</span>
+					</div>
+				</SfButton>
 			</div>
 		</div>
 
@@ -106,107 +101,77 @@ else
 			<div class="overview-card total-sales">
 				<div class="card-icon">📈</div>
 				<div class="card-content">
-					<h3>Total Sales</h3>
-					<p class="amount">@_saleOverviews.Sum(_ => _.Total).FormatIndianCurrency()</p>
-				</div>
-			</div>
-
-			<div class="overview-card total-tax">
-				<div class="card-icon">💰</div>
-				<div class="card-content">
-					<h3>Total Transactions</h3>
-					<p class="amount">@_saleOverviews.Count</p>
-				</div>
-			</div>
-
-			<div class="overview-card total-discount">
-				<div class="card-icon">🏷️</div>
-				<div class="card-content">
-					<h3>Total Discount</h3>
-					<p class="amount">@_saleOverviews.Sum(_ => _.DiscountAmount).FormatIndianCurrency()</p>
+					<h3>Total Orders</h3>
+					<p class="amount">@_orderOverviews.Count</p>
 				</div>
 			</div>
 
 			<div class="overview-card total-products">
 				<div class="card-icon">📦</div>
 				<div class="card-content">
-					<h3>Products Sold</h3>
-					<p class="amount">@_saleOverviews.Sum(_ => _.TotalProducts)</p>
+					<h3>Total Products</h3>
+					<p class="amount">@_orderOverviews.Sum(_ => _.TotalProducts)</p>
+				</div>
+			</div>
+
+			<div class="overview-card total-quantity">
+				<div class="card-icon">🧮</div>
+				<div class="card-content">
+					<h3>Total Quantity</h3>
+					<p class="amount">@_orderOverviews.Sum(_ => _.TotalQuantity)</p>
+				</div>
+			</div>
+
+			<div class="overview-card order-status">
+				<div class="card-icon">🔍</div>
+				<div class="card-content">
+					<h3>Pending Orders</h3>
+					<p class="amount">@_orderOverviews.Count(_ => !_.SaleId.HasValue)</p>
 				</div>
 			</div>
 		</div>
 
 		<div class="detailed-grid-card">
 			<div class="card-header">
-				<h3 class="chart-title">Transaction Details</h3>
+				<h3 class="chart-title">Order Details</h3>
+				<p class="grid-info">Click on any row to view order summary and actions</p>
 			</div>
 			<div class="card-body">
 				<SfGrid ID="_sfGrid"
 						@ref="_sfGrid"
-						DataSource="_saleOverviews"
+						DataSource="_orderOverviews"
 						AllowSorting="true"
 						AllowFiltering="true"
 						AllowResizing="true"
 						AllowPaging="true"
 						AllowExcelExport="true"
-						AllowPdfExport="true">
-					<GridEvents RowSelected="SaleHistoryRowSelected" TValue="SaleOverviewModel" />
+						AllowPdfExport="true"
+						CssClass="clickable-grid">
+					<GridEvents RowSelected="OnOrderRowSelected" TValue="OrderOverviewModel" />
 					<GridPageSettings PageSize="10" />
 					<GridColumns>
-						<GridColumn Field="@nameof(SaleOverviewModel.BillNo)" HeaderText="Bill No" Width="90" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(SaleOverviewModel.SaleDateTime)" HeaderText="Date & Time" Width="160" Format="dd/MM/yyyy hh:mm tt" />
-						<GridColumn Field="@nameof(SaleOverviewModel.UserName)" HeaderText="Cashier" Width="130" />
-						<GridColumn Field="@nameof(SaleOverviewModel.PartyName)" HeaderText="Party" Width="130" />
-						<GridColumn Field="@nameof(SaleOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />
-
-						<GridColumn HeaderText="Base Total" Width="120" TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(OrderOverviewModel.OrderNo)" HeaderText="Order #" Width="90" TextAlign="TextAlign.Center" />
+						<GridColumn Field="@nameof(OrderOverviewModel.OrderDate)" HeaderText="Order Date" Width="120" Format="dd/MM/yyyy" />
+						<GridColumn Field="@nameof(OrderOverviewModel.LocationName)" HeaderText="Outlet / Franchise" Width="130" />
+						<GridColumn Field="@nameof(OrderOverviewModel.UserName)" HeaderText="Created By" Width="130" />
+						<GridColumn Field="@nameof(OrderOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(OrderOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn HeaderText="Status" Width="100" TextAlign="TextAlign.Center">
 							<Template>
 								@{
-									var sale = (context as SaleOverviewModel);
-									@(sale.BaseTotal.FormatIndianCurrency())
+									var order = (context as OrderOverviewModel);
+									<span class="order-status-badge @(order.SaleId.HasValue ? "completed" : "pending")">
+										@(order.SaleId.HasValue ? "Sold" : "Pending")
+									</span>
 								}
 							</Template>
 						</GridColumn>
-
-						<GridColumn HeaderText="Discount" Width="110" TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(OrderOverviewModel.SaleBillNo)" HeaderText="Sale Bill #" Width="120" TextAlign="TextAlign.Center">
 							<Template>
 								@{
-									var sale = (context as SaleOverviewModel);
-									@(sale.DiscountAmount.FormatIndianCurrency())
+									var order = (context as OrderOverviewModel);
+									@(order.SaleBillNo ?? "-")
 								}
-							</Template>
-						</GridColumn>
-
-						<GridColumn HeaderText="Tax" Width="100" TextAlign="TextAlign.Right">
-							<Template>
-								@{
-									var sale = (context as SaleOverviewModel);
-									@(sale.TotalTaxAmount.FormatIndianCurrency())
-								}
-							</Template>
-						</GridColumn>
-
-						<GridColumn HeaderText="Total" Width="120" TextAlign="TextAlign.Right">
-							<Template>
-								@{
-									var sale = (context as SaleOverviewModel);
-									@(sale.Total.FormatIndianCurrency())
-								}
-							</Template>
-						</GridColumn>
-
-						<GridColumn HeaderText="Action" Width="100" TextAlign="TextAlign.Center" AllowFiltering="false" AllowSorting="false">
-							<Template>
-								@{
-									var sale = (context as SaleOverviewModel);
-								}
-								<button @onclick="() => ShowDeleteConfirmation(sale.SaleId, sale.BillNo)"
-										@onclick:stopPropagation="true"
-										class="delete-button"
-										title="Deactivate Sale">
-									<span class="delete-icon">🗑️</span>
-								</button>
 							</Template>
 						</GridColumn>
 					</GridColumns>
@@ -216,29 +181,29 @@ else
 
 		<div class="chart-grid">
 			<div class="chart-card">
-				<h3 class="chart-title">Daily Sales Trend</h3>
+				<h3 class="chart-title">Daily Orders</h3>
 				<SfChart Height="300px">
 					<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
 									   Title="Date"></ChartPrimaryXAxis>
-					<ChartPrimaryYAxis Title="Amount (₹)" LabelFormat="{value}"></ChartPrimaryYAxis>
+					<ChartPrimaryYAxis Title="Orders" LabelFormat="{value}"></ChartPrimaryYAxis>
 					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
 					<ChartSeriesCollection>
-						<ChartSeries DataSource="@GetDailySalesData()"
-									 XName="Date" YName="Amount" Type="ChartSeriesType.Line"
-									 Name="Sales" Fill="#512BD4">
+						<ChartSeries DataSource="@GetDailyOrdersData()"
+									 XName="Date" YName="Count" Type="ChartSeriesType.Line"
+									 Name="Orders" Fill="#512BD4">
 						</ChartSeries>
 					</ChartSeriesCollection>
 				</SfChart>
 			</div>
 
 			<div class="chart-card">
-				<h3 class="chart-title">Payment Methods</h3>
-				<SfAccumulationChart Title="Payment Distribution" EnableSmartLabels="true" Height="300px">
+				<h3 class="chart-title">Order Status Distribution</h3>
+				<SfAccumulationChart Title="Order Status" EnableSmartLabels="true" Height="300px">
 					<AccumulationChartSeriesCollection>
-						<AccumulationChartSeries DataSource="@GetPaymentMethodsData()" XName="PaymentMethod"
-												 YName="Amount" Name="Payment"
+						<AccumulationChartSeries DataSource="@GetOrderStatusData()" XName="Status"
+												 YName="Count" Name="Status"
 												 InnerRadius="40%" LegendShape="LegendShape.Circle">
-							<AccumulationDataLabelSettings Visible="true" Name="PaymentMethod"
+							<AccumulationDataLabelSettings Visible="true" Name="Status"
 														   Position="AccumulationLabelPosition.Outside" />
 							<AccumulationChartAnimation Enable="true"></AccumulationChartAnimation>
 						</AccumulationChartSeries>
@@ -255,67 +220,12 @@ else
 	</div>
 }
 
-<!-- Delete Confirmation Dialog -->
-<SfDialog ID="_sfDeleteConfirmationDialog"
-		  @ref="_sfDeleteConfirmationDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_deleteConfirmationDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="warning-icon">⚠️</span>
-				<span>Confirm Delete Sale</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				<div class="confirm-section">
-					<div class="warning-message">
-						<p>Are you sure you want to deactivate this sale?</p>
-					</div>
-
-					<div class="sale-info">
-						<div class="detail-item">
-							<span class="detail-label">Sale ID:</span>
-							<span class="detail-value">@_saleToDeleteId</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">Bill No:</span>
-							<span class="detail-value">@_saleToDeleteBillNo</span>
-						</div>
-					</div>
-
-					<div class="warning-note">
-						<p><strong>Note:</strong> This action will:</p>
-						<ul>
-							<li>Set the sale status to inactive</li>
-							<li>Remove associated stock entries</li>
-							<li>This action cannot be easily undone</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Yes, Delete"
-							  IsPrimary="true"
-							  OnClick="ConfirmDeleteSale"
-							  CssClass="delete-confirm-button" />
-					<SfButton Content="Cancel"
-							  OnClick="CancelDelete"
-							  CssClass="dialog-button" />
-				</div>
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
+<!-- Order Summary Module -->
+<OrderSummaryModule IsVisible="_orderSummaryVisible"
+					IsVisibleChanged="OnOrderSummaryVisibilityChanged"
+					SelectedOrder="_selectedOrder"
+					OrderDetails="_selectedOrderDetails"
+					CurrentUser="_user" />
 
 <style>
 	:root {
@@ -332,118 +242,36 @@ else
 		--discount-color: #20c997;
 		--tax-color: #6c757d;
 		--excel-color: #217346;
+		--pending-color: #FFA500;
+		--completed-color: #4CAF50;
+		--sold-color: #4CAF50;
 	}
 
-	/* Delete Button Styling */
-	.delete-button {
-		background-color: #f44336;
-		color: white;
-		border: none;
-		padding: 6px 10px;
-		border-radius: 4px;
-		cursor: pointer;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		font-size: 12px;
-	}
-
-		.delete-button:hover {
-			background-color: #d32f2f;
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
-		}
-
-		.delete-button:active {
-			transform: translateY(0);
-		}
-
-	.delete-icon {
+	/* Grid Info */
+	.grid-info {
+		margin: 5px 0 0 0;
+		color: var(--dotnet-accent);
 		font-size: 14px;
+		font-style: italic;
+		font-weight: 500;
 	}
 
-	/* Delete Confirmation Dialog Styling */
-	.warning-icon {
-		font-size: 24px;
-		margin-right: 10px;
-	}
-
-	.warning-message {
-		background-color: #fff3cd;
-		border: 1px solid #ffeaa7;
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 20px;
-		text-align: center;
-	}
-
-		.warning-message p {
-			margin: 0;
-			font-weight: 600;
-			color: #856404;
-			font-size: 16px;
-		}
-
-	.sale-info {
-		background-color: var(--dotnet-light);
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 20px;
-	}
-
-		.sale-info .detail-item {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 8px;
-		}
-
-		.sale-info .detail-label {
-			font-weight: 600;
-			color: var(--dotnet-dark);
-		}
-
-		.sale-info .detail-value {
-			color: var(--dotnet-secondary);
-			font-weight: 500;
-		}
-
-	.warning-note {
-		background-color: #f8d7da;
-		border: 1px solid #f5c6cb;
-		border-radius: 6px;
-		padding: 15px;
-	}
-
-		.warning-note p {
-			margin: 0 0 10px 0;
-			font-weight: 600;
-			color: #721c24;
-		}
-
-		.warning-note ul {
-			margin: 0;
-			padding-left: 20px;
-			color: #721c24;
-		}
-
-		.warning-note li {
-			margin-bottom: 5px;
-		}
-
-	.delete-confirm-button {
-		background-color: #f44336;
-		color: white;
-		border: none;
-		padding: 10px 20px;
-		border-radius: 6px;
-		font-weight: 600;
+	/* Clickable Grid Styling */
+	.clickable-grid ::deep .e-grid .e-row {
+		cursor: pointer;
 		transition: all 0.2s ease;
 	}
 
-		.delete-confirm-button:hover {
-			background-color: #d32f2f;
+		.clickable-grid ::deep .e-grid .e-row:hover {
+			background-color: rgba(81, 43, 212, 0.08);
+			transform: translateY(-1px);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		}
+
+	.clickable-grid ::deep .e-grid .e-rowselect {
+		background-color: rgba(81, 43, 212, 0.15);
+		border-left: 4px solid var(--dotnet-primary);
+	}
 
 	/* General Layout */
 	.dashboard-container {
@@ -600,24 +428,20 @@ else
 		gap: 10px;
 	}
 
-	.export-button {
-		background-color: var(--dotnet-secondary);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
+	/* Button Content for Excel buttons */
+	.button-content {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		transition: all 0.2s ease;
+		justify-content: center;
 	}
 
-		.export-button:hover {
-			background-color: #571b6c;
-			transform: translateY(-2px);
-		}
+	/* Icon styling for Excel buttons */
+	.excel-icon,
+	.products-excel-icon {
+		width: 16px;
+		height: 16px;
+	}
 
 	.excel-button {
 		background-color: var(--excel-color);
@@ -629,7 +453,7 @@ else
 		font-weight: 600;
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		justify-content: center;
 		transition: all 0.2s ease;
 	}
 
@@ -638,9 +462,24 @@ else
 			transform: translateY(-2px);
 		}
 
-	.export-icon, .excel-icon {
-		font-size: 16px;
+	.products-button {
+		background-color: #8e44ad;
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
 	}
+
+		.products-button:hover {
+			background-color: #6c3483;
+			transform: translateY(-2px);
+		}
 
 	/* Overview Cards */
 	.overview-cards {
@@ -671,7 +510,7 @@ else
 		font-size: 30px;
 		width: 60px;
 		height: 60px;
-		min-width: 60px; /* Prevent icon from shrinking */
+		min-width: 60px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -684,24 +523,24 @@ else
 		color: var(--dotnet-accent);
 	}
 
-	.total-tax .card-icon {
+	.total-products .card-icon {
 		background-color: rgba(104, 33, 122, 0.1);
 		color: var(--dotnet-secondary);
 	}
 
-	.total-discount .card-icon {
-		background-color: rgba(220, 53, 69, 0.1);
-		color: #dc3545;
+	.total-quantity .card-icon {
+		background-color: rgba(46, 196, 134, 0.1);
+		color: #2EC486;
 	}
 
-	.total-products .card-icon {
-		background-color: rgba(40, 167, 69, 0.1);
-		color: #28a745;
+	.order-status .card-icon {
+		background-color: rgba(255, 165, 0, 0.1);
+		color: var(--pending-color);
 	}
 
 	.card-content {
 		width: 100%;
-		overflow: hidden; /* Prevent text overflow */
+		overflow: hidden;
 	}
 
 		.card-content h3 {
@@ -721,6 +560,24 @@ else
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	/* Order status badges */
+	.order-status-badge {
+		padding: 4px 8px;
+		border-radius: 12px;
+		font-size: 12px;
+		font-weight: 500;
+	}
+
+	.pending {
+		background-color: rgba(255, 165, 0, 0.2);
+		color: var(--pending-color);
+	}
+
+	.completed {
+		background-color: rgba(76, 175, 80, 0.2);
+		color: var(--sold-color);
 	}
 
 	/* Detailed Grid */
@@ -762,7 +619,7 @@ else
 		border-radius: 12px;
 		padding: 20px;
 		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-		height: 360px; /* Fixed height for uniformity */
+		height: 360px;
 	}
 
 	.chart-title {
@@ -861,125 +718,15 @@ else
 		background-color: var(--dotnet-light);
 	}
 
-	/* Dialog Styling */
-	.dialog-header {
-		font-size: 20px;
-		font-weight: 600;
-		color: var(--dotnet-secondary);
-		display: flex;
-		align-items: center;
-	}
-
-	.dialog-content {
-		padding: 20px;
-	}
-
-	.confirm-section {
-		margin-bottom: 0;
-	}
-
-	/* Dialog Footer */
-	.dialog-footer {
-		display: flex;
-		justify-content: flex-end;
-		align-items: center;
-		padding: 15px 20px;
-		background-color: var(--dotnet-light);
-		border-top: 1px solid var(--dotnet-border);
-	}
-
-	.footer-buttons {
-		display: flex;
-		gap: 10px;
-	}
-
-	/* Dialog buttons */
-	.dialog-button {
-		border-radius: 6px;
-		padding: 8px 16px;
-		height: 38px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 500;
-	}
-
-	/* Toast Styling */
-	::deep .e-toast-container {
-		z-index: 1000;
-	}
-
-		::deep .e-toast-container .e-toast {
-			border: 0;
-			border-radius: 8px;
-			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+	/* Animations */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
 		}
 
-	/* Success Toast */
-	::deep .e-toast-success {
-		background-color: #ebf7ee;
-		border-left: 4px solid #4CAF50;
-		color: #2E7D32;
-	}
-
-		::deep .e-toast-success .e-toast-title {
-			color: #2E7D32;
-			font-weight: 700;
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
 		}
-
-		::deep .e-toast-success .e-toast-content {
-			color: #2E7D32;
-		}
-
-		::deep .e-toast-success .e-toast-close-icon {
-			color: #2E7D32;
-		}
-
-		::deep .e-toast-success::before {
-			content: "✓";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-	/* Error Toast */
-	::deep .e-toast-danger {
-		background-color: #fdeeee;
-		border-left: 4px solid #F44336;
-		color: #C62828;
-	}
-
-		::deep .e-toast-danger .e-toast-title {
-			color: #C62828;
-			font-weight: 700;
-		}
-
-		::deep .e-toast-danger .e-toast-content {
-			color: #C62828;
-		}
-
-		::deep .e-toast-danger .e-toast-close-icon {
-			color: #C62828;
-		}
-
-		::deep .e-toast-danger::before {
-			content: "⚠";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-	/* Toast Animation */
-	::deep .e-toast-container .e-toast {
-		padding: 10px 10px 10px 40px;
-		position: relative;
-		animation-fill-mode: both;
 	}
 
 	/* Responsive Design */
@@ -991,13 +738,6 @@ else
 		.chart-card {
 			height: auto;
 			min-height: 360px;
-		}
-	}
-
-	@@media (max-width: 992px) {
-		#_sfBillSelectionDialog {
-			width: 95vw !important;
-			height: 90vh !important;
 		}
 	}
 
@@ -1035,16 +775,11 @@ else
 			height: auto;
 			min-height: 120px;
 		}
-	}
-
-	/* Animations */
-	@@keyframes rotate {
-		0% {
-			transform: rotate(0deg) translate(-24px) rotate(0deg);
-		}
-
-		100% {
-			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		/* Mobile responsive icon sizes */
+		.excel-icon,
+		.products-excel-icon {
+			width: 14px;
+			height: 14px;
 		}
 	}
 </style>

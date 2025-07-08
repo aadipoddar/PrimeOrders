@@ -1,7 +1,7 @@
 ﻿using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
 
-namespace PrimeOrders.Components.Pages.Reports;
+namespace PrimeOrders.Components.Pages.Reports.Order;
 
 public partial class OrderHistoryPage
 {
@@ -19,7 +19,7 @@ public partial class OrderHistoryPage
 
 	private OrderOverviewModel _selectedOrder;
 
-	private readonly List<OrderData.OrderDetailDisplayModel> _selectedOrderDetails = [];
+	private readonly List<OrderDetailDisplayModel> _selectedOrderDetails = [];
 	private List<OrderOverviewModel> _orderOverviews = [];
 	private List<LocationModel> _locations = [];
 
@@ -157,9 +157,9 @@ public partial class OrderHistoryPage
 	#endregion
 
 	#region Charts
-	private List<OrderData.ChartData> GetDailyOrdersData()
+	private List<OrderChartData> GetDailyOrdersData()
 	{
-		var result = new List<OrderData.ChartData>();
+		var result = new List<OrderChartData>();
 		if (_orderOverviews == null || _orderOverviews.Count == 0)
 			return result;
 
@@ -178,9 +178,9 @@ public partial class OrderHistoryPage
 		return result;
 	}
 
-	private List<OrderData.StatusData> GetOrderStatusData()
+	private List<OrderStatusData> GetOrderStatusData()
 	{
-		var result = new List<OrderData.StatusData>();
+		var result = new List<OrderStatusData>();
 		if (_orderOverviews == null || _orderOverviews.Count == 0)
 			return result;
 

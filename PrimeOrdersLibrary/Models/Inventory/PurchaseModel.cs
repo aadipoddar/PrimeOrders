@@ -88,3 +88,26 @@ public enum MeasurementUnit
 	Gram,
 	Litre
 }
+
+#region Chart and Helper Models
+public class PurchaseDetailDisplayModel
+{
+	public string RawMaterialName { get; set; } = "";
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
+}
+
+public class DailyPurchaseData
+{
+	public string Date { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class VendorDistributionData
+{
+	public int SupplierId { get; set; }
+	public string SupplierName { get; set; }
+	public decimal Amount { get; set; }
+}
+#endregion

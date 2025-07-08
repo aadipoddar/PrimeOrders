@@ -3,7 +3,7 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
-namespace PrimeOrders.Components.Pages.Inventory;
+namespace PrimeOrders.Components.Pages.Inventory.Stock;
 
 public partial class ProductStockAdjustmentPage
 {
@@ -199,7 +199,7 @@ public partial class ProductStockAdjustmentPage
 		else
 			_filteredProducts = [.. _products.Where(p =>
 				p.Name.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase) ||
-				(p.Code != null && p.Code.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase))
+				p.Code != null && p.Code.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase)
 			)];
 
 		_selectedProductIndex = 0;

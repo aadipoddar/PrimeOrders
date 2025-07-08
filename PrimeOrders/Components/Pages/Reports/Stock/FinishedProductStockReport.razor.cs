@@ -2,7 +2,7 @@ using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 
-namespace PrimeOrders.Components.Pages.Reports;
+namespace PrimeOrders.Components.Pages.Reports.Stock;
 
 public partial class FinishedProductStockReport
 {

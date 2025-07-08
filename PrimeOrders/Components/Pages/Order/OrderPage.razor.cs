@@ -16,7 +16,6 @@ public partial class OrderPage
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
 	private bool _orderDetailsDialogVisible = false;
-	private bool _locationDialogVisible = false;
 	private bool _orderSummaryDialogVisible = false;
 
 	private decimal _selectedQuantity = 1;
@@ -48,7 +47,6 @@ public partial class OrderPage
 	private SfGrid<OrderProductCartModel> _sfProductCartGrid;
 
 	private SfDialog _sfOrderDetailsDialog;
-	private SfDialog _sfLocationDialog;
 	private SfDialog _sfOrderSummaryDialog;
 	private SfDialog _sfProductManageDialog;
 	private SfDialog _sfQuantityDialog;

@@ -93,3 +93,25 @@ public class SaleOverviewModel
 	public decimal UPI { get; set; }
 	public decimal Credit { get; set; }
 }
+
+#region Chatr and Helper Models 
+public class SaleDetailDisplayModel
+{
+	public string ProductName { get; set; } = "";
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
+}
+
+public class SalePaymentMethodData
+{
+	public string PaymentMethod { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class DailySalesData
+{
+	public string Date { get; set; }
+	public decimal Amount { get; set; }
+}
+#endregion

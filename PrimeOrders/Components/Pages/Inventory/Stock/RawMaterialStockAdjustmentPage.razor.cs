@@ -1,28 +1,26 @@
-using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
-namespace PrimeOrders.Components.Pages.Inventory;
+namespace PrimeOrders.Components.Pages.Inventory.Stock;
 
-public partial class KitchenIssuePage
+public partial class RawMaterialStockAdjustmentPage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
-
-	[Parameter] public int? KitchenIssueId { get; set; }
 
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
-	private bool _billDetailsDialogVisible = false;
-	private bool _kitchenIssueSummaryDialogVisible = false;
+	private bool _stockDetailsDialogVisible = false;
+	private bool _adjustmentSummaryDialogVisible = false;
 
 	private decimal _baseTotal = 0;
 	private decimal _total = 0;
 	private decimal _selectedQuantity = 1;
 
+	private int _selectedLocationId = 1;
 	private int _selectedRawMaterialId = 0;
 
 	private string _materialSearchText = "";
@@ -31,26 +29,19 @@ public partial class KitchenIssuePage
 	private bool _isMaterialSearchActive = false;
 	private bool _hasAddedMaterialViaSearch = true;
 
-	private KitchenIssueRawMaterialCartModel _selectedRawMaterialCart = new();
+	private StockAdjustmentRawMaterialCartModel _selectedRawMaterialCart = new();
 	private RawMaterialModel _selectedRawMaterial = new();
 
-	private KitchenModel _kitchen = new();
-	private KitchenIssueModel _kitchenIssue = new()
-	{
-		IssueDate = DateTime.Now,
-		Status = true
-	};
-
-	private List<KitchenModel> _kitchens;
-	private List<RawMaterialModel> _rawMaterials;
-	private readonly List<KitchenIssueRawMaterialCartModel> _kitchenIssueRawMaterialCarts = [];
+	private List<RawMaterialStockDetailModel> _stockDetails = [];
+	private List<RawMaterialModel> _rawMaterials = [];
+	private readonly List<StockAdjustmentRawMaterialCartModel> _stockAdjustmentRawMaterialCarts = [];
 
 	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
-	private SfGrid<KitchenIssueRawMaterialCartModel> _sfRawMaterialCartGrid;
+	private SfGrid<StockAdjustmentRawMaterialCartModel> _sfRawMaterialCartGrid;
+	private SfGrid<RawMaterialStockDetailModel> _sfStockGrid;
 
-	private SfDialog _sfBillDetailsDialog;
-	private SfDialog _sfKitchenDialog;
-	private SfDialog _sfKitchenIssueSummaryDialog;
+	private SfDialog _sfStockDetailsDialog;
+	private SfDialog _sfAdjustmentSummaryDialog;
 	private SfDialog _sfRawMaterialManageDialog;
 	private SfDialog _sfQuantityDialog;
 	private SfToast _sfSuccessToast;
@@ -68,7 +59,7 @@ public partial class KitchenIssuePage
 			return;
 
 		await LoadData();
-		await JS.InvokeVoidAsync("setupKitchenIssuePageKeyboardHandlers", DotNetObjectReference.Create(this));
+		await JS.InvokeVoidAsync("setupStockAdjustmentPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
 		_isLoading = false;
 		StateHasChanged();
@@ -76,54 +67,28 @@ public partial class KitchenIssuePage
 
 	private async Task LoadData()
 	{
-		_kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen);
-		_kitchen = _kitchens.FirstOrDefault();
-		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
+		_selectedLocationId = 1;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(0);
+		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		_filteredRawMaterials = [.. _rawMaterials];
 
-		_kitchenIssue.LocationId = _user?.LocationId ?? 0;
-		_kitchenIssue.UserId = _user?.Id ?? 0;
-		_kitchenIssue.TransactionNo = await GenerateBillNo.GenerateKitchenIssueTransactionNo(_kitchenIssue);
-
-		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
-			await LoadKitchenIssue();
-
+		await LoadStockDetails();
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}
 
-	private async Task LoadKitchenIssue()
+	private async Task LoadStockDetails()
 	{
-		_kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, KitchenIssueId.Value);
+		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(
+			DateTime.Now.AddDays(-1),
+			DateTime.Now.AddDays(1),
+			1);
 
-		if (_kitchenIssue is null)
-			NavManager.NavigateTo("/Inventory-Dashboard");
+		if (_sfStockGrid is not null)
+			await _sfStockGrid.Refresh();
 
-		_kitchenIssueRawMaterialCarts.Clear();
-
-		var kitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(_kitchenIssue.Id);
-		foreach (var item in kitchenIssueDetails)
-		{
-			var rawMaterial = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, item.RawMaterialId);
-
-			_kitchenIssueRawMaterialCarts.Add(new()
-			{
-				RawMaterialId = item.RawMaterialId,
-				RawMaterialName = rawMaterial.Name,
-				Quantity = item.Quantity,
-				Rate = rawMaterial.MRP,
-				Total = item.Quantity * rawMaterial.MRP
-			});
-		}
-
-		if (_sfRawMaterialCartGrid is not null)
-			await _sfRawMaterialCartGrid.Refresh();
-
-		UpdateFinancialDetails();
 		StateHasChanged();
 	}
 	#endregion
@@ -222,7 +187,7 @@ public partial class KitchenIssuePage
 		else
 			_filteredRawMaterials = [.. _rawMaterials.Where(m =>
 				m.Name.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase) ||
-				(m.Code != null && m.Code.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase))
+				m.Code != null && m.Code.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase)
 			)];
 
 		_selectedMaterialIndex = 0;
@@ -268,29 +233,15 @@ public partial class KitchenIssuePage
 	}
 	#endregion
 
-	#region Kitchen Issue Details Events
-	private async Task OnKitchenChanged(ChangeEventArgs<int, KitchenModel> args)
-	{
-		_kitchen = await CommonData.LoadTableDataById<KitchenModel>(TableNames.Kitchen, args.Value);
-		_kitchen ??= new KitchenModel();
-
-		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
-		UpdateFinancialDetails();
-		StateHasChanged();
-	}
-
+	#region Stock Adjustment Details Events
 	private void UpdateFinancialDetails()
 	{
-		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
-		_kitchenIssue.UserId = _user?.Id ?? 0;
-		_kitchenIssue.LocationId = _user?.LocationId ?? 0;
-
-		foreach (var item in _kitchenIssueRawMaterialCarts)
+		foreach (var item in _stockAdjustmentRawMaterialCarts)
 		{
 			item.Total = item.Rate * item.Quantity;
 		}
 
-		_baseTotal = _kitchenIssueRawMaterialCarts.Sum(c => c.Total);
+		_baseTotal = _stockAdjustmentRawMaterialCarts.Sum(c => c.Total);
 		_total = _baseTotal;
 
 		_sfRawMaterialCartGrid?.Refresh();
@@ -312,7 +263,7 @@ public partial class KitchenIssuePage
 		StateHasChanged();
 	}
 
-	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<KitchenIssueRawMaterialCartModel> args)
+	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<StockAdjustmentRawMaterialCartModel> args)
 	{
 		_selectedRawMaterialCart = args.Data;
 		_dialogVisible = true;
@@ -330,13 +281,13 @@ public partial class KitchenIssuePage
 			return;
 		}
 
-		var existingMaterial = _kitchenIssueRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterial.Id);
+		var existingMaterial = _stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterial.Id);
 
 		if (existingMaterial is not null)
-			existingMaterial.Quantity += _selectedQuantity;
+			existingMaterial.Quantity = _selectedQuantity; // For stock adjustment, we set the target quantity, not add to it
 		else
 		{
-			_kitchenIssueRawMaterialCarts.Add(new()
+			_stockAdjustmentRawMaterialCarts.Add(new()
 			{
 				RawMaterialId = _selectedRawMaterial.Id,
 				RawMaterialName = _selectedRawMaterial.Name,
@@ -379,10 +330,10 @@ public partial class KitchenIssuePage
 
 	private async Task OnSaveRawMaterialManageClick()
 	{
-		_kitchenIssueRawMaterialCarts.Remove(_kitchenIssueRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
+		_stockAdjustmentRawMaterialCarts.Remove(_stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
 
 		if (_selectedRawMaterialCart.Quantity > 0)
-			_kitchenIssueRawMaterialCarts.Add(_selectedRawMaterialCart);
+			_stockAdjustmentRawMaterialCarts.Add(_selectedRawMaterialCart);
 
 		_dialogVisible = false;
 		await _sfRawMaterialCartGrid?.Refresh();
@@ -394,7 +345,7 @@ public partial class KitchenIssuePage
 	private async Task OnRemoveFromCartRawMaterialManageClick()
 	{
 		_selectedRawMaterialCart.Quantity = 0;
-		_kitchenIssueRawMaterialCarts.Remove(_kitchenIssueRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
+		_stockAdjustmentRawMaterialCarts.Remove(_stockAdjustmentRawMaterialCarts.FirstOrDefault(c => c.RawMaterialId == _selectedRawMaterialCart.RawMaterialId));
 
 		_dialogVisible = false;
 		await _sfRawMaterialCartGrid?.Refresh();
@@ -407,101 +358,65 @@ public partial class KitchenIssuePage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
-		if (_kitchenIssueRawMaterialCarts.Count == 0 || _kitchenIssueRawMaterialCarts is null)
+		if (_stockAdjustmentRawMaterialCarts.Count == 0 || _stockAdjustmentRawMaterialCarts is null)
 		{
-			_sfErrorToast.Content = "Please add at least one raw material to the kitchen issue.";
+			_sfErrorToast.Content = "Please add at least one raw material for stock adjustment.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 
-		if (_kitchenIssue.KitchenId <= 0)
+		if (_selectedLocationId <= 0)
 		{
-			_sfErrorToast.Content = "Please select a kitchen.";
+			_sfErrorToast.Content = "Please select a location.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
 
-		if (string.IsNullOrWhiteSpace(_kitchenIssue.TransactionNo))
-		{
-			_sfErrorToast.Content = "Transaction No is required.";
-			await _sfErrorToast.ShowAsync();
-			return false;
-		}
-
-		if (_kitchenIssue.UserId == 0)
-		{
-			_sfErrorToast.Content = "User is required.";
-			await _sfErrorToast.ShowAsync();
-			return false;
-		}
 		return true;
 	}
 
-	private async Task OnSaveKitchenIssueClick()
+	private async Task OnSaveStockAdjustmentClick()
 	{
 		UpdateFinancialDetails();
 
 		if (!await ValidateForm())
 			return;
 
-		_kitchenIssue.Id = await KitchenIssueData.InsertKitchenIssue(_kitchenIssue);
-		if (_kitchenIssue.Id <= 0)
-		{
-			_sfErrorToast.Content = "Failed to save kitchen issue.";
-			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
-			return;
-		}
+		await InsertStockAdjustment();
 
-		await InsertKitchenIssueDetail();
-		await InsertStock();
-
-		_kitchenIssueSummaryDialogVisible = false;
+		_adjustmentSummaryDialogVisible = false;
 		await _sfSuccessToast.ShowAsync();
 	}
 
-	private async Task InsertKitchenIssueDetail()
+	private async Task InsertStockAdjustment()
 	{
-		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
+		foreach (var item in _stockAdjustmentRawMaterialCarts)
 		{
-			var existingKitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(KitchenIssueId.Value);
-			foreach (var item in existingKitchenIssueDetails)
+			decimal adjustmentQuantity = 0;
+			var existingStock = _stockDetails.FirstOrDefault(s => s.RawMaterialId == item.RawMaterialId);
+
+			if (existingStock is null)
+				adjustmentQuantity = item.Quantity;
+			else
+				adjustmentQuantity = item.Quantity - existingStock.ClosingStock;
+
+			if (adjustmentQuantity != 0) // Only create stock entry if there's an actual adjustment
 			{
-				item.Status = false;
-				await KitchenIssueData.InsertKitchenIssueDetail(item);
+				await StockData.InsertRawMaterialStock(new()
+				{
+					Id = 0,
+					RawMaterialId = item.RawMaterialId,
+					Quantity = adjustmentQuantity,
+					Type = StockType.Adjustment.ToString(),
+					TransactionNo = $"ADJ-{DateTime.Now:yyyyMMddHHmmss}",
+					TransactionDate = DateOnly.FromDateTime(DateTime.Now),
+					LocationId = _selectedLocationId
+				});
 			}
 		}
 
-		foreach (var item in _kitchenIssueRawMaterialCarts)
-			await KitchenIssueData.InsertKitchenIssueDetail(new()
-			{
-				Id = 0,
-				KitchenIssueId = _kitchenIssue.Id,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = item.Quantity,
-				Status = true
-			});
-	}
-
-	private async Task InsertStock()
-	{
-		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
-			await StockData.DeleteRawMaterialStockByTransactionNo(_kitchenIssue.TransactionNo);
-
-		if (!_kitchenIssue.Status)
-			return;
-
-		foreach (var item in _kitchenIssueRawMaterialCarts)
-			await StockData.InsertRawMaterialStock(new()
-			{
-				Id = 0,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = -item.Quantity,
-				Type = StockType.KitchenIssue.ToString(),
-				TransactionNo = _kitchenIssue.TransactionNo,
-				TransactionDate = DateOnly.FromDateTime(_kitchenIssue.IssueDate),
-				LocationId = _user.LocationId
-			});
+		// Refresh stock details after adjustment
+		await LoadStockDetails();
 	}
 	#endregion
 }

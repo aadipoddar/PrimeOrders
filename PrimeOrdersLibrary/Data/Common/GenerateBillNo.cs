@@ -158,4 +158,9 @@ public static class GenerateBillNo
 
 		return $"{prefix}FP{year}000001";
 	}
+
+	public static async Task<string> GenerateRawMaterialCode()
+	{
+		return "";
+	}
 }

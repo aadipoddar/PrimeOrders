@@ -2,6 +2,7 @@
 
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Models.Inventory;
+using PrimeOrdersLibrary.Models.Product;
 using PrimeOrdersLibrary.Models.Sale;
 
 using Syncfusion.Drawing;
@@ -24,8 +25,11 @@ public static class SaleA4Print
 	private const float _headerHeight = 30f;
 	private const float _footerReservedSpace = 100f; // Space reserved for footer content
 
-	public static async Task<byte[]> GenerateA4SaleBill(SaleModel sale, List<SaleProductCartModel> saleProducts)
+	public static async Task<byte[]> GenerateA4SaleBill(int saleId)
 	{
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);
+		var saleDetails = await SaleData.LoadSaleDetailBySale(saleId);
+
 		using var document = new PdfDocument();
 		var page = document.Pages.Add();
 		var graphics = page.Graphics;
@@ -53,22 +57,20 @@ public static class SaleA4Print
 
 		// Customer Information (only on first page, if party exists)
 		if (sale.PartyId.HasValue && sale.PartyId.Value > 0)
-		{
 			currentY = await DrawCustomerInfo(graphics, pageWidth, currentY, subHeaderFont, normalFont, sale);
-		}
 
 		// Items Table with pagination support
-		var (finalY, lastPage) = DrawItemsTableWithPagination(document, saleProducts, currentY, pageWidth, pageHeight, subHeaderFont, normalFont, boldFont);
+		var (finalY, lastPage) = await DrawItemsTableWithPagination(document, saleDetails, currentY, pageWidth, pageHeight, subHeaderFont, normalFont, boldFont);
 
 		// Use the last page for remaining content
 		graphics = lastPage.Graphics;
 		currentY = finalY;
 
 		// Summary Section
-		currentY = DrawSummarySection(graphics, pageWidth, currentY, subHeaderFont, normalFont, boldFont, saleProducts, sale);
+		currentY = DrawSummarySection(graphics, pageWidth, currentY, subHeaderFont, normalFont, boldFont, saleDetails, sale);
 
 		// Amount in Words
-		currentY = DrawAmountInWords(graphics, pageWidth, currentY, normalFont, boldFont, saleProducts.Sum(x => x.Total));
+		currentY = DrawAmountInWords(graphics, pageWidth, currentY, normalFont, boldFont, saleDetails.Sum(x => x.Total));
 
 		// Payment Information
 		currentY = DrawPaymentInfo(graphics, pageWidth, currentY, normalFont, boldFont, sale);
@@ -82,10 +84,10 @@ public static class SaleA4Print
 		return stream.ToArray();
 	}
 
-	private static (float finalY, PdfPage lastPage) DrawItemsTableWithPagination(PdfDocument document, List<SaleProductCartModel> saleProducts,
+	private static async Task<(float finalY, PdfPage lastPage)> DrawItemsTableWithPagination(PdfDocument document, List<SaleDetailModel> saleProducts,
 		float startY, float pageWidth, float pageHeight, PdfFont subHeaderFont, PdfFont normalFont, PdfFont boldFont)
 	{
-		if (saleProducts == null || saleProducts.Count == 0)
+		if (saleProducts is null || saleProducts.Count == 0)
 			return (startY + 50, document.Pages[0]);
 
 		var currentPage = document.Pages[0];
@@ -138,7 +140,7 @@ public static class SaleA4Print
 			}
 
 			// Draw the row
-			DrawTableRow(graphics, saleProducts[i], i, tableStartX, currentY, tableWidth,
+			await DrawTableRow(graphics, saleProducts[i], i, tableStartX, currentY, tableWidth,
 				col1X, col2X, col3X, col4X, col5X, col6X, col1Width, col2Width, col3Width, col4Width, col5Width, col6Width,
 				normalFont, boldFont);
 
@@ -183,7 +185,7 @@ public static class SaleA4Print
 		DrawRightAlignedText(graphics, "Total", boldFont, PdfBrushes.White, col6X, tableWidth * 0.10f, headerY);
 	}
 
-	private static void DrawTableRow(PdfGraphics graphics, SaleProductCartModel product, int index,
+	private static async Task DrawTableRow(PdfGraphics graphics, SaleDetailModel saleItem, int index,
 		float tableStartX, float currentY, float tableWidth,
 		float col1X, float col2X, float col3X, float col4X, float col5X, float col6X,
 		float col1Width, float col2Width, float col3Width, float col4Width, float col5Width, float col6Width,
@@ -203,20 +205,22 @@ public static class SaleA4Print
 		DrawCenteredText(graphics, $"{index + 1}", normalFont, PdfBrushes.Black, col1X, col1Width, rowY);
 
 		// Product Name - Left aligned with truncation
-		var productName = TruncateString(product.ProductName ?? "Unknown", 30);
+
+		var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, saleItem.ProductId);
+		var productName = TruncateString(product.Name ?? "Unknown", 30);
 		graphics.DrawString(productName, normalFont, PdfBrushes.Black, new PointF(col2X + 5, rowY));
 
 		// Qty - Center aligned
-		DrawCenteredText(graphics, $"{product.Quantity:N2}", normalFont, PdfBrushes.Black, col3X, col3Width, rowY);
+		DrawCenteredText(graphics, $"{saleItem.Quantity:N2}", normalFont, PdfBrushes.Black, col3X, col3Width, rowY);
 
 		// Rate - Right aligned
-		DrawRightAlignedText(graphics, $"₹{product.Rate:N2}", normalFont, PdfBrushes.Black, col4X, col4Width, rowY);
+		DrawRightAlignedText(graphics, $"₹{saleItem.Rate:N2}", normalFont, PdfBrushes.Black, col4X, col4Width, rowY);
 
 		// Amount - Right aligned
-		DrawRightAlignedText(graphics, $"₹{product.BaseTotal:N2}", normalFont, PdfBrushes.Black, col5X, col5Width, rowY);
+		DrawRightAlignedText(graphics, $"₹{saleItem.BaseTotal:N2}", normalFont, PdfBrushes.Black, col5X, col5Width, rowY);
 
 		// Total - Right aligned with color
-		DrawRightAlignedText(graphics, $"₹{product.Total:N2}", boldFont, new PdfSolidBrush(_secondaryColor), col6X, col6Width, rowY);
+		DrawRightAlignedText(graphics, $"₹{saleItem.Total:N2}", boldFont, new PdfSolidBrush(_secondaryColor), col6X, col6Width, rowY);
 	}
 
 	private static void DrawFooterOnAllPages(PdfDocument document, float pageWidth, float pageHeight, PdfFont smallFont, PdfFont normalFont)
@@ -330,9 +334,9 @@ public static class SaleA4Print
 		return currentY + 80;
 	}
 
-	private static float DrawSummarySection(PdfGraphics graphics, float pageWidth, float currentY, PdfFont subHeaderFont, PdfFont normalFont, PdfFont boldFont, List<SaleProductCartModel> saleProducts, SaleModel sale)
+	private static float DrawSummarySection(PdfGraphics graphics, float pageWidth, float currentY, PdfFont subHeaderFont, PdfFont normalFont, PdfFont boldFont, List<SaleDetailModel> saleProducts, SaleModel sale)
 	{
-		if (saleProducts == null || saleProducts.Count == 0)
+		if (saleProducts is null || saleProducts.Count == 0)
 			return currentY + 50;
 
 		var summaryWidth = 250f;

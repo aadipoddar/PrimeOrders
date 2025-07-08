@@ -1,7 +1,7 @@
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
-namespace PrimeOrders.Components.Pages.Order;
+namespace PrimeOrders.Components.Pages.Reports.Order;
 
 public partial class OrderSummaryModule
 {
@@ -11,7 +11,7 @@ public partial class OrderSummaryModule
 	[Parameter] public bool IsVisible { get; set; }
 	[Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
 	[Parameter] public OrderOverviewModel SelectedOrder { get; set; }
-	[Parameter] public List<OrderData.OrderDetailDisplayModel> OrderDetails { get; set; }
+	[Parameter] public List<OrderDetailDisplayModel> OrderDetails { get; set; }
 	[Parameter] public UserModel CurrentUser { get; set; }
 
 	private SfDialog _sfOrderSummaryModuleDialog;
@@ -23,7 +23,10 @@ public partial class OrderSummaryModule
 	private int _orderToDeleteId = 0;
 	private string _orderToDeleteNo = "";
 
-	#region Order Actions
+	private bool _saleSummaryVisible = false;
+	private SaleOverviewModel _selectedSale;
+	private List<SaleDetailDisplayModel> _selectedSaleDetails = [];
+
 	private async Task ExportOrderChallan()
 	{
 		var orderDetails = await OrderData.LoadOrderDetailByOrder(SelectedOrder.OrderId);
@@ -40,6 +43,7 @@ public partial class OrderSummaryModule
 		await CloseDialog();
 	}
 
+	#region Delete Order
 	private void ShowDeleteConfirmation()
 	{
 		_orderToDeleteId = SelectedOrder?.OrderId ?? 0;
@@ -83,6 +87,56 @@ public partial class OrderSummaryModule
 		_deleteConfirmationDialogVisible = false;
 		_orderToDeleteId = 0;
 		_orderToDeleteNo = "";
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Sale Summary
+	private async Task ViewCorrespondingSale()
+	{
+		if (!SelectedOrder.SaleId.HasValue)
+		{
+			await ShowErrorToast("No sale is linked to this order.");
+			return;
+		}
+
+		_selectedSale = await SaleData.LoadSaleOverviewBySaleId(SelectedOrder.SaleId.Value);
+		if (_selectedSale is null)
+		{
+			await ShowErrorToast("Sale not found.");
+			return;
+		}
+
+		_selectedSaleDetails.Clear();
+
+		var saleDetails = await SaleData.LoadSaleDetailBySale(_selectedSale.SaleId);
+		foreach (var detail in saleDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			if (product is not null)
+				_selectedSaleDetails.Add(new SaleDetailDisplayModel
+				{
+					ProductName = product.Name,
+					Quantity = detail.Quantity,
+					Rate = detail.Rate,
+					Total = detail.Total
+				});
+		}
+
+		await CloseDialog();
+		_saleSummaryVisible = true;
+		StateHasChanged();
+	}
+
+	private void OnSaleSummaryVisibilityChanged(bool isVisible)
+	{
+		_saleSummaryVisible = isVisible;
+		if (!isVisible)
+		{
+			// Clear sale data when sale summary is closed
+			_selectedSale = null;
+			_selectedSaleDetails.Clear();
+		}
 		StateHasChanged();
 	}
 	#endregion

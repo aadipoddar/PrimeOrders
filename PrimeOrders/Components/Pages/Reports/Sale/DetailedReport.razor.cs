@@ -2,10 +2,8 @@ using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
-using Syncfusion.Blazor.Popups;
 
-namespace PrimeOrders.Components.Pages.Reports;
+namespace PrimeOrders.Components.Pages.Reports.Sale;
 
 public partial class DetailedReport
 {
@@ -16,23 +14,21 @@ public partial class DetailedReport
 
 	private UserModel _user;
 	private bool _isLoading = true;
-	private bool _deleteConfirmationDialogVisible = false;
+	private bool _saleSummaryVisible = false;
 
 	private int _selectedLocationId = 0;
-	private int _saleToDeleteId = 0;
-	private string _saleToDeleteBillNo = "";
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
+	private SaleOverviewModel _selectedSale;
+	private readonly List<SaleDetailDisplayModel> _selectedSaleDetails = [];
 	private List<LocationModel> _locations = [];
 	private List<SaleOverviewModel> _saleOverviews = [];
 
 	private SfGrid<SaleOverviewModel> _sfGrid;
-	private SfDialog _sfDeleteConfirmationDialog;
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
 
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!firstRender)
@@ -74,7 +70,6 @@ public partial class DetailedReport
 			if (_selectedLocationId == 0)
 				_selectedLocationId = _locations.FirstOrDefault()?.Id ?? 0;
 		}
-
 		else
 			_selectedLocationId = _user.LocationId;
 
@@ -85,55 +80,45 @@ public partial class DetailedReport
 
 		StateHasChanged();
 	}
+	#endregion
 
-	public void SaleHistoryRowSelected(RowSelectEventArgs<SaleOverviewModel> args) =>
-		NavManager.NavigateTo($"/Sale/{args.Data.SaleId}");
-
-	private void ShowDeleteConfirmation(int saleId, string billNo)
+	#region Sale Summary Module Methods
+	private async Task OnSaleRowSelected(RowSelectEventArgs<SaleOverviewModel> args)
 	{
-		if (!_user.Admin)
-		{
-			_sfErrorToast.Content = "Only administrators can delete records.";
-			_sfErrorToast.ShowAsync();
-			return;
-		}
-
-		_saleToDeleteId = saleId;
-		_saleToDeleteBillNo = billNo;
-		_deleteConfirmationDialogVisible = true;
+		_selectedSale = args.Data;
+		await LoadSaleDetails(_selectedSale.SaleId);
+		_saleSummaryVisible = true;
 		StateHasChanged();
 	}
 
-	private async Task ConfirmDeleteSale()
+	private async Task LoadSaleDetails(int saleId)
 	{
-		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, _saleToDeleteId);
-		if (sale is null)
+		_selectedSaleDetails.Clear();
+
+		var saleDetails = await SaleData.LoadSaleDetailBySale(saleId);
+		foreach (var detail in saleDetails)
 		{
-			_sfErrorToast.Content = "Sale not found.";
-			await _sfErrorToast.ShowAsync();
-			return;
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			if (product is not null)
+				_selectedSaleDetails.Add(new()
+				{
+					ProductName = product.Name,
+					Quantity = detail.Quantity,
+					Rate = detail.Rate,
+					Total = detail.Total
+				});
 		}
+	}
 
-		sale.Status = false;
-		await SaleData.InsertSale(sale);
-		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
-
-		_sfSuccessToast.Content = "Sale Deleted Successfully.";
-		await _sfSuccessToast.ShowAsync();
-
+	private async Task OnSaleSummaryVisibilityChanged(bool isVisible)
+	{
+		_saleSummaryVisible = isVisible;
 		await LoadData();
-		_deleteConfirmationDialogVisible = false;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void CancelDelete()
-	{
-		_deleteConfirmationDialogVisible = false;
-		_saleToDeleteId = 0;
-		_saleToDeleteBillNo = "";
-		StateHasChanged();
-	}
-
+	#region Excel Export
 	private async Task ExportToExcel()
 	{
 		if (_saleOverviews is null || _saleOverviews.Count == 0)
@@ -146,7 +131,9 @@ public partial class DetailedReport
 		var fileName = $"Sales_Detail_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
+	#endregion
 
+	#region Chart Data
 	private List<DailySalesData> GetDailySalesData()
 	{
 		var result = _saleOverviews
@@ -162,9 +149,9 @@ public partial class DetailedReport
 		return result;
 	}
 
-	private List<PaymentMethodData> GetPaymentMethodsData()
+	private List<SalePaymentMethodData> GetPaymentMethodsData()
 	{
-		var paymentData = new List<PaymentMethodData>
+		var paymentData = new List<SalePaymentMethodData>
 		{
 			new() { PaymentMethod = "Cash", Amount = _saleOverviews.Sum(s => s.Cash) },
 			new() { PaymentMethod = "Card", Amount = _saleOverviews.Sum(s => s.Card) },
@@ -174,16 +161,5 @@ public partial class DetailedReport
 
 		return [.. paymentData.Where(p => p.Amount > 0)];
 	}
-
-	public class PaymentMethodData
-	{
-		public string PaymentMethod { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class DailySalesData
-	{
-		public string Date { get; set; }
-		public decimal Amount { get; set; }
-	}
+	#endregion
 }

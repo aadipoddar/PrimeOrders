@@ -3,7 +3,7 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
-namespace PrimeOrders.Components.Pages.Inventory;
+namespace PrimeOrders.Components.Pages.Inventory.Purchase;
 
 public partial class PurchasePage
 {
@@ -239,7 +239,7 @@ public partial class PurchasePage
 		else
 			_filteredRawMaterials = [.. _rawMaterials.Where(m =>
 				m.Name.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase) ||
-				(m.Code != null && m.Code.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase))
+				m.Code != null && m.Code.Contains(_materialSearchText, StringComparison.OrdinalIgnoreCase)
 			)];
 
 		_selectedMaterialIndex = 0;

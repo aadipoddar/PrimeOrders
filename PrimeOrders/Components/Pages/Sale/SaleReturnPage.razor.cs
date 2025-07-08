@@ -23,7 +23,6 @@ public partial class SaleReturnPage
 	private bool _billSelectionDialogVisible = false;
 
 	private decimal _selectedQuantity = 1;
-	private readonly int _selectedProductId = 0;
 	private int _selectedSaleId = 0;
 
 	private string _productSearchText = "";

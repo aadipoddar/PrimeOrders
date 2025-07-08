@@ -1,4 +1,6 @@
 ﻿@using PrimeOrdersLibrary.Models.Order
+@using PrimeOrdersLibrary.Models.Sale
+@using PrimeOrders.Components.Pages.Reports.Sale
 
 <!-- Success Toast -->
 <SfToast @ref="_sfSuccessToast"
@@ -166,9 +168,21 @@
 							</div>
 						</SfButton>
 
-						<!-- Edit and Delete Buttons - Only for pending orders -->
-						@if (!SelectedOrder.SaleId.HasValue && CurrentUser.Admin)
+						<!-- Conditional buttons based on order status -->
+						@if (SelectedOrder.SaleId.HasValue)
 						{
+							<!-- View Sale Button - Only for sold orders -->
+							<SfButton CssClass="view-sale-button"
+									  OnClick="ViewCorrespondingSale">
+								<div class="button-content">
+									<img src="images/bill.png" alt="View Sale" class="view-sale-icon" />
+									<span>View Sale</span>
+								</div>
+							</SfButton>
+						}
+						else if (CurrentUser.Admin)
+						{
+							<!-- Edit and Delete Buttons - Only for pending orders and admins -->
 							<SfButton CssClass="view-button"
 									  OnClick='() => NavManager.NavigateTo($"/Order/{SelectedOrder.OrderId}")'>
 								<div class="button-content">
@@ -261,6 +275,13 @@
 	</DialogTemplates>
 </SfDialog>
 
+<!-- Sale Summary Module - Reusing existing component -->
+<SaleSummaryModule IsVisible="_saleSummaryVisible"
+				   IsVisibleChanged="OnSaleSummaryVisibilityChanged"
+				   SelectedSale="_selectedSale"
+				   SaleDetails="_selectedSaleDetails"
+				   CurrentUser="CurrentUser" />
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -272,6 +293,7 @@
 		--pending-color: #FFA500;
 		--completed-color: #4CAF50;
 		--excel-green: #217346;
+		--view-sale-color: #6f42c1;
 	}
 
 	/* Delete Button Styling */
@@ -608,7 +630,8 @@
 
 	/* Icon styling for all buttons */
 	.excel-icon,
-	.edit-icon {
+	.edit-icon,
+	.view-sale-icon {
 		width: 20px;
 		height: 20px;
 	}
@@ -639,6 +662,28 @@
 			background-color: #0078d4;
 			transform: translateY(-2px);
 			box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+		}
+
+	.view-sale-button {
+		background-color: var(--view-sale-color);
+		color: white;
+		border: none;
+		padding: 16px 28px;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 15px;
+		min-width: 140px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.view-sale-button:hover {
+			background-color: #5a2d91;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
 		}
 
 	.challan-button {
@@ -813,6 +858,7 @@
 		}
 		/* Make buttons full width on mobile for better usability */
 		.view-button,
+		.view-sale-button,
 		.challan-button,
 		.delete-button {
 			min-width: 140px;
@@ -829,6 +875,7 @@
 		/* Mobile icon sizes */
 		.excel-icon,
 		.edit-icon,
+		.view-sale-icon,
 		.delete-icon {
 			width: 16px;
 			height: 16px;

@@ -58,6 +58,7 @@ public static class StoredProcedureNames
 
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 	public static string LoadLastSaleByLocation => "Load_LastSale_By_Location";
+	public static string LoadSaleOverviewBySaleId => "Load_SaleOverview_By_SaleId";
 
 	public static string LoadSaleReturnDetailBySaleReturn => "Load_SaleReturnDetail_By_SaleReturn";
 	public static string LoadLastSaleReturnByLocation => "Load_LastSaleReturn_By_Location";

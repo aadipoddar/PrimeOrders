@@ -1,7 +1,7 @@
-﻿@page "/Reports/OrderHistory"
-@using PrimeOrders.Components.Pages.Order
+﻿@page "/Reports/Detailed"
+@page "/Reports/Detailed/{LocationId:int}"
 
-<PageTitle>Order History - Prime Orders</PageTitle>
+<PageTitle>Detailed Report - Prime Orders</PageTitle>
 
 @if (_isLoading)
 {
@@ -11,7 +11,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading order history...</p>
+		<p class="loading-text">Loading detailed report...</p>
 	</div>
 }
 else
@@ -31,8 +31,8 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Order History</h2>
-			<p>Track and analyze customer order records</p>
+			<h2>Detailed Report</h2>
+			<p>View and analyze in-depth transaction records</p>
 			<button @onclick='() => NavManager.NavigateTo("/Report-Dashboard")' class="back-button">
 				<span class="back-icon">←</span> Back to Reports
 			</button>
@@ -50,19 +50,6 @@ else
 									   CssClass="filter-control">
 						<DateRangePickerEvents TValue="DateOnly" ValueChange="DateRangeChanged" />
 					</SfDateRangePicker>
-				</div>
-
-				<div class="filter-item">
-					<label>Status</label>
-					<SfComboBox TValue="string"
-								TItem="string"
-								Placeholder="Select Status"
-								FloatLabelType='@FloatLabelType.Auto'
-								DataSource="@(new List<string> { "All", "Pending", "Sold" })"
-								Value="@_selectedStatusFilter"
-								CssClass="filter-control">
-						<ComboBoxEvents TItem="string" TValue="string" ValueChange="OnStatusFilterChanged" />
-					</SfComboBox>
 				</div>
 
 				@if (_user?.LocationId == 1)
@@ -89,12 +76,6 @@ else
 						<span>Export Excel</span>
 					</div>
 				</SfButton>
-				<SfButton CssClass="products-button" OnClick="@(() => ExportToProductsExcel())">
-					<div class="button-content">
-						<img src="images/excel.png" alt="Excel" class="products-excel-icon" />
-						<span>Export Pending Order Products Excel</span>
-					</div>
-				</SfButton>
 			</div>
 		</div>
 
@@ -102,76 +83,93 @@ else
 			<div class="overview-card total-sales">
 				<div class="card-icon">📈</div>
 				<div class="card-content">
-					<h3>Total Orders</h3>
-					<p class="amount">@_orderOverviews.Count</p>
+					<h3>Total Sales</h3>
+					<p class="amount">@_saleOverviews.Sum(_ => _.Total).FormatIndianCurrency()</p>
+				</div>
+			</div>
+
+			<div class="overview-card total-tax">
+				<div class="card-icon">💰</div>
+				<div class="card-content">
+					<h3>Total Transactions</h3>
+					<p class="amount">@_saleOverviews.Count</p>
+				</div>
+			</div>
+
+			<div class="overview-card total-discount">
+				<div class="card-icon">🏷️</div>
+				<div class="card-content">
+					<h3>Total Discount</h3>
+					<p class="amount">@_saleOverviews.Sum(_ => _.DiscountAmount).FormatIndianCurrency()</p>
 				</div>
 			</div>
 
 			<div class="overview-card total-products">
 				<div class="card-icon">📦</div>
 				<div class="card-content">
-					<h3>Total Products</h3>
-					<p class="amount">@_orderOverviews.Sum(_ => _.TotalProducts)</p>
-				</div>
-			</div>
-
-			<div class="overview-card total-quantity">
-				<div class="card-icon">🧮</div>
-				<div class="card-content">
-					<h3>Total Quantity</h3>
-					<p class="amount">@_orderOverviews.Sum(_ => _.TotalQuantity)</p>
-				</div>
-			</div>
-
-			<div class="overview-card order-status">
-				<div class="card-icon">🔍</div>
-				<div class="card-content">
-					<h3>Pending Orders</h3>
-					<p class="amount">@_orderOverviews.Count(_ => !_.SaleId.HasValue)</p>
+					<h3>Products Sold</h3>
+					<p class="amount">@_saleOverviews.Sum(_ => _.TotalProducts)</p>
 				</div>
 			</div>
 		</div>
 
 		<div class="detailed-grid-card">
 			<div class="card-header">
-				<h3 class="chart-title">Order Details</h3>
-				<p class="grid-info">Click on any row to view order summary and actions</p>
+				<h3 class="chart-title">Transaction Details</h3>
 			</div>
 			<div class="card-body">
 				<SfGrid ID="_sfGrid"
 						@ref="_sfGrid"
-						DataSource="_orderOverviews"
+						DataSource="_saleOverviews"
 						AllowSorting="true"
 						AllowFiltering="true"
 						AllowResizing="true"
 						AllowPaging="true"
 						AllowExcelExport="true"
-						AllowPdfExport="true"
-						CssClass="clickable-grid">
-					<GridEvents RowSelected="OnOrderRowSelected" TValue="OrderOverviewModel" />
+						AllowPdfExport="true">
+					<GridEvents RowSelected="OnSaleRowSelected" TValue="SaleOverviewModel" />
 					<GridPageSettings PageSize="10" />
 					<GridColumns>
-						<GridColumn Field="@nameof(OrderOverviewModel.OrderNo)" HeaderText="Order #" Width="90" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(OrderOverviewModel.OrderDate)" HeaderText="Order Date" Width="120" Format="dd/MM/yyyy" />
-						<GridColumn Field="@nameof(OrderOverviewModel.LocationName)" HeaderText="Outlet / Franchise" Width="130" />
-						<GridColumn Field="@nameof(OrderOverviewModel.UserName)" HeaderText="Created By" Width="130" />
-						<GridColumn Field="@nameof(OrderOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(OrderOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn HeaderText="Status" Width="100" TextAlign="TextAlign.Center">
+						<GridColumn Field="@nameof(SaleOverviewModel.BillNo)" HeaderText="Bill No" Width="90" TextAlign="TextAlign.Center" />
+						<GridColumn Field="@nameof(SaleOverviewModel.SaleDateTime)" HeaderText="Date & Time" Width="160" Format="dd/MM/yyyy hh:mm tt" />
+						<GridColumn Field="@nameof(SaleOverviewModel.UserName)" HeaderText="Cashier" Width="130" />
+						<GridColumn Field="@nameof(SaleOverviewModel.PartyName)" HeaderText="Party" Width="130" />
+
+						<GridColumn Field="@nameof(SaleOverviewModel.OrderNo)" HeaderText="Order Bill #" Width="120" TextAlign="TextAlign.Center">
 							<Template>
 								@{
-									var order = (context as OrderOverviewModel);
-									<span class="order-status-badge @(order.SaleId.HasValue ? "completed" : "pending")">
-										@(order.SaleId.HasValue ? "Sold" : "Pending")
-									</span>
+									var sale = (context as SaleOverviewModel);
+									@(sale.OrderNo ?? "-")
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(OrderOverviewModel.SaleBillNo)" HeaderText="Sale Bill #" Width="120" TextAlign="TextAlign.Center">
+
+						<GridColumn Field="@nameof(SaleOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />
+
+						<GridColumn HeaderText="Base Total" Width="120" TextAlign="TextAlign.Right">
 							<Template>
 								@{
-									var order = (context as OrderOverviewModel);
-									@(order.SaleBillNo ?? "-")
+									var sale = (context as SaleOverviewModel);
+									@(sale.BaseTotal.FormatIndianCurrency())
+								}
+							</Template>
+						</GridColumn>
+
+						<GridColumn HeaderText="Discount" Width="110" TextAlign="TextAlign.Right">
+							<Template>
+								@{
+									var sale = (context as SaleOverviewModel);
+									@(sale.DiscountAmount.FormatIndianCurrency())
+								}
+							</Template>
+						</GridColumn>
+
+						<GridColumn HeaderText="Total" Width="120" TextAlign="TextAlign.Right">
+							<Template>
+								@{
+									var sale = (context as SaleOverviewModel);
+									@(sale.Total.FormatIndianCurrency())
 								}
 							</Template>
 						</GridColumn>
@@ -182,29 +180,29 @@ else
 
 		<div class="chart-grid">
 			<div class="chart-card">
-				<h3 class="chart-title">Daily Orders</h3>
+				<h3 class="chart-title">Daily Sales Trend</h3>
 				<SfChart Height="300px">
 					<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
 									   Title="Date"></ChartPrimaryXAxis>
-					<ChartPrimaryYAxis Title="Orders" LabelFormat="{value}"></ChartPrimaryYAxis>
+					<ChartPrimaryYAxis Title="Amount (₹)" LabelFormat="{value}"></ChartPrimaryYAxis>
 					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
 					<ChartSeriesCollection>
-						<ChartSeries DataSource="@GetDailyOrdersData()"
-									 XName="Date" YName="Count" Type="ChartSeriesType.Line"
-									 Name="Orders" Fill="#512BD4">
+						<ChartSeries DataSource="@GetDailySalesData()"
+									 XName="Date" YName="Amount" Type="ChartSeriesType.Line"
+									 Name="Sales" Fill="#512BD4">
 						</ChartSeries>
 					</ChartSeriesCollection>
 				</SfChart>
 			</div>
 
 			<div class="chart-card">
-				<h3 class="chart-title">Order Status Distribution</h3>
-				<SfAccumulationChart Title="Order Status" EnableSmartLabels="true" Height="300px">
+				<h3 class="chart-title">Payment Methods</h3>
+				<SfAccumulationChart Title="Payment Distribution" EnableSmartLabels="true" Height="300px">
 					<AccumulationChartSeriesCollection>
-						<AccumulationChartSeries DataSource="@GetOrderStatusData()" XName="Status"
-												 YName="Count" Name="Status"
+						<AccumulationChartSeries DataSource="@GetPaymentMethodsData()" XName="PaymentMethod"
+												 YName="Amount" Name="Payment"
 												 InnerRadius="40%" LegendShape="LegendShape.Circle">
-							<AccumulationDataLabelSettings Visible="true" Name="Status"
+							<AccumulationDataLabelSettings Visible="true" Name="PaymentMethod"
 														   Position="AccumulationLabelPosition.Outside" />
 							<AccumulationChartAnimation Enable="true"></AccumulationChartAnimation>
 						</AccumulationChartSeries>
@@ -221,14 +219,15 @@ else
 	</div>
 }
 
-<!-- Order Summary Module -->
-<OrderSummaryModule IsVisible="_orderSummaryVisible"
-					IsVisibleChanged="OnOrderSummaryVisibilityChanged"
-					SelectedOrder="_selectedOrder"
-					OrderDetails="_selectedOrderDetails"
-					CurrentUser="_user" />
+<!-- Sale Summary Module -->
+<SaleSummaryModule IsVisible="_saleSummaryVisible"
+				   IsVisibleChanged="OnSaleSummaryVisibilityChanged"
+				   SelectedSale="_selectedSale"
+				   SaleDetails="_selectedSaleDetails"
+				   CurrentUser="_user" />
 
 <style>
+	/* Same styles as before - keeping existing CSS for consistency */
 	:root {
 		--dotnet-primary: #512BD4;
 		--dotnet-secondary: #68217A;
@@ -243,35 +242,6 @@ else
 		--discount-color: #20c997;
 		--tax-color: #6c757d;
 		--excel-color: #217346;
-		--pending-color: #FFA500;
-		--completed-color: #4CAF50;
-		--sold-color: #4CAF50;
-	}
-
-	/* Grid Info */
-	.grid-info {
-		margin: 5px 0 0 0;
-		color: var(--dotnet-accent);
-		font-size: 14px;
-		font-style: italic;
-		font-weight: 500;
-	}
-
-	/* Clickable Grid Styling */
-	.clickable-grid ::deep .e-grid .e-row {
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-		.clickable-grid ::deep .e-grid .e-row:hover {
-			background-color: rgba(81, 43, 212, 0.08);
-			transform: translateY(-1px);
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		}
-
-	.clickable-grid ::deep .e-grid .e-rowselect {
-		background-color: rgba(81, 43, 212, 0.15);
-		border-left: 4px solid var(--dotnet-primary);
 	}
 
 	/* General Layout */
@@ -429,17 +399,7 @@ else
 		gap: 10px;
 	}
 
-	/* Button Content for Excel buttons */
-	.button-content {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		justify-content: center;
-	}
-
-	/* Icon styling for Excel buttons */
-	.excel-icon,
-	.products-excel-icon {
+	.excel-icon{
 		width: 16px;
 		height: 16px;
 	}
@@ -454,7 +414,7 @@ else
 		font-weight: 600;
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		gap: 8px;
 		transition: all 0.2s ease;
 	}
 
@@ -462,29 +422,6 @@ else
 			background-color: #1e5f3e;
 			transform: translateY(-2px);
 		}
-
-	.products-button {
-		background-color: #8e44ad;
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-	}
-
-		.products-button:hover {
-			background-color: #6c3483;
-			transform: translateY(-2px);
-		}
-
-	.export-icon, .excel-icon {
-		font-size: 16px;
-	}
 
 	/* Overview Cards */
 	.overview-cards {
@@ -528,19 +465,19 @@ else
 		color: var(--dotnet-accent);
 	}
 
-	.total-products .card-icon {
+	.total-tax .card-icon {
 		background-color: rgba(104, 33, 122, 0.1);
 		color: var(--dotnet-secondary);
 	}
 
-	.total-quantity .card-icon {
-		background-color: rgba(46, 196, 134, 0.1);
-		color: #2EC486;
+	.total-discount .card-icon {
+		background-color: rgba(220, 53, 69, 0.1);
+		color: #dc3545;
 	}
 
-	.order-status .card-icon {
-		background-color: rgba(255, 165, 0, 0.1);
-		color: var(--pending-color);
+	.total-products .card-icon {
+		background-color: rgba(40, 167, 69, 0.1);
+		color: #28a745;
 	}
 
 	.card-content {
@@ -565,24 +502,6 @@ else
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-	}
-
-	/* Order status badges */
-	.order-status-badge {
-		padding: 4px 8px;
-		border-radius: 12px;
-		font-size: 12px;
-		font-weight: 500;
-	}
-
-	.pending {
-		background-color: rgba(255, 165, 0, 0.2);
-		color: var(--pending-color);
-	}
-
-	.completed {
-		background-color: rgba(76, 175, 80, 0.2);
-		color: var(--sold-color);
 	}
 
 	/* Detailed Grid */
@@ -723,15 +642,47 @@ else
 		background-color: var(--dotnet-light);
 	}
 
-	/* Animations */
-	@@keyframes rotate {
-		0% {
-			transform: rotate(0deg) translate(-24px) rotate(0deg);
-		}
+	/* Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+		display: flex;
+		align-items: center;
+	}
 
-		100% {
-			transform: rotate(360deg) translate(-24px) rotate(-360deg);
-		}
+	.dialog-content {
+		padding: 20px;
+	}
+
+	.confirm-section {
+		margin-bottom: 0;
+	}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Dialog buttons */
+	.dialog-button {
+		border-radius: 6px;
+		padding: 8px 16px;
+		height: 38px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 500;
 	}
 
 	/* Responsive Design */
@@ -780,11 +731,16 @@ else
 			height: auto;
 			min-height: 120px;
 		}
-		/* Mobile responsive icon sizes */
-		.excel-icon,
-		.products-excel-icon {
-			width: 14px;
-			height: 14px;
+	}
+
+	/* Animations */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
 		}
 	}
 </style>

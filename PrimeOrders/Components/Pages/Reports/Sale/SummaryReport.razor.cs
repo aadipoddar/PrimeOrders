@@ -1,6 +1,6 @@
 using Syncfusion.Blazor.Calendars;
 
-namespace PrimeOrders.Components.Pages.Reports;
+namespace PrimeOrders.Components.Pages.Reports.Sale;
 
 public partial class SummaryReport
 {

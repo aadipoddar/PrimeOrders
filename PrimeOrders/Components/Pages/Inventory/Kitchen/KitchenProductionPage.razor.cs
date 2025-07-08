@@ -3,7 +3,7 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
-namespace PrimeOrders.Components.Pages.Inventory;
+namespace PrimeOrders.Components.Pages.Inventory.Kitchen;
 
 public partial class KitchenProductionPage
 {
@@ -49,7 +49,6 @@ public partial class KitchenProductionPage
 	private SfGrid<KitchenProductionProductCartModel> _sfProductCartGrid;
 
 	private SfDialog _sfBillDetailsDialog;
-	private SfDialog _sfKitchenDialog;
 	private SfDialog _sfKitchenProductionSummaryDialog;
 	private SfDialog _sfProductManageDialog;
 	private SfDialog _sfQuantityDialog;
@@ -223,7 +222,7 @@ public partial class KitchenProductionPage
 		else
 			_filteredProducts = [.. _products.Where(p =>
 				p.Name.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase) ||
-				(p.Code != null && p.Code.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase))
+				p.Code != null && p.Code.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase)
 			)];
 
 		_selectedProductIndex = 0;
