@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Data.Inventory.Kitchen;
+
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;

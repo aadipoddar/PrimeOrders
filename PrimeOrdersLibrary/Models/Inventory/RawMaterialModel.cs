@@ -7,6 +7,7 @@ public class RawMaterialModel
 	public string Code { get; set; }
 	public int RawMaterialCategoryId { get; set; }
 	public decimal MRP { get; set; }
+	public string MeasurementUnit { get; set; }
 	public int TaxId { get; set; }
 	public bool Status { get; set; }
 }

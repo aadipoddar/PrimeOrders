@@ -154,4 +154,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ReturnDateTime" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b46b28b6-cf02-45ea-b5fc-50655530dbb5" ChangeDateTime="07/08/2025 18:48:15">
+    <Property Name="ElementName" Value="[dbo].[RawMaterial].[MeasurmentUnit]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[RawMaterial]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[MeasurementUnit]" />
+  </Operation>
 </Operations>

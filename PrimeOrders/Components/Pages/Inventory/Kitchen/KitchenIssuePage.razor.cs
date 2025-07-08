@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Data.Inventory.Kitchen;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -79,7 +81,7 @@ public partial class KitchenIssuePage
 		_kitchen = _kitchens.FirstOrDefault();
 		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(0);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(0, DateOnly.FromDateTime(_kitchenIssue.IssueDate));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		_filteredRawMaterials = [.. _rawMaterials];
@@ -274,6 +276,21 @@ public partial class KitchenIssuePage
 		_kitchen ??= new KitchenModel();
 
 		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	public async Task KitchenIssueDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime> args)
+	{
+		_kitchenIssue.IssueDate = args.Value;
+
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(0, DateOnly.FromDateTime(_kitchenIssue.IssueDate));
+		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
+		_filteredRawMaterials = [.. _rawMaterials];
+
+		if (_sfRawMaterialGrid is not null)
+			await _sfRawMaterialGrid.Refresh();
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}

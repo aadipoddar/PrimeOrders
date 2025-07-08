@@ -1,5 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[Load_RawMaterial_Rate_By_Supplier]
-	@SupplierId INT
+﻿CREATE PROCEDURE [dbo].[Load_RawMaterial_Rate_By_Supplier_PurchaseDate]
+	@SupplierId INT,
+	@PurchaseDate DATE
 AS
 BEGIN
 	SELECT
@@ -17,6 +18,7 @@ BEGIN
 					   AND p.SupplierId = @SupplierId
 					   AND p.Status = 1
 					   AND pd.Status = 1
+					   AND p.BillDate <= @PurchaseDate
 					 ORDER BY pd.Id DESC)
 				ELSE
 					(SELECT TOP 1 Rate FROM PurchaseDetail pd
@@ -24,9 +26,11 @@ BEGIN
 					 WHERE pd.RawMaterialId = r.[Id]
 					   AND p.Status = 1
 					   AND pd.Status = 1
+					   AND p.BillDate <= @PurchaseDate
 					 ORDER BY pd.Id DESC)
 			END, r.[MRP]) AS [MRP],
 	
+		r.[MeasurementUnit],
 		r.[TaxId],
 		r.[Status]
 	FROM RawMaterial r

@@ -16,9 +16,9 @@ var worksheet = package.Workbook.Worksheets[0];
 
 // await InsertProducts(worksheet);
 
-// await InsertRawMaterial(worksheet);
+await InsertRawMaterial(worksheet);
 
-await InsertSupplier(worksheet);
+// await InsertSupplier(worksheet);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -27,28 +27,32 @@ static async Task InsertRawMaterial(ExcelWorksheet worksheet)
 {
 	int row = 1;
 
-	while (worksheet.Cells[row, 1].Value != null)
+	while (worksheet.Cells[row, 2].Value != null)
 	{
-		var code = worksheet.Cells[row, 1].Value.ToString();
 		var name = worksheet.Cells[row, 2].Value.ToString();
+		var unit = worksheet.Cells[row, 3].Value?.ToString();
+		var code = "RM" + row.ToString("D4");
 
-		if (string.IsNullOrWhiteSpace(code) ||
-			string.IsNullOrWhiteSpace(name))
+		if (string.IsNullOrWhiteSpace(unit))
+			unit = "KG";
+
+		if (string.IsNullOrWhiteSpace(name))
 		{
 			Console.WriteLine("Not Inserted Row = " + row);
 			continue;
 		}
 
-		code = code.Replace(" ", "");
+		unit = unit.Replace(" ", "");
 
-		Console.WriteLine("Inserting New Raw Material: " + name + " and code " + code);
+		Console.WriteLine("Inserting New Raw Material: " + name + " with unit " + unit);
 		await RawMaterialData.InsertRawMaterial(new()
 		{
-			Id = 0,
+			Id = row,
 			Code = code,
 			Name = name,
 			MRP = 0,
 			RawMaterialCategoryId = 1,
+			MeasurementUnit = unit,
 			TaxId = 7,
 			Status = true
 		});

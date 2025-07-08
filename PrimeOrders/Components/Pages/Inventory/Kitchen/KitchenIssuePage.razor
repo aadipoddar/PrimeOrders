@@ -191,9 +191,11 @@ else
 
 				<div class="form-group">
 					<label>Issue Date</label>
-					<SfDatePicker @bind-Value="_kitchenIssue.IssueDate"
+					<SfDatePicker Value="_kitchenIssue.IssueDate"
 								  Placeholder="Select Date"
-								  CssClass="form-control" />
+								  CssClass="form-control">
+						<DatePickerEvents TValue="DateTime" ValueChange="KitchenIssueDateChanged" />
+					</SfDatePicker>
 				</div>
 
 				<div class="form-group">

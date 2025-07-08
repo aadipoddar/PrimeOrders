@@ -1,4 +1,4 @@
-﻿using PrimeOrdersLibrary.Data.Inventory;
+﻿using PrimeOrdersLibrary.Data.Inventory.Kitchen;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.Data.Sale;
 using PrimeOrdersLibrary.Models.Inventory;
@@ -159,8 +159,20 @@ public static class GenerateBillNo
 		return $"{prefix}FP{year}000001";
 	}
 
-	public static async Task<string> GenerateRawMaterialCode()
+	public static string GenerateRawMaterialCode(string lastRawMaterialCode)
 	{
-		return "";
+		if (string.IsNullOrWhiteSpace(lastRawMaterialCode))
+			return "RM0001";
+
+		var prefix = "RM";
+		var lastNumberPart = lastRawMaterialCode[prefix.Length..];
+
+		if (int.TryParse(lastNumberPart, out int lastNumber))
+		{
+			int nextNumber = lastNumber + 1;
+			return $"{prefix}{nextNumber:D4}";
+		}
+
+		return $"{prefix}0001";
 	}
 }

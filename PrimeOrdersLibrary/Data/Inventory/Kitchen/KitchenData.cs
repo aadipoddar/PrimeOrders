@@ -1,6 +1,6 @@
 ﻿using PrimeOrdersLibrary.Models.Inventory;
 
-namespace PrimeOrdersLibrary.Data.Inventory;
+namespace PrimeOrdersLibrary.Data.Inventory.Kitchen;
 
 public static class KitchenData
 {

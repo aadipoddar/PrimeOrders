@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Data.Inventory.Purchase;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -27,8 +29,7 @@ public partial class PurchasePage
 	private decimal _total = 0;
 	private decimal _selectedQuantity = 1;
 	private decimal _selectedRate = 0;
-	private MeasurementUnit _selectedMeasurementUnit = MeasurementUnit.KiloGram;
-	private MeasurementUnit _dialogSelectedMeasurementUnit = MeasurementUnit.KiloGram;
+	private string _selectedMeasurementUnit;
 
 	private int _selectedRawMaterialId = 0;
 
@@ -47,8 +48,6 @@ public partial class PurchasePage
 	private List<SupplierModel> _suppliers;
 	private List<RawMaterialModel> _rawMaterials;
 	private readonly List<PurchaseRawMaterialCartModel> _purchaseRawMaterialCarts = [];
-
-	private readonly List<MeasurementUnit> _measurementUnits = [.. Enum.GetValues<MeasurementUnit>()];
 
 	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
 	private SfGrid<PurchaseRawMaterialCartModel> _sfRawMaterialCartGrid;
@@ -86,7 +85,7 @@ public partial class PurchasePage
 		_supplier = _suppliers.FirstOrDefault();
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(_purchase.SupplierId);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -107,7 +106,7 @@ public partial class PurchasePage
 		_supplier = _suppliers.FirstOrDefault(s => s.Id == _purchase.SupplierId);
 		_purchaseRawMaterialCarts.Clear();
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(_purchase.SupplierId);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -291,7 +290,7 @@ public partial class PurchasePage
 		_purchase.SupplierId = args.Value;
 		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new SupplierModel();
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplier(_purchase.SupplierId);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -305,6 +304,21 @@ public partial class PurchasePage
 	private void CashDiscountPercentValueChanged(decimal args)
 	{
 		_purchase.CDPercent = args;
+		UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	public async Task PurchaseDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateOnly> args)
+	{
+		_purchase.BillDate = args.Value;
+
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
+		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
+		_filteredRawMaterials = [.. _rawMaterials];
+
+		if (_sfRawMaterialGrid is not null)
+			await _sfRawMaterialGrid.Refresh();
+
 		UpdateFinancialDetails();
 		StateHasChanged();
 	}
@@ -354,19 +368,12 @@ public partial class PurchasePage
 	{
 		_selectedQuantity = 1;
 		_selectedRate = _selectedRawMaterial.MRP;
-		_selectedMeasurementUnit = MeasurementUnit.KiloGram;
+		_selectedMeasurementUnit = _selectedRawMaterial.MeasurementUnit;
 	}
 
 	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<PurchaseRawMaterialCartModel> args)
 	{
 		_selectedRawMaterialCart = args.Data;
-
-		// Set dialog measurement unit from cart model
-		if (Enum.TryParse<MeasurementUnit>(_selectedRawMaterialCart.MeasurementUnit, out var unit))
-			_dialogSelectedMeasurementUnit = unit;
-		else
-			_dialogSelectedMeasurementUnit = MeasurementUnit.KiloGram;
-
 		_dialogVisible = true;
 		UpdateFinancialDetails();
 		StateHasChanged();
@@ -400,7 +407,7 @@ public partial class PurchasePage
 				RawMaterialName = _selectedRawMaterial.Name,
 				Quantity = _selectedQuantity,
 				Rate = _selectedRate,
-				MeasurementUnit = _selectedMeasurementUnit.ToString(),
+				MeasurementUnit = _selectedMeasurementUnit,
 				BaseTotal = _selectedRate * _selectedQuantity,
 				DiscPercent = 0,
 				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
@@ -439,13 +446,6 @@ public partial class PurchasePage
 	{
 		_selectedRawMaterialCart.Quantity = args;
 		UpdateModalFinancialDetails();
-	}
-
-	private void DialogMeasurementUnitValueChanged(MeasurementUnit args)
-	{
-		_dialogSelectedMeasurementUnit = args;
-		_selectedRawMaterialCart.MeasurementUnit = args.ToString();
-		StateHasChanged();
 	}
 
 	private void DialogDiscPercentValueChanged(decimal args)
@@ -535,12 +535,14 @@ public partial class PurchasePage
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
+
 		if (_purchase.UserId == 0)
 		{
 			_sfErrorToast.Content = "User is required.";
 			await _sfErrorToast.ShowAsync();
 			return false;
 		}
+
 		return true;
 	}
 
@@ -586,7 +588,7 @@ public partial class PurchasePage
 				PurchaseId = _purchase.Id,
 				RawMaterialId = item.RawMaterialId,
 				Quantity = item.Quantity,
-				MeasurementUnit = item.MeasurementUnit,
+				MeasurementUnit = item.MeasurementUnit.ToUpper(),
 				Rate = item.Rate,
 				BaseTotal = item.BaseTotal,
 				DiscPercent = item.DiscPercent,

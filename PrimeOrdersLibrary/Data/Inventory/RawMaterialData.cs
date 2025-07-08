@@ -13,6 +13,6 @@ public static class RawMaterialData
 	public static async Task<List<RawMaterialModel>> LoadRawMaterialByRawMaterialCategory(int RawMaterialCategoryId) =>
 		await SqlDataAccess.LoadData<RawMaterialModel, dynamic>(StoredProcedureNames.LoadRawMaterialByRawMaterialCategory, new { RawMaterialCategoryId });
 
-	public static async Task<List<RawMaterialModel>> LoadRawMaterialRateBySupplier(int SupplierId) =>
-		await SqlDataAccess.LoadData<RawMaterialModel, dynamic>(StoredProcedureNames.LoadRawMaterialRateBySupplier, new { SupplierId });
+	public static async Task<List<RawMaterialModel>> LoadRawMaterialRateBySupplierPurchaseDate(int SupplierId, DateOnly PurchaseDate) =>
+		await SqlDataAccess.LoadData<RawMaterialModel, dynamic>(StoredProcedureNames.LoadRawMaterialRateBySupplierPurchaseDate, new { SupplierId, PurchaseDate });
 }

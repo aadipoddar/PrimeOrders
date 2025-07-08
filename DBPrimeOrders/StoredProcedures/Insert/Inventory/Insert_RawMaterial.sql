@@ -4,14 +4,15 @@
 	@Code VARCHAR(50),
 	@RawMaterialCategoryId INT,
 	@MRP MONEY,
+	@MeasurementUnit VARCHAR(20),
 	@TaxId INT,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[RawMaterial] ([Name], [Code], [RawMaterialCategoryId], [MRP], [TaxId], [Status])
-		VALUES (@Name, @Code, @RawMaterialCategoryId, @MRP, @TaxId, @Status);
+		INSERT INTO [dbo].[RawMaterial] ([Name], [Code], [RawMaterialCategoryId], [MRP], [MeasurementUnit], [TaxId], [Status])
+		VALUES (@Name, @Code, @RawMaterialCategoryId, @MRP, @MeasurementUnit, @TaxId, @Status);
 	END
 	ELSE
 	BEGIN
@@ -20,6 +21,7 @@ BEGIN
 			[Code] = @Code, 
 			[RawMaterialCategoryId] = @RawMaterialCategoryId, 
 			[MRP] = @MRP, 
+			[MeasurementUnit] = @MeasurementUnit,
 			[TaxId] = @TaxId, 
 			[Status] = @Status
 		WHERE [Id] = @Id;

@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Data.Inventory.Purchase;
+
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 

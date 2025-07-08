@@ -85,7 +85,8 @@ else
 							<label>Raw Material Code</label>
 							<SfTextBox @bind-Value="_rawMaterialModel.Code"
 									   Placeholder="Enter Raw Material Code"
-									   CssClass="form-control" />
+									   CssClass="form-control"
+									   Readonly=true />
 						</div>
 					</div>
 
@@ -104,6 +105,15 @@ else
 						</div>
 
 						<div class="form-group">
+							<label>Unit of Measurement</label>
+							<SfTextBox @bind-Value="_rawMaterialModel.MeasurementUnit"
+									   Placeholder="Enter Unit (e.g., kg, lbs, pcs)"
+									   CssClass="form-control" />
+						</div>
+					</div>
+
+					<div class="form-row">
+						<div class="form-group">
 							<label>Rate (MRP)</label>
 							<SfNumericTextBox @bind-Value="_rawMaterialModel.MRP"
 											  Format="N2"
@@ -111,9 +121,7 @@ else
 											  Min="0"
 											  CssClass="form-control" />
 						</div>
-					</div>
 
-					<div class="form-row">
 						<div class="form-group">
 							<label>Tax Type</label>
 							<SfComboBox TValue="int"
@@ -165,7 +173,7 @@ else
 							<GridColumn Field=@nameof(RawMaterialModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(RawMaterialModel.Name) HeaderText="Name" Width="200" />
 							<GridColumn Field=@nameof(RawMaterialModel.Code) HeaderText="Code" Width="120" />
-							<GridColumn Field=@nameof(RawMaterialModel.RawMaterialCategoryId) HeaderText="Category ID" Width="120" />
+							<GridColumn Field=@nameof(RawMaterialModel.MeasurementUnit) HeaderText="Unit of Measurement" Width="80" />
 							<GridColumn Field=@nameof(RawMaterialModel.MRP) HeaderText="MRP" Width="100" Format="N2" TextAlign="TextAlign.Right" />
 							<GridColumn Field=@nameof(RawMaterialModel.TaxId) HeaderText="Tax ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(RawMaterialModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />

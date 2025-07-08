@@ -82,13 +82,6 @@ public class PurchaseOverviewModel
 	public decimal Total { get; set; }
 }
 
-public enum MeasurementUnit
-{
-	KiloGram,
-	Gram,
-	Litre
-}
-
 #region Chart and Helper Models
 public class PurchaseDetailDisplayModel
 {
