@@ -399,5 +399,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-PilatoWorksLibrary/DataAccess/Secrets.cs
-PilatoWorksLibrary/DataAccess/Secrets.cs
+PrimeOrdersLibrary/DataAccess/Secrets.cs
