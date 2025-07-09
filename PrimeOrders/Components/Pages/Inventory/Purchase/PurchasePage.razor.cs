@@ -133,6 +133,7 @@ public partial class PurchasePage
 				SGSTAmount = item.SGSTAmount,
 				IGSTAmount = item.IGSTAmount,
 				Total = item.Total,
+				NetRate = item.NetRate,
 			});
 		}
 
@@ -337,6 +338,8 @@ public partial class PurchasePage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+			item.NetRate = (item.AfterDiscount - (item.AfterDiscount * (_purchase.CDPercent / 100))
+				+ (item.CGSTAmount + item.SGSTAmount + item.IGSTAmount)) / item.Quantity;
 		}
 
 		_baseTotal = _purchaseRawMaterialCarts.Sum(c => c.BaseTotal);
@@ -445,6 +448,12 @@ public partial class PurchasePage
 	private void DialogQuantityValueChanged(decimal args)
 	{
 		_selectedRawMaterialCart.Quantity = args;
+		UpdateModalFinancialDetails();
+	}
+
+	private void DialogMesuringUnitValueChanged(string args)
+	{
+		_selectedRawMaterialCart.MeasurementUnit = args;
 		UpdateModalFinancialDetails();
 	}
 
@@ -601,6 +610,7 @@ public partial class PurchasePage
 				IGSTPercent = item.IGSTPercent,
 				IGSTAmount = item.IGSTAmount,
 				Total = item.Total,
+				NetRate = item.NetRate,
 				Status = true
 			});
 	}
@@ -619,6 +629,7 @@ public partial class PurchasePage
 				Id = 0,
 				RawMaterialId = item.RawMaterialId,
 				Quantity = item.Quantity,
+				NetRate = item.NetRate,
 				Type = StockType.Purchase.ToString(),
 				TransactionNo = _purchase.BillNo,
 				TransactionDate = _purchase.BillDate,

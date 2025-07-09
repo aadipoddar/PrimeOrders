@@ -32,6 +32,7 @@ public class PurchaseDetailModel
 	public decimal IGSTPercent { get; set; }
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -53,6 +54,7 @@ public class PurchaseRawMaterialCartModel
 	public decimal IGSTPercent { get; set; }
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
 }
 
 public class PurchaseOverviewModel

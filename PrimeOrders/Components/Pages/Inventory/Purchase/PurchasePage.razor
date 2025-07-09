@@ -170,6 +170,7 @@ else
 	</div>
 }
 
+
 <!-- Bill Details Dialog -->
 <SfDialog ID="_sfBillDetailsDialog"
 		  @ref="_sfBillDetailsDialog"
@@ -507,8 +508,18 @@ else
 									<div class="form-row">
 										<div class="form-group">
 											<label>Measuring Unit</label>
-											<SfTextBox Value="_selectedRawMaterialCart.MeasurementUnit"
-													   CssClass="form-control" />
+											<SfTextBox Value="@_selectedRawMaterialCart.MeasurementUnit"
+													   CssClass="form-control"
+													   ValueChanged="DialogMesuringUnitValueChanged" />
+										</div>
+
+										<div class="form-group">
+											<label>Net Rate</label>
+											<SfNumericTextBox TValue="decimal"
+															  Value="_selectedRawMaterialCart.NetRate"
+															  Format="N2"
+															  Readonly=true
+															  CssClass="form-control" />
 										</div>
 									</div>
 

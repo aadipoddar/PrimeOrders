@@ -142,14 +142,18 @@ else
 						AllowPdfExport="true">
 					<GridPageSettings PageSize="10"></GridPageSettings>
 					<GridColumns>
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)" HeaderText="Category" Width="80" />
 						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCode)" HeaderText="Code" Width="100" />
-						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialName)" HeaderText="Item Name" Width="180" />
-						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)" HeaderText="Category" Width="150" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.RawMaterialName)" HeaderText="Item Name" Width="150" />
 						<GridColumn Field="@nameof(RawMaterialStockDetailModel.OpeningStock)" HeaderText="Opening" Width="110" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(RawMaterialStockDetailModel.PurchaseStock)" HeaderText="Purchases" Width="120" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(RawMaterialStockDetailModel.SaleStock)" HeaderText="Sales" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(RawMaterialStockDetailModel.MonthlyStock)" HeaderText="Monthly" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(RawMaterialStockDetailModel.ClosingStock)" HeaderText="Closing" Width="110" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.AveragePrice)" HeaderText="Average Price" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.LastPurchasePrice)" HeaderText="Last Purchase Price" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.WeightedAverageValue)" HeaderText="Weighted Average Value" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(RawMaterialStockDetailModel.LastPurchaseValue)" HeaderText="Last Purchase Value" Width="120" Format="N2" TextAlign="TextAlign.Right" />
 					</GridColumns>
 				</SfGrid>
 			</div>

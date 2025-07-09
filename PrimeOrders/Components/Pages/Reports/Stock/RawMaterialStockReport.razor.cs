@@ -1,4 +1,4 @@
-using Syncfusion.Blazor.Calendars;
+﻿using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
 
 namespace PrimeOrders.Components.Pages.Reports.Stock;
@@ -64,16 +64,16 @@ public partial class RawMaterialStockReport
 
 		// Create summary items dictionary with key stock metrics
 		Dictionary<string, object> summaryItems = new()
-		{
-			{ "Total Stock Items", _stockDetails.Count },
-			{ "Opening Stock", _stockDetails.Sum(s => s.OpeningStock) },
-			{ "Total Purchases", _stockDetails.Sum(s => s.PurchaseStock) },
-			{ "Total Sales", _stockDetails.Sum(s => s.SaleStock) },
-			{ "Monthly Stock", _stockDetails.Sum(s => s.MonthlyStock) },
-			{ "Closing Stock", _stockDetails.Sum(s => s.ClosingStock) },
-			{ "Stock Movement", _stockDetails.Sum(s => s.PurchaseStock + s.SaleStock) },
-			{ "Net Stock Change", _stockDetails.Sum(s => s.ClosingStock - s.OpeningStock) }
-		};
+	{
+		{ "Total Stock Items", _stockDetails.Count },
+		{ "Opening Stock", _stockDetails.Sum(s => s.OpeningStock) },
+		{ "Total Purchases", _stockDetails.Sum(s => s.PurchaseStock) },
+		{ "Total Sales", _stockDetails.Sum(s => s.SaleStock) },
+		{ "Monthly Stock", _stockDetails.Sum(s => s.MonthlyStock) },
+		{ "Closing Stock", _stockDetails.Sum(s => s.ClosingStock) },
+		{ "Stock Movement", _stockDetails.Sum(s => s.PurchaseStock + s.SaleStock) },
+		{ "Net Stock Change", _stockDetails.Sum(s => s.ClosingStock - s.OpeningStock) }
+	};
 
 		// Add top categories summary data
 		var topCategories = _stockDetails
@@ -88,13 +88,17 @@ public partial class RawMaterialStockReport
 		// Define the column order for better readability
 		List<string> columnOrder = [
 			nameof(RawMaterialStockDetailModel.RawMaterialCode),
-			nameof(RawMaterialStockDetailModel.RawMaterialName),
-			nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
-			nameof(RawMaterialStockDetailModel.OpeningStock),
-			nameof(RawMaterialStockDetailModel.PurchaseStock),
-			nameof(RawMaterialStockDetailModel.SaleStock),
-			nameof(RawMaterialStockDetailModel.MonthlyStock),
-			nameof(RawMaterialStockDetailModel.ClosingStock)
+		nameof(RawMaterialStockDetailModel.RawMaterialName),
+		nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
+		nameof(RawMaterialStockDetailModel.OpeningStock),
+		nameof(RawMaterialStockDetailModel.PurchaseStock),
+		nameof(RawMaterialStockDetailModel.SaleStock),
+		nameof(RawMaterialStockDetailModel.MonthlyStock),
+		nameof(RawMaterialStockDetailModel.ClosingStock),
+		nameof(RawMaterialStockDetailModel.AveragePrice),
+		nameof(RawMaterialStockDetailModel.WeightedAverageValue),
+		nameof(RawMaterialStockDetailModel.LastPurchasePrice),
+		nameof(RawMaterialStockDetailModel.LastPurchaseValue)
 		];
 
 		// Define custom column settings
@@ -212,6 +216,42 @@ public partial class RawMaterialStockReport
 
 					return null;
 				}
+			},
+			[nameof(RawMaterialStockDetailModel.AveragePrice)] = new()
+			{
+				DisplayName = "Average Price",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(RawMaterialStockDetailModel.WeightedAverageValue)] = new()
+			{
+				DisplayName = "Weighted Avg Value",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(RawMaterialStockDetailModel.LastPurchasePrice)] = new()
+			{
+				DisplayName = "Last Purchase Price",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(RawMaterialStockDetailModel.LastPurchaseValue)] = new()
+			{
+				DisplayName = "Last Purchase Value",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			}
 		};
 

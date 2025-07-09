@@ -400,22 +400,20 @@ public partial class RawMaterialStockAdjustmentPage
 			else
 				adjustmentQuantity = item.Quantity - existingStock.ClosingStock;
 
-			if (adjustmentQuantity != 0) // Only create stock entry if there's an actual adjustment
-			{
+			if (adjustmentQuantity != 0)
 				await StockData.InsertRawMaterialStock(new()
 				{
 					Id = 0,
 					RawMaterialId = item.RawMaterialId,
 					Quantity = adjustmentQuantity,
+					NetRate = null,
 					Type = StockType.Adjustment.ToString(),
 					TransactionNo = $"ADJ-{DateTime.Now:yyyyMMddHHmmss}",
 					TransactionDate = DateOnly.FromDateTime(DateTime.Now),
 					LocationId = _selectedLocationId
 				});
-			}
 		}
 
-		// Refresh stock details after adjustment
 		await LoadStockDetails();
 	}
 	#endregion

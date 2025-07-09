@@ -5,6 +5,7 @@ public class RawMaterialStockModel
 	public int Id { get; set; }
 	public int RawMaterialId { get; set; }
 	public decimal Quantity { get; set; }
+	public decimal? NetRate { get; set; }
 	public string Type { get; set; }
 	public string TransactionNo { get; set; }
 	public DateOnly TransactionDate { get; set; }
@@ -51,6 +52,10 @@ public class RawMaterialStockDetailModel
 	public decimal SaleStock { get; set; }
 	public decimal MonthlyStock { get; set; }
 	public decimal ClosingStock { get; set; }
+	public decimal AveragePrice { get; set; }
+	public decimal LastPurchasePrice { get; set; }
+	public decimal WeightedAverageValue { get; set; }
+	public decimal LastPurchaseValue { get; set; }
 }
 
 public class ProductStockDetailModel

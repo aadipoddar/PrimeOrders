@@ -3,6 +3,7 @@
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [RawMaterialId] INT NOT NULL ,
     [Quantity] DECIMAL(7, 3) NOT NULL,
+    [NetRate] MONEY NULL, 
     [Type] VARCHAR(20) NOT NULL, 
     [TransactionNo] VARCHAR(20) NOT NULL, 
     [TransactionDate] DATE NOT NULL, 

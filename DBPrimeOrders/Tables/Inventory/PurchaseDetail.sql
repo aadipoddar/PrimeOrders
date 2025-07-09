@@ -17,6 +17,7 @@
     [IGSTPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0, 
     [IGSTAmount] MONEY NOT NULL DEFAULT 0, 
     [Total] MONEY NOT NULL DEFAULT 0, 
+    [NetRate] MONEY NOT NULL DEFAULT 0, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_PurchaseDetail_ToRawMaterial] FOREIGN KEY (RawMaterialId) REFERENCES [RawMaterial](Id), 
     CONSTRAINT [FK_PurchaseDetail_ToPurchase] FOREIGN KEY (PurchaseId) REFERENCES [Purchase](Id), 
