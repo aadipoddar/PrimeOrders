@@ -26,7 +26,7 @@ BEGIN
             FROM [RawMaterialStock]
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND Type = 'Purchase'
                   AND LocationId = @LocationId),
            0) AS PurchaseStock,
@@ -37,7 +37,7 @@ BEGIN
             FROM [RawMaterialStock]
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND Type = 'Sale'
                   AND LocationId = @LocationId),
            0) AS SaleStock,
@@ -48,7 +48,7 @@ BEGIN
             FROM [RawMaterialStock]
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND LocationId = @LocationId),
            0) AS MonthlyStock,
 
@@ -66,7 +66,7 @@ BEGIN
                FROM [RawMaterialStock]
                WHERE     RawMaterialId = s.RawMaterialId
                      AND TransactionDate >= @FromDate
-                     AND TransactionDate < @ToDate
+                     AND TransactionDate <= @ToDate
                      AND LocationId = @LocationId),
               0)) AS ClosingStock,
 
@@ -76,7 +76,7 @@ BEGIN
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
-                   AND TransactionDate < @ToDate
+                   AND TransactionDate <= @ToDate
                    AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId),
@@ -87,7 +87,8 @@ BEGIN
             (SELECT TOP 1 NetRate
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
-                   AND TransactionDate <= @FromDate
+                   AND TransactionDate >= @FromDate
+                   AND TransactionDate <= @ToDate
                    AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId
@@ -112,14 +113,14 @@ BEGIN
                           FROM [RawMaterialStock]
                           WHERE     RawMaterialId = s.RawMaterialId
                                 AND TransactionDate >= @FromDate
-                                AND TransactionDate < @ToDate
+                                AND TransactionDate <= @ToDate
                                 AND LocationId = @LocationId),
                          0)
                 )
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
-                   AND TransactionDate < @ToDate
+                   AND TransactionDate <= @ToDate
                    AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId),
@@ -143,13 +144,14 @@ BEGIN
                           FROM [RawMaterialStock]
                           WHERE     RawMaterialId = s.RawMaterialId
                                 AND TransactionDate >= @FromDate
-                                AND TransactionDate < @ToDate
+                                AND TransactionDate <= @ToDate
                                 AND LocationId = @LocationId),
                          0)
                 )
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
-                   AND TransactionDate <= @FromDate
+                   AND TransactionDate >= @FromDate
+                   AND TransactionDate <= @ToDate
                    AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId
