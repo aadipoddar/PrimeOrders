@@ -798,9 +798,9 @@ public partial class SalePage
 
 	private async Task PrintA4Bill()
 	{
-		var pdfBytes = await SaleA4Print.GenerateA4SaleBill(_sale.Id);
+		var memoryStream = await SaleA4Print.GenerateA4SaleBill(_sale.Id);
 		var fileName = $"Sale_Bill_{_sale.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await JS.InvokeVoidAsync("downloadPdf", Convert.ToBase64String(pdfBytes), fileName);
+		await JS.InvokeVoidAsync("savePDF", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 	#endregion
 }

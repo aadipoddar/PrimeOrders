@@ -126,7 +126,7 @@ public partial class PurchaseReport
 
 		var memoryStream = await PurchaseExcelExport.ExportPurchaseOverviewExcel(_purchaseOverviews, _startDate, _endDate, _selectedSupplierId);
 		var fileName = $"Purchase_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
+		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 	#endregion
 

@@ -31,19 +31,9 @@ public partial class PurchaseSummaryModule
 
 	private async Task PrintInvoice()
 	{
-		try
-		{
-			// Call print functionality - you can implement thermal or A4 printing here
-			await JS.InvokeVoidAsync("window.print");
-
-			_sfSuccessToast.Content = "Print job sent successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
-		catch (Exception ex)
-		{
-			_sfErrorToast.Content = $"Print failed: {ex.Message}";
-			await _sfErrorToast.ShowAsync();
-		}
+		//var pdfBytes = await PurchaseA4Print.GenerateA4PurchaseBill(SelectedPurchase.PurchaseId);
+		//var fileName = $"Purchase_Invoice_{SelectedPurchase.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		//await JS.InvokeVoidAsync("downloadPdf", Convert.ToBase64String(pdfBytes), fileName);
 	}
 
 	private void ShowDeleteConfirmation()

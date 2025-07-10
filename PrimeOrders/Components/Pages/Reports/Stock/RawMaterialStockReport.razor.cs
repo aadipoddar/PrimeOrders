@@ -271,7 +271,7 @@ public partial class RawMaterialStockReport
 			columnOrder);
 
 		var fileName = $"Raw_material_Stock_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
+		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
 	// Chart data methods

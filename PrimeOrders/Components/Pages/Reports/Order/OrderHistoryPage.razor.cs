@@ -139,7 +139,7 @@ public partial class OrderHistoryPage
 
 		var memoryStream = await OrderExcelExport.ExportPendingProductsExcel(pendingOrders, _startDate, _endDate);
 		var fileName = $"Pending_Orders_Products_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
+		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
 	private async Task ExportToExcel()
@@ -152,7 +152,7 @@ public partial class OrderHistoryPage
 
 		var memoryStream = OrderExcelExport.ExportOrderOverviewExcel(_orderOverviews, _startDate, _endDate);
 		var fileName = $"Order_History_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await JS.InvokeVoidAsync("saveAs", Convert.ToBase64String(memoryStream.ToArray()), fileName);
+		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 	#endregion
 

@@ -15,4 +15,7 @@ public class PurchaseData
 
 	public static async Task<List<PurchaseOverviewModel>> LoadPurchaseDetailsByDate(DateTime FromDate, DateTime ToDate) =>
 		await SqlDataAccess.LoadData<PurchaseOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseDetailsByDate, new { FromDate, ToDate });
+
+	public static async Task<PurchaseOverviewModel> LoadPurchaseOverviewByPurchaseId(int PurchaseId) =>
+		(await SqlDataAccess.LoadData<PurchaseOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseOverviewByPurchaseId, new { PurchaseId })).FirstOrDefault();
 }

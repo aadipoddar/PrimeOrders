@@ -50,8 +50,4 @@
     <Using Include="PrimeOrdersLibrary.Models.Sale" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Components\Pages\Reports\NewFolder\" />
-  </ItemGroup>
-
 </Project>

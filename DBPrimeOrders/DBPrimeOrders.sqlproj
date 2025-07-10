@@ -179,6 +179,7 @@
     <Build Include="Views\SaleReturn_Overview.sql" />
     <Build Include="StoredProcedures\Reports\Load_SaleReturnDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleOverview_By_SaleId.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_PurchaseOverview_By_PurchaseId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

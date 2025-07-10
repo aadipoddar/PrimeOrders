@@ -32,9 +32,9 @@ public partial class SaleSummaryModule
 	#region Printing
 	private async Task PrintInvoice()
 	{
-		var pdfBytes = await SaleA4Print.GenerateA4SaleBill(SelectedSale.SaleId);
+		var memoryStream = await SaleA4Print.GenerateA4SaleBill(SelectedSale.SaleId);
 		var fileName = $"Sale_Bill_{SelectedSale.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await JS.InvokeVoidAsync("downloadPdf", Convert.ToBase64String(pdfBytes), fileName);
+		await JS.InvokeVoidAsync("savePDF", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
 	private async Task PrintThermalReceipt()
