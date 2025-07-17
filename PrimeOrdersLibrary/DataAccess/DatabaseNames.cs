@@ -48,6 +48,8 @@ public static class StoredProcedureNames
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 	public static string LoadPurchaseOverviewByPurchaseId => "Load_PurchaseOverview_By_PurchaseId";
 
+	public static string LoadSupplierByLocation => "Load_Supplier_By_Location";
+
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
 	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
 	public static string LoadProductByLocationRate => "Load_Product_By_LocationRate";

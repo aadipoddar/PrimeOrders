@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Data.Inventory.Purchase;
+
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
@@ -83,6 +85,29 @@ public partial class LocationPage
 			return;
 
 		await LocationData.InsertLocation(_locationModel);
+		await InsertSupplier();
+
 		await _sfToast.ShowAsync();
+	}
+
+	private async Task InsertSupplier()
+	{
+		SupplierModel supplier = null;
+		if (_locationModel.Id > 0)
+			supplier = await SupplierData.LoadSupplierByLocation(_locationModel.Id);
+
+		await SupplierData.InsertSupplier(new()
+		{
+			Id = supplier?.Id ?? 0,
+			Name = _locationModel.Name,
+			LocationId = _locationModel.Id,
+			Code = await GenerateBillNo.GetLocationPrefix(_locationModel.Id),
+			Address = "",
+			Email = "",
+			GSTNo = "",
+			Phone = "",
+			StateId = 2,
+			Status = true
+		});
 	}
 }

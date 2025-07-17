@@ -8,7 +8,7 @@ namespace PrimeOrdersLibrary.Data.Common;
 
 public static class GenerateBillNo
 {
-	private static async Task<string> GetLocationPrefix(int locationId)
+	public static async Task<string> GetLocationPrefix(int locationId)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, locationId);
 		if (location is null)

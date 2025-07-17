@@ -187,6 +187,7 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Recipe\Load_RecipeDetail_By_Recipe.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_By_RawMaterialCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_Rate_By_Supplier.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Load_Supplier_By_Location.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
