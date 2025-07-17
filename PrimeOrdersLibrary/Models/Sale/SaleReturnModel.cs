@@ -47,3 +47,32 @@ public class SaleReturnOverviewModel
 	public int TotalProducts { get; set; }
 	public decimal TotalQuantity { get; set; }
 }
+
+#region Charts and Helper Methods
+public class LocationGroupSaleReturnChartData
+{
+	public int LocationId { get; set; }
+	public string LocationName { get; set; }
+	public int TotalReturns { get; set; }
+	public int TotalProducts { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class LocationWiseSaleReturnData
+{
+	public string LocationName { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class DailySaleReturnChartData
+{
+	public string Date { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class ProductCategorySaleReturnChartData
+{
+	public string CategoryName { get; set; }
+	public int ProductCount { get; set; }
+}
+#endregion

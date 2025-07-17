@@ -1,0 +1,944 @@
+﻿@using PrimeOrdersLibrary.Models.Sale
+
+<!-- Success Toast -->
+<SfToast @ref="_sfSuccessToast"
+		 ID="toast_success_sale_return_module"
+		 Title="Success"
+		 Content="Operation completed successfully."
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<!-- Error Toast -->
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error_sale_return_module"
+		 Title="Error"
+		 Content="An error occurred."
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<!-- Sale Return Summary Dialog -->
+<SfDialog ID="_sfSaleReturnSummaryModuleDialog"
+		  @ref="_sfSaleReturnSummaryModuleDialog"
+		  Width="950px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="true"
+		  @bind-Visible="IsVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="return-icon">🔄</span>
+				<span>Sale Return Summary - @SelectedSaleReturn?.TransactionNo</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				@if (SelectedSaleReturn is not null)
+				{
+					<div class="sale-return-summary-container">
+						<!-- Return Information Section -->
+						<div class="summary-section">
+							<h3 class="section-title">
+								<span class="section-icon">📋</span>
+								Return Information
+							</h3>
+							<div class="info-grid">
+								<div class="info-item">
+									<span class="info-label">Transaction No:</span>
+									<span class="info-value">@SelectedSaleReturn.TransactionNo</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">Return Date:</span>
+									<span class="info-value">@SelectedSaleReturn.ReturnDateTime.ToString("dd/MM/yyyy hh:mm tt")</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">Location:</span>
+									<span class="info-value">@SelectedSaleReturn.LocationName</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">Processed By:</span>
+									<span class="info-value">@SelectedSaleReturn.UserName</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">Original Bill:</span>
+									<span class="info-value">@SelectedSaleReturn.OriginalBillNo</span>
+								</div>
+								<div class="info-item">
+									<span class="info-label">Status:</span>
+									<span class="info-value status @(SelectedSaleReturn.Status ? "active" : "inactive")">
+										@(SelectedSaleReturn.Status ? "Active" : "Inactive")
+									</span>
+								</div>
+							</div>
+							@if (!string.IsNullOrEmpty(SelectedSaleReturn.Remarks))
+							{
+								<div class="remarks-section">
+									<span class="info-label">Remarks:</span>
+									<div class="remarks-content">@SelectedSaleReturn.Remarks</div>
+								</div>
+							}
+						</div>
+
+						<!-- Return Statistics Section -->
+						<div class="summary-section">
+							<h3 class="section-title">
+								<span class="section-icon">📊</span>
+								Return Statistics
+							</h3>
+							<div class="stats-grid">
+								<div class="stat-card">
+									<div class="stat-icon">📦</div>
+									<div class="stat-content">
+										<div class="stat-label">Total Products</div>
+										<div class="stat-value">@SelectedSaleReturn.TotalProducts</div>
+									</div>
+								</div>
+								<div class="stat-card">
+									<div class="stat-icon">🧮</div>
+									<div class="stat-content">
+										<div class="stat-label">Total Quantity</div>
+										<div class="stat-value">@SelectedSaleReturn.TotalQuantity.ToString("N2")</div>
+									</div>
+								</div>
+								<div class="stat-card">
+									<div class="stat-icon">🔄</div>
+									<div class="stat-content">
+										<div class="stat-label">Return Type</div>
+										<div class="stat-value">Product Return</div>
+									</div>
+								</div>
+								<div class="stat-card">
+									<div class="stat-icon">📅</div>
+									<div class="stat-content">
+										<div class="stat-label">Processing Time</div>
+										<div class="stat-value">@GetProcessingTime()</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Return Details Section -->
+						@if (SaleReturnDetails is not null && SaleReturnDetails.Any())
+						{
+							<div class="summary-section">
+								<h3 class="section-title">
+									<span class="section-icon">🛒</span>
+									Returned Products
+								</h3>
+								<div class="products-table-container">
+									<SfGrid DataSource="SaleReturnDetails"
+											AllowSorting="true"
+											AllowFiltering="true"
+											AllowPaging="true"
+											Height="300px"
+											CssClass="return-details-grid">
+										<GridPageSettings PageSize="5" />
+										<GridColumns>
+											<GridColumn Field="ProductName" HeaderText="Product" Width="250" />
+											<GridColumn Field="Quantity" HeaderText="Quantity" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+										</GridColumns>
+									</SfGrid>
+								</div>
+							</div>
+						}
+
+						<!-- Original Sale Information -->
+						<div class="summary-section">
+							<h3 class="section-title">
+								<span class="section-icon">🧾</span>
+								Original Sale Reference
+							</h3>
+							<div class="original-sale-info">
+								<div class="sale-reference-card">
+									<div class="sale-icon">🧾</div>
+									<div class="sale-details">
+										<div class="sale-bill">Bill No: @SelectedSaleReturn.OriginalBillNo</div>
+										<div class="sale-date">Sale ID: @SelectedSaleReturn.SaleId</div>
+										<div class="sale-action">
+											<button class="view-original-button" @onclick='() => NavManager.NavigateTo($"/Sale/{SelectedSaleReturn.SaleId}")'>
+												View Original Sale
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="action-buttons-container">
+					<!-- Action Buttons -->
+					<div class="return-actions">
+						<!-- Print Return Receipt Button -->
+						<SfButton CssClass="print-button"
+								  OnClick="PrintReturnReceipt">
+							<div class="button-content">
+								<img src="images/printA4.png" alt="Print Receipt" class="print-icon" />
+								<span>Print Receipt</span>
+							</div>
+						</SfButton>
+
+						<!-- Edit Button - Only for admins -->
+						@if (CurrentUser.Admin)
+						{
+							<SfButton CssClass="edit-button"
+									  OnClick='() => NavManager.NavigateTo($"/SaleReturn/{SelectedSaleReturn.SaleReturnId}")'>
+								<div class="button-content">
+									<img src="images/edit.png" alt="Edit" class="edit-icon" />
+									<span>Edit Return</span>
+								</div>
+							</SfButton>
+
+							<!-- Delete Button -->
+							<SfButton CssClass="delete-button-large"
+									  OnClick="ShowDeleteConfirmation">
+								<div class="button-content">
+									<img src="images/delete.png" alt="Delete" class="delete-icon" />
+									<span>Delete Return</span>
+								</div>
+							</SfButton>
+						}
+					</div>
+
+					<div class="dialog-controls">
+						<SfButton Content="Close"
+								  OnClick="CloseDialog"
+								  CssClass="close-button" />
+					</div>
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Delete Confirmation Dialog -->
+<SfDialog ID="_sfDeleteConfirmationDialog"
+		  @ref="_sfDeleteConfirmationDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_deleteConfirmationDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="warning-icon">⚠️</span>
+				<span>Confirm Delete Sale Return</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="confirm-section">
+					<div class="warning-message">
+						<p>Are you sure you want to delete this sale return?</p>
+					</div>
+
+					<div class="return-info">
+						<div class="detail-item">
+							<span class="detail-label">Return ID:</span>
+							<span class="detail-value">@SelectedSaleReturn?.SaleReturnId</span>
+						</div>
+						<div class="detail-item">
+							<span class="detail-label">Transaction No:</span>
+							<span class="detail-value">@SelectedSaleReturn?.TransactionNo</span>
+						</div>
+					</div>
+
+					<div class="warning-note">
+						<p><strong>Note:</strong> This action will:</p>
+						<ul>
+							<li>Set the sale return status to inactive</li>
+							<li>Remove associated stock entries</li>
+							<li>This action cannot be easily undone</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Yes, Delete"
+							  IsPrimary="true"
+							  OnClick="ConfirmDeleteSaleReturn"
+							  CssClass="delete-confirm-button" />
+					<SfButton Content="Cancel"
+							  OnClick="CancelDelete"
+							  CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<style>
+	:root {
+		--dotnet-primary: #512BD4;
+		--dotnet-secondary: #68217A;
+		--dotnet-accent: #00A4EF;
+		--dotnet-light: #F7F7F7;
+		--dotnet-dark: #1E1E1E;
+		--dotnet-border: #E0E0E0;
+		--return-primary: #dc3545;
+		--return-secondary: #c82333;
+		--print-color: #17a2b8;
+		--edit-color: #28a745;
+		--delete-color: #f44336;
+	}
+
+	/* Delete Button Styling */
+	.delete-confirm-button {
+		background-color: var(--delete-color);
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+		.delete-confirm-button:hover {
+			background-color: #d32f2f;
+		}
+
+	/* Delete Confirmation Dialog Styling */
+	.warning-icon {
+		font-size: 24px;
+		margin-right: 10px;
+	}
+
+	.warning-message {
+		background-color: #fff3cd;
+		border: 1px solid #ffeaa7;
+		border-radius: 6px;
+		padding: 15px;
+		margin-bottom: 20px;
+		text-align: center;
+	}
+
+		.warning-message p {
+			margin: 0;
+			font-weight: 600;
+			color: #856404;
+			font-size: 16px;
+		}
+
+	.return-info {
+		background-color: var(--dotnet-light);
+		border-radius: 6px;
+		padding: 15px;
+		margin-bottom: 20px;
+	}
+
+		.return-info .detail-item {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 8px;
+		}
+
+		.return-info .detail-label {
+			font-weight: 600;
+			color: var(--dotnet-dark);
+		}
+
+		.return-info .detail-value {
+			color: var(--return-primary);
+			font-weight: 500;
+		}
+
+	.warning-note {
+		background-color: #f8d7da;
+		border: 1px solid #f5c6cb;
+		border-radius: 6px;
+		padding: 15px;
+	}
+
+		.warning-note p {
+			margin: 0 0 10px 0;
+			font-weight: 600;
+			color: #721c24;
+		}
+
+		.warning-note ul {
+			margin: 0;
+			padding-left: 20px;
+			color: #721c24;
+		}
+
+		.warning-note li {
+			margin-bottom: 5px;
+		}
+
+	.confirm-section {
+		margin-bottom: 0;
+	}
+
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Dialog Header */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--return-primary);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.return-icon {
+		font-size: 24px;
+	}
+
+	/* Dialog Content */
+	.dialog-content {
+		padding: 20px;
+		max-height: 70vh;
+		overflow-y: auto;
+	}
+
+	.sale-return-summary-container {
+		display: flex;
+		flex-direction: column;
+		gap: 25px;
+	}
+
+	/* Summary Sections */
+	.summary-section {
+		background-color: var(--dotnet-light);
+		border-radius: 12px;
+		padding: 20px;
+		border: 1px solid var(--dotnet-border);
+	}
+
+	.section-title {
+		margin: 0 0 15px 0;
+		color: var(--return-primary);
+		font-size: 18px;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border-bottom: 2px solid var(--return-primary);
+		padding-bottom: 8px;
+	}
+
+	.section-icon {
+		font-size: 20px;
+	}
+
+	/* Info Grid */
+	.info-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 15px;
+	}
+
+	.info-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px;
+		background-color: white;
+		border-radius: 6px;
+		border: 1px solid var(--dotnet-border);
+	}
+
+	.info-label {
+		font-weight: 600;
+		color: var(--dotnet-dark);
+		flex-shrink: 0;
+	}
+
+	.info-value {
+		color: var(--return-primary);
+		font-weight: 500;
+		text-align: right;
+	}
+
+		.info-value.status {
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 12px;
+			font-weight: 600;
+			text-transform: uppercase;
+		}
+
+			.info-value.status.active {
+				background-color: rgba(40, 167, 69, 0.1);
+				color: #28a745;
+			}
+
+			.info-value.status.inactive {
+				background-color: rgba(220, 53, 69, 0.1);
+				color: #dc3545;
+			}
+
+	/* Remarks Section */
+	.remarks-section {
+		margin-top: 15px;
+		padding: 15px;
+		background-color: white;
+		border-radius: 6px;
+		border: 1px solid var(--dotnet-border);
+	}
+
+	.remarks-content {
+		margin-top: 8px;
+		padding: 10px;
+		background-color: var(--dotnet-light);
+		border-radius: 4px;
+		font-style: italic;
+		color: var(--dotnet-dark);
+		border-left: 4px solid var(--return-primary);
+	}
+
+	/* Statistics Grid */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 15px;
+	}
+
+	.stat-card {
+		display: flex;
+		align-items: center;
+		background-color: white;
+		border-radius: 12px;
+		padding: 20px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--dotnet-border);
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+		.stat-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+	.stat-icon {
+		font-size: 32px;
+		margin-right: 15px;
+		color: var(--return-primary);
+	}
+
+	.stat-content {
+		flex-grow: 1;
+	}
+
+	.stat-label {
+		font-size: 14px;
+		color: #666;
+		margin-bottom: 5px;
+	}
+
+	.stat-value {
+		font-size: 24px;
+		font-weight: bold;
+		color: var(--dotnet-dark);
+	}
+
+	/* Products Table */
+	.products-table-container {
+		background-color: white;
+		border-radius: 8px;
+		overflow: hidden;
+		border: 1px solid var(--dotnet-border);
+	}
+
+	.return-details-grid {
+		border: none;
+	}
+
+	::deep .return-details-grid .e-grid .e-headercell {
+		background-color: var(--dotnet-light);
+		color: var(--return-primary);
+		font-weight: 600;
+		border-bottom: 2px solid var(--return-primary);
+	}
+
+	::deep .return-details-grid .e-grid .e-rowcell {
+		padding: 12px 15px;
+		border-bottom: 1px solid var(--dotnet-border);
+	}
+
+	::deep .return-details-grid .e-grid .e-row:hover {
+		background-color: rgba(220, 53, 69, 0.05);
+	}
+
+	/* Original Sale Information */
+	.original-sale-info {
+		padding: 10px;
+	}
+
+	.sale-reference-card {
+		display: flex;
+		align-items: center;
+		background-color: white;
+		border-radius: 12px;
+		padding: 20px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--dotnet-border);
+		transition: transform 0.2s ease;
+	}
+
+		.sale-reference-card:hover {
+			transform: translateY(-2px);
+		}
+
+	.sale-icon {
+		font-size: 32px;
+		margin-right: 15px;
+		color: var(--dotnet-primary);
+	}
+
+	.sale-details {
+		flex-grow: 1;
+	}
+
+	.sale-bill {
+		font-size: 18px;
+		font-weight: 600;
+		color: var(--dotnet-dark);
+		margin-bottom: 5px;
+	}
+
+	.sale-date {
+		font-size: 14px;
+		color: #666;
+		margin-bottom: 10px;
+	}
+
+	.view-original-button {
+		background-color: var(--dotnet-primary);
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+		.view-original-button:hover {
+			background-color: var(--dotnet-secondary);
+		}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px;
+		background-color: var(--dotnet-light);
+		border-top: 1px solid var(--dotnet-border);
+	}
+
+	.action-buttons-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+		gap: 15px;
+	}
+
+	.return-actions {
+		display: flex;
+		gap: 15px;
+	}
+
+	.dialog-controls {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Button Content for All Action Buttons */
+	.button-content {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		justify-content: center;
+	}
+
+	/* Icon styling for all buttons */
+	.print-icon,
+	.edit-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	.delete-icon {
+		width: 18px;
+		height: 18px;
+	}
+
+	/* Action Buttons */
+	.print-button {
+		background-color: var(--print-color);
+		color: white;
+		border: none;
+		padding: 16px 28px;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 15px;
+		min-width: 140px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.print-button:hover {
+			background-color: #138496;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+		}
+
+	.edit-button {
+		background-color: var(--edit-color);
+		color: white;
+		border: none;
+		padding: 16px 28px;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 15px;
+		min-width: 140px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.edit-button:hover {
+			background-color: #218838;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+		}
+
+	.delete-button-large {
+		background-color: var(--delete-color);
+		color: white;
+		border: none;
+		padding: 16px 28px;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 15px;
+		min-width: 140px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.delete-button-large:hover {
+			background-color: #d32f2f;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+		}
+
+	.close-button {
+		background-color: var(--return-primary);
+		color: white;
+		border: none;
+		padding: 16px 32px;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 15px;
+		min-width: 120px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.close-button:hover {
+			background-color: var(--return-secondary);
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+		}
+
+	/* Dialog buttons */
+	.dialog-button {
+		border-radius: 6px;
+		padding: 8px 16px;
+		height: 38px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 500;
+	}
+
+	/* Toast Styling */
+	::deep .e-toast-container {
+		z-index: 1000;
+	}
+
+		::deep .e-toast-container .e-toast {
+			border: 0;
+			border-radius: 8px;
+			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+		}
+
+	/* Success Toast */
+	::deep .e-toast-success {
+		background-color: #ebf7ee;
+		border-left: 4px solid #4CAF50;
+		color: #2E7D32;
+	}
+
+		::deep .e-toast-success .e-toast-title {
+			color: #2E7D32;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-success .e-toast-content {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success .e-toast-close-icon {
+			color: #2E7D32;
+		}
+
+		::deep .e-toast-success::before {
+			content: "✓";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Error Toast */
+	::deep .e-toast-danger {
+		background-color: #fdeeee;
+		border-left: 4px solid #F44336;
+		color: #C62828;
+	}
+
+		::deep .e-toast-danger .e-toast-title {
+			color: #C62828;
+			font-weight: 700;
+		}
+
+		::deep .e-toast-danger .e-toast-content {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger .e-toast-close-icon {
+			color: #C62828;
+		}
+
+		::deep .e-toast-danger::before {
+			content: "⚠";
+			font-size: 18px;
+			font-weight: bold;
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+	/* Toast Animation */
+	::deep .e-toast-container .e-toast {
+		padding: 10px 10px 10px 40px;
+		position: relative;
+		animation-fill-mode: both;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 768px) {
+		.info-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.stats-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.action-buttons-container {
+			flex-direction: column;
+			gap: 15px;
+		}
+
+		.return-actions {
+			width: 100%;
+			justify-content: center;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+
+		.dialog-controls {
+			width: 100%;
+			justify-content: center;
+		}
+		/* Make buttons full width on mobile for better usability */
+		.print-button,
+		.edit-button,
+		.delete-button-large {
+			min-width: 140px;
+			flex: 1;
+			height: 45px;
+			padding: 14px 24px;
+		}
+
+		.close-button {
+			min-width: 160px;
+			height: 45px;
+			padding: 14px 28px;
+		}
+		/* Mobile icon sizes */
+		.print-icon,
+		.edit-icon,
+		.delete-icon {
+			width: 16px;
+			height: 16px;
+		}
+	}
+
+	/* Scrollbar Styling */
+	.dialog-content::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.dialog-content::-webkit-scrollbar-track {
+		background: var(--dotnet-light);
+		border-radius: 3px;
+	}
+
+	.dialog-content::-webkit-scrollbar-thumb {
+		background: var(--return-primary);
+		border-radius: 3px;
+	}
+
+		.dialog-content::-webkit-scrollbar-thumb:hover {
+			background: var(--return-secondary);
+		}
+</style>

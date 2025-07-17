@@ -1,9 +1,5 @@
-using PrimeOrdersLibrary.Exporting;
-
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports.Sale;
 
@@ -14,22 +10,21 @@ public partial class SaleReturnReport
 
 	private UserModel _user;
 	private bool _isLoading = true;
-	private bool _deleteConfirmationDialogVisible = false;
+	private bool _saleReturnSummaryVisible = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 	private int _selectedLocationId = 0;
-	private int _saleReturnToDeleteId = 0;
-	private string _saleReturnToDeleteTransactionNo = "";
 
 	private List<SaleReturnOverviewModel> _saleReturnOverviews = [];
 	private List<LocationModel> _locations = [];
 
-	private SfGrid<SaleReturnOverviewModel> _sfGrid;
-	private SfDialog _sfDeleteConfirmationDialog;
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private SaleReturnOverviewModel _selectedSaleReturn;
+	private List<SaleReturnProductCartModel> _selectedSaleReturnDetails = [];
 
+	private SfGrid<SaleReturnOverviewModel> _sfGrid;
+
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!firstRender)
@@ -90,60 +85,116 @@ public partial class SaleReturnReport
 		_isLoading = false;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void OnRowSelected(RowSelectEventArgs<SaleReturnOverviewModel> args) =>
-			NavManager.NavigateTo($"/SaleReturn/{args.Data.SaleReturnId}");
-
-	private void ShowDeleteConfirmation(int saleReturnId, string transactionNo)
+	#region Summary Module Methods
+	private async void OnRowSelected(RowSelectEventArgs<SaleReturnOverviewModel> args)
 	{
-		if (!_user.Admin)
-		{
-			_sfErrorToast.Content = "Only administrators can delete records.";
-			_sfErrorToast.ShowAsync();
+		_selectedSaleReturn = _saleReturnOverviews.FirstOrDefault(s => s.SaleReturnId == args.Data.SaleReturnId);
+		if (_selectedSaleReturn is null)
 			return;
+
+		var saleReturns = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(args.Data.SaleReturnId);
+		foreach (var saleReturn in saleReturns)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, saleReturn.ProductId);
+			if (product is not null)
+				_selectedSaleReturnDetails.Add(new()
+				{
+					ProductId = product.Id,
+					ProductName = product.Name,
+					Quantity = saleReturn.Quantity
+				});
 		}
 
-		_saleReturnToDeleteId = saleReturnId;
-		_saleReturnToDeleteTransactionNo = transactionNo;
-		_deleteConfirmationDialogVisible = true;
+		_saleReturnSummaryVisible = true;
 		StateHasChanged();
 	}
 
-	private async Task ConfirmDeleteSaleReturn()
+	private void OnSaleReturnSummaryVisibilityChanged(bool isVisible)
 	{
-		var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, _saleReturnToDeleteId);
-		if (saleReturn is null)
-		{
-			_sfErrorToast.Content = "Sale return not found.";
-			await _sfErrorToast.ShowAsync();
-			return;
-		}
-
-		saleReturn.Status = false;
-		await SaleReturnData.InsertSaleReturn(saleReturn);
-		await StockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
-
-		_sfSuccessToast.Content = "Sale return deleted successfully.";
-		await _sfSuccessToast.ShowAsync();
-
-		await LoadSaleReturnData();
-		_deleteConfirmationDialogVisible = false;
+		_saleReturnSummaryVisible = isVisible;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void CancelDelete()
+	#region Location Analysis Methods
+	private List<LocationGroupSaleReturnChartData> GetLocationGroups() =>
+		[.. _saleReturnOverviews
+			.GroupBy(sr => new { sr.LocationId, sr.LocationName })
+			.Select(g => new LocationGroupSaleReturnChartData
+			{
+				LocationId = g.Key.LocationId,
+				LocationName = g.Key.LocationName,
+				TotalReturns = g.Count(),
+				TotalProducts = g.Sum(x => x.TotalProducts),
+				TotalQuantity = g.Sum(x => x.TotalQuantity)
+			})
+			.OrderByDescending(x => x.TotalReturns)];
+
+	private string GetMostActiveDay(int locationId)
 	{
-		_deleteConfirmationDialogVisible = false;
-		_saleReturnToDeleteId = 0;
-		_saleReturnToDeleteTransactionNo = "";
-		StateHasChanged();
+		var dayGroup = _saleReturnOverviews
+			.Where(sr => sr.LocationId == locationId)
+			.GroupBy(sr => sr.ReturnDateTime.DayOfWeek)
+			.OrderByDescending(g => g.Count())
+			.FirstOrDefault();
+
+		return dayGroup?.Key.ToString() ?? "N/A";
 	}
 
-	// Chart data methods
-	private List<LocationWiseData> GetLocationWiseData() =>
+	private string GetLatestReturnDate(int locationId)
+	{
+		var latestReturn = _saleReturnOverviews
+			.Where(sr => sr.LocationId == locationId)
+			.OrderByDescending(sr => sr.ReturnDateTime)
+			.FirstOrDefault();
+
+		return latestReturn?.ReturnDateTime.ToString("dd/MM/yyyy") ?? "N/A";
+	}
+
+	private string GetReturnRate(int locationId)
+	{
+		var locationReturns = _saleReturnOverviews.Where(sr => sr.LocationId == locationId);
+		var totalDays = (_endDate.ToDateTime(TimeOnly.MinValue) - _startDate.ToDateTime(TimeOnly.MinValue)).Days + 1;
+		var rate = locationReturns.Count() / (double)totalDays;
+		return $"{rate:F1}/day";
+	}
+
+	private string GetStaffCount(int locationId)
+	{
+		var uniqueStaff = _saleReturnOverviews
+			.Where(sr => sr.LocationId == locationId)
+			.Select(sr => sr.UserId)
+			.Distinct()
+			.Count();
+
+		return uniqueStaff.ToString();
+	}
+
+	private List<DailySaleReturnChartData> GetLocationDailyData(int locationId) =>
+		[.. _saleReturnOverviews
+			.Where(sr => sr.LocationId == locationId)
+			.GroupBy(sr => DateOnly.FromDateTime(sr.ReturnDateTime))
+			.Select(g => new DailySaleReturnChartData
+			{
+				Date = g.Key.ToString("dd/MM"),
+				TotalQuantity = g.Sum(x => x.TotalQuantity)
+			})
+			.OrderBy(x => DateOnly.Parse(x.Date, new System.Globalization.CultureInfo("en-GB")))];
+
+	private async Task FilterByLocation(int locationId)
+	{
+		_selectedLocationId = locationId;
+		await RefreshData();
+	}
+	#endregion
+
+	#region Chart Data Methods
+	private List<LocationWiseSaleReturnData> GetLocationWiseData() =>
 		[.. _saleReturnOverviews
 			.GroupBy(sr => sr.LocationName)
-			.Select(g => new LocationWiseData
+			.Select(g => new LocationWiseSaleReturnData
 			{
 				LocationName = g.Key,
 				TotalQuantity = g.Sum(x => x.TotalQuantity)
@@ -151,30 +202,29 @@ public partial class SaleReturnReport
 			.OrderByDescending(x => x.TotalQuantity)
 			.Take(10)];
 
-	private List<DailyReturnData> GetDailyReturnData() =>
+	private List<DailySaleReturnChartData> GetDailyReturnData() =>
 		[.. _saleReturnOverviews
 			.GroupBy(sr => DateOnly.FromDateTime(sr.ReturnDateTime))
-			.Select(g => new DailyReturnData
+			.Select(g => new DailySaleReturnChartData
 			{
 				Date = g.Key.ToString("dd/MM"),
 				TotalQuantity = g.Sum(x => x.TotalQuantity)
 			})
 			.OrderBy(x => DateOnly.Parse(x.Date, new System.Globalization.CultureInfo("en-GB")))];
 
-	private List<ProductCategoryData> GetProductCategoryData() =>
+	private List<ProductCategorySaleReturnChartData> GetProductCategoryData() =>
 		[.. _saleReturnOverviews
 			.GroupBy(sr => sr.LocationName)
-			.Select(g => new ProductCategoryData
+			.Select(g => new ProductCategorySaleReturnChartData
 			{
 				CategoryName = g.Key,
 				ProductCount = g.Count()
 			})
 			.OrderByDescending(x => x.ProductCount)
 			.Take(10)];
+	#endregion
 
-	private async Task ExportToPdf() =>
-		await _sfGrid.ExportToPdfAsync();
-
+	#region Excel Export
 	private async Task ExportToExcel()
 	{
 		if (_saleReturnOverviews is null || _saleReturnOverviews.Count == 0)
@@ -183,163 +233,9 @@ public partial class SaleReturnReport
 			return;
 		}
 
-		// Create summary items dictionary with key metrics
-		Dictionary<string, object> summaryItems = new()
-		{
-			{ "Total Returns", _saleReturnOverviews.Count },
-			{ "Total Products", _saleReturnOverviews.Sum(_ => _.TotalProducts) },
-			{ "Total Quantity", _saleReturnOverviews.Sum(_ => _.TotalQuantity) },
-			{ "Locations Active", _saleReturnOverviews.Select(_ => _.LocationId).Distinct().Count() }
-		};
-
-		// Add top locations summary data
-		var topLocations = _saleReturnOverviews
-			.GroupBy(sr => sr.LocationName)
-			.OrderByDescending(g => g.Sum(x => x.TotalQuantity))
-			.Take(3)
-			.ToList();
-
-		foreach (var location in topLocations)
-			summaryItems.Add($"Location: {location.Key}", location.Sum(l => l.TotalQuantity));
-
-		// Define the column order for better readability
-		List<string> columnOrder = [
-			nameof(SaleReturnOverviewModel.TransactionNo),
-			nameof(SaleReturnOverviewModel.ReturnDateTime),
-			nameof(SaleReturnOverviewModel.LocationName),
-			nameof(SaleReturnOverviewModel.UserName),
-			nameof(SaleReturnOverviewModel.OriginalBillNo),
-			nameof(SaleReturnOverviewModel.TotalProducts),
-			nameof(SaleReturnOverviewModel.TotalQuantity),
-			nameof(SaleReturnOverviewModel.Remarks),
-			nameof(SaleReturnOverviewModel.Status)
-		];
-
-		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
-		{
-			[nameof(SaleReturnOverviewModel.TransactionNo)] = new()
-			{
-				DisplayName = "Transaction #",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(SaleReturnOverviewModel.ReturnDateTime)] = new()
-			{
-				DisplayName = "Return Date",
-				Format = "dd-MMM-yyyy HH:mm",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(SaleReturnOverviewModel.LocationName)] = new()
-			{
-				DisplayName = "Location",
-				Width = 20,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(SaleReturnOverviewModel.UserName)] = new()
-			{
-				DisplayName = "Processed By",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(SaleReturnOverviewModel.OriginalBillNo)] = new()
-			{
-				DisplayName = "Original Bill",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(SaleReturnOverviewModel.TotalProducts)] = new()
-			{
-				DisplayName = "Products",
-				Format = "#,##0",
-				Width = 10,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
-			[nameof(SaleReturnOverviewModel.TotalQuantity)] = new()
-			{
-				DisplayName = "Total Quantity",
-				Format = "#,##0.00",
-				Width = 15,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
-				FormatCallback = (value) =>
-				{
-					if (value == null) return null;
-					var qtyValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
-					{
-						Bold = qtyValue > 10,
-						FontColor = qtyValue > 10 ? Syncfusion.Drawing.Color.FromArgb(220, 53, 69) : null
-					};
-				}
-			},
-			[nameof(SaleReturnOverviewModel.Remarks)] = new()
-			{
-				DisplayName = "Remarks",
-				Width = 30,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(SaleReturnOverviewModel.Status)] = new()
-			{
-				DisplayName = "Active",
-				Width = 10,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			}
-		};
-
-		// Generate title based on location selection if applicable
-		string reportTitle = "Sale Return Report";
-
-		if (_selectedLocationId > 0)
-		{
-			var location = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
-			if (location != null)
-				reportTitle = $"Sale Return Report - {location.Name}";
-		}
-
-		string worksheetName = "Return Details";
-
-		var memoryStream = ExcelExportUtil.ExportToExcel(
-			_saleReturnOverviews,
-			reportTitle,
-			worksheetName,
-			_startDate,
-			_endDate,
-			summaryItems,
-			columnSettings,
-			columnOrder);
-
-		// Generate appropriate filename
-		string filenameSuffix = string.Empty;
-		if (_selectedLocationId > 0)
-		{
-			var location = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
-			if (location is not null)
-				filenameSuffix = $"_{location.Name}";
-		}
-
-		var fileName = $"Sale_Return_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
+		var memoryStream = SaleReturnExcelExport.ExportSaleReturnOverviewExcel(_saleReturnOverviews, _startDate, _endDate);
+		var fileName = $"Sale_Return_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
-
-	// Data classes for charts
-	public class LocationWiseData
-	{
-		public string LocationName { get; set; }
-		public decimal TotalQuantity { get; set; }
-	}
-
-	public class DailyReturnData
-	{
-		public string Date { get; set; }
-		public decimal TotalQuantity { get; set; }
-	}
-
-	public class ProductCategoryData
-	{
-		public string CategoryName { get; set; }
-		public int ProductCount { get; set; }
-	}
+	#endregion
 }

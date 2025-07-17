@@ -57,6 +57,7 @@ else
 						<label>Location</label>
 						<SfComboBox TValue="int"
 									TItem="LocationModel"
+									FloatLabelType='@FloatLabelType.Auto'
 									Placeholder="Select a Location"
 									DataSource="_locations"
 									@bind-Value="_selectedLocationId"
@@ -68,7 +69,6 @@ else
 				}
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
 				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
 			</div>
 		</div>
@@ -386,25 +386,6 @@ else
 		display: flex;
 		gap: 10px;
 	}
-
-	.export-button {
-		background-color: var(--dotnet-secondary);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.2s ease;
-	}
-
-		.export-button:hover {
-			background-color: #571b6c;
-			transform: translateY(-2px);
-		}
 
 	.excel-button {
 		background-color: var(--excel-color);

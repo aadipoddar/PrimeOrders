@@ -2,34 +2,6 @@
 
 <PageTitle>Sale Return Report - Prime Orders</PageTitle>
 
-<SfToast @ref="_sfErrorToast"
-		 ID="toast_error"
-		 Title="Error"
-		 Content="Some Error Message"
-		 Timeout="3000"
-		 ShowCloseButton="true"
-		 CssClass="e-toast-danger">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastAnimationSettings>
-		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
-		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
-	</ToastAnimationSettings>
-</SfToast>
-
-<SfToast @ref="_sfSuccessToast"
-		 ID="toast_success"
-		 Title="Success"
-		 Content="Sale return deleted successfully."
-		 Timeout="3000"
-		 ShowCloseButton="true"
-		 CssClass="e-toast-success">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastAnimationSettings>
-		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
-		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
-	</ToastAnimationSettings>
-</SfToast>
-
 @if (_isLoading)
 {
 	<div class="loader-container">
@@ -85,6 +57,7 @@ else
 						<label>Location</label>
 						<SfComboBox TValue="int"
 									TItem="LocationModel"
+									FloatLabelType='@FloatLabelType.Auto'
 									Placeholder="Select a Location"
 									DataSource="_locations"
 									@bind-Value="_selectedLocationId"
@@ -96,8 +69,12 @@ else
 				}
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
-				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
+				<SfButton CssClass="excel-button" OnClick="@(() => ExportToExcel())">
+					<div class="button-content">
+						<img src="images/excel.png" alt="Excel" class="excel-icon" />
+						<span>Export Excel</span>
+					</div>
+				</SfButton>
 			</div>
 		</div>
 
@@ -173,7 +150,7 @@ else
 		<div class="detailed-grid-card">
 			<div class="card-header">
 				<h3 class="chart-title">Sale Return Details</h3>
-				<p class="card-info">Click on a row to edit the sale return</p>
+				<p class="card-info">Click on a row to view detailed summary</p>
 			</div>
 			<div class="card-body">
 				<SfGrid ID="_sfGrid"
@@ -195,22 +172,6 @@ else
 						<GridColumn Field="@nameof(SaleReturnOverviewModel.OriginalBillNo)" HeaderText="Original Bill" Width="120" />
 						<GridColumn Field="@nameof(SaleReturnOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(SaleReturnOverviewModel.TotalQuantity)" HeaderText="Total Qty" Width="110" TextAlign="TextAlign.Right" />
-						<GridColumn HeaderText="Actions" Width="140">
-							<Template>
-								@{
-									var saleReturn = (context as SaleReturnOverviewModel);
-									<div class="action-buttons grid-actions">
-										<button @onclick='() => NavManager.NavigateTo($"/SaleReturn/{saleReturn.SaleReturnId}")' class="view-button">Edit</button>
-										<button @onclick="() => ShowDeleteConfirmation(saleReturn.SaleReturnId, saleReturn.TransactionNo)"
-												@onclick:stopPropagation="true"
-												class="delete-button"
-												title="Delete Sale Return">
-											<span class="delete-icon">🗑️</span>
-										</button>
-									</div>
-								}
-							</Template>
-						</GridColumn>
 					</GridColumns>
 				</SfGrid>
 			</div>
@@ -253,73 +214,109 @@ else
 			</div>
 		</div>
 
+		<!-- Location-wise Returns Section -->
+		<div class="location-reports">
+			<h2 class="section-title">Location-wise Return Analysis</h2>
+			<SfAccordion>
+				<AccordionItems>
+					@foreach (var locationGroup in GetLocationGroups())
+					{
+						<AccordionItem>
+							<HeaderTemplate>
+								<div class="accordion-header improved">
+									<div class="header-left">
+										<span class="location-name">@locationGroup.LocationName</span>
+									</div>
+									<div class="header-center">
+										<span class="location-amount">@locationGroup.TotalReturns Returns</span>
+									</div>
+									<div class="header-right">
+										<SfButton CssClass="detail-button" OnClick='() => FilterByLocation(locationGroup.LocationId)' Content="Filter" />
+									</div>
+								</div>
+							</HeaderTemplate>
+
+							<ContentTemplate>
+								<div class="location-details improved">
+									<div class="detail-section">
+										<h4 class="section-subtitle">Return Summary</h4>
+										<div class="stats-group uniform">
+											<div class="stat-item highlighted">
+												<label>Total Returns:</label>
+												<div class="stat-value">@locationGroup.TotalReturns</div>
+											</div>
+											<div class="stat-item">
+												<label>Total Products:</label>
+												<div class="stat-value">@locationGroup.TotalProducts</div>
+											</div>
+											<div class="stat-item">
+												<label>Total Quantity:</label>
+												<div class="stat-value">@locationGroup.TotalQuantity.ToString("N2")</div>
+											</div>
+											<div class="stat-item">
+												<label>Avg. Products per Return:</label>
+												<div class="stat-value">@(locationGroup.TotalReturns > 0 ? (locationGroup.TotalProducts / locationGroup.TotalReturns).ToString("N1") : "0")</div>
+											</div>
+										</div>
+
+										<h4 class="section-subtitle">Return Trends</h4>
+										<div class="stats-group uniform">
+											<div class="stat-item">
+												<label>Most Active Day:</label>
+												<div class="stat-value">@GetMostActiveDay(locationGroup.LocationId)</div>
+											</div>
+											<div class="stat-item">
+												<label>Latest Return:</label>
+												<div class="stat-value">@GetLatestReturnDate(locationGroup.LocationId)</div>
+											</div>
+											<div class="stat-item">
+												<label>Return Rate:</label>
+												<div class="stat-value">@GetReturnRate(locationGroup.LocationId)</div>
+											</div>
+											<div class="stat-item">
+												<label>Processing Staff:</label>
+												<div class="stat-value">@GetStaffCount(locationGroup.LocationId)</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="location-chart-container">
+										<h4 class="section-subtitle">Daily Returns for @locationGroup.LocationName</h4>
+										<div class="location-chart">
+											<SfChart Height="250px">
+												<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Date"></ChartPrimaryXAxis>
+												<ChartPrimaryYAxis Title="Quantity"></ChartPrimaryYAxis>
+												<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+												<ChartSeriesCollection>
+													<ChartSeries DataSource="@GetLocationDailyData(locationGroup.LocationId)" 
+																 XName="Date" YName="TotalQuantity" Type="ChartSeriesType.Line"
+																 Name="Returns" Fill="#dc3545">
+														<ChartMarker Visible="true"></ChartMarker>
+													</ChartSeries>
+												</ChartSeriesCollection>
+											</SfChart>
+										</div>
+									</div>
+								</div>
+							</ContentTemplate>
+						</AccordionItem>
+					}
+				</AccordionItems>
+			</SfAccordion>
+		</div>
+
 		<div class="dashboard-footer">
 			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
 		</div>
 	</div>
 }
 
-<!-- Delete Confirmation Dialog -->
-<SfDialog ID="_sfDeleteConfirmationDialog"
-		  @ref="_sfDeleteConfirmationDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_deleteConfirmationDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="warning-icon">⚠️</span>
-				<span>Confirm Delete Sale Return</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				<div class="confirm-section">
-					<div class="warning-message">
-						<p>Are you sure you want to delete this sale return?</p>
-					</div>
-
-					<div class="sale-return-info">
-						<div class="detail-item">
-							<span class="detail-label">Sale Return ID:</span>
-							<span class="detail-value">@_saleReturnToDeleteId</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">Transaction No:</span>
-							<span class="detail-value">@_saleReturnToDeleteTransactionNo</span>
-						</div>
-					</div>
-
-					<div class="warning-note">
-						<p><strong>Note:</strong> This action will:</p>
-						<ul>
-							<li>Set the sale return status to inactive</li>
-							<li>Remove associated product stock entries</li>
-							<li>This action cannot be easily undone</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Yes, Delete"
-							  IsPrimary="true"
-							  OnClick="ConfirmDeleteSaleReturn"
-							  CssClass="delete-confirm-button" />
-					<SfButton Content="Cancel"
-							  OnClick="CancelDelete"
-							  CssClass="dialog-button" />
-				</div>
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
+<!-- Sale Return Summary Module -->
+<SaleReturnSummaryModule IsVisible="_saleReturnSummaryVisible"
+						 IsVisibleChanged="OnSaleReturnSummaryVisibilityChanged"
+						 SelectedSaleReturn="_selectedSaleReturn"
+						 SaleReturnDetails="_selectedSaleReturnDetails"
+						 CurrentUser="_user" />
 
 <style>
 	:root {
@@ -333,118 +330,6 @@ else
 		--return-secondary: #c82333;
 		--excel-color: #217346;
 	}
-
-	/* Delete Button Styling */
-	.delete-button {
-		background-color: #f44336;
-		color: white;
-		border: none;
-		padding: 6px 10px;
-		border-radius: 4px;
-		cursor: pointer;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		font-size: 12px;
-		margin-left: 5px;
-	}
-
-		.delete-button:hover {
-			background-color: #d32f2f;
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
-		}
-
-		.delete-button:active {
-			transform: translateY(0);
-		}
-
-	.delete-icon {
-		font-size: 14px;
-	}
-
-	/* Delete Confirmation Dialog Styling */
-	.warning-icon {
-		font-size: 24px;
-		margin-right: 10px;
-	}
-
-	.warning-message {
-		background-color: #fff3cd;
-		border: 1px solid #ffeaa7;
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 20px;
-		text-align: center;
-	}
-
-		.warning-message p {
-			margin: 0;
-			font-weight: 600;
-			color: #856404;
-			font-size: 16px;
-		}
-
-	.sale-return-info {
-		background-color: var(--dotnet-light);
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 20px;
-	}
-
-		.sale-return-info .detail-item {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 8px;
-		}
-
-		.sale-return-info .detail-label {
-			font-weight: 600;
-			color: var(--dotnet-dark);
-		}
-
-		.sale-return-info .detail-value {
-			color: var(--return-primary);
-			font-weight: 500;
-		}
-
-	.warning-note {
-		background-color: #f8d7da;
-		border: 1px solid #f5c6cb;
-		border-radius: 6px;
-		padding: 15px;
-	}
-
-		.warning-note p {
-			margin: 0 0 10px 0;
-			font-weight: 600;
-			color: #721c24;
-		}
-
-		.warning-note ul {
-			margin: 0;
-			padding-left: 20px;
-			color: #721c24;
-		}
-
-		.warning-note li {
-			margin-bottom: 5px;
-		}
-
-	.delete-confirm-button {
-		background-color: #f44336;
-		color: white;
-		border: none;
-		padding: 10px 20px;
-		border-radius: 6px;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
-
-		.delete-confirm-button:hover {
-			background-color: #d32f2f;
-		}
 
 	/* General Layout */
 	.dashboard-container {
@@ -601,24 +486,10 @@ else
 		gap: 10px;
 	}
 
-	.export-button {
-		background-color: var(--return-secondary);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.2s ease;
+	.excel-icon {
+		width: 16px;
+		height: 16px;
 	}
-
-		.export-button:hover {
-			background-color: var(--return-primary);
-			transform: translateY(-2px);
-		}
 
 	.excel-button {
 		background-color: var(--excel-color);
@@ -639,7 +510,18 @@ else
 			transform: translateY(-2px);
 		}
 
-	.export-icon, .excel-icon {
+	.button-content {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.excel-icon {
+		width: 16px;
+		height: 16px;
+	}
+
+	.export-icon {
 		font-size: 16px;
 	}
 
@@ -782,6 +664,176 @@ else
 		font-weight: 600;
 	}
 
+	/* Location Reports */
+	.location-reports {
+		background-color: white;
+		border-radius: 12px;
+		padding: 20px;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+	}
+
+	.section-title {
+		color: var(--return-secondary);
+		margin-top: 0;
+		margin-bottom: 15px;
+		font-size: 20px;
+		font-weight: 600;
+	}
+
+	.section-subtitle {
+		color: var(--return-secondary);
+		margin: 20px 0 10px 0;
+		font-size: 16px;
+		font-weight: 600;
+		border-bottom: 1px solid var(--dotnet-border);
+		padding-bottom: 8px;
+	}
+
+	/* Improved Accordion Header */
+	.accordion-header.improved {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		align-items: center;
+		width: 100%;
+		padding: 12px 15px;
+		background-color: rgba(220, 53, 69, 0.03);
+		border-radius: 8px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	.header-left {
+		text-align: left;
+	}
+
+	.header-center {
+		display: flex;
+		justify-content: center;
+		padding: 0 20px;
+	}
+
+	.header-right {
+		text-align: right;
+	}
+
+	.location-name {
+		font-weight: 600;
+		font-size: 16px;
+		color: var(--return-secondary);
+		display: inline-block;
+		padding: 6px 12px;
+		background-color: rgba(200, 35, 51, 0.1);
+		border-radius: 4px;
+	}
+
+	.location-amount {
+		font-weight: 700;
+		font-size: 18px;
+		color: var(--return-primary);
+		padding: 5px 15px;
+		background-color: rgba(220, 53, 69, 0.1);
+		border-radius: 20px;
+		display: inline-block;
+	}
+
+	.detail-button {
+		background-color: var(--dotnet-accent);
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+		.detail-button:hover {
+			background-color: #0078d4;
+			transform: translateY(-2px);
+		}
+
+	/* Improved Location Details */
+	.location-details.improved {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 30px;
+		padding: 15px 10px;
+	}
+
+	.detail-section {
+		padding: 15px;
+	}
+
+	/* Uniform sizing for stats groups */
+	.stats-group {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+		gap: 15px;
+		margin-bottom: 20px;
+	}
+
+		/* Uniform stats group with fixed sizes */
+		.stats-group.uniform {
+			display: grid;
+			grid-auto-rows: minmax(100px, auto); /* Set minimum row height */
+		}
+
+	/* Uniform stat items */
+	.stat-item {
+		padding: 15px;
+		background-color: var(--dotnet-light);
+		border-radius: 8px;
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: 100px; /* Fixed height for uniformity */
+		overflow: hidden; /* Prevent content overflow */
+	}
+
+		.stat-item:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+		}
+
+		.stat-item.highlighted {
+			background-color: rgba(220, 53, 69, 0.1);
+			border-left: 3px solid var(--return-primary);
+		}
+
+		.stat-item label {
+			font-size: 13px;
+			color: #666;
+			margin-bottom: 5px;
+			display: block;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+	.stat-value {
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--dotnet-dark);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.location-chart-container {
+		padding: 15px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.location-chart {
+		flex-grow: 1;
+		min-height: 250px; /* Ensure chart has minimum height */
+	}
+
 	/* Grid Actions */
 	.grid-actions {
 		display: flex;
@@ -914,84 +966,6 @@ else
 		font-weight: 500;
 	}
 
-	/* Toast Styling */
-	::deep .e-toast-container {
-		z-index: 1000;
-	}
-
-		::deep .e-toast-container .e-toast {
-			border: 0;
-			border-radius: 8px;
-			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-		}
-
-	/* Success Toast */
-	::deep .e-toast-success {
-		background-color: #ebf7ee;
-		border-left: 4px solid #4CAF50;
-		color: #2E7D32;
-	}
-
-		::deep .e-toast-success .e-toast-title {
-			color: #2E7D32;
-			font-weight: 700;
-		}
-
-		::deep .e-toast-success .e-toast-content {
-			color: #2E7D32;
-		}
-
-		::deep .e-toast-success .e-toast-close-icon {
-			color: #2E7D32;
-		}
-
-		::deep .e-toast-success::before {
-			content: "✓";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-	/* Error Toast */
-	::deep .e-toast-danger {
-		background-color: #fdeeee;
-		border-left: 4px solid #F44336;
-		color: #C62828;
-	}
-
-		::deep .e-toast-danger .e-toast-title {
-			color: #C62828;
-			font-weight: 700;
-		}
-
-		::deep .e-toast-danger .e-toast-content {
-			color: #C62828;
-		}
-
-		::deep .e-toast-danger .e-toast-close-icon {
-			color: #C62828;
-		}
-
-		::deep .e-toast-danger::before {
-			content: "⚠";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-	/* Toast Animation */
-	::deep .e-toast-container .e-toast {
-		padding: 10px 10px 10px 40px;
-		position: relative;
-		animation-fill-mode: both;
-	}
-
 	/* Animations */
 	@@keyframes rotate {
 		0% {
@@ -1035,6 +1009,10 @@ else
 			height: auto;
 			min-height: 360px;
 		}
+
+		.location-details.improved {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	@@media (max-width: 768px) {
@@ -1067,9 +1045,32 @@ else
 			justify-content: space-between;
 		}
 
+		.accordion-header.improved {
+			grid-template-columns: 1fr;
+			gap: 10px;
+		}
+
+		.header-left, .header-center, .header-right {
+			text-align: center;
+		}
+		/* Adjust to single column on mobile */
+		.stats-group, .stats-group.uniform {
+			grid-template-columns: 1fr;
+		}
+		/* Maintain box height on mobile */
 		.overview-card {
 			height: auto;
 			min-height: 120px;
+		}
+
+		.chart-card {
+			height: auto;
+			min-height: 360px;
+		}
+
+		.stat-item {
+			height: auto;
+			min-height: 100px;
 		}
 	}
 </style>
