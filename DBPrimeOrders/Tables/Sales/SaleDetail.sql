@@ -16,6 +16,7 @@
     [IGSTPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0, 
     [IGSTAmount] MONEY NOT NULL DEFAULT 0, 
     [Total] MONEY NOT NULL DEFAULT 0, 
+    [NetRate] MONEY NOT NULL DEFAULT 0, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_SaleDetail_ToSale] FOREIGN KEY (SaleId) REFERENCES [Sale](Id), 
     CONSTRAINT [FK_SaleDetail_ToProduct] FOREIGN KEY (ProductId) REFERENCES [Product](Id), 

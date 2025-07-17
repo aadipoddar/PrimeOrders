@@ -138,7 +138,8 @@ public partial class SalePage
 				CGSTAmount = item.CGSTAmount,
 				SGSTAmount = item.SGSTAmount,
 				IGSTAmount = item.IGSTAmount,
-				Total = item.Total
+				Total = item.Total,
+				NetRate = item.NetRate
 			});
 		}
 
@@ -391,6 +392,7 @@ public partial class SalePage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+			item.NetRate = item.Total / item.Quantity;
 		}
 
 		_baseTotal = _saleProductCart.Sum(c => c.BaseTotal);
@@ -722,6 +724,7 @@ public partial class SalePage
 				IGSTPercent = item.IGSTPercent,
 				IGSTAmount = item.IGSTAmount,
 				Total = item.Total,
+				NetRate = item.NetRate,
 				Status = true
 			});
 	}
@@ -742,6 +745,7 @@ public partial class SalePage
 				Id = 0,
 				ProductId = product.ProductId,
 				Quantity = -product.Quantity,
+				NetRate = product.NetRate,
 				TransactionNo = _sale.BillNo,
 				Type = StockType.Sale.ToString(),
 				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
@@ -760,6 +764,7 @@ public partial class SalePage
 					Id = 0,
 					ProductId = product.ProductId,
 					Quantity = product.Quantity,
+					NetRate = product.NetRate,
 					Type = StockType.Purchase.ToString(),
 					TransactionNo = _sale.BillNo,
 					TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),

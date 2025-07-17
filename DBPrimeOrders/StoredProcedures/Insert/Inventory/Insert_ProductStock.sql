@@ -2,6 +2,7 @@
 	@Id INT,
 	@ProductId INT, 
 	@Quantity DECIMAL(7, 3), 
+	@NetRate MONEY,
 	@Type VARCHAR(20), 
 	@TransactionNo VARCHAR(20),
 	@TransactionDate DATE, 
@@ -14,6 +15,7 @@ BEGIN
 		(
 			[ProductId], 
 			[Quantity], 
+			[NetRate],
 			[Type], 
 			[TransactionNo],
 			[TransactionDate], 
@@ -23,6 +25,7 @@ BEGIN
 		(
 			@ProductId, 
 			@Quantity,
+			@NetRate,
 			@Type, 
 			@TransactionNo,
 			@TransactionDate, 
@@ -36,6 +39,7 @@ BEGIN
 		SET 
 			[ProductId] = @ProductId, 
 			[Quantity] = @Quantity, 
+			[NetRate] = @NetRate,
 			[Type] = @Type, 
 			[TransactionNo] = @TransactionNo,
 			[TransactionDate] = @TransactionDate, 

@@ -17,6 +17,7 @@ public class ProductStockModel
 	public int Id { get; set; }
 	public int ProductId { get; set; }
 	public decimal Quantity { get; set; }
+	public decimal? NetRate { get; set; }
 	public string Type { get; set; }
 	public string TransactionNo { get; set; }
 	public DateOnly TransactionDate { get; set; }
@@ -32,12 +33,6 @@ public enum StockType
 	Adjustment,
 	KitchenIssue,
 	KitchenProduction,
-}
-
-public class ItemQantityModel
-{
-	public int ItemId { get; set; }
-	public decimal Quantity { get; set; }
 }
 
 public class RawMaterialStockDetailModel
@@ -70,6 +65,10 @@ public class ProductStockDetailModel
 	public decimal SaleStock { get; set; }
 	public decimal MonthlyStock { get; set; }
 	public decimal ClosingStock { get; set; }
+	public decimal AveragePrice { get; set; }
+	public decimal LastSalePrice { get; set; }
+	public decimal WeightedAverageValue { get; set; }
+	public decimal LastSaleValue { get; set; }
 }
 
 public class StockAdjustmentRawMaterialCartModel

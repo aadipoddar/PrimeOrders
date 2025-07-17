@@ -69,7 +69,7 @@ public partial class RawMaterialStockAdjustmentPage
 	{
 		_selectedLocationId = 1;
 
-		_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(0, DateOnly.FromDateTime(DateTime.Now));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		_filteredRawMaterials = [.. _rawMaterials];

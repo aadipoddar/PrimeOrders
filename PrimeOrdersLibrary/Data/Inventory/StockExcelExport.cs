@@ -41,9 +41,9 @@ public static class StockExcelExport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
+			nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
 			nameof(RawMaterialStockDetailModel.RawMaterialCode),
 			nameof(RawMaterialStockDetailModel.RawMaterialName),
-			nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
 			nameof(RawMaterialStockDetailModel.OpeningStock),
 			nameof(RawMaterialStockDetailModel.PurchaseStock),
 			nameof(RawMaterialStockDetailModel.SaleStock),
@@ -58,6 +58,12 @@ public static class StockExcelExport
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
+			[nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)] = new()
+			{
+				DisplayName = "Category",
+				Width = 20,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
 			[nameof(RawMaterialStockDetailModel.RawMaterialCode)] = new()
 			{
 				DisplayName = "Item Code",
@@ -68,12 +74,6 @@ public static class StockExcelExport
 			{
 				DisplayName = "Item Name",
 				Width = 30,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)] = new()
-			{
-				DisplayName = "Category",
-				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
 			[nameof(RawMaterialStockDetailModel.OpeningStock)] = new()
@@ -269,19 +269,29 @@ public static class StockExcelExport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
+			nameof(ProductStockDetailModel.ProductCategoryName),
 			nameof(ProductStockDetailModel.ProductCode),
 			nameof(ProductStockDetailModel.ProductName),
-			nameof(ProductStockDetailModel.ProductCategoryName),
 			nameof(ProductStockDetailModel.OpeningStock),
 			nameof(ProductStockDetailModel.PurchaseStock),
 			nameof(ProductStockDetailModel.SaleStock),
 			nameof(ProductStockDetailModel.MonthlyStock),
-			nameof(ProductStockDetailModel.ClosingStock)
+			nameof(ProductStockDetailModel.ClosingStock),
+			nameof(ProductStockDetailModel.AveragePrice),
+			nameof(ProductStockDetailModel.WeightedAverageValue),
+			nameof(ProductStockDetailModel.LastSalePrice),
+			nameof(ProductStockDetailModel.LastSaleValue)
 		];
 
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
+			[nameof(ProductStockDetailModel.ProductCategoryName)] = new()
+			{
+				DisplayName = "Category",
+				Width = 20,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
 			[nameof(ProductStockDetailModel.ProductCode)] = new()
 			{
 				DisplayName = "Product Code",
@@ -292,12 +302,6 @@ public static class StockExcelExport
 			{
 				DisplayName = "Product Name",
 				Width = 30,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(ProductStockDetailModel.ProductCategoryName)] = new()
-			{
-				DisplayName = "Category",
-				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
 			[nameof(ProductStockDetailModel.OpeningStock)] = new()
@@ -394,6 +398,42 @@ public static class StockExcelExport
 
 					return null;
 				}
+			},
+			[nameof(ProductStockDetailModel.AveragePrice)] = new()
+			{
+				DisplayName = "Average Price",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(ProductStockDetailModel.WeightedAverageValue)] = new()
+			{
+				DisplayName = "Weighted Avg Value",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(ProductStockDetailModel.LastSalePrice)] = new()
+			{
+				DisplayName = "Last Sale Price",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
+			},
+			[nameof(ProductStockDetailModel.LastSaleValue)] = new()
+			{
+				DisplayName = "Last Sale Value",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			}
 		};
 
@@ -403,7 +443,7 @@ public static class StockExcelExport
 		if (selectedLocationId > 0 && locations is not null)
 		{
 			var location = locations.FirstOrDefault(l => l.Id == selectedLocationId);
-			if (location != null)
+			if (location is not null)
 				reportTitle = $"Finished Product Stock Report - {location.Name}";
 		}
 

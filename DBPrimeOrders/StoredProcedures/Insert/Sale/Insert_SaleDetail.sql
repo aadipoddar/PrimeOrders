@@ -15,6 +15,7 @@
 	@IGSTPercent DECIMAL(5, 2),
 	@IGSTAmount MONEY,
 	@Total MONEY,
+	@NetRate MONEY,
 	@Status BIT
 AS
 BEGIN
@@ -37,6 +38,7 @@ BEGIN
 			IGSTPercent,
 			IGSTAmount,
 			Total,
+			NetRate,
 			Status
 		) VALUES
 		(
@@ -55,6 +57,7 @@ BEGIN
 			@IGSTPercent,
 			@IGSTAmount,
 			@Total,
+			@NetRate,
 			@Status
 		);
 	END
@@ -78,6 +81,7 @@ BEGIN
 			IGSTPercent = @IGSTPercent,
 			IGSTAmount = @IGSTAmount,
 			Total = @Total, 
+			NetRate = @NetRate,
 			Status = @Status
 		WHERE Id = @Id;
 	END

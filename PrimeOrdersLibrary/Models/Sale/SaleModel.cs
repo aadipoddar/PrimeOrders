@@ -37,6 +37,7 @@ public class SaleDetailModel
 	public decimal IGSTPercent { get; set; }
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -57,6 +58,7 @@ public class SaleProductCartModel
 	public decimal IGSTPercent { get; set; }
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
 }
 
 public class SaleOverviewModel

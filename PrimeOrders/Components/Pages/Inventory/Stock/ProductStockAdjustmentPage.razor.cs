@@ -419,6 +419,7 @@ public partial class ProductStockAdjustmentPage
 					Id = 0,
 					ProductId = item.ProductId,
 					Quantity = adjustmentQuantity,
+					NetRate = null,
 					Type = StockType.Adjustment.ToString(),
 					TransactionNo = $"PADJ-{DateTime.Now:yyyyMMddHHmmss}",
 					TransactionDate = DateOnly.FromDateTime(DateTime.Now),
