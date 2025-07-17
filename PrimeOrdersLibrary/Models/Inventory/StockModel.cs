@@ -89,3 +89,55 @@ public class ProductStockAdjustmentCartModel
 	public decimal Rate { get; set; }
 	public decimal Total { get; set; }
 }
+
+#region Charts and Helper Model
+public class StockOverviewRawMaterialChartData
+{
+	public string Component { get; set; }
+	public decimal Value { get; set; }
+}
+
+public class CategoryDistributionRawMaterialChartData
+{
+	public string CategoryName { get; set; }
+	public decimal StockCount { get; set; }
+}
+
+public class TopMovingItemsRawMaterialChartData
+{
+	public string ItemName { get; set; }
+	public decimal Movement { get; set; }
+}
+
+public class OpeningClosingRawMaterialChartData
+{
+	public string ItemName { get; set; }
+	public decimal OpeningStock { get; set; }
+	public decimal ClosingStock { get; set; }
+}
+
+public class StockOverviewProductChartData
+{
+	public string Component { get; set; }
+	public decimal Value { get; set; }
+}
+
+public class CategoryDistributionProductChartData
+{
+	public string CategoryName { get; set; }
+	public decimal StockCount { get; set; }
+}
+
+public class TopMovingItemsProductChartData
+{
+	public string ItemName { get; set; }
+	public decimal Movement { get; set; }
+}
+
+public class OpeningClosingProductChartData
+{
+	public string ItemName { get; set; }
+	public decimal OpeningStock { get; set; }
+	public decimal ClosingStock { get; set; }
+}
+#endregion

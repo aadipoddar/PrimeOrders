@@ -19,6 +19,7 @@ BEGIN
                   AND TransactionDate < @FromDate
                   AND LocationId = @LocationId),
            0) AS OpeningStock,
+
         ISNULL
         (
            (SELECT SUM (Quantity)
@@ -29,6 +30,7 @@ BEGIN
                   AND Type = 'Purchase'
                   AND LocationId = @LocationId),
            0) AS PurchaseStock,
+
         ISNULL
         (
            (SELECT SUM (Quantity)
@@ -39,6 +41,7 @@ BEGIN
                   AND Type = 'Sale'
                   AND LocationId = @LocationId),
            0) AS SaleStock,
+
         ISNULL
         (
            (SELECT SUM (Quantity)
@@ -48,6 +51,7 @@ BEGIN
                   AND TransactionDate < @ToDate
                   AND LocationId = @LocationId),
            0) AS MonthlyStock,
+
         (  ISNULL
            (
               (SELECT SUM (Quantity)

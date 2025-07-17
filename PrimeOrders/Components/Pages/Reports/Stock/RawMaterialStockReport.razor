@@ -52,7 +52,12 @@ else
 				</div>
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
+				<SfButton CssClass="excel-button" OnClick="@(() => ExportToExcel())">
+					<div class="button-content">
+						<img src="images/excel.png" alt="Excel" class="excel-icon" />
+						<span>Export Excel</span>
+					</div>
+				</SfButton>
 			</div>
 		</div>
 
@@ -374,6 +379,11 @@ else
 		gap: 10px;
 	}
 
+	.excel-icon {
+		width: 16px;
+		height: 16px;
+	}
+
 	.excel-button {
 		background-color: var(--excel-color);
 		color: white;
@@ -392,10 +402,6 @@ else
 			background-color: #1e5f3e;
 			transform: translateY(-2px);
 		}
-
-	.export-icon, .excel-icon {
-		font-size: 16px;
-	}
 
 	/* Overview Cards */
 	.overview-cards {
