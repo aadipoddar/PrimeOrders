@@ -131,9 +131,9 @@ public partial class PurchaseReport
 	#endregion
 
 	#region Chart Data
-	private List<DailyPurchaseData> GetDailyPurchaseData()
+	private List<DailyPurchaseChartData> GetDailyPurchaseData()
 	{
-		var result = new List<DailyPurchaseData>();
+		var result = new List<DailyPurchaseChartData>();
 		if (_purchaseOverviews == null || _purchaseOverviews.Count == 0)
 			return result;
 
@@ -144,7 +144,7 @@ public partial class PurchaseReport
 
 		foreach (var group in groupedByDate)
 		{
-			result.Add(new DailyPurchaseData
+			result.Add(new DailyPurchaseChartData
 			{
 				Date = group.Key.ToString("dd/MM/yyyy"),
 				Amount = group.Sum(p => p.Total)
@@ -154,15 +154,15 @@ public partial class PurchaseReport
 		return result;
 	}
 
-	private List<VendorDistributionData> GetVendorDistributionData()
+	private List<VendorDistributionChartData> GetVendorDistributionData()
 	{
-		var result = new List<VendorDistributionData>();
+		var result = new List<VendorDistributionChartData>();
 		if (_purchaseOverviews == null || _purchaseOverviews.Count == 0)
 			return result;
 
 		var groupedBySupplier = _purchaseOverviews
 			.GroupBy(p => new { p.SupplierId, p.SupplierName })
-			.Select(g => new VendorDistributionData
+			.Select(g => new VendorDistributionChartData
 			{
 				SupplierId = g.Key.SupplierId,
 				SupplierName = g.Key.SupplierName,

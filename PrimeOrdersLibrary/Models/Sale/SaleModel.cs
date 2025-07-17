@@ -94,7 +94,7 @@ public class SaleOverviewModel
 	public decimal Credit { get; set; }
 }
 
-#region Chatr and Helper Models 
+#region Chart and Helper Models
 public class SaleDetailDisplayModel
 {
 	public string ProductName { get; set; } = "";
@@ -103,13 +103,13 @@ public class SaleDetailDisplayModel
 	public decimal Total { get; set; }
 }
 
-public class SalePaymentMethodData
+public class SalePaymentMethodChartData
 {
 	public string PaymentMethod { get; set; }
 	public decimal Amount { get; set; }
 }
 
-public class DailySalesData
+public class DailySalesChartData
 {
 	public string Date { get; set; }
 	public decimal Amount { get; set; }

@@ -31,6 +31,7 @@ public partial class ProductDetail
 
 	private SfGrid<ProductOverviewModel> _sfGrid;
 
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!firstRender)
@@ -123,13 +124,9 @@ public partial class ProductDetail
 		_selectedProductId = args.Value;
 		await ApplyFilters();
 	}
+	#endregion
 
-	private async Task ExportToPdf()
-	{
-		if (_sfGrid is not null)
-			await _sfGrid.ExportToPdfAsync();
-	}
-
+	#region Excel Export
 	private async Task ExportToExcel()
 	{
 		if (_filteredProductOverviews is null || _filteredProductOverviews.Count == 0)
@@ -138,178 +135,19 @@ public partial class ProductDetail
 			return;
 		}
 
-		// Create summary items dictionary
-		Dictionary<string, object> summaryItems = new()
-		{
-			{ "Total Sales", _filteredProductOverviews.Sum(p => p.TotalAmount) },
-			{ "Total Products", _filteredProductOverviews.Select(p => p.ProductId).Distinct().Count() },
-			{ "Total Quantity", _filteredProductOverviews.Sum(p => p.QuantitySold) },
-			{ "Total Discount", _filteredProductOverviews.Sum(p => p.DiscountAmount) },
-			{ "Total Tax", _filteredProductOverviews.Sum(p => p.TotalTaxAmount) },
-			{ "Transactions", _filteredProductOverviews.Select(p => p.SaleId).Distinct().Count() }
-		};
-
-		// Add product-specific info if a product is selected
-		if (_selectedProductId > 0 && _selectedProduct is not null)
-		{
-			summaryItems.Add("Product Code", _selectedProduct.Code);
-			summaryItems.Add("MRP", _selectedProduct.Rate);
-			summaryItems.Add("Average Selling Price", _filteredProductOverviews.Average(p => p.AveragePrice));
-
-			var categoryName = _productCategories.FirstOrDefault(c => c.Id == _selectedProduct.ProductCategoryId)?.Name;
-			if (!string.IsNullOrEmpty(categoryName))
-				summaryItems.Add("Category", categoryName);
-		}
-
-		// Define the column order for better readability
-		List<string> columnOrder = [
-				nameof(ProductOverviewModel.ProductName),
-				nameof(ProductOverviewModel.ProductCode),
-				nameof(ProductOverviewModel.ProductCategoryName),
-				nameof(ProductOverviewModel.SaleId),
-				nameof(ProductOverviewModel.BillDateTime),
-				nameof(ProductOverviewModel.QuantitySold),
-				nameof(ProductOverviewModel.AveragePrice),
-				nameof(ProductOverviewModel.BaseTotal),
-				nameof(ProductOverviewModel.DiscountAmount),
-				nameof(ProductOverviewModel.TotalTaxAmount),
-				nameof(ProductOverviewModel.TotalAmount),
-				nameof(ProductOverviewModel.SGSTAmount),
-				nameof(ProductOverviewModel.CGSTAmount),
-				nameof(ProductOverviewModel.IGSTAmount)
-			];
-
-		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
-		{
-			[nameof(ProductOverviewModel.ProductCode)] = new()
-			{
-				DisplayName = "Product Code",
-				Width = 12
-			},
-			[nameof(ProductOverviewModel.ProductName)] = new()
-			{
-				DisplayName = "Product Name",
-				Width = 25,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(ProductOverviewModel.ProductCategoryName)] = new()
-			{
-				DisplayName = "Category",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(ProductOverviewModel.SaleId)] = new()
-			{
-				DisplayName = "Bill No",
-				Width = 10
-			},
-			[nameof(ProductOverviewModel.BillDateTime)] = new()
-			{
-				DisplayName = "Date & Time",
-				Format = "dd-MMM-yyyy hh:mm tt",
-				Width = 20
-			},
-			[nameof(ProductOverviewModel.QuantitySold)] = new()
-			{
-				DisplayName = "Quantity",
-				Format = "#,##0.00",
-				Width = 12,
-				IncludeInTotal = true
-			},
-			[nameof(ProductOverviewModel.AveragePrice)] = new()
-			{
-				DisplayName = "Rate",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true
-			},
-			[nameof(ProductOverviewModel.BaseTotal)] = new()
-			{
-				DisplayName = "Base Total",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true,
-				IncludeInTotal = true
-			},
-			[nameof(ProductOverviewModel.DiscountAmount)] = new()
-			{
-				DisplayName = "Discount",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true,
-				IncludeInTotal = true
-			},
-			[nameof(ProductOverviewModel.TotalTaxAmount)] = new()
-			{
-				DisplayName = "Total Tax",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true,
-				IncludeInTotal = true
-			},
-			[nameof(ProductOverviewModel.SGSTAmount)] = new()
-			{
-				DisplayName = "SGST",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true
-			},
-			[nameof(ProductOverviewModel.CGSTAmount)] = new()
-			{
-				DisplayName = "CGST",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true
-			},
-			[nameof(ProductOverviewModel.IGSTAmount)] = new()
-			{
-				DisplayName = "IGST",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true
-			},
-			[nameof(ProductOverviewModel.TotalAmount)] = new()
-			{
-				DisplayName = "Total",
-				Format = "₹#,##0.00",
-				Width = 15,
-				IsCurrency = true,
-				IncludeInTotal = true,
-				HighlightNegative = true
-			}
-		};
-
-		// Generate title based on selected filters
-		string reportTitle = "Product Detail Report";
-
-		if (_selectedProduct is not null)
-			reportTitle = $"Detail Report - {_selectedProduct.Name}";
-
-		else if (_selectedCategoryId > 0)
-		{
-			var category = _productCategories.FirstOrDefault(c => c.Id == _selectedCategoryId);
-			if (category != null)
-				reportTitle = $"Product Detail Report - {category.Name} Category";
-		}
-
-		string worksheetName = "Product Details";
-
-		var memoryStream = ExcelExportUtil.ExportToExcel(
+		// Use the new ProductExcelExport class for generating Excel
+		var memoryStream = ProductExcelExport.ExportProductDetailExcel(
 			_filteredProductOverviews,
-			reportTitle,
-			worksheetName,
 			_startDate,
 			_endDate,
-			summaryItems,
-			columnSettings,
-			columnOrder);
+			_selectedProduct,
+			_selectedCategoryId,
+			_productCategories);
 
 		// Generate filename based on selected product/category
 		string filenameSuffix = string.Empty;
 		if (_selectedProduct is not null)
 			filenameSuffix = $"_{_selectedProduct.Name}";
-
 		else if (_selectedCategoryId > 0)
 		{
 			var category = _productCategories.FirstOrDefault(c => c.Id == _selectedCategoryId);
@@ -320,14 +158,14 @@ public partial class ProductDetail
 		var fileName = $"Product_Detail{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
+	#endregion
 
 	#region Chart Data Methods
-
-	private List<DailySalesData> GetDailySalesData()
+	private List<DailyProductSalesChartData> GetDailySalesData()
 	{
 		var result = _filteredProductOverviews
 			.GroupBy(s => s.BillDateTime.Date)
-			.Select(group => new DailySalesData
+			.Select(group => new DailyProductSalesChartData
 			{
 				Date = group.Key.ToString("dd/MM"),
 				Amount = group.Sum(s => s.TotalAmount)
@@ -338,11 +176,11 @@ public partial class ProductDetail
 		return result;
 	}
 
-	private List<SalesQuantityData> GetDailySalesQuantityData()
+	private List<SalesQuantityChartData> GetDailySalesQuantityData()
 	{
 		var result = _filteredProductOverviews
 			.GroupBy(s => s.BillDateTime.Date)
-			.Select(group => new SalesQuantityData
+			.Select(group => new SalesQuantityChartData
 			{
 				Date = group.Key.ToString("dd/MM"),
 				Amount = group.Sum(s => s.TotalAmount),
@@ -354,14 +192,14 @@ public partial class ProductDetail
 		return result;
 	}
 
-	private List<LocationSalesData> GetLocationSalesData()
+	private List<LocationSalesChartData> GetLocationSalesData()
 	{
 		if (_locations is null || _locations.Count == 0 || _filteredProductOverviews is null || _filteredProductOverviews.Count == 0)
 			return [];
 
 		return [.. _filteredProductOverviews
 			.GroupBy(s => s.LocationId)
-			.Select(group => new LocationSalesData
+			.Select(group => new LocationSalesChartData
 			{
 				LocationId = group.Key,
 				LocationName = _locations.FirstOrDefault(l => l.Id == group.Key)?.Name ?? "Unknown",
@@ -371,7 +209,7 @@ public partial class ProductDetail
 			.Take(10)];
 	}
 
-	private List<TaxComponentData> GetTaxDistributionData()
+	private List<TaxComponentChartData> GetTaxDistributionData()
 	{
 		if (_filteredProductOverviews is null || _filteredProductOverviews.Count == 0)
 			return [];
@@ -384,43 +222,12 @@ public partial class ProductDetail
 		decimal cgst = _filteredProductOverviews.Sum(p => p.CGSTAmount);
 		decimal igst = _filteredProductOverviews.Sum(p => p.IGSTAmount);
 
-		return [.. new List<TaxComponentData>
+		return [.. new List<TaxComponentChartData>
 		{
 			new() { Component = "SGST", Amount = sgst },
 			new() { Component = "CGST", Amount = cgst },
 			new() { Component = "IGST", Amount = igst }
 		}.Where(t => t.Amount > 0)];
 	}
-
-	#endregion
-
-	#region Chart Data Classes
-
-	public class DailySalesData
-	{
-		public string Date { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class SalesQuantityData
-	{
-		public string Date { get; set; }
-		public decimal Amount { get; set; }
-		public decimal Quantity { get; set; }
-	}
-
-	public class LocationSalesData
-	{
-		public int LocationId { get; set; }
-		public string LocationName { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class TaxComponentData
-	{
-		public string Component { get; set; }
-		public decimal Amount { get; set; }
-	}
-
 	#endregion
 }

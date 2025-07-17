@@ -75,13 +75,13 @@ public class ChallanItemModel
 	public decimal Quantity { get; set; }
 }
 
-public class OrderChartData
+public class OrderChartChartData
 {
 	public string Date { get; set; }
 	public int Count { get; set; }
 }
 
-public class OrderStatusData
+public class OrderStatusChartData
 {
 	public string Status { get; set; }
 	public int Count { get; set; }

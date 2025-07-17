@@ -59,6 +59,7 @@ else
 						<label>Location</label>
 						<SfComboBox TValue="int"
 									TItem="LocationModel"
+									FloatLabelType='@FloatLabelType.Auto'
 									Placeholder="Select a Location"
 									DataSource="_locations"
 									Value="_selectedLocationId"
@@ -73,6 +74,7 @@ else
 					<label>Category</label>
 					<SfComboBox TValue="int"
 								TItem="ProductCategoryModel"
+								FloatLabelType='@FloatLabelType.Auto'
 								Placeholder="Select a Category"
 								DataSource="_productCategories"
 								Value="_selectedCategoryId"
@@ -86,6 +88,7 @@ else
 					<label>Product</label>
 					<SfComboBox TValue="int"
 								TItem="ProductModel"
+								FloatLabelType='@FloatLabelType.Auto'
 								Placeholder="Select a Product"
 								DataSource="_filteredProducts"
 								Value="_selectedProductId"
@@ -96,8 +99,12 @@ else
 				</div>
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
-				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
+				<SfButton CssClass="excel-button" OnClick="@(() => ExportToExcel())">
+					<div class="button-content">
+						<img src="images/excel.png" alt="Excel" class="excel-icon" />
+						<span>Export Excel</span>
+					</div>
+				</SfButton>
 			</div>
 		</div>
 
@@ -494,25 +501,6 @@ else
 		gap: 10px;
 	}
 
-	.export-button {
-		background-color: var(--dotnet-secondary);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.2s ease;
-	}
-
-		.export-button:hover {
-			background-color: #571b6c;
-			transform: translateY(-2px);
-		}
-
 	.excel-button {
 		background-color: var(--excel-color);
 		color: white;
@@ -532,8 +520,15 @@ else
 			transform: translateY(-2px);
 		}
 
-	.export-icon, .excel-icon {
-		font-size: 16px;
+	.button-content {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.excel-icon {
+		width: 16px;
+		height: 16px;
 	}
 
 	/* Overview Cards */

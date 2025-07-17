@@ -42,3 +42,40 @@ public class ProductRateModel
 	public int LocationId { get; set; }
 	public bool Status { get; set; }
 }
+
+public class ProductCategoryModel
+{
+	public int Id { get; set; }
+	public string Name { get; set; }
+	public int LocationId { get; set; }
+	public bool Status { get; set; }
+}
+
+
+#region Chart and Helper Models
+public class DailyProductSalesChartData
+{
+	public string Date { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class SalesQuantityChartData
+{
+	public string Date { get; set; }
+	public decimal Amount { get; set; }
+	public decimal Quantity { get; set; }
+}
+
+public class LocationSalesChartData
+{
+	public int LocationId { get; set; }
+	public string LocationName { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class TaxComponentChartData
+{
+	public string Component { get; set; }
+	public decimal Amount { get; set; }
+}
+#endregion

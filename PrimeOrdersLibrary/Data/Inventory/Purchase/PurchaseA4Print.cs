@@ -1,4 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
 using Syncfusion.Drawing;
@@ -84,7 +85,7 @@ public static class PurchaseA4Print
 			Total = (int)item.Total
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil.PageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.08f, // S.No
@@ -109,8 +110,8 @@ public static class PurchaseA4Print
 
 		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil.PageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil.PageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
 
 		return result;
 	}

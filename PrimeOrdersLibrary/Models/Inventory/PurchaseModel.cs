@@ -93,13 +93,13 @@ public class PurchaseDetailDisplayModel
 	public decimal Total { get; set; }
 }
 
-public class DailyPurchaseData
+public class DailyPurchaseChartData
 {
 	public string Date { get; set; }
 	public decimal Amount { get; set; }
 }
 
-public class VendorDistributionData
+public class VendorDistributionChartData
 {
 	public int SupplierId { get; set; }
 	public string SupplierName { get; set; }

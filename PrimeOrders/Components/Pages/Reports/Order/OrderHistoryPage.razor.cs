@@ -157,9 +157,9 @@ public partial class OrderHistoryPage
 	#endregion
 
 	#region Charts
-	private List<OrderChartData> GetDailyOrdersData()
+	private List<OrderChartChartData> GetDailyOrdersData()
 	{
-		var result = new List<OrderChartData>();
+		var result = new List<OrderChartChartData>();
 		if (_orderOverviews == null || _orderOverviews.Count == 0)
 			return result;
 
@@ -178,9 +178,9 @@ public partial class OrderHistoryPage
 		return result;
 	}
 
-	private List<OrderStatusData> GetOrderStatusData()
+	private List<OrderStatusChartData> GetOrderStatusData()
 	{
-		var result = new List<OrderStatusData>();
+		var result = new List<OrderStatusChartData>();
 		if (_orderOverviews == null || _orderOverviews.Count == 0)
 			return result;
 

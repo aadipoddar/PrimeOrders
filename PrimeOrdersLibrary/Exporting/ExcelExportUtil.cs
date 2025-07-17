@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Syncfusion.Drawing;
 using Syncfusion.XlsIO;
 
-namespace PrimeOrdersLibrary.Data.Common;
+namespace PrimeOrdersLibrary.Exporting;
 
 /// <summary>
 /// Generic Excel exporter for all report types in the application

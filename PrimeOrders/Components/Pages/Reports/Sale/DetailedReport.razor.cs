@@ -134,11 +134,11 @@ public partial class DetailedReport
 	#endregion
 
 	#region Chart Data
-	private List<DailySalesData> GetDailySalesData()
+	private List<DailySalesChartData> GetDailySalesData()
 	{
 		var result = _saleOverviews
 			.GroupBy(s => s.SaleDateTime.Date)
-			.Select(group => new DailySalesData
+			.Select(group => new DailySalesChartData
 			{
 				Date = group.Key.ToString("dd/MM"),
 				Amount = group.Sum(s => s.Total)
@@ -149,9 +149,9 @@ public partial class DetailedReport
 		return result;
 	}
 
-	private List<SalePaymentMethodData> GetPaymentMethodsData()
+	private List<SalePaymentMethodChartData> GetPaymentMethodsData()
 	{
-		var paymentData = new List<SalePaymentMethodData>
+		var paymentData = new List<SalePaymentMethodChartData>
 		{
 			new() { PaymentMethod = "Cash", Amount = _saleOverviews.Sum(s => s.Cash) },
 			new() { PaymentMethod = "Card", Amount = _saleOverviews.Sum(s => s.Card) },
