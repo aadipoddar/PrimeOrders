@@ -2,7 +2,7 @@
 using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
-namespace PrimeOrdersLibrary.Data.Inventory.Purchase;
+namespace PrimeOrdersLibrary.Exporting.Purchase;
 
 public static class PurchaseExcelExport
 {

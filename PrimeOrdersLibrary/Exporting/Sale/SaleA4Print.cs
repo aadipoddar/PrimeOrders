@@ -1,4 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Sale;
 using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Product;
 using PrimeOrdersLibrary.Models.Sale;
@@ -8,7 +9,7 @@ using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Pdf.Grid;
 
-namespace PrimeOrdersLibrary.Data.Sale;
+namespace PrimeOrdersLibrary.Exporting.Sale;
 
 public static class SaleA4Print
 {

@@ -1,4 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Inventory.Purchase;
 using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
@@ -7,7 +8,7 @@ using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Pdf.Grid;
 
-namespace PrimeOrdersLibrary.Data.Inventory.Purchase;
+namespace PrimeOrdersLibrary.Exporting.Purchase;
 
 public static class PurchaseA4Print
 {

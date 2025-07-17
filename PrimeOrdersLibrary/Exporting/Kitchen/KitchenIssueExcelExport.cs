@@ -2,12 +2,12 @@
 using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
-namespace PrimeOrdersLibrary.Data.Inventory.Kitchen;
+namespace PrimeOrdersLibrary.Exporting.Kitchen;
 
-public static class KitchenProductionExcelExport
+public static class KitchenIssueExcelExport
 {
-	public static async Task<MemoryStream> ExportKitchenProductionOverviewExcel(
-		List<KitchenProductionOverviewModel> kitchenProductionOverviews,
+	public static async Task<MemoryStream> ExportKitchenIssueOverviewExcel(
+		List<KitchenIssueOverviewModel> kitchenIssueOverviews,
 		DateOnly startDate,
 		DateOnly endDate,
 		int selectedKitchenId)
@@ -15,12 +15,12 @@ public static class KitchenProductionExcelExport
 		// Create summary items dictionary with key metrics
 		Dictionary<string, object> summaryItems = new()
 		{
-			{ "Total Transactions", kitchenProductionOverviews.Count },
-			{ "Total Products", kitchenProductionOverviews.Sum(_ => _.TotalProducts) },
-			{ "Total Quantity", kitchenProductionOverviews.Sum(_ => _.TotalQuantity) },
-			{ "Kitchens Active", kitchenProductionOverviews.Select(_ => _.KitchenId).Distinct().Count() },
-			{ "Average Items per Transaction", kitchenProductionOverviews.Count > 0 ? kitchenProductionOverviews.Average(_ => _.TotalProducts) : 0 },
-			{ "Average Quantity per Transaction", kitchenProductionOverviews.Count > 0 ? kitchenProductionOverviews.Average(_ => _.TotalQuantity) : 0 }
+			{ "Total Transactions", kitchenIssueOverviews.Count },
+			{ "Total Products", kitchenIssueOverviews.Sum(_ => _.TotalProducts) },
+			{ "Total Quantity", kitchenIssueOverviews.Sum(_ => _.TotalQuantity) },
+			{ "Kitchens Active", kitchenIssueOverviews.Select(_ => _.KitchenId).Distinct().Count() },
+			{ "Average Items per Transaction", kitchenIssueOverviews.Count > 0 ? kitchenIssueOverviews.Average(_ => _.TotalProducts) : 0 },
+			{ "Average Quantity per Transaction", kitchenIssueOverviews.Count > 0 ? kitchenIssueOverviews.Average(_ => _.TotalQuantity) : 0 }
 		};
 
 		// Add kitchen filter info if specific kitchen is selected
@@ -32,7 +32,7 @@ public static class KitchenProductionExcelExport
 		}
 
 		// Add top kitchens summary data
-		var topKitchens = kitchenProductionOverviews
+		var topKitchens = kitchenIssueOverviews
 			.GroupBy(i => i.KitchenName)
 			.OrderByDescending(g => g.Sum(x => x.TotalQuantity))
 			.Take(3)
@@ -43,43 +43,43 @@ public static class KitchenProductionExcelExport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-			nameof(KitchenProductionOverviewModel.TransactionNo),
-			nameof(KitchenProductionOverviewModel.ProductionDate),
-			nameof(KitchenProductionOverviewModel.KitchenName),
-			nameof(KitchenProductionOverviewModel.UserName),
-			nameof(KitchenProductionOverviewModel.TotalProducts),
-			nameof(KitchenProductionOverviewModel.TotalQuantity)
+			nameof(KitchenIssueOverviewModel.TransactionNo),
+			nameof(KitchenIssueOverviewModel.IssueDate),
+			nameof(KitchenIssueOverviewModel.KitchenName),
+			nameof(KitchenIssueOverviewModel.UserName),
+			nameof(KitchenIssueOverviewModel.TotalProducts),
+			nameof(KitchenIssueOverviewModel.TotalQuantity)
 		];
 
 		// Define custom column settings with professional styling
 		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
 		{
-			[nameof(KitchenProductionOverviewModel.TransactionNo)] = new()
+			[nameof(KitchenIssueOverviewModel.TransactionNo)] = new()
 			{
 				DisplayName = "Transaction #",
 				Width = 15,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(KitchenProductionOverviewModel.ProductionDate)] = new()
+			[nameof(KitchenIssueOverviewModel.IssueDate)] = new()
 			{
-				DisplayName = "Production Date",
+				DisplayName = "Issue Date",
 				Format = "dd-MMM-yyyy",
 				Width = 15,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(KitchenProductionOverviewModel.KitchenName)] = new()
+			[nameof(KitchenIssueOverviewModel.KitchenName)] = new()
 			{
 				DisplayName = "Kitchen",
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(KitchenProductionOverviewModel.UserName)] = new()
+			[nameof(KitchenIssueOverviewModel.UserName)] = new()
 			{
-				DisplayName = "Produced By",
+				DisplayName = "Issued By",
 				Width = 18,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(KitchenProductionOverviewModel.TotalProducts)] = new()
+			[nameof(KitchenIssueOverviewModel.TotalProducts)] = new()
 			{
 				DisplayName = "Products",
 				Format = "#,##0",
@@ -97,7 +97,7 @@ public static class KitchenProductionExcelExport
 					};
 				}
 			},
-			[nameof(KitchenProductionOverviewModel.TotalQuantity)] = new()
+			[nameof(KitchenIssueOverviewModel.TotalQuantity)] = new()
 			{
 				DisplayName = "Total Quantity",
 				Format = "#,##0.00",
@@ -119,20 +119,20 @@ public static class KitchenProductionExcelExport
 		};
 
 		// Generate title based on kitchen selection if applicable
-		string reportTitle = "Kitchen Production Report";
+		string reportTitle = "Kitchen Issue Report";
 
 		if (selectedKitchenId > 0)
 		{
 			var kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen, true);
 			var kitchen = kitchens.FirstOrDefault(k => k.Id == selectedKitchenId);
 			if (kitchen != null)
-				reportTitle = $"Kitchen Production Report - {kitchen.Name}";
+				reportTitle = $"Kitchen Issue Report - {kitchen.Name}";
 		}
 
-		string worksheetName = "Kitchen Productions";
+		string worksheetName = "Kitchen Issues";
 
 		return ExcelExportUtil.ExportToExcel(
-			kitchenProductionOverviews,
+			kitchenIssueOverviews,
 			reportTitle,
 			worksheetName,
 			startDate,

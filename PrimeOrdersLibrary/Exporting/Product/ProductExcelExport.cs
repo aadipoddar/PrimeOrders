@@ -1,7 +1,7 @@
 ﻿using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Product;
 
-namespace PrimeOrdersLibrary.Data.Product;
+namespace PrimeOrdersLibrary.Exporting.Product;
 
 public static class ProductExcelExport
 {

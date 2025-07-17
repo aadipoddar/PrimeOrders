@@ -1,4 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Inventory.Kitchen;
 using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 using PrimeOrdersLibrary.Models.Product;
@@ -8,7 +9,7 @@ using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Pdf.Grid;
 
-namespace PrimeOrdersLibrary.Data.Inventory.Kitchen;
+namespace PrimeOrdersLibrary.Exporting.Kitchen;
 
 public static class KitchenProductionA4Print
 {

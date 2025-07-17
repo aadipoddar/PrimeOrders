@@ -1,7 +1,7 @@
 ﻿using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
-namespace PrimeOrdersLibrary.Data.Inventory;
+namespace PrimeOrdersLibrary.Exporting.Stock;
 
 public static class StockExcelExport
 {

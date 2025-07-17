@@ -3,10 +3,11 @@
 using NumericWordsConversion;
 
 using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Sale;
 using PrimeOrdersLibrary.Models.Product;
 using PrimeOrdersLibrary.Models.Sale;
 
-namespace PrimeOrdersLibrary.Data.Sale;
+namespace PrimeOrdersLibrary.Exporting.Sale;
 
 public class SaleThermalPrint
 {

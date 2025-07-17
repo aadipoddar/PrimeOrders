@@ -4,7 +4,7 @@ using PrimeOrdersLibrary.Models.Product;
 
 using static PrimeOrdersLibrary.Data.Order.OrderData;
 
-namespace PrimeOrdersLibrary.Data.Order;
+namespace PrimeOrdersLibrary.Exporting.Order;
 
 public static class OrderExcelExport
 {
