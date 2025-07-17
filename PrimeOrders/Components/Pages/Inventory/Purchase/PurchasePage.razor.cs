@@ -22,6 +22,7 @@ public partial class PurchasePage
 	private bool _supplierDialogVisible = false;
 	private bool _adjustmentsDialogVisible = false;
 	private bool _purchaseSummaryDialogVisible = false;
+	private bool _isSaving = false;
 
 	private decimal _baseTotal = 0;
 	private decimal _afterDiscounts = 0;
@@ -555,6 +556,24 @@ public partial class PurchasePage
 		return true;
 	}
 
+	private async Task<bool> SavePurchase()
+	{
+		_purchase.Id = await PurchaseData.InsertPurchase(_purchase);
+		if (_purchase.Id <= 0)
+		{
+			_sfErrorToast.Content = "Failed to save Purchase.";
+			await _sfErrorToast.ShowAsync();
+			_isSaving = false;
+			StateHasChanged();
+			return false;
+		}
+
+		await InsertPurchaseDetail();
+		await InsertStock();
+		return true;
+	}
+
+	// Button 1: Save Only
 	private async Task OnSavePurchaseClick()
 	{
 		UpdateFinancialDetails();
@@ -562,20 +581,38 @@ public partial class PurchasePage
 		if (!await ValidateForm())
 			return;
 
-		_purchase.Id = await PurchaseData.InsertPurchase(_purchase);
-		if (_purchase.Id <= 0)
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SavePurchase())
 		{
-			_sfErrorToast.Content = "Failed to save purchase.";
-			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
-			return;
+			_sfSuccessToast.Content = "Purchase saved successfully.";
+			await _sfSuccessToast.ShowAsync();
 		}
 
-		await InsertPurchaseDetail();
-		await InsertStock();
+		_purchaseSummaryDialogVisible = false;
+		_isSaving = false;
+		StateHasChanged();
+	}
+
+	// Button 2: Save and A4 Prints
+	private async Task OnSaveAndPrintClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SavePurchase())
+		{
+			await PrintInvoice();
+			_sfSuccessToast.Content = "Purchase saved and invoice generated successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
 
 		_purchaseSummaryDialogVisible = false;
-		await _sfSuccessToast.ShowAsync();
+		StateHasChanged();
 	}
 
 	private async Task InsertPurchaseDetail()
@@ -635,6 +672,13 @@ public partial class PurchasePage
 				TransactionDate = _purchase.BillDate,
 				LocationId = _user.LocationId
 			});
+	}
+
+	private async Task PrintInvoice()
+	{
+		var memoryStream = await PurchaseA4Print.GenerateA4PurchaseBill(_purchase.Id);
+		var fileName = $"Purchase_Invoice_{_purchase.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		await JS.InvokeVoidAsync("savePDF", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 	#endregion
 }

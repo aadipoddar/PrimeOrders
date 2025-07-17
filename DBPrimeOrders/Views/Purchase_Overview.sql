@@ -28,7 +28,8 @@ SELECT
 
 	SUM(pd.BaseTotal) AS BaseTotal,
 	SUM(pd.AfterDiscount) AS SubTotal,
-	SUM(pd.Total) AS Total
+
+	SUM(pd.Total - p.CDAmount) AS Total
 
 FROM
 	[dbo].[Purchase] AS p

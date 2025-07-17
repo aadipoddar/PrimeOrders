@@ -31,9 +31,9 @@ public partial class PurchaseSummaryModule
 
 	private async Task PrintInvoice()
 	{
-		//var pdfBytes = await PurchaseA4Print.GenerateA4PurchaseBill(SelectedPurchase.PurchaseId);
-		//var fileName = $"Purchase_Invoice_{SelectedPurchase.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		//await JS.InvokeVoidAsync("downloadPdf", Convert.ToBase64String(pdfBytes), fileName);
+		var memoryStream = await PurchaseA4Print.GenerateA4PurchaseBill(SelectedPurchase.PurchaseId);
+		var fileName = $"Purchase_Invoice_{SelectedPurchase.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		await JS.InvokeVoidAsync("savePDF", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 
 	private void ShowDeleteConfirmation()

@@ -366,6 +366,12 @@ else
 			<div class="dialog-footer">
 				<div class="footer-buttons">
 					<SfButton CssClass="save-button-dialog" Content="Save Purchase" IsPrimary="true" OnClick="OnSavePurchaseClick" />
+					<SfButton CssClass="print-button-dialog" Content="Save & Print Invoice" OnClick="OnSaveAndPrintClick">
+						<div class="button-content">
+							<span class="print-icon">🖨️</span>
+							<span>Save & Print Invoice</span>
+						</div>
+					</SfButton>
 					<SfButton Content="Close" OnClick="() => _purchaseSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>
@@ -1540,6 +1546,30 @@ else
 		color: var(--dotnet-dark);
 		font-size: 16px;
 		margin-top: 10px;
+	}
+
+	/* Print Button Styling */
+	.print-button-dialog {
+		background-color: #17a2b8;
+		color: white;
+		padding: 10px 20px;
+		border-radius: 8px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+		.print-button-dialog:hover {
+			background-color: #138496;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+		}
+
+	.print-icon {
+		margin-right: 6px;
+		font-size: 18px;
 	}
 
 	/* Animations */
