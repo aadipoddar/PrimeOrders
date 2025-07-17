@@ -42,3 +42,30 @@ public class KitchenIssueRawMaterialCartModel
 	public decimal Rate { get; set; }
 	public decimal Total { get; set; }
 }
+
+#region Charts and Helper Methods
+public class KitchenIssueDetailDisplayModel
+{
+	public string RawMaterialName { get; set; }
+	public decimal Quantity { get; set; }
+	public string Unit { get; set; }
+}
+
+public class KitchenWiseData
+{
+	public string KitchenName { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class DailyIssueData
+{
+	public string Date { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class KitchenIssueCountData
+{
+	public string KitchenName { get; set; }
+	public int IssueCount { get; set; }
+}
+#endregion

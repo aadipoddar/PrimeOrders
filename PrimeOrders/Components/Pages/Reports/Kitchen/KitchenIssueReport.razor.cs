@@ -1,10 +1,7 @@
 using PrimeOrdersLibrary.Data.Inventory.Kitchen;
-using PrimeOrdersLibrary.Exporting;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports.Kitchen;
 
@@ -15,22 +12,21 @@ public partial class KitchenIssueReport
 
 	private bool _isLoading = true;
 	private UserModel _user;
-	private bool _deleteConfirmationDialogVisible = false;
+	private bool _kitchenIssueSummaryVisible = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 	private int _selectedKitchenId = 0;
-	private int _kitchenIssueToDeleteId = 0;
-	private string _kitchenIssueToDeleteTransactionNo = "";
 
 	private List<KitchenIssueOverviewModel> _kitchenIssueOverviews = [];
 	private List<KitchenModel> _kitchens = [];
 
-	private SfGrid<KitchenIssueOverviewModel> _sfGrid;
-	private SfDialog _sfDeleteConfirmationDialog;
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private KitchenIssueOverviewModel _selectedKitchenIssue;
+	private readonly List<KitchenIssueDetailDisplayModel> _selectedKitchenIssueDetails = [];
 
+	private SfGrid<KitchenIssueOverviewModel> _sfGrid;
+
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!firstRender)
@@ -87,56 +83,59 @@ public partial class KitchenIssueReport
 		_isLoading = false;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void OnRowSelected(RowSelectEventArgs<KitchenIssueOverviewModel> args) =>
-			NavManager.NavigateTo($"/Inventory/Kitchen-Issue/{args.Data.KitchenIssueId}");
-
-	private void ShowDeleteConfirmation(int kitchenIssueId, string transactionNo)
+	#region Kitchen Issue Summary Module Methods
+	private async Task OnRowSelected(RowSelectEventArgs<KitchenIssueOverviewModel> args)
 	{
-		if (!_user.Admin)
-		{
-			_sfErrorToast.Content = "Only administrators can delete records.";
-			_sfErrorToast.ShowAsync();
-			return;
-		}
-
-		_kitchenIssueToDeleteId = kitchenIssueId;
-		_kitchenIssueToDeleteTransactionNo = transactionNo;
-		_deleteConfirmationDialogVisible = true;
+		_selectedKitchenIssue = args.Data;
+		await LoadKitchenIssueDetails(_selectedKitchenIssue.KitchenIssueId);
+		_kitchenIssueSummaryVisible = true;
 		StateHasChanged();
 	}
 
-	private async Task ConfirmDeleteKitchenIssue()
+	private async Task LoadKitchenIssueDetails(int kitchenIssueId)
 	{
-		var kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, _kitchenIssueToDeleteId);
-		if (kitchenIssue is null)
+		_selectedKitchenIssueDetails.Clear();
+
+		var kitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(kitchenIssueId);
+		foreach (var detail in kitchenIssueDetails)
 		{
-			_sfErrorToast.Content = "Kitchen issue not found.";
-			await _sfErrorToast.ShowAsync();
-			return;
+			var rawMaterial = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, detail.RawMaterialId);
+			if (rawMaterial is not null)
+				_selectedKitchenIssueDetails.Add(new()
+				{
+					RawMaterialName = rawMaterial.Name,
+					Quantity = detail.Quantity,
+					Unit = rawMaterial.MeasurementUnit ?? "Unit"
+				});
 		}
+	}
 
-		kitchenIssue.Status = false;
-		await KitchenIssueData.InsertKitchenIssue(kitchenIssue);
-		await StockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
-
-		_sfSuccessToast.Content = "Kitchen issue deleted successfully.";
-		await _sfSuccessToast.ShowAsync();
-
+	private async Task OnKitchenIssueSummaryVisibilityChanged(bool isVisible)
+	{
+		_kitchenIssueSummaryVisible = isVisible;
 		await LoadKitchenIssueData();
-		_deleteConfirmationDialogVisible = false;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void CancelDelete()
+	#region Excel Export
+	private async Task ExportToExcel()
 	{
-		_deleteConfirmationDialogVisible = false;
-		_kitchenIssueToDeleteId = 0;
-		_kitchenIssueToDeleteTransactionNo = "";
-		StateHasChanged();
-	}
+		if (_kitchenIssueOverviews is null || _kitchenIssueOverviews.Count == 0)
+		{
+			await JS.InvokeVoidAsync("alert", "No data to export");
+			return;
+		}
 
-	// Chart data methods
+		var memoryStream = await KitchenIssueExcelExport.ExportKitchenIssueOverviewExcel(_kitchenIssueOverviews, _startDate, _endDate, _selectedKitchenId);
+		var fileName = $"Kitchen_Issue_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
+		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
+	}
+	#endregion
+
+	#region Chart Data
 	private List<KitchenWiseData> GetKitchenWiseData()
 	{
 		return [.. _kitchenIssueOverviews
@@ -148,11 +147,6 @@ public partial class KitchenIssueReport
 			})
 			.OrderByDescending(x => x.TotalQuantity)
 			.Take(10)];
-	}
-
-	private List<KitchenWiseData> GetKitchenDistributionData()
-	{
-		return GetKitchenWiseData();
 	}
 
 	private List<DailyIssueData> GetDailyIssueData() =>
@@ -175,155 +169,5 @@ public partial class KitchenIssueReport
 			})
 			.OrderByDescending(x => x.IssueCount)
 			.Take(10)];
-
-	private async Task ExportToPdf() =>
-		await _sfGrid.ExportToPdfAsync();
-
-	private async Task ExportToExcel()
-	{
-		if (_kitchenIssueOverviews is null || _kitchenIssueOverviews.Count == 0)
-		{
-			await JS.InvokeVoidAsync("alert", "No data to export");
-			return;
-		}
-
-		// Create summary items dictionary with key metrics
-		Dictionary<string, object> summaryItems = new()
-		{
-			{ "Total Transactions", _kitchenIssueOverviews.Count },
-			{ "Total Products", _kitchenIssueOverviews.Sum(_ => _.TotalProducts) },
-			{ "Total Quantity", _kitchenIssueOverviews.Sum(_ => _.TotalQuantity) },
-			{ "Kitchens Served", _kitchenIssueOverviews.Select(_ => _.KitchenId).Distinct().Count() }
-		};
-
-		// Add top kitchens summary data
-		var topKitchens = _kitchenIssueOverviews
-			.GroupBy(i => i.KitchenName)
-			.OrderByDescending(g => g.Sum(x => x.TotalQuantity))
-			.Take(3)
-			.ToList();
-
-		foreach (var kitchen in topKitchens)
-			summaryItems.Add($"Kitchen: {kitchen.Key}", kitchen.Sum(k => k.TotalQuantity));
-
-		// Define the column order for better readability
-		List<string> columnOrder = [
-			nameof(KitchenIssueOverviewModel.TransactionNo),
-		nameof(KitchenIssueOverviewModel.IssueDate),
-		nameof(KitchenIssueOverviewModel.KitchenName),
-		nameof(KitchenIssueOverviewModel.UserName),
-		nameof(KitchenIssueOverviewModel.TotalProducts),
-		nameof(KitchenIssueOverviewModel.TotalQuantity),
-		nameof(KitchenIssueOverviewModel.Status)
-		];
-
-		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
-		{
-			[nameof(KitchenIssueOverviewModel.TransactionNo)] = new()
-			{
-				DisplayName = "Transaction #",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(KitchenIssueOverviewModel.IssueDate)] = new()
-			{
-				DisplayName = "Issue Date",
-				Format = "dd-MMM-yyyy",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(KitchenIssueOverviewModel.KitchenName)] = new()
-			{
-				DisplayName = "Kitchen",
-				Width = 20,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(KitchenIssueOverviewModel.UserName)] = new()
-			{
-				DisplayName = "Issued By",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(KitchenIssueOverviewModel.TotalProducts)] = new()
-			{
-				DisplayName = "Products",
-				Format = "#,##0",
-				Width = 10,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
-			[nameof(KitchenIssueOverviewModel.TotalQuantity)] = new()
-			{
-				DisplayName = "Total Quantity",
-				Format = "#,##0.00",
-				Width = 15,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
-				FormatCallback = (value) =>
-				{
-					if (value == null) return null;
-					var qtyValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
-					{
-						Bold = qtyValue > 10,
-						FontColor = qtyValue > 10 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
-					};
-				}
-			}
-		};
-
-		// Generate title based on kitchen selection if applicable
-		string reportTitle = "Kitchen Issue Report";
-
-		if (_selectedKitchenId > 0)
-		{
-			var kitchen = _kitchens.FirstOrDefault(k => k.Id == _selectedKitchenId);
-			if (kitchen != null)
-				reportTitle = $"Kitchen Issue Report - {kitchen.Name}";
-		}
-
-		string worksheetName = "Issue Details";
-
-		var memoryStream = ExcelExportUtil.ExportToExcel(
-			_kitchenIssueOverviews,
-			reportTitle,
-			worksheetName,
-			_startDate,
-			_endDate,
-			summaryItems,
-			columnSettings,
-			columnOrder);
-
-		// Generate appropriate filename
-		string filenameSuffix = string.Empty;
-		if (_selectedKitchenId > 0)
-		{
-			var kitchen = _kitchens.FirstOrDefault(k => k.Id == _selectedKitchenId);
-			if (kitchen is not null)
-				filenameSuffix = $"_{kitchen.Name}";
-		}
-
-		var fileName = $"Kitchen_Issue_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
-	}
-
-	// Data classes for charts
-	public class KitchenWiseData
-	{
-		public string KitchenName { get; set; }
-		public decimal TotalQuantity { get; set; }
-	}
-
-	public class DailyIssueData
-	{
-		public string Date { get; set; }
-		public decimal TotalQuantity { get; set; }
-	}
-
-	public class KitchenIssueCountData
-	{
-		public string KitchenName { get; set; }
-		public int IssueCount { get; set; }
-	}
+	#endregion
 }
