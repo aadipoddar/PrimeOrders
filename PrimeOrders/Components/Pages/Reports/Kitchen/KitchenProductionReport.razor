@@ -2,34 +2,6 @@
 
 <PageTitle>Kitchen Production Report - Prime Orders</PageTitle>
 
-<SfToast @ref="_sfErrorToast"
-		 ID="toast_error"
-		 Title="Error"
-		 Content="Some Error Message"
-		 Timeout="3000"
-		 ShowCloseButton="true"
-		 CssClass="e-toast-danger">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastAnimationSettings>
-		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
-		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
-	</ToastAnimationSettings>
-</SfToast>
-
-<SfToast @ref="_sfSuccessToast"
-		 ID="toast_success"
-		 Title="Success"
-		 Content="Kitchen production deleted successfully."
-		 Timeout="3000"
-		 ShowCloseButton="true"
-		 CssClass="e-toast-success">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastAnimationSettings>
-		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
-		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
-	</ToastAnimationSettings>
-</SfToast>
-
 @if (_isLoading)
 {
 	<div class="loader-container">
@@ -83,6 +55,7 @@ else
 					<label>Kitchen</label>
 					<SfComboBox TValue="int"
 								TItem="KitchenModel"
+								FloatLabelType='@FloatLabelType.Auto'
 								Placeholder="Select a Kitchen"
 								DataSource="_kitchens"
 								@bind-Value="_selectedKitchenId"
@@ -93,8 +66,12 @@ else
 				</div>
 			</div>
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportToPdf())" />
-				<SfButton CssClass="excel-button" IconCss="excel-icon" Content="Export Excel" OnClick="@(() => ExportToExcel())" />
+				<SfButton CssClass="excel-button" OnClick="@(() => ExportToExcel())">
+					<div class="button-content">
+						<img src="images/excel.png" alt="Excel" class="excel-icon" />
+						<span>Export Excel</span>
+					</div>
+				</SfButton>
 			</div>
 		</div>
 
@@ -132,45 +109,10 @@ else
 			</div>
 		</div>
 
-		<div class="chart-grid">
-			<div class="chart-card">
-				<h3 class="chart-title">Production by Kitchen</h3>
-				<SfChart Height="300px">
-					<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
-									   Title="Kitchen"></ChartPrimaryXAxis>
-					<ChartPrimaryYAxis Title="Quantity" LabelFormat="{value}"></ChartPrimaryYAxis>
-					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
-					<ChartSeriesCollection>
-						<ChartSeries DataSource="GetKitchenWiseData()"
-									 XName="KitchenName" YName="TotalQuantity" Type="ChartSeriesType.Column"
-									 Name="Total Quantity" Fill="#512BD4">
-						</ChartSeries>
-					</ChartSeriesCollection>
-				</SfChart>
-			</div>
-
-			<div class="chart-card">
-				<h3 class="chart-title">Production Distribution</h3>
-				<SfAccumulationChart Title="Production by Kitchen" EnableSmartLabels="true" Height="300px">
-					<AccumulationChartSeriesCollection>
-						<AccumulationChartSeries DataSource="GetKitchenWiseData()" XName="KitchenName"
-												 YName="TotalQuantity" Name="Production"
-												 InnerRadius="40%" LegendShape="LegendShape.Circle">
-							<AccumulationDataLabelSettings Visible="true" Name="KitchenName"
-														   Position="AccumulationLabelPosition.Outside" />
-							<AccumulationChartAnimation Enable="true"></AccumulationChartAnimation>
-						</AccumulationChartSeries>
-					</AccumulationChartSeriesCollection>
-					<AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
-					<AccumulationChartTooltipSettings Enable="true" Format="${point.y} - ${point.percentage}%" />
-				</SfAccumulationChart>
-			</div>
-		</div>
-
 		<div class="detailed-grid-card">
 			<div class="card-header">
 				<h3 class="chart-title">Kitchen Production Details</h3>
-				<p class="card-info">Click on a row to edit the kitchen production</p>
+				<p class="card-info">Click on a row to view detailed summary</p>
 			</div>
 			<div class="card-body">
 				<SfGrid ID="_sfGrid"
@@ -191,24 +133,43 @@ else
 						<GridColumn Field="@nameof(KitchenProductionOverviewModel.UserName)" HeaderText="Produced By" Width="140" />
 						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalQuantity)" HeaderText="Total Qty" Width="110" TextAlign="TextAlign.Right" />
-						<GridColumn HeaderText="Actions" Width="140">
-							<Template>
-								@{
-									var production = (context as KitchenProductionOverviewModel);
-									<div class="action-buttons grid-actions">
-										<button @onclick='() => NavManager.NavigateTo($"/Inventory/Kitchen-Production/{production.KitchenProductionId}")' class="view-button">Edit</button>
-										<button @onclick="() => ShowDeleteConfirmation(production.KitchenProductionId, production.TransactionNo)"
-												@onclick:stopPropagation="true"
-												class="delete-button"
-												title="Delete Kitchen Production">
-											<span class="delete-icon">🗑️</span>
-										</button>
-									</div>
-								}
-							</Template>
-						</GridColumn>
 					</GridColumns>
 				</SfGrid>
+			</div>
+		</div>
+
+		<div class="chart-grid">
+			<div class="chart-card">
+				<h3 class="chart-title">Production by Kitchen</h3>
+				<SfChart Height="300px">
+					<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
+									   Title="Kitchen"></ChartPrimaryXAxis>
+					<ChartPrimaryYAxis Title="Quantity" LabelFormat="{value}"></ChartPrimaryYAxis>
+					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+					<ChartSeriesCollection>
+						<ChartSeries DataSource="@GetKitchenWiseData()"
+									 XName="KitchenName" YName="TotalQuantity" Type="ChartSeriesType.Column"
+									 Name="Total Quantity" Fill="#512BD4">
+						</ChartSeries>
+					</ChartSeriesCollection>
+				</SfChart>
+			</div>
+
+			<div class="chart-card">
+				<h3 class="chart-title">Production Distribution</h3>
+				<SfAccumulationChart Title="Production by Kitchen" EnableSmartLabels="true" Height="300px">
+					<AccumulationChartSeriesCollection>
+						<AccumulationChartSeries DataSource="@GetKitchenWiseData()" XName="KitchenName"
+												 YName="TotalQuantity" Name="Production"
+												 InnerRadius="40%" LegendShape="LegendShape.Circle">
+							<AccumulationDataLabelSettings Visible="true" Name="KitchenName"
+														   Position="AccumulationLabelPosition.Outside" />
+							<AccumulationChartAnimation Enable="true"></AccumulationChartAnimation>
+						</AccumulationChartSeries>
+					</AccumulationChartSeriesCollection>
+					<AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
+					<AccumulationChartTooltipSettings Enable="true" Format="${point.y} - ${point.percentage}%" />
+				</SfAccumulationChart>
 			</div>
 		</div>
 
@@ -233,16 +194,16 @@ else
 			</div>
 
 			<div class="chart-card">
-				<h3 class="chart-title">Product Category Distribution</h3>
+				<h3 class="chart-title">Kitchen Production Distribution</h3>
 				<SfChart Height="300px">
 					<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
-									   Title="Categories"></ChartPrimaryXAxis>
+									   Title="Kitchens"></ChartPrimaryXAxis>
 					<ChartPrimaryYAxis Title="Production Count" LabelFormat="{value}"></ChartPrimaryYAxis>
 					<ChartTooltipSettings Enable="true"></ChartTooltipSettings>
 					<ChartSeriesCollection>
-						<ChartSeries DataSource="@GetProductCategoryData()"
-									 XName="CategoryName" YName="ProductCount" Type="ChartSeriesType.Column"
-									 Name="Products" Fill="#68217A">
+						<ChartSeries DataSource="@GetKitchenProductionCountData()"
+									 XName="KitchenName" YName="ProductionCount" Type="ChartSeriesType.Column"
+									 Name="Productions" Fill="#68217A">
 						</ChartSeries>
 					</ChartSeriesCollection>
 				</SfChart>
@@ -255,67 +216,12 @@ else
 	</div>
 }
 
-<!-- Delete Confirmation Dialog -->
-<SfDialog ID="_sfDeleteConfirmationDialog"
-		  @ref="_sfDeleteConfirmationDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_deleteConfirmationDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="warning-icon">⚠️</span>
-				<span>Confirm Delete Kitchen Production</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				<div class="confirm-section">
-					<div class="warning-message">
-						<p>Are you sure you want to delete this kitchen production?</p>
-					</div>
-
-					<div class="kitchen-production-info">
-						<div class="detail-item">
-							<span class="detail-label">Kitchen Production ID:</span>
-							<span class="detail-value">@_kitchenProductionToDeleteId</span>
-						</div>
-						<div class="detail-item">
-							<span class="detail-label">Transaction No:</span>
-							<span class="detail-value">@_kitchenProductionToDeleteTransactionNo</span>
-						</div>
-					</div>
-
-					<div class="warning-note">
-						<p><strong>Note:</strong> This action will:</p>
-						<ul>
-							<li>Set the kitchen production status to inactive</li>
-							<li>Remove the production from active reports</li>
-							<li>This action cannot be easily undone</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Yes, Delete"
-							  IsPrimary="true"
-							  OnClick="ConfirmDeleteKitchenProduction"
-							  CssClass="delete-confirm-button" />
-					<SfButton Content="Cancel"
-							  OnClick="CancelDelete"
-							  CssClass="dialog-button" />
-				</div>
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
+<!-- Kitchen Production Summary Module -->
+<KitchenProductionSummaryModule IsVisible="_kitchenProductionSummaryVisible"
+								IsVisibleChanged="OnKitchenProductionSummaryVisibilityChanged"
+								SelectedKitchenProduction="_selectedKitchenProduction"
+								KitchenProductionDetails="_selectedKitchenProductionDetails"
+								CurrentUser="_user" />
 
 <style>
 	:root {
@@ -333,118 +239,6 @@ else
 		--tax-color: #6c757d;
 		--excel-color: #217346;
 	}
-
-	/* Delete Button Styling */
-	.delete-button {
-		background-color: #f44336;
-		color: white;
-		border: none;
-		padding: 6px 10px;
-		border-radius: 4px;
-		cursor: pointer;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		font-size: 12px;
-		margin-left: 5px;
-	}
-
-		.delete-button:hover {
-			background-color: #d32f2f;
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
-		}
-
-		.delete-button:active {
-			transform: translateY(0);
-		}
-
-	.delete-icon {
-		font-size: 14px;
-	}
-
-	/* Delete Confirmation Dialog Styling */
-	.warning-icon {
-		font-size: 24px;
-		margin-right: 10px;
-	}
-
-	.warning-message {
-		background-color: #fff3cd;
-		border: 1px solid #ffeaa7;
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 20px;
-		text-align: center;
-	}
-
-		.warning-message p {
-			margin: 0;
-			font-weight: 600;
-			color: #856404;
-			font-size: 16px;
-		}
-
-	.kitchen-production-info {
-		background-color: var(--dotnet-light);
-		border-radius: 6px;
-		padding: 15px;
-		margin-bottom: 20px;
-	}
-
-		.kitchen-production-info .detail-item {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 8px;
-		}
-
-		.kitchen-production-info .detail-label {
-			font-weight: 600;
-			color: var(--dotnet-dark);
-		}
-
-		.kitchen-production-info .detail-value {
-			color: var(--dotnet-secondary);
-			font-weight: 500;
-		}
-
-	.warning-note {
-		background-color: #f8d7da;
-		border: 1px solid #f5c6cb;
-		border-radius: 6px;
-		padding: 15px;
-	}
-
-		.warning-note p {
-			margin: 0 0 10px 0;
-			font-weight: 600;
-			color: #721c24;
-		}
-
-		.warning-note ul {
-			margin: 0;
-			padding-left: 20px;
-			color: #721c24;
-		}
-
-		.warning-note li {
-			margin-bottom: 5px;
-		}
-
-	.delete-confirm-button {
-		background-color: #f44336;
-		color: white;
-		border: none;
-		padding: 10px 20px;
-		border-radius: 6px;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
-
-		.delete-confirm-button:hover {
-			background-color: #d32f2f;
-		}
 
 	/* General Layout */
 	.dashboard-container {
@@ -601,24 +395,10 @@ else
 		gap: 10px;
 	}
 
-	.export-button {
-		background-color: var(--dotnet-secondary);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.2s ease;
+	.excel-icon {
+		width: 16px;
+		height: 16px;
 	}
-
-		.export-button:hover {
-			background-color: #571b6c;
-			transform: translateY(-2px);
-		}
 
 	.excel-button {
 		background-color: var(--excel-color);
@@ -638,10 +418,6 @@ else
 			background-color: #1e5f3e;
 			transform: translateY(-2px);
 		}
-
-	.export-icon, .excel-icon {
-		font-size: 16px;
-	}
 
 	/* Overview Cards */
 	.overview-cards {
@@ -911,84 +687,6 @@ else
 		align-items: center;
 		justify-content: center;
 		font-weight: 500;
-	}
-
-	/* Toast Styling */
-	::deep .e-toast-container {
-		z-index: 1000;
-	}
-
-		::deep .e-toast-container .e-toast {
-			border: 0;
-			border-radius: 8px;
-			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-		}
-
-	/* Success Toast */
-	::deep .e-toast-success {
-		background-color: #ebf7ee;
-		border-left: 4px solid #4CAF50;
-		color: #2E7D32;
-	}
-
-		::deep .e-toast-success .e-toast-title {
-			color: #2E7D32;
-			font-weight: 700;
-		}
-
-		::deep .e-toast-success .e-toast-content {
-			color: #2E7D32;
-		}
-
-		::deep .e-toast-success .e-toast-close-icon {
-			color: #2E7D32;
-		}
-
-		::deep .e-toast-success::before {
-			content: "✓";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-	/* Error Toast */
-	::deep .e-toast-danger {
-		background-color: #fdeeee;
-		border-left: 4px solid #F44336;
-		color: #C62828;
-	}
-
-		::deep .e-toast-danger .e-toast-title {
-			color: #C62828;
-			font-weight: 700;
-		}
-
-		::deep .e-toast-danger .e-toast-content {
-			color: #C62828;
-		}
-
-		::deep .e-toast-danger .e-toast-close-icon {
-			color: #C62828;
-		}
-
-		::deep .e-toast-danger::before {
-			content: "⚠";
-			font-size: 18px;
-			font-weight: bold;
-			position: absolute;
-			left: 15px;
-			top: 50%;
-			transform: translateY(-50%);
-		}
-
-	/* Toast Animation */
-	::deep .e-toast-container .e-toast {
-		padding: 10px 10px 10px 40px;
-		position: relative;
-		animation-fill-mode: both;
 	}
 
 	/* Animations */

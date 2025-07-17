@@ -136,11 +136,11 @@ public partial class KitchenIssueReport
 	#endregion
 
 	#region Chart Data
-	private List<KitchenWiseData> GetKitchenWiseData()
+	private List<KitchenWiseIssueChartData> GetKitchenWiseData()
 	{
 		return [.. _kitchenIssueOverviews
 			.GroupBy(i => i.KitchenName)
-			.Select(g => new KitchenWiseData
+			.Select(g => new KitchenWiseIssueChartData
 			{
 				KitchenName = g.Key,
 				TotalQuantity = g.Sum(x => x.TotalQuantity)
@@ -149,20 +149,20 @@ public partial class KitchenIssueReport
 			.Take(10)];
 	}
 
-	private List<DailyIssueData> GetDailyIssueData() =>
+	private List<DailyIssueChartData> GetDailyIssueData() =>
 		[.. _kitchenIssueOverviews
 			.GroupBy(i => DateOnly.FromDateTime(i.IssueDate))
-			.Select(g => new DailyIssueData
+			.Select(g => new DailyIssueChartData
 			{
 				Date = g.Key.ToString("dd/MM"),
 				TotalQuantity = g.Sum(x => x.TotalQuantity)
 			})
 			.OrderBy(x => DateOnly.Parse(x.Date, new System.Globalization.CultureInfo("en-GB")))];
 
-	private List<KitchenIssueCountData> GetKitchenIssueCountData() =>
+	private List<KitchenIssueCountChartData> GetKitchenIssueCountData() =>
 		[.. _kitchenIssueOverviews
 			.GroupBy(i => i.KitchenName)
-			.Select(g => new KitchenIssueCountData
+			.Select(g => new KitchenIssueCountChartData
 			{
 				KitchenName = g.Key,
 				IssueCount = g.Count()

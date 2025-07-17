@@ -1,10 +1,7 @@
 using PrimeOrdersLibrary.Data.Inventory.Kitchen;
-using PrimeOrdersLibrary.Exporting;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeOrders.Components.Pages.Reports.Kitchen;
 
@@ -15,22 +12,21 @@ public partial class KitchenProductionReport
 
 	private bool _isLoading = true;
 	private UserModel _user;
-	private bool _deleteConfirmationDialogVisible = false;
+	private bool _kitchenProductionSummaryVisible = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 	private int _selectedKitchenId = 0;
-	private int _kitchenProductionToDeleteId = 0;
-	private string _kitchenProductionToDeleteTransactionNo = "";
 
 	private List<KitchenProductionOverviewModel> _kitchenProductionOverviews = [];
 	private List<KitchenModel> _kitchens = [];
 
-	private SfGrid<KitchenProductionOverviewModel> _sfGrid;
-	private SfDialog _sfDeleteConfirmationDialog;
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private KitchenProductionOverviewModel _selectedKitchenProduction;
+	private readonly List<KitchenProductionDetailDisplayModel> _selectedKitchenProductionDetails = [];
 
+	private SfGrid<KitchenProductionOverviewModel> _sfGrid;
+
+	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (!firstRender)
@@ -51,26 +47,17 @@ public partial class KitchenProductionReport
 	private async Task LoadKitchens()
 	{
 		_kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen);
-		// Add "All Kitchens" option
 		_kitchens.Insert(0, new KitchenModel { Id = 0, Name = "All Kitchens" });
 	}
 
 	private async Task LoadKitchenProductionData()
 	{
-		if (_selectedKitchenId > 0)
-		{
-			_kitchenProductionOverviews = await KitchenProductionData.LoadKitchenProductionDetailsByDate(
-				_startDate.ToDateTime(new TimeOnly(0, 0)),
-				_endDate.ToDateTime(new TimeOnly(23, 59)));
+		_kitchenProductionOverviews = await KitchenProductionData.LoadKitchenProductionDetailsByDate(
+			_startDate.ToDateTime(new TimeOnly(0, 0)),
+			_endDate.ToDateTime(new TimeOnly(23, 59)));
 
+		if (_selectedKitchenId > 0)
 			_kitchenProductionOverviews = [.. _kitchenProductionOverviews.Where(i => i.KitchenId == _selectedKitchenId)];
-		}
-		else
-		{
-			_kitchenProductionOverviews = await KitchenProductionData.LoadKitchenProductionDetailsByDate(
-				_startDate.ToDateTime(new TimeOnly(0, 0)),
-				_endDate.ToDateTime(new TimeOnly(23, 59)));
-		}
 	}
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
@@ -96,91 +83,43 @@ public partial class KitchenProductionReport
 		_isLoading = false;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void OnRowSelected(RowSelectEventArgs<KitchenProductionOverviewModel> args) =>
-			NavManager.NavigateTo($"/Inventory/Kitchen-Production/{args.Data.KitchenProductionId}");
-
-	private void ShowDeleteConfirmation(int kitchenProductionId, string transactionNo)
+	#region Kitchen Production Summary Module Methods
+	private async Task OnRowSelected(RowSelectEventArgs<KitchenProductionOverviewModel> args)
 	{
-		if (!_user.Admin)
-		{
-			_sfErrorToast.Content = "Only administrators can delete records.";
-			_sfErrorToast.ShowAsync();
-			return;
-		}
-
-		_kitchenProductionToDeleteId = kitchenProductionId;
-		_kitchenProductionToDeleteTransactionNo = transactionNo;
-		_deleteConfirmationDialogVisible = true;
+		_selectedKitchenProduction = args.Data;
+		await LoadKitchenProductionDetails(_selectedKitchenProduction.KitchenProductionId);
+		_kitchenProductionSummaryVisible = true;
 		StateHasChanged();
 	}
 
-	private async Task ConfirmDeleteKitchenProduction()
+	private async Task LoadKitchenProductionDetails(int kitchenProductionId)
 	{
-		var kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, _kitchenProductionToDeleteId);
-		if (kitchenProduction is null)
+		_selectedKitchenProductionDetails.Clear();
+
+		var kitchenProductionDetails = await KitchenProductionData.LoadKitchenProductionDetailByKitchenProduction(kitchenProductionId);
+		foreach (var detail in kitchenProductionDetails)
 		{
-			_sfErrorToast.Content = "Kitchen production not found.";
-			await _sfErrorToast.ShowAsync();
-			return;
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			if (product is not null)
+				_selectedKitchenProductionDetails.Add(new()
+				{
+					ProductName = product.Name,
+					Quantity = detail.Quantity,
+				});
 		}
+	}
 
-		kitchenProduction.Status = false;
-		await KitchenProductionData.InsertKitchenProduction(kitchenProduction);
-		await StockData.DeleteProductStockByTransactionNo(kitchenProduction.TransactionNo);
-
-		_sfSuccessToast.Content = "Kitchen production deleted successfully.";
-		await _sfSuccessToast.ShowAsync();
-
+	private async Task OnKitchenProductionSummaryVisibilityChanged(bool isVisible)
+	{
+		_kitchenProductionSummaryVisible = isVisible;
 		await LoadKitchenProductionData();
-		_deleteConfirmationDialogVisible = false;
 		StateHasChanged();
 	}
+	#endregion
 
-	private void CancelDelete()
-	{
-		_deleteConfirmationDialogVisible = false;
-		_kitchenProductionToDeleteId = 0;
-		_kitchenProductionToDeleteTransactionNo = "";
-		StateHasChanged();
-	}
-
-	// Chart data methods
-	private List<KitchenWiseData> GetKitchenWiseData() =>
-		[.. _kitchenProductionOverviews
-			.GroupBy(i => i.KitchenName)
-			.Select(g => new KitchenWiseData
-			{
-				KitchenName = g.Key,
-				TotalQuantity = g.Sum(x => x.TotalQuantity)
-			})
-			.OrderByDescending(x => x.TotalQuantity)
-			.Take(10)];
-
-	private List<DailyProductionData> GetDailyProductionData() =>
-		[.. _kitchenProductionOverviews
-			.GroupBy(i => DateOnly.FromDateTime(i.ProductionDate))
-			.Select(g => new DailyProductionData
-			{
-				Date = g.Key.ToString("dd/MM"),
-				TotalQuantity = g.Sum(x => x.TotalQuantity)
-			})
-			.OrderBy(x => DateOnly.Parse(x.Date, new System.Globalization.CultureInfo("en-GB")))];
-
-	private List<ProductCategoryData> GetProductCategoryData() =>
-		[.. _kitchenProductionOverviews
-			.GroupBy(i => i.KitchenName)
-			.Select(g => new ProductCategoryData
-			{
-				CategoryName = g.Key,
-				ProductCount = g.Count()
-			})
-			.OrderByDescending(x => x.ProductCount)
-			.Take(10)];
-
-	private async Task ExportToPdf() =>
-		await _sfGrid.ExportToPdfAsync();
-
+	#region Excel Export
 	private async Task ExportToExcel()
 	{
 		if (_kitchenProductionOverviews is null || _kitchenProductionOverviews.Count == 0)
@@ -189,143 +128,45 @@ public partial class KitchenProductionReport
 			return;
 		}
 
-		// Create summary items dictionary with key metrics
-		Dictionary<string, object> summaryItems = new()
-		{
-			{ "Total Transactions", _kitchenProductionOverviews.Count },
-			{ "Total Products", _kitchenProductionOverviews.Sum(_ => _.TotalProducts) },
-			{ "Total Quantity", _kitchenProductionOverviews.Sum(_ => _.TotalQuantity) },
-			{ "Kitchens Active", _kitchenProductionOverviews.Select(_ => _.KitchenId).Distinct().Count() }
-		};
-
-		// Add top kitchens summary data
-		var topKitchens = _kitchenProductionOverviews
-			.GroupBy(i => i.KitchenName)
-			.OrderByDescending(g => g.Sum(x => x.TotalQuantity))
-			.Take(3)
-			.ToList();
-
-		foreach (var kitchen in topKitchens)
-			summaryItems.Add($"Kitchen: {kitchen.Key}", kitchen.Sum(k => k.TotalQuantity));
-
-		// Define the column order for better readability
-		List<string> columnOrder = [
-			nameof(KitchenProductionOverviewModel.TransactionNo),
-			nameof(KitchenProductionOverviewModel.ProductionDate),
-			nameof(KitchenProductionOverviewModel.KitchenName),
-			nameof(KitchenProductionOverviewModel.UserName),
-			nameof(KitchenProductionOverviewModel.TotalProducts),
-			nameof(KitchenProductionOverviewModel.TotalQuantity),
-			nameof(KitchenProductionOverviewModel.Status)
-		];
-
-		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
-		{
-			[nameof(KitchenProductionOverviewModel.TransactionNo)] = new()
-			{
-				DisplayName = "Transaction #",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(KitchenProductionOverviewModel.ProductionDate)] = new()
-			{
-				DisplayName = "Production Date",
-				Format = "dd-MMM-yyyy",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(KitchenProductionOverviewModel.KitchenName)] = new()
-			{
-				DisplayName = "Kitchen",
-				Width = 20,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(KitchenProductionOverviewModel.UserName)] = new()
-			{
-				DisplayName = "Produced By",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(KitchenProductionOverviewModel.TotalProducts)] = new()
-			{
-				DisplayName = "Products",
-				Format = "#,##0",
-				Width = 10,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
-			[nameof(KitchenProductionOverviewModel.TotalQuantity)] = new()
-			{
-				DisplayName = "Total Quantity",
-				Format = "#,##0.00",
-				Width = 15,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
-				FormatCallback = (value) =>
-				{
-					if (value == null) return null;
-					var qtyValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
-					{
-						Bold = qtyValue > 10,
-						FontColor = qtyValue > 10 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
-					};
-				}
-			}
-		};
-
-		// Generate title based on kitchen selection if applicable
-		string reportTitle = "Kitchen Production Report";
-
-		if (_selectedKitchenId > 0)
-		{
-			var kitchen = _kitchens.FirstOrDefault(k => k.Id == _selectedKitchenId);
-			if (kitchen != null)
-				reportTitle = $"Kitchen Production Report - {kitchen.Name}";
-		}
-
-		string worksheetName = "Production Details";
-
-		var memoryStream = ExcelExportUtil.ExportToExcel(
-			_kitchenProductionOverviews,
-			reportTitle,
-			worksheetName,
-			_startDate,
-			_endDate,
-			summaryItems,
-			columnSettings,
-			columnOrder);
-
-		// Generate appropriate filename
-		string filenameSuffix = string.Empty;
-		if (_selectedKitchenId > 0)
-		{
-			var kitchen = _kitchens.FirstOrDefault(k => k.Id == _selectedKitchenId);
-			if (kitchen is not null)
-				filenameSuffix = $"_{kitchen.Name}";
-		}
-
-		var fileName = $"Kitchen_Production_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
+		var memoryStream = await KitchenProductionExcelExport.ExportKitchenProductionOverviewExcel(_kitchenProductionOverviews, _startDate, _endDate, _selectedKitchenId);
+		var fileName = $"Kitchen_Production_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
+	#endregion
 
-	// Data classes for charts
-	public class KitchenWiseData
+	#region Chart Data
+	private List<KitchenWiseProductionChartData> GetKitchenWiseData()
 	{
-		public string KitchenName { get; set; }
-		public decimal TotalQuantity { get; set; }
+		return [.. _kitchenProductionOverviews
+			.GroupBy(i => i.KitchenName)
+			.Select(g => new KitchenWiseProductionChartData
+			{
+				KitchenName = g.Key,
+				TotalQuantity = g.Sum(x => x.TotalQuantity)
+			})
+			.OrderByDescending(x => x.TotalQuantity)
+			.Take(10)];
 	}
 
-	public class DailyProductionData
-	{
-		public string Date { get; set; }
-		public decimal TotalQuantity { get; set; }
-	}
+	private List<DailyProductionChartData> GetDailyProductionData() =>
+		[.. _kitchenProductionOverviews
+			.GroupBy(i => DateOnly.FromDateTime(i.ProductionDate))
+			.Select(g => new DailyProductionChartData
+			{
+				Date = g.Key.ToString("dd/MM"),
+				TotalQuantity = g.Sum(x => x.TotalQuantity)
+			})
+			.OrderBy(x => DateOnly.Parse(x.Date, new System.Globalization.CultureInfo("en-GB")))];
 
-	public class ProductCategoryData
-	{
-		public string CategoryName { get; set; }
-		public int ProductCount { get; set; }
-	}
+	private List<KitchenProductionCountChartData> GetKitchenProductionCountData() =>
+		[.. _kitchenProductionOverviews
+			.GroupBy(i => i.KitchenName)
+			.Select(g => new KitchenProductionCountChartData
+			{
+				KitchenName = g.Key,
+				ProductionCount = g.Count()
+			})
+			.OrderByDescending(x => x.ProductionCount)
+			.Take(10)];
+	#endregion
 }

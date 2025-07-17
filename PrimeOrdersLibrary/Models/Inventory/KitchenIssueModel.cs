@@ -51,19 +51,19 @@ public class KitchenIssueDetailDisplayModel
 	public string Unit { get; set; }
 }
 
-public class KitchenWiseData
+public class KitchenWiseIssueChartData
 {
 	public string KitchenName { get; set; }
 	public decimal TotalQuantity { get; set; }
 }
 
-public class DailyIssueData
+public class DailyIssueChartData
 {
 	public string Date { get; set; }
 	public decimal TotalQuantity { get; set; }
 }
 
-public class KitchenIssueCountData
+public class KitchenIssueCountChartData
 {
 	public string KitchenName { get; set; }
 	public int IssueCount { get; set; }

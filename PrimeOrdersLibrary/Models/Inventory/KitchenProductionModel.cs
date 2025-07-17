@@ -42,3 +42,29 @@ public class KitchenProductionProductCartModel
 	public decimal Rate { get; set; }
 	public decimal Total { get; set; }
 }
+
+#region Charts and Helper Methods
+public class KitchenProductionDetailDisplayModel
+{
+	public string ProductName { get; set; }
+	public decimal Quantity { get; set; }
+}
+
+public class KitchenWiseProductionChartData
+{
+	public string KitchenName { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class DailyProductionChartData
+{
+	public string Date { get; set; }
+	public decimal TotalQuantity { get; set; }
+}
+
+public class KitchenProductionCountChartData
+{
+	public string KitchenName { get; set; }
+	public int ProductionCount { get; set; }
+}
+#endregion
