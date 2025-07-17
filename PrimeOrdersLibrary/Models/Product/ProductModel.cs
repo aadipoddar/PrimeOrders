@@ -53,6 +53,41 @@ public class ProductCategoryModel
 
 
 #region Chart and Helper Models
+public class ProductSummaryChartData
+{
+	public int TotalProducts { get; set; }
+	public decimal TotalAmount { get; set; }
+	public decimal TotalQuantity { get; set; }
+	public decimal TotalDiscount { get; set; }
+	public decimal TotalTax { get; set; }
+}
+
+public class TopProductChartData
+{
+	public string ProductName { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class CategorySalesChartData
+{
+	public int CategoryId { get; set; }
+	public string CategoryName { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class MonthlySalesChartData
+{
+	public string Month { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class ProductQuantityRevenueChartData
+{
+	public string ProductName { get; set; }
+	public decimal Amount { get; set; }
+	public decimal Quantity { get; set; }
+}
+
 public class DailyProductSalesChartData
 {
 	public string Date { get; set; }

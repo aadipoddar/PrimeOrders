@@ -12,6 +12,7 @@ public partial class OrderPage
 	[Parameter] public int? OrderId { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
@@ -64,6 +65,8 @@ public partial class OrderPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Order)).User) is not null))
 			return;
 
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
 		await LoadData();
 		await JS.InvokeVoidAsync("setupOrderPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
@@ -76,7 +79,7 @@ public partial class OrderPage
 		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 		_locations.Remove(_locations.FirstOrDefault(c => c.Id == 1));
 
-		if (_user.LocationId == 1)
+		if (_userLocation.MainLocation)
 			_order.LocationId = _locations.FirstOrDefault()?.Id ?? 0;
 		else
 			_order.LocationId = _user.LocationId;
@@ -102,7 +105,7 @@ public partial class OrderPage
 		if (_order is null)
 			NavManager.NavigateTo("/");
 
-		if (_order.SaleId != null && _order.SaleId > 0)
+		if (_order.SaleId is not null && _order.SaleId > 0)
 			NavManager.NavigateTo("/");
 
 		_orderProductCarts.Clear();
@@ -111,7 +114,6 @@ public partial class OrderPage
 		foreach (var detail in orderDetails)
 		{
 			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
-
 			_orderProductCarts.Add(new()
 			{
 				ProductId = product.Id,
@@ -301,14 +303,12 @@ public partial class OrderPage
 		if (existingProduct is not null)
 			existingProduct.Quantity += _selectedQuantity;
 		else
-		{
 			_orderProductCarts.Add(new()
 			{
 				ProductId = _selectedProduct.Id,
 				ProductName = _selectedProduct.Name,
 				Quantity = _selectedQuantity
 			});
-		}
 
 		_quantityDialogVisible = false;
 		_selectedProduct = new();
@@ -361,7 +361,7 @@ public partial class OrderPage
 		if (OrderId is null)
 			_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
 
-		if (!_user.Admin || _user.LocationId != 1)
+		if (!_user.Admin || !_userLocation.MainLocation)
 			_order.LocationId = _user.LocationId;
 
 		if (_order.LocationId <= 0)

@@ -11,6 +11,7 @@ public partial class SaleReturnReport
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _saleReturnSummaryVisible = false;
 
@@ -37,6 +38,8 @@ public partial class SaleReturnReport
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Sales, primaryLocationRequirement: true)).User) is not null))
 			return;
 
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
 		await LoadLocations();
 		await LoadSaleReturnData();
 
@@ -46,7 +49,7 @@ public partial class SaleReturnReport
 
 	private async Task LoadLocations()
 	{
-		if (_user.LocationId == 1)
+		if (_userLocation.MainLocation)
 		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 			_locations.Insert(0, new LocationModel { Id = 0, Name = "All Locations" });
@@ -55,7 +58,7 @@ public partial class SaleReturnReport
 
 	private async Task LoadSaleReturnData()
 	{
-		if (_user.LocationId != 1)
+		if (!_userLocation.MainLocation)
 			_selectedLocationId = _user.LocationId;
 
 		_saleReturnOverviews = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(

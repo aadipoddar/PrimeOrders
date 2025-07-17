@@ -48,7 +48,6 @@ else
 			</SfDateRangePicker>
 
 			<div class="action-buttons">
-				<SfButton CssClass="export-button" IconCss="export-icon" Content="Export PDF" OnClick="@(() => ExportReport())" />
 				<SfButton CssClass="detailed-button" IconCss="detailed-icon" Content="Detailed Report" OnClick="@(() => NavManager.NavigateTo("/Reports/Detailed"))" />
 			</div>
 		</div>
@@ -253,9 +252,6 @@ else
 								</div>
 								<div class="header-center">
 									<span class="total-amount">@(_saleOverviews.Sum(_ => _.Total).FormatIndianCurrency())</span>
-								</div>
-								<div class="header-right">
-									<SfButton CssClass="print-button" IconCss="print-icon" Content="Print PDF" OnClick="@(() => ExportReport())" />
 								</div>
 							</div>
 						</HeaderTemplate>

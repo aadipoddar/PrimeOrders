@@ -97,6 +97,18 @@ public class SaleOverviewModel
 }
 
 #region Chart and Helper Models
+public class PaymentMethodChartData
+{
+	public string PaymentMethod { get; set; }
+	public decimal Amount { get; set; }
+}
+
+public class LocationSalesSummaryChartData
+{
+	public string LocationName { get; set; }
+	public decimal Amount { get; set; }
+}
+
 public class SaleDetailDisplayModel
 {
 	public string ProductName { get; set; } = "";

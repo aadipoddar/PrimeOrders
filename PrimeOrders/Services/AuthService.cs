@@ -51,10 +51,14 @@ public static class AuthService
 			}
 		}
 
-		if (primaryLocationRequirement.HasValue && primaryLocationRequirement.Value && user.LocationId != 1)
+		if (primaryLocationRequirement.HasValue && primaryLocationRequirement.Value)
 		{
-			navigationManager.NavigateTo("/");
-			return new AuthenticationResult(false, null, "User must be associated with a primary location");
+			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, user.LocationId);
+			if (location is null || !location.MainLocation)
+			{
+				navigationManager.NavigateTo("/");
+				return new AuthenticationResult(false, null, "User must be associated with a primary location");
+			}
 		}
 
 		return new AuthenticationResult(true, user);

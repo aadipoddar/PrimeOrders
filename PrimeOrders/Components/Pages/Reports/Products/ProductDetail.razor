@@ -53,7 +53,7 @@ else
 					</SfDateRangePicker>
 				</div>
 
-				@if (_user?.LocationId == 1)
+				@if (_userLocation.MainLocation)
 				{
 					<div class="filter-item">
 						<label>Location</label>
@@ -290,7 +290,7 @@ else
 			</div>
 		</div>
 
-		@if (_selectedProductId > 0 && _selectedProduct != null)
+		@if (_selectedProductId > 0 && _selectedProduct is not null)
 		{
 			<div class="product-detail-section">
 				<h2 class="section-title">Product Details: @_selectedProduct.Name</h2>

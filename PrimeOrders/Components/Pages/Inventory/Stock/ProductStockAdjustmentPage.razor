@@ -82,7 +82,7 @@ else
 					<p class="card-info">Press <kbd>F2</kbd> to search products, click Add to Cart or row to add to cart</p>
 				</div>
 				<div class="card-body">
-					@if (_user?.LocationId == 1)
+					@if (_userLocation.MainLocation)
 					{
 						<div class="location-selector">
 							<label>Select Outlet / Franchise</label>

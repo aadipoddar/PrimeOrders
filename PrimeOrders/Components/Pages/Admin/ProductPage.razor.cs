@@ -9,6 +9,7 @@ public partial class ProductPage
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 
 	private ProductModel _productModel = new()
@@ -47,6 +48,8 @@ public partial class ProductPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Admin)).User) is not null))
 			return;
 
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
 		await LoadData();
 
 		_isLoading = false;
@@ -62,7 +65,7 @@ public partial class ProductPage
 
 		_productModel.LocationId = _user.LocationId;
 
-		if (_user.LocationId != 1)
+		if (!_userLocation.MainLocation)
 		{
 			_products = [.. _products.Where(p => p.LocationId == _user.LocationId)];
 			_productCategories = [.. _productCategories.Where(c => c.LocationId == _user.LocationId || c.LocationId == 1)];
@@ -97,7 +100,7 @@ public partial class ProductPage
 		{
 			_productRates = await ProductData.LoadProductRateByProduct(_productModel.Id);
 
-			if (_user.LocationId != 1)
+			if (!_userLocation.MainLocation)
 				_productRates = [.. _productRates.Where(r => r.LocationId == _user.LocationId)];
 
 			if (_sfRatesGrid is not null)
@@ -167,7 +170,7 @@ public partial class ProductPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (_user.LocationId != 1)
+		if (!_userLocation.MainLocation)
 			_productModel.LocationId = _user.LocationId;
 
 		if (string.IsNullOrWhiteSpace(_productModel.Name))

@@ -8,8 +8,9 @@ public partial class UserPage
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
 
-	private bool _isLoading = true;
 	private UserModel _currentUser;
+	private LocationModel _currentUserLocation;
+	private bool _isLoading = true;
 
 	private UserModel _userModel = new()
 	{
@@ -41,6 +42,8 @@ public partial class UserPage
 		if (!((_currentUser = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Admin)).User) is not null))
 			return;
 
+		_currentUserLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _currentUser.LocationId);
+
 		await LoadData();
 
 		_isLoading = false;
@@ -52,7 +55,7 @@ public partial class UserPage
 		_users = await CommonData.LoadTableData<UserModel>(TableNames.User);
 		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
-		if (_currentUser.LocationId != 1)
+		if (!_currentUserLocation.MainLocation)
 			_users = [.. _users.Where(u => u.LocationId == _currentUser.LocationId)];
 
 		_userModel.LocationId = _currentUser.LocationId;
@@ -72,7 +75,7 @@ public partial class UserPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (_currentUser.LocationId != 1)
+		if (!_currentUserLocation.MainLocation)
 			_userModel.LocationId = _currentUser.LocationId;
 
 		if (string.IsNullOrWhiteSpace(_userModel.Name))

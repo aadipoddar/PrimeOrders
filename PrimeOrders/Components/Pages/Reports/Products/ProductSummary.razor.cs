@@ -17,7 +17,7 @@ public partial class ProductSummary
 	private List<ProductModel> _products = [];
 	private List<ProductOverviewModel> _productOverviews = [];
 
-	private ProductSummaryData _productSummary = new();
+	private ProductSummaryChartData _productSummary = new();
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -63,9 +63,8 @@ public partial class ProductSummary
 		StateHasChanged();
 	}
 
-	private void CalculateSummaryData()
-	{
-		_productSummary = new ProductSummaryData
+	private void CalculateSummaryData() =>
+		_productSummary = new()
 		{
 			TotalProducts = _productOverviews.Select(p => p.ProductId).Distinct().Count(),
 			TotalAmount = _productOverviews.Sum(p => p.TotalAmount),
@@ -73,17 +72,13 @@ public partial class ProductSummary
 			TotalDiscount = _productOverviews.Sum(p => p.DiscountAmount),
 			TotalTax = _productOverviews.Sum(p => p.TotalTaxAmount)
 		};
-	}
 
-	private async Task ExportReport() =>
-		await JS.InvokeVoidAsync("alert", "PDF Export functionality will be implemented here");
-
-	// Chart data methods
-	private List<TopProductData> GetTopProductsData()
+	#region Chart data methods
+	private List<TopProductChartData> GetTopProductsData()
 	{
 		return [.. _productOverviews
 			.GroupBy(p => new { p.ProductId, p.ProductName })
-			.Select(g => new TopProductData
+			.Select(g => new TopProductChartData
 			{
 				ProductName = g.Key.ProductName,
 				Amount = g.Sum(p => p.TotalAmount)
@@ -92,11 +87,10 @@ public partial class ProductSummary
 			.Take(5)];
 	}
 
-	private List<CategorySalesData> GetCategorySalesData()
-	{
-		return [.. _productOverviews
+	private List<CategorySalesChartData> GetCategorySalesData() =>
+		[.. _productOverviews
 			.GroupBy(p => new { p.ProductCategoryId, p.ProductCategoryName })
-			.Select(g => new CategorySalesData
+			.Select(g => new CategorySalesChartData
 			{
 				CategoryId = g.Key.ProductCategoryId,
 				CategoryName = g.Key.ProductCategoryName,
@@ -104,28 +98,21 @@ public partial class ProductSummary
 			})
 			.OrderByDescending(p => p.Amount)
 			.Take(8)];
-	}
 
-	private List<MonthlySalesData> GetMonthlySalesData()
-	{
-		var startDate = _startDate.AddMonths(-12); // Go back 12 months from selected date
-		var endDate = _endDate;
-
-		return [.. _productOverviews
+	private List<MonthlySalesChartData> GetMonthlySalesData() =>
+		[.. _productOverviews
 			.GroupBy(p => new { Month = p.BillDateTime.ToString("MMM yyyy") })
-			.Select(g => new MonthlySalesData
+			.Select(g => new MonthlySalesChartData
 			{
 				Month = g.Key.Month,
 				Amount = g.Sum(p => p.TotalAmount)
 			})
 			.OrderBy(d => DateTime.ParseExact(d.Month, "MMM yyyy", null))];
-	}
 
-	private List<ProductQuantityRevenueData> GetQuantityRevenueData()
-	{
-		return [.. _productOverviews
+	private List<ProductQuantityRevenueChartData> GetQuantityRevenueData() =>
+		[.. _productOverviews
 			.GroupBy(p => new { p.ProductId, p.ProductName })
-			.Select(g => new ProductQuantityRevenueData
+			.Select(g => new ProductQuantityRevenueChartData
 			{
 				ProductName = g.Key.ProductName,
 				Amount = g.Sum(p => p.TotalAmount),
@@ -133,55 +120,17 @@ public partial class ProductSummary
 			})
 			.OrderByDescending(p => p.Amount)
 			.Take(5)];
-	}
 
-	private List<TopProductData> GetTopProductsByCategoryData(int categoryId)
-	{
-		return [.. _productOverviews
+	private List<TopProductChartData> GetTopProductsByCategoryData(int categoryId) =>
+		[.. _productOverviews
 			.Where(p => p.ProductCategoryId == categoryId)
 			.GroupBy(p => new { p.ProductId, p.ProductName })
-			.Select(g => new TopProductData
+			.Select(g => new TopProductChartData
 			{
 				ProductName = g.Key.ProductName,
 				Amount = g.Sum(p => p.TotalAmount)
 			})
 			.OrderByDescending(p => p.Amount)
 			.Take(5)];
-	}
-
-	// Data classes to support charts
-	public class ProductSummaryData
-	{
-		public int TotalProducts { get; set; }
-		public decimal TotalAmount { get; set; }
-		public decimal TotalQuantity { get; set; }
-		public decimal TotalDiscount { get; set; }
-		public decimal TotalTax { get; set; }
-	}
-
-	public class TopProductData
-	{
-		public string ProductName { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class CategorySalesData
-	{
-		public int CategoryId { get; set; }
-		public string CategoryName { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class MonthlySalesData
-	{
-		public string Month { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class ProductQuantityRevenueData
-	{
-		public string ProductName { get; set; }
-		public decimal Amount { get; set; }
-		public decimal Quantity { get; set; }
-	}
+	#endregion
 }

@@ -38,23 +38,26 @@ else
 		</div>
 
 		<div class="dashboard-cards">
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Purchase")'>
-				<div class="card-icon purchase-icon">🛒</div>
-				<h3>New Raw Material Purchase</h3>
-				<p>Create a new purchase order</p>
-			</div>
+			@if (_userLocation.MainLocation)
+			{
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Purchase")'>
+					<div class="card-icon purchase-icon">🛒</div>
+					<h3>New Raw Material Purchase</h3>
+					<p>Create a new purchase order</p>
+				</div>
 
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Kitchen-Issue")'>
-				<div class="card-icon kitchen-icon">👨‍🍳</div>
-				<h3>Kitchen Issue</h3>
-				<p>Manage items issued to kitchen</p>
-			</div>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Kitchen-Issue")'>
+					<div class="card-icon kitchen-icon">👨‍🍳</div>
+					<h3>Kitchen Issue</h3>
+					<p>Manage items issued to kitchen</p>
+				</div>
 
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/RawMaterialStockAdjustment")'>
-				<div class="card-icon stock-icon">📊</div>
-				<h3>Raw Material Stock Adjustment</h3>
-				<p>Adjust and manage raw material stock levels</p>
-			</div>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/RawMaterialStockAdjustment")'>
+					<div class="card-icon stock-icon">📊</div>
+					<h3>Raw Material Stock Adjustment</h3>
+					<p>Adjust and manage raw material stock levels</p>
+				</div>
+			}
 
 			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/ProductStockAdjustment")'>
 				<div class="card-icon product-stock-icon">📦</div>
@@ -62,17 +65,20 @@ else
 				<p>Adjust and manage finished product inventory</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Kitchen-Production")'>
-				<div class="card-icon production-icon">🍲</div>
-				<h3>Kitchen Production</h3>
-				<p>Manage kitchen production activities</p>
-			</div>
+			@if (_userLocation.MainLocation)
+			{
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Kitchen-Production")'>
+					<div class="card-icon production-icon">🍲</div>
+					<h3>Kitchen Production</h3>
+					<p>Manage kitchen production activities</p>
+				</div>
 
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Recipies")'>
-				<div class="card-icon receipt-icon">🧾</div>
-				<h3>Recipies</h3>
-				<p>Manage and view purchase receipts</p>
-			</div>
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Recipies")'>
+					<div class="card-icon receipt-icon">🧾</div>
+					<h3>Recipies</h3>
+					<p>Manage and view purchase receipts</p>
+				</div>
+			}
 		</div>
 
 		<div class="dashboard-footer">

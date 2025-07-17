@@ -187,7 +187,7 @@ else
 								  CssClass="form-control" />
 				</div>
 
-				@if (_user.Admin && _user.LocationId == 1)
+				@if (_user.Admin && _userLocation.MainLocation)
 				{
 					<div class="form-group">
 						<label>Outlet / Franchise</label>

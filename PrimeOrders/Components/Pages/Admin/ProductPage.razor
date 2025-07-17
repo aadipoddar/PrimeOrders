@@ -127,7 +127,7 @@ else
 							</SfComboBox>
 						</div>
 
-						@if (_user?.LocationId == 1)
+						@if (_userLocation.MainLocation)
 						{
 							<div class="form-group">
 								<label>Primary Location</label>
@@ -204,7 +204,7 @@ else
 							</SfGrid>
 
 							<!-- Add new location rate section -->
-							@if (_user?.LocationId == 1 && _locations.Count > 0)
+							@if ((_userLocation.MainLocation) && _locations.Count > 0)
 							{
 								<div class="add-location-rate">
 									<h3>Add Location Rate</h3>

@@ -247,7 +247,7 @@ else
 							</SfDateRangePicker>
 						</div>
 
-						@if (_user?.LocationId == 1)
+						@if (_userLocation.MainLocation)
 						{
 							<div class="form-group">
 								<label>Return Location</label>
@@ -264,7 +264,7 @@ else
 						}
 					</div>
 
-					@if (_user?.LocationId == 1)
+					@if (_userLocation.MainLocation)
 					{
 						<div class="location-info">
 							<p class="info-text">
@@ -392,7 +392,7 @@ else
 						<span class="detail-label">Return Date:</span>
 						<span class="detail-value">@_saleReturn.ReturnDateTime.ToString("dd-MMM-yyyy")</span>
 					</div>
-					@if (_user?.LocationId == 1 && _locations.Any(l => l.Id == _saleReturn.LocationId))
+					@if (_userLocation.MainLocation && _locations.Any(l => l.Id == _saleReturn.LocationId))
 					{
 						<div class="detail-item">
 							<span class="detail-label">Return Location:</span>

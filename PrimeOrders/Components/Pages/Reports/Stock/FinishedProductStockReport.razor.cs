@@ -12,6 +12,7 @@ public partial class FinishedProductStockReport
 	[Inject] private IJSRuntime JS { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
@@ -33,6 +34,8 @@ public partial class FinishedProductStockReport
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager)).User) is not null))
 			return;
 
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
 		await LoadLocations();
 		await LoadStockDetails();
 
@@ -44,7 +47,7 @@ public partial class FinishedProductStockReport
 	{
 		_selectedLocationId = _user.LocationId;
 
-		if (_user.LocationId == 1)
+		if (_userLocation.MainLocation)
 			_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 	}
 

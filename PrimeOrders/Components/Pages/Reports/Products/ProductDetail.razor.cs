@@ -14,6 +14,7 @@ public partial class ProductDetail
 	[Inject] private IJSRuntime JS { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 
 	private int _selectedLocationId = 0;
@@ -44,6 +45,8 @@ public partial class ProductDetail
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager)).User) is not null))
 			return;
 
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
 		await LoadData();
 
 		_isLoading = false;
@@ -62,7 +65,7 @@ public partial class ProductDetail
 		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product, true);
 		_filteredProducts = [.. _products];
 
-		if (_user.LocationId != 1)
+		if (!_userLocation.MainLocation)
 			_selectedLocationId = _user.LocationId;
 
 		await LoadProductOverviews();
@@ -70,7 +73,7 @@ public partial class ProductDetail
 
 	private async Task LoadProductOverviews()
 	{
-		int locationId = _user?.LocationId == 1 ? _selectedLocationId : _user.LocationId;
+		int locationId = _userLocation.MainLocation ? _selectedLocationId : _user.LocationId;
 
 		_productOverviews = await ProductData.LoadProductDetailsByDateLocationId(
 			_startDate.ToDateTime(new TimeOnly(0, 0)),

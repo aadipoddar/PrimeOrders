@@ -408,7 +408,7 @@ public partial class RawMaterialStockAdjustmentPage
 					Quantity = adjustmentQuantity,
 					NetRate = null,
 					Type = StockType.Adjustment.ToString(),
-					TransactionNo = $"ADJ-{DateTime.Now:yyyyMMddHHmmss}",
+					TransactionNo = $"RMADJ{DateTime.Now:yyyyMMddHHmmss}",
 					TransactionDate = DateOnly.FromDateTime(DateTime.Now),
 					LocationId = _selectedLocationId
 				});

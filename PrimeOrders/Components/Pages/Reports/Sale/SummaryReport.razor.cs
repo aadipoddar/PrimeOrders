@@ -50,9 +50,9 @@ public partial class SummaryReport
 		StateHasChanged();
 	}
 
-	private List<PaymentMethodData> GetPaymentMethodsData()
+	private List<PaymentMethodChartData> GetPaymentMethodsData()
 	{
-		var paymentData = new List<PaymentMethodData>
+		var paymentData = new List<PaymentMethodChartData>
 		{
 			new() { PaymentMethod = "Cash", Amount = _saleOverviews.Sum(s => s.Cash) },
 			new() { PaymentMethod = "Card", Amount = _saleOverviews.Sum(s => s.Card) },
@@ -63,22 +63,20 @@ public partial class SummaryReport
 		return [.. paymentData.Where(p => p.Amount > 0)];
 	}
 
-	private List<LocationSalesData> GetLocationSalesData()
-	{
-		return [.. _locations
-			.Select(location => new LocationSalesData
+	private List<LocationSalesSummaryChartData> GetLocationSalesData() =>
+		[.. _locations
+			.Select(location => new LocationSalesSummaryChartData
 			{
 				LocationName = location.Name,
 				Amount = _saleOverviews.Where(s => s.LocationId == location.Id).Sum(s => s.Total)
 			})
 			.Where(data => data.Amount > 0)];
-	}
 
-	private List<PaymentMethodData> GetLocationPaymentData(int locationId)
+	private List<PaymentMethodChartData> GetLocationPaymentData(int locationId)
 	{
 		var locationSales = _saleOverviews.Where(s => s.LocationId == locationId).ToList();
 
-		var paymentData = new List<PaymentMethodData>
+		var paymentData = new List<PaymentMethodChartData>
 		{
 			new() { PaymentMethod = "Cash", Amount = locationSales.Sum(s => s.Cash) },
 			new() { PaymentMethod = "Card", Amount = locationSales.Sum(s => s.Card) },
@@ -87,20 +85,5 @@ public partial class SummaryReport
 		};
 
 		return [.. paymentData.Where(p => p.Amount > 0)];
-	}
-
-	private async Task ExportReport() =>
-		await JS.InvokeVoidAsync("alert", "PDF Export functionality will be implemented here");
-
-	public class PaymentMethodData
-	{
-		public string PaymentMethod { get; set; }
-		public decimal Amount { get; set; }
-	}
-
-	public class LocationSalesData
-	{
-		public string LocationName { get; set; }
-		public decimal Amount { get; set; }
 	}
 }

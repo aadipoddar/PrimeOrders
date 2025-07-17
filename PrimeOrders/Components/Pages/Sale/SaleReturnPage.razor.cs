@@ -14,6 +14,7 @@ public partial class SaleReturnPage
 	[Parameter] public int? SaleReturnId { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
@@ -72,6 +73,8 @@ public partial class SaleReturnPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Sales)).User) is not null))
 			return;
 
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
 		await LoadData();
 		await JS.InvokeVoidAsync("setupSaleReturnPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
@@ -83,7 +86,7 @@ public partial class SaleReturnPage
 	{
 		await LoadLocations();
 
-		if (_user.LocationId == 1)
+		if (_userLocation.MainLocation)
 			_saleReturn.LocationId = _locations.FirstOrDefault()?.Id ?? _user.LocationId;
 		else
 			_saleReturn.LocationId = _user.LocationId;
@@ -98,7 +101,7 @@ public partial class SaleReturnPage
 
 	private async Task LoadLocations()
 	{
-		if (_user.LocationId == 1)
+		if (_userLocation.MainLocation)
 		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 			_locations.RemoveAll(l => l.Id == 1);
@@ -502,7 +505,7 @@ public partial class SaleReturnPage
 	private async Task OnSaveProductManageClick()
 	{
 		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProductCart.ProductId);
-		if (availableProduct != null && _selectedProductCart.Quantity > availableProduct.MaxQuantity)
+		if (availableProduct is not null && _selectedProductCart.Quantity > availableProduct.MaxQuantity)
 		{
 			_sfErrorToast.Content = $"Cannot return more than {availableProduct.MaxQuantity} units.";
 			await _sfErrorToast.ShowAsync();
@@ -537,7 +540,7 @@ public partial class SaleReturnPage
 	{
 		_saleReturn.UserId = _user.Id;
 
-		if (_user.LocationId != 1)
+		if (!_userLocation.MainLocation)
 			_saleReturn.LocationId = _user.LocationId;
 
 		if (_selectedSaleId == 0)

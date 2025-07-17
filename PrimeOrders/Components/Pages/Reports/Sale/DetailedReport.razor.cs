@@ -15,6 +15,7 @@ public partial class DetailedReport
 	[Inject] private IJSRuntime JS { get; set; }
 
 	private UserModel _user;
+	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _saleSummaryVisible = false;
 
@@ -41,7 +42,9 @@ public partial class DetailedReport
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager)).User) is not null))
 			return;
 
-		if (LocationId.HasValue && LocationId.Value > 0 && _user.LocationId == 1)
+		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+
+		if (LocationId.HasValue && LocationId.Value > 0 && _userLocation.MainLocation)
 			_selectedLocationId = LocationId.Value;
 
 		await LoadData();
@@ -65,7 +68,7 @@ public partial class DetailedReport
 
 	private async Task LoadData()
 	{
-		if (_user.LocationId == 1)
+		if (_userLocation.MainLocation)
 		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
 
@@ -136,20 +139,15 @@ public partial class DetailedReport
 	#endregion
 
 	#region Chart Data
-	private List<DailySalesChartData> GetDailySalesData()
-	{
-		var result = _saleOverviews
+	private List<DailySalesChartData> GetDailySalesData() =>
+		[.. _saleOverviews
 			.GroupBy(s => s.SaleDateTime.Date)
 			.Select(group => new DailySalesChartData
 			{
 				Date = group.Key.ToString("dd/MM"),
 				Amount = group.Sum(s => s.Total)
 			})
-			.OrderBy(d => DateTime.ParseExact(d.Date, "dd/MM", null))
-			.ToList();
-
-		return result;
-	}
+			.OrderBy(d => DateTime.ParseExact(d.Date, "dd/MM", null))];
 
 	private List<SalePaymentMethodChartData> GetPaymentMethodsData()
 	{

@@ -2,13 +2,14 @@
 	@Id INT,
 	@Name VARCHAR(50),
 	@Discount DECIMAL(5, 2),
+	@MainLocation BIT,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Location] (Name, Discount, Status)
-		VALUES (@Name, @Discount, @Status);
+		INSERT INTO [dbo].[Location] (Name, Discount, MainLocation, Status)
+		VALUES (@Name, @Discount, @MainLocation, @Status);
 	END
 
 	ELSE
@@ -17,6 +18,7 @@ BEGIN
 		SET
 			Name = @Name,
 			Discount = @Discount,
+			MainLocation = @MainLocation,
 			Status = @Status
 		WHERE Id = @Id;
 	END
