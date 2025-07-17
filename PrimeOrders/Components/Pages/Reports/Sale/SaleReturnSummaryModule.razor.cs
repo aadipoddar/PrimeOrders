@@ -21,6 +21,10 @@ public partial class SaleReturnSummaryModule
 
 	private bool _deleteConfirmationDialogVisible = false;
 
+	private bool _saleSummaryVisible = false;
+	private SaleOverviewModel _selectedSale;
+	private List<SaleDetailDisplayModel> _selectedSaleDetails = [];
+
 	private async Task CloseDialog()
 	{
 		IsVisible = false;
@@ -74,6 +78,58 @@ public partial class SaleReturnSummaryModule
 		_deleteConfirmationDialogVisible = false;
 		StateHasChanged();
 	}
+
+	#region Sale Summary
+	private async Task ViewOriginalSale()
+	{
+		if (SelectedSaleReturn?.SaleId is null || SelectedSaleReturn.SaleId == 0)
+		{
+			_sfErrorToast.Content = "No original sale is linked to this return.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		_selectedSale = await SaleData.LoadSaleOverviewBySaleId(SelectedSaleReturn.SaleId);
+		if (_selectedSale is null)
+		{
+			_sfErrorToast.Content = "Original sale not found.";
+			await _sfErrorToast.ShowAsync();
+			return;
+		}
+
+		_selectedSaleDetails.Clear();
+
+		var saleDetails = await SaleData.LoadSaleDetailBySale(_selectedSale.SaleId);
+		foreach (var detail in saleDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			if (product is not null)
+				_selectedSaleDetails.Add(new SaleDetailDisplayModel
+				{
+					ProductName = product.Name,
+					Quantity = detail.Quantity,
+					Rate = detail.Rate,
+					Total = detail.Total
+				});
+		}
+
+		await CloseDialog();
+		_saleSummaryVisible = true;
+		StateHasChanged();
+	}
+
+	private void OnSaleSummaryVisibilityChanged(bool isVisible)
+	{
+		_saleSummaryVisible = isVisible;
+		if (!isVisible)
+		{
+			// Clear sale data when sale summary is closed
+			_selectedSale = null;
+			_selectedSaleDetails.Clear();
+		}
+		StateHasChanged();
+	}
+	#endregion
 
 	private string GetProcessingTime()
 	{

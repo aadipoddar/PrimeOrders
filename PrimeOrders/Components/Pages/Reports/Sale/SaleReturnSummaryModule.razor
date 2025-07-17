@@ -171,9 +171,13 @@
 										<div class="sale-bill">Bill No: @SelectedSaleReturn.OriginalBillNo</div>
 										<div class="sale-date">Sale ID: @SelectedSaleReturn.SaleId</div>
 										<div class="sale-action">
-											<button class="view-original-button" @onclick='() => NavManager.NavigateTo($"/Sale/{SelectedSaleReturn.SaleId}")'>
-												View Original Sale
-											</button>
+											<SfButton CssClass="view-original-sale-button"
+													  OnClick="ViewOriginalSale">
+												<div class="button-content">
+													<img src="images/bill.png" alt="View Sale" class="view-sale-icon" />
+													<span>View Original Sale</span>
+												</div>
+											</SfButton>
 										</div>
 									</div>
 								</div>
@@ -292,6 +296,13 @@
 	</DialogTemplates>
 </SfDialog>
 
+<!-- Sale Summary Module - Reusing existing component -->
+<SaleSummaryModule IsVisible="_saleSummaryVisible"
+				   IsVisibleChanged="OnSaleSummaryVisibilityChanged"
+				   SelectedSale="_selectedSale"
+				   SaleDetails="_selectedSaleDetails"
+				   CurrentUser="CurrentUser" />
+
 <style>
 	:root {
 		--dotnet-primary: #512BD4;
@@ -305,6 +316,7 @@
 		--print-color: #17a2b8;
 		--edit-color: #28a745;
 		--delete-color: #f44336;
+		--view-sale-color: #6f42c1;
 	}
 
 	/* Delete Button Styling */
@@ -632,19 +644,31 @@
 		margin-bottom: 10px;
 	}
 
-	.view-original-button {
-		background-color: var(--dotnet-primary);
+	.sale-action {
+		margin-top: 10px;
+	}
+
+	/* View Original Sale Button */
+	.view-original-sale-button {
+		background-color: var(--view-sale-color);
 		color: white;
 		border: none;
-		padding: 8px 16px;
-		border-radius: 6px;
-		cursor: pointer;
+		padding: 12px 20px;
+		border-radius: 8px;
 		font-weight: 600;
+		font-size: 14px;
+		min-width: 140px;
+		height: 45px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		transition: all 0.2s ease;
 	}
 
-		.view-original-button:hover {
-			background-color: var(--dotnet-secondary);
+		.view-original-sale-button:hover {
+			background-color: #5a2d91;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
 		}
 
 	/* Dialog Footer */
@@ -685,7 +709,8 @@
 
 	/* Icon styling for all buttons */
 	.print-icon,
-	.edit-icon {
+	.edit-icon,
+	.view-sale-icon {
 		width: 20px;
 		height: 20px;
 	}
@@ -917,9 +942,17 @@
 		/* Mobile icon sizes */
 		.print-icon,
 		.edit-icon,
-		.delete-icon {
+		.delete-icon,
+		.view-sale-icon {
 			width: 16px;
 			height: 16px;
+		}
+
+		.view-original-sale-button {
+			min-width: 120px;
+			height: 40px;
+			padding: 10px 16px;
+			font-size: 13px;
 		}
 	}
 
