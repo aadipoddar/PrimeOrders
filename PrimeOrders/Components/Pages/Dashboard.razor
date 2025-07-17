@@ -44,30 +44,12 @@ else
 				</div>
 			}
 
-			@if (_user?.Admin == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Admin-Dashboard")'>
-					<div class="card-icon admin-icon">⚙️</div>
-					<h3>Admin</h3>
-					<p>System administration and settings</p>
-				</div>
-			}
-
 			@if (_user?.Sales == true)
 			{
 				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Sale")'>
 					<div class="card-icon sales-icon">📈</div>
 					<h3>Sales</h3>
 					<p>View and manage sales information</p>
-				</div>
-			}
-
-			@if (_user?.Sales == true)
-			{
-				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/SaleReturn")'>
-					<div class="card-icon return-icon">↩️</div>
-					<h3>Sale Returns</h3>
-					<p>Process and manage product returns</p>
 				</div>
 			}
 
@@ -80,11 +62,29 @@ else
 				</div>
 			}
 
+			@if (_user?.Sales == true)
+			{
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/SaleReturn")'>
+					<div class="card-icon return-icon">↩️</div>
+					<h3>Sale Returns</h3>
+					<p>Process and manage product returns</p>
+				</div>
+			}
+
 			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Report-Dashboard")'>
 				<div class="card-icon reports-icon">📊</div>
 				<h3>Reports</h3>
 				<p>View and generate business reports</p>
 			</div>
+
+			@if (_user?.Admin == true)
+			{
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Admin-Dashboard")'>
+					<div class="card-icon admin-icon">⚙️</div>
+					<h3>Admin</h3>
+					<p>System administration and settings</p>
+				</div>
+			}
 		</div>
 
 		<div class="dashboard-footer">
