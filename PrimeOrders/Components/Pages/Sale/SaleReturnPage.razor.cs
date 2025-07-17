@@ -82,7 +82,6 @@ public partial class SaleReturnPage
 	private async Task LoadData()
 	{
 		await LoadLocations();
-		await LoadAvailableSales();
 
 		if (_user.LocationId == 1)
 			_saleReturn.LocationId = _locations.FirstOrDefault()?.Id ?? _user.LocationId;
@@ -91,6 +90,8 @@ public partial class SaleReturnPage
 
 		if (SaleReturnId.HasValue && SaleReturnId.Value > 0)
 			await LoadSaleReturn();
+
+		await LoadAvailableSales();
 
 		StateHasChanged();
 	}

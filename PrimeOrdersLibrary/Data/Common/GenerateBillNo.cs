@@ -42,17 +42,17 @@ public static class GenerateBillNo
 			var lastOrderNo = lastOrder.OrderNo;
 			if (lastOrderNo.StartsWith(prefix))
 			{
-				var lastYear = lastOrderNo.Substring(prefix.Length + 1, 2);
+				var lastYear = lastOrderNo.Substring(prefix.Length, 2);
 				if (lastYear == year)
 				{
-					int lastNumber = int.Parse(lastOrderNo[(prefix.Length + 3)..]);
+					int lastNumber = int.Parse(lastOrderNo[(prefix.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{prefix}O{year}{nextNumber:D6}";
+					return $"{prefix}{year}OD{nextNumber:D6}";
 				}
 			}
 		}
 
-		return $"{prefix}O{year}000001";
+		return $"{prefix}{year}OD000001";
 	}
 
 	public static async Task<string> GenerateSaleBillNo(SaleModel sale)
@@ -68,17 +68,17 @@ public static class GenerateBillNo
 			var lastSaleNo = lastSale.BillNo;
 			if (lastSaleNo.StartsWith(prefix))
 			{
-				var lastYear = lastSaleNo.Substring(prefix.Length + 1, 2);
+				var lastYear = lastSaleNo.Substring(prefix.Length, 2);
 				if (lastYear == year)
 				{
-					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
+					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{prefix}S{year}{nextNumber:D6}";
+					return $"{prefix}{year}SL{nextNumber:D6}";
 				}
 			}
 		}
 
-		return $"{prefix}S{year}000001";
+		return $"{prefix}{year}SL000001";
 	}
 
 	public static async Task<string> GenerateSaleReturnTransactionNo(SaleReturnModel saleReturn)
@@ -94,17 +94,17 @@ public static class GenerateBillNo
 			var lastTransactionNo = lastSaleReturn.TransactionNo;
 			if (lastTransactionNo.StartsWith(prefix))
 			{
-				var lastYear = lastTransactionNo.Substring(prefix.Length + 2, 2);
+				var lastYear = lastTransactionNo.Substring(prefix.Length, 2);
 				if (lastYear == year)
 				{
-					int lastNumber = int.Parse(lastTransactionNo[(prefix.Length + 3)..]);
+					int lastNumber = int.Parse(lastTransactionNo[(prefix.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{prefix}SR{year}{nextNumber:D6}";
+					return $"{prefix}{year}SR{nextNumber:D6}";
 				}
 			}
 		}
 
-		return $"{prefix}SR{year}000001";
+		return $"{prefix}{year}SR000001";
 	}
 
 	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
@@ -120,17 +120,17 @@ public static class GenerateBillNo
 			var lastSaleNo = lastIssue.TransactionNo;
 			if (lastSaleNo.StartsWith(prefix))
 			{
-				var lastYear = lastSaleNo.Substring(prefix.Length + 2, 2);
+				var lastYear = lastSaleNo.Substring(prefix.Length, 2);
 				if (lastYear == year)
 				{
-					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
+					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{prefix}RM{year}{nextNumber:D6}";
+					return $"{prefix}{year}RM{nextNumber:D6}";
 				}
 			}
 		}
 
-		return $"{prefix}RM{year}000001";
+		return $"{prefix}{year}RM000001";
 	}
 
 	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
@@ -146,17 +146,17 @@ public static class GenerateBillNo
 			var lastSaleNo = lastProduction.TransactionNo;
 			if (lastSaleNo.StartsWith(prefix))
 			{
-				var lastYear = lastSaleNo.Substring(prefix.Length + 2, 2);
+				var lastYear = lastSaleNo.Substring(prefix.Length, 2);
 				if (lastYear == year)
 				{
-					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 3)..]);
+					int lastNumber = int.Parse(lastSaleNo[(prefix.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{prefix}FP{year}{nextNumber:D6}";
+					return $"{prefix}{year}FP{nextNumber:D6}";
 				}
 			}
 		}
 
-		return $"{prefix}FP{year}000001";
+		return $"{prefix}{year}FP000001";
 	}
 
 	public static string GenerateRawMaterialCode(string lastRawMaterialCode)
