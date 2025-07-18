@@ -1,6 +1,6 @@
-namespace PrimeOrders.Components.Pages.Accounts;
+namespace PrimeOrders.Components.Pages.Accounts.Masters;
 
-public partial class AccountsDashboard
+public partial class MastersDashboard
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] private IJSRuntime JS { get; set; }

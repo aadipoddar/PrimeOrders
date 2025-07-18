@@ -1,9 +1,9 @@
 ﻿
 using OfficeOpenXml;
 
+using PrimeOrdersLibrary.Data.Accounts;
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Inventory;
-using PrimeOrdersLibrary.Data.Inventory.Purchase;
 using PrimeOrdersLibrary.Data.Product;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Models.Product;
@@ -14,17 +14,17 @@ ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
 using var package = new ExcelPackage(fileInfo);
 
-//await package.LoadAsync(fileInfo);
+await package.LoadAsync(fileInfo);
 
-//var worksheet = package.Workbook.Worksheets[0];
+var worksheet = package.Workbook.Worksheets[0];
 
 // await InsertProducts(worksheet);
 
-await UpdateProducts();
+// await UpdateProducts();
 
 // await InsertRawMaterial(worksheet);
 
-// await InsertSupplier(worksheet);
+await InsertSupplier(worksheet);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -138,37 +138,38 @@ static async Task InsertProducts(ExcelWorksheet worksheet)
 
 static async Task InsertSupplier(ExcelWorksheet worksheet)
 {
-	int row = 1;
+	int row = 2;
 
 	while (worksheet.Cells[row, 1].Value != null)
 	{
-		var code = worksheet.Cells[row, 1].Value.ToString();
-		var name = worksheet.Cells[row, 2].Value.ToString();
-		var address = worksheet.Cells[row, 3].Value?.ToString() ?? string.Empty;
-		var phone = worksheet.Cells[row, 4].Value?.ToString() ?? string.Empty;
-		var gstNo = worksheet.Cells[row, 5].Value?.ToString() ?? string.Empty;
+		var code = "LD" + (row - 1).ToString("D5");
+		var name = worksheet.Cells[row, 1].Value.ToString();
+		var address = worksheet.Cells[row, 2].Value?.ToString() ?? string.Empty;
+		var remarks = worksheet.Cells[row, 3].Value?.ToString() ?? string.Empty;
+		var accountType = worksheet.Cells[row, 4].Value?.ToString() ?? string.Empty;
+		var phone = worksheet.Cells[row, 5].Value?.ToString() ?? string.Empty;
+		var gstNo = worksheet.Cells[row, 6].Value?.ToString() ?? string.Empty;
 
-		if (string.IsNullOrWhiteSpace(code) ||
-			string.IsNullOrWhiteSpace(name))
+		if (string.IsNullOrWhiteSpace(name))
 		{
 			Console.WriteLine("Not Inserted Row = " + row);
 			continue;
 		}
 
-		code = code.Replace(" ", "");
-
-		Console.WriteLine("Inserting New Product: " + name + " and code " + code);
-		await SupplierData.InsertSupplier(new()
+		Console.WriteLine("Inserting Ledger: " + name + " and code " + code);
+		await LedgerData.InsertLedger(new()
 		{
 			Id = 0,
 			Code = code,
 			Name = name,
 			Address = address ?? string.Empty,
-			Email = string.Empty,
 			GSTNo = gstNo ?? string.Empty,
 			Phone = phone ?? string.Empty,
-			StateId = 2,
+			StateId = 1,
 			LocationId = null,
+			Remarks = remarks ?? string.Empty,
+			AccountTypeId = int.Parse(accountType),
+			GroupId = 1,
 			Status = true
 		});
 

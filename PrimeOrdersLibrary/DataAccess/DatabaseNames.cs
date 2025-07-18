@@ -29,6 +29,7 @@ public static class TableNames
 	public static string KitchenIssueDetail => "KitchenIssueDetail";
 	public static string KitchenProduction => "KitchenProduction";
 	public static string KitchenProductionDetail => "KitchenProductionDetail";
+	public static string Ledger => "Ledger";
 }
 
 public static class StoredProcedureNames
@@ -120,6 +121,8 @@ public static class StoredProcedureNames
 
 	public static string InsertKitchenProduction => "Insert_KitchenProduction";
 	public static string InsertKitchenProductionDetail => "Insert_KitchenProductionDetail";
+
+	public static string InsertLedger => "Insert_Ledger";
 
 	public static string DeleteProductStockByTransactionNo => "Delete_ProductStock_By_TransactionNo";
 	public static string DeleteRawMaterialStockByTransactionNo => "Delete_RawMaterialStock_By_TransactionNo";

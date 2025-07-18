@@ -87,6 +87,8 @@
     <Folder Include="StoredProcedures\Reports\Stock" />
     <Folder Include="StoredProcedures\LoadData\Inventory\Recipe" />
     <Folder Include="StoredProcedures\LoadData\Inventory\RawMaterial" />
+    <Folder Include="Tables\Accounts" />
+    <Folder Include="StoredProcedures\Insert\Accounts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
@@ -188,6 +190,12 @@
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_By_RawMaterialCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_Rate_By_Supplier.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Load_Supplier_By_Location.sql" />
+    <Build Include="Tables\Accounts\AccountType.sql" />
+    <Build Include="Tables\Accounts\FinancialYear.sql" />
+    <Build Include="Tables\Accounts\Group.sql" />
+    <Build Include="Tables\Accounts\Ledger.sql" />
+    <Build Include="Tables\Accounts\Voucher.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Insert_Ledger.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

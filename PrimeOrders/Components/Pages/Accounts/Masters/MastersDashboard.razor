@@ -1,6 +1,6 @@
-﻿@page "/Accounts-Dashboard"
+﻿@page "/Accounts/Masters-Dashboard"
 
-<PageTitle>Accounts Dashboard - Prime Orders</PageTitle>
+<PageTitle>Account Masters Dashboard - Prime Orders</PageTitle>
 
 @if (_isLoading)
 {
@@ -10,7 +10,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading accounts dashboard...</p>
+		<p class="loading-text">Loading account masters...</p>
 	</div>
 }
 else
@@ -30,30 +30,42 @@ else
 		</div>
 
 		<div class="welcome-section">
-			<h2>Accounts Management</h2>
-			<p>Select an option below to manage financial accounts and transactions</p>
-			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
-				<span class="back-icon">←</span> Back to Dashboard
+			<h2>Account Masters Management</h2>
+			<p>Configure and manage fundamental accounting components</p>
+			<button @onclick='() => NavManager.NavigateTo("/Accounts-Dashboard")' class="back-button">
+				<span class="back-icon">←</span> Back to Accounts
 			</button>
 		</div>
 
 		<div class="dashboard-cards">
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Entries")'>
-				<div class="card-icon entries-icon">📝</div>
-				<h3>Voucher Entries</h3>
-				<p>Create and manage financial account entries</p>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Masters/Ledgers")'>
+				<div class="card-icon ledger-icon">📊</div>
+				<h3>Ledger Management</h3>
+				<p>Add, update, and manage chart of accounts and ledger entries</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Masters-Dashboard")'>
-				<div class="card-icon masters-icon">⚙️</div>
-				<h3>Account Masters</h3>
-				<p>Configure account types, groups, and categories</p>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Masters/Groups")'>
+				<div class="card-icon group-icon">📂</div>
+				<h3>Account Groups</h3>
+				<p>Organize accounts into logical groups and categories</p>
 			</div>
 
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports")'>
-				<div class="card-icon reports-icon">📈</div>
-				<h3>Financial Reports</h3>
-				<p>Generate balance sheets, P&L, and other reports</p>
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Masters/AccountTypes")'>
+				<div class="card-icon account-type-icon">🏷️</div>
+				<h3>Account Types</h3>
+				<p>Define and manage different types of accounts</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Masters/Vouchers")'>
+				<div class="card-icon voucher-icon">📋</div>
+				<h3>Voucher Management</h3>
+				<p>Create and manage voucher types for transactions</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Masters/FinancialYears")'>
+				<div class="card-icon financial-year-icon">📅</div>
+				<h3>Financial Years</h3>
+				<p>Set up and manage accounting periods and financial years</p>
 			</div>
 		</div>
 
@@ -171,20 +183,30 @@ else
 			opacity: 0.7;
 		}
 
-	/* Custom icons for accounts page */
-	.entries-icon {
+	/* Custom icons for masters page */
+	.ledger-icon {
+		background-color: rgba(81, 43, 212, 0.1);
+		color: var(--dotnet-primary);
+	}
+
+	.group-icon {
+		background-color: rgba(104, 33, 122, 0.1);
+		color: var(--dotnet-secondary);
+	}
+
+	.account-type-icon {
 		background-color: rgba(0, 164, 239, 0.1);
 		color: var(--dotnet-accent);
 	}
 
-	.masters-icon {
-		background-color: rgba(108, 117, 125, 0.1);
-		color: #6c757d;
+	.voucher-icon {
+		background-color: rgba(220, 53, 69, 0.1);
+		color: #dc3545;
 	}
 
-	.reports-icon {
-		background-color: rgba(81, 43, 212, 0.1);
-		color: var(--dotnet-primary);
+	.financial-year-icon {
+		background-color: rgba(128, 128, 128, 0.1);
+		color: #444;
 	}
 
 	/* Back button styles */
