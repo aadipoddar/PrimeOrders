@@ -6,14 +6,15 @@
 	@Sales BIT,
 	@Order BIT,
 	@Inventory BIT,
+	@Accounts BIT,
 	@Admin BIT,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[User] (Name, Passcode, LocationId, [Order], Inventory, Admin, Sales, Status)
-		VALUES (@Name, @Passcode, @LocationId, @Order, @Inventory, @Admin, @Sales, @Status);
+		INSERT INTO [dbo].[User] (Name, Passcode, LocationId, [Order], Inventory, Accounts, Admin, Sales, Status)
+		VALUES (@Name, @Passcode, @LocationId, @Order, @Inventory, @Accounts, @Admin, @Sales, @Status);
 	END
 
 	ELSE
@@ -24,6 +25,7 @@ BEGIN
 			LocationId = @LocationId,
 			[Order] = @Order,
 			Inventory = @Inventory,
+			Accounts = @Accounts,
 			Admin = @Admin,
 			Sales = @Sales,
 			Status = @Status

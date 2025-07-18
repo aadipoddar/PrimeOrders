@@ -76,7 +76,14 @@ public partial class UserPage
 	private async Task<bool> ValidateForm()
 	{
 		if (!_currentUserLocation.MainLocation)
+		{
 			_userModel.LocationId = _currentUser.LocationId;
+			_userModel.Accounts = false;
+		}
+
+		var location = _locations.FirstOrDefault(l => l.Id == _userModel.LocationId);
+		if (!location.MainLocation)
+			_userModel.Accounts = false;
 
 		if (string.IsNullOrWhiteSpace(_userModel.Name))
 		{

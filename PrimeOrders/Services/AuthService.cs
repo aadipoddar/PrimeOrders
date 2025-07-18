@@ -41,6 +41,7 @@ public static class AuthService
 				UserRoles.Sales => user.Sales,
 				UserRoles.Order => user.Order,
 				UserRoles.Inventory => user.Inventory,
+				UserRoles.Accounts => user.Accounts,
 				_ => false
 			};
 

@@ -7,6 +7,7 @@
     [Sales] BIT NOT NULL DEFAULT 0, 
     [Order] BIT NOT NULL DEFAULT 0, 
     [Inventory] BIT NOT NULL DEFAULT 0, 
+    [Accounts] BIT NOT NULL DEFAULT 0, 
     [Admin] BIT NOT NULL DEFAULT 0, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Users_ToLocation] FOREIGN KEY (LocationId) REFERENCES [Location](Id)

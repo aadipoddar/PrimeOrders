@@ -85,6 +85,15 @@ else
 					<p>System administration and settings</p>
 				</div>
 			}
+
+			@if (_user?.Accounts == true)
+			{
+				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts-Dashboard")'>
+					<div class="card-icon accounts-icon">💼</div>
+					<h3>Accounts</h3>
+					<p>Manage customer accounts and financial records</p>
+				</div>
+			}
 		</div>
 
 		<div class="dashboard-footer">
@@ -268,6 +277,11 @@ else
 	.reports-icon {
 		background-color: rgba(25, 170, 141, 0.1);
 		color: #19AA8D;
+	}
+
+	.accounts-icon {
+		background-color: rgba(255, 193, 7, 0.1);
+		color: #FFC107;
 	}
 
 	.dashboard-card h3 {

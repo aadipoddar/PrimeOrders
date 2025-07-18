@@ -9,6 +9,7 @@ public class UserModel
 	public bool Sales { get; set; }
 	public bool Order { get; set; }
 	public bool Inventory { get; set; }
+	public bool Accounts { get; set; }
 	public bool Admin { get; set; }
 	public bool Status { get; set; }
 }
@@ -18,7 +19,8 @@ public enum UserRoles
 	Admin,
 	Sales,
 	Order,
-	Inventory
+	Inventory,
+	Accounts
 }
 
 public record AuthenticationResult(
