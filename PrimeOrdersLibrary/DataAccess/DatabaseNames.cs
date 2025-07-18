@@ -32,6 +32,8 @@ public static class TableNames
 	public static string Ledger => "Ledger";
 	public static string Group => "Group";
 	public static string AccountType => "AccountType";
+	public static string Voucher => "Voucher";
+	public static string FinancialYear => "FinancialYear";
 }
 
 public static class StoredProcedureNames
@@ -127,6 +129,8 @@ public static class StoredProcedureNames
 	public static string InsertLedger => "Insert_Ledger";
 	public static string InsertGroup => "Insert_Group";
 	public static string InsertAccountType => "Insert_AccountType";
+	public static string InsertVoucher => "Insert_Voucher";
+	public static string InsertFinancialYear => "Insert_FinancialYear";
 
 	public static string DeleteProductStockByTransactionNo => "Delete_ProductStock_By_TransactionNo";
 	public static string DeleteRawMaterialStockByTransactionNo => "Delete_RawMaterialStock_By_TransactionNo";

@@ -196,9 +196,11 @@
     <Build Include="Tables\Accounts\Ledger.sql" />
     <Build Include="Tables\Accounts\Voucher.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Insert_Ledger.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_Supplier_By_Location.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Insert_Group.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Insert_AccountType.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Insert_Voucher.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_Supplier_By_Location.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Insert_FinancialYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
