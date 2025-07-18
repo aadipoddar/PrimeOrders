@@ -6,7 +6,7 @@ using PrimeOrdersLibrary.Models.Sale;
 
 namespace PrimeOrdersLibrary.Data.Common;
 
-public static class GenerateBillNo
+public static class GenerateCodes
 {
 	public static async Task<string> GetLocationPrefix(int locationId)
 	{

@@ -68,7 +68,7 @@ public partial class LedgerPage
 		_ledgerModel.GroupId = _groups.FirstOrDefault().Id;
 		_ledgerModel.AccountTypeId = _accountTypes.FirstOrDefault().Id;
 
-		_ledgerModel.Code = GenerateBillNo.GenerateLedgerCode(_ledgers.OrderBy(r => r.Code).LastOrDefault()?.Code);
+		_ledgerModel.Code = GenerateCodes.GenerateLedgerCode(_ledgers.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
@@ -86,7 +86,7 @@ public partial class LedgerPage
 	private async Task<bool> ValidateForm()
 	{
 		if (_ledgerModel.Id == 0)
-			_ledgerModel.Code = GenerateBillNo.GenerateLedgerCode(_ledgers.OrderBy(r => r.Code).LastOrDefault()?.Code);
+			_ledgerModel.Code = GenerateCodes.GenerateLedgerCode(_ledgers.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		if (string.IsNullOrWhiteSpace(_ledgerModel.Name))
 		{

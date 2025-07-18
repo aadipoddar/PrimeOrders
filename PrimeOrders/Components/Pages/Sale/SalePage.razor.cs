@@ -103,7 +103,7 @@ public partial class SalePage
 		_filteredProducts = [.. _products];
 
 		_sale.LocationId = _user?.LocationId ?? 0;
-		_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
+		_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
 
 		await UpdateFinancialDetails();
 
@@ -386,7 +386,7 @@ public partial class SalePage
 		_sale.LocationId = _user?.LocationId ?? 0;
 
 		if (SaleId is null)
-			_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
+			_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
 
 		foreach (var item in _saleProductCart)
 		{
@@ -600,7 +600,7 @@ public partial class SalePage
 		_sale.SaleDateTime = DateOnly.FromDateTime(_sale.SaleDateTime).ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second));
 
 		if (SaleId is null)
-			_sale.BillNo = await GenerateBillNo.GenerateSaleBillNo(_sale);
+			_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
 
 		if (_saleProductCart?.Count == 0)
 		{

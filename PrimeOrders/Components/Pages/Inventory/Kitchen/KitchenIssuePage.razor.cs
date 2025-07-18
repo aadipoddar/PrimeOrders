@@ -88,7 +88,7 @@ public partial class KitchenIssuePage
 
 		_kitchenIssue.LocationId = _user?.LocationId ?? 0;
 		_kitchenIssue.UserId = _user?.Id ?? 0;
-		_kitchenIssue.TransactionNo = await GenerateBillNo.GenerateKitchenIssueTransactionNo(_kitchenIssue);
+		_kitchenIssue.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(_kitchenIssue);
 
 		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
 			await LoadKitchenIssue();

@@ -126,6 +126,7 @@ public static class StoredProcedureNames
 
 	public static string InsertLedger => "Insert_Ledger";
 	public static string InsertGroup => "Insert_Group";
+	public static string InsertAccountType => "Insert_AccountType";
 
 	public static string DeleteProductStockByTransactionNo => "Delete_ProductStock_By_TransactionNo";
 	public static string DeleteRawMaterialStockByTransactionNo => "Delete_RawMaterialStock_By_TransactionNo";

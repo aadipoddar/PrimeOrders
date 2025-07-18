@@ -170,7 +170,7 @@ public partial class SaleReturnPage
 
 		if (_selectedSale is not null)
 		{
-			_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
+			_saleReturn.TransactionNo = await GenerateCodes.GenerateSaleReturnTransactionNo(_saleReturn);
 
 			var saleDetails = await SaleData.LoadSaleDetailBySale(saleId);
 			var existingReturns = await SaleReturnData.LoadSaleReturnBySale(saleId);
@@ -248,7 +248,7 @@ public partial class SaleReturnPage
 		_saleReturn.LocationId = args.Value;
 
 		if (_selectedSaleId > 0)
-			_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
+			_saleReturn.TransactionNo = await GenerateCodes.GenerateSaleReturnTransactionNo(_saleReturn);
 
 		await LoadAvailableSales();
 		StateHasChanged();
@@ -553,7 +553,7 @@ public partial class SaleReturnPage
 		_saleReturn.SaleId = _selectedSaleId;
 
 		if (SaleReturnId is null)
-			_saleReturn.TransactionNo = await GenerateBillNo.GenerateSaleReturnTransactionNo(_saleReturn);
+			_saleReturn.TransactionNo = await GenerateCodes.GenerateSaleReturnTransactionNo(_saleReturn);
 
 		if (_saleReturnProductCart.Count == 0)
 		{

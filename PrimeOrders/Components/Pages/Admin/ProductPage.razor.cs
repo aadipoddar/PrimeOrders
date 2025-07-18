@@ -83,7 +83,7 @@ public partial class ProductPage
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 
-		_productModel.Code = GenerateBillNo.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code);
+		_productModel.Code = GenerateCodes.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		StateHasChanged();
 	}
@@ -173,7 +173,7 @@ public partial class ProductPage
 	private async Task<bool> ValidateForm()
 	{
 		if (_productModel.Id == 0)
-			_productModel.Code = GenerateBillNo.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code);
+			_productModel.Code = GenerateCodes.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		if (!_userLocation.MainLocation)
 			_productModel.LocationId = _user.LocationId;

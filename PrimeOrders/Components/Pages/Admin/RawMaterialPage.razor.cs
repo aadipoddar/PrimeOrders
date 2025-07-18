@@ -60,7 +60,7 @@ public partial class RawMaterialPage
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 
-		_rawMaterialModel.Code = GenerateBillNo.GenerateRawMaterialCode(_rawMaterials.OrderBy(r => r.Code).LastOrDefault()?.Code);
+		_rawMaterialModel.Code = GenerateCodes.GenerateRawMaterialCode(_rawMaterials.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		StateHasChanged();
 	}
@@ -75,7 +75,7 @@ public partial class RawMaterialPage
 	private async Task<bool> ValidateForm()
 	{
 		if (_rawMaterialModel.Id == 0)
-			_rawMaterialModel.Code = GenerateBillNo.GenerateRawMaterialCode(_rawMaterials.OrderBy(r => r.Code).LastOrDefault()?.Code);
+			_rawMaterialModel.Code = GenerateCodes.GenerateRawMaterialCode(_rawMaterials.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		_rawMaterialModel.MeasurementUnit = _rawMaterialModel.MeasurementUnit.ToUpper();
 

@@ -105,7 +105,7 @@ public partial class LocationPage
 			Id = ledger?.Id ?? 0,
 			Name = _locationModel.Name,
 			LocationId = _locationModel.Id,
-			Code = ledger?.Code ?? GenerateBillNo.GenerateLedgerCode(ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
+			Code = ledger?.Code ?? GenerateCodes.GenerateLedgerCode(ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
 			AccountTypeId = 3,
 			GroupId = 1,
 			Remarks = "",

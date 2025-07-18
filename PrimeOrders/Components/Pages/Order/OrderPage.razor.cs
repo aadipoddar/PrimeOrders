@@ -90,7 +90,7 @@ public partial class OrderPage
 
 		_filteredProducts = [.. _products];
 
-		_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
+		_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
 
 		if (OrderId.HasValue && OrderId > 0)
 			await LoadOrder();
@@ -359,7 +359,7 @@ public partial class OrderPage
 		_order.UserId = _user.Id;
 
 		if (OrderId is null)
-			_order.OrderNo = await GenerateBillNo.GenerateOrderBillNo(_order);
+			_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
 
 		if (!_user.Admin || !_userLocation.MainLocation)
 			_order.LocationId = _user.LocationId;
