@@ -176,13 +176,13 @@ public static class GenerateBillNo
 		return $"{prefix}0001";
 	}
 
-	public static string GenerateProductCode(string productCode)
+	public static string GenerateProductCode(string lastProductCode)
 	{
-		if (string.IsNullOrWhiteSpace(productCode))
+		if (string.IsNullOrWhiteSpace(lastProductCode))
 			return "FP0001";
 
 		var prefix = "FP";
-		var lastNumberPart = productCode[prefix.Length..];
+		var lastNumberPart = lastProductCode[prefix.Length..];
 
 		if (int.TryParse(lastNumberPart, out int lastNumber))
 		{
@@ -191,5 +191,22 @@ public static class GenerateBillNo
 		}
 
 		return $"{prefix}0001";
+	}
+
+	public static string GenerateLedgerCode(string lastLedgerCode)
+	{
+		if (string.IsNullOrWhiteSpace(lastLedgerCode))
+			return "LD00001";
+
+		var prefix = "LD";
+		var lastNumberPart = lastLedgerCode[prefix.Length..];
+
+		if (int.TryParse(lastNumberPart, out int lastNumber))
+		{
+			int nextNumber = lastNumber + 1;
+			return $"{prefix}{nextNumber:D5}";
+		}
+
+		return $"{prefix}00001";
 	}
 }

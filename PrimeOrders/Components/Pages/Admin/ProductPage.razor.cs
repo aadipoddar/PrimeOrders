@@ -172,7 +172,7 @@ public partial class ProductPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (_productModel.Id > 0)
+		if (_productModel.Id == 0)
 			_productModel.Code = GenerateBillNo.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		if (!_userLocation.MainLocation)

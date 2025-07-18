@@ -30,6 +30,8 @@ public static class TableNames
 	public static string KitchenProduction => "KitchenProduction";
 	public static string KitchenProductionDetail => "KitchenProductionDetail";
 	public static string Ledger => "Ledger";
+	public static string Group => "Group";
+	public static string AccountType => "AccountType";
 }
 
 public static class StoredProcedureNames

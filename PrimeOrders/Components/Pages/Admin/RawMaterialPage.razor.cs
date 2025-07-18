@@ -74,7 +74,7 @@ public partial class RawMaterialPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (_rawMaterialModel.Id > 0)
+		if (_rawMaterialModel.Id == 0)
 			_rawMaterialModel.Code = GenerateBillNo.GenerateRawMaterialCode(_rawMaterials.OrderBy(r => r.Code).LastOrDefault()?.Code);
 
 		_rawMaterialModel.MeasurementUnit = _rawMaterialModel.MeasurementUnit.ToUpper();
