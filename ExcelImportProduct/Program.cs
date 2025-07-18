@@ -1,8 +1,12 @@
 ﻿
 using OfficeOpenXml;
 
+using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Inventory;
+using PrimeOrdersLibrary.Data.Inventory.Purchase;
 using PrimeOrdersLibrary.Data.Product;
+using PrimeOrdersLibrary.DataAccess;
+using PrimeOrdersLibrary.Models.Product;
 
 FileInfo fileInfo = new(@"C:\Others\supplier.xlsx");
 
@@ -10,18 +14,48 @@ ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
 using var package = new ExcelPackage(fileInfo);
 
-await package.LoadAsync(fileInfo);
+//await package.LoadAsync(fileInfo);
 
-var worksheet = package.Workbook.Worksheets[0];
+//var worksheet = package.Workbook.Worksheets[0];
 
 // await InsertProducts(worksheet);
 
-await InsertRawMaterial(worksheet);
+await UpdateProducts();
+
+// await InsertRawMaterial(worksheet);
 
 // await InsertSupplier(worksheet);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
+
+static async Task UpdateProducts()
+{
+	var products = await CommonData.LoadTableData<ProductModel>(TableNames.Product);
+	int row = 1;
+
+	foreach (var product in products)
+	{
+		Console.WriteLine(product.Name);
+
+		var code = "FP" + row.ToString("D4");
+
+		await ProductData.InsertProduct(new()
+		{
+			Id = product.Id,
+			Code = code,
+			Name = product.Name,
+			ProductCategoryId = product.ProductCategoryId,
+			LocationId = product.LocationId,
+			Rate = product.Rate,
+			TaxId = product.TaxId,
+			Status = product.Status
+		});
+
+		Console.WriteLine("Updated Product: " + product.Name + " with code " + code);
+		row++;
+	}
+}
 
 static async Task InsertRawMaterial(ExcelWorksheet worksheet)
 {

@@ -175,4 +175,21 @@ public static class GenerateBillNo
 
 		return $"{prefix}0001";
 	}
+
+	public static string GenerateProductCode(string productCode)
+	{
+		if (string.IsNullOrWhiteSpace(productCode))
+			return "FP0001";
+
+		var prefix = "FP";
+		var lastNumberPart = productCode[prefix.Length..];
+
+		if (int.TryParse(lastNumberPart, out int lastNumber))
+		{
+			int nextNumber = lastNumber + 1;
+			return $"{prefix}{nextNumber:D4}";
+		}
+
+		return $"{prefix}0001";
+	}
 }
