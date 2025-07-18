@@ -1,4 +1,5 @@
-using PrimeOrdersLibrary.Data.Inventory.Purchase;
+using PrimeOrdersLibrary.Data.Accounts;
+using PrimeOrdersLibrary.Models.Accounts;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -92,18 +93,23 @@ public partial class LocationPage
 
 	private async Task InsertSupplier()
 	{
-		SupplierModel supplier = null;
-		if (_locationModel.Id > 0)
-			supplier = await SupplierData.LoadSupplierByLocation(_locationModel.Id);
+		LedgerModel ledger = null;
 
-		await SupplierData.InsertSupplier(new()
+		var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+
+		if (_locationModel.Id > 0)
+			ledger = await LedgerData.LoadLedgerByLocation(_locationModel.Id);
+
+		await LedgerData.InsertLedger(new()
 		{
-			Id = supplier?.Id ?? 0,
+			Id = ledger?.Id ?? 0,
 			Name = _locationModel.Name,
 			LocationId = _locationModel.Id,
-			Code = await GenerateBillNo.GetLocationPrefix(_locationModel.Id),
+			Code = ledger?.Code ?? GenerateBillNo.GenerateLedgerCode(ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
+			AccountTypeId = 3,
+			GroupId = 1,
+			Remarks = "",
 			Address = "",
-			Email = "",
 			GSTNo = "",
 			Phone = "",
 			StateId = 2,

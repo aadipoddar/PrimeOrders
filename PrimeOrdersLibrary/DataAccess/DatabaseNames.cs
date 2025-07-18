@@ -51,8 +51,6 @@ public static class StoredProcedureNames
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 	public static string LoadPurchaseOverviewByPurchaseId => "Load_PurchaseOverview_By_PurchaseId";
 
-	public static string LoadSupplierByLocation => "Load_Supplier_By_Location";
-
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
 	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
 	public static string LoadProductByLocationRate => "Load_Product_By_LocationRate";
@@ -84,6 +82,8 @@ public static class StoredProcedureNames
 	public static string LoadKitchenIssueDetailsByDate => "Load_KitchenIssueDetails_By_Date";
 	public static string LoadKitchenProductionDetailsByDate => "Load_KitchenProductionDetails_By_Date";
 	public static string LoadSaleReturnDetailsByDateLocationId => "Load_SaleReturnDetails_By_Date_LocationId";
+
+	public static string LoadLedgerByLocation => "Load_Ledger_By_Location";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";

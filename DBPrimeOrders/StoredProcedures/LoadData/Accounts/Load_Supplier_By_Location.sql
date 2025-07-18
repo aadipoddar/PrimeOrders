@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[Load_Supplier_By_Location]
+﻿CREATE PROCEDURE [dbo].[Load_Ledger_By_Location]
 	@LocationId INT
 AS
 BEGIN
 	SELECT *
-	FROM Supplier
+	FROM [Ledger]
 	WHERE LocationId = @LocationId;
 END
