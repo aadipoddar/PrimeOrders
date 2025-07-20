@@ -55,6 +55,12 @@ else
 				<h3>Financial Reports</h3>
 				<p>Generate balance sheets, P&L, and other reports</p>
 			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Settings")'>
+				<div class="card-icon settings-icon">🔧</div>
+				<h3>Settings</h3>
+				<p>Configure system settings and preferences</p>
+			</div>
 		</div>
 
 		<div class="dashboard-footer">
@@ -185,6 +191,11 @@ else
 	.reports-icon {
 		background-color: rgba(81, 43, 212, 0.1);
 		color: var(--dotnet-primary);
+	}
+
+	.settings-icon {
+		background-color: rgba(108, 117, 125, 0.1);
+		color: #6c757d;
 	}
 
 	/* Back button styles */

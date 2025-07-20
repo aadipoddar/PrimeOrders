@@ -94,6 +94,7 @@
     <Folder Include="Tables\Accounts\FinancialAccounting" />
     <Folder Include="StoredProcedures\Insert\Accounts\FinancialAccounting" />
     <Folder Include="StoredProcedures\Insert\Accounts\Masters" />
+    <Folder Include="StoredProcedures\Settings" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
@@ -212,6 +213,10 @@
     <Build Include="StoredProcedures\LoadData\Accounts\Load_LastAccounting_By_FinancialYear_Voucher.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_FinancialYear_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingDetails_By_Accounting.sql" />
+    <Build Include="Tables\Common\Settings.sql" />
+    <Build Include="StoredProcedures\Settings\Load_Settings_By_Key.sql" />
+    <Build Include="StoredProcedures\Settings\Reset_Settings.sql" />
+    <Build Include="StoredProcedures\Settings\Update_Settings.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />
