@@ -15,4 +15,7 @@ public static class AccountingData
 
 	public static async Task<List<AccountingDetailsModel>> LoadAccountingDetailsByAccounting(int AccountingId) =>
 		await SqlDataAccess.LoadData<AccountingDetailsModel, dynamic>(StoredProcedureNames.LoadAccountingDetailsByAccounting, new { AccountingId });
+
+	public static async Task<AccountingModel> LoadAccountingByReferenceNo(string ReferenceNo) =>
+		(await SqlDataAccess.LoadData<AccountingModel, dynamic>(StoredProcedureNames.LoadAccountingByReferenceNo, new { ReferenceNo })).FirstOrDefault();
 }

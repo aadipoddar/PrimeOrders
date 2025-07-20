@@ -1,4 +1,7 @@
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Exporting.Sale;
+using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -592,7 +595,7 @@ public partial class SalePage
 	}
 	#endregion
 
-	#region Saving Methods
+	#region Saving
 	private async Task<bool> ValidateForm()
 	{
 		await UpdateFinancialDetails();
@@ -617,6 +620,16 @@ public partial class SalePage
 			StateHasChanged();
 			return false;
 		}
+
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _sale.LocationId);
+		if (location.MainLocation && _sale.Credit > 0 && _sale.PartyId is null)
+		{
+			_sfErrorToast.Content = "Party is required when Payment Mode is Credit.";
+			await _sfErrorToast.ShowAsync();
+			StateHasChanged();
+			return false;
+		}
+
 		return true;
 	}
 
@@ -635,66 +648,15 @@ public partial class SalePage
 		await InsertSaleDetail();
 		await InsertStock();
 		await UpdateOrder();
+
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _sale.LocationId);
+		if (location.MainLocation)
+		{
+			int accountingId = await InsertAccounting();
+			await InsertAccountingDetails(accountingId);
+		}
+
 		return true;
-	}
-
-	// Button 1: Save Only
-	private async Task OnSaveOnlyClick()
-	{
-		if (!await ValidateForm())
-			return;
-
-		_isSaving = true;
-		StateHasChanged();
-
-		if (await SaveSale())
-		{
-			_sfSuccessToast.Content = "Sale saved successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
-
-		_isSaving = false;
-		StateHasChanged();
-	}
-
-	// Button 2: Save and Thermal Print
-	private async Task OnSaveAndThermalPrintClick()
-	{
-		if (!await ValidateForm())
-			return;
-
-		_isSaving = true;
-		StateHasChanged();
-
-		if (await SaveSale())
-		{
-			await PrintThermalBill();
-			_sfSuccessToast.Content = "Sale saved and thermal bill printed successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
-
-		_isSaving = false;
-		StateHasChanged();
-	}
-
-	// Button 3: Save and A4 Print
-	private async Task OnSaveAndA4PrintClick()
-	{
-		if (!await ValidateForm())
-			return;
-
-		_isSaving = true;
-		StateHasChanged();
-
-		if (await SaveSale())
-		{
-			await PrintA4Bill();
-			_sfSuccessToast.Content = "Sale saved and A4 bill generated successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
-
-		_isSaving = false;
-		StateHasChanged();
 	}
 
 	private async Task InsertSaleDetail()
@@ -797,6 +759,129 @@ public partial class SalePage
 			order.SaleId = _sale.Id;
 			await OrderData.InsertOrder(order);
 		}
+	}
+
+	private async Task<int> InsertAccounting()
+	{
+		if (SaleId.HasValue && SaleId.Value > 0)
+		{
+			var existingAccounting = await AccountingData.LoadAccountingByReferenceNo(_sale.BillNo);
+			if (existingAccounting is not null && existingAccounting.Id > 0)
+			{
+				existingAccounting.Status = false;
+				await AccountingData.InsertAccounting(existingAccounting);
+			}
+		}
+
+		return await AccountingData.InsertAccounting(new()
+		{
+			Id = 0,
+			ReferenceNo = _sale.BillNo,
+			AccountingDate = DateOnly.FromDateTime(_sale.SaleDateTime),
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(_sale.SaleDateTime))).Id,
+			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId)).Value),
+			Remarks = _sale.Remarks,
+			UserId = _sale.UserId,
+			GeneratedModule = GeneratedModules.Sales.ToString(),
+			Status = true
+		});
+	}
+
+	private async Task InsertAccountingDetails(int accountingId)
+	{
+		var saleOverview = await SaleData.LoadSaleOverviewBySaleId(_sale.Id);
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = saleOverview.Credit > 0 ? saleOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
+			Amount = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
+			Type = 'D',
+			Remarks = $"Cash / Party Account Posting For Sale Bill {saleOverview.BillNo}",
+			Status = true
+		});
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
+			Amount = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
+			Type = 'C',
+			Remarks = $"Sales Account Posting For Sale Bill {saleOverview.BillNo}",
+			Status = true
+		});
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
+			Amount = saleOverview.TotalTaxAmount,
+			Type = 'C',
+			Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
+			Status = true
+		});
+	}
+
+	// Button 1: Save Only
+	private async Task OnSaveOnlyClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SaveSale())
+		{
+			_sfSuccessToast.Content = "Sale saved successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_isSaving = false;
+		StateHasChanged();
+	}
+
+	// Button 2: Save and Thermal Print
+	private async Task OnSaveAndThermalPrintClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SaveSale())
+		{
+			await PrintThermalBill();
+			_sfSuccessToast.Content = "Sale saved and thermal bill printed successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_isSaving = false;
+		StateHasChanged();
+	}
+
+	// Button 3: Save and A4 Print
+	private async Task OnSaveAndA4PrintClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		if (await SaveSale())
+		{
+			await PrintA4Bill();
+			_sfSuccessToast.Content = "Sale saved and A4 bill generated successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_isSaving = false;
+		StateHasChanged();
 	}
 
 	private async Task PrintThermalBill()

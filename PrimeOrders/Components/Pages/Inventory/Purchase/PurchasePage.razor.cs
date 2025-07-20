@@ -1,5 +1,8 @@
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Data.Inventory.Purchase;
 using PrimeOrdersLibrary.Exporting.Purchase;
+using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -569,46 +572,10 @@ public partial class PurchasePage
 
 		await InsertPurchaseDetail();
 		await InsertStock();
+		int accountingId = await InsertAccounting();
+		await InsertAccountingDetails(accountingId);
+
 		return true;
-	}
-
-	// Button 1: Save Only
-	private async Task OnSavePurchaseClick()
-	{
-		UpdateFinancialDetails();
-
-		if (!await ValidateForm())
-			return;
-
-		StateHasChanged();
-
-		if (await SavePurchase())
-		{
-			_sfSuccessToast.Content = "Purchase saved successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
-
-		_purchaseSummaryDialogVisible = false;
-		StateHasChanged();
-	}
-
-	// Button 2: Save and A4 Prints
-	private async Task OnSaveAndPrintClick()
-	{
-		if (!await ValidateForm())
-			return;
-
-		StateHasChanged();
-
-		if (await SavePurchase())
-		{
-			await PrintInvoice();
-			_sfSuccessToast.Content = "Purchase saved and invoice generated successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
-
-		_purchaseSummaryDialogVisible = false;
-		StateHasChanged();
 	}
 
 	private async Task InsertPurchaseDetail()
@@ -665,6 +632,109 @@ public partial class PurchasePage
 				TransactionDate = _purchase.BillDate,
 				LocationId = _user.LocationId
 			});
+	}
+
+	private async Task<int> InsertAccounting()
+	{
+		if (PurchaseId.HasValue && PurchaseId.Value > 0)
+		{
+			var existingAccounting = await AccountingData.LoadAccountingByReferenceNo(_purchase.BillNo);
+			if (existingAccounting is not null && existingAccounting.Id > 0)
+			{
+				existingAccounting.Status = false;
+				await AccountingData.InsertAccounting(existingAccounting);
+			}
+		}
+
+		return await AccountingData.InsertAccounting(new()
+		{
+			Id = 0,
+			ReferenceNo = _purchase.BillNo,
+			AccountingDate = _purchase.BillDate,
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(_purchase.BillDate)).Id,
+			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId)).Value),
+			Remarks = _purchase.Remarks,
+			UserId = _purchase.UserId,
+			GeneratedModule = GeneratedModules.Purchase.ToString(),
+			Status = true
+		});
+	}
+
+	private async Task InsertAccountingDetails(int accountingId)
+	{
+		var purchaseOverview = await PurchaseData.LoadPurchaseOverviewByPurchaseId(_purchase.Id);
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = purchaseOverview.SupplierId,
+			Amount = purchaseOverview.Total,
+			Type = 'C',
+			Remarks = $"Cash / Party Account Posting For Purchase Bill {purchaseOverview.BillNo}",
+			Status = true
+		});
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value),
+			Amount = purchaseOverview.Total - purchaseOverview.TotalTaxAmount,
+			Type = 'D',
+			Remarks = $"Purchase Account Posting For Purchase Bill {purchaseOverview.BillNo}",
+			Status = true
+		});
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
+			Amount = purchaseOverview.TotalTaxAmount,
+			Type = 'D',
+			Remarks = $"GST Account Posting For Purchase Bill {purchaseOverview.BillNo}",
+			Status = true
+		});
+	}
+
+	// Button 1: Save Only
+	private async Task OnSavePurchaseClick()
+	{
+		UpdateFinancialDetails();
+
+		if (!await ValidateForm())
+			return;
+
+		StateHasChanged();
+
+		if (await SavePurchase())
+		{
+			_sfSuccessToast.Content = "Purchase saved successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_purchaseSummaryDialogVisible = false;
+		StateHasChanged();
+	}
+
+	// Button 2: Save and A4 Prints
+	private async Task OnSaveAndPrintClick()
+	{
+		if (!await ValidateForm())
+			return;
+
+		StateHasChanged();
+
+		if (await SavePurchase())
+		{
+			await PrintInvoice();
+			_sfSuccessToast.Content = "Purchase saved and invoice generated successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_purchaseSummaryDialogVisible = false;
+		StateHasChanged();
 	}
 
 	private async Task PrintInvoice()

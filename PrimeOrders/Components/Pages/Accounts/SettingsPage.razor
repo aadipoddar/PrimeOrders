@@ -97,6 +97,24 @@ else
 								</SfComboBox>
 							</div>
 						</div>
+
+						<div class="form-row">
+							<div class="form-group">
+								<div class="label-with-description">
+									<label>Sale Return Voucher</label>
+									<span class="setting-description">@_settings.Where(_ => _.Key == SettingsKeys.SaleReturnVoucherId).Select(_ => _.Description).FirstOrDefault()</span>
+								</div>
+								<SfComboBox TValue="int"
+											TItem="VoucherModel"
+											Placeholder="Select Sale Return Voucher"
+											DataSource="@_vouchers"
+											@bind-Value="_saleReturnVoucherId"
+											PopupWidth="100%"
+											CssClass="form-control">
+									<ComboBoxFieldSettings Value="Id" Text="Name" />
+								</SfComboBox>
+							</div>
+						</div>
 					</div>
 
 					<div class="form-section">

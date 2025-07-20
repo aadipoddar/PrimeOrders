@@ -11,6 +11,7 @@ public static class SettingsKeys
 {
 	public static string SalesVoucherId => "SalesVoucherId";
 	public static string PurchaseVoucherId => "PurchaseVoucherId";
+	public static string SaleReturnVoucherId => "SaleReturnVoucherId";
 	public static string SaleLedgerId => "SaleLedgerId";
 	public static string PurchaseLedgerId => "PurchaseLedgerId";
 	public static string CashLedgerId => "CashLedgerId";

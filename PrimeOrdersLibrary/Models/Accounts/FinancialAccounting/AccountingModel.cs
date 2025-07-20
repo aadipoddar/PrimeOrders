@@ -9,7 +9,7 @@ public class AccountingModel
 	public DateOnly AccountingDate { get; set; }
 	public int FinancialYearId { get; set; }
 	public int UserId { get; set; }
-	public bool Generated { get; set; }
+	public string GeneratedModule { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -32,4 +32,12 @@ public class AccountingCartModel
 	public string Remarks { get; set; }
 	public decimal? Debit { get; set; }
 	public decimal? Credit { get; set; }
+}
+
+public enum GeneratedModules
+{
+	FinancialAccounting,
+	Sales,
+	Purchase,
+	SaleReturn,
 }

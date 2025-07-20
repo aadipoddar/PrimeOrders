@@ -7,6 +7,6 @@ BEGIN
 	FROM Accounting
 	WHERE FinancialYearId = @FinancialYearId
 	AND VoucherId = @VoucherId
-	AND Generated = 0
+	AND GeneratedModule = 'FinancialAccounting'
 	ORDER BY AccountingDate DESC, Id DESC
 END

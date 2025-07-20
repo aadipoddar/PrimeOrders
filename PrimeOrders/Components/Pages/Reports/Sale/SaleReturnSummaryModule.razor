@@ -79,12 +79,6 @@
 									<span class="info-label">Original Bill:</span>
 									<span class="info-value">@SelectedSaleReturn.OriginalBillNo</span>
 								</div>
-								<div class="info-item">
-									<span class="info-label">Status:</span>
-									<span class="info-value status @(SelectedSaleReturn.Status ? "active" : "inactive")">
-										@(SelectedSaleReturn.Status ? "Active" : "Inactive")
-									</span>
-								</div>
 							</div>
 							@if (!string.IsNullOrEmpty(SelectedSaleReturn.Remarks))
 							{

@@ -161,4 +161,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[MeasurementUnit]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ffc4c29f-e316-4fc7-b53c-80fe31ea34ce" ChangeDateTime="07/20/2025 12:40:29">
+    <Property Name="ElementName" Value="[dbo].[Accounting].[Generated]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Accounting]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="GeneratedWindow" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3a459257-8f2f-480b-b502-cfa5fbbbd125" ChangeDateTime="07/20/2025 12:40:44">
+    <Property Name="ElementName" Value="[dbo].[Accounting].[GeneratedWindow]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Accounting]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="GeneratedModule" />
+  </Operation>
 </Operations>

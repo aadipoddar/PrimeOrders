@@ -7,7 +7,7 @@ AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Group]
+		INSERT INTO [dbo].[AccountType]
 		(
 			[Name],
 			[Remarks],
@@ -23,7 +23,7 @@ BEGIN
 
 	ELSE
 	BEGIN
-		UPDATE [dbo].[Group]
+		UPDATE [dbo].[AccountType]
 		SET
 			[Name] = @Name,
 			[Remarks] = @Remarks,

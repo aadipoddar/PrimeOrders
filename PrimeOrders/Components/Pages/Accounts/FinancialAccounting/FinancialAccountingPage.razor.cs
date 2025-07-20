@@ -389,7 +389,7 @@ public partial class FinancialAccountingPage
 		_accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate)).Id;
 		_accounting.ReferenceNo = await GenerateCodes.GenerateAccountingReferenceNo(_accounting.VoucherId, _accounting.AccountingDate);
 		_accounting.UserId = _user.Id;
-		_accounting.Generated = false;
+		_accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
 
 		if (_accountingCart.Count == 0)
 		{

@@ -1,3 +1,7 @@
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Data.Accounts.Masters;
+using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
+
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -28,7 +32,7 @@ public partial class SaleReturnPage
 
 	private string _productSearchText = "";
 	private int _selectedProductIndex = -1;
-	private List<ProductModel> _filteredProducts = [];
+	private List<SaleReturnProductCartModel> _filteredProducts = [];
 	private bool _isProductSearchActive = false;
 	private bool _hasAddedProductViaSearch = true;
 
@@ -36,7 +40,7 @@ public partial class SaleReturnPage
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
 	private SaleReturnProductCartModel _selectedProductCart = new();
-	private ProductModel _selectedProduct = new();
+	private SaleReturnProductCartModel _selectedProduct = new();
 	private SaleModel _selectedSale = new();
 	private SaleReturnModel _saleReturn = new()
 	{
@@ -45,13 +49,13 @@ public partial class SaleReturnPage
 		Status = true
 	};
 
-	private List<ProductModel> _products;
+	private List<SaleReturnProductCartModel> _products;
 	private List<LocationModel> _locations = [];
 	private List<SaleOverviewModel> _availableSales = [];
 	private readonly List<SaleReturnProductCartModel> _availableSaleProducts = [];
 	private readonly List<SaleReturnProductCartModel> _saleReturnProductCart = [];
 
-	private SfGrid<ProductModel> _sfProductGrid;
+	private SfGrid<SaleReturnProductCartModel> _sfProductGrid;
 	private SfGrid<SaleReturnProductCartModel> _sfProductCartGrid;
 
 	private SfDialog _sfReturnDetailsDialog;
@@ -155,7 +159,20 @@ public partial class SaleReturnPage
 				Quantity = item.Quantity,
 				MaxQuantity = cartItem?.SoldQuantity ?? 0,
 				SoldQuantity = cartItem?.SoldQuantity ?? 0,
-				AlreadyReturnedQuantity = cartItem?.AlreadyReturnedQuantity ?? 0
+				AlreadyReturnedQuantity = cartItem?.AlreadyReturnedQuantity ?? 0,
+				Rate = item.Rate,
+				BaseTotal = item.BaseTotal,
+				DiscPercent = item.DiscPercent,
+				DiscAmount = item.DiscAmount,
+				AfterDiscount = item.AfterDiscount,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = item.CGSTAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = item.SGSTAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = item.IGSTAmount,
+				NetRate = item.NetRate,
+				Total = item.Total,
 			});
 		}
 
@@ -191,7 +208,6 @@ public partial class SaleReturnPage
 				decimal maxReturnableQty = detail.Quantity - alreadyReturnedQty;
 
 				if (maxReturnableQty > 0)
-				{
 					_availableSaleProducts.Add(new()
 					{
 						ProductId = product.Id,
@@ -199,17 +215,26 @@ public partial class SaleReturnPage
 						Quantity = 0,
 						MaxQuantity = maxReturnableQty,
 						SoldQuantity = detail.Quantity,
-						AlreadyReturnedQuantity = alreadyReturnedQty
+						AlreadyReturnedQuantity = alreadyReturnedQty,
+						Rate = detail.Rate,
+						BaseTotal = detail.BaseTotal,
+						DiscPercent = detail.DiscPercent,
+						DiscAmount = detail.DiscAmount,
+						AfterDiscount = detail.AfterDiscount,
+						CGSTPercent = detail.CGSTPercent,
+						CGSTAmount = detail.CGSTAmount,
+						SGSTPercent = detail.SGSTPercent,
+						SGSTAmount = detail.SGSTAmount,
+						IGSTPercent = detail.IGSTPercent,
+						IGSTAmount = detail.IGSTAmount,
+						NetRate = detail.NetRate,
+						Total = detail.Total
 					});
-				}
 			}
 
 			_products = [];
 			foreach (var availableProduct in _availableSaleProducts)
-			{
-				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, availableProduct.ProductId);
-				_products.Add(product);
-			}
+				_products.Add(availableProduct);
 
 			_filteredProducts = [.. _products];
 		}
@@ -218,7 +243,7 @@ public partial class SaleReturnPage
 	}
 	#endregion
 
-	#region Date Range and Bill Selection
+	#region Fields Selection
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
 		_startDate = args.StartDate;
@@ -240,10 +265,8 @@ public partial class SaleReturnPage
 		_billSelectionDialogVisible = true;
 		StateHasChanged();
 	}
-	#endregion
 
-	#region Location Selection
-	private async Task OnLocationChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, LocationModel> args)
+	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
 	{
 		_saleReturn.LocationId = args.Value;
 
@@ -355,8 +378,7 @@ public partial class SaleReturnPage
 			_filteredProducts = [.. _products];
 		else
 			_filteredProducts = [.. _products.Where(p =>
-				p.Name.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase) ||
-				p.Code.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase)
+				p.ProductName.Contains(_productSearchText, StringComparison.OrdinalIgnoreCase)
 			)];
 
 		_selectedProductIndex = 0;
@@ -384,7 +406,7 @@ public partial class SaleReturnPage
 
 	private async Task SelectCurrentProduct()
 	{
-		if (_selectedProduct.Id > 0)
+		if (_selectedProduct.ProductId > 0)
 		{
 			await OnAddToCartButtonClick(_selectedProduct);
 			await ExitProductSearch();
@@ -401,9 +423,9 @@ public partial class SaleReturnPage
 	#endregion
 
 	#region Products
-	private async Task OnAddToCartButtonClick(ProductModel product)
+	private async Task OnAddToCartButtonClick(SaleReturnProductCartModel product)
 	{
-		if (product is null || product.Id <= 0)
+		if (product is null || product.ProductId <= 0)
 			return;
 
 		if (_selectedSaleId == 0)
@@ -413,7 +435,7 @@ public partial class SaleReturnPage
 			return;
 		}
 
-		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == product.Id);
+		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == product.ProductId);
 		if (availableProduct is null)
 		{
 			_sfErrorToast.Content = "This product is not available for return from the selected sale.";
@@ -441,6 +463,25 @@ public partial class SaleReturnPage
 		_dialogVisible = true;
 		StateHasChanged();
 	}
+
+	private void UpdateFinancialDetails()
+	{
+		foreach (var item in _saleReturnProductCart)
+		{
+			item.BaseTotal = item.Rate * item.Quantity;
+			item.DiscAmount = item.BaseTotal * (item.DiscPercent / 100);
+			item.AfterDiscount = item.BaseTotal - item.DiscAmount;
+			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
+			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
+			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
+			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+			item.NetRate = item.Total / item.Quantity;
+		}
+
+		_sfProductGrid?.Refresh();
+		_sfProductCartGrid?.Refresh();
+		StateHasChanged();
+	}
 	#endregion
 
 	#region Dialog Events
@@ -452,7 +493,7 @@ public partial class SaleReturnPage
 			return;
 		}
 
-		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProduct.Id);
+		var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProduct.ProductId);
 		if (availableProduct is null)
 		{
 			_sfErrorToast.Content = "Product not found in the selected sale.";
@@ -461,7 +502,7 @@ public partial class SaleReturnPage
 			return;
 		}
 
-		var existingCartItem = _saleReturnProductCart.FirstOrDefault(c => c.ProductId == _selectedProduct.Id);
+		var existingCartItem = _saleReturnProductCart.FirstOrDefault(c => c.ProductId == _selectedProduct.ProductId);
 		decimal currentCartQuantity = existingCartItem?.Quantity ?? 0;
 
 		if (currentCartQuantity + _selectedQuantity > availableProduct.MaxQuantity)
@@ -476,12 +517,18 @@ public partial class SaleReturnPage
 		else
 			_saleReturnProductCart.Add(new()
 			{
-				ProductId = _selectedProduct.Id,
-				ProductName = _selectedProduct.Name,
+				ProductId = _selectedProduct.ProductId,
+				ProductName = _selectedProduct.ProductName,
 				Quantity = _selectedQuantity,
 				MaxQuantity = availableProduct.MaxQuantity,
 				SoldQuantity = availableProduct.SoldQuantity,
-				AlreadyReturnedQuantity = availableProduct.AlreadyReturnedQuantity
+				AlreadyReturnedQuantity = availableProduct.AlreadyReturnedQuantity,
+				Rate = _selectedProduct.Rate,
+				DiscPercent = _selectedProduct.DiscPercent,
+				CGSTPercent = _selectedProduct.CGSTPercent,
+				SGSTPercent = _selectedProduct.SGSTPercent,
+				IGSTPercent = _selectedProduct.IGSTPercent,
+				// Handle Calculation in UpdateFinancialDetails
 			});
 
 		_quantityDialogVisible = false;
@@ -592,9 +639,9 @@ public partial class SaleReturnPage
 
 		await InsertSaleReturnDetails();
 		await InsertStock();
+		int accountingId = await InsertAccounting();
+		await InsertAccountingDetails(accountingId);
 
-		_returnSummaryDialogVisible = false;
-		_isSaving = false;
 		await _sfSuccessToast.ShowAsync();
 	}
 
@@ -617,6 +664,19 @@ public partial class SaleReturnPage
 				SaleReturnId = _saleReturn.Id,
 				ProductId = cartItem.ProductId,
 				Quantity = cartItem.Quantity,
+				Rate = cartItem.Rate,
+				BaseTotal = cartItem.BaseTotal,
+				DiscPercent = cartItem.DiscPercent,
+				DiscAmount = cartItem.DiscAmount,
+				AfterDiscount = cartItem.AfterDiscount,
+				CGSTPercent = cartItem.CGSTPercent,
+				CGSTAmount = cartItem.CGSTAmount,
+				SGSTPercent = cartItem.SGSTPercent,
+				SGSTAmount = cartItem.SGSTAmount,
+				IGSTPercent = cartItem.IGSTPercent,
+				IGSTAmount = cartItem.IGSTAmount,
+				NetRate = cartItem.NetRate,
+				Total = cartItem.Total,
 				Status = true
 			});
 	}
@@ -656,6 +716,70 @@ public partial class SaleReturnPage
 				LocationId = 1
 			});
 		}
+	}
+
+	private async Task<int> InsertAccounting()
+	{
+		if (SaleReturnId.HasValue && SaleReturnId.Value > 0)
+		{
+			var existingAccounting = await AccountingData.LoadAccountingByReferenceNo(_saleReturn.TransactionNo);
+			if (existingAccounting is not null && existingAccounting.Id > 0)
+			{
+				existingAccounting.Status = false;
+				await AccountingData.InsertAccounting(existingAccounting);
+			}
+		}
+
+		return await AccountingData.InsertAccounting(new()
+		{
+			Id = 0,
+			ReferenceNo = _saleReturn.TransactionNo,
+			AccountingDate = DateOnly.FromDateTime(_saleReturn.ReturnDateTime),
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(_saleReturn.ReturnDateTime))).Id,
+			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
+			Remarks = _saleReturn.Remarks,
+			UserId = _saleReturn.UserId,
+			GeneratedModule = GeneratedModules.SaleReturn.ToString(),
+			Status = true
+		});
+	}
+
+	private async Task InsertAccountingDetails(int accountingId)
+	{
+		var saleReturnOverview = await SaleReturnData.LoadSaleReturnOverviewBySaleReturnId(_saleReturn.Id);
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = (await LedgerData.LoadLedgerByLocation(saleReturnOverview.LocationId)).Id,
+			Amount = saleReturnOverview.Total,
+			Type = 'C',
+			Remarks = $"Cash / Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+			Status = true
+		});
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
+			Amount = saleReturnOverview.Total - saleReturnOverview.TotalTaxAmount,
+			Type = 'D',
+			Remarks = $"Sales Return Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+			Status = true
+		});
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = accountingId,
+			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
+			Amount = saleReturnOverview.TotalTaxAmount,
+			Type = 'D',
+			Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+			Status = true
+		});
 	}
 	#endregion
 }

@@ -128,21 +128,21 @@ else
 								CssClass="modern-products-grid">
 							<GridPageSettings PageSize="7" />
 							<GridColumns>
-								<GridColumn Field=@nameof(ProductModel.Name) Width="100%" />
+								<GridColumn Field=@nameof(SaleReturnProductCartModel.ProductName) Width="100%" />
 								<GridColumn AllowFiltering="false" />
 								<GridColumn AllowFiltering="false" />
 							</GridColumns>
 							<GridTemplates>
 								<RowTemplate>
 									@{
-										var product = (context as ProductModel);
-										var isSelected = _isProductSearchActive && product?.Id == _selectedProduct.Id;
-										var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == product.Id);
+										var product = (context as SaleReturnProductCartModel);
+										var isSelected = _isProductSearchActive && product?.ProductId == _selectedProduct.ProductId;
+										var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == product.ProductId);
 									}
 									<tr class="product-row @(isSelected ? "selected-product-row" : "")">
 										<td class="product-name">
 											<div class="name-wrapper">
-												<span class="name-text" title="@product?.Name">@product?.Name</span>
+												<span class="name-text" title="@product?.ProductName">@product?.ProductName</span>
 											</div>
 										</td>
 										<td class="available-quantity">
@@ -463,13 +463,13 @@ else
 		<Header>
 			<div class="dialog-header">
 				<span>Return Quantity: </span>
-				<span class="material-name">@_selectedProduct.Name</span>
+				<span class="material-name">@_selectedProduct.ProductName</span>
 			</div>
 		</Header>
 		<Content>
 			<div class="dialog-content">
 				@{
-					var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProduct.Id);
+					var availableProduct = _availableSaleProducts.FirstOrDefault(p => p.ProductId == _selectedProduct.ProductId);
 				}
 
 				<div class="quantity-info-section">

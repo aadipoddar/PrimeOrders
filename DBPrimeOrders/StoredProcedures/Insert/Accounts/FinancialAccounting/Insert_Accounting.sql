@@ -5,7 +5,7 @@
 	@Remarks VARCHAR(500),
 	@AccountingDate DATE,
 	@FinancialYearId INT,
-	@Generated BIT,
+	@GeneratedModule VARCHAR(20),
 	@UserId INT,
 	@Status BIT
 AS
@@ -20,7 +20,7 @@ BEGIN
 			AccountingDate,
 			FinancialYearId,
 			UserId,
-			Generated,
+			GeneratedModule,
 			Status
 		) VALUES
 		(
@@ -30,7 +30,7 @@ BEGIN
 			@AccountingDate,
 			@FinancialYearId,
 			@UserId,
-			@Generated,
+			@GeneratedModule,
 			@Status
 		)
 
@@ -47,7 +47,7 @@ BEGIN
 			AccountingDate = @AccountingDate,
 			FinancialYearId = @FinancialYearId,
 			UserId = @UserId,
-			Generated = @Generated,
+			GeneratedModule = @GeneratedModule,
 			Status = @Status
 		WHERE Id = @Id
 	END

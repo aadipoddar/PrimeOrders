@@ -75,6 +75,7 @@ public static class StoredProcedureNames
 	public static string LoadSaleReturnDetailBySaleReturn => "Load_SaleReturnDetail_By_SaleReturn";
 	public static string LoadLastSaleReturnByLocation => "Load_LastSaleReturn_By_Location";
 	public static string LoadSaleReturnBySale => "Load_SaleReturn_By_Sale";
+	public static string LoadSaleReturnOverviewBySaleReturnId => "Load_SaleReturnOverview_By_SaleReturnId";
 
 	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
@@ -96,6 +97,7 @@ public static class StoredProcedureNames
 
 	public static string LoadLastAccountingByFinancialYearVoucher => "Load_LastAccounting_By_FinancialYear_Voucher";
 	public static string LoadAccountingDetailsByAccounting => "Load_AccountingDetails_By_Accounting";
+	public static string LoadAccountingByReferenceNo => "Load_Accounting_By_ReferenceNo";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";

@@ -23,6 +23,7 @@ public partial class SettingsPage
 	// Setting values
 	private int _salesVoucherId = 1;
 	private int _purchaseVoucherId = 1;
+	private int _saleReturnVoucherId = 1;
 	private int _saleLedgerId = 1;
 	private int _purchaseLedgerId = 1;
 	private int _cashLedgerId = 1;
@@ -64,6 +65,7 @@ public partial class SettingsPage
 	{
 		_salesVoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId)).Value);
 		_purchaseVoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId)).Value);
+		_saleReturnVoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value);
 		_saleLedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value);
 		_purchaseLedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value);
 		_cashLedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value);
@@ -79,6 +81,7 @@ public partial class SettingsPage
 			{
 				new() { Key = SettingsKeys.SalesVoucherId, Value = _salesVoucherId.ToString() },
 				new() { Key = SettingsKeys.PurchaseVoucherId, Value = _purchaseVoucherId.ToString() },
+				new() { Key = SettingsKeys.SaleReturnVoucherId, Value = _saleReturnVoucherId.ToString() },
 				new() { Key = SettingsKeys.SaleLedgerId, Value = _saleLedgerId.ToString() },
 				new() { Key = SettingsKeys.PurchaseLedgerId, Value = _purchaseLedgerId.ToString() },
 				new() { Key = SettingsKeys.CashLedgerId, Value = _cashLedgerId.ToString() },

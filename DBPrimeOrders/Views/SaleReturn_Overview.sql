@@ -11,10 +11,24 @@
 		l.Name AS LocationName,
 		sr.ReturnDateTime,
 		sr.Remarks,
-		sr.Status,
 
 		COUNT(DISTINCT srd.Id) AS TotalProducts,
-		SUM(srd.Quantity) AS TotalQuantity
+		SUM(srd.Quantity) AS TotalQuantity,
+
+		AVG(srd.SGSTPercent) AS SGSTPercent,
+		AVG(srd.CGSTPercent) AS CGSTPercent,
+		AVG(srd.IGSTPercent) AS IGSTPercent,
+
+		SUM(srd.SGSTAmount) AS SGSTAmount,
+		SUM(srd.CGSTAmount) AS CGSTAmount,
+		SUM(srd.IGSTAmount) AS IGSTAmount,
+
+		SUM(srd.DiscAmount) AS DiscountAmount,
+		SUM(srd.SGSTAmount + srd.CGSTAmount + srd.IGSTAmount) AS TotalTaxAmount,
+
+		SUM(srd.BaseTotal) AS BaseTotal,
+		SUM(srd.AfterDiscount) AS SubTotal,
+		SUM(srd.Total) AS Total
 
 	FROM
 		dbo.SaleReturn sr

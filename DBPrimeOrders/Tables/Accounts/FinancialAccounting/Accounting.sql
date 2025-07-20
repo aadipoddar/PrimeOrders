@@ -7,7 +7,7 @@
     [AccountingDate] DATE NOT NULL, 
     [FinancialYearId] INT NOT NULL, 
     [UserId] INT NOT NULL, 
-    [Generated] BIT NOT NULL DEFAULT 0, 
+    [GeneratedModule] VARCHAR(20) NOT NULL , 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Accounting_ToVoucher] FOREIGN KEY (VoucherId) REFERENCES [Voucher](Id), 
     CONSTRAINT [FK_Accounting_ToFinancialYear] FOREIGN KEY (FinancialYearId) REFERENCES [FinancialYear](Id), 
