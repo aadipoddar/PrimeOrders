@@ -7,5 +7,6 @@ BEGIN
 	FROM Accounting
 	WHERE FinancialYearId = @FinancialYearId
 	AND VoucherId = @VoucherId
+	AND Generated = 0
 	ORDER BY AccountingDate DESC, Id DESC
 END

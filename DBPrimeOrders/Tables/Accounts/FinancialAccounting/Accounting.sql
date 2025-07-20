@@ -6,8 +6,11 @@
     [Remarks] VARCHAR(500) NOT NULL, 
     [AccountingDate] DATE NOT NULL, 
     [FinancialYearId] INT NOT NULL, 
+    [UserId] INT NOT NULL, 
+    [Generated] BIT NOT NULL DEFAULT 0, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Accounting_ToVoucher] FOREIGN KEY (VoucherId) REFERENCES [Voucher](Id), 
-    CONSTRAINT [FK_Accounting_ToFinancialYear] FOREIGN KEY (FinancialYearId) REFERENCES [FinancialYear](Id)
+    CONSTRAINT [FK_Accounting_ToFinancialYear] FOREIGN KEY (FinancialYearId) REFERENCES [FinancialYear](Id), 
+    CONSTRAINT [FK_Accounting_ToUser] FOREIGN KEY (UserId) REFERENCES [User](Id)
 
 )

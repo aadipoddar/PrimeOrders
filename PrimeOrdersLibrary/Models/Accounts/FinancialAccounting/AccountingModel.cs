@@ -8,6 +8,8 @@ public class AccountingModel
 	public string Remarks { get; set; }
 	public DateOnly AccountingDate { get; set; }
 	public int FinancialYearId { get; set; }
+	public int UserId { get; set; }
+	public bool Generated { get; set; }
 	public bool Status { get; set; }
 }
 

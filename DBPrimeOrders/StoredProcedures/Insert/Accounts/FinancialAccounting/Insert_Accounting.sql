@@ -5,6 +5,8 @@
 	@Remarks VARCHAR(500),
 	@AccountingDate DATE,
 	@FinancialYearId INT,
+	@Generated BIT,
+	@UserId INT,
 	@Status BIT
 AS
 BEGIN
@@ -17,6 +19,8 @@ BEGIN
 			Remarks,
 			AccountingDate,
 			FinancialYearId,
+			UserId,
+			Generated,
 			Status
 		) VALUES
 		(
@@ -25,6 +29,8 @@ BEGIN
 			@Remarks,
 			@AccountingDate,
 			@FinancialYearId,
+			@UserId,
+			@Generated,
 			@Status
 		)
 
@@ -40,6 +46,8 @@ BEGIN
 			Remarks = @Remarks,
 			AccountingDate = @AccountingDate,
 			FinancialYearId = @FinancialYearId,
+			UserId = @UserId,
+			Generated = @Generated,
 			Status = @Status
 		WHERE Id = @Id
 	END
