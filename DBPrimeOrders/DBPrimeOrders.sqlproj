@@ -119,8 +119,6 @@
     <Build Include="StoredProcedures\Insert\Products\Insert_ProductCategory.sql" />
     <Build Include="StoredProcedures\Insert\Products\Insert_Tax.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_ProductCategory.sql" />
-    <Build Include="Tables\Inventory\Supplier.sql" />
-    <Build Include="StoredProcedures\Insert\Inventory\Insert_Supplier.sql" />
     <Build Include="Tables\Common\State.sql" />
     <Build Include="Tables\Inventory\Purchase.sql" />
     <Build Include="Tables\Inventory\PurchaseDetail.sql" />
@@ -195,7 +193,7 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Recipe\Load_RecipeDetail_By_Recipe.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_By_RawMaterialCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_Rate_By_Supplier.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_Supplier_By_Location.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_Ledger_By_Location].sql" />
     <Build Include="Tables\Accounts\Masters\AccountType.sql" />
     <Build Include="Tables\Accounts\Masters\FinancialYear.sql" />
     <Build Include="Tables\Accounts\Masters\Group.sql" />

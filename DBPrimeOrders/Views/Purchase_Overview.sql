@@ -36,7 +36,7 @@ FROM
 INNER JOIN
 	[dbo].[User] AS u ON p.UserId = u.Id
 INNER JOIN
-	[dbo].[Supplier] AS s ON p.SupplierId = s.Id
+	[dbo].[Ledger] AS s ON p.SupplierId = s.Id
 INNER JOIN
 	[dbo].[PurchaseDetail] AS pd ON p.Id = pd.PurchaseId
 

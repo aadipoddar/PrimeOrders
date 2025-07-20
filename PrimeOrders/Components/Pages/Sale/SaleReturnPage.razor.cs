@@ -1,6 +1,7 @@
 using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
@@ -124,7 +125,7 @@ public partial class SaleReturnPage
 		foreach (var sale in _availableSales)
 			if (sale.PartyId.HasValue && sale.PartyId > 0)
 			{
-				var supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, sale.PartyId.Value);
+				var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
 				if (supplier?.LocationId == _saleReturn.LocationId)
 					filteredSales.Add(sale);
 			}

@@ -9,6 +9,6 @@
     [Remarks] VARCHAR(250) NOT NULL, 
     [UserId] INT NOT NULL, 
     [Status] BIT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_Purchase_ToSupplier] FOREIGN KEY (SupplierId) REFERENCES [Supplier](Id), 
+    CONSTRAINT [FK_Purchase_ToLedger] FOREIGN KEY (SupplierId) REFERENCES [Ledger](Id), 
     CONSTRAINT [FK_Purchase_ToUser] FOREIGN KEY (UserId) REFERENCES [User](Id)
 )

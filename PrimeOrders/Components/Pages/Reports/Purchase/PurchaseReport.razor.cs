@@ -1,5 +1,5 @@
-﻿using PrimeOrdersLibrary.Data.Inventory.Purchase;
-using PrimeOrdersLibrary.Exporting.Purchase;
+﻿using PrimeOrdersLibrary.Exporting.Purchase;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
@@ -18,7 +18,7 @@ public partial class PurchaseReport
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
-	private List<SupplierModel> _suppliers = [];
+	private List<LedgerModel> _suppliers = [];
 	private List<PurchaseOverviewModel> _purchaseOverviews = [];
 	private int _selectedSupplierId = 0;
 
@@ -47,8 +47,8 @@ public partial class PurchaseReport
 
 	private async Task LoadSuppliers()
 	{
-		_suppliers = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier, true);
-		_suppliers.Insert(0, new SupplierModel { Id = 0, Name = "All Suppliers" });
+		_suppliers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger, true);
+		_suppliers.Insert(0, new LedgerModel { Id = 0, Name = "All Suppliers" });
 		_selectedSupplierId = 0;
 	}
 
@@ -59,7 +59,7 @@ public partial class PurchaseReport
 		await LoadData();
 	}
 
-	private async Task OnSupplierChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, SupplierModel> args)
+	private async Task OnSupplierChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, LedgerModel> args)
 	{
 		_selectedSupplierId = args.Value;
 		await LoadData();

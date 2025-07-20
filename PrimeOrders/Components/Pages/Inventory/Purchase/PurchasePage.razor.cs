@@ -1,8 +1,8 @@
 using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
-using PrimeOrdersLibrary.Data.Inventory.Purchase;
 using PrimeOrdersLibrary.Exporting.Purchase;
 using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -46,10 +46,10 @@ public partial class PurchasePage
 	private PurchaseRawMaterialCartModel _selectedRawMaterialCart = new();
 	private RawMaterialModel _selectedRawMaterial = new();
 
-	private SupplierModel _supplier = new();
+	private LedgerModel _supplier = new();
 	private PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Remarks = "" };
 
-	private List<SupplierModel> _suppliers;
+	private List<LedgerModel> _suppliers;
 	private List<RawMaterialModel> _rawMaterials;
 	private readonly List<PurchaseRawMaterialCartModel> _purchaseRawMaterialCarts = [];
 
@@ -85,7 +85,7 @@ public partial class PurchasePage
 
 	private async Task LoadData()
 	{
-		_suppliers = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier);
+		_suppliers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
 		_supplier = _suppliers.FirstOrDefault();
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 
@@ -290,10 +290,10 @@ public partial class PurchasePage
 	#endregion
 
 	#region Purchase Details Events
-	private async Task OnSupplierChanged(ChangeEventArgs<int, SupplierModel> args)
+	private async Task OnSupplierChanged(ChangeEventArgs<int, LedgerModel> args)
 	{
 		_purchase.SupplierId = args.Value;
-		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new SupplierModel();
+		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new();
 
 		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;

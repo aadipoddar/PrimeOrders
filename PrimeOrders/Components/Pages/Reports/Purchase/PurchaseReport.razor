@@ -1,4 +1,5 @@
 ﻿@page "/Reports/PurchaseReport"
+@using PrimeOrdersLibrary.Models.Accounts.Masters
 
 <PageTitle>Purchase Report - Prime Orders</PageTitle>
 
@@ -54,13 +55,13 @@ else
 				<div class="filter-item">
 					<label>Supplier</label>
 					<SfComboBox TValue="int"
-								TItem="SupplierModel"
+								TItem="LedgerModel"
 								Placeholder="Select a Supplier"
 								FloatLabelType='@FloatLabelType.Auto'
 								DataSource="_suppliers"
 								Value="_selectedSupplierId"
 								CssClass="filter-control">
-						<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="OnSupplierChanged" />
+						<ComboBoxEvents TItem="LedgerModel" TValue="int" ValueChange="OnSupplierChanged" />
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
 				</div>

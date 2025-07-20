@@ -1,5 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Exporting;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 using PrimeOrdersLibrary.Models.Inventory;
 
 namespace PrimeOrdersLibrary.Exporting.Purchase;
@@ -24,7 +24,7 @@ public static class PurchaseExcelExport
 		// Add supplier filter info if specific supplier is selected
 		if (selectedSupplierId > 0)
 		{
-			var suppliers = await CommonData.LoadTableData<SupplierModel>(TableNames.Supplier);
+			var suppliers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
 			var supplierName = suppliers.FirstOrDefault(s => s.Id == selectedSupplierId)?.Name ?? "Unknown";
 			summaryItems.Add("Filtered by Supplier", supplierName);
 		}

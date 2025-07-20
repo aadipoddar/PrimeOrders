@@ -1,5 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Data.Inventory.Purchase;
+using PrimeOrdersLibrary.Data.Inventory;
 using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 

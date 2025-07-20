@@ -1,6 +1,6 @@
 ﻿using PrimeOrdersLibrary.Models.Inventory;
 
-namespace PrimeOrdersLibrary.Data.Inventory.Purchase;
+namespace PrimeOrdersLibrary.Data.Inventory;
 
 public class PurchaseData
 {

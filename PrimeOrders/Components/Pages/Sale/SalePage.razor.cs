@@ -2,6 +2,7 @@ using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Exporting.Sale;
 using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -55,7 +56,7 @@ public partial class SalePage
 
 	private List<PaymentModeModel> _paymentModes;
 	private List<OrderModel> _orders = [];
-	private List<SupplierModel> _parties = [];
+	private List<LedgerModel> _parties = [];
 	private List<ProductModel> _products;
 	private readonly List<SaleProductCartModel> _saleProductCart = [];
 
@@ -93,7 +94,7 @@ public partial class SalePage
 
 	private async Task LoadData()
 	{
-		_parties = await CommonData.LoadTableDataByStatus<SupplierModel>(TableNames.Supplier);
+		_parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
 		_parties.RemoveAll(p => p.LocationId == _user.LocationId);
 
 		_paymentModes = PaymentModeData.GetPaymentModes();
@@ -300,7 +301,7 @@ public partial class SalePage
 	#endregion
 
 	#region Sale Details Events
-	private async Task OnPartyChanged(ChangeEventArgs<int?, SupplierModel> args)
+	private async Task OnPartyChanged(ChangeEventArgs<int?, LedgerModel> args)
 	{
 		if (args.Value.HasValue && args.Value.Value > 0)
 		{
@@ -722,7 +723,7 @@ public partial class SalePage
 		if (_sale.PartyId is null || _sale.PartyId <= 0)
 			return;
 
-		var supplier = await CommonData.LoadTableDataById<SupplierModel>(TableNames.Supplier, _sale.PartyId.Value);
+		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, _sale.PartyId.Value);
 		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
 			foreach (var product in _saleProductCart)
 				await StockData.InsertProductStock(new()

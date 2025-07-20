@@ -1,6 +1,7 @@
 ﻿@page "/Sale"
 @page "/Sale/{SaleId:int}"
 @using PrimeOrdersLibrary.Data.Common
+@using PrimeOrdersLibrary.Models.Accounts.Masters
 
 <PageTitle>Sale - Prime Orders</PageTitle>
 
@@ -287,12 +288,12 @@ else
 				<div class="form-group">
 					<label>Party</label>
 					<SfComboBox TValue="int?"
-								TItem="SupplierModel"
+								TItem="LedgerModel"
 								Placeholder="Select a Party"
 								DataSource="@_parties"
 								CssClass="form-control"
 								Value="_sale.PartyId">
-						<ComboBoxEvents TItem="SupplierModel" TValue="int?" ValueChange="@OnPartyChanged" />
+						<ComboBoxEvents TItem="LedgerModel" TValue="int?" ValueChange="@OnPartyChanged" />
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
 				</div>

@@ -1,6 +1,7 @@
 ﻿@page "/Inventory/Purchase"
 @page "/Inventory/Purchase/{PurchaseId:int}"
 @using PrimeOrdersLibrary.Data.Common
+@using PrimeOrdersLibrary.Models.Accounts.Masters
 
 <PageTitle>Purchase - Prime Orders</PageTitle>
 
@@ -243,12 +244,12 @@ else
 				<div class="form-group">
 					<label>Supplier</label>
 					<SfComboBox TValue="int"
-								TItem="SupplierModel"
+								TItem="LedgerModel"
 								Placeholder="Select a Supplier"
 								DataSource="@_suppliers"
 								@bind-Value="_purchase.SupplierId"
 								CssClass="form-control">
-						<ComboBoxEvents TItem="SupplierModel" TValue="int" ValueChange="OnSupplierChanged" />
+						<ComboBoxEvents TItem="LedgerModel" TValue="int" ValueChange="OnSupplierChanged" />
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
 				</div>
@@ -261,10 +262,6 @@ else
 					<div class="detail-row">
 						<span class="detail-label">Phone:</span>
 						<span class="detail-value">@_supplier?.Phone</span>
-					</div>
-					<div class="detail-row">
-						<span class="detail-label">Email:</span>
-						<span class="detail-value">@_supplier?.Email</span>
 					</div>
 					<div class="detail-row">
 						<span class="detail-label">Address:</span>
