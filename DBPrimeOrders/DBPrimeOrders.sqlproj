@@ -90,6 +90,10 @@
     <Folder Include="Tables\Accounts" />
     <Folder Include="StoredProcedures\Insert\Accounts" />
     <Folder Include="StoredProcedures\LoadData\Accounts" />
+    <Folder Include="Tables\Accounts\Masters" />
+    <Folder Include="Tables\Accounts\FinancialAccounting" />
+    <Folder Include="StoredProcedures\Insert\Accounts\FinancialAccounting" />
+    <Folder Include="StoredProcedures\Insert\Accounts\Masters" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
@@ -190,17 +194,24 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Recipe\Load_RecipeDetail_By_Recipe.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_By_RawMaterialCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_Rate_By_Supplier.sql" />
-    <Build Include="Tables\Accounts\AccountType.sql" />
-    <Build Include="Tables\Accounts\FinancialYear.sql" />
-    <Build Include="Tables\Accounts\Group.sql" />
-    <Build Include="Tables\Accounts\Ledger.sql" />
-    <Build Include="Tables\Accounts\Voucher.sql" />
-    <Build Include="StoredProcedures\Insert\Accounts\Insert_Ledger.sql" />
-    <Build Include="StoredProcedures\Insert\Accounts\Insert_Group.sql" />
-    <Build Include="StoredProcedures\Insert\Accounts\Insert_AccountType.sql" />
-    <Build Include="StoredProcedures\Insert\Accounts\Insert_Voucher.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_Supplier_By_Location.sql" />
-    <Build Include="StoredProcedures\Insert\Accounts\Insert_FinancialYear.sql" />
+    <Build Include="Tables\Accounts\Masters\AccountType.sql" />
+    <Build Include="Tables\Accounts\Masters\FinancialYear.sql" />
+    <Build Include="Tables\Accounts\Masters\Group.sql" />
+    <Build Include="Tables\Accounts\Masters\Ledger.sql" />
+    <Build Include="Tables\Accounts\Masters\Voucher.sql" />
+    <Build Include="Tables\Accounts\FinancialAccounting\Accounting.sql" />
+    <Build Include="Tables\Accounts\FinancialAccounting\AccountingDetails.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_Accounting.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_AccountingDetails.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_AccountType.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_FinancialYear.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Group.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Ledger.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Voucher.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_LastAccounting_By_FinancialYear_Voucher.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_FinancialYear_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingDetails_By_Accounting.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

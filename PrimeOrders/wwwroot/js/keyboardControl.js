@@ -350,3 +350,103 @@ window.scrollToElement = (elementId) => {
 		element.scrollIntoView({ behavior: 'smooth' });
 	}
 };
+
+window.setupAccountingPageKeyboardHandlers = (dotNetHelper) => {
+	// Remove existing listeners first
+	if (window.accountingPageKeyHandler) {
+		document.removeEventListener('keydown', window.accountingPageKeyHandler);
+	}
+
+	// Create new handler
+	window.accountingPageKeyHandler = async (event) => {
+		// Don't handle keys when typing in input fields
+		if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
+			return;
+		}
+
+		try {
+			await dotNetHelper.invokeMethodAsync('HandleKeyboardShortcut', event.key);
+		} catch (error) {
+			console.error('Keyboard handler error:', error);
+		}
+
+		// Prevent default for function keys
+		if (event.key.startsWith('F') || event.ctrlKey) {
+			event.preventDefault();
+		}
+	};
+
+	// Add new listener
+	document.addEventListener('keydown', window.accountingPageKeyHandler);
+};
+
+// Ledger search functions for Financial Accounting page
+window.showLedgerSearchIndicator = (searchText) => {
+	const indicator = document.getElementById('ledgerSearchIndicator');
+	if (indicator) {
+		indicator.style.display = 'block';
+		const searchTextElement = document.getElementById('searchText');
+		if (searchTextElement) {
+			searchTextElement.textContent = searchText;
+		}
+	}
+};
+
+window.hideLedgerSearchIndicator = () => {
+	const indicator = document.getElementById('ledgerSearchIndicator');
+	if (indicator) {
+		indicator.style.display = 'none';
+	}
+};
+
+window.updateLedgerSearchIndicator = (searchText, resultCount) => {
+	const searchTextElement = document.getElementById('searchText');
+	const searchResultsElement = document.getElementById('searchResults');
+
+	if (searchTextElement) {
+		searchTextElement.textContent = searchText;
+	}
+	if (searchResultsElement) {
+		searchResultsElement.textContent = `${resultCount} ledgers found`;
+	}
+};
+
+// Update the cleanup function to include accounting page handler
+window.cleanupKeyboardHandlers = () => {
+	if (window.salePageKeyHandler) {
+		document.removeEventListener('keydown', window.salePageKeyHandler);
+		window.salePageKeyHandler = null;
+	}
+	if (window.saleReturnPageKeyHandler) {
+		document.removeEventListener('keydown', window.saleReturnPageKeyHandler);
+		window.saleReturnPageKeyHandler = null;
+	}
+	if (window.orderPageKeyHandler) {
+		document.removeEventListener('keydown', window.orderPageKeyHandler);
+		window.orderPageKeyHandler = null;
+	}
+	if (window.purchasePageKeyHandler) {
+		document.removeEventListener('keydown', window.purchasePageKeyHandler);
+		window.purchasePageKeyHandler = null;
+	}
+	if (window.kitchenIssuePageKeyHandler) {
+		document.removeEventListener('keydown', window.kitchenIssuePageKeyHandler);
+		window.kitchenIssuePageKeyHandler = null;
+	}
+	if (window.kitchenProductionPageKeyHandler) {
+		document.removeEventListener('keydown', window.kitchenProductionPageKeyHandler);
+		window.kitchenProductionPageKeyHandler = null;
+	}
+	if (window.stockAdjustmentPageKeyHandler) {
+		document.removeEventListener('keydown', window.stockAdjustmentPageKeyHandler);
+		window.stockAdjustmentPageKeyHandler = null;
+	}
+	if (window.productStockAdjustmentPageKeyHandler) {
+		document.removeEventListener('keydown', window.productStockAdjustmentPageKeyHandler);
+		window.productStockAdjustmentPageKeyHandler = null;
+	}
+	if (window.accountingPageKeyHandler) {
+		document.removeEventListener('keydown', window.accountingPageKeyHandler);
+		window.accountingPageKeyHandler = null;
+	}
+};

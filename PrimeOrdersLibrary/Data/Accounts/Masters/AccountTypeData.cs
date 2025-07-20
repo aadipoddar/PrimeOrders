@@ -1,6 +1,6 @@
-﻿using PrimeOrdersLibrary.Models.Accounts;
+﻿using PrimeOrdersLibrary.Models.Accounts.Masters;
 
-namespace PrimeOrdersLibrary.Data.Accounts;
+namespace PrimeOrdersLibrary.Data.Accounts.Masters;
 
 public static class AccountTypeData
 {

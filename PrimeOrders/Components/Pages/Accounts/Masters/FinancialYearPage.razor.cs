@@ -1,5 +1,5 @@
-using PrimeOrdersLibrary.Data.Accounts;
-using PrimeOrdersLibrary.Models.Accounts;
+using PrimeOrdersLibrary.Data.Accounts.Masters;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;

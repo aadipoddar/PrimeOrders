@@ -1,6 +1,6 @@
-﻿namespace PrimeOrdersLibrary.Models.Accounts;
+﻿namespace PrimeOrdersLibrary.Models.Accounts.Masters;
 
-public class GroupModel
+public class AccountTypeModel
 {
 	public int Id { get; set; }
 	public string Name { get; set; }

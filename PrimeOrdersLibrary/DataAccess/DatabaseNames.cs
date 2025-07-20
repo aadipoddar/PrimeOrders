@@ -34,6 +34,8 @@ public static class TableNames
 	public static string AccountType => "AccountType";
 	public static string Voucher => "Voucher";
 	public static string FinancialYear => "FinancialYear";
+	public static string Accounting => "Accounting";
+	public static string AccountingDetails => "AccountingDetails";
 }
 
 public static class StoredProcedureNames
@@ -86,6 +88,10 @@ public static class StoredProcedureNames
 	public static string LoadSaleReturnDetailsByDateLocationId => "Load_SaleReturnDetails_By_Date_LocationId";
 
 	public static string LoadLedgerByLocation => "Load_Ledger_By_Location";
+	public static string LoadFinancialYearByDate => "Load_FinancialYear_By_Date";
+
+	public static string LoadLastAccountingByFinancialYearVoucher => "Load_LastAccounting_By_FinancialYear_Voucher";
+	public static string LoadAccountingDetailsByAccounting => "Load_AccountingDetails_By_Accounting";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
@@ -131,6 +137,9 @@ public static class StoredProcedureNames
 	public static string InsertAccountType => "Insert_AccountType";
 	public static string InsertVoucher => "Insert_Voucher";
 	public static string InsertFinancialYear => "Insert_FinancialYear";
+
+	public static string InsertAccounting => "Insert_Accounting";
+	public static string InsertAccountingDetails => "Insert_AccountingDetails";
 
 	public static string DeleteProductStockByTransactionNo => "Delete_ProductStock_By_TransactionNo";
 	public static string DeleteRawMaterialStockByTransactionNo => "Delete_RawMaterialStock_By_TransactionNo";

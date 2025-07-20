@@ -23,7 +23,6 @@ public partial class PurchasePage
 	private bool _supplierDialogVisible = false;
 	private bool _adjustmentsDialogVisible = false;
 	private bool _purchaseSummaryDialogVisible = false;
-	private bool _isSaving = false;
 
 	private decimal _baseTotal = 0;
 	private decimal _afterDiscounts = 0;
@@ -564,7 +563,6 @@ public partial class PurchasePage
 		{
 			_sfErrorToast.Content = "Failed to save Purchase.";
 			await _sfErrorToast.ShowAsync();
-			_isSaving = false;
 			StateHasChanged();
 			return false;
 		}
@@ -582,7 +580,6 @@ public partial class PurchasePage
 		if (!await ValidateForm())
 			return;
 
-		_isSaving = true;
 		StateHasChanged();
 
 		if (await SavePurchase())
@@ -592,7 +589,6 @@ public partial class PurchasePage
 		}
 
 		_purchaseSummaryDialogVisible = false;
-		_isSaving = false;
 		StateHasChanged();
 	}
 
@@ -602,7 +598,6 @@ public partial class PurchasePage
 		if (!await ValidateForm())
 			return;
 
-		_isSaving = true;
 		StateHasChanged();
 
 		if (await SavePurchase())
@@ -657,9 +652,6 @@ public partial class PurchasePage
 	{
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
 			await StockData.DeleteRawMaterialStockByTransactionNo(_purchase.BillNo);
-
-		if (!_purchase.Status)
-			return;
 
 		foreach (var item in _purchaseRawMaterialCarts)
 			await StockData.InsertRawMaterialStock(new()

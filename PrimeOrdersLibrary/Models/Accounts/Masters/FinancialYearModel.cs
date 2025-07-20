@@ -1,4 +1,4 @@
-﻿namespace PrimeOrdersLibrary.Models.Accounts;
+﻿namespace PrimeOrdersLibrary.Models.Accounts.Masters;
 
 public class FinancialYearModel
 {

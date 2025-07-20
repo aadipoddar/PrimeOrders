@@ -1,6 +1,9 @@
-﻿using PrimeOrdersLibrary.Data.Inventory.Kitchen;
+﻿using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
+using PrimeOrdersLibrary.Data.Accounts.Masters;
+using PrimeOrdersLibrary.Data.Inventory.Kitchen;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.Data.Sale;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 using PrimeOrdersLibrary.Models.Inventory;
 using PrimeOrdersLibrary.Models.Sale;
 
@@ -8,14 +11,13 @@ namespace PrimeOrdersLibrary.Data.Common;
 
 public static class GenerateCodes
 {
-	public static async Task<string> GetLocationPrefix(int locationId)
+	private static string GenerateInitialsByName(string name)
 	{
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, locationId);
-		if (location is null)
+		if (name is null)
 			return string.Empty;
 
 		string prefix = string.Empty;
-		string[] words = location.Name.Split([' ', '-', '_', '.'], StringSplitOptions.RemoveEmptyEntries);
+		string[] words = name.Split([' ', '-', '_', '.'], StringSplitOptions.RemoveEmptyEntries);
 
 		foreach (var word in words)
 			if (word.Length > 1)
@@ -29,9 +31,21 @@ public static class GenerateCodes
 		return prefix;
 	}
 
+	private static int GetNumberOfDigits(this int number) =>
+		number switch
+		{
+			< 10 => 1,
+			< 100 => 2,
+			< 1000 => 3,
+			< 10000 => 4,
+			< 100000 => 5,
+			_ => 6
+		};
+
 	public static async Task<string> GenerateOrderBillNo(OrderModel order)
 	{
-		var prefix = await GetLocationPrefix(order.LocationId);
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId);
+		var prefix = GenerateInitialsByName(location.Name);
 		var year = $"{order.OrderDate:yy}";
 		if (order.OrderDate.Month <= 3)
 			year = $"{order.OrderDate.AddYears(-1):yy}";
@@ -57,7 +71,8 @@ public static class GenerateCodes
 
 	public static async Task<string> GenerateSaleBillNo(SaleModel sale)
 	{
-		var prefix = await GetLocationPrefix(sale.LocationId);
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, sale.LocationId);
+		var prefix = GenerateInitialsByName(location.Name);
 		var year = $"{sale.SaleDateTime:yy}";
 		if (sale.SaleDateTime.Month <= 3)
 			year = $"{sale.SaleDateTime.AddYears(-1):yy}";
@@ -83,7 +98,8 @@ public static class GenerateCodes
 
 	public static async Task<string> GenerateSaleReturnTransactionNo(SaleReturnModel saleReturn)
 	{
-		var prefix = await GetLocationPrefix(saleReturn.LocationId);
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, saleReturn.LocationId);
+		var prefix = GenerateInitialsByName(location.Name);
 		var year = $"{saleReturn.ReturnDateTime:yy}";
 		if (saleReturn.ReturnDateTime.Month <= 3)
 			year = $"{saleReturn.ReturnDateTime.AddYears(-1):yy}";
@@ -109,7 +125,8 @@ public static class GenerateCodes
 
 	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
 	{
-		var prefix = await GetLocationPrefix(kitchenIssue.LocationId);
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenIssue.LocationId);
+		var prefix = GenerateInitialsByName(location.Name);
 		var year = $"{kitchenIssue.IssueDate:yy}";
 		if (kitchenIssue.IssueDate.Month <= 3)
 			year = $"{kitchenIssue.IssueDate.AddYears(-1):yy}";
@@ -135,7 +152,8 @@ public static class GenerateCodes
 
 	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
 	{
-		var prefix = await GetLocationPrefix(kitchenProduction.LocationId);
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenProduction.LocationId);
+		var prefix = GenerateInitialsByName(location.Name);
 		var year = $"{kitchenProduction.ProductionDate:yy}";
 		if (kitchenProduction.ProductionDate.Month <= 3)
 			year = $"{kitchenProduction.ProductionDate.AddYears(-1):yy}";
@@ -208,5 +226,28 @@ public static class GenerateCodes
 		}
 
 		return $"{prefix}00001";
+	}
+
+	public static async Task<string> GenerateAccountingReferenceNo(int voucherId, DateOnly accountingDate)
+	{
+		var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, voucherId);
+		var financialYear = await FinancialYearData.LoadFinancialYearByDate(accountingDate);
+		var lastAccounting = await AccountingData.LoadLastAccountingByFinancialYearVoucher(financialYear.Id, voucherId);
+
+		var voucherPrefix = GenerateInitialsByName(voucher.Name);
+		var year = financialYear.YearNo;
+
+		if (lastAccounting is not null)
+		{
+			var lastReferenceNo = lastAccounting.ReferenceNo;
+			if (lastReferenceNo.StartsWith($"FA{year}{voucherPrefix}"))
+			{
+				var lastNumber = int.Parse(lastReferenceNo[(2 + year.GetNumberOfDigits() + voucherPrefix.Length)..]);
+				int nextNumber = lastNumber + 1;
+				return $"FA{year}{voucherPrefix}{nextNumber:D6}";
+			}
+		}
+
+		return $"FA{year}{voucherPrefix}000001";
 	}
 }
