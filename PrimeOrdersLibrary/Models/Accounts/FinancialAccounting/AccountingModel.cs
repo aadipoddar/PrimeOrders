@@ -41,3 +41,24 @@ public enum GeneratedModules
 	Purchase,
 	SaleReturn,
 }
+
+public class AccountingOverviewModel
+{
+	public int AccountingId { get; set; }
+	public string ReferenceNo { get; set; }
+	public int UserId { get; set; }
+	public string UserName { get; set; }
+	public DateOnly AccountingDate { get; set; }
+	public int VoucherId { get; set; }
+	public string VoucherName { get; set; }
+	public int FinancialYearId { get; set; }
+	public string FinancialYearPeriod { get; set; }
+	public string GeneratedModule { get; set; }
+	public string Remarks { get; set; }
+	public int TotalLedgers { get; set; }
+	public int TotalDebitLedgers { get; set; }
+	public int TotalCreditLedgers { get; set; }
+	public decimal TotalDebitAmount { get; set; }
+	public decimal TotalCreditAmount { get; set; }
+	public decimal TotalAmount { get; set; }
+}

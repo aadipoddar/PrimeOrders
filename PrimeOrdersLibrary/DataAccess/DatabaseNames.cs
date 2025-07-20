@@ -98,6 +98,8 @@ public static class StoredProcedureNames
 	public static string LoadAccountingDetailsByAccounting => "Load_AccountingDetails_By_Accounting";
 	public static string LoadAccountingByReferenceNo => "Load_Accounting_By_ReferenceNo";
 
+	public static string LoadAccountingDetailsByDate => "Load_AccountingDetails_By_Date";
+
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
 
@@ -157,4 +159,5 @@ public static class ViewNames
 	public static string PurchaseOverview => "Purchase_Overview";
 	public static string KitchenIssueOverview => "KitchenIssue_Overview";
 	public static string KitchenProductionOverview => "KitchenProduction_Overview";
+	public static string AccountingOverview => "Accounting_Overview";
 }

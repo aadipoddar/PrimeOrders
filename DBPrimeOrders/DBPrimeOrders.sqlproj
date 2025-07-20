@@ -95,6 +95,7 @@
     <Folder Include="StoredProcedures\Insert\Accounts\FinancialAccounting" />
     <Folder Include="StoredProcedures\Insert\Accounts\Masters" />
     <Folder Include="StoredProcedures\Settings" />
+    <Folder Include="StoredProcedures\Reports\Accounts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
@@ -217,6 +218,8 @@
     <Build Include="StoredProcedures\Settings\Update_Settings.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_Accounting_By_ReferenceNo.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturnOverview_By_SaleReturnId.sql" />
+    <Build Include="Views\Accounting_Overview.sql" />
+    <Build Include="StoredProcedures\Reports\Accounts\Load_AccountingDetails_By_Date.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

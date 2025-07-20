@@ -1,0 +1,414 @@
+﻿@page "/Accounts/Reports"
+
+<PageTitle>Financial Reports Dashboard - Prime Orders</PageTitle>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading financial reports dashboard...</p>
+	</div>
+}
+else
+{
+	<div class="dashboard-container">
+		<div class="dashboard-header">
+			<div class="logo-section">
+				<img src="images/order.gif" alt="Prime Orders Logo" class="dashboard-logo" />
+				<h1 class="dashboard-title">Prime Orders</h1>
+			</div>
+			<div class="user-info">
+				<span class="user-name">@_user?.Name</span>
+				<button @onclick="async () => await AuthService.Logout(JS, NavManager)" class="logout-button">
+					<span class="logout-icon">⟲</span> Logout
+				</button>
+			</div>
+		</div>
+
+		<div class="welcome-section">
+			<h2>Financial Reports Management</h2>
+			<p>Generate and view comprehensive financial reports and statements</p>
+			<button @onclick='() => NavManager.NavigateTo("/Accounts-Dashboard")' class="back-button">
+				<span class="back-icon">←</span> Back to Accounts
+			</button>
+		</div>
+
+		<div class="dashboard-cards">
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/LedgerReport")'>
+				<div class="card-icon ledger-report-icon">📊</div>
+				<h3>Ledger Reports</h3>
+				<p>View detailed ledger statements and account transactions</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/TrialBalance")'>
+				<div class="card-icon trial-balance-icon">⚖️</div>
+				<h3>Trial Balance</h3>
+				<p>Generate trial balance reports for all accounts</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/BalanceSheet")'>
+				<div class="card-icon balance-sheet-icon">📋</div>
+				<h3>Balance Sheet</h3>
+				<p>Generate balance sheet statements for financial position</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/DayBook")'>
+				<div class="card-icon day-book-icon">📅</div>
+				<h3>Day Book</h3>
+				<p>View daily transaction summaries and day-wise reports</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/ProfitLoss")'>
+				<div class="card-icon profit-loss-icon">📈</div>
+				<h3>Profit & Loss Statement</h3>
+				<p>Generate comprehensive P&L reports and analysis</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/CashFlow")'>
+				<div class="card-icon cash-flow-icon">💰</div>
+				<h3>Cash Flow Statement</h3>
+				<p>Track cash inflows and outflows over periods</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/VoucherRegister")'>
+				<div class="card-icon voucher-register-icon">📖</div>
+				<h3>Voucher Register</h3>
+				<p>View and manage voucher-wise transaction records</p>
+			</div>
+
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/AccountStatement")'>
+				<div class="card-icon account-statement-icon">🗂️</div>
+				<h3>Account Statement</h3>
+				<p>Generate detailed account statements for any period</p>
+			</div>
+		</div>
+
+		<div class="dashboard-footer">
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--dotnet-primary: #512BD4;
+		--dotnet-secondary: #68217A;
+		--dotnet-accent: #00A4EF;
+		--dotnet-light: #F7F7F7;
+		--dotnet-dark: #1E1E1E;
+	}
+
+	/* General Layout */
+	body {
+		margin: 0;
+		padding: 0;
+		background-color: var(--dotnet-light);
+		color: var(--dotnet-dark);
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		overflow-x: hidden;
+	}
+
+	.dashboard-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		padding: 20px;
+		background: linear-gradient(135deg, rgba(81, 43, 212, 0.05) 0%, rgba(104, 33, 122, 0.05) 100%);
+	}
+
+	/* Header Styles */
+	.dashboard-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px 20px;
+		background-color: white;
+		border-radius: 15px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		margin-bottom: 30px;
+	}
+
+	.logo-section {
+		display: flex;
+		align-items: center;
+	}
+
+	.dashboard-logo {
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		margin-right: 15px;
+	}
+
+	.dashboard-title {
+		color: var(--dotnet-primary);
+		font-size: 24px;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+	}
+
+	.user-name {
+		font-weight: 600;
+		color: var(--dotnet-secondary);
+	}
+
+	.logout-button {
+		background-color: transparent;
+		border: 2px solid var(--dotnet-primary);
+		color: var(--dotnet-primary);
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+	}
+
+		.logout-button:hover {
+			background-color: var(--dotnet-primary);
+			color: white;
+		}
+
+	.logout-icon {
+		font-size: 16px;
+	}
+
+	/* Welcome Section */
+	.welcome-section {
+		text-align: center;
+		margin-bottom: 40px;
+	}
+
+		.welcome-section h2 {
+			color: var(--dotnet-secondary);
+			margin-bottom: 10px;
+		}
+
+		.welcome-section p {
+			color: var(--dotnet-dark);
+			opacity: 0.7;
+		}
+
+	/* Custom icons for financial reports page */
+	.ledger-report-icon {
+		background-color: rgba(81, 43, 212, 0.1);
+		color: var(--dotnet-primary);
+	}
+
+	.trial-balance-icon {
+		background-color: rgba(104, 33, 122, 0.1);
+		color: var(--dotnet-secondary);
+	}
+
+	.balance-sheet-icon {
+		background-color: rgba(0, 164, 239, 0.1);
+		color: var(--dotnet-accent);
+	}
+
+	.day-book-icon {
+		background-color: rgba(255, 193, 7, 0.1);
+		color: #FFC107;
+	}
+
+	.profit-loss-icon {
+		background-color: rgba(40, 167, 69, 0.1);
+		color: #28a745;
+	}
+
+	.cash-flow-icon {
+		background-color: rgba(220, 53, 69, 0.1);
+		color: #dc3545;
+	}
+
+	.voucher-register-icon {
+		background-color: rgba(108, 117, 125, 0.1);
+		color: #6c757d;
+	}
+
+	.account-statement-icon {
+		background-color: rgba(255, 87, 51, 0.1);
+		color: #FF5733;
+	}
+
+	/* Back button styles */
+	.back-button {
+		background-color: transparent;
+		border: 2px solid var(--dotnet-secondary);
+		color: var(--dotnet-secondary);
+		padding: 8px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.2s ease;
+		margin-top: 15px;
+	}
+
+		.back-button:hover {
+			background-color: var(--dotnet-secondary);
+			color: white;
+		}
+
+	.back-icon {
+		font-size: 16px;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: #666;
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--dotnet-primary);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--dotnet-secondary);
+			text-decoration: underline;
+		}
+
+	/* Dashboard cards */
+	.dashboard-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 25px;
+		margin-bottom: 40px;
+	}
+
+	.dashboard-card {
+		background-color: white;
+		border-radius: 15px;
+		padding: 30px;
+		text-align: center;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+		cursor: pointer;
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 200px;
+	}
+
+		.dashboard-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 12px 30px rgba(81, 43, 212, 0.2);
+		}
+
+	.card-icon {
+		font-size: 40px;
+		margin-bottom: 15px;
+		width: 80px;
+		height: 80px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+	}
+
+	.dashboard-card h3 {
+		color: var(--dotnet-dark);
+		margin-bottom: 10px;
+		font-size: 20px;
+	}
+
+	.dashboard-card p {
+		color: #666;
+		font-size: 14px;
+		margin: 0;
+	}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--dotnet-primary);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--dotnet-accent);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--dotnet-secondary);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--dotnet-dark);
+		font-size: 16px;
+		margin-top: 10px;
+	}
+
+	/* Animations */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 768px) {
+		.dashboard-header {
+			flex-direction: column;
+			gap: 15px;
+			padding: 15px;
+		}
+
+		.dashboard-cards {
+			grid-template-columns: 1fr;
+		}
+
+		.dashboard-card {
+			min-height: 180px;
+		}
+	}
+</style>
