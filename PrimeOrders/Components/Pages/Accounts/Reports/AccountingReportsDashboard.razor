@@ -38,6 +38,12 @@ else
 		</div>
 
 		<div class="dashboard-cards">
+			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/AccountingReport")'>
+				<div class="card-icon account-statement-icon">🗂️</div>
+				<h3>Accounting Report</h3>
+				<p>Generate detailed account statements for any period</p>
+			</div>
+
 			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/LedgerReport")'>
 				<div class="card-icon ledger-report-icon">📊</div>
 				<h3>Ledger Reports</h3>
@@ -78,12 +84,6 @@ else
 				<div class="card-icon voucher-register-icon">📖</div>
 				<h3>Voucher Register</h3>
 				<p>View and manage voucher-wise transaction records</p>
-			</div>
-
-			<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Accounts/Reports/AccountStatement")'>
-				<div class="card-icon account-statement-icon">🗂️</div>
-				<h3>Account Statement</h3>
-				<p>Generate detailed account statements for any period</p>
 			</div>
 		</div>
 
