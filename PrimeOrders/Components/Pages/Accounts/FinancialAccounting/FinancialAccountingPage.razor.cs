@@ -1,5 +1,6 @@
 using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
+using PrimeOrdersLibrary.Exporting.Accounting;
 using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Models.Accounts.Masters;
 
@@ -386,10 +387,13 @@ public partial class FinancialAccountingPage
 	#region Saving
 	private async Task<bool> ValidateEntry()
 	{
-		_accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate)).Id;
-		_accounting.ReferenceNo = await GenerateCodes.GenerateAccountingReferenceNo(_accounting.VoucherId, _accounting.AccountingDate);
-		_accounting.UserId = _user.Id;
-		_accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
+		if (AccountingId is null)
+		{
+			_accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate)).Id;
+			_accounting.ReferenceNo = await GenerateCodes.GenerateAccountingReferenceNo(_accounting.VoucherId, _accounting.AccountingDate);
+			_accounting.UserId = _user.Id;
+			_accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
+		}
 
 		if (_accountingCart.Count == 0)
 		{
@@ -422,13 +426,23 @@ public partial class FinancialAccountingPage
 		return true;
 	}
 
-	private async Task OnSaveEntryClick()
+	private async Task<bool> OnSaveEntry()
 	{
 		if (!await ValidateEntry() || _isSaving)
-			return;
+			return false;
 
 		_isSaving = true;
 		_accounting.Id = await AccountingData.InsertAccounting(_accounting);
+
+		if (AccountingId.HasValue && AccountingId.Value > 0)
+		{
+			var existingEntry = await AccountingData.LoadAccountingDetailsByAccounting(AccountingId.Value);
+			foreach (var detail in existingEntry)
+			{
+				detail.Status = false;
+				await AccountingData.InsertAccountingDetails(detail);
+			}
+		}
 
 		foreach (var cartItem in _accountingCart)
 			await AccountingData.InsertAccountingDetails(new()
@@ -442,8 +456,35 @@ public partial class FinancialAccountingPage
 				Status = true
 			});
 
-		_sfSuccessToast.Content = "Accounting entry saved successfully.";
-		await _sfSuccessToast.ShowAsync();
+		return true;
+	}
+
+	// Button 1: Save Only
+	private async Task OnSaveEntryClick()
+	{
+		if (await OnSaveEntry())
+		{
+			_sfSuccessToast.Content = "Accounting entry saved successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+	}
+
+	// Button 2: Save and A4 Prints
+	private async Task OnSaveAndPrintClick()
+	{
+		if (await OnSaveEntry())
+		{
+			await PrintInvoice();
+			_sfSuccessToast.Content = "Accounting entry saved successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+	}
+
+	private async Task PrintInvoice()
+	{
+		var memoryStream = await AccountingA4Print.GenerateA4AccountingVoucher(_accounting.Id);
+		var fileName = $"Accounting_Voucher_{_accounting.ReferenceNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		await JS.InvokeVoidAsync("savePDF", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 	#endregion
 }

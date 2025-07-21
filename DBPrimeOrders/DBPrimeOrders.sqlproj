@@ -220,6 +220,7 @@
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturnOverview_By_SaleReturnId.sql" />
     <Build Include="Views\Accounting_Overview.sql" />
     <Build Include="StoredProcedures\Reports\Accounts\Load_AccountingDetails_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingOverview_By_AccountingId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

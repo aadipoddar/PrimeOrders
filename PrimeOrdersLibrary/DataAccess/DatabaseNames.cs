@@ -99,6 +99,7 @@ public static class StoredProcedureNames
 	public static string LoadAccountingByReferenceNo => "Load_Accounting_By_ReferenceNo";
 
 	public static string LoadAccountingDetailsByDate => "Load_AccountingDetails_By_Date";
+	public static string LoadAccountingOverviewByAccountingId => "Load_AccountingOverview_By_AccountingId";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";

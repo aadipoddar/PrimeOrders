@@ -30,7 +30,7 @@ public partial class AccountingReport
 	// Summary dialog
 	private bool _accountingSummaryVisible = false;
 	private AccountingOverviewModel _selectedAccounting = new();
-	private List<AccountingDetailsModel> _selectedAccountingDetails = [];
+	private List<AccountingCartModel> _selectedAccountingDetails = [];
 
 	#region Page Load
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -89,7 +89,23 @@ public partial class AccountingReport
 	public async Task OnRowSelected(RowSelectEventArgs<AccountingOverviewModel> args)
 	{
 		_selectedAccounting = args.Data;
-		_selectedAccountingDetails = await AccountingData.LoadAccountingDetailsByAccounting(_selectedAccounting.AccountingId);
+		var accountingDetails = await AccountingData.LoadAccountingDetailsByAccounting(_selectedAccounting.AccountingId);
+
+		_selectedAccountingDetails.Clear();
+		foreach (var item in accountingDetails)
+		{
+			var ledger = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, item.LedgerId);
+			_selectedAccountingDetails.Add(new()
+			{
+				Serial = _selectedAccountingDetails.Count + 1,
+				Id = item.Id,
+				Name = ledger.Name,
+				Debit = item.Type == 'D' ? item.Amount : null,
+				Credit = item.Type == 'C' ? item.Amount : null,
+				Remarks = item.Remarks,
+			});
+		}
+
 		_accountingSummaryVisible = true;
 		StateHasChanged();
 	}
