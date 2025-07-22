@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_AccountingDetails]
 	@Id INT,
 	@AccountingId INT,
-	@Type CHAR(1),
 	@LedgerId INT,
-	@Amount MONEY,
+	@Debit MONEY,
+	@Credit MONEY,
 	@Remarks VARCHAR(250),
 	@Status BIT
 AS
@@ -13,17 +13,17 @@ BEGIN
 		INSERT INTO [dbo].[AccountingDetails]
 		(
 			AccountingId,
-			Type,
 			LedgerId,
-			Amount,
+			Debit,
+			Credit,
 			Remarks,
 			Status
 		) VALUES
 		(
 			@AccountingId,
-			@Type,
 			@LedgerId,
-			@Amount,
+			@Debit,
+			@Credit,
 			@Remarks,
 			@Status
 		)
@@ -34,9 +34,9 @@ BEGIN
 		UPDATE [dbo].[AccountingDetails]
 		SET
 			AccountingId = @AccountingId,
-			Type = @Type,
 			LedgerId = @LedgerId,
-			Amount = @Amount,
+			Debit = @Debit,
+			Credit = @Credit,
 			Remarks = @Remarks,
 			Status = @Status
 		WHERE Id = @Id

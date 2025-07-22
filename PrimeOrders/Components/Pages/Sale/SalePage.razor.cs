@@ -797,8 +797,8 @@ public partial class SalePage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = saleOverview.Credit > 0 ? saleOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
-			Amount = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
-			Type = 'D',
+			Debit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
+			Credit = null,
 			Remarks = $"Cash / Party Account Posting For Sale Bill {saleOverview.BillNo}",
 			Status = true
 		});
@@ -808,8 +808,8 @@ public partial class SalePage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
-			Amount = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
-			Type = 'C',
+			Debit = null,
+			Credit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
 			Remarks = $"Sales Account Posting For Sale Bill {saleOverview.BillNo}",
 			Status = true
 		});
@@ -819,8 +819,8 @@ public partial class SalePage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
-			Amount = saleOverview.TotalTaxAmount,
-			Type = 'C',
+			Debit = null,
+			Credit = saleOverview.TotalTaxAmount,
 			Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
 			Status = true
 		});

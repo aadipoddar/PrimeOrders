@@ -17,9 +17,9 @@ public class AccountingDetailsModel
 {
 	public int Id { get; set; }
 	public int AccountingId { get; set; }
-	public char Type { get; set; }
 	public int LedgerId { get; set; }
-	public decimal Amount { get; set; }
+	public decimal? Debit { get; set; }
+	public decimal? Credit { get; set; }
 	public string Remarks { get; set; }
 	public bool Status { get; set; }
 }
@@ -58,8 +58,8 @@ public class AccountingOverviewModel
 	public int TotalLedgers { get; set; }
 	public int TotalDebitLedgers { get; set; }
 	public int TotalCreditLedgers { get; set; }
-	public decimal TotalDebitAmount { get; set; }
 	public decimal TotalCreditAmount { get; set; }
+	public decimal TotalDebitAmount { get; set; }
 	public decimal TotalAmount { get; set; }
 }
 

@@ -100,8 +100,8 @@ public partial class AccountingReport
 				Serial = _selectedAccountingDetails.Count + 1,
 				Id = item.Id,
 				Name = ledger.Name,
-				Debit = item.Type == 'D' ? item.Amount : null,
-				Credit = item.Type == 'C' ? item.Amount : null,
+				Debit = item.Debit,
+				Credit = item.Credit,
 				Remarks = item.Remarks,
 			});
 		}
@@ -118,46 +118,34 @@ public partial class AccountingReport
 	#endregion
 
 	#region Chart Data Methods
-	private List<VoucherWiseChartData> GetVoucherWiseData()
-	{
-		return _accountingOverviews
+	private List<VoucherWiseChartData> GetVoucherWiseData() =>
+			[.. _accountingOverviews
 			.GroupBy(a => a.VoucherName)
 			.Select(g => new VoucherWiseChartData
 			{
 				VoucherName = g.Key,
 				EntryCount = g.Count()
 			})
-			.OrderByDescending(x => x.EntryCount)
-			.ToList();
-	}
+			.OrderByDescending(x => x.EntryCount)];
 
-	private List<DebitCreditChartData> GetDebitCreditData()
-	{
-		var totalDebit = _accountingOverviews.Sum(a => a.TotalDebitAmount);
-		var totalCredit = _accountingOverviews.Sum(a => a.TotalCreditAmount);
+	private List<DebitCreditChartData> GetDebitCreditData() =>
+		[
+			new() { Type = "Debit", Amount = _accountingOverviews.Sum(a => a.TotalDebitAmount) },
+			new() { Type = "Credit", Amount = _accountingOverviews.Sum(a => a.TotalCreditAmount) }
+		];
 
-		return new List<DebitCreditChartData>
-		{
-			new() { Type = "Debit", Amount = totalDebit },
-			new() { Type = "Credit", Amount = totalCredit }
-		};
-	}
-
-	private List<DailyEntryChartData> GetDailyEntryData()
-	{
-		return _accountingOverviews
+	private List<DailyEntryChartData> GetDailyEntryData() =>
+		[.. _accountingOverviews
 			.GroupBy(a => a.AccountingDate)
 			.Select(g => new DailyEntryChartData
 			{
 				Date = g.Key.ToString("dd/MM"),
 				EntryCount = g.Count()
 			})
-			.OrderBy(x => x.Date)
-			.ToList();
-	}
+			.OrderBy(x => x.Date)];
 
 	private List<MonthlyAmountChartData> GetMonthlyAmountData() =>
-		_accountingOverviews
+		[.. _accountingOverviews
 			.GroupBy(a => new { Year = a.AccountingDate.Year, Month = a.AccountingDate.Month })
 			.Select(g => new MonthlyAmountChartData
 			{
@@ -165,8 +153,7 @@ public partial class AccountingReport
 				DebitAmount = g.Sum(x => x.TotalDebitAmount),
 				CreditAmount = g.Sum(x => x.TotalCreditAmount)
 			})
-			.OrderBy(x => x.Month)
-			.ToList();
+			.OrderBy(x => x.Month)];
 	#endregion
 
 	#region Export

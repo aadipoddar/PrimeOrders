@@ -14,13 +14,14 @@ SELECT
     [a].[Remarks],
 
     COUNT(DISTINCT ad.Id) AS TotalLedgers,
-    SUM(CASE WHEN ad.Type = 'D' THEN 1 ELSE 0 END) AS TotalDebitLedgers,
-    SUM(CASE WHEN ad.Type = 'C' THEN 1 ELSE 0 END) AS TotalCreditLedgers,
 
-    SUM(CASE WHEN ad.Type = 'C' THEN ad.Amount ELSE 0 END) AS TotalCreditAmount,
-    SUM(CASE WHEN ad.Type = 'D' THEN ad.Amount ELSE 0 END) AS TotalDebitAmount,
+    SUM(CASE WHEN ad.Debit IS NOT NULL THEN 1 ELSE 0 END) AS TotalDebitLedgers,
+    SUM(CASE WHEN ad.Credit IS NOT NULL THEN 1 ELSE 0 END) AS TotalCreditLedgers,
 
-    SUM(ad.Amount) AS TotalAmount
+    SUM(ad.Debit) AS TotalDebitAmount,
+    SUM(ad.Credit) AS TotalCreditAmount,
+
+    SUM(ad.Debit) + SUM(ad.Credit) AS TotalAmount
 FROM
     [dbo].[Accounting] a
 INNER JOIN

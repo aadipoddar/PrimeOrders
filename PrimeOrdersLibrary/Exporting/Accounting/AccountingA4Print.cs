@@ -38,8 +38,8 @@ public static class AccountingA4Print
 				Serial = ledgerRows.Count + 1,
 				Id = ledger.Id,
 				Name = ledger.Name,
-				Debit = detail.Type == 'D' ? detail.Amount : 0,
-				Credit = detail.Type == 'C' ? detail.Amount : 0,
+				Debit = detail.Debit,
+				Credit = detail.Credit,
 				Remarks = detail.Remarks
 			});
 		}

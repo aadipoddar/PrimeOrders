@@ -135,8 +135,8 @@ public partial class FinancialAccountingPage
 						Id = ledger.Id,
 						Name = ledger.Name,
 						Remarks = detail.Remarks,
-						Debit = detail.Type == 'D' ? detail.Amount : null,
-						Credit = detail.Type == 'C' ? detail.Amount : null
+						Debit = detail.Debit,
+						Credit = detail.Credit
 					});
 			}
 		}
@@ -449,9 +449,9 @@ public partial class FinancialAccountingPage
 			{
 				Id = 0,
 				AccountingId = _accounting.Id,
-				Type = cartItem.Debit.HasValue ? 'D' : 'C',
 				LedgerId = cartItem.Id,
-				Amount = cartItem.Debit ?? cartItem.Credit ?? 0,
+				Debit = cartItem.Debit,
+				Credit = cartItem.Credit,
 				Remarks = cartItem.Remarks ?? "",
 				Status = true
 			});

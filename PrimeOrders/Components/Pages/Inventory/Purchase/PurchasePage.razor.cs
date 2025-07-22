@@ -669,8 +669,8 @@ public partial class PurchasePage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = purchaseOverview.SupplierId,
-			Amount = purchaseOverview.Total,
-			Type = 'C',
+			Debit = null,
+			Credit = purchaseOverview.Total,
 			Remarks = $"Cash / Party Account Posting For Purchase Bill {purchaseOverview.BillNo}",
 			Status = true
 		});
@@ -680,8 +680,8 @@ public partial class PurchasePage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value),
-			Amount = purchaseOverview.Total - purchaseOverview.TotalTaxAmount,
-			Type = 'D',
+			Debit = purchaseOverview.Total - purchaseOverview.TotalTaxAmount,
+			Credit = null,
 			Remarks = $"Purchase Account Posting For Purchase Bill {purchaseOverview.BillNo}",
 			Status = true
 		});
@@ -691,8 +691,8 @@ public partial class PurchasePage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
-			Amount = purchaseOverview.TotalTaxAmount,
-			Type = 'D',
+			Debit = purchaseOverview.TotalTaxAmount,
+			Credit = null,
 			Remarks = $"GST Account Posting For Purchase Bill {purchaseOverview.BillNo}",
 			Status = true
 		});

@@ -754,8 +754,8 @@ public partial class SaleReturnPage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = (await LedgerData.LoadLedgerByLocation(saleReturnOverview.LocationId)).Id,
-			Amount = saleReturnOverview.Total,
-			Type = 'C',
+			Credit = saleReturnOverview.Total,
+			Debit = null,
 			Remarks = $"Cash / Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			Status = true
 		});
@@ -765,8 +765,8 @@ public partial class SaleReturnPage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
-			Amount = saleReturnOverview.Total - saleReturnOverview.TotalTaxAmount,
-			Type = 'D',
+			Debit = saleReturnOverview.Total - saleReturnOverview.TotalTaxAmount,
+			Credit = null,
 			Remarks = $"Sales Return Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			Status = true
 		});
@@ -776,8 +776,8 @@ public partial class SaleReturnPage
 			Id = 0,
 			AccountingId = accountingId,
 			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
-			Amount = saleReturnOverview.TotalTaxAmount,
-			Type = 'D',
+			Debit = saleReturnOverview.TotalTaxAmount,
+			Credit = null,
 			Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			Status = true
 		});

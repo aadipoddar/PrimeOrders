@@ -101,6 +101,8 @@ public static class StoredProcedureNames
 	public static string LoadAccountingDetailsByDate => "Load_AccountingDetails_By_Date";
 	public static string LoadAccountingOverviewByAccountingId => "Load_AccountingOverview_By_AccountingId";
 
+	public static string LoadLedgerDetailsByDateLedger => "Load_LedgerDetails_By_Date_Ledger";
+
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
 
@@ -161,4 +163,5 @@ public static class ViewNames
 	public static string KitchenIssueOverview => "KitchenIssue_Overview";
 	public static string KitchenProductionOverview => "KitchenProduction_Overview";
 	public static string AccountingOverview => "Accounting_Overview";
+	public static string LedgerOverview => "Ledger_Overview";
 }
