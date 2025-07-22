@@ -43,6 +43,7 @@ LEFT JOIN
 	[dbo].[Location] lo ON l.LocationId = lo.Id
 
 WHERE
+	[a].[Status] = 1 AND
 	[ad].[Status] = 1
 
 GROUP BY

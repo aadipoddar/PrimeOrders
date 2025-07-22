@@ -1,3 +1,4 @@
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Exporting.Sale;
 
 using Syncfusion.Blazor.Notifications;
@@ -66,6 +67,10 @@ public partial class SaleReturnSummaryModule
 		saleReturn.Status = false;
 		await SaleReturnData.InsertSaleReturn(saleReturn);
 		await StockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
+
+		var accounting = await AccountingData.LoadAccountingByReferenceNo(saleReturn.TransactionNo);
+		accounting.Status = false;
+		await AccountingData.InsertAccounting(accounting);
 
 		_sfSuccessToast.Content = "Sale return deleted successfully.";
 		await _sfSuccessToast.ShowAsync();

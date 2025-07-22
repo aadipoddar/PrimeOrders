@@ -1,3 +1,4 @@
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Exporting.Sale;
 
 using Syncfusion.Blazor.Notifications;
@@ -84,6 +85,10 @@ public partial class SaleSummaryModule
 		sale.Status = false;
 		await SaleData.InsertSale(sale);
 		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
+
+		var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
+		accounting.Status = false;
+		await AccountingData.InsertAccounting(accounting);
 
 		_sfSuccessToast.Content = "Sale deactivated successfully.";
 		await _sfSuccessToast.ShowAsync();

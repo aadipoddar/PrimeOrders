@@ -149,12 +149,12 @@
 								  OnClick="PrintVoucher">
 							<div class="button-content">
 								<img src="images/printA4.png" alt="Print" class="print-icon" />
-								<span>Print Invoice</span>
+								<span>Print Voucher</span>
 							</div>
 						</SfButton>
 
 						<!-- Edit Button - Only for admins -->
-						@if (CurrentUser.Admin)
+						@if (CurrentUser.Admin && SelectedAccounting.GeneratedModule == "FinancialAccounting")
 						{
 							<SfButton CssClass="view-button"
 									  OnClick='() => NavManager.NavigateTo($"/Accounts/FinancialAccounting/{SelectedAccounting.AccountingId}")'>
@@ -211,7 +211,7 @@
 						<p>Are you sure you want to delete this voucher?</p>
 					</div>
 
-					<div class="voucher-info">
+					<div class="purchase-info">
 						<div class="detail-item">
 							<span class="detail-label">Voucher ID:</span>
 							<span class="detail-value">@SelectedAccounting?.AccountingId</span>

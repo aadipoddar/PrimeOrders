@@ -1,3 +1,4 @@
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Exporting.Purchase;
 
 using Syncfusion.Blazor.Notifications;
@@ -62,6 +63,10 @@ public partial class PurchaseSummaryModule
 		purchase.Status = false;
 		await PurchaseData.InsertPurchase(purchase);
 		await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
+
+		var accounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);
+		accounting.Status = false;
+		await AccountingData.InsertAccounting(accounting);
 
 		_sfSuccessToast.Content = "Purchase deactivated successfully.";
 		await _sfSuccessToast.ShowAsync();

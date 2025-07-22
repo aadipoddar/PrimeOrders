@@ -36,6 +36,7 @@ INNER JOIN
 	[dbo].[ProductCategory] pc ON p.ProductCategoryId = pc.Id
 
 WHERE
+	[s].[Status] = 1 AND
 	[sd].[Status] = 1
 
 GROUP BY

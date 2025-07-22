@@ -192,8 +192,12 @@ else
 			<div class="dialog-content">
 				<div class="form-group">
 					<label>Bill Number</label>
+					@{
+						var isBillNoReadonly = PurchaseId.HasValue;
+					}
 					<SfTextBox @bind-Value="_purchase.BillNo"
 							   Placeholder="Enter Bill No"
+							   Readonly="isBillNoReadonly"
 							   CssClass="form-control" />
 				</div>
 
