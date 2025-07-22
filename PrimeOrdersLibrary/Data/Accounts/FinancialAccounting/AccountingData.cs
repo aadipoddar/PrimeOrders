@@ -24,4 +24,7 @@ public static class AccountingData
 
 	public static async Task<AccountingOverviewModel> LoadAccountingOverviewByAccountingId(int AccountingId) =>
 		(await SqlDataAccess.LoadData<AccountingOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingOverviewByAccountingId, new { AccountingId })).FirstOrDefault();
+
+	public static async Task<List<TrialBalanceModel>> LoadTrialBalanceByDate(DateTime FromDate, DateTime ToDate) =>
+		await SqlDataAccess.LoadData<TrialBalanceModel, dynamic>(StoredProcedureNames.LoadTrialBalanceByDate, new { FromDate, ToDate });
 }

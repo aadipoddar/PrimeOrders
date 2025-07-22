@@ -1,5 +1,4 @@
-﻿using PrimeOrdersLibrary.Exporting;
-using PrimeOrdersLibrary.Models.Inventory;
+﻿using PrimeOrdersLibrary.Models.Inventory;
 
 namespace PrimeOrdersLibrary.Exporting.Stock;
 

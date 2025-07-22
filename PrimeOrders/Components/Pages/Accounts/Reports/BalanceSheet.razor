@@ -1,0 +1,846 @@
+﻿@page "/Accounts/Reports/BalanceSheet"
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Charts
+@using System.Globalization
+
+<PageTitle>Balance Sheet Report</PageTitle>
+
+<div class="balance-sheet-container">
+	<div class="page-header">
+		<h2 class="page-title">Balance Sheet Report</h2>
+		<div class="header-actions">
+			<SfButton CssClass="e-success" @onclick="ExportToPdf">
+				<i class="fas fa-file-pdf"></i> Export PDF
+			</SfButton>
+			<SfButton CssClass="e-info" @onclick="ExportToExcel">
+				<i class="fas fa-file-excel"></i> Export Excel
+			</SfButton>
+			<SfButton CssClass="e-primary" @onclick="RefreshReport">
+				<i class="fas fa-sync"></i> Refresh
+			</SfButton>
+		</div>
+	</div>
+
+	<div class="filter-section">
+		<div class="filter-row">
+			<div class="filter-item">
+				<label>As of Date:</label>
+				<SfDatePicker @bind-Value="ReportDate"
+							  Format="dd/MM/yyyy"
+							  CssClass="e-outline"
+							  Placeholder="Select Date">
+				</SfDatePicker>
+			</div>
+			<div class="filter-item">
+				<label>Company:</label>
+				<SfDropDownList @bind-Value="SelectedCompany"
+								DataSource="@CompanyList"
+								CssClass="e-outline"
+								Placeholder="Select Company">
+					<DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+				</SfDropDownList>
+			</div>
+			<div class="filter-item">
+				<label>Currency:</label>
+				<SfDropDownList @bind-Value="SelectedCurrency"
+								DataSource="@CurrencyList"
+								CssClass="e-outline"
+								Placeholder="Select Currency">
+					<DropDownListFieldSettings Value="Code" Text="Name"></DropDownListFieldSettings>
+				</SfDropDownList>
+			</div>
+			<div class="filter-item">
+				<SfButton CssClass="e-primary generate-btn" @onclick="GenerateReport">
+					Generate Report
+				</SfButton>
+			</div>
+		</div>
+	</div>
+
+	@if (IsLoading)
+	{
+		<div class="loading-container">
+			<div class="spinner"></div>
+			<p>Generating Balance Sheet...</p>
+		</div>
+	}
+	else if (BalanceSheetData?.Any() == true)
+	{
+		<div class="report-content">
+			<div class="company-header">
+				<h3>@GetSelectedCompanyName()</h3>
+				<h4>Balance Sheet</h4>
+				<p>As of @ReportDate.ToString("MMMM dd, yyyy")</p>
+				<p class="currency-info">All amounts in @SelectedCurrency</p>
+			</div>
+
+			<div class="balance-sheet-grid">
+				<SfGrid DataSource="@BalanceSheetData"
+						AllowPaging="false"
+						AllowSorting="false"
+						GridLines="GridLine.None"
+						CssClass="balance-sheet-table">
+					<GridColumns>
+						<GridColumn Field="@nameof(BalanceSheetItem.AccountName)"
+									HeaderText="Account"
+									Width="300"
+									TextAlign="TextAlign.Left">
+							<Template>
+								@{
+									var item = (context as BalanceSheetItem);
+								}
+								<div class="account-row @GetAccountCssClass(item.AccountType)"
+									 style="padding-left: @(item.Level * 20)px">
+									@if (item.IsBold)
+									{
+										<strong>@item.AccountName</strong>
+									}
+									else
+									{
+										@item.AccountName
+									}
+								</div>
+							</Template>
+						</GridColumn>
+						<GridColumn Field="@nameof(BalanceSheetItem.CurrentAmount)"
+									HeaderText="@ReportDate.ToString("MMM yyyy")"
+									Width="150"
+									TextAlign="TextAlign.Right"
+									Format="N2">
+							<Template>
+								@{
+									var item = (context as BalanceSheetItem);
+								}
+								<div class="amount-cell @GetAccountCssClass(item.AccountType)">
+									@if (item.CurrentAmount.HasValue)
+									{
+										if (item.IsBold)
+										{
+											<strong>@FormatAmount(item.CurrentAmount.Value)</strong>
+										}
+										else
+										{
+											@FormatAmount(item.CurrentAmount.Value)
+										}
+									}
+								</div>
+							</Template>
+						</GridColumn>
+						<GridColumn Field="@nameof(BalanceSheetItem.PreviousAmount)"
+									HeaderText="@ReportDate.AddYears(-1).ToString("MMM yyyy")"
+									Width="150"
+									TextAlign="TextAlign.Right"
+									Format="N2">
+							<Template>
+								@{
+									var item = (context as BalanceSheetItem);
+								}
+								<div class="amount-cell @GetAccountCssClass(item.AccountType)">
+									@if (item.PreviousAmount.HasValue)
+									{
+										if (item.IsBold)
+										{
+											<strong>@FormatAmount(item.PreviousAmount.Value)</strong>
+										}
+										else
+										{
+											@FormatAmount(item.PreviousAmount.Value)
+										}
+									}
+								</div>
+							</Template>
+						</GridColumn>
+					</GridColumns>
+				</SfGrid>
+			</div>
+
+			<div class="financial-ratios">
+				<h4>Key Financial Ratios</h4>
+				<div class="ratio-cards">
+					<div class="ratio-card">
+						<h5>Current Ratio</h5>
+						<p class="ratio-value">@CurrentRatio.ToString("N2")</p>
+					</div>
+					<div class="ratio-card">
+						<h5>Debt-to-Equity</h5>
+						<p class="ratio-value">@DebtToEquityRatio.ToString("N2")</p>
+					</div>
+					<div class="ratio-card">
+						<h5>Working Capital</h5>
+						<p class="ratio-value">@FormatAmount(WorkingCapital)</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<div class="no-data">
+			<i class="fas fa-chart-line"></i>
+			<p>No data available for the selected criteria.</p>
+			<p>Please select different filters and try again.</p>
+		</div>
+	}
+</div>
+
+@code {
+	// Properties
+	private DateTime ReportDate { get; set; } = DateTime.Today;
+	private string SelectedCompany { get; set; } = "1";
+	private string SelectedCurrency { get; set; } = "USD";
+	private bool IsLoading { get; set; } = false;
+
+	// Data Collections
+	private List<BalanceSheetItem> BalanceSheetData { get; set; } = new();
+	private List<Company> CompanyList { get; set; } = new();
+	private List<Currency> CurrencyList { get; set; } = new();
+
+	// Calculated Ratios
+	private decimal CurrentRatio { get; set; }
+	private decimal DebtToEquityRatio { get; set; }
+	private decimal WorkingCapital { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadInitialData();
+		await GenerateReport();
+	}
+
+	private async Task LoadInitialData()
+	{
+		// Load companies
+		CompanyList = new List<Company>
+		{
+			new() { Id = "1", Name = "Acme Corporation" },
+			new() { Id = "2", Name = "TechStart Ltd." },
+			new() { Id = "3", Name = "Global Industries Inc." }
+		};
+
+		// Load currencies
+		CurrencyList = new List<Currency>
+		{
+			new() { Code = "USD", Name = "US Dollar" },
+			new() { Code = "EUR", Name = "Euro" },
+			new() { Code = "GBP", Name = "British Pound" },
+			new() { Code = "INR", Name = "Indian Rupee" }
+		};
+
+		await Task.CompletedTask;
+	}
+
+	private async Task GenerateReport()
+	{
+		IsLoading = true;
+		StateHasChanged();
+
+		try
+		{
+			// Simulate API call delay
+			await Task.Delay(1500);
+
+			// Generate sample balance sheet data
+			BalanceSheetData = GenerateSampleBalanceSheetData();
+
+			// Calculate financial ratios
+			CalculateFinancialRatios();
+		}
+		finally
+		{
+			IsLoading = false;
+			StateHasChanged();
+		}
+	}
+
+	private List<BalanceSheetItem> GenerateSampleBalanceSheetData()
+	{
+		var random = new Random();
+		var data = new List<BalanceSheetItem>();
+
+		// ASSETS
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "ASSETS",
+			AccountType = "Header",
+			Level = 0,
+			IsBold = true
+		});
+
+		// Current Assets
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Current Assets",
+			AccountType = "SubHeader",
+			Level = 1,
+			IsBold = true
+		});
+
+		var cash = random.Next(50000, 200000);
+		var previousCash = random.Next(40000, 180000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Cash and Cash Equivalents",
+			AccountType = "Asset",
+			Level = 2,
+			CurrentAmount = cash,
+			PreviousAmount = previousCash
+		});
+
+		var receivables = random.Next(30000, 150000);
+		var previousReceivables = random.Next(25000, 140000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Accounts Receivable",
+			AccountType = "Asset",
+			Level = 2,
+			CurrentAmount = receivables,
+			PreviousAmount = previousReceivables
+		});
+
+		var inventory = random.Next(20000, 100000);
+		var previousInventory = random.Next(15000, 95000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Inventory",
+			AccountType = "Asset",
+			Level = 2,
+			CurrentAmount = inventory,
+			PreviousAmount = previousInventory
+		});
+
+		var totalCurrentAssets = cash + receivables + inventory;
+		var totalPreviousCurrentAssets = previousCash + previousReceivables + previousInventory;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Total Current Assets",
+			AccountType = "Total",
+			Level = 1,
+			IsBold = true,
+			CurrentAmount = totalCurrentAssets,
+			PreviousAmount = totalPreviousCurrentAssets
+		});
+
+		// Non-Current Assets
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Non-Current Assets",
+			AccountType = "SubHeader",
+			Level = 1,
+			IsBold = true
+		});
+
+		var ppe = random.Next(200000, 500000);
+		var previousPpe = random.Next(180000, 480000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Property, Plant & Equipment",
+			AccountType = "Asset",
+			Level = 2,
+			CurrentAmount = ppe,
+			PreviousAmount = previousPpe
+		});
+
+		var intangible = random.Next(50000, 150000);
+		var previousIntangible = random.Next(45000, 140000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Intangible Assets",
+			AccountType = "Asset",
+			Level = 2,
+			CurrentAmount = intangible,
+			PreviousAmount = previousIntangible
+		});
+
+		var totalNonCurrentAssets = ppe + intangible;
+		var totalPreviousNonCurrentAssets = previousPpe + previousIntangible;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Total Non-Current Assets",
+			AccountType = "Total",
+			Level = 1,
+			IsBold = true,
+			CurrentAmount = totalNonCurrentAssets,
+			PreviousAmount = totalPreviousNonCurrentAssets
+		});
+
+		var totalAssets = totalCurrentAssets + totalNonCurrentAssets;
+		var totalPreviousAssets = totalPreviousCurrentAssets + totalPreviousNonCurrentAssets;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "TOTAL ASSETS",
+			AccountType = "GrandTotal",
+			Level = 0,
+			IsBold = true,
+			CurrentAmount = totalAssets,
+			PreviousAmount = totalPreviousAssets
+		});
+
+		// LIABILITIES
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "LIABILITIES",
+			AccountType = "Header",
+			Level = 0,
+			IsBold = true
+		});
+
+		// Current Liabilities
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Current Liabilities",
+			AccountType = "SubHeader",
+			Level = 1,
+			IsBold = true
+		});
+
+		var payables = random.Next(20000, 80000);
+		var previousPayables = random.Next(18000, 75000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Accounts Payable",
+			AccountType = "Liability",
+			Level = 2,
+			CurrentAmount = payables,
+			PreviousAmount = previousPayables
+		});
+
+		var shortTermDebt = random.Next(10000, 50000);
+		var previousShortTermDebt = random.Next(8000, 45000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Short-term Debt",
+			AccountType = "Liability",
+			Level = 2,
+			CurrentAmount = shortTermDebt,
+			PreviousAmount = previousShortTermDebt
+		});
+
+		var totalCurrentLiabilities = payables + shortTermDebt;
+		var totalPreviousCurrentLiabilities = previousPayables + previousShortTermDebt;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Total Current Liabilities",
+			AccountType = "Total",
+			Level = 1,
+			IsBold = true,
+			CurrentAmount = totalCurrentLiabilities,
+			PreviousAmount = totalPreviousCurrentLiabilities
+		});
+
+		// Long-term Liabilities
+		var longTermDebt = random.Next(100000, 300000);
+		var previousLongTermDebt = random.Next(90000, 280000);
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Long-term Debt",
+			AccountType = "Liability",
+			Level = 1,
+			CurrentAmount = longTermDebt,
+			PreviousAmount = previousLongTermDebt
+		});
+
+		var totalLiabilities = totalCurrentLiabilities + longTermDebt;
+		var totalPreviousLiabilities = totalPreviousCurrentLiabilities + previousLongTermDebt;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "TOTAL LIABILITIES",
+			AccountType = "GrandTotal",
+			Level = 0,
+			IsBold = true,
+			CurrentAmount = totalLiabilities,
+			PreviousAmount = totalPreviousLiabilities
+		});
+
+		// EQUITY
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "EQUITY",
+			AccountType = "Header",
+			Level = 0,
+			IsBold = true
+		});
+
+		var shareCapital = 100000;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Share Capital",
+			AccountType = "Equity",
+			Level = 1,
+			CurrentAmount = shareCapital,
+			PreviousAmount = shareCapital
+		});
+
+		var retainedEarnings = totalAssets - totalLiabilities - shareCapital;
+		var previousRetainedEarnings = totalPreviousAssets - totalPreviousLiabilities - shareCapital;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "Retained Earnings",
+			AccountType = "Equity",
+			Level = 1,
+			CurrentAmount = retainedEarnings,
+			PreviousAmount = previousRetainedEarnings
+		});
+
+		var totalEquity = shareCapital + retainedEarnings;
+		var totalPreviousEquity = shareCapital + previousRetainedEarnings;
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "TOTAL EQUITY",
+			AccountType = "GrandTotal",
+			Level = 0,
+			IsBold = true,
+			CurrentAmount = totalEquity,
+			PreviousAmount = totalPreviousEquity
+		});
+
+		data.Add(new BalanceSheetItem
+		{
+			AccountName = "TOTAL LIABILITIES AND EQUITY",
+			AccountType = "GrandTotal",
+			Level = 0,
+			IsBold = true,
+			CurrentAmount = totalLiabilities + totalEquity,
+			PreviousAmount = totalPreviousLiabilities + totalPreviousEquity
+		});
+
+		// Store values for ratio calculations
+		WorkingCapital = totalCurrentAssets - totalCurrentLiabilities;
+
+		return data;
+	}
+
+	private void CalculateFinancialRatios()
+	{
+		var currentAssets = BalanceSheetData.FirstOrDefault(x => x.AccountName == "Total Current Assets")?.CurrentAmount ?? 0;
+		var currentLiabilities = BalanceSheetData.FirstOrDefault(x => x.AccountName == "Total Current Liabilities")?.CurrentAmount ?? 0;
+		var totalLiabilities = BalanceSheetData.FirstOrDefault(x => x.AccountName == "TOTAL LIABILITIES")?.CurrentAmount ?? 0;
+		var totalEquity = BalanceSheetData.FirstOrDefault(x => x.AccountName == "TOTAL EQUITY")?.CurrentAmount ?? 0;
+
+		CurrentRatio = currentLiabilities > 0 ? currentAssets / currentLiabilities : 0;
+		DebtToEquityRatio = totalEquity > 0 ? totalLiabilities / totalEquity : 0;
+	}
+
+	private string GetSelectedCompanyName()
+	{
+		return CompanyList.FirstOrDefault(c => c.Id == SelectedCompany)?.Name ?? "";
+	}
+
+	private string GetAccountCssClass(string accountType)
+	{
+		return accountType switch
+		{
+			"Header" => "header-row",
+			"SubHeader" => "subheader-row",
+			"Total" => "total-row",
+			"GrandTotal" => "grand-total-row",
+			_ => "account-row"
+		};
+	}
+
+	private string FormatAmount(decimal amount)
+	{
+		return amount.ToString("N0", CultureInfo.CurrentCulture);
+	}
+
+	private async Task RefreshReport()
+	{
+		await GenerateReport();
+	}
+
+	private async Task ExportToPdf()
+	{
+		// Implementation for PDF export
+		await Task.Delay(500);
+		// Add Syncfusion PDF export logic here
+	}
+
+	private async Task ExportToExcel()
+	{
+		// Implementation for Excel export
+		await Task.Delay(500);
+		// Add Syncfusion Excel export logic here
+	}
+
+	// Data Models
+	public class BalanceSheetItem
+	{
+		public string AccountName { get; set; } = "";
+		public string AccountType { get; set; } = "";
+		public int Level { get; set; }
+		public decimal? CurrentAmount { get; set; }
+		public decimal? PreviousAmount { get; set; }
+		public bool IsBold { get; set; }
+	}
+
+	public class Company
+	{
+		public string Id { get; set; } = "";
+		public string Name { get; set; } = "";
+	}
+
+	public class Currency
+	{
+		public string Code { get; set; } = "";
+		public string Name { get; set; } = "";
+	}
+}
+
+<style>
+	.balance-sheet-container {
+		padding: 20px;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	}
+
+	.page-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 30px;
+		padding-bottom: 20px;
+		border-bottom: 2px solid #e0e0e0;
+	}
+
+	.page-title {
+		margin: 0;
+		color: #333;
+		font-size: 28px;
+		font-weight: 600;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 10px;
+	}
+
+	.filter-section {
+		background: #f8f9fa;
+		padding: 20px;
+		border-radius: 8px;
+		margin-bottom: 30px;
+	}
+
+	.filter-row {
+		display: flex;
+		gap: 20px;
+		align-items: end;
+		flex-wrap: wrap;
+	}
+
+	.filter-item {
+		display: flex;
+		flex-direction: column;
+		min-width: 200px;
+	}
+
+		.filter-item label {
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: #555;
+		}
+
+	.generate-btn {
+		margin-top: 24px !important;
+	}
+
+	.loading-container {
+		text-align: center;
+		padding: 60px;
+	}
+
+	.spinner {
+		border: 4px solid #f3f3f3;
+		border-top: 4px solid #007bff;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		animation: spin 2s linear infinite;
+		margin: 0 auto 20px;
+	}
+
+	@@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+	.report-content {
+		background: white;
+		border-radius: 8px;
+		box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		overflow: hidden;
+	}
+
+	.company-header {
+		text-align: center;
+		padding: 30px;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+	}
+
+		.company-header h3 {
+			margin: 0 0 10px 0;
+			font-size: 24px;
+			font-weight: 600;
+		}
+
+		.company-header h4 {
+			margin: 0 0 10px 0;
+			font-size: 20px;
+			font-weight: 400;
+		}
+
+		.company-header p {
+			margin: 5px 0;
+			opacity: 0.9;
+		}
+
+	.currency-info {
+		font-style: italic;
+		font-size: 14px;
+	}
+
+	.balance-sheet-grid {
+		padding: 0;
+	}
+
+	.balance-sheet-table {
+		border: none;
+	}
+
+		.balance-sheet-table .e-grid .e-gridheader {
+			background: #f8f9fa;
+			font-weight: 600;
+		}
+
+		.balance-sheet-table .e-grid .e-row {
+			border-bottom: 1px solid #eee;
+		}
+
+	.account-row {
+		padding: 8px 0;
+	}
+
+	.header-row {
+		background: #e9ecef;
+		font-weight: bold;
+		color: #495057;
+		padding: 12px 0;
+		border-top: 2px solid #dee2e6;
+		border-bottom: 1px solid #dee2e6;
+	}
+
+	.subheader-row {
+		background: #f8f9fa;
+		font-weight: 600;
+		color: #6c757d;
+		padding: 10px 0;
+		border-bottom: 1px solid #e9ecef;
+	}
+
+	.total-row {
+		background: #fff3cd;
+		font-weight: 600;
+		color: #856404;
+		border-top: 1px solid #ffeaa7;
+		border-bottom: 1px solid #ffeaa7;
+		padding: 10px 0;
+	}
+
+	.grand-total-row {
+		background: #d4edda;
+		font-weight: bold;
+		color: #155724;
+		border-top: 2px solid #28a745;
+		border-bottom: 2px solid #28a745;
+		padding: 12px 0;
+	}
+
+	.amount-cell {
+		padding: 8px 0;
+		text-align: right;
+	}
+
+	.financial-ratios {
+		padding: 30px;
+		background: #f8f9fa;
+		border-top: 1px solid #dee2e6;
+	}
+
+		.financial-ratios h4 {
+			margin: 0 0 20px 0;
+			color: #495057;
+			font-weight: 600;
+		}
+
+	.ratio-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 20px;
+	}
+
+	.ratio-card {
+		background: white;
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+		text-align: center;
+	}
+
+		.ratio-card h5 {
+			margin: 0 0 10px 0;
+			color: #6c757d;
+			font-size: 14px;
+			font-weight: 500;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+	.ratio-value {
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: #495057;
+	}
+
+	.no-data {
+		text-align: center;
+		padding: 60px;
+		color: #6c757d;
+	}
+
+		.no-data i {
+			font-size: 48px;
+			margin-bottom: 20px;
+			opacity: 0.5;
+		}
+
+		.no-data p {
+			margin: 10px 0;
+		}
+
+	@@media (max-width: 768px) {
+		.filter-row {
+			flex-direction: column;
+		}
+
+		.filter-item {
+			min-width: 100%;
+		}
+
+		.header-actions {
+			flex-direction: column;
+			gap: 5px;
+		}
+
+		.ratio-cards {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

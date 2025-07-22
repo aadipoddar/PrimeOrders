@@ -102,6 +102,7 @@ public static class StoredProcedureNames
 	public static string LoadAccountingOverviewByAccountingId => "Load_AccountingOverview_By_AccountingId";
 
 	public static string LoadLedgerDetailsByDateLedger => "Load_LedgerDetails_By_Date_Ledger";
+	public static string LoadTrialBalanceByDate => "Load_TrialBalance_By_Date";
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";

@@ -86,9 +86,13 @@ public partial class SaleSummaryModule
 		await SaleData.InsertSale(sale);
 		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
 
-		var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
-		accounting.Status = false;
-		await AccountingData.InsertAccounting(accounting);
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, sale.LocationId);
+		if (location.MainLocation)
+		{
+			var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
+			accounting.Status = false;
+			await AccountingData.InsertAccounting(accounting);
+		}
 
 		_sfSuccessToast.Content = "Sale deactivated successfully.";
 		await _sfSuccessToast.ShowAsync();

@@ -16,7 +16,6 @@ public partial class RawMaterialStockReport
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
-	private readonly List<LocationModel> _locations = [];
 	private List<RawMaterialStockDetailModel> _stockDetails = [];
 
 	private SfGrid<RawMaterialStockDetailModel> _sfGrid;
