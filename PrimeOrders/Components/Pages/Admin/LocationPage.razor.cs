@@ -86,12 +86,12 @@ public partial class LocationPage
 			return;
 
 		await LocationData.InsertLocation(_locationModel);
-		await InsertSupplier();
+		await InsertLedger();
 
 		await _sfToast.ShowAsync();
 	}
 
-	private async Task InsertSupplier()
+	private async Task InsertLedger()
 	{
 		LedgerModel ledger = null;
 
