@@ -1,9 +1,68 @@
+using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.DataAccess;
+using PrimeOrdersLibrary.Models.Common;
+using PrimeOrdersLibrary.Models.Order;
+using PrimeOrdersLibrary.Models.Product;
+
 namespace PrimeBakes.Order;
 
 public partial class OrderPage : ContentPage
 {
+	private readonly int _userId;
+	private UserModel _user;
+	private List<ProductModel> _allProducts;
+	private List<ProductModel> _products;
+	private readonly List<OrderProductCartModel> _cart = [];
+
 	public OrderPage(int userId)
 	{
 		InitializeComponent();
+
+		_userId = userId;
+	}
+
+	protected override async void OnAppearing()
+	{
+		base.OnAppearing();
+
+		_user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
+
+		_allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
+		_allProducts.RemoveAll(r => r.LocationId != 1);
+		_products = [.. _allProducts.Take(20)];
+
+		itemsCollectionView.ItemsSource = _products;
+		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+	}
+
+	private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+	{
+		_products = [.. _allProducts.Where(p => p.Name.Contains(e.NewTextValue, StringComparison.OrdinalIgnoreCase))];
+		_products = [.. _products.Take(20)];
+		itemsCollectionView.ItemsSource = _products;
+		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+	}
+
+	private void AddButton_Clicked(object sender, EventArgs e)
+	{
+		if ((sender as Button).Parent.BindingContext is not ProductModel product)
+			return;
+
+		var existingCartItem = _cart.FirstOrDefault(c => c.ProductId == product.Id);
+		if (existingCartItem is not null)
+			existingCartItem.Quantity += 1;
+		else
+			_cart.Add(new()
+			{
+				ProductId = product.Id,
+				ProductName = product.Name,
+				Quantity = 1
+			});
+
+		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+	}
+
+	private void CartButton_Clicked(object sender, EventArgs e)
+	{
 	}
 }

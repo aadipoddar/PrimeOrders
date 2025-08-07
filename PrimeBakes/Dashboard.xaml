@@ -5,7 +5,7 @@
              Title="Dashboard">
 
 	<ScrollView>
-		<StackLayout>
+		<VerticalStackLayout>
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
@@ -19,8 +19,8 @@
 					</Grid>
 				</Border>
 
-				<Grid Grid.Row="1">
-					<StackLayout>
+				<ScrollView Grid.Row="1">
+					<VerticalStackLayout>
 						<Grid>
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="*"/>
@@ -30,9 +30,9 @@
 							<Button MinimumHeightRequest="100" Margin="10" Text="ORDER" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" Clicked="OrderButton_Clicked" />
 							<Button MinimumHeightRequest="100" Grid.Column="1" Margin="10" Text="SALE" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" />
 						</Grid>
-					</StackLayout>
-				</Grid>
+					</VerticalStackLayout>
+				</ScrollView>
 			</Grid>
-		</StackLayout>
+		</VerticalStackLayout>
 	</ScrollView>
 </ContentPage>

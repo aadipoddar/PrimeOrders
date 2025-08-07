@@ -10,7 +10,6 @@ public partial class LoginPage : ContentPage
 	{
 		InitializeComponent();
 
-		Navigation.PushAsync(new Dashboard(1), true);
 		var userId = SecureStorage.GetAsync(_currentUserIdKey).GetAwaiter().GetResult();
 		if (userId is not null && userId is not "0")
 			Navigation.PushAsync(new Dashboard(int.Parse(userId)), true);
