@@ -20,10 +20,10 @@ public static class MauiProgram
 	public static MauiApp CreateMauiApp()
 	{
 #if ANDROID
-		var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+		// var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-		if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
-			Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+		// if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
+		// Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
 #endif
 
 		Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Secrets.SyncfusionLicense);
@@ -34,6 +34,8 @@ public static class MauiProgram
 			.ConfigureSyncfusionToolkit()
 			.ConfigureFonts(fonts =>
 			{
+				fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");
+				fonts.AddFont("CascadiaCode-SemiBold.ttf", "CascadiaCodeSemibold");
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});

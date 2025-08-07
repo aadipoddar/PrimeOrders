@@ -3,10 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PrimeBakes.Dashboard"
              Title="Dashboard">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+
+	<ScrollView>
+		<StackLayout>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+
+				<Border Background="MediumPurple" Margin="10" StrokeShape="RoundRectangle 10" Padding="5">
+					<Grid>
+						<Label Text="Dashboard" FontSize="30" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
+						<Button Text="Log Out" HorizontalOptions="End" Margin="15,0" Background="BlueViolet" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="17" Clicked="LogOutButton_Clicked" />
+					</Grid>
+				</Border>
+
+				<Grid Grid.Row="1">
+					<StackLayout>
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+
+							<Button MinimumHeightRequest="100" Margin="10" Text="ORDER" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" Clicked="OrderButton_Clicked" />
+							<Button MinimumHeightRequest="100" Grid.Column="1" Margin="10" Text="SALE" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" />
+						</Grid>
+					</StackLayout>
+				</Grid>
+			</Grid>
+		</StackLayout>
+	</ScrollView>
 </ContentPage>

@@ -10,8 +10,10 @@ public partial class LoginPage : ContentPage
 	{
 		InitializeComponent();
 
+		Navigation.PushAsync(new Dashboard(1), true);
 		var userId = SecureStorage.GetAsync(_currentUserIdKey).GetAwaiter().GetResult();
-		if (userId is not null && userId is not "0") Navigation.PushAsync(new Dashboard(int.Parse(userId)), true);
+		if (userId is not null && userId is not "0")
+			Navigation.PushAsync(new Dashboard(int.Parse(userId)), true);
 	}
 
 	protected override void OnAppearing()
@@ -23,7 +25,6 @@ public partial class LoginPage : ContentPage
 	private async void OnValueChanged(object sender, Syncfusion.Maui.Toolkit.OtpInput.OtpInputValueChangedEventArgs e)
 	{
 		var passcode = e.NewValue?.ToString() ?? string.Empty;
-
 		if (passcode.Length != 4)
 			return;
 

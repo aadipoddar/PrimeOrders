@@ -1,9 +1,37 @@
+using PrimeBakes.Order;
+
+using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.DataAccess;
+using PrimeOrdersLibrary.Models.Common;
+
 namespace PrimeBakes;
 
 public partial class Dashboard : ContentPage
 {
+	private const string _currentUserIdKey = "user_id";
+	private readonly int _userId;
+
 	public Dashboard(int userId)
 	{
 		InitializeComponent();
+
+		_userId = userId;
 	}
+
+	protected override async void OnAppearing()
+	{
+		base.OnAppearing();
+
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
+		Title = $"Welcome, {user.Name}";
+	}
+
+	private void LogOutButton_Clicked(object sender, EventArgs e)
+	{
+		SecureStorage.Remove(_currentUserIdKey);
+		Navigation.PopAsync(true);
+	}
+
+	private void OrderButton_Clicked(object sender, EventArgs e) =>
+		Navigation.PushAsync(new OrderPage(_userId), true);
 }
