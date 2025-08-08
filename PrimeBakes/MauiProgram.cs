@@ -12,6 +12,8 @@ using Syncfusion.Maui.Toolkit.Hosting;
 
 using PrimeOrdersLibrary.DataAccess;
 
+using Syncfusion.Maui.Core.Hosting;
+
 
 namespace PrimeBakes;
 
@@ -32,6 +34,7 @@ public static class MauiProgram
 		builder
 			.UseMauiApp<App>()
 			.ConfigureSyncfusionToolkit()
+			.ConfigureSyncfusionCore()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");

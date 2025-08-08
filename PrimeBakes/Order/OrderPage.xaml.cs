@@ -1,6 +1,5 @@
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.DataAccess;
-using PrimeOrdersLibrary.Models.Common;
 using PrimeOrdersLibrary.Models.Order;
 using PrimeOrdersLibrary.Models.Product;
 
@@ -9,7 +8,6 @@ namespace PrimeBakes.Order;
 public partial class OrderPage : ContentPage
 {
 	private readonly int _userId;
-	private UserModel _user;
 	private List<ProductModel> _allProducts;
 	private List<ProductModel> _products;
 	private readonly List<OrderProductCartModel> _cart = [];
@@ -24,8 +22,6 @@ public partial class OrderPage : ContentPage
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
-
-		_user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
 
 		_allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
 		_allProducts.RemoveAll(r => r.LocationId != 1);
@@ -62,7 +58,8 @@ public partial class OrderPage : ContentPage
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 	}
 
-	private void CartButton_Clicked(object sender, EventArgs e)
+	private async void CartButton_Clicked(object sender, EventArgs e)
 	{
+		await Navigation.PushAsync(new CartPage(_userId, _cart));
 	}
 }

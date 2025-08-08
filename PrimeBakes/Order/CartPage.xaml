@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PrimeBakes.Order.CartPage"
+			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Expander;assembly=Syncfusion.Maui.Expander"
+			 xmlns:control="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+             Title="Cart">
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+
+		<Border Margin="10" Stroke="#CAC4D0">
+			<syncfusion:SfExpander IsExpanded="True" Margin="10">
+				<syncfusion:SfExpander.Header>
+					<Label Text="Order Details" FontSize="20" FontFamily="CascadiaCodeSemibold" Background="#ddb7fd" HorizontalTextAlignment="Center" Padding="5" TextColor="Black" />
+				</syncfusion:SfExpander.Header>
+
+				<syncfusion:SfExpander.Content>
+					<StackLayout Padding="10">
+						<Grid Margin="5">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+
+							<Label Text="Order No:" VerticalTextAlignment="Center" />
+							<Entry Grid.Column="1" Text="YTFFGH676654" HorizontalOptions="End" IsReadOnly="True"/>
+						</Grid>
+
+						<Grid Margin="5">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+
+							<Label Text="Date:" VerticalTextAlignment="Center" />
+							<DatePicker Grid.Column="1" HorizontalOptions="End" />
+						</Grid>
+
+						<Grid Margin="5">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+
+							<Label Text="Remarks:" VerticalTextAlignment="Center" />
+							<Entry Grid.Column="1" Margin="10,0,0,0" Placeholder="Narration Regarding This Order..." />
+						</Grid>
+
+						<Grid Margin="5" x:Name="locationSelectionGrid">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+
+							<Label Text="Location:" VerticalTextAlignment="Center" />
+							<control:SfComboBox x:Name="locationComboBox" Grid.Column="1" Margin="10,0,0,0" Background="#ddb7fd" />
+						</Grid>
+					</StackLayout>
+				</syncfusion:SfExpander.Content>
+			</syncfusion:SfExpander>
+		</Border>
+
+		<ScrollView Grid.Row="1" Margin="10">
+			<CollectionView x:Name="cartItemsCollectionView">
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Border Margin="10" Background="Transparent" Padding="5">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="10"/>
+
+								<control:SfNumericEntry Grid.Column="1" x:Name="quantityNumericEntry"
+                                                        Value="{Binding Quantity}"
+														Margin="10,5"	
+														Background="MediumPurple"
+                                                        CustomFormat="0" AllowNull="False"
+                                                        Minimum="0" UpDownPlacementMode="Inline"
+                                                        ValueChanged="quantityNumericEntry_ValueChanged">
+								</control:SfNumericEntry>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</ScrollView>
+
+		<Border Background="MediumPurple" Grid.Row="2" Margin="10" StrokeShape="RoundRectangle 10" Padding="5">
+			<Grid>
+				<Label x:Name="cartItemsLabel" Text="15 Items" FontSize="17" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
+				<Button Text="CheckOut ->" HorizontalOptions="End" Margin="15,0" Background="ForestGreen" TextColor="White" FontFamily="CascadiaCodeSemibold" Clicked="CheckoutButton_Clicked" />
+			</Grid>
+		</Border>
+	</Grid>
+
+</ContentPage>
