@@ -48,6 +48,7 @@ public partial class LoginPage : ContentPage
 			return;
 		}
 
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 		await SecureStorage.Default.SetAsync(_currentUserIdKey, user.Id.ToString());
 		await Navigation.PushAsync(new Dashboard(user.Id));
 		passcodeInput.Value = string.Empty;

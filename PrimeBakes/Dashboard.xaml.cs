@@ -34,10 +34,14 @@ public partial class Dashboard : ContentPage
 
 	private async void LogOutButton_Clicked(object sender, EventArgs e)
 	{
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 		SecureStorage.Remove(_currentUserIdKey);
 		await Navigation.PopAsync(true);
 	}
 
-	private async void OrderButton_Clicked(object sender, EventArgs e) =>
+	private async void OrderButton_Clicked(object sender, EventArgs e)
+	{
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 		await Navigation.PushAsync(new OrderPage(_userId), true);
+	}
 }

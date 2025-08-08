@@ -1,4 +1,6 @@
 
+using Plugin.Maui.Audio;
+
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.DataAccess;
@@ -62,7 +64,7 @@ public partial class CartPage : ContentPage
 			LocationId = !location.MainLocation ? _user.LocationId : int.Parse(locationComboBox.SelectedValue.ToString()),
 			OrderDate = DateOnly.FromDateTime(orderDatePicker.Date),
 			OrderNo = "",
-			Remarks = remarksTextBox.Text,
+			Remarks = remarksTextBox.Text ?? string.Empty,
 			SaleId = null,
 			UserId = _user.Id,
 			Status = true,
@@ -99,6 +101,8 @@ public partial class CartPage : ContentPage
 		File.WriteAllText(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
 
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
 	private async void CheckoutButton_Clicked(object sender, EventArgs e)
@@ -117,6 +121,11 @@ public partial class CartPage : ContentPage
 		if (File.Exists(fullPath))
 			File.Delete(fullPath);
 
+		if (Vibration.Default.IsSupported)
+			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+
+		AudioManager.Current.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("checkout.mp3")).Play();
+
 		Navigation.RemovePage(_orderPage);
 		Navigation.RemovePage(this);
 		await Navigation.PushAsync(new Dashboard(_userId));
@@ -131,7 +140,7 @@ public partial class CartPage : ContentPage
 			LocationId = !location.MainLocation ? _user.LocationId : int.Parse(locationComboBox.SelectedValue.ToString()),
 			OrderDate = DateOnly.FromDateTime(orderDatePicker.Date),
 			OrderNo = "",
-			Remarks = remarksTextBox.Text,
+			Remarks = remarksTextBox.Text ?? string.Empty,
 			SaleId = null,
 			UserId = _user.Id,
 			Status = true,

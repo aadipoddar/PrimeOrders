@@ -65,6 +65,8 @@ public partial class OrderPage : ContentPage
 			});
 
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
 	private async void CartButton_Clicked(object sender, EventArgs e)
@@ -82,5 +84,7 @@ public partial class OrderPage : ContentPage
 
 		File.WriteAllText(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
 		await Navigation.PushAsync(new CartPage(_userId, this));
+
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 }

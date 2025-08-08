@@ -103,6 +103,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.90" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+		<PackageReference Include="Plugin.Maui.Audio" Version="4.0.0" />
 		<PackageReference Include="Syncfusion.Maui.Expander" Version="30.2.4" />
 		<PackageReference Include="Syncfusion.Maui.Inputs" Version="30.2.4" />
 		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />

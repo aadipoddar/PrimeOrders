@@ -9,7 +9,7 @@ namespace PrimeOrdersLibrary.DataAccess;
 
 public static class SqlDataAccess
 {
-	private static readonly string _databaseConnection = ConnectionStrings.Azure;
+	private static readonly string _databaseConnection = ConnectionStrings.Local;
 
 	public static async Task<List<T>> LoadData<T, U>(string storedProcedure, U parameters)
 	{
