@@ -2,12 +2,6 @@
 using Microsoft.Extensions.Logging;
 #endif
 
-#if ANDROID
-using System.Reflection;
-
-using PrimeBakes.Platforms.Android;
-#endif
-
 using Syncfusion.Maui.Toolkit.Hosting;
 
 using PrimeOrdersLibrary.DataAccess;
@@ -21,13 +15,7 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
-#if ANDROID
-		// var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-		// if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
-		// Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
-#endif
-
+		Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 		Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(Secrets.SyncfusionLicense);
 
 		var builder = MauiApp.CreateBuilder();

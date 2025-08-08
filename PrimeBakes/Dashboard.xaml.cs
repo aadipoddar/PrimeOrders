@@ -24,14 +24,20 @@ public partial class Dashboard : ContentPage
 
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
 		Title = $"Welcome, {user.Name}";
+
+		if (user.Order)
+			orderButton.IsVisible = true;
+
+		if (user.Sales)
+			saleButton.IsVisible = true;
 	}
 
-	private void LogOutButton_Clicked(object sender, EventArgs e)
+	private async void LogOutButton_Clicked(object sender, EventArgs e)
 	{
 		SecureStorage.Remove(_currentUserIdKey);
-		Navigation.PopAsync(true);
+		await Navigation.PopAsync(true);
 	}
 
-	private void OrderButton_Clicked(object sender, EventArgs e) =>
-		Navigation.PushAsync(new OrderPage(_userId), true);
+	private async void OrderButton_Clicked(object sender, EventArgs e) =>
+		await Navigation.PushAsync(new OrderPage(_userId), true);
 }

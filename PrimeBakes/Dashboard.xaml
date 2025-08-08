@@ -27,8 +27,8 @@
 								<ColumnDefinition Width="*"/>
 							</Grid.ColumnDefinitions>
 
-							<Button MinimumHeightRequest="100" Margin="10" Text="ORDER" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" Clicked="OrderButton_Clicked" />
-							<Button MinimumHeightRequest="100" Grid.Column="1" Margin="10" Text="SALE" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" />
+							<Button MinimumHeightRequest="100" x:Name="orderButton" Margin="10" Text="ORDER" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" Clicked="OrderButton_Clicked" IsVisible="Collapse" />
+							<Button MinimumHeightRequest="100" x:Name="saleButton" Grid.Column="1" Margin="10" Text="SALE" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="25" Background="DarkViolet" IsVisible="Collapse" />
 						</Grid>
 					</VerticalStackLayout>
 				</ScrollView>

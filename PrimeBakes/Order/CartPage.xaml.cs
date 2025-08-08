@@ -1,4 +1,6 @@
+
 using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Models.Common;
 using PrimeOrdersLibrary.Models.Order;
@@ -11,12 +13,15 @@ public partial class CartPage : ContentPage
 	private readonly int _userId;
 	private UserModel _user;
 	private readonly List<OrderProductCartModel> _cart = [];
+	private readonly OrderPage _orderPage;
 
-	public CartPage(int userId)
+	public CartPage(int userId, OrderPage orderPage)
 	{
 		InitializeComponent();
 
 		_userId = userId;
+		_orderPage = orderPage;
+
 		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
 		if (File.Exists(fullPath))
 		{
@@ -45,12 +50,23 @@ public partial class CartPage : ContentPage
 			locationSelectionGrid.IsVisible = false;
 			locationComboBox.SelectedValue = _user.LocationId;
 		}
-
 		else
 		{
 			locationSelectionGrid.IsVisible = true;
 			locationComboBox.SelectedValue = locations.FirstOrDefault().Id;
 		}
+
+		orderNoTextBox.Text = await GenerateCodes.GenerateOrderBillNo(new()
+		{
+			Id = 0,
+			LocationId = !location.MainLocation ? _user.LocationId : int.Parse(locationComboBox.SelectedValue.ToString()),
+			OrderDate = DateOnly.FromDateTime(orderDatePicker.Date),
+			OrderNo = "",
+			Remarks = remarksTextBox.Text,
+			SaleId = null,
+			UserId = _user.Id,
+			Status = true,
+		});
 
 		cartItemsCollectionView.ItemsSource = _cart;
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
@@ -85,8 +101,57 @@ public partial class CartPage : ContentPage
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 	}
 
-	private void CheckoutButton_Clicked(object sender, EventArgs e)
+	private async void CheckoutButton_Clicked(object sender, EventArgs e)
 	{
+		if (_cart.Count == 0)
+		{
+			await DisplayAlert("Empty Cart", "Your cart is empty. Please add items to your cart before proceeding.", "OK");
+			return;
+		}
 
+		var order = await InsertOrder();
+		await InsertOrderDetails(order);
+
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+
+		if (File.Exists(fullPath))
+			File.Delete(fullPath);
+
+		Navigation.RemovePage(_orderPage);
+		Navigation.RemovePage(this);
+		await Navigation.PushAsync(new Dashboard(_userId));
+	}
+
+	private async Task<OrderModel> InsertOrder()
+	{
+		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
+		var order = new OrderModel()
+		{
+			Id = 0,
+			LocationId = !location.MainLocation ? _user.LocationId : int.Parse(locationComboBox.SelectedValue.ToString()),
+			OrderDate = DateOnly.FromDateTime(orderDatePicker.Date),
+			OrderNo = "",
+			Remarks = remarksTextBox.Text,
+			SaleId = null,
+			UserId = _user.Id,
+			Status = true,
+		};
+
+		order.OrderNo = await GenerateCodes.GenerateOrderBillNo(order);
+		order.Id = await OrderData.InsertOrder(order);
+		return order;
+	}
+
+	private async Task InsertOrderDetails(OrderModel order)
+	{
+		foreach (var item in _cart)
+			await OrderData.InsertOrderDetail(new()
+			{
+				Id = 0,
+				OrderId = order.Id,
+				ProductId = item.ProductId,
+				Quantity = item.Quantity,
+				Status = true
+			});
 	}
 }

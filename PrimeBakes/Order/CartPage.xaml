@@ -28,7 +28,7 @@
 							</Grid.ColumnDefinitions>
 
 							<Label Text="Order No:" VerticalTextAlignment="Center" />
-							<Entry Grid.Column="1" Text="YTFFGH676654" HorizontalOptions="End" IsReadOnly="True"/>
+							<Entry Grid.Column="1" Text="YTFFGH676654" HorizontalOptions="End" IsReadOnly="True" x:Name="orderNoTextBox"/>
 						</Grid>
 
 						<Grid Margin="5">
@@ -38,7 +38,7 @@
 							</Grid.ColumnDefinitions>
 
 							<Label Text="Date:" VerticalTextAlignment="Center" />
-							<DatePicker Grid.Column="1" HorizontalOptions="End" />
+							<DatePicker Grid.Column="1" HorizontalOptions="End" x:Name="orderDatePicker" />
 						</Grid>
 
 						<Grid Margin="5">
@@ -48,7 +48,7 @@
 							</Grid.ColumnDefinitions>
 
 							<Label Text="Remarks:" VerticalTextAlignment="Center" />
-							<Entry Grid.Column="1" Margin="10,0,0,0" Placeholder="Narration Regarding This Order..." />
+							<Entry Grid.Column="1" Margin="10,0,0,0" Placeholder="Narration Regarding This Order..." x:Name="remarksTextBox" />
 						</Grid>
 
 						<Grid Margin="5" x:Name="locationSelectionGrid">

@@ -1,4 +1,10 @@
-﻿using PrimeOrdersLibrary.Data.Common;
+﻿#if ANDROID
+using System.Reflection;
+
+using PrimeBakes.Platforms.Android;
+#endif
+
+using PrimeOrdersLibrary.Data.Common;
 
 namespace PrimeBakes;
 
@@ -9,6 +15,13 @@ public partial class LoginPage : ContentPage
 	public LoginPage()
 	{
 		InitializeComponent();
+
+#if ANDROID
+		var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+		if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
+			Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+#endif
 
 		var userId = SecureStorage.GetAsync(_currentUserIdKey).GetAwaiter().GetResult();
 		if (userId is not null && userId is not "0")

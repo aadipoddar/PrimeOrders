@@ -414,7 +414,7 @@ public partial class OrderPage
 		}
 
 		foreach (var cartItem in _orderProductCarts)
-			await OrderData.InsertOrderDetail(new OrderDetailModel()
+			await OrderData.InsertOrderDetail(new()
 			{
 				Id = 0,
 				OrderId = _order.Id,

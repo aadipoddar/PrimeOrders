@@ -81,6 +81,6 @@ public partial class OrderPage : ContentPage
 			File.Delete(fullPath);
 
 		File.WriteAllText(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
-		await Navigation.PushAsync(new CartPage(_userId));
+		await Navigation.PushAsync(new CartPage(_userId, this));
 	}
 }
