@@ -83,8 +83,9 @@
 														Background="MediumPurple"
                                                         CustomFormat="0" AllowNull="False"
                                                         Minimum="0" UpDownPlacementMode="Inline"
-                                                        ValueChanged="quantityNumericEntry_ValueChanged">
-								</control:SfNumericEntry>
+														MinimumWidthRequest="120"
+														HorizontalTextAlignment="Center"
+                                                        ValueChanged="quantityNumericEntry_ValueChanged" />
 							</Grid>
 						</Border>
 					</DataTemplate>
@@ -94,8 +95,8 @@
 
 		<Border Background="MediumPurple" Grid.Row="2" Margin="10" StrokeShape="RoundRectangle 10" Padding="5">
 			<Grid>
-				<Label x:Name="cartItemsLabel" Text="15 Items" FontSize="17" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
-				<Button Text="CheckOut ->" HorizontalOptions="End" Margin="15,0" Background="ForestGreen" TextColor="White" FontFamily="CascadiaCodeSemibold" Clicked="CheckoutButton_Clicked" />
+				<Label x:Name="cartItemsLabel" Text="0 Items" FontSize="17" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
+				<Button Text="Check Out ->" HorizontalOptions="End" Margin="15,0" Background="ForestGreen" TextColor="White" FontFamily="CascadiaCodeSemibold" Clicked="CheckoutButton_Clicked" />
 			</Grid>
 		</Border>
 	</Grid>
