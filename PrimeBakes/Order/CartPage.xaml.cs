@@ -7,16 +7,22 @@ namespace PrimeBakes.Order;
 
 public partial class CartPage : ContentPage
 {
+	private const string _fileName = "cart.json";
 	private readonly int _userId;
 	private UserModel _user;
-	private readonly List<OrderProductCartModel> _cart;
+	private readonly List<OrderProductCartModel> _cart = [];
 
-	public CartPage(int userId, List<OrderProductCartModel> cart)
+	public CartPage(int userId)
 	{
 		InitializeComponent();
 
 		_userId = userId;
-		_cart = cart;
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+		if (File.Exists(fullPath))
+		{
+			var cartData = File.ReadAllText(fullPath);
+			_cart.AddRange(System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(cartData) ?? []);
+		}
 		cartItemsCollectionView.ItemsSource = _cart;
 	}
 
@@ -25,7 +31,6 @@ public partial class CartPage : ContentPage
 		base.OnAppearing();
 
 		_user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
-		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 
 		var locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 		locations.Remove(locations.FirstOrDefault(c => c.Id == 1));
@@ -46,6 +51,9 @@ public partial class CartPage : ContentPage
 			locationSelectionGrid.IsVisible = true;
 			locationComboBox.SelectedValue = locations.FirstOrDefault().Id;
 		}
+
+		cartItemsCollectionView.ItemsSource = _cart;
+		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 	}
 
 	private void quantityNumericEntry_ValueChanged(object sender, Syncfusion.Maui.Inputs.NumericEntryValueChangedEventArgs e)
@@ -66,6 +74,13 @@ public partial class CartPage : ContentPage
 				ProductName = item.ProductName,
 				Quantity = quantity
 			});
+
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+
+		if (File.Exists(fullPath))
+			File.Delete(fullPath);
+
+		File.WriteAllText(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
 
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 	}

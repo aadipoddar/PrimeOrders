@@ -7,6 +7,7 @@ namespace PrimeBakes.Order;
 
 public partial class OrderPage : ContentPage
 {
+	private const string _fileName = "cart.json";
 	private readonly int _userId;
 	private List<ProductModel> _allProducts;
 	private List<ProductModel> _products;
@@ -17,6 +18,13 @@ public partial class OrderPage : ContentPage
 		InitializeComponent();
 
 		_userId = userId;
+
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+		if (File.Exists(fullPath))
+		{
+			var cartData = File.ReadAllText(fullPath);
+			_cart.AddRange(System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(cartData) ?? []);
+		}
 	}
 
 	protected override async void OnAppearing()
@@ -28,6 +36,7 @@ public partial class OrderPage : ContentPage
 		_products = [.. _allProducts.Take(20)];
 
 		itemsCollectionView.ItemsSource = _products;
+
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 	}
 
@@ -60,6 +69,18 @@ public partial class OrderPage : ContentPage
 
 	private async void CartButton_Clicked(object sender, EventArgs e)
 	{
-		await Navigation.PushAsync(new CartPage(_userId, _cart));
+		if (_cart.Count == 0)
+		{
+			await DisplayAlert("Empty Cart", "Your cart is empty. Please add items to your cart before proceeding.", "OK");
+			return;
+		}
+
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+
+		if (File.Exists(fullPath))
+			File.Delete(fullPath);
+
+		File.WriteAllText(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
+		await Navigation.PushAsync(new CartPage(_userId));
 	}
 }
