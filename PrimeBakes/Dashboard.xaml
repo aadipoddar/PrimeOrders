@@ -14,8 +14,8 @@
 
 				<Border Background="MediumPurple" Margin="10" StrokeShape="RoundRectangle 10" Padding="5">
 					<Grid>
-						<Label Text="Dashboard" FontSize="30" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
-						<Button Text="Log Out" HorizontalOptions="End" Margin="15,0" Background="BlueViolet" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="17" Clicked="LogOutButton_Clicked" />
+						<Label Text="Dashboard" FontSize="20" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
+						<Button Text="Log Out" HorizontalOptions="End" Margin="10,0" Background="IndianRed" TextColor="White" FontFamily="CascadiaCodeSemibold" FontSize="15" Clicked="LogOutButton_Clicked" />
 					</Grid>
 				</Border>
 

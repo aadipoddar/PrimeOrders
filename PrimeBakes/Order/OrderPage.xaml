@@ -11,7 +11,7 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		
-		<Entry x:Name="searchTextBox" Placeholder="Search" Margin="10" TextChanged="searchTextBox_TextChanged" />
+		<Entry x:Name="searchTextBox" Placeholder="Search" Margin="15,10" TextChanged="searchTextBox_TextChanged" />
 
 		<ScrollView Grid.Row="1" Margin="10">
 			<CollectionView x:Name="itemsCollectionView">

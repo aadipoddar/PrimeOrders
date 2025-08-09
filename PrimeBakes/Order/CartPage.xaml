@@ -74,8 +74,9 @@
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*" />
 									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
 								</Grid.ColumnDefinitions>
-								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="10"/>
+								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="10" VerticalOptions="Center"/>
 
 								<control:SfNumericEntry Grid.Column="1" x:Name="quantityNumericEntry"
                                                         Value="{Binding Quantity}"
@@ -83,9 +84,12 @@
 														Background="MediumPurple"
                                                         CustomFormat="0" AllowNull="False"
                                                         Minimum="0" UpDownPlacementMode="Inline"
-														MinimumWidthRequest="120"
+														MinimumWidthRequest="100"
 														HorizontalTextAlignment="Center"
+														ValueChangeMode="OnLostFocus"
                                                         ValueChanged="quantityNumericEntry_ValueChanged" />
+
+								<ImageButton Source="close.png" Grid.Column="2" Padding="5" MaximumHeightRequest="30" MaximumWidthRequest="30" VerticalOptions="Center" HorizontalOptions="Center" Clicked="RemoveFromCartButton_Clicked" />
 							</Grid>
 						</Border>
 					</DataTemplate>

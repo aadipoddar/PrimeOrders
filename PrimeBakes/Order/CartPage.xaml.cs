@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 
 using Plugin.Maui.Audio;
 
@@ -14,7 +15,7 @@ public partial class CartPage : ContentPage
 	private const string _fileName = "cart.json";
 	private readonly int _userId;
 	private UserModel _user;
-	private readonly List<OrderProductCartModel> _cart = [];
+	private readonly ObservableCollection<OrderProductCartModel> _cart = [];
 	private readonly OrderPage _orderPage;
 
 	public CartPage(int userId, OrderPage orderPage)
@@ -24,11 +25,13 @@ public partial class CartPage : ContentPage
 		_userId = userId;
 		_orderPage = orderPage;
 
+		_cart.Clear();
 		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
 		if (File.Exists(fullPath))
 		{
-			var cartData = File.ReadAllText(fullPath);
-			_cart.AddRange(System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(cartData) ?? []);
+			var items = System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(File.ReadAllText(fullPath)) ?? [];
+			foreach (var item in items)
+				_cart.Add(item);
 		}
 		cartItemsCollectionView.ItemsSource = _cart;
 	}
@@ -70,11 +73,10 @@ public partial class CartPage : ContentPage
 			Status = true,
 		});
 
-		cartItemsCollectionView.ItemsSource = _cart;
-		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+		await RefreshFileAndCart();
 	}
 
-	private void quantityNumericEntry_ValueChanged(object sender, Syncfusion.Maui.Inputs.NumericEntryValueChangedEventArgs e)
+	private async void quantityNumericEntry_ValueChanged(object sender, Syncfusion.Maui.Inputs.NumericEntryValueChangedEventArgs e)
 	{
 		if ((sender as Syncfusion.Maui.Inputs.SfNumericEntry).Parent.BindingContext is not OrderProductCartModel item)
 			return;
@@ -93,16 +95,33 @@ public partial class CartPage : ContentPage
 				Quantity = quantity
 			});
 
+		await RefreshFileAndCart();
+
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+	}
+
+	private async void RemoveFromCartButton_Clicked(object sender, EventArgs e)
+	{
+		if ((sender as ImageButton).Parent.BindingContext is not OrderProductCartModel item)
+			return;
+
+		var existingCart = _cart.FirstOrDefault(x => x.ProductId == item.ProductId);
+		if (existingCart is not null)
+			_cart.Remove(existingCart);
+
+		await RefreshFileAndCart();
+	}
+
+	private async Task RefreshFileAndCart()
+	{
 		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
 
 		if (File.Exists(fullPath))
 			File.Delete(fullPath);
 
-		File.WriteAllText(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
+		await File.WriteAllTextAsync(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
 
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
-
-		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
 	private async void CheckoutButton_Clicked(object sender, EventArgs e)
@@ -117,7 +136,6 @@ public partial class CartPage : ContentPage
 		await InsertOrderDetails(order);
 
 		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
-
 		if (File.Exists(fullPath))
 			File.Delete(fullPath);
 

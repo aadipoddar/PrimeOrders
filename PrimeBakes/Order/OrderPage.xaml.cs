@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Models.Order;
@@ -11,20 +13,13 @@ public partial class OrderPage : ContentPage
 	private readonly int _userId;
 	private List<ProductModel> _allProducts;
 	private List<ProductModel> _products;
-	private readonly List<OrderProductCartModel> _cart = [];
+	private readonly ObservableCollection<OrderProductCartModel> _cart = [];
 
 	public OrderPage(int userId)
 	{
 		InitializeComponent();
 
 		_userId = userId;
-
-		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
-		if (File.Exists(fullPath))
-		{
-			var cartData = File.ReadAllText(fullPath);
-			_cart.AddRange(System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(cartData) ?? []);
-		}
 	}
 
 	protected override async void OnAppearing()
@@ -34,8 +29,16 @@ public partial class OrderPage : ContentPage
 		_allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
 		_allProducts.RemoveAll(r => r.LocationId != 1);
 		_products = [.. _allProducts.Take(20)];
-
 		itemsCollectionView.ItemsSource = _products;
+
+		_cart.Clear();
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+		if (File.Exists(fullPath))
+		{
+			var items = System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(File.ReadAllText(fullPath)) ?? [];
+			foreach (var item in items)
+				_cart.Add(item);
+		}
 
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 	}
