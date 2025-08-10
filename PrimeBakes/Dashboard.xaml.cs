@@ -1,3 +1,9 @@
+#if ANDROID
+using System.Reflection;
+
+using PrimeBakes.Platforms.Android;
+#endif
+
 using PrimeBakes.Order;
 
 using PrimeOrdersLibrary.Data.Common;
@@ -21,6 +27,13 @@ public partial class Dashboard : ContentPage
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
+
+#if ANDROID
+		var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+		if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
+			await Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+#endif
 
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
 		Title = $"Welcome, {user.Name}";
