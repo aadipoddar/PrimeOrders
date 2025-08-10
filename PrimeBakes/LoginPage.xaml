@@ -4,8 +4,99 @@
              x:Class="PrimeBakes.LoginPage"
 			 xmlns:control="clr-namespace:Syncfusion.Maui.Toolkit.OtpInput;assembly=Syncfusion.Maui.Toolkit">
 
-	<StackLayout VerticalOptions="Center" HorizontalOptions="Center">
-		<control:SfOtpInput x:Name="passcodeInput" StylingMode="Filled" ValueChanged="OnValueChanged" />
-	</StackLayout>
+	<ContentPage.Resources>
+		<ResourceDictionary>
+			<Color x:Key="PrimaryColor">#512BD4</Color>
+			<Color x:Key="SecondaryColor">#68217A</Color>
+			<Color x:Key="AccentColor">#00A4EF</Color>
+			<Color x:Key="LightColor">#F7F7F7</Color>
+			<Color x:Key="DarkColor">#1E1E1E</Color>
 
+			<LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+				<GradientStop Color="{StaticResource PrimaryColor}" Offset="0.0" />
+				<GradientStop Color="{StaticResource SecondaryColor}" Offset="1.0" />
+			</LinearGradientBrush>
+
+			<Style x:Key="HintStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="14" />
+				<Setter Property="TextColor" Value="#666" />
+				<Setter Property="HorizontalTextAlignment" Value="Center" />
+				<Setter Property="FontFamily" Value="CascadiaCodeRegular" />
+				<Setter Property="Margin" Value="0,15,0,0" />
+			</Style>
+		</ResourceDictionary>
+	</ContentPage.Resources>
+
+	<Grid Background="{StaticResource BackgroundGradient}">
+		<ScrollView VerticalOptions="Fill" HorizontalOptions="Fill">
+			<StackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
+				<Border StrokeShape="RoundRectangle 20" Padding="40" Margin="20" Background="White">
+					<StackLayout>
+
+						<StackLayout HorizontalOptions="Center" Spacing="0">
+							<Label Text="Prime Bakes" FontFamily="CascadiaCodeSemibold" FontSize="32" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" HorizontalTextAlignment="Center" Margin="5" />
+							<Label Text="Enter your access code" FontFamily="CascadiaCodeSemibold" FontSize="16" TextColor="{StaticResource DarkColor}" HorizontalTextAlignment="Center" Margin="10" Opacity="0.8" />
+						</StackLayout>
+
+						<control:SfOtpInput x:Name="passcodeInput" 
+											ValueChanged="OnValueChanged"
+											AutoFocus="True"
+											Margin="0,30"
+											StylingMode="Filled"
+											HorizontalOptions="Center" />
+
+						<StackLayout x:Name="FooterSection" HorizontalOptions="Center" HeightRequest="90">
+							<StackLayout x:Name="DefaultFooter" IsVisible="True" HorizontalOptions="Center">
+								<StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,0,0,15">
+									<Ellipse x:Name="Dot1" 
+											 Fill="{StaticResource PrimaryColor}" 
+											 WidthRequest="10" 
+											 HeightRequest="10" 
+											 Margin="5,0" />
+									<Ellipse x:Name="Dot2" 
+											 Fill="{StaticResource AccentColor}" 
+											 WidthRequest="10" 
+											 HeightRequest="10" 
+											 Margin="5,0" />
+									<Ellipse x:Name="Dot3" 
+											 Fill="{StaticResource SecondaryColor}" 
+											 WidthRequest="10" 
+											 HeightRequest="10" 
+											 Margin="5,0" />
+								</StackLayout>
+								<Label Text="Enter your 4-digit access code to continue" Style="{StaticResource HintStyle}" />
+							</StackLayout>
+
+							<!-- Loading State -->
+							<StackLayout x:Name="LoadingFooter" IsVisible="False" HorizontalOptions="Center">
+								<ActivityIndicator x:Name="LoadingIndicator"
+												   IsRunning="False"
+												   Color="{StaticResource PrimaryColor}"
+												   WidthRequest="30"
+												   HeightRequest="30"
+												   Margin="0,0,0,15" />
+								<Label Text="Verifying access code..." Style="{StaticResource HintStyle}" />
+							</StackLayout>
+						</StackLayout>
+
+						<Label HorizontalOptions="Center" HorizontalTextAlignment="Center">
+							<Label.FormattedText>
+								<FormattedString>
+									<Span Text="© A Product By " TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>
+									<Span Text="AadiSoft" 
+										  TextColor="{StaticResource PrimaryColor}" 
+										  FontAttributes="Bold"
+										  FontFamily="CascadiaCodeSemibold"/>
+									<Span Text=". All rights reserved." TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>
+								</FormattedString>
+							</Label.FormattedText>
+							<Label.GestureRecognizers>
+								<TapGestureRecognizer Tapped="OnAadiSoftTapped" />
+							</Label.GestureRecognizers>
+						</Label>
+					</StackLayout>
+				</Border>
+			</StackLayout>
+		</ScrollView>
+	</Grid>
 </ContentPage>
