@@ -43,19 +43,22 @@
 									<Grid.ColumnDefinitions>
 										<ColumnDefinition Width="Auto"/>
 										<ColumnDefinition Width="Auto"/>
+										<ColumnDefinition Width="Auto"/>
 									</Grid.ColumnDefinitions>
 
+									<Button Clicked="MinusButton_Clicked" Text="-" Background="IndianRed" FontAttributes="Bold" VerticalOptions="Center" TextColor="Black" CornerRadius="50" FontSize="20" />
+
 									<control:SfNumericEntry x:Name="quantityNumericEntry"
+															Grid.Column="1"
 															Value="{Binding Quantity}"
 															Margin="10,5"	
 															Background="MediumPurple"
 															CustomFormat="0" AllowNull="False"
-															Minimum="0" UpDownPlacementMode="Inline"
-															MinimumWidthRequest="100"
+															Minimum="0" UpDownPlacementMode="Hidden"
 															HorizontalTextAlignment="Center"
 															ValueChanged="quantityNumericEntry_ValueChanged" />
 
-									<Button Grid.Column="1" Clicked="RemoveFromCartButton_Clicked" Text="X" Background="IndianRed" FontAttributes="Bold" VerticalOptions="Center" />
+									<Button Grid.Column="2" Clicked="PlusButton_Clicked" Text="+" Background="LightGreen" FontAttributes="Bold" VerticalOptions="Center" TextColor="Black" CornerRadius="50" FontSize="20" />
 								</Grid>
 							</Grid>
 						</Border>

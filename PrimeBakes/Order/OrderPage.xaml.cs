@@ -49,6 +49,8 @@ public partial class OrderPage : ContentPage
 		RefreshCollectionView();
 	}
 
+	#region Collection View
+
 	private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
 	{
 		_currentSearchText = e.NewTextValue ?? string.Empty;
@@ -111,20 +113,32 @@ public partial class OrderPage : ContentPage
 		File.WriteAllText(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
 
+		if (Convert.ToInt32(e.NewValue) == 0)
+			RefreshCollectionView();
+
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
-	private void RemoveFromCartButton_Clicked(object sender, EventArgs e)
+	private void PlusButton_Clicked(object sender, EventArgs e)
 	{
 		if ((sender as Button).BindingContext is not OrderProductCartModel item)
 			return;
 
-		_cart.FirstOrDefault(x => x.ProductId == item.ProductId).Quantity = 0;
-
+		_cart.FirstOrDefault(x => x.ProductId == item.ProductId).Quantity = _cart.FirstOrDefault(x => x.ProductId == item.ProductId).Quantity + 1;
 		RefreshCollectionView();
-
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
+
+	private void MinusButton_Clicked(object sender, EventArgs e)
+	{
+		if ((sender as Button).BindingContext is not OrderProductCartModel item)
+			return;
+
+		_cart.FirstOrDefault(x => x.ProductId == item.ProductId).Quantity = Math.Max(0, _cart.FirstOrDefault(x => x.ProductId == item.ProductId).Quantity - 1);
+		RefreshCollectionView();
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+	}
+	#endregion
 
 	private async void CartButton_Clicked(object sender, EventArgs e)
 	{
