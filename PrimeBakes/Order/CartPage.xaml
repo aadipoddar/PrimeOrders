@@ -2,8 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PrimeBakes.Order.CartPage"
-			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Expander;assembly=Syncfusion.Maui.Expander"
-			 xmlns:control="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+			 xmlns:expander="clr-namespace:Syncfusion.Maui.Expander;assembly=Syncfusion.Maui.Expander"
+			 xmlns:input="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+			 xmlns:control="clr-namespace:PrimeBakes.Controls"
              Title="Cart">
 
 	<Grid>
@@ -14,12 +15,12 @@
 		</Grid.RowDefinitions>
 
 		<Border Margin="10" Stroke="#CAC4D0">
-			<syncfusion:SfExpander IsExpanded="True" Margin="10">
-				<syncfusion:SfExpander.Header>
+			<expander:SfExpander IsExpanded="True" Margin="10">
+				<expander:SfExpander.Header>
 					<Label Text="Order Details" FontSize="20" FontFamily="CascadiaCodeSemibold" Background="#ddb7fd" HorizontalTextAlignment="Center" Padding="5" TextColor="Black" />
-				</syncfusion:SfExpander.Header>
+				</expander:SfExpander.Header>
 
-				<syncfusion:SfExpander.Content>
+				<expander:SfExpander.Content>
 					<StackLayout Padding="10">
 						<Grid Margin="5">
 							<Grid.ColumnDefinitions>
@@ -58,11 +59,11 @@
 							</Grid.ColumnDefinitions>
 
 							<Label Text="Location:" VerticalTextAlignment="Center" />
-							<control:SfComboBox x:Name="locationComboBox" Grid.Column="1" Margin="10,0,0,0" Background="#ddb7fd" />
+							<input:SfComboBox x:Name="locationComboBox" Grid.Column="1" Margin="10,0,0,0" Background="#ddb7fd" />
 						</Grid>
 					</StackLayout>
-				</syncfusion:SfExpander.Content>
-			</syncfusion:SfExpander>
+				</expander:SfExpander.Content>
+			</expander:SfExpander>
 		</Border>
 
 		<ScrollView Grid.Row="1" Margin="10">
@@ -78,7 +79,7 @@
 								</Grid.ColumnDefinitions>
 								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="10" VerticalOptions="Center"/>
 
-								<control:SfNumericEntry Grid.Column="1" x:Name="quantityNumericEntry"
+								<input:SfNumericEntry Grid.Column="1" x:Name="quantityNumericEntry"
                                                         Value="{Binding Quantity}"
 														Margin="10,5"	
 														Background="MediumPurple"
@@ -96,12 +97,24 @@
 			</CollectionView>
 		</ScrollView>
 
-		<Border Background="MediumPurple" Grid.Row="2" Margin="10" StrokeShape="RoundRectangle 10" Padding="5">
-			<Grid>
-				<Label x:Name="cartItemsLabel" Text="0 Items" FontSize="17" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
-				<Button Text="Check Out ->" HorizontalOptions="End" Margin="15,0" Background="ForestGreen" TextColor="White" FontFamily="CascadiaCodeSemibold" Clicked="CheckoutButton_Clicked" />
-			</Grid>
-		</Border>
+
+		<control:MySlideView HeightRequest="60" SlideCompleted="SlideCompleted" Grid.Row="2">
+			<control:MySlideView.MyThumb>
+				<Border StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="AliceBlue" Padding="0" Margin="-20,0,0,0" HeightRequest="60" WidthRequest="60" x:Name="myframe" >
+					<Image x:Name="myimg" Source="dotnet_bot.png" Aspect="AspectFit"  VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="60" WidthRequest="60" />
+				</Border>
+			</control:MySlideView.MyThumb>
+
+			<control:MySlideView.MyTrackBar>
+				<Border StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="DarkGray" Padding="0">
+					<Label TextColor="White" x:Name="cartItemsLabel" Text="SWIPE TO Checkout" HorizontalOptions="Center" VerticalOptions="Center" />
+				</Border>
+			</control:MySlideView.MyTrackBar>
+
+			<control:MySlideView.MyFillBar>
+				<Border  StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="MediumPurple" Padding="0,0,20,20" />
+			</control:MySlideView.MyFillBar>
+		</control:MySlideView>
 	</Grid>
 
 </ContentPage>

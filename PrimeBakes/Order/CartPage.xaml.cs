@@ -124,11 +124,11 @@ public partial class CartPage : ContentPage
 
 		_isRefreshing = true;
 		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart));
-		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+		cartItemsLabel.Text = $"Swipe To Checkout {_cart.Sum(_ => _.Quantity)} Items";
 		_isRefreshing = false;
 	}
 
-	private async void CheckoutButton_Clicked(object sender, EventArgs e)
+	private async void SlideCompleted(object sender, EventArgs e)
 	{
 		if (_cart.Count == 0)
 		{

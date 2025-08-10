@@ -58,7 +58,7 @@
 															HorizontalTextAlignment="Center"
 															ValueChanged="quantityNumericEntry_ValueChanged" />
 
-									<Button Grid.Column="2" Clicked="PlusButton_Clicked" Text="+" Background="LightGreen" FontAttributes="Bold" VerticalOptions="Center" TextColor="Black" CornerRadius="50" FontSize="20" />
+									<Button Grid.Column="2" Clicked="PlusButton_Clicked" Text="+" Background="ForestGreen" FontAttributes="Bold" VerticalOptions="Center" TextColor="Black" CornerRadius="50" FontSize="20" />
 								</Grid>
 							</Grid>
 						</Border>

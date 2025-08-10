@@ -142,7 +142,7 @@ public partial class OrderPage : ContentPage
 
 	private async void CartButton_Clicked(object sender, EventArgs e)
 	{
-		if (_cart.Count == 0)
+		if (_cart.Sum(_ => _.Quantity) == 0)
 		{
 			await DisplayAlert("Empty Cart", "Your cart is empty. Please add items to your cart before proceeding.", "OK");
 			return;
