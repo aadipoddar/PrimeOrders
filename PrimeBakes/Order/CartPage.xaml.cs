@@ -17,6 +17,7 @@ public partial class CartPage : ContentPage
 	private UserModel _user;
 	private readonly ObservableCollection<OrderProductCartModel> _cart = [];
 	private readonly OrderPage _orderPage;
+	private bool _isRefreshing = false;
 
 	public CartPage(int userId, OrderPage orderPage)
 	{
@@ -81,6 +82,9 @@ public partial class CartPage : ContentPage
 		if ((sender as Syncfusion.Maui.Inputs.SfNumericEntry).Parent.BindingContext is not OrderProductCartModel item)
 			return;
 
+		if (_isRefreshing)
+			return;
+
 		var quantity = Convert.ToInt32(e.NewValue);
 
 		var existingCart = _cart.FirstOrDefault(x => x.ProductId == item.ProductId);
@@ -102,7 +106,7 @@ public partial class CartPage : ContentPage
 
 	private async void RemoveFromCartButton_Clicked(object sender, EventArgs e)
 	{
-		if ((sender as ImageButton).Parent.BindingContext is not OrderProductCartModel item)
+		if ((sender as Button).Parent.BindingContext is not OrderProductCartModel item)
 			return;
 
 		var existingCart = _cart.FirstOrDefault(x => x.ProductId == item.ProductId);
@@ -110,18 +114,18 @@ public partial class CartPage : ContentPage
 			_cart.Remove(existingCart);
 
 		await RefreshFileAndCart();
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
 	private async Task RefreshFileAndCart()
 	{
-		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+		if (_isRefreshing)
+			return;
 
-		if (File.Exists(fullPath))
-			File.Delete(fullPath);
-
-		await File.WriteAllTextAsync(fullPath, System.Text.Json.JsonSerializer.Serialize(_cart));
-
+		_isRefreshing = true;
+		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart));
 		cartItemsLabel.Text = $"{_cart.Sum(_ => _.Quantity)} Items";
+		_isRefreshing = false;
 	}
 
 	private async void CheckoutButton_Clicked(object sender, EventArgs e)

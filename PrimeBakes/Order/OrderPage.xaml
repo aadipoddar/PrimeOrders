@@ -2,7 +2,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PrimeBakes.Order.OrderPage"
+			 xmlns:control="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+			 xmlns:converters="clr-namespace:PrimeBakes.Converters"
              Title="Order">
+
+	<ContentPage.Resources>
+		<ResourceDictionary>
+			<converters:QuantityToVisibilityConverter x:Key="QuantityToVisibilityConverter" />
+		</ResourceDictionary>
+	</ContentPage.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
@@ -10,22 +18,45 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		
+
 		<Entry x:Name="searchTextBox" Placeholder="Search" Margin="15,10" TextChanged="searchTextBox_TextChanged" />
 
 		<ScrollView Grid.Row="1" Margin="10">
-			<CollectionView x:Name="itemsCollectionView">
+			<CollectionView x:Name="itemsCollectionView" >
 				<CollectionView.ItemTemplate>
 					<DataTemplate>
-						<Border Margin="10" Background="Transparent" Padding="5">
+						<Border Margin="10" Background="Transparent" Padding="5" StrokeShape="RoundRectangle 10">
 							<Grid>
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*" />
 									<ColumnDefinition Width="Auto" />
 								</Grid.ColumnDefinitions>
 
-								<Label x:Name="itemNameLabel" Text="{Binding Name}" Grid.Column="0" Margin="10"/>
-								<Button Text="+ Add" Grid.Column="1" Margin="10,5" Clicked="AddButton_Clicked" />
+								<Label x:Name="itemNameLabel" Text="{Binding ProductName}" Grid.Column="0" Margin="10" VerticalOptions="Center"/>
+
+								<!-- Add button - visible when quantity is 0 -->
+								<Button Text="+ Add" Grid.Column="1" Margin="10,5" Clicked="AddButton_Clicked" 
+										IsVisible="{Binding Quantity, Converter={StaticResource QuantityToVisibilityConverter}, ConverterParameter=inverse}" />
+
+								<!-- Quantity grid - visible when quantity > 0 -->
+								<Grid Grid.Column="1" IsVisible="{Binding Quantity, Converter={StaticResource QuantityToVisibilityConverter}}">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto"/>
+										<ColumnDefinition Width="Auto"/>
+									</Grid.ColumnDefinitions>
+
+									<control:SfNumericEntry x:Name="quantityNumericEntry"
+															Value="{Binding Quantity}"
+															Margin="10,5"	
+															Background="MediumPurple"
+															CustomFormat="0" AllowNull="False"
+															Minimum="0" UpDownPlacementMode="Inline"
+															MinimumWidthRequest="100"
+															HorizontalTextAlignment="Center"
+															ValueChanged="quantityNumericEntry_ValueChanged" />
+
+									<Button Grid.Column="1" Clicked="RemoveFromCartButton_Clicked" Text="X" Background="IndianRed" FontAttributes="Bold" VerticalOptions="Center" />
+								</Grid>
 							</Grid>
 						</Border>
 					</DataTemplate>

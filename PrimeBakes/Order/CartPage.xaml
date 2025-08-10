@@ -86,10 +86,9 @@
                                                         Minimum="0" UpDownPlacementMode="Inline"
 														MinimumWidthRequest="100"
 														HorizontalTextAlignment="Center"
-														ValueChangeMode="OnLostFocus"
                                                         ValueChanged="quantityNumericEntry_ValueChanged" />
 
-								<ImageButton Source="close.png" Grid.Column="2" Padding="5" MaximumHeightRequest="30" MaximumWidthRequest="30" VerticalOptions="Center" HorizontalOptions="Center" Clicked="RemoveFromCartButton_Clicked" />
+								<Button Grid.Column="2" Clicked="RemoveFromCartButton_Clicked" Text="X" Background="IndianRed" FontAttributes="Bold" VerticalOptions="Center" />
 							</Grid>
 						</Border>
 					</DataTemplate>
