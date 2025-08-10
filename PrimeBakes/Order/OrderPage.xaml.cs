@@ -65,12 +65,12 @@ public partial class OrderPage : ContentPage
 		_isRefreshing = true;
 
 		if (string.IsNullOrEmpty(_currentSearchText))
-			itemsCollectionView.ItemsSource = _cart.Take(20).ToList();
+			itemsCollectionView.ItemsSource = _cart.Take(10).ToList();
 
 		else
 			itemsCollectionView.ItemsSource = _cart
 				.Where(p => p.ProductName.Contains(_currentSearchText, StringComparison.OrdinalIgnoreCase))
-				.Take(20)
+				.Take(10)
 				.ToList();
 
 		File.WriteAllText(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));

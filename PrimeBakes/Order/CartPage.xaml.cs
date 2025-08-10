@@ -1,5 +1,8 @@
 using System.Collections.ObjectModel;
 
+#region ANDROID
+using Plugin.LocalNotification;
+#endregion
 using Plugin.Maui.Audio;
 
 using PrimeOrdersLibrary.Data.Common;
@@ -139,6 +142,8 @@ public partial class CartPage : ContentPage
 		var order = await InsertOrder();
 		await InsertOrderDetails(order);
 
+		_cart.Clear();
+
 		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
 		if (File.Exists(fullPath))
 			File.Delete(fullPath);
@@ -147,6 +152,30 @@ public partial class CartPage : ContentPage
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
 
 		AudioManager.Current.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("checkout.mp3")).Play();
+
+		#region ANDROID
+		var request = new NotificationRequest
+		{
+			NotificationId = 100,
+			Title = "Order Placed",
+			Subtitle = "Order Confirmation",
+			Description = $"Your order #{order.OrderNo} has been successfully placed. {order.Remarks}",
+			CategoryType = NotificationCategoryType.Reminder,
+			BadgeNumber = 1,
+			Schedule = new NotificationRequestSchedule
+			{
+				NotifyTime = DateTime.Now.AddSeconds(1),
+				RepeatType = NotificationRepeat.No
+			},
+			Android =
+			{
+				ChannelId = "order_channel",
+				Priority = Plugin.LocalNotification.AndroidOption.AndroidPriority.Max
+			}
+		};
+
+		await LocalNotificationCenter.Current.Show(request);
+		#endregion
 
 		Navigation.RemovePage(_orderPage);
 		Navigation.RemovePage(this);

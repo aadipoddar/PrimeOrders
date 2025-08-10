@@ -2,4 +2,4 @@
 
 Salasar Foods Guwahati Prime Bakes Order, Sales, Inventory Management and Accounts
 
-Android Latest Version = 1.0.0.5
+Android Latest Version = 1.0.0.6

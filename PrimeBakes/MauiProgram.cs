@@ -2,12 +2,14 @@
 using Microsoft.Extensions.Logging;
 #endif
 
-using Syncfusion.Maui.Toolkit.Hosting;
+#region ANDROID
+using Plugin.LocalNotification;
+#endregion
 
 using PrimeOrdersLibrary.DataAccess;
 
 using Syncfusion.Maui.Core.Hosting;
-
+using Syncfusion.Maui.Toolkit.Hosting;
 
 namespace PrimeBakes;
 
@@ -23,6 +25,9 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.ConfigureSyncfusionToolkit()
 			.ConfigureSyncfusionCore()
+		#region ANDROID
+			.UseLocalNotification()
+		#endregion
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");

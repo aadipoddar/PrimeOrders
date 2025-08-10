@@ -66,18 +66,18 @@
 			</expander:SfExpander>
 		</Border>
 
-		<ScrollView Grid.Row="1" Margin="10">
+		<ScrollView Grid.Row="1" Margin="5">
 			<CollectionView x:Name="cartItemsCollectionView">
 				<CollectionView.ItemTemplate>
 					<DataTemplate>
-						<Border Margin="10" Background="Transparent" Padding="5">
+						<Border Margin="5" Background="Transparent" Padding="5" StrokeShape="RoundRectangle 10">
 							<Grid>
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*" />
 									<ColumnDefinition Width="Auto" />
 									<ColumnDefinition Width="Auto" />
 								</Grid.ColumnDefinitions>
-								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="10" VerticalOptions="Center"/>
+								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="5" VerticalOptions="Center"/>
 
 								<input:SfNumericEntry Grid.Column="1" x:Name="quantityNumericEntry"
                                                         Value="{Binding Quantity}"
