@@ -39,10 +39,10 @@ public partial class Dashboard : ContentPage
 		Title = $"Welcome, {user.Name}";
 
 		if (user.Order)
-			orderButton.IsVisible = true;
+			orderBorder.IsVisible = true;
 
 		if (user.Sales)
-			saleButton.IsVisible = true;
+			saleBorder.IsVisible = true;
 	}
 
 	private async void LogOutButton_Clicked(object sender, EventArgs e)
@@ -57,4 +57,10 @@ public partial class Dashboard : ContentPage
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 		await Navigation.PushAsync(new OrderPage(_userId), true);
 	}
+
+	private async void SaleButton_Clicked(object sender, TappedEventArgs e) =>
+		await DisplayAlert("Feature Unavailable", "This feature is currently under development.", "OK");
+
+	private async void OnAadiSoftTapped(object sender, TappedEventArgs e) =>
+		await Browser.OpenAsync("https://aadisoft.vercel.app", BrowserLaunchMode.SystemPreferred);
 }

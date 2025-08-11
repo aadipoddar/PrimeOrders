@@ -67,9 +67,6 @@ public partial class LoginPage : ContentPage
 		LoadingIndicator.IsRunning = isLoading;
 	}
 
-	private async void OnAadiSoftTapped(object sender, EventArgs e) =>
-		await Browser.OpenAsync("https://aadisoft.vercel.app", BrowserLaunchMode.SystemPreferred);
-
 	private async void StartDotAnimation()
 	{
 		while (true)
@@ -92,4 +89,7 @@ public partial class LoginPage : ContentPage
 			await Task.Delay(500);
 		}
 	}
+
+	private async void OnAadiSoftTapped(object sender, TappedEventArgs e) =>
+		await Browser.OpenAsync("https://aadisoft.vercel.app", BrowserLaunchMode.SystemPreferred);
 }
