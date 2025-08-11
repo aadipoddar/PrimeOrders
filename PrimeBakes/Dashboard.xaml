@@ -6,48 +6,54 @@
 
 	<ContentPage.Resources>
 		<ResourceDictionary>
-			<Color x:Key="PrimaryColor">#512BD4</Color>
-			<Color x:Key="SecondaryColor">#68217A</Color>
-			<Color x:Key="AccentColor">#00A4EF</Color>
-			<Color x:Key="LightColor">#F7F7F7</Color>
-			<Color x:Key="DarkColor">#1E1E1E</Color>
-			<Color x:Key="SuccessColor">#28A745</Color>
-			<Color x:Key="WarningColor">#FFC107</Color>
-			<Color x:Key="DangerColor">#DC3545</Color>
-			<Color x:Key="WhiteColor">#FFFFFF</Color>
+			<!-- Minimalist Color Palette -->
+			<Color x:Key="PrimaryColor">#2C3E50</Color>
+			<Color x:Key="AccentColor">#3498DB</Color>
+			<Color x:Key="SuccessColor">#27AE60</Color>
+			<Color x:Key="BackgroundColor">#FAFAFA</Color>
+			<Color x:Key="CardColor">#FFFFFF</Color>
+			<Color x:Key="TextPrimary">#2C3E50</Color>
+			<Color x:Key="TextSecondary">#7F8C8D</Color>
+			<Color x:Key="BorderColor">#ECF0F1</Color>
 
-			<!-- Gradient Resources -->
-			<LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
-				<GradientStop Color="{StaticResource PrimaryColor}" Offset="0.0" />
-				<GradientStop Color="{StaticResource SecondaryColor}" Offset="1.0" />
-			</LinearGradientBrush>
-
-			<LinearGradientBrush x:Key="OrderGradient" StartPoint="0,0" EndPoint="1,1">
-				<GradientStop Color="{StaticResource AccentColor}" Offset="0.0" />
-				<GradientStop Color="#0087CC" Offset="1.0" />
-			</LinearGradientBrush>
-
-			<LinearGradientBrush x:Key="SaleGradient" StartPoint="0,0" EndPoint="1,1">
-				<GradientStop Color="{StaticResource SuccessColor}" Offset="0.0" />
-				<GradientStop Color="#1E7E34" Offset="1.0" />
-			</LinearGradientBrush>
-
-			<!-- Styles -->
-			<Style x:Key="ActionButtonStyle" TargetType="Border">
+			<!-- Minimalist Styles -->
+			<Style x:Key="CardStyle" TargetType="Border">
+				<Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
 				<Setter Property="StrokeThickness" Value="0" />
-				<Setter Property="StrokeShape" Value="RoundRectangle 15" />
+				<Setter Property="StrokeShape" Value="RoundRectangle 12" />
 				<Setter Property="Padding" Value="0" />
-				<Setter Property="Margin" Value="15,10" />
-				<Setter Property="HeightRequest" Value="140" />
+				<Setter Property="Margin" Value="8" />
+				<Setter Property="Shadow">
+					<Shadow Brush="MediumPurple" Opacity="1" Radius="8" Offset="0,2" />
+				</Setter>
 			</Style>
 
-			<Style x:Key="ButtonTextStyle" TargetType="Label">
-				<Setter Property="FontSize" Value="22" />
-				<Setter Property="FontFamily" Value="CascadiaCodeSemibold" />
-				<Setter Property="FontAttributes" Value="Bold" />
-				<Setter Property="TextColor" Value="{StaticResource WhiteColor}" />
-				<Setter Property="HorizontalOptions" Value="Center" />
+			<Style x:Key="ButtonContentStyle" TargetType="StackLayout">
+				<Setter Property="Spacing" Value="12" />
+				<Setter Property="Padding" Value="24" />
 				<Setter Property="VerticalOptions" Value="Center" />
+				<Setter Property="HorizontalOptions" Value="Center" />
+			</Style>
+
+			<Style x:Key="IconStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="32" />
+				<Setter Property="HorizontalOptions" Value="Center" />
+			</Style>
+
+			<Style x:Key="TitleStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="18" />
+				<Setter Property="FontAttributes" Value="Bold" />
+				<Setter Property="FontFamily" Value="CascadiaCodeSemiBold" />
+				<Setter Property="TextColor" Value="MediumOrchid" />
+				<Setter Property="HorizontalOptions" Value="Center" />
+			</Style>
+
+			<Style x:Key="SubtitleStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="13" />
+				<Setter Property="FontFamily" Value="CascadiaCodeRegular" />
+				<Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+				<Setter Property="HorizontalOptions" Value="Center" />
+				<Setter Property="HorizontalTextAlignment" Value="Center" />
 			</Style>
 		</ResourceDictionary>
 	</ContentPage.Resources>
@@ -59,146 +65,133 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
+		<!-- Header -->
 		<Border Grid.Row="0" 
-				Background="{StaticResource HeaderGradient}" 
-				StrokeShape="RoundRectangle 0,0,25,25" 
 				StrokeThickness="0"
-				Padding="0,20,0,25"
-				Margin="0,0,0,10">
+				Padding="20"
+				Margin="0,0,0,16">
 			<Grid>
-				<Label Text="🏠︎ Prime Bakes"
-					   FontFamily="CascadiaCodeSemibold"
-					   TextColor="White"
-					   HorizontalOptions="Start"
-					   VerticalOptions="Center"
-					   Margin="15,0"
-					   FontSize="20"
-					   FontAttributes="Bold"/>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
 
-				<Button Text="⏻ Log Out" 
-						FontFamily="CascadiaCodeSemibold"
-						TextColor="White"
-						HorizontalOptions="End"
-						VerticalOptions="Center"
-						Margin="15,0"
-						Padding="20,10"
-						Background="IndianRed"
+				<StackLayout Grid.Column="0" VerticalOptions="Center">
+					<Label Text="Prime Bakes"
+						   FontSize="24"
+						   FontFamily="CascadiaCodeRegular"
+						   FontAttributes="Bold"
+						   TextColor="MediumPurple" />
+					<Label Text="Bakery Management System"
+						   FontFamily="CascadiaCodeRegular"
+						   TextColor="{StaticResource TextSecondary}"
+						   FontSize="12" />
+				</StackLayout>
+
+				<Button Grid.Column="1"
+						Text="Log Out" 
+						BackgroundColor="Transparent"
+						TextColor="IndianRed"
+						BorderColor="IndianRed"
+						BorderWidth="1"
+						CornerRadius="8"
+						Padding="16,8"
+						FontSize="14"
+						FontFamily="CascadiaCodeRegular"
 						Clicked="LogOutButton_Clicked" />
 			</Grid>
 		</Border>
 
-		<!-- Main Content Area -->
-		<ScrollView Grid.Row="1" Padding="0,10">
-			<VerticalStackLayout>
+		<!-- Main Content -->
+		<ScrollView Grid.Row="1" Padding="16,0">
+			<StackLayout Spacing="32" Padding="0,16">
 
 				<!-- Welcome Section -->
-				<VerticalStackLayout>
-					<Label Text="Welcome to PrimeBakes!" 
-						   HorizontalOptions="Center"
-						   FontFamily="CascadiaCodeSemibold"
-						   TextColor="MediumPurple"
+				<StackLayout Spacing="8">
+					<Label Text="Welcome Back!"
 						   FontSize="20"
-						   Margin="10"
-						   FontAttributes="Bold" />
-					<Label Text="Choose an option below to get started with your bakery operations" 
-						   TextColor="DarkGray"
-						   Margin="10,0,10,20"
-						   HorizontalTextAlignment="Center"
+						   FontAttributes="Bold"
+						   TextColor="MediumPurple"
+						   FontFamily="CascadiaCodeRegular"
+						   HorizontalOptions="Center" />
+					<Label Text="Choose an option to get started"
 						   FontSize="14"
-						   FontFamily="CascadiaCodeSemibold" />
-				</VerticalStackLayout>
+						   FontFamily="CascadiaCodeRegular"
+						   TextColor="{StaticResource TextSecondary}"
+						   HorizontalOptions="Center"
+						   HorizontalTextAlignment="Center" />
+				</StackLayout>
 
-				<!-- Action Buttons Section -->
+				<!-- Action Cards -->
 				<Grid ColumnDefinitions="*,*" 
-					  ColumnSpacing="0" 
-					  Margin="0,10,0,0">
+					  RowDefinitions="Auto"
+					  ColumnSpacing="16">
 
-					<!-- Order Button -->
-					<Border Grid.Column="0" 
+					<!-- Order Card -->
+					<Border Grid.Column="0"
 							x:Name="orderBorder"
-							Style="{StaticResource ActionButtonStyle}"
-							Background="{StaticResource OrderGradient}"
+							Style="{StaticResource CardStyle}"
 							IsVisible="False">
 						<Border.GestureRecognizers>
 							<TapGestureRecognizer Tapped="OrderButton_Clicked" />
 						</Border.GestureRecognizers>
 
-						<Grid>
-							<VerticalStackLayout Spacing="10" VerticalOptions="Center">
-								<Label Text="🛒" 
-									   FontSize="35" 
-									   HorizontalOptions="Center" />
-								<Label Text="ORDER" 
-									   Style="{StaticResource ButtonTextStyle}" />
-								<Label Text="Create new orders" 
-									   FontSize="12" 
-									   FontFamily="CascadiaCodeSemibold"
-									   TextColor="{StaticResource WhiteColor}" 
-									   HorizontalOptions="Center" 
-									   Opacity="0.9" />
-							</VerticalStackLayout>
-
-							<!-- Animated highlight overlay -->
-							<BoxView BackgroundColor="{StaticResource WhiteColor}" 
-									 Opacity="0" 
-									 x:Name="orderHighlight" />
-						</Grid>
+						<StackLayout Style="{StaticResource ButtonContentStyle}">
+							<Label Text="📦" 
+								   Style="{StaticResource IconStyle}"
+								   TextColor="{StaticResource AccentColor}" />
+							<Label Text="ORDERS" 
+								   Style="{StaticResource TitleStyle}" />
+							<Label Text="Place New Orders"
+								   Style="{StaticResource SubtitleStyle}"
+								   MaxLines="2" />
+						</StackLayout>
 					</Border>
 
-					<!-- Sale Button -->
-					<Border Grid.Column="1" 
+					<!-- Sale Card -->
+					<Border Grid.Column="1"
 							x:Name="saleBorder"
-							Style="{StaticResource ActionButtonStyle}"
-							Background="{StaticResource SaleGradient}"
+							Style="{StaticResource CardStyle}"
 							IsVisible="False">
 						<Border.GestureRecognizers>
 							<TapGestureRecognizer Tapped="SaleButton_Clicked" />
 						</Border.GestureRecognizers>
 
-						<Grid>
-							<VerticalStackLayout Spacing="10" VerticalOptions="Center">
-								<Label Text="💳" 
-									   FontSize="35" 
-									   HorizontalOptions="Center" />
-								<Label Text="SALE" 
-									   Style="{StaticResource ButtonTextStyle}" />
-								<Label Text="Process sales transactions" 
-									   FontSize="12" 
-									   HorizontalTextAlignment="Center"
-									   FontFamily="CascadiaCodeSemibold"
-									   TextColor="{StaticResource WhiteColor}" 
-									   HorizontalOptions="Center" 
-									   Opacity="0.9" />
-							</VerticalStackLayout>
-
-							<!-- Animated highlight overlay -->
-							<BoxView BackgroundColor="{StaticResource WhiteColor}" 
-									 Opacity="0" 
-									 x:Name="saleHighlight" />
-						</Grid>
+						<StackLayout Style="{StaticResource ButtonContentStyle}">
+							<Label Text="💳" 
+								   Style="{StaticResource IconStyle}"
+								   TextColor="{StaticResource SuccessColor}" />
+							<Label Text="SALES" 
+								   Style="{StaticResource TitleStyle}" />
+							<Label Text="Process New Sales"
+								   Style="{StaticResource SubtitleStyle}"
+								   MaxLines="2" />
+						</StackLayout>
 					</Border>
 				</Grid>
 
-			</VerticalStackLayout>
+			</StackLayout>
 		</ScrollView>
 
-		<!-- Modern Footer -->
+		<!-- Footer -->
 		<Border Grid.Row="2" 
-				BackgroundColor="{StaticResource WhiteColor}" 
-				Opacity="0.7"
-				StrokeShape="RoundRectangle 25,25,0,0" 
+				BackgroundColor="{StaticResource CardColor}"
 				StrokeThickness="0"
-				Padding="20,15"
-				Margin="0,10,0,0">
-			<Label HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="12">
+				Padding="20,16">
+			<Border.Shadow>
+				<Shadow Brush="#E0E0E0" Opacity="0.2" Radius="4" Offset="0,-2" />
+			</Border.Shadow>
+
+			<Label HorizontalOptions="Center" 
+				   FontSize="12"
+				   TextColor="{StaticResource TextSecondary}">
 				<Label.FormattedText>
 					<FormattedString>
-						<Span Text="© A Product By " TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>
+						<Span Text="© A Product By " />
 						<Span Text="AadiSoft" 
-							  TextColor="{StaticResource PrimaryColor}" 
-							  FontAttributes="Bold"
-							  FontFamily="CascadiaCodeSemibold"/>
-						<Span Text=". All rights reserved." TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>
+							  TextColor="{StaticResource AccentColor}" 
+							  FontAttributes="Bold"/>
+						<Span Text=". All rights reserved." />
 					</FormattedString>
 				</Label.FormattedText>
 				<Label.GestureRecognizers>

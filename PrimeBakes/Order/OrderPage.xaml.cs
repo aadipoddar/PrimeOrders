@@ -151,6 +151,6 @@ public partial class OrderPage : ContentPage
 		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 		await Navigation.PushAsync(new CartPage(_userId, this));
 
-		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
 	}
 }

@@ -18,7 +18,7 @@
 			</LinearGradientBrush>
 
 			<Style x:Key="HintStyle" TargetType="Label">
-				<Setter Property="FontSize" Value="14" />
+				<Setter Property="FontSize" Value="12" />
 				<Setter Property="TextColor" Value="#666" />
 				<Setter Property="HorizontalTextAlignment" Value="Center" />
 				<Setter Property="FontFamily" Value="CascadiaCodeRegular" />
@@ -32,16 +32,15 @@
 			<StackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
 				<Border StrokeShape="RoundRectangle 20" Padding="40" Margin="20" Background="White">
 					<StackLayout>
-
-						<StackLayout HorizontalOptions="Center" Spacing="0">
-							<Label Text="Prime Bakes" FontFamily="CascadiaCodeSemibold" FontSize="32" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" HorizontalTextAlignment="Center" Margin="5" />
-							<Label Text="Enter your access code" FontFamily="CascadiaCodeSemibold" FontSize="16" TextColor="{StaticResource DarkColor}" HorizontalTextAlignment="Center" Margin="10" Opacity="0.8" />
+						<StackLayout HorizontalOptions="Center">
+							<Label Text="Prime Bakes" FontFamily="CascadiaCodeSemibold" FontSize="28" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" HorizontalTextAlignment="Center" Margin="5" />
+							<Label Text="Enter your access code" FontFamily="CascadiaCodeSemibold" FontSize="13" TextColor="{StaticResource DarkColor}" HorizontalTextAlignment="Center" Margin="10" Opacity="0.8" />
 						</StackLayout>
 
 						<control:SfOtpInput x:Name="passcodeInput" 
 											ValueChanged="OnValueChanged"
 											AutoFocus="True"
-											Margin="0,30"
+											Margin="0,20"
 											StylingMode="Filled"
 											HorizontalOptions="Center" />
 
@@ -79,7 +78,7 @@
 							</StackLayout>
 						</StackLayout>
 
-						<Label HorizontalOptions="Center" HorizontalTextAlignment="Center">
+						<Label HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="10">
 							<Label.FormattedText>
 								<FormattedString>
 									<Span Text="© A Product By " TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>

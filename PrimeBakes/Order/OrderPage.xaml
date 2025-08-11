@@ -9,6 +9,17 @@
 	<ContentPage.Resources>
 		<ResourceDictionary>
 			<converters:QuantityToVisibilityConverter x:Key="QuantityToVisibilityConverter" />
+
+			<!-- Color Resources -->
+			<Color x:Key="Primary">#2563EB</Color>
+			<Color x:Key="PrimaryLight">#3B82F6</Color>
+			<Color x:Key="Secondary">#64748B</Color>
+			<Color x:Key="Success">#10B981</Color>
+			<Color x:Key="Danger">#EF4444</Color>
+			<Color x:Key="Background">#F8FAFC</Color>
+			<Color x:Key="Surface">#FFFFFF</Color>
+			<Color x:Key="OnSurface">#1E293B</Color>
+			<Color x:Key="Border">#E2E8F0</Color>
 		</ResourceDictionary>
 	</ContentPage.Resources>
 
@@ -19,60 +30,160 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<Entry x:Name="searchTextBox" Placeholder="Search" Margin="15,10" TextChanged="searchTextBox_TextChanged" />
+		<!-- Search Section -->
+		<Border Grid.Row="0" 
+		       Stroke="{StaticResource Border}"
+		       StrokeShape="RoundRectangle 16"
+		       Margin="20,0,20,10"
+		       Padding="0">
+			<Grid Padding="20,16">
+				<Entry x:Name="searchTextBox" 
+				       Placeholder="Search Products..." 
+				       PlaceholderColor="MediumPurple"
+				       TextColor="{StaticResource Primary}"
+				       BackgroundColor="Transparent"
+				       FontSize="16"
+					   FontFamily="CascadiaCodeRegular"
+				       TextChanged="searchTextBox_TextChanged" />
+				<Label Text="🔍" 
+				       FontSize="18"
+				       HorizontalOptions="End"
+				       VerticalOptions="Center"
+				       TextColor="{StaticResource Secondary}" />
+			</Grid>
+		</Border>
 
-		<ScrollView Grid.Row="1" Margin="5">
-			<CollectionView x:Name="itemsCollectionView" >
+		<!-- Products List -->
+		<ScrollView Grid.Row="1" 
+		           Margin="20,10">
+			<CollectionView x:Name="itemsCollectionView">
 				<CollectionView.ItemTemplate>
 					<DataTemplate>
-						<Border Margin="5" Background="Transparent" Padding="5" StrokeShape="RoundRectangle 10">
-							<Grid>
+						<Border Stroke="{StaticResource Border}"
+								StrokeShape="RoundRectangle 12"
+						        Margin="0,4"
+						        Padding="0">
+							<Grid Padding="20,16">
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*" />
 									<ColumnDefinition Width="Auto" />
 								</Grid.ColumnDefinitions>
 
-								<Label x:Name="itemNameLabel" Text="{Binding ProductName}" Grid.Column="0" Margin="5" VerticalOptions="Center"/>
+								<!-- Product Name -->
+								<Label Text="{Binding ProductName}" 
+								       Grid.Column="0"
+								       FontSize="16"
+								       FontAttributes="None"
+								       VerticalOptions="Center" />
 
-								<!-- Add button - visible when quantity is 0 -->
-								<Button Text="+ Add" Grid.Column="1" Margin="10,5" Clicked="AddButton_Clicked" 
-										IsVisible="{Binding Quantity, Converter={StaticResource QuantityToVisibilityConverter}, ConverterParameter=inverse}" />
+								<!-- Add Button (when quantity is 0) -->
+								<Button Text="Add"
+								        Grid.Column="1"
+								        BackgroundColor="{StaticResource Primary}"
+								        TextColor="White"
+								        FontSize="14"
+								        FontAttributes="None"
+								        CornerRadius="8"
+								        Padding="16,8"
+								        MinimumWidthRequest="70"
+								        Clicked="AddButton_Clicked"
+								        IsVisible="{Binding Quantity, Converter={StaticResource QuantityToVisibilityConverter}, ConverterParameter=inverse}" />
 
-								<!-- Quantity grid - visible when quantity > 0 -->
-								<Grid Grid.Column="1" IsVisible="{Binding Quantity, Converter={StaticResource QuantityToVisibilityConverter}}">
-									<Grid.ColumnDefinitions>
-										<ColumnDefinition Width="Auto"/>
-										<ColumnDefinition Width="Auto"/>
-										<ColumnDefinition Width="Auto"/>
-									</Grid.ColumnDefinitions>
+								<!-- Quantity Controls (when quantity > 0) -->
+								<StackLayout Grid.Column="1"
+								           Orientation="Horizontal"
+								           Spacing="8"
+								           IsVisible="{Binding Quantity, Converter={StaticResource QuantityToVisibilityConverter}}">
 
-									<Button Clicked="MinusButton_Clicked" Text="-" Background="IndianRed" FontAttributes="Bold" VerticalOptions="Center" TextColor="Black" CornerRadius="50" FontSize="20" />
+									<!-- Decrease Button -->
+									<Button Text="−"
+									        BackgroundColor="Transparent"
+									        TextColor="{StaticResource Danger}"
+									        BorderColor="{StaticResource Border}"
+									        BorderWidth="1"
+									        FontSize="16"
+									        FontAttributes="Bold"
+									        CornerRadius="8"
+									        WidthRequest="40"
+									        HeightRequest="40"
+									        Clicked="MinusButton_Clicked" />
 
+									<!-- Quantity Display -->
 									<control:SfNumericEntry x:Name="quantityNumericEntry"
-															Grid.Column="1"
-															Value="{Binding Quantity}"
-															Margin="10,5"	
-															Background="MediumPurple"
-															CustomFormat="0" AllowNull="False"
-															Minimum="0" UpDownPlacementMode="Hidden"
-															HorizontalTextAlignment="Center"
-															ValueChanged="quantityNumericEntry_ValueChanged" />
+									                        Value="{Binding Quantity}"
+									                        BackgroundColor="Transparent"
+															TextColor="MediumPurple"
+									                        Stroke="{StaticResource Border}"
+									                        WidthRequest="60"
+									                        HeightRequest="40"
+									                        CustomFormat="0"
+									                        AllowNull="False"
+									                        Minimum="0"
+									                        UpDownPlacementMode="Hidden"
+									                        HorizontalTextAlignment="Center"
+									                        FontSize="14"
+									                        ValueChanged="quantityNumericEntry_ValueChanged" />
 
-									<Button Grid.Column="2" Clicked="PlusButton_Clicked" Text="+" Background="ForestGreen" FontAttributes="Bold" VerticalOptions="Center" TextColor="Black" CornerRadius="50" FontSize="20" />
-								</Grid>
+									<!-- Increase Button -->
+									<Button Text="+"
+									        BackgroundColor="Transparent"
+									        TextColor="{StaticResource Success}"
+									        BorderColor="{StaticResource Border}"
+									        BorderWidth="1"
+									        FontSize="16"
+									        FontAttributes="Bold"
+									        CornerRadius="8"
+									        WidthRequest="40"
+									        HeightRequest="40"
+									        Clicked="PlusButton_Clicked" />
+								</StackLayout>
 							</Grid>
 						</Border>
 					</DataTemplate>
 				</CollectionView.ItemTemplate>
+				<CollectionView.ItemsLayout>
+					<LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+				</CollectionView.ItemsLayout>
 			</CollectionView>
 		</ScrollView>
 
-		<Border Background="MediumPurple" Grid.Row="2" Margin="10" StrokeShape="RoundRectangle 10" Padding="5">
-			<Grid>
-				<Label x:Name="cartItemsLabel" Text="0 Items" FontSize="17" TextColor="White" FontFamily="CascadiaCodeSemibold" Margin="10,0" HorizontalOptions="Start" VerticalOptions="Center" />
-				<Button Text="Cart ->" HorizontalOptions="End" Margin="15,0" Background="BlueViolet" TextColor="White" FontFamily="CascadiaCodeSemibold" Clicked="CartButton_Clicked" />
+		<!-- Cart Summary -->
+		<Border Grid.Row="2"
+				StrokeShape="RoundRectangle 16"
+				BackgroundColor="MediumPurple"
+				Margin="10,0,10,10"
+				Padding="5">
+			<Grid Padding="5">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+
+				<!-- Cart Items Count -->
+				<StackLayout Grid.Column="0"
+				           VerticalOptions="Center">
+					<Label x:Name="cartItemsLabel" 
+					       Text="0 Items"
+						   TextColor="Black"
+						   FontFamily="CascadiaCodeRegular"
+					       FontAttributes="Bold" />
+					<Label Text="Review your order"
+					       FontSize="10"
+						   TextColor="Black"
+						   FontFamily="CascadiaCodeRegular" />
+				</StackLayout>
+
+				<!-- Cart Button -->
+				<Button Text="View Cart"
+				        Grid.Column="1"
+				        BackgroundColor="{StaticResource Primary}"
+				        TextColor="White"
+						FontFamily="CascadiaCodeRegular"
+				        CornerRadius="12"
+				        Padding="20,10"
+				        MinimumWidthRequest="120"
+				        Clicked="CartButton_Clicked" />
 			</Grid>
 		</Border>
 	</Grid>
-
 </ContentPage>
