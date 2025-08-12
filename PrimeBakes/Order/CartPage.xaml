@@ -271,7 +271,7 @@
                                x:Name="cartItemsLabel" 
                                Text="SWIPE TO CHECKOUT" 
                                FontSize="16"
-							   FontFamily="CascadiaSemiBold"
+							   FontFamily="CascadiaCodeSemiBold"
                                FontAttributes="Bold"
                                HorizontalOptions="Center" 
                                VerticalOptions="Center" />

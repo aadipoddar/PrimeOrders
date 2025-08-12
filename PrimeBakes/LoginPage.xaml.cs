@@ -1,7 +1,7 @@
 ﻿#if ANDROID
 using System.Reflection;
 
-using PrimeBakes.Platforms.Android;
+using PrimeBakes.Services.Android;
 #endif
 
 using PrimeOrdersLibrary.Data.Common;

@@ -5,9 +5,12 @@ using Plugin.LocalNotification;
 #endif
 using Plugin.Maui.Audio;
 
+using PrimeBakes.Services;
+
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.DataAccess;
+using PrimeOrdersLibrary.Exporting.Order;
 using PrimeOrdersLibrary.Models.Common;
 using PrimeOrdersLibrary.Models.Order;
 
@@ -154,28 +157,28 @@ public partial class CartPage : ContentPage
 		AudioManager.Current.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("checkout.mp3")).Play();
 
 #if ANDROID
+		if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+			await LocalNotificationCenter.Current.RequestNotificationPermission();
+
 		var request = new NotificationRequest
 		{
-			NotificationId = 100,
+			NotificationId = 101,
 			Title = "Order Placed",
 			Subtitle = "Order Confirmation",
 			Description = $"Your order #{order.OrderNo} has been successfully placed. {order.Remarks}",
-			CategoryType = NotificationCategoryType.Reminder,
-			BadgeNumber = 1,
 			Schedule = new NotificationRequestSchedule
 			{
-				NotifyTime = DateTime.Now.AddSeconds(1),
-				RepeatType = NotificationRepeat.No
-			},
-			Android =
-			{
-				ChannelId = "order_channel",
-				Priority = Plugin.LocalNotification.AndroidOption.AndroidPriority.Max
+				NotifyTime = DateTime.Now.AddSeconds(5)
 			}
 		};
 
 		await LocalNotificationCenter.Current.Show(request);
 #endif
+
+		var ms = await OrderA4Print.GenerateA4OrderDocument(order.Id);
+		var fileName = $"Order_Bill_{order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		SaveService saveService = new();
+		var filePath = saveService.SaveAndView(fileName, "application/pdf", ms);
 
 		Navigation.RemovePage(_orderPage);
 		Navigation.RemovePage(this);

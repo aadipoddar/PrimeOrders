@@ -27,7 +27,7 @@ public partial class OrderSummaryModule
 
 	private bool _saleSummaryVisible = false;
 	private SaleOverviewModel _selectedSale;
-	private List<SaleDetailDisplayModel> _selectedSaleDetails = [];
+	private readonly List<SaleDetailDisplayModel> _selectedSaleDetails = [];
 
 	private async Task ExportOrderChallan()
 	{

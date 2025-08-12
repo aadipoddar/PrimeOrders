@@ -2,7 +2,7 @@
 
 using Application = Android.App.Application;
 
-namespace PrimeBakes.Platforms.Android;
+namespace PrimeBakes.Services.Android;
 
 public static class AadiSoftUpdater
 {
