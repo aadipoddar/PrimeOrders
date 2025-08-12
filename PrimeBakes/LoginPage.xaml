@@ -2,91 +2,151 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PrimeBakes.LoginPage"
-			 xmlns:control="clr-namespace:Syncfusion.Maui.Toolkit.OtpInput;assembly=Syncfusion.Maui.Toolkit">
+             xmlns:control="clr-namespace:Syncfusion.Maui.Toolkit.OtpInput;assembly=Syncfusion.Maui.Toolkit">
 
 	<ContentPage.Resources>
 		<ResourceDictionary>
-			<Color x:Key="PrimaryColor">#512BD4</Color>
-			<Color x:Key="SecondaryColor">#68217A</Color>
-			<Color x:Key="AccentColor">#00A4EF</Color>
-			<Color x:Key="LightColor">#F7F7F7</Color>
-			<Color x:Key="DarkColor">#1E1E1E</Color>
+			<!-- Minimalist Color Palette -->
+			<Color x:Key="PrimaryColor">#2C3E50</Color>
+			<Color x:Key="AccentColor">#3498DB</Color>
+			<Color x:Key="BackgroundColor">#FAFAFA</Color>
+			<Color x:Key="CardColor">#FFFFFF</Color>
+			<Color x:Key="TextPrimary">#2C3E50</Color>
+			<Color x:Key="TextSecondary">#7F8C8D</Color>
+			<Color x:Key="TextTertiary">#BDC3C7</Color>
 
-			<LinearGradientBrush x:Key="BackgroundGradient" StartPoint="0,0" EndPoint="1,1">
-				<GradientStop Color="{StaticResource PrimaryColor}" Offset="0.0" />
-				<GradientStop Color="{StaticResource SecondaryColor}" Offset="1.0" />
-			</LinearGradientBrush>
+			<!-- Minimalist Styles -->
+			<Style x:Key="LoginCardStyle" TargetType="Border">
+				<Setter Property="BackgroundColor" Value="{StaticResource CardColor}" />
+				<Setter Property="StrokeThickness" Value="0" />
+				<Setter Property="StrokeShape" Value="RoundRectangle 16" />
+				<Setter Property="Padding" Value="32" />
+				<Setter Property="Margin" Value="24" />
+				<Setter Property="Shadow">
+					<Shadow Brush="MediumPurple" Opacity="1" Radius="12" Offset="0,4" />
+				</Setter>
+			</Style>
 
 			<Style x:Key="HintStyle" TargetType="Label">
 				<Setter Property="FontSize" Value="12" />
-				<Setter Property="TextColor" Value="#666" />
-				<Setter Property="HorizontalTextAlignment" Value="Center" />
 				<Setter Property="FontFamily" Value="CascadiaCodeRegular" />
-				<Setter Property="Margin" Value="0,15,0,0" />
+				<Setter Property="TextColor" Value="DimGray" />
+				<Setter Property="HorizontalTextAlignment" Value="Center" />
+				<Setter Property="Margin" Value="0,16,0,0" />
+			</Style>
+
+			<Style x:Key="FooterStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="10" />
+				<Setter Property="HorizontalOptions" Value="Center" />
+				<Setter Property="HorizontalTextAlignment" Value="Center" />
+				<Setter Property="Margin" Value="0,24,0,0" />
 			</Style>
 		</ResourceDictionary>
 	</ContentPage.Resources>
 
-	<Grid Background="{StaticResource BackgroundGradient}">
-		<ScrollView VerticalOptions="Fill" HorizontalOptions="Fill">
-			<StackLayout VerticalOptions="Center" HorizontalOptions="Center" Padding="20">
-				<Border StrokeShape="RoundRectangle 20" Padding="40" Margin="20" Background="White">
-					<StackLayout>
-						<StackLayout HorizontalOptions="Center">
-							<Label Text="Prime Bakes" FontFamily="CascadiaCodeSemibold" FontSize="28" FontAttributes="Bold" TextColor="{StaticResource PrimaryColor}" HorizontalTextAlignment="Center" Margin="5" />
-							<Label Text="Enter your access code" FontFamily="CascadiaCodeSemibold" FontSize="13" TextColor="{StaticResource DarkColor}" HorizontalTextAlignment="Center" Margin="10" Opacity="0.8" />
+	<Grid>
+		<ScrollView VerticalOptions="Center" 
+                   HorizontalOptions="Center">
+			<StackLayout VerticalOptions="Center" 
+                        HorizontalOptions="Center" 
+                        Padding="20">
+
+				<!-- Login Card -->
+				<Border Style="{StaticResource LoginCardStyle}">
+					<StackLayout Spacing="0">
+
+						<!-- Header Section -->
+						<StackLayout HorizontalOptions="Center" Spacing="0">
+							<Label Text="Prime Bakes" 
+								   FontSize="22"
+								   FontFamily="CascadiaCodeSemiBold"
+								   FontAttributes="Bold"
+								   TextColor="MediumPurple"
+								   HorizontalOptions="Center"
+								   Margin="5"/>
+							<Label Text="Enter your access code to continue" 
+								   FontSize="12"
+								   FontFamily="CascadiaCodeRegular"
+								   TextColor="MediumPurple"
+								   HorizontalOptions="Center"
+								   Margin="5" />
 						</StackLayout>
 
-						<control:SfOtpInput x:Name="passcodeInput" 
-											ValueChanged="OnValueChanged"
-											AutoFocus="True"
-											Margin="0,20"
-											StylingMode="Filled"
-											HorizontalOptions="Center" />
+						<!-- OTP Input Section -->
+						<StackLayout HorizontalOptions="Center" Spacing="0">
+							<control:SfOtpInput x:Name="passcodeInput" 
+												ValueChanged="OnValueChanged"
+												AutoFocus="True"
+												StylingMode="Outlined"
+												HorizontalOptions="Center"
+												Margin="10" />
+						</StackLayout>
 
-						<StackLayout x:Name="FooterSection" HorizontalOptions="Center" HeightRequest="90">
-							<StackLayout x:Name="DefaultFooter" IsVisible="True" HorizontalOptions="Center">
-								<StackLayout Orientation="Horizontal" HorizontalOptions="Center" Margin="0,0,0,15">
+						<!-- Footer Section -->
+						<StackLayout x:Name="FooterSection" 
+                                    HorizontalOptions="Center" 
+                                    HeightRequest="80"
+                                    Spacing="0">
+
+							<!-- Default State -->
+							<StackLayout x:Name="DefaultFooter" 
+                                        IsVisible="True" 
+                                        HorizontalOptions="Center"
+                                        Spacing="0">
+
+								<!-- Simple Progress Dots -->
+								<StackLayout Orientation="Horizontal" 
+                                            HorizontalOptions="Center" 
+                                            Margin="0,0,0,12"
+                                            Spacing="8">
 									<Ellipse x:Name="Dot1" 
-											 Fill="{StaticResource PrimaryColor}" 
-											 WidthRequest="10" 
-											 HeightRequest="10" 
-											 Margin="5,0" />
+                                             Fill="MediumPurple" 
+                                             WidthRequest="8" 
+                                             HeightRequest="8" />
 									<Ellipse x:Name="Dot2" 
-											 Fill="{StaticResource AccentColor}" 
-											 WidthRequest="10" 
-											 HeightRequest="10" 
-											 Margin="5,0" />
+                                             Fill="DeepSkyBlue" 
+                                             WidthRequest="8" 
+                                             HeightRequest="8" />
 									<Ellipse x:Name="Dot3" 
-											 Fill="{StaticResource SecondaryColor}" 
-											 WidthRequest="10" 
-											 HeightRequest="10" 
-											 Margin="5,0" />
+                                             Fill="Black" 
+                                             WidthRequest="8" 
+                                             HeightRequest="8" />
 								</StackLayout>
-								<Label Text="Enter your 4-digit access code to continue" Style="{StaticResource HintStyle}" />
+
+								<Label Text="Enter your 4-digit access code" 
+                                       Style="{StaticResource HintStyle}" />
 							</StackLayout>
 
 							<!-- Loading State -->
-							<StackLayout x:Name="LoadingFooter" IsVisible="False" HorizontalOptions="Center">
+							<StackLayout x:Name="LoadingFooter" 
+                                        IsVisible="False" 
+                                        HorizontalOptions="Center"
+                                        Spacing="0">
 								<ActivityIndicator x:Name="LoadingIndicator"
-												   IsRunning="False"
-												   Color="{StaticResource PrimaryColor}"
-												   WidthRequest="30"
-												   HeightRequest="30"
-												   Margin="0,0,0,15" />
-								<Label Text="Verifying access code..." Style="{StaticResource HintStyle}" />
+                                                  IsRunning="False"
+                                                  Color="MediumPurple"
+                                                  WidthRequest="24"
+                                                  HeightRequest="24"
+                                                  Margin="12" />
+								<Label Text="Verifying access code..." 
+                                       Style="{StaticResource HintStyle}" />
 							</StackLayout>
 						</StackLayout>
 
-						<Label HorizontalOptions="Center" HorizontalTextAlignment="Center" FontSize="10">
+						<!-- Footer Text -->
+						<Label Style="{StaticResource FooterStyle}">
 							<Label.FormattedText>
 								<FormattedString>
-									<Span Text="© A Product By " TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>
+									<Span Text="© A Product By " 
+                                          TextColor="Black"
+										  FontFamily="CascadiaCodeRegular"/>
 									<Span Text="AadiSoft" 
-										  TextColor="{StaticResource PrimaryColor}" 
-										  FontAttributes="Bold"
-										  FontFamily="CascadiaCodeSemibold"/>
-									<Span Text=". All rights reserved." TextColor="{StaticResource DarkColor}" FontFamily="CascadiaCodeRegular"/>
+										  FontFamily="CascadiaCodeRegular"
+                                          TextColor="MediumPurple" 
+                                          FontAttributes="Bold" />
+									<Span Text=". All rights reserved." 
+										  FontFamily="CascadiaCodeRegular"
+                                          TextColor="Black" />
 								</FormattedString>
 							</Label.FormattedText>
 							<Label.GestureRecognizers>

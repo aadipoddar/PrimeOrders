@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 
-#region ANDROID
+#if ANDROID
 using Plugin.LocalNotification;
-#endregion
+#endif
 using Plugin.Maui.Audio;
 
 using PrimeOrdersLibrary.Data.Common;
@@ -153,7 +153,7 @@ public partial class CartPage : ContentPage
 
 		AudioManager.Current.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("checkout.mp3")).Play();
 
-		#region ANDROID
+#if ANDROID
 		var request = new NotificationRequest
 		{
 			NotificationId = 100,
@@ -175,7 +175,7 @@ public partial class CartPage : ContentPage
 		};
 
 		await LocalNotificationCenter.Current.Show(request);
-		#endregion
+#endif
 
 		Navigation.RemovePage(_orderPage);
 		Navigation.RemovePage(this);

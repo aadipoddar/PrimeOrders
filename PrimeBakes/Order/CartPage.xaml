@@ -5,7 +5,56 @@
 			 xmlns:expander="clr-namespace:Syncfusion.Maui.Expander;assembly=Syncfusion.Maui.Expander"
 			 xmlns:input="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
 			 xmlns:control="clr-namespace:PrimeBakes.Controls"
-             Title="Cart">
+             Title="My Cart">
+
+	<ContentPage.Resources>
+		<ResourceDictionary>
+			<!-- Color Scheme -->
+			<Color x:Key="PrimaryColor">#6366F1</Color>
+			<Color x:Key="SecondaryColor">#F3F4F6</Color>
+			<Color x:Key="AccentColor">#10B981</Color>
+			<Color x:Key="ErrorColor">#EF4444</Color>
+			<Color x:Key="TextPrimary">#1F2937</Color>
+			<Color x:Key="TextSecondary">#6B7280</Color>
+			<Color x:Key="SurfaceColor">#FFFFFF</Color>
+			<Color x:Key="BorderColor">#E5E7EB</Color>
+
+			<!-- Styles -->
+			<Style x:Key="CardStyle" TargetType="Border">
+				<Setter Property="Stroke" Value="MediumPurple" />
+				<Setter Property="StrokeThickness" Value="1" />
+				<Setter Property="StrokeShape" Value="RoundRectangle 16" />
+				<Setter Property="Margin" Value="16,8" />
+				<Setter Property="Padding" Value="0" />
+				<Setter Property="Shadow">
+					<Setter.Value>
+						<Shadow Brush="MediumPurple"
+                                Offset="0,2"
+                                Radius="8"
+                                Opacity="0.5" />
+					</Setter.Value>
+				</Setter>
+			</Style>
+
+			<Style x:Key="HeaderLabelStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="18" />
+				<Setter Property="FontFamily" Value="CascadiaCodeSemibold" />
+				<Setter Property="FontAttributes" Value="Bold" />
+				<Setter Property="TextColor" Value="MediumPurple" />
+			</Style>
+
+			<Style x:Key="BodyLabelStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="14" />
+				<Setter Property="FontFamily" Value="CascadiaCodeRegular" />
+			</Style>
+
+			<Style x:Key="ValueLabelStyle" TargetType="Label">
+				<Setter Property="FontSize" Value="14" />
+				<Setter Property="FontAttributes" Value="Bold" />
+				<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+			</Style>
+		</ResourceDictionary>
+	</ContentPage.Resources>
 
 	<Grid>
 		<Grid.RowDefinitions>
@@ -14,82 +63,185 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<Border Margin="10" Stroke="#CAC4D0">
-			<expander:SfExpander IsExpanded="True" Margin="10">
+		<!-- Order Details Expander -->
+		<Border Grid.Row="0" Style="{StaticResource CardStyle}">
+			<expander:SfExpander IsExpanded="True"
+                                 AnimationDuration="200">
 				<expander:SfExpander.Header>
-					<Label Text="Order Details" FontSize="20" FontFamily="CascadiaCodeSemibold" Background="#ddb7fd" HorizontalTextAlignment="Center" Padding="5" TextColor="Black" />
+					<Grid Padding="20,16">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
+
+						<StackLayout Grid.Column="0" 
+									 VerticalOptions="Center"
+									 Spacing="2">
+							<StackLayout VerticalOptions="Center" Spacing="2">
+								<Label Text="Order Details" 
+                                       Style="{StaticResource HeaderLabelStyle}" />
+								<Label Text="Tap to expand or collapse" 
+                                       Style="{StaticResource BodyLabelStyle}"
+                                       FontSize="12" />
+							</StackLayout>
+						</StackLayout>
+					</Grid>
 				</expander:SfExpander.Header>
 
 				<expander:SfExpander.Content>
-					<StackLayout Padding="10">
-						<Grid Margin="5">
+					<StackLayout Padding="20,0,20,20" Spacing="16">
+						<!-- Order Number -->
+						<Grid>
 							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="100"/>
 								<ColumnDefinition Width="*"/>
 							</Grid.ColumnDefinitions>
 
-							<Label Text="Order No:" VerticalTextAlignment="Center" />
-							<Entry Grid.Column="1" Text="YTFFGH676654" HorizontalOptions="End" IsReadOnly="True" x:Name="orderNoTextBox"/>
+							<Label Text="Order No" 
+                                   Style="{StaticResource BodyLabelStyle}"
+                                   VerticalOptions="Center" />
+
+							<Border Grid.Column="1" 
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,8">
+								<Entry Text="YTFFGH676654" 
+                                       x:Name="orderNoTextBox"
+                                       IsReadOnly="True"
+									   FontFamily="CascadiaCodeSemiBold"
+                                       TextColor="MediumOrchid"
+                                       FontSize="14"
+                                       FontAttributes="Bold" />
+							</Border>
 						</Grid>
 
-						<Grid Margin="5">
+						<!-- Date -->
+						<Grid>
 							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="100"/>
 								<ColumnDefinition Width="*"/>
 							</Grid.ColumnDefinitions>
 
-							<Label Text="Date:" VerticalTextAlignment="Center" />
-							<DatePicker Grid.Column="1" HorizontalOptions="End" x:Name="orderDatePicker" />
+							<Label Text="Date" 
+                                   Style="{StaticResource BodyLabelStyle}"
+                                   VerticalOptions="Center" />
+
+							<Border Grid.Column="1" 
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,8">
+								<DatePicker x:Name="orderDatePicker"
+											FontFamily="CascadiaCodeSemiBold"
+                                            FontSize="14" />
+							</Border>
 						</Grid>
 
-						<Grid Margin="5">
+						<!-- Remarks -->
+						<Grid>
 							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="100"/>
 								<ColumnDefinition Width="*"/>
 							</Grid.ColumnDefinitions>
 
-							<Label Text="Remarks:" VerticalTextAlignment="Center" />
-							<Entry Grid.Column="1" Margin="10,0,0,0" Placeholder="Narration Regarding This Order..." x:Name="remarksTextBox" />
+							<Label Text="Remarks" 
+                                   Style="{StaticResource BodyLabelStyle}"
+                                   VerticalOptions="Center"
+                                   Margin="0,12,0,0" />
+
+							<Border Grid.Column="1" 
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12,8">
+								<Entry x:Name="remarksTextBox"
+                                       Placeholder="Add notes for this order..."
+                                       FontFamily="CascadiaCodeSemiBold"
+									   PlaceholderColor="MediumPurple"
+                                       FontSize="14" />
+							</Border>
 						</Grid>
 
-						<Grid Margin="5" x:Name="locationSelectionGrid">
+						<!-- Location -->
+						<Grid x:Name="locationSelectionGrid">
 							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="100"/>
 								<ColumnDefinition Width="*"/>
 							</Grid.ColumnDefinitions>
 
-							<Label Text="Location:" VerticalTextAlignment="Center" />
-							<input:SfComboBox x:Name="locationComboBox" Grid.Column="1" Margin="10,0,0,0" Background="#ddb7fd" />
+							<Label Text="Location" 
+                                   Style="{StaticResource BodyLabelStyle}"
+                                   VerticalOptions="Center" />
+
+							<Border Grid.Column="1" 
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="4">
+								<input:SfComboBox x:Name="locationComboBox" 
+                                                  BackgroundColor="Transparent"
+												  FontFamily="CascadiaRegular"
+												  TextColor="MediumOrchid"
+												  PlaceholderColor="MediumPurple"
+                                                  FontSize="14"
+                                                  Placeholder="Select location" />
+							</Border>
 						</Grid>
 					</StackLayout>
 				</expander:SfExpander.Content>
 			</expander:SfExpander>
 		</Border>
 
-		<ScrollView Grid.Row="1" Margin="5">
+		<!-- Cart Items -->
+		<ScrollView Grid.Row="1" 
+                    Margin="10">
 			<CollectionView x:Name="cartItemsCollectionView">
 				<CollectionView.ItemTemplate>
 					<DataTemplate>
-						<Border Margin="5" Background="Transparent" Padding="5" StrokeShape="RoundRectangle 10">
-							<Grid>
+						<Border Style="{StaticResource CardStyle}"
+                                Margin="16,4">
+							<Grid Padding="16" 
+                                  RowSpacing="12">
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*" />
 									<ColumnDefinition Width="Auto" />
-									<ColumnDefinition Width="Auto" />
 								</Grid.ColumnDefinitions>
-								<Label Text="{Binding ProductName}" Grid.Column="0" Margin="5" VerticalOptions="Center"/>
 
-								<input:SfNumericEntry Grid.Column="1" x:Name="quantityNumericEntry"
-                                                        Value="{Binding Quantity}"
-														Margin="10,5"	
-														Background="MediumPurple"
-                                                        CustomFormat="0" AllowNull="False"
-                                                        Minimum="0" UpDownPlacementMode="Inline"
-														MinimumWidthRequest="100"
-														HorizontalTextAlignment="Center"
-                                                        ValueChanged="quantityNumericEntry_ValueChanged" />
+								<!-- Product Name -->
+								<Label Grid.Column="0"
+                                       Text="{Binding ProductName}" 
+									   FontFamily="CascadiaRegular"
+                                       FontSize="16"
+									   VerticalOptions="Center"/>
 
-								<Button Grid.Column="2" Clicked="RemoveFromCartButton_Clicked" Text="X" Background="IndianRed" FontAttributes="Bold" VerticalOptions="Center" />
+								<!-- Quantity and Remove Button -->
+								<Grid Grid.Column="1">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+									</Grid.ColumnDefinitions>
+
+									<!-- Quantity Control -->
+									<input:SfNumericEntry x:Name="quantityNumericEntry"
+														  Grid.Column="0"
+														  Margin="8,0"
+														  Padding="4"
+														  Value="{Binding Quantity}"
+														  CustomFormat="0" 
+														  Background="Transparent"
+														  AllowNull="False"
+														  Minimum="0" 
+														  UpDownPlacementMode="Inline"
+														  MinimumWidthRequest="100"
+														  HorizontalTextAlignment="Center"
+														  TextColor="MediumPurple"
+														  ValueChanged="quantityNumericEntry_ValueChanged" />
+
+									<!-- Remove Button -->
+									<Button Grid.Column="1" 
+                                            Clicked="RemoveFromCartButton_Clicked" 
+                                            BackgroundColor="{StaticResource ErrorColor}"
+                                            TextColor="White"
+                                            CornerRadius="20"
+                                            WidthRequest="40"
+                                            HeightRequest="40"
+                                            FontSize="16"
+                                            FontAttributes="Bold"
+                                            Text="×" />
+								</Grid>
 							</Grid>
 						</Border>
 					</DataTemplate>
@@ -97,24 +249,60 @@
 			</CollectionView>
 		</ScrollView>
 
-
-		<control:MySlideView HeightRequest="60" SlideCompleted="SlideCompleted" Grid.Row="2">
+		<!-- Checkout Swipe Button -->
+		<control:MySlideView Grid.Row="2"
+								 Margin="10"
+								 HeightRequest="64" 
+                                 SlideCompleted="SlideCompleted">
 			<control:MySlideView.MyThumb>
-				<Border StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="AliceBlue" Padding="0" Margin="-20,0,0,0" HeightRequest="60" WidthRequest="60" x:Name="myframe" >
-					<Image x:Name="myimg" Source="dotnet_bot.png" Aspect="AspectFit"  VerticalOptions="Center" HorizontalOptions="Center" HeightRequest="60" WidthRequest="60" />
+				<Border StrokeShape="RoundRectangle 60"
+                            StrokeThickness="0" 
+                            BackgroundColor="{StaticResource SurfaceColor}"
+                            Margin="2"
+                            HeightRequest="56" 
+                            WidthRequest="56"
+                            x:Name="myframe">
+					<Border.Shadow>
+						<Shadow Brush="MediumPurple"
+                                    Offset="0,2"
+                                    Radius="8"
+                                    Opacity="1" />
+					</Border.Shadow>
+
+					<Label Text="🛒" 
+                               FontSize="24"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
 				</Border>
 			</control:MySlideView.MyThumb>
 
 			<control:MySlideView.MyTrackBar>
-				<Border StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="DarkGray" Padding="0">
-					<Label TextColor="White" x:Name="cartItemsLabel" Text="SWIPE TO Checkout" HorizontalOptions="Center" VerticalOptions="Center" />
+				<Border StrokeShape="RoundRectangle 60" 
+                            StrokeThickness="0" 
+                            BackgroundColor="{StaticResource TextSecondary}"
+                            Padding="0">
+					<Label TextColor="White" 
+                               x:Name="cartItemsLabel" 
+                               Text="SWIPE TO CHECKOUT" 
+                               FontSize="16"
+							   FontFamily="CascadiaSemiBold"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center" />
 				</Border>
 			</control:MySlideView.MyTrackBar>
 
 			<control:MySlideView.MyFillBar>
-				<Border  StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="MediumPurple" Padding="0,0,20,20" />
+				<Border  StrokeShape="RoundRectangle 60,60,60,60" StrokeThickness="0" BackgroundColor="MediumPurple">
+					<Label Text="✓ CHECKOUT" 
+						   FontSize="16"
+						   FontFamily="CascadiaSemiBold"
+						   FontAttributes="Bold"
+						   TextColor="White"
+						   HorizontalOptions="Center" 
+						   VerticalOptions="Center" />
+				</Border>
 			</control:MySlideView.MyFillBar>
 		</control:MySlideView>
 	</Grid>
-
 </ContentPage>

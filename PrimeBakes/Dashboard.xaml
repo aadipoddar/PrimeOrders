@@ -138,8 +138,7 @@
 
 						<StackLayout Style="{StaticResource ButtonContentStyle}">
 							<Label Text="📦" 
-								   Style="{StaticResource IconStyle}"
-								   TextColor="{StaticResource AccentColor}" />
+								   Style="{StaticResource IconStyle}"/>
 							<Label Text="ORDERS" 
 								   Style="{StaticResource TitleStyle}" />
 							<Label Text="Place New Orders"
@@ -159,8 +158,7 @@
 
 						<StackLayout Style="{StaticResource ButtonContentStyle}">
 							<Label Text="💳" 
-								   Style="{StaticResource IconStyle}"
-								   TextColor="{StaticResource SuccessColor}" />
+								   Style="{StaticResource IconStyle}" />
 							<Label Text="SALES" 
 								   Style="{StaticResource TitleStyle}" />
 							<Label Text="Process New Sales"
@@ -177,21 +175,25 @@
 		<Border Grid.Row="2" 
 				BackgroundColor="{StaticResource CardColor}"
 				StrokeThickness="0"
-				Padding="20,16">
+				Padding="20,12">
 			<Border.Shadow>
-				<Shadow Brush="#E0E0E0" Opacity="0.2" Radius="4" Offset="0,-2" />
+				<Shadow Brush="MediumPurple" Opacity="1" Radius="4" Offset="0,-2" />
 			</Border.Shadow>
 
 			<Label HorizontalOptions="Center" 
-				   FontSize="12"
-				   TextColor="{StaticResource TextSecondary}">
+				   FontSize="12">
 				<Label.FormattedText>
 					<FormattedString>
-						<Span Text="© A Product By " />
+						<Span Text="© A Product By "
+							  TextColor="Black"
+							  FontFamily="CascadiaCodeRegular" />
 						<Span Text="AadiSoft" 
-							  TextColor="{StaticResource AccentColor}" 
+							  TextColor="MediumPurple" 
+							  FontFamily="CascadiaCodeRegular"
 							  FontAttributes="Bold"/>
-						<Span Text=". All rights reserved." />
+						<Span Text=". All rights reserved."
+							  TextColor="Black"
+							  FontFamily="CascadiaCodeRegular"/>
 					</FormattedString>
 				</Label.FormattedText>
 				<Label.GestureRecognizers>

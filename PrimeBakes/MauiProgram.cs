@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Logging;
 #endif
 
-#region ANDROID
+#if ANDROID
 using Plugin.LocalNotification;
-#endregion
+#endif
 
 using PrimeOrdersLibrary.DataAccess;
 
@@ -25,9 +25,9 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.ConfigureSyncfusionToolkit()
 			.ConfigureSyncfusionCore()
-		#region ANDROID
+#if ANDROID
 			.UseLocalNotification()
-		#endregion
+#endif
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");

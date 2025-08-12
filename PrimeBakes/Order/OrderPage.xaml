@@ -73,6 +73,7 @@
 								<Label Text="{Binding ProductName}" 
 								       Grid.Column="0"
 								       FontSize="16"
+									   Margin="5"
 								       FontAttributes="None"
 								       VerticalOptions="Center" />
 
