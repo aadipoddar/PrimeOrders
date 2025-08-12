@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="PrimeBakes.LoginPage"
-             xmlns:control="clr-namespace:Syncfusion.Maui.Toolkit.OtpInput;assembly=Syncfusion.Maui.Toolkit">
+             xmlns:control="clr-namespace:Syncfusion.Maui.Toolkit.OtpInput;assembly=Syncfusion.Maui.Toolkit"
+			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
+			 Loaded="ContentPage_Loaded">
 
 	<ContentPage.Resources>
 		<ResourceDictionary>
@@ -69,6 +71,7 @@
 								   FontFamily="CascadiaCodeRegular"
 								   TextColor="MediumPurple"
 								   HorizontalOptions="Center"
+								   HorizontalTextAlignment="Center"
 								   Margin="5" />
 						</StackLayout>
 
@@ -153,9 +156,12 @@
 								<TapGestureRecognizer Tapped="OnAadiSoftTapped" />
 							</Label.GestureRecognizers>
 						</Label>
+
 					</StackLayout>
 				</Border>
 			</StackLayout>
 		</ScrollView>
+		
+		<syncfusion:SfPopup x:Name="popup" HeaderTitle="Update Available" Message="The App is Being Updated Please Wait" />
 	</Grid>
 </ContentPage>

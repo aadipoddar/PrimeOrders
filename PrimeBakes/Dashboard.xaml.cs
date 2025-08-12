@@ -24,25 +24,39 @@ public partial class Dashboard : ContentPage
 		_userId = userId;
 	}
 
-	protected override async void OnAppearing()
+	private async void ContentPage_Loaded(object sender, EventArgs e)
 	{
-		base.OnAppearing();
-
+		try
+		{
 #if ANDROID
-		var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-		if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
-			await Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+			if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
+			{
+				updatePopup.Show();
+				await Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+			}
 #endif
 
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
-		Title = $"Welcome, {user.Name}";
+			loadingPopup.Show();
+			var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, _userId);
+			Title = $"Welcome, {user.Name}";
 
-		if (user.Order)
-			orderBorder.IsVisible = true;
+			if (user.Order)
+				orderBorder.IsVisible = true;
 
-		if (user.Sales)
-			saleBorder.IsVisible = true;
+			if (user.Sales)
+				saleBorder.IsVisible = true;
+		}
+		catch (Exception)
+		{
+			await DisplayAlert("No Internet", "Please check your internet connection and try again.", "OK");
+			throw;
+		}
+		finally
+		{
+			loadingPopup.Dismiss();
+		}
 	}
 
 	private async void LogOutButton_Clicked(object sender, EventArgs e)

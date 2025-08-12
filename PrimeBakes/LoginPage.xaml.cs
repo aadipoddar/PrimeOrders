@@ -18,13 +18,6 @@ public partial class LoginPage : ContentPage
 		StartDotAnimation();
 		ShowLoadingState(false);
 
-#if ANDROID
-		var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-		if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
-			Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
-#endif
-
 		var userId = SecureStorage.GetAsync(_currentUserIdKey).GetAwaiter().GetResult();
 		if (userId is not null && userId is not "0")
 			Navigation.PushAsync(new Dashboard(int.Parse(userId)), true);
@@ -34,6 +27,26 @@ public partial class LoginPage : ContentPage
 	{
 		base.OnAppearing();
 		SecureStorage.Remove(_currentUserIdKey);
+	}
+
+	private void ContentPage_Loaded(object sender, EventArgs e)
+	{
+#if ANDROID
+		var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+		try
+		{
+			if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
+			{
+				popup.Show();
+				Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+			}
+		}
+		catch (Exception)
+		{
+			DisplayAlert("No Internet", "Please check your internet connection and try again.", "OK");
+		}
+#endif
 	}
 
 	private async void OnValueChanged(object sender, Syncfusion.Maui.Toolkit.OtpInput.OtpInputValueChangedEventArgs e)

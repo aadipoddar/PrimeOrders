@@ -5,6 +5,7 @@
 			 xmlns:expander="clr-namespace:Syncfusion.Maui.Expander;assembly=Syncfusion.Maui.Expander"
 			 xmlns:input="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
 			 xmlns:control="clr-namespace:PrimeBakes.Controls"
+			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
              Title="My Cart">
 
 	<ContentPage.Resources>
@@ -290,5 +291,7 @@
 				</Border>
 			</control:MySlideView.MyFillBar>
 		</control:MySlideView>
+
+		<syncfusion:SfPopup x:Name="placingOrderPopup" HeaderTitle="Placing Order" Message="We Are Processing your Order Please Wait" />
 	</Grid>
 </ContentPage>

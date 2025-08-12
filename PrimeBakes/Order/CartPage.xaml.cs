@@ -142,6 +142,13 @@ public partial class CartPage : ContentPage
 			return;
 		}
 
+		var result = await DisplayAlert("Confirm Order", "Are you sure you want to place this order?", "Yes", "No");
+
+		if (!result)
+			return;
+
+		placingOrderPopup.Show();
+
 		var order = await InsertOrder();
 		await InsertOrderDetails(order);
 
