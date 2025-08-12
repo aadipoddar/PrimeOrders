@@ -26,14 +26,6 @@
 				<Setter Property="StrokeShape" Value="RoundRectangle 16" />
 				<Setter Property="Margin" Value="16,8" />
 				<Setter Property="Padding" Value="0" />
-				<Setter Property="Shadow">
-					<Setter.Value>
-						<Shadow Brush="MediumPurple"
-                                Offset="0,2"
-                                Radius="8"
-                                Opacity="0.5" />
-					</Setter.Value>
-				</Setter>
 			</Style>
 
 			<Style x:Key="HeaderLabelStyle" TargetType="Label">
@@ -192,7 +184,7 @@
 				<CollectionView.ItemTemplate>
 					<DataTemplate>
 						<Border Style="{StaticResource CardStyle}"
-                                Margin="16,4">
+                                Margin="10,4">
 							<Grid Padding="16" 
                                   RowSpacing="12">
 								<Grid.ColumnDefinitions>
@@ -225,7 +217,7 @@
 														  AllowNull="False"
 														  Minimum="0" 
 														  UpDownPlacementMode="Inline"
-														  MinimumWidthRequest="100"
+														  MinimumWidthRequest="120"
 														  HorizontalTextAlignment="Center"
 														  TextColor="MediumPurple"
 														  ValueChanged="quantityNumericEntry_ValueChanged" />
