@@ -39,12 +39,6 @@
 				<Setter Property="FontSize" Value="14" />
 				<Setter Property="FontFamily" Value="CascadiaCodeRegular" />
 			</Style>
-
-			<Style x:Key="ValueLabelStyle" TargetType="Label">
-				<Setter Property="FontSize" Value="14" />
-				<Setter Property="FontAttributes" Value="Bold" />
-				<Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
-			</Style>
 		</ResourceDictionary>
 	</ContentPage.Resources>
 
