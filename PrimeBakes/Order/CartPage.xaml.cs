@@ -13,11 +13,14 @@ using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Exporting.Order;
 using PrimeOrdersLibrary.Models.Common;
 using PrimeOrdersLibrary.Models.Order;
+using PrimeOrdersLibrary.Models.Product;
+using PrimeOrdersLibrary.Models.Sale;
 
 namespace PrimeBakes.Order;
 
 public partial class CartPage : ContentPage
 {
+	#region Load Data
 	private const string _fileName = "cart.json";
 	private readonly int _userId;
 	private UserModel _user;
@@ -82,6 +85,46 @@ public partial class CartPage : ContentPage
 
 		await RefreshFileAndCart();
 	}
+	#endregion
+
+	#region Cart
+	private async void OnProductTapped(object sender, TappedEventArgs e)
+	{
+		if (e.Parameter is not OrderProductCartModel product)
+			return;
+
+		var productDetails = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
+		var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, productDetails.TaxId);
+
+		SaleProductCartModel productOverview = new()
+		{
+			ProductId = product.ProductId,
+			ProductName = product.ProductName,
+			Quantity = product.Quantity,
+			Rate = productDetails.Rate,
+			BaseTotal = productDetails.Rate * product.Quantity,
+			DiscPercent = 0,
+			DiscAmount = 0,
+			AfterDiscount = productDetails.Rate * product.Quantity,
+			CGSTPercent = productTax.CGST,
+			CGSTAmount = (productDetails.Rate * product.Quantity) * (productTax.CGST / 100),
+			SGSTPercent = productTax.SGST,
+			SGSTAmount = (productDetails.Rate * product.Quantity) * (productTax.SGST / 100),
+			IGSTPercent = productTax.IGST,
+			IGSTAmount = (productDetails.Rate * product.Quantity) * (productTax.IGST / 100),
+			Total = (productDetails.Rate * product.Quantity) +
+					((productDetails.Rate * product.Quantity) * (productTax.CGST / 100)) +
+					((productDetails.Rate * product.Quantity) * (productTax.SGST / 100)) +
+					((productDetails.Rate * product.Quantity) * (productTax.IGST / 100)),
+			NetRate = productDetails.Rate +
+					((productDetails.Rate * productTax.CGST) / 100) +
+					((productDetails.Rate * productTax.SGST) / 100) +
+					((productDetails.Rate * productTax.IGST) / 100)
+		};
+
+		productPopup.Show();
+		productPopup.BindingContext = productOverview;
+	}
 
 	private async void quantityNumericEntry_ValueChanged(object sender, Syncfusion.Maui.Inputs.NumericEntryValueChangedEventArgs e)
 	{
@@ -134,6 +177,9 @@ public partial class CartPage : ContentPage
 		_isRefreshing = false;
 	}
 
+	#endregion
+
+	#region Saving
 	private async void SlideCompleted(object sender, EventArgs e)
 	{
 		if (_cart.Count == 0)
@@ -224,4 +270,5 @@ public partial class CartPage : ContentPage
 				Status = true
 			});
 	}
+	#endregion
 }

@@ -1,14 +1,16 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Models.Order;
 using PrimeOrdersLibrary.Models.Product;
+using PrimeOrdersLibrary.Models.Sale;
 
 namespace PrimeBakes.Order;
 
 public partial class OrderPage : ContentPage
 {
+	#region Load Data
 	private const string _fileName = "cart.json";
 	private readonly int _userId;
 	private List<ProductModel> _allProducts;
@@ -48,8 +50,46 @@ public partial class OrderPage : ContentPage
 
 		RefreshCollectionView();
 	}
+	#endregion
 
-	#region Collection View
+	#region Products
+	private async void OnProductTapped(object sender, TappedEventArgs e)
+	{
+		if (e.Parameter is not OrderProductCartModel product)
+			return;
+
+		var productDetails = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
+		var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, productDetails.TaxId);
+
+		SaleProductCartModel productOverview = new()
+		{
+			ProductId = product.ProductId,
+			ProductName = product.ProductName,
+			Quantity = product.Quantity,
+			Rate = productDetails.Rate,
+			BaseTotal = productDetails.Rate * product.Quantity,
+			DiscPercent = 0,
+			DiscAmount = 0,
+			AfterDiscount = productDetails.Rate * product.Quantity,
+			CGSTPercent = productTax.CGST,
+			CGSTAmount = (productDetails.Rate * product.Quantity) * (productTax.CGST / 100),
+			SGSTPercent = productTax.SGST,
+			SGSTAmount = (productDetails.Rate * product.Quantity) * (productTax.SGST / 100),
+			IGSTPercent = productTax.IGST,
+			IGSTAmount = (productDetails.Rate * product.Quantity) * (productTax.IGST / 100),
+			Total = (productDetails.Rate * product.Quantity) +
+					((productDetails.Rate * product.Quantity) * (productTax.CGST / 100)) +
+					((productDetails.Rate * product.Quantity) * (productTax.SGST / 100)) +
+					((productDetails.Rate * product.Quantity) * (productTax.IGST / 100)),
+			NetRate = productDetails.Rate +
+					((productDetails.Rate * productTax.CGST) / 100) +
+					((productDetails.Rate * productTax.SGST) / 100) +
+					((productDetails.Rate * productTax.IGST) / 100)
+		};
+
+		productPopup.Show();
+		productPopup.BindingContext = productOverview;
+	}
 
 	private void searchTextBox_TextChanged(object sender, TextChangedEventArgs e)
 	{

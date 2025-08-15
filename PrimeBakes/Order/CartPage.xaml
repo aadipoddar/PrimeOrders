@@ -192,7 +192,11 @@
                                        Text="{Binding ProductName}" 
 									   FontFamily="CascadiaRegular"
                                        FontSize="16"
-									   VerticalOptions="Center"/>
+									   VerticalOptions="Center">
+									<Label.GestureRecognizers>
+										<TapGestureRecognizer Tapped="OnProductTapped" CommandParameter="{Binding}" />
+									</Label.GestureRecognizers>
+								</Label>
 
 								<!-- Quantity and Remove Button -->
 								<Grid Grid.Column="1">
@@ -293,5 +297,57 @@
 		</control:MySlideView>
 
 		<syncfusion:SfPopup x:Name="placingOrderPopup" HeaderTitle="Placing Order" Message="We Are Processing your Order Please Wait" />
+
+		<syncfusion:SfPopup x:Name="productPopup" ShowCloseButton="True" ShowFooter="True" IsVisible="False" AutoSizeMode="Height">
+			<syncfusion:SfPopup.HeaderTemplate>
+				<DataTemplate>
+					<Label Text="{Binding ProductName}" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+				</DataTemplate>
+			</syncfusion:SfPopup.HeaderTemplate>
+
+			<syncfusion:SfPopup.ContentTemplate>
+				<DataTemplate>
+					<Grid Padding="5" Margin="10">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+
+						<Label Text="Quantity:" Grid.Row="0" Grid.Column="0" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" />
+						<Label Text="{Binding Quantity}" Grid.Row="0" Grid.Column="1" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" HorizontalTextAlignment="End" />
+
+						<Label Text="Rate:" Grid.Row="1" Grid.Column="0" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" />
+						<Label Text="{Binding Rate, StringFormat='₹{0:N2}'}" Grid.Row="1" Grid.Column="1" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" HorizontalTextAlignment="End" />
+
+						<Label Text="Base Total:" Grid.Row="2" Grid.Column="0" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" />
+						<Label Text="{Binding BaseTotal, StringFormat='₹{0:N2}'}" Grid.Row="2" Grid.Column="1" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" HorizontalTextAlignment="End" />
+
+						<Label Text="CGST:" Grid.Row="3" Grid.Column="0" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" />
+						<Label Text="{Binding CGSTPercent, StringFormat='₹{0:N2}'}" Grid.Row="3" Grid.Column="1" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" HorizontalTextAlignment="End" />
+
+						<Label Text="SGST:" Grid.Row="4" Grid.Column="0" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" />
+						<Label Text="{Binding SGSTPercent, StringFormat='₹{0:N2}'}" Grid.Row="4" Grid.Column="1" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" HorizontalTextAlignment="End" />
+
+						<Label Text="Net Rate:" Grid.Row="5" Grid.Column="0" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" />
+						<Label Text="{Binding NetRate, StringFormat='₹{0:N2}'}" Grid.Row="5" Grid.Column="1" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="18" HorizontalTextAlignment="End" />
+					</Grid>
+				</DataTemplate>
+			</syncfusion:SfPopup.ContentTemplate>
+
+			<syncfusion:SfPopup.FooterTemplate>
+				<DataTemplate>
+					<Label Text="{Binding Total, StringFormat='Grand Total: ₹{0:N2}'}" HorizontalOptions="Center" TextColor="Black" FontFamily="CascadiaCodeRegular" FontSize="20" />
+				</DataTemplate>
+			</syncfusion:SfPopup.FooterTemplate>
+		</syncfusion:SfPopup>
 	</Grid>
 </ContentPage>
