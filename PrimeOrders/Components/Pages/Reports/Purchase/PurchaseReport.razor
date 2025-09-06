@@ -54,16 +54,15 @@ else
 
 				<div class="filter-item">
 					<label>Supplier</label>
-					<SfComboBox TValue="int"
-								TItem="LedgerModel"
-								Placeholder="Select a Supplier"
-								FloatLabelType='@FloatLabelType.Auto'
-								DataSource="_suppliers"
-								Value="_selectedSupplierId"
-								CssClass="filter-control">
-						<ComboBoxEvents TItem="LedgerModel" TValue="int" ValueChange="OnSupplierChanged" />
-						<ComboBoxFieldSettings Value="Id" Text="Name" />
-					</SfComboBox>
+					<SfAutoComplete TValue="LedgerModel"
+									TItem="LedgerModel"
+									Value="@_selectedSupplier"
+									Placeholder="Search suppliers..."
+									FloatLabelType='@FloatLabelType.Auto'
+									DataSource="@_suppliers">
+						<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnSupplierChanged" />
+						<AutoCompleteFieldSettings Value="Name" />
+					</SfAutoComplete>
 				</div>
 			</div>
 			<div class="action-buttons">

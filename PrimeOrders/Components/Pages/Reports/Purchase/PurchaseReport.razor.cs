@@ -20,7 +20,7 @@ public partial class PurchaseReport
 
 	private List<LedgerModel> _suppliers = [];
 	private List<PurchaseOverviewModel> _purchaseOverviews = [];
-	private int _selectedSupplierId = 0;
+	private LedgerModel _selectedSupplier = new();
 
 	private PurchaseOverviewModel _selectedPurchase;
 	private readonly List<PurchaseDetailDisplayModel> _selectedPurchaseDetails = [];
@@ -49,7 +49,7 @@ public partial class PurchaseReport
 	{
 		_suppliers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger, true);
 		_suppliers.Insert(0, new LedgerModel { Id = 0, Name = "All Suppliers" });
-		_selectedSupplierId = 0;
+		_selectedSupplier = _suppliers.FirstOrDefault();
 	}
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
@@ -59,9 +59,14 @@ public partial class PurchaseReport
 		await LoadData();
 	}
 
-	private async Task OnSupplierChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, LedgerModel> args)
+	private async Task OnSupplierChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
 	{
-		_selectedSupplierId = args.Value;
+		if (args.ItemData is null)
+			_selectedSupplier = _suppliers.FirstOrDefault();
+
+		else
+			_selectedSupplier = args.ItemData;
+
 		await LoadData();
 	}
 
@@ -71,8 +76,8 @@ public partial class PurchaseReport
 			_startDate.ToDateTime(new TimeOnly(0, 0)),
 			_endDate.ToDateTime(new TimeOnly(23, 59)));
 
-		if (_selectedSupplierId > 0)
-			_purchaseOverviews = [.. allPurchases.Where(p => p.SupplierId == _selectedSupplierId)];
+		if (_selectedSupplier.Id > 0)
+			_purchaseOverviews = [.. allPurchases.Where(p => p.SupplierId == _selectedSupplier.Id)];
 		else
 			_purchaseOverviews = allPurchases;
 
@@ -125,7 +130,7 @@ public partial class PurchaseReport
 			return;
 		}
 
-		var memoryStream = await PurchaseExcelExport.ExportPurchaseOverviewExcel(_purchaseOverviews, _startDate, _endDate, _selectedSupplierId);
+		var memoryStream = await PurchaseExcelExport.ExportPurchaseOverviewExcel(_purchaseOverviews, _startDate, _endDate, _selectedSupplier.Id);
 		var fileName = $"Purchase_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
