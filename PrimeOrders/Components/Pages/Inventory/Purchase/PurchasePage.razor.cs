@@ -455,7 +455,7 @@ public partial class PurchasePage
 		UpdateModalFinancialDetails();
 	}
 
-	private void DialogMesuringUnitValueChanged(string args)
+	private void DialogMeasuringUnitValueChanged(string args)
 	{
 		_selectedRawMaterialCart.MeasurementUnit = args;
 		UpdateModalFinancialDetails();
