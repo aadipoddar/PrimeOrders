@@ -46,6 +46,7 @@ public partial class SalePage
 
 	private SaleProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
+	private CustomerModel _customer = new();
 	private SaleModel _sale = new()
 	{
 		SaleDateTime = DateTime.Now,
@@ -303,6 +304,8 @@ public partial class SalePage
 	#region Sale Details Events
 	private async Task OnPartyChanged(ChangeEventArgs<int?, LedgerModel> args)
 	{
+		_orders = [];
+
 		if (args.Value.HasValue && args.Value.Value > 0)
 		{
 			_sale.PartyId = args.Value.Value;
@@ -317,10 +320,11 @@ public partial class SalePage
 
 		else
 		{
-			_sale.OrderId = null;
 			_sale.PartyId = null;
 			_sale.DiscPercent = 0;
 		}
+
+		_sale.OrderId = null;
 
 		foreach (var item in _saleProductCart)
 			item.DiscPercent = _sale.DiscPercent;
@@ -381,6 +385,43 @@ public partial class SalePage
 			item.DiscPercent = args;
 
 		await UpdateFinancialDetails();
+		StateHasChanged();
+	}
+
+	private async Task SaleCustomerNumberValueChanged(string args)
+	{
+		_customer.Number = args;
+
+		for (int i = 0; i < _customer.Number.Length; i++)
+			if (!char.IsDigit(_customer.Number[i]))
+			{
+				_customer.Number = _customer.Number.Remove(i, 1);
+				i--;
+			}
+
+		if (string.IsNullOrEmpty(_customer.Number))
+		{
+			_customer = new();
+			_sale.CustomerId = null;
+			StateHasChanged();
+			return;
+		}
+
+		if (_customer.Number.Length > 10)
+			_customer.Number = _customer.Number[..10];
+
+		var customer = await CustomerData.LoadCustomerByNumber(_customer.Number);
+		if (customer is not null && customer.Id > 0)
+		{
+			_customer = customer;
+			_sale.CustomerId = customer.Id;
+		}
+		else
+		{
+			_customer = new() { Number = _customer.Number };
+			_sale.CustomerId = null;
+		}
+
 		StateHasChanged();
 	}
 
@@ -601,7 +642,9 @@ public partial class SalePage
 	{
 		await UpdateFinancialDetails();
 
-		_sale.SaleDateTime = DateOnly.FromDateTime(_sale.SaleDateTime).ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second));
+		_sale.SaleDateTime = DateOnly.FromDateTime(_sale.SaleDateTime)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second))
+			.AddHours(5).AddMinutes(30);
 
 		if (SaleId is null)
 			_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
@@ -636,6 +679,8 @@ public partial class SalePage
 
 	private async Task<bool> SaveSale()
 	{
+		await InsertCustomer();
+
 		_sale.Id = await SaleData.InsertSale(_sale);
 		if (_sale.Id <= 0)
 		{
@@ -658,6 +703,30 @@ public partial class SalePage
 		}
 
 		return true;
+	}
+
+	private async Task InsertCustomer()
+	{
+		if (string.IsNullOrEmpty(_customer.Number) || string.IsNullOrEmpty(_customer.Name))
+			return;
+
+		for (int i = 0; i < _customer.Number.Length; i++)
+			if (!char.IsDigit(_customer.Number[i]))
+			{
+				_customer.Number = _customer.Number.Remove(i, 1);
+				i--;
+			}
+
+		if (_customer.Number.Length > 10)
+			_customer.Number = _customer.Number[..10];
+
+		var existingCustomer = await CustomerData.LoadCustomerByNumber(_customer.Number);
+		if (existingCustomer is not null && existingCustomer.Id > 0)
+			_customer.Id = existingCustomer.Id;
+
+		_customer.Id = await CustomerData.InsertCustomer(_customer);
+		if (_customer.Id > 0)
+			_sale.CustomerId = _customer.Id;
 	}
 
 	private async Task InsertSaleDetail()

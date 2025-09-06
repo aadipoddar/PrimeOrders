@@ -20,6 +20,7 @@ public static class TableNames
 	public static string RawMaterialStock => "RawMaterialStock";
 	public static string Order => "Order";
 	public static string OrderDetail => "OrderDetail";
+	public static string Customer => "Customer";
 	public static string Sale => "Sale";
 	public static string SaleDetail => "SaleDetail";
 	public static string SaleReturn => "SaleReturn";
@@ -48,6 +49,7 @@ public static class StoredProcedureNames
 	public static string UpdateSettings => "Update_Settings";
 
 	public static string LoadUserByPasscode => "Load_User_By_Passcode";
+	public static string LoadCustomerByNumber => "Load_Customer_By_Number";
 
 	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
 	public static string LoadRawMaterialRateBySupplierPurchaseDate => "Load_RawMaterial_Rate_By_Supplier_PurchaseDate";
@@ -106,6 +108,7 @@ public static class StoredProcedureNames
 
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
+	public static string InsertCustomer => "Insert_Customer";
 
 	public static string InsertTax => "Insert_Tax";
 

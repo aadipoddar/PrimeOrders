@@ -16,6 +16,7 @@ public class SaleModel
 	public decimal Card { get; set; }
 	public decimal UPI { get; set; }
 	public decimal Credit { get; set; }
+	public int? CustomerId { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -94,6 +95,9 @@ public class SaleOverviewModel
 	public decimal Card { get; set; }
 	public decimal UPI { get; set; }
 	public decimal Credit { get; set; }
+	public int? CustomerId { get; set; }
+	public string? CustomerName { get; set; }
+	public string? CustomerNumber { get; set; }
 }
 
 #region Chart and Helper Models

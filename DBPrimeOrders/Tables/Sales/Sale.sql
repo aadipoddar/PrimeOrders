@@ -14,9 +14,11 @@
     [Card] MONEY NOT NULL DEFAULT 0, 
     [UPI] MONEY NOT NULL DEFAULT 0, 
     [Credit] MONEY NOT NULL DEFAULT 0, 
+    [CustomerId] INT NULL, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Sale_ToUser] FOREIGN KEY (UserId) REFERENCES [User](Id), 
     CONSTRAINT [FK_Sale_ToLocation] FOREIGN KEY (LocationId) REFERENCES [Location](Id), 
     CONSTRAINT [FK_Sale_ToLedger] FOREIGN KEY (PartyId) REFERENCES [Ledger](Id), 
     CONSTRAINT [FK_Sale_ToOrder] FOREIGN KEY (OrderId) REFERENCES [Order](Id), 
+    CONSTRAINT [FK_Sale_ToCustomer] FOREIGN KEY (CustomerId) REFERENCES [Customer](Id), 
 )

@@ -13,15 +13,16 @@
 	@Card MONEY = 0,
 	@UPI MONEY = 0,
 	@Credit MONEY = 0,
+	@CustomerId INT = NULL,
 	@Status BIT = 1
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
 		INSERT INTO [dbo].[Sale] 
-			([BillNo], [DiscPercent], DiscReason, Remarks, UserId, LocationId, SaleDateTime, PartyId, OrderId, Cash, Card, UPI, Credit, Status)
+			([BillNo], [DiscPercent], DiscReason, Remarks, UserId, LocationId, SaleDateTime, PartyId, OrderId, Cash, Card, UPI, Credit, CustomerId, Status)
 		VALUES 
-			(@BillNo, @DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @SaleDateTime, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @Status);
+			(@BillNo, @DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @SaleDateTime, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @CustomerId, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
@@ -41,6 +42,7 @@ BEGIN
 			Card = @Card,
 			UPI = @UPI,
 			Credit = @Credit,
+			CustomerId = @CustomerId,
 			Status = @Status
 		WHERE Id = @Id;
 	END

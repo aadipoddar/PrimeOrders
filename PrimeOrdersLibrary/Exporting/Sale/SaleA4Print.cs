@@ -1,6 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Sale;
-using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Product;
 using PrimeOrdersLibrary.Models.Sale;
 
@@ -58,6 +57,12 @@ public static class SaleA4Print
 			["Date"] = sale.SaleDateTime.ToString("dddd, MMMM dd, yyyy hh:mm tt"),
 			["User"] = sale.UserName ?? "N/A"
 		};
+
+		if (sale.CustomerId is not null)
+		{
+			leftColumnDetails["Cust. Name"] = sale.CustomerName ?? "N/A";
+			leftColumnDetails["Cust. No."] = sale.CustomerNumber ?? "N/A";
+		}
 
 		var rightColumnDetails = new Dictionary<string, string>();
 

@@ -272,6 +272,10 @@ internal static class PDFExportUtil
 		Dictionary<string, string> leftColumnDetails, Dictionary<string, string> rightColumnDetails)
 	{
 		var detailsRect = new RectangleF(20, currentY, pdfPage.GetClientSize().Width - 40, 90);
+
+		if (leftColumnDetails.Count > 3)
+			detailsRect = new RectangleF(20, currentY, pdfPage.GetClientSize().Width - 40, 120);
+
 		pdfPage.Graphics.DrawRectangle(new PdfPen(Color.Black, 1), detailsRect);
 
 		var leftX = 30;

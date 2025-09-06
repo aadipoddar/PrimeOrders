@@ -304,6 +304,7 @@ else
 								TItem="OrderModel"
 								Placeholder="Select an Order"
 								DataSource="@_orders"
+								Value="@_sale.OrderId"
 								CssClass="form-control">
 						<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="@OnOrderChanged" />
 						<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
@@ -370,6 +371,23 @@ else
 								CssClass="form-control">
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
+				</div>
+
+				<div class="dialog-content form-grid">
+					<div class="form-group">
+						<label>Customer Number</label>
+						<SfTextBox Value="@_customer.Number"
+								   Placeholder="Phone Number (optional)"
+								   ValueChanged="SaleCustomerNumberValueChanged"
+								   CssClass="form-control" />
+					</div>
+
+					<div class="form-group">
+						<label>Customer Name</label>
+						<SfTextBox @bind-Value="_customer.Name"
+								   Placeholder="Customer Name (optional)"
+								   CssClass="form-control" />
+					</div>
 				</div>
 			</div>
 		</Content>

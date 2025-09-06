@@ -37,7 +37,10 @@
 		[s].[Cash],
 		[s].[Card],
 		[s].[UPI],
-		[s].[Credit]
+		[s].[Credit],
+		[s].[CustomerId],
+		[c].[Name] AS CustomerName,
+		[c].[Number] AS CustomerNumber
 	FROM
 		[dbo].[Sale] s
 	INNER JOIN
@@ -50,6 +53,8 @@
 		[dbo].[Ledger] p ON s.PartyId = p.Id
 	LEFT JOIN
 		[dbo].[Order] o ON s.OrderId = o.Id
+	LEFT JOIN
+		[dbo].[Customer] c ON s.CustomerId = c.Id
 
 	WHERE
 		[s].[Status] = 1
@@ -74,4 +79,7 @@
 		[s].[Card],
 		[s].[UPI],
 		[s].[Credit],
-		[s].[Status];
+		[s].[Status],
+		[s].[CustomerId],
+		[c].[Name],
+		[c].[Number];
