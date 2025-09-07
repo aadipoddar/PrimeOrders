@@ -1,7 +1,6 @@
-﻿
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 
-using PrimeOrdersLibrary.Data.Accounts;
+using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Inventory;
 using PrimeOrdersLibrary.Data.Product;
@@ -18,13 +17,13 @@ await package.LoadAsync(fileInfo);
 
 var worksheet = package.Workbook.Worksheets[0];
 
-// await InsertProducts(worksheet);
+await InsertProducts(worksheet);
 
 // await UpdateProducts();
 
 // await InsertRawMaterial(worksheet);
 
-await InsertSupplier(worksheet);
+// await InsertSupplier(worksheet);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -101,17 +100,15 @@ static async Task InsertProducts(ExcelWorksheet worksheet)
 
 	while (worksheet.Cells[row, 1].Value != null)
 	{
-		var code = worksheet.Cells[row, 1].Value.ToString();
-		var name = worksheet.Cells[row, 2].Value.ToString();
-		var categoryId = worksheet.Cells[row, 3].Value.ToString();
-		var taxId = worksheet.Cells[row, 4].Value.ToString();
-		var price = worksheet.Cells[row, 5].Value.ToString();
+		var code = "FP" + row.ToString("D4");
+		var name = worksheet.Cells[row, 1].Value.ToString();
+		var categoryId = worksheet.Cells[row, 2].Value.ToString();
+		var taxId = 7;
+		var price = 0;
 
 		if (string.IsNullOrWhiteSpace(code) ||
 			string.IsNullOrWhiteSpace(name) ||
-			string.IsNullOrWhiteSpace(categoryId) ||
-			string.IsNullOrWhiteSpace(taxId) ||
-			string.IsNullOrWhiteSpace(price))
+			string.IsNullOrWhiteSpace(categoryId))
 		{
 			Console.WriteLine("Not Inserted Row = " + row);
 			continue;
@@ -127,8 +124,8 @@ static async Task InsertProducts(ExcelWorksheet worksheet)
 			Name = name,
 			ProductCategoryId = int.Parse(categoryId),
 			LocationId = 1,
-			Rate = decimal.Parse(price),
-			TaxId = int.Parse(taxId),
+			Rate = price,
+			TaxId = taxId,
 			Status = true
 		});
 
