@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Location]
-	@Id INT,
+	@Id INT OUTPUT,
 	@Name VARCHAR(50),
 	@Discount DECIMAL(5, 2),
 	@MainLocation BIT,
@@ -10,6 +10,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[Location] (Name, Discount, MainLocation, Status)
 		VALUES (@Name, @Discount, @MainLocation, @Status);
+		SET @Id = SCOPE_IDENTITY();
 	END
 
 	ELSE
@@ -22,4 +23,6 @@ BEGIN
 			Status = @Status
 		WHERE Id = @Id;
 	END
+
+	SELECT @Id AS Id;
 END;

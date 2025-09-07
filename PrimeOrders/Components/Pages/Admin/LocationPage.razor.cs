@@ -85,7 +85,7 @@ public partial class LocationPage
 		if (!await ValidateForm())
 			return;
 
-		await LocationData.InsertLocation(_locationModel);
+		_locationModel.Id = await LocationData.InsertLocation(_locationModel);
 		await InsertLedger();
 
 		await _sfToast.ShowAsync();
@@ -93,12 +93,8 @@ public partial class LocationPage
 
 	private async Task InsertLedger()
 	{
-		LedgerModel ledger = null;
-
 		var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
-
-		if (_locationModel.Id > 0)
-			ledger = await LedgerData.LoadLedgerByLocation(_locationModel.Id);
+		var ledger = await LedgerData.LoadLedgerByLocation(_locationModel.Id);
 
 		await LedgerData.InsertLedger(new()
 		{
