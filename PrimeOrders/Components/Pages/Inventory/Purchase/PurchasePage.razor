@@ -356,6 +356,10 @@ else
 						<span>Sub Total:</span>
 						<span class="amount">@_subTotal.FormatIndianCurrency()</span>
 					</div>
+					<div class="summary-row">
+						<span>Cash Discount:</span>
+						<span class="amount" style="color:green">-@_purchase.CDAmount.FormatIndianCurrency()</span>
+					</div>
 					<div class="summary-row total-row">
 						<span>Grand Total:</span>
 						<span class="total-amount">@_total.FormatIndianCurrency()</span>
