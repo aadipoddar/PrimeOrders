@@ -54,7 +54,7 @@ public static class PurchaseA4Print
 		var leftColumnDetails = new Dictionary<string, string>
 		{
 			["Invoice No"] = purchase.BillNo ?? "N/A",
-			["Date"] = purchase.BillDate.ToString("dddd, MMMM dd, yyyy"),
+			["Date"] = purchase.BillDateTime.ToString("dddd, MMMM dd, yyyy hh:mm tt"),
 			["User"] = purchase.UserName ?? "N/A"
 		};
 

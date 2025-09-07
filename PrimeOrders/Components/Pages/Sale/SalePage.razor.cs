@@ -642,9 +642,9 @@ public partial class SalePage
 	{
 		await UpdateFinancialDetails();
 
-		_sale.SaleDateTime = DateOnly.FromDateTime(_sale.SaleDateTime)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second))
-			.AddHours(5).AddMinutes(30);
+		_sale.SaleDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_sale.SaleDateTime)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
 
 		if (SaleId is null)
 			_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);

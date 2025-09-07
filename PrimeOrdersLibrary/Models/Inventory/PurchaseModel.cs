@@ -5,7 +5,7 @@ public class PurchaseModel
 	public int Id { get; set; }
 	public string BillNo { get; set; }
 	public int SupplierId { get; set; }
-	public DateOnly BillDate { get; set; }
+	public DateTime BillDateTime { get; set; }
 	public decimal CDPercent { get; set; }
 	public decimal CDAmount { get; set; }
 	public string Remarks { get; set; }
@@ -65,7 +65,7 @@ public class PurchaseOverviewModel
 	public int SupplierId { get; set; }
 	public string SupplierName { get; set; }
 	public string BillNo { get; set; }
-	public DateOnly BillDate { get; set; }
+	public DateTime BillDateTime { get; set; }
 	public string Remarks { get; set; }
 	public decimal CashDiscountPercent { get; set; }
 	public decimal CashDiscountAmount { get; set; }

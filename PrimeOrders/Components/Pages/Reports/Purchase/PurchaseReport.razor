@@ -127,7 +127,7 @@ else
 					<GridEvents RowSelected="OnPurchaseRowSelected" TValue="PurchaseOverviewModel" />
 					<GridColumns>
 						<GridColumn Field="@nameof(PurchaseOverviewModel.BillNo)" HeaderText="Invoice No" Width="120" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.BillDate)" HeaderText="Date" Width="120" Format="dd/MM/yyyy" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.BillDateTime)" HeaderText="Date" Width="120" Format="dd/MM/yyyy HH:mm" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.SupplierName)" HeaderText="Supplier" Width="150" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalQuantity)" HeaderText="Qty" Width="80" Format="N2" TextAlign="TextAlign.Right" />

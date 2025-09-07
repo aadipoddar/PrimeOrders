@@ -52,7 +52,7 @@ public static class StoredProcedureNames
 	public static string LoadCustomerByNumber => "Load_Customer_By_Number";
 
 	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
-	public static string LoadRawMaterialRateBySupplierPurchaseDate => "Load_RawMaterial_Rate_By_Supplier_PurchaseDate";
+	public static string LoadRawMaterialRateBySupplierPurchaseDateTime => "Load_RawMaterial_Rate_By_Supplier_PurchaseDateTime";
 
 	public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
 	public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";

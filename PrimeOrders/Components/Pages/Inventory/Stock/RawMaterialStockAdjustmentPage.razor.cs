@@ -69,7 +69,7 @@ public partial class RawMaterialStockAdjustmentPage
 	{
 		_selectedLocationId = 1;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(0, DateOnly.FromDateTime(DateTime.Now));
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.Now, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		_filteredRawMaterials = [.. _rawMaterials];

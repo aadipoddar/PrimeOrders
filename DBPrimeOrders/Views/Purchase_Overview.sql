@@ -7,7 +7,7 @@ SELECT
 	[s].[Id] AS SupplierId,
 	[s].[Name] AS SupplierName,
 	[p].[BillNo],
-	[p].[BillDate],
+	[p].[BillDateTime],
 	[p].[Remarks],
 	[p].[CDPercent] AS CashDiscountPercent,
 	[p].[CDAmount]AS CashDiscountAmount,
@@ -51,7 +51,7 @@ GROUP BY
 	s.Id,
 	s.Name,
 	p.BillNo,
-	p.BillDate,
+	p.BillDateTime,
 	p.Remarks,
 	p.CDPercent,
 	p.CDAmount

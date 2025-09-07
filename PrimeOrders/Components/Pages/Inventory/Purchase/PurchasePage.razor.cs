@@ -47,7 +47,7 @@ public partial class PurchasePage
 	private RawMaterialModel _selectedRawMaterial = new();
 
 	private LedgerModel _supplier = new();
-	private PurchaseModel _purchase = new() { BillDate = DateOnly.FromDateTime(DateTime.Now), Status = true, Remarks = "" };
+	private PurchaseModel _purchase = new() { BillDateTime = DateTime.Now, Status = true, Remarks = "" };
 
 	private List<LedgerModel> _suppliers;
 	private List<RawMaterialModel> _rawMaterials;
@@ -89,7 +89,7 @@ public partial class PurchasePage
 		_supplier = _suppliers.FirstOrDefault();
 		_purchase.SupplierId = _supplier?.Id ?? 0;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_purchase.SupplierId, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_purchase.BillDateTime, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -110,7 +110,7 @@ public partial class PurchasePage
 		_supplier = _suppliers.FirstOrDefault(s => s.Id == _purchase.SupplierId);
 		_purchaseRawMaterialCarts.Clear();
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_purchase.SupplierId, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_purchase.BillDateTime, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -295,7 +295,7 @@ public partial class PurchasePage
 		_purchase.SupplierId = args.Value;
 		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new();
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_purchase.SupplierId, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_purchase.BillDateTime, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -313,11 +313,11 @@ public partial class PurchasePage
 		StateHasChanged();
 	}
 
-	public async Task PurchaseDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateOnly> args)
+	public async Task PurchaseDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime> args)
 	{
-		_purchase.BillDate = args.Value;
+		_purchase.BillDateTime = args.Value;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(_purchase.SupplierId, _purchase.BillDate);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_purchase.SupplierId, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_purchase.BillDateTime, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -528,6 +528,10 @@ public partial class PurchasePage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
+		_purchase.BillDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_purchase.BillDateTime)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
+
 		if (_purchaseRawMaterialCarts.Count == 0 || _purchaseRawMaterialCarts is null)
 		{
 			_sfErrorToast.Content = "Please add at least one raw material to the purchase.";
@@ -629,7 +633,7 @@ public partial class PurchasePage
 				NetRate = item.NetRate,
 				Type = StockType.Purchase.ToString(),
 				TransactionNo = _purchase.BillNo,
-				TransactionDate = _purchase.BillDate,
+				TransactionDate = DateOnly.FromDateTime(_purchase.BillDateTime),
 				LocationId = _user.LocationId
 			});
 	}
@@ -650,8 +654,8 @@ public partial class PurchasePage
 		{
 			Id = 0,
 			ReferenceNo = _purchase.BillNo,
-			AccountingDate = _purchase.BillDate,
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(_purchase.BillDate)).Id,
+			AccountingDate = DateOnly.FromDateTime(_purchase.BillDateTime),
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(_purchase.BillDateTime))).Id,
 			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId)).Value),
 			Remarks = _purchase.Remarks,
 			UserId = _purchase.UserId,

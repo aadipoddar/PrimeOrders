@@ -409,6 +409,10 @@ public partial class KitchenProductionPage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
+		_kitchenProduction.ProductionDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_kitchenProduction.ProductionDate)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
+
 		if (_kitchenProductionProductCarts.Count == 0 || _kitchenProductionProductCarts is null)
 		{
 			_sfErrorToast.Content = "Please add at least one product to the kitchen production.";

@@ -32,7 +32,7 @@ public static class PurchaseExcelExport
 		// Define the column order for better readability
 		List<string> columnOrder = [
 			nameof(PurchaseOverviewModel.BillNo),
-			nameof(PurchaseOverviewModel.BillDate),
+			nameof(PurchaseOverviewModel.BillDateTime),
 			nameof(PurchaseOverviewModel.SupplierName),
 			nameof(PurchaseOverviewModel.UserName),
 			nameof(PurchaseOverviewModel.TotalItems),
@@ -55,10 +55,10 @@ public static class PurchaseExcelExport
 				Width = 15,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(PurchaseOverviewModel.BillDate)] = new()
+			[nameof(PurchaseOverviewModel.BillDateTime)] = new()
 			{
 				DisplayName = "Date",
-				Format = "dd-MMM-yyyy",
+				Format = "dd-MMM-yyyy HH:mm",
 				Width = 15
 			},
 			[nameof(PurchaseOverviewModel.SupplierName)] = new()

@@ -8,5 +8,5 @@ BEGIN
 	FROM
 		[dbo].[Purchase_Overview] AS po
 	WHERE
-		po.BillDate BETWEEN @FromDate AND @ToDate
+		po.BillDateTime BETWEEN @FromDate AND @ToDate
 END;

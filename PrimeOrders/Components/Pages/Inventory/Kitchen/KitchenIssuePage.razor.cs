@@ -81,7 +81,7 @@ public partial class KitchenIssuePage
 		_kitchen = _kitchens.FirstOrDefault();
 		_kitchenIssue.KitchenId = _kitchen?.Id ?? 0;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(0, DateOnly.FromDateTime(_kitchenIssue.IssueDate));
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_kitchenIssue.IssueDate, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 
 		_filteredRawMaterials = [.. _rawMaterials];
@@ -284,7 +284,7 @@ public partial class KitchenIssuePage
 	{
 		_kitchenIssue.IssueDate = args.Value;
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDate(0, DateOnly.FromDateTime(_kitchenIssue.IssueDate));
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_kitchenIssue.IssueDate, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;
 		_filteredRawMaterials = [.. _rawMaterials];
 
@@ -423,6 +423,10 @@ public partial class KitchenIssuePage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
+		_kitchenIssue.IssueDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_kitchenIssue.IssueDate)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
+
 		if (_kitchenIssueRawMaterialCarts.Count == 0 || _kitchenIssueRawMaterialCarts is null)
 		{
 			_sfErrorToast.Content = "Please add at least one raw material to the kitchen issue.";
