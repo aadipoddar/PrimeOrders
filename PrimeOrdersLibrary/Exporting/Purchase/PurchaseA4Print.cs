@@ -1,6 +1,5 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Inventory;
-using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
 using Syncfusion.Drawing;
@@ -55,7 +54,7 @@ public static class PurchaseA4Print
 		var leftColumnDetails = new Dictionary<string, string>
 		{
 			["Invoice No"] = purchase.BillNo ?? "N/A",
-			["Date"] = purchase.BillDate.ToString("dddd, MMMM dd, yyyy hh:mm tt"),
+			["Date"] = purchase.BillDate.ToString("dddd, MMMM dd, yyyy"),
 			["User"] = purchase.UserName ?? "N/A"
 		};
 
