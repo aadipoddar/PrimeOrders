@@ -212,7 +212,7 @@ public static class ExcelExportUtil
 				setting.Alignment = ExcelHAlign.HAlignCenter;
 
 				if (prop.Name.Contains("DateTime") || prop.Name.EndsWith("Time"))
-					setting.Format = "dd-MMM-yyyy hh:mm tt";
+					setting.Format = "dd-MMM-yyyy hh:mm";
 				else
 					setting.Format = "dd-MMM-yyyy";
 			}
@@ -222,7 +222,7 @@ public static class ExcelExportUtil
 					 (prop.Name.Contains("Time") || prop.Name.EndsWith("At")))
 			{
 				setting.Alignment = ExcelHAlign.HAlignCenter;
-				setting.Format = "hh:mm tt";
+				setting.Format = "hh:mm";
 			}
 
 			else if (propType == typeof(bool))
@@ -571,7 +571,7 @@ public static class ExcelExportUtil
 					else if (value is TimeOnly timeOnlyValue)
 					{
 						cell.DateTime = DateTime.Today.Add(timeOnlyValue.ToTimeSpan());
-						cell.CellStyle.NumberFormat = setting.Format ?? "hh:mm tt";
+						cell.CellStyle.NumberFormat = setting.Format ?? "hh:mm";
 					}
 
 					else if (value is bool boolValue)

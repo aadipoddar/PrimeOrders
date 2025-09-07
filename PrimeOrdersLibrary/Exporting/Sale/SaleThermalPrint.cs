@@ -60,7 +60,7 @@ public class SaleThermalPrint
 			if (order is not null)
 			{
 				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Order No:</span> <span class='detail-value'>{order.OrderNo}</span></div>");
-				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Order Date:</span> <span class='detail-value'>{order.OrderDate}</span></div>");
+				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Order Date:</span> <span class='detail-value'>{order.OrderDateTime}</span></div>");
 			}
 		}
 
@@ -69,6 +69,16 @@ public class SaleThermalPrint
 			var party = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, sale.PartyId.Value);
 			if (party is not null)
 				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Party:</span> <span class='detail-value'>{party.Name}</span></div>");
+		}
+
+		if (sale.CustomerId.HasValue && sale.CustomerId.Value > 0)
+		{
+			var customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, sale.CustomerId.Value);
+			if (customer is not null)
+			{
+				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Cust. Name:</span> <span class='detail-value'>{customer.Name}</span></div>");
+				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Cust. No.:</span> <span class='detail-value'>{customer.Number}</span></div>");
+			}
 		}
 
 		content.AppendLine("</div>");

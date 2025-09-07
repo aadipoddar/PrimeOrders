@@ -58,7 +58,7 @@ public static class PurchaseExcelExport
 			[nameof(PurchaseOverviewModel.BillDateTime)] = new()
 			{
 				DisplayName = "Date",
-				Format = "dd-MMM-yyyy HH:mm",
+				Format = "dd-MMM-yyyy hh:mm",
 				Width = 15
 			},
 			[nameof(PurchaseOverviewModel.SupplierName)] = new()

@@ -1,5 +1,4 @@
-﻿using PrimeOrdersLibrary.Exporting;
-using PrimeOrdersLibrary.Models.Sale;
+﻿using PrimeOrdersLibrary.Models.Sale;
 
 namespace PrimeOrdersLibrary.Exporting.Sale;
 
@@ -64,7 +63,7 @@ public static class SaleReturnExcelExport
 			[nameof(SaleReturnOverviewModel.ReturnDateTime)] = new()
 			{
 				DisplayName = "Return Date",
-				Format = "dd-MMM-yyyy HH:mm",
+				Format = "dd-MMM-yyyy hh:mm",
 				Width = 18,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},

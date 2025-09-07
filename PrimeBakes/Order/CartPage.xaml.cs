@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 
+
 #if ANDROID
 using Plugin.LocalNotification;
 #endif
@@ -75,7 +76,7 @@ public partial class CartPage : ContentPage
 		{
 			Id = 0,
 			LocationId = !location.MainLocation ? _user.LocationId : int.Parse(locationComboBox.SelectedValue.ToString()),
-			OrderDate = DateOnly.FromDateTime(orderDatePicker.Date),
+			OrderDateTime = DateOnly.FromDateTime(orderDatePicker.Date).ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
 			OrderNo = "",
 			Remarks = remarksTextBox.Text ?? string.Empty,
 			SaleId = null,
@@ -245,7 +246,7 @@ public partial class CartPage : ContentPage
 		{
 			Id = 0,
 			LocationId = !location.MainLocation ? _user.LocationId : int.Parse(locationComboBox.SelectedValue.ToString()),
-			OrderDate = DateOnly.FromDateTime(orderDatePicker.Date),
+			OrderDateTime = DateOnly.FromDateTime(orderDatePicker.Date).ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
 			OrderNo = "",
 			Remarks = remarksTextBox.Text ?? string.Empty,
 			SaleId = null,

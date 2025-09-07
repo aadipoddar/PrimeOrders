@@ -49,7 +49,7 @@ public static class OrderA4Print
 		var leftColumnDetails = new Dictionary<string, string>
 		{
 			["Order No"] = order.OrderNo ?? "N/A",
-			["Date"] = order.OrderDate.ToString("dddd, MMMM dd, yyyy"),
+			["Date"] = order.OrderDateTime.ToString("dddd, MMMM dd, yyyy hh:mm tt"),
 			["Created By"] = user.Name ?? "N/A"
 		};
 

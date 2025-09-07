@@ -46,9 +46,9 @@ public static class GenerateCodes
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId);
 		var prefix = GenerateInitialsByName(location.Name);
-		var year = $"{order.OrderDate:yy}";
-		if (order.OrderDate.Month <= 3)
-			year = $"{order.OrderDate.AddYears(-1):yy}";
+		var year = $"{order.OrderDateTime:yy}";
+		if (order.OrderDateTime.Month <= 3)
+			year = $"{order.OrderDateTime.AddYears(-1):yy}";
 
 		var lastOrder = await OrderData.LoadLastOrderByLocation(order.LocationId);
 		if (lastOrder is not null)

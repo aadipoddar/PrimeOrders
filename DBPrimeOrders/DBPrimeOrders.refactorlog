@@ -175,4 +175,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="GeneratedModule" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="31765d87-2e53-40b0-9135-289cc830e9fc" ChangeDateTime="09/07/2025 05:56:00">
+    <Property Name="ElementName" Value="[dbo].[Order].[OrderDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Order]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="OrderDateTime" />
+  </Operation>
 </Operations>

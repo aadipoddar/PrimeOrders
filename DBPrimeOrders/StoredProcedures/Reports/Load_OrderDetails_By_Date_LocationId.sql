@@ -8,13 +8,13 @@ BEGIN
     BEGIN
         SELECT *
         FROM dbo.Order_Overview v
-        WHERE OrderDate BETWEEN @FromDate AND @ToDate;
+        WHERE OrderDateTime BETWEEN @FromDate AND @ToDate;
     END
     ELSE
     BEGIN
         SELECT *
         FROM dbo.Order_Overview v
-        WHERE OrderDate BETWEEN @FromDate AND @ToDate
+        WHERE OrderDateTime BETWEEN @FromDate AND @ToDate
           AND LocationId = @LocationId;
     END
 END

@@ -151,7 +151,7 @@ else
 					<GridPageSettings PageSize="10" />
 					<GridColumns>
 						<GridColumn Field="@nameof(OrderOverviewModel.OrderNo)" HeaderText="Order #" Width="90" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(OrderOverviewModel.OrderDate)" HeaderText="Order Date" Width="120" Format="dd/MM/yyyy" />
+						<GridColumn Field="@nameof(OrderOverviewModel.OrderDateTime)" HeaderText="Order Date" Width="120" Format="dd/MM/yyyy HH:mm tt" />
 						<GridColumn Field="@nameof(OrderOverviewModel.LocationName)" HeaderText="Outlet / Franchise" Width="130" />
 						<GridColumn Field="@nameof(OrderOverviewModel.UserName)" HeaderText="Created By" Width="130" />
 						<GridColumn Field="@nameof(OrderOverviewModel.TotalProducts)" HeaderText="Products" Width="100" TextAlign="TextAlign.Right" />

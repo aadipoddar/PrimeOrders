@@ -1,5 +1,4 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Product;
 
 using static PrimeOrdersLibrary.Data.Order.OrderData;
@@ -23,7 +22,7 @@ public static class OrderExcelExport
 		// Define the column order for better readability
 		List<string> columnOrder = [
 			nameof(OrderOverviewModel.OrderNo),
-			nameof(OrderOverviewModel.OrderDate),
+			nameof(OrderOverviewModel.OrderDateTime),
 			nameof(OrderOverviewModel.LocationName),
 			nameof(OrderOverviewModel.UserName),
 			nameof(OrderOverviewModel.TotalProducts),
@@ -41,10 +40,10 @@ public static class OrderExcelExport
 				Width = 12,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(OrderOverviewModel.OrderDate)] = new()
+			[nameof(OrderOverviewModel.OrderDateTime)] = new()
 			{
 				DisplayName = "Order Date",
-				Format = "dd-MMM-yyyy",
+				Format = "dd-MMM-yyyy hh:mm",
 				Width = 15
 			},
 			[nameof(OrderOverviewModel.LocationName)] = new()
@@ -324,7 +323,7 @@ public static class OrderExcelExport
 		Dictionary<string, object> summaryItems = new()
 			{
 				{ "Order Number", selectedOrder.OrderNo },
-				{ "Order Date", selectedOrder.OrderDate.ToString("dd-MMM-yyyy") },
+				{ "Order Date", selectedOrder.OrderDateTime.ToString("dd-MMM-yyyy hh:mm tt") },
 				{ "Location", selectedOrder.LocationName },
 				{ "Created By", selectedOrder.UserName },
 				{ "Total Products", challanItems.Count },
@@ -371,8 +370,8 @@ public static class OrderExcelExport
 			challanItems,
 			reportTitle,
 			worksheetName,
-			selectedOrder.OrderDate,
-			selectedOrder.OrderDate,
+			DateOnly.FromDateTime(selectedOrder.OrderDateTime),
+			DateOnly.FromDateTime(selectedOrder.OrderDateTime),
 			summaryItems,
 			columnSettings,
 			columnOrder);

@@ -34,7 +34,7 @@ public partial class OrderPage
 	private OrderModel _order = new()
 	{
 		Id = 0,
-		OrderDate = DateOnly.FromDateTime(DateTime.Now),
+		OrderDateTime = DateTime.Now,
 		Remarks = "",
 		SaleId = null,
 		Status = true
@@ -356,6 +356,10 @@ public partial class OrderPage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
+		_order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_order.OrderDateTime)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
+
 		_order.UserId = _user.Id;
 
 		if (OrderId is null)

@@ -4,7 +4,7 @@ public class OrderModel
 {
 	public int Id { get; set; }
 	public string OrderNo { get; set; }
-	public DateOnly OrderDate { get; set; }
+	public DateTime OrderDateTime { get; set; }
 	public int LocationId { get; set; }
 	public int UserId { get; set; }
 	public string Remarks { get; set; }
@@ -36,7 +36,7 @@ public class OrderOverviewModel
 	public string UserName { get; set; }
 	public int LocationId { get; set; }
 	public string LocationName { get; set; }
-	public DateOnly OrderDate { get; set; }
+	public DateTime OrderDateTime { get; set; }
 	public string Remarks { get; set; }
 	public int TotalProducts { get; set; }
 	public decimal TotalQuantity { get; set; }

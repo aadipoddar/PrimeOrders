@@ -1,5 +1,4 @@
 ﻿using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Exporting;
 using PrimeOrdersLibrary.Models.Inventory;
 
 namespace PrimeOrdersLibrary.Exporting.Kitchen;
@@ -63,7 +62,7 @@ public static class KitchenIssueExcelExport
 			[nameof(KitchenIssueOverviewModel.IssueDate)] = new()
 			{
 				DisplayName = "Issue Date",
-				Format = "dd-MMM-yyyy",
+				Format = "dd-MMM-yyyy HH:mm",
 				Width = 15,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},

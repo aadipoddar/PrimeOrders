@@ -39,7 +39,7 @@ public partial class OrderSummaryModule
 		}
 
 		var memoryStream = await OrderExcelExport.ExportOrderChallanExcel(SelectedOrder, orderDetails);
-		var fileName = $"Challan_Order_{SelectedOrder.OrderNo}_{SelectedOrder.OrderDate:yyyy-MM-dd}.xlsx";
+		var fileName = $"Challan_Order_{SelectedOrder.OrderNo}_{SelectedOrder.OrderDateTime:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 
 		await CloseDialog();

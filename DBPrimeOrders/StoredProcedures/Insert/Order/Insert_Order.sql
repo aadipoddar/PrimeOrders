@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Order]
 	@Id INT OUTPUT,
 	@OrderNo VARCHAR(50),
-	@OrderDate DATE,
+	@OrderDateTime DATETIME,
 	@LocationId INT,
 	@UserId INT,
 	@Remarks VARCHAR(250),
@@ -11,8 +11,8 @@ AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Order] ([OrderNo], [OrderDate], [LocationId], [UserId], [Remarks], [SaleId], [Status])
-		VALUES (@OrderNo, @OrderDate, @LocationId, @UserId, @Remarks, @SaleId, @Status);
+		INSERT INTO [dbo].[Order] ([OrderNo], [OrderDateTime], [LocationId], [UserId], [Remarks], [SaleId], [Status])
+		VALUES (@OrderNo, @OrderDateTime, @LocationId, @UserId, @Remarks, @SaleId, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
@@ -20,7 +20,7 @@ BEGIN
 		UPDATE [dbo].[Order]
 		SET
 			OrderNo = @OrderNo,
-			OrderDate = @OrderDate,
+			OrderDateTime = @OrderDateTime,
 			LocationId = @LocationId,
 			UserId = @UserId,
 			Remarks = @Remarks,

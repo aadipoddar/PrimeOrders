@@ -2,7 +2,7 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [OrderNo] VARCHAR(20) NOT NULL UNIQUE, 
-    [OrderDate] DATE NOT NULL, 
+    [OrderDateTime] DATETIME NOT NULL, 
     [LocationId] INT NOT NULL, 
     [UserId] INT NOT NULL, 
     [Remarks] VARCHAR(250) NOT NULL, 

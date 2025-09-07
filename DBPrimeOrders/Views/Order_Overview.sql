@@ -7,7 +7,7 @@
 		[u].[Name] AS UserName,
 		[o].[LocationId],
 		[l].[Name] AS LocationName,
-		[o].[OrderDate],
+		[o].[OrderDateTime],
 		[o].[Remarks],
 
 		COUNT(DISTINCT od.Id) AS TotalProducts,
@@ -39,7 +39,7 @@
 		[u].[Name],
 		[o].[LocationId],
 		[l].[Name],
-		[o].[OrderDate],
+		[o].[OrderDateTime],
 		[o].[Remarks],
 		[o].[SaleId],
 		[s].[BillNo],

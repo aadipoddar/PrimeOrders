@@ -1,5 +1,4 @@
-﻿using PrimeOrdersLibrary.Exporting;
-using PrimeOrdersLibrary.Models.Product;
+﻿using PrimeOrdersLibrary.Models.Product;
 
 namespace PrimeOrdersLibrary.Exporting.Product;
 
@@ -102,7 +101,7 @@ public static class ProductExcelExport
 			[nameof(ProductOverviewModel.BillDateTime)] = new()
 			{
 				DisplayName = "Date & Time",
-				Format = "dd-MMM-yyyy hh:mm tt",
+				Format = "dd-MMM-yyyy hh:mm",
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},

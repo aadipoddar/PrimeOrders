@@ -182,7 +182,7 @@ else
 
 				<div class="form-group">
 					<label>Order Date</label>
-					<SfDatePicker @bind-Value="_order.OrderDate"
+					<SfDatePicker @bind-Value="_order.OrderDateTime"
 								  Placeholder="Select Order Date"
 								  CssClass="form-control" />
 				</div>
@@ -254,7 +254,7 @@ else
 					</div>
 					<div class="detail-item">
 						<span class="detail-label">Order Date:</span>
-						<span class="detail-value">@_order.OrderDate.ToShortDateString()</span>
+						<span class="detail-value">@_order.OrderDateTime.ToShortDateString()</span>
 					</div>
 					@if (_order.LocationId > 0 && _locations.Any(l => l.Id == _order.LocationId))
 					{
