@@ -287,7 +287,17 @@ else
 			<div class="dialog-content">
 				<div class="form-group">
 					<label>Party</label>
-					<SfComboBox TValue="int?"
+					<SfAutoComplete TValue="LedgerModel?"
+									TItem="LedgerModel"
+									Value="@_selectedParty"
+									Placeholder="Search Parties..."
+									FloatLabelType='@FloatLabelType.Auto'
+									DataSource="@_parties">
+						<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel?" ValueChange="OnPartyChanged" />
+						<AutoCompleteFieldSettings Value="Name" />
+					</SfAutoComplete>
+
+					@* <SfComboBox TValue="int?"
 								TItem="LedgerModel"
 								Placeholder="Select a Party"
 								DataSource="@_parties"
@@ -295,7 +305,7 @@ else
 								Value="_sale.PartyId">
 						<ComboBoxEvents TItem="LedgerModel" TValue="int?" ValueChange="@OnPartyChanged" />
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
-					</SfComboBox>
+					</SfComboBox> *@
 				</div>
 
 				<div class="form-group">

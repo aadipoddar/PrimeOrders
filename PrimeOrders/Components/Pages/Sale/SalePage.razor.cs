@@ -47,6 +47,7 @@ public partial class SalePage
 	private SaleProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
 	private CustomerModel _customer = new();
+	private LedgerModel _selectedParty = new();
 	private SaleModel _sale = new()
 	{
 		SaleDateTime = DateTime.Now,
@@ -302,13 +303,14 @@ public partial class SalePage
 	#endregion
 
 	#region Sale Details Events
-	private async Task OnPartyChanged(ChangeEventArgs<int?, LedgerModel> args)
+	private async Task OnPartyChanged(ChangeEventArgs<LedgerModel?, LedgerModel> args)
 	{
 		_orders = [];
+		_selectedParty = args.Value;
 
-		if (args.Value.HasValue && args.Value.Value > 0)
+		if (args.ItemData is not null && args.ItemData.Id > 0)
 		{
-			_sale.PartyId = args.Value.Value;
+			_sale.PartyId = args.ItemData.Id;
 
 			if (args.ItemData.LocationId is not null)
 			{
