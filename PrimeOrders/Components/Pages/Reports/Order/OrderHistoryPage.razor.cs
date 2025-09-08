@@ -169,7 +169,7 @@ public partial class OrderHistoryPage
 			return result;
 
 		var groupedByDate = _orderOverviews
-			.GroupBy(o => o.OrderDateTime)
+			.GroupBy(o => o.OrderDateTime.Date)
 			.OrderBy(g => g.Key)
 			.ToList();
 

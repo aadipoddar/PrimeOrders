@@ -144,7 +144,7 @@ public partial class PurchaseReport
 			return result;
 
 		var groupedByDate = _purchaseOverviews
-			.GroupBy(p => p.BillDateTime)
+			.GroupBy(p => p.BillDateTime.Date)
 			.OrderBy(g => g.Key)
 			.ToList();
 
