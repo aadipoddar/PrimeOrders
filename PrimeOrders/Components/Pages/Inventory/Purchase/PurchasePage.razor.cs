@@ -528,9 +528,13 @@ public partial class PurchasePage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
+		UpdateFinancialDetails();
+
 		_purchase.BillDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_purchase.BillDateTime)
 			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
 			"India Standard Time");
+
+		StateHasChanged();
 
 		if (_purchaseRawMaterialCarts.Count == 0 || _purchaseRawMaterialCarts is null)
 		{
@@ -565,6 +569,11 @@ public partial class PurchasePage
 
 	private async Task<bool> SavePurchase()
 	{
+		if (!await ValidateForm())
+			return false;
+
+		StateHasChanged();
+
 		_purchase.Id = await PurchaseData.InsertPurchase(_purchase);
 		if (_purchase.Id <= 0)
 		{
@@ -705,13 +714,6 @@ public partial class PurchasePage
 	// Button 1: Save Only
 	private async Task OnSavePurchaseClick()
 	{
-		UpdateFinancialDetails();
-
-		if (!await ValidateForm())
-			return;
-
-		StateHasChanged();
-
 		if (await SavePurchase())
 		{
 			_sfSuccessToast.Content = "Purchase saved successfully.";
@@ -725,10 +727,7 @@ public partial class PurchasePage
 	// Button 2: Save and A4 Prints
 	private async Task OnSaveAndPrintClick()
 	{
-		if (!await ValidateForm())
-			return;
 
-		StateHasChanged();
 
 		if (await SavePurchase())
 		{

@@ -1,3 +1,5 @@
+using PrimeOrdersLibrary.Exporting.Order;
+
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -362,6 +364,8 @@ public partial class OrderPage
 
 		_order.UserId = _user.Id;
 
+		StateHasChanged();
+
 		if (OrderId is null)
 			_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
 
@@ -385,24 +389,25 @@ public partial class OrderPage
 		return true;
 	}
 
-	private async Task ConfirmOrderSubmission()
+	private async Task<bool> SaveOrder()
 	{
 		if (!await ValidateForm())
-			return;
+			return false;
+
+		StateHasChanged();
 
 		_order.Id = await OrderData.InsertOrder(_order);
 		if (_order.Id <= 0)
 		{
 			_sfErrorToast.Content = "Failed to save the order. Please try again.";
-			StateHasChanged();
 			await _sfErrorToast.ShowAsync();
-			return;
+			StateHasChanged();
+			return false;
 		}
 
 		await InsertOrderDetails();
 
-		_orderSummaryDialogVisible = false;
-		await _sfSuccessToast.ShowAsync();
+		return true;
 	}
 
 	private async Task InsertOrderDetails()
@@ -426,6 +431,38 @@ public partial class OrderPage
 				Quantity = cartItem.Quantity,
 				Status = true
 			});
+	}
+
+	private async Task ConfirmOrderSubmission()
+	{
+		if (await SaveOrder())
+		{
+			_sfSuccessToast.Content = "Order saved successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_orderSummaryDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private async Task OnSaveAndPrintClick()
+	{
+		if (await SaveOrder())
+		{
+			await PrintInvoice();
+			_sfSuccessToast.Content = "Order saved and invoice generated successfully.";
+			await _sfSuccessToast.ShowAsync();
+		}
+
+		_orderSummaryDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private async Task PrintInvoice()
+	{
+		var memoryStream = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
+		var fileName = $"Order_Invoice_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		await JS.InvokeVoidAsync("savePDF", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
 	#endregion
 }

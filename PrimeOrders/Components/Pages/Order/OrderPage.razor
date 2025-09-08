@@ -304,6 +304,12 @@ else
 			<div class="dialog-footer">
 				<div class="footer-buttons">
 					<SfButton Content="Submit Order" IsPrimary="true" OnClick="ConfirmOrderSubmission" CssClass="save-button-dialog" />
+					<SfButton CssClass="print-button-dialog" Content="Save & Print Invoice" OnClick="OnSaveAndPrintClick">
+						<div class="button-content">
+							<span class="print-icon">🖨️</span>
+							<span>Submit & Print Invoice</span>
+						</div>
+					</SfButton>
 					<SfButton Content="Edit Order" OnClick="() => _orderSummaryDialogVisible = false" CssClass="dialog-button" />
 				</div>
 			</div>
@@ -906,6 +912,30 @@ else
 		align-items: center;
 		justify-content: center;
 		font-weight: 500;
+	}
+
+	/* Print Button Styling */
+	.print-button-dialog {
+		background-color: #17a2b8;
+		color: white;
+		padding: 10px 20px;
+		border-radius: 8px;
+		font-weight: 600;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+		.print-button-dialog:hover {
+			background-color: #138496;
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+		}
+
+	.print-icon {
+		margin-right: 6px;
+		font-size: 18px;
 	}
 
 	/* Order Confirmation styles */
