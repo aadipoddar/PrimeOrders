@@ -290,10 +290,15 @@ public partial class PurchasePage
 	#endregion
 
 	#region Purchase Details Events
-	private async Task OnSupplierChanged(ChangeEventArgs<int, LedgerModel> args)
+	private async Task OnSupplierChanged(ChangeEventArgs<LedgerModel, LedgerModel> args)
 	{
-		_purchase.SupplierId = args.Value;
-		_supplier = _suppliers.FirstOrDefault(s => s.Id == args.Value) ?? new();
+		if (args.ItemData is null || args.ItemData.Id <= 0)
+			_supplier = _suppliers.FirstOrDefault();
+
+		else
+			_supplier = args.ItemData ?? new();
+
+		_purchase.SupplierId = _supplier.Id;
 
 		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_purchase.SupplierId, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(_purchase.BillDateTime, "India Standard Time"));
 		_selectedRawMaterialId = _rawMaterials.FirstOrDefault()?.Id ?? 0;

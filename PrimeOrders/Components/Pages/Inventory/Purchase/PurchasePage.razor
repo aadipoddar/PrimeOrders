@@ -247,15 +247,15 @@ else
 			<div class="dialog-content">
 				<div class="form-group">
 					<label>Supplier</label>
-					<SfComboBox TValue="int"
-								TItem="LedgerModel"
-								Placeholder="Select a Supplier"
-								DataSource="@_suppliers"
-								@bind-Value="_purchase.SupplierId"
-								CssClass="form-control">
-						<ComboBoxEvents TItem="LedgerModel" TValue="int" ValueChange="OnSupplierChanged" />
-						<ComboBoxFieldSettings Value="Id" Text="Name" />
-					</SfComboBox>
+					<SfAutoComplete TValue="LedgerModel"
+									TItem="LedgerModel"
+									Value="@_supplier"
+									Placeholder="Search Parties..."
+									FloatLabelType='@FloatLabelType.Auto'
+									DataSource="@_suppliers">
+						<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnSupplierChanged" />
+						<AutoCompleteFieldSettings Value="Name" />
+					</SfAutoComplete>
 				</div>
 
 				<div class="supplier-details">
