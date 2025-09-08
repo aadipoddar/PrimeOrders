@@ -19,14 +19,21 @@ public static class GenerateCodes
 		string prefix = string.Empty;
 		string[] words = name.Split([' ', '-', '_', '.'], StringSplitOptions.RemoveEmptyEntries);
 
-		foreach (var word in words)
-			if (word.Length > 1)
-			{
-				var firstLetter = word[0];
-
-				if (char.IsLetter(firstLetter) && char.IsUpper(firstLetter))
-					prefix += char.ToUpper(firstLetter);
-			}
+		if (words.Length == 1)
+		{
+			// For single words, take first 4 characters (or available length)
+			var word = words[0];
+			for (int i = 0; i < Math.Min(4, word.Length); i++)
+				if (char.IsLetter(word[i]))
+					prefix += char.ToUpper(word[i]);
+		}
+		else
+		{
+			// For multiple words, take first letter of each word
+			foreach (var word in words)
+				if (word.Length > 0 && char.IsLetter(word[0]))
+					prefix += char.ToUpper(word[0]);
+		}
 
 		return prefix;
 	}
