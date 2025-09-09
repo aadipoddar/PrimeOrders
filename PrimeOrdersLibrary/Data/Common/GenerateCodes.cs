@@ -1,4 +1,6 @@
-﻿using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
+﻿using System.Text;
+
+using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Data.Inventory.Kitchen;
 using PrimeOrdersLibrary.Data.Order;
@@ -11,31 +13,61 @@ namespace PrimeOrdersLibrary.Data.Common;
 
 public static class GenerateCodes
 {
-	private static string GenerateInitialsByName(string name)
+	private static string GeneratePhoneticCode(string name, int maxLength = 4)
 	{
-		if (name is null)
+		if (string.IsNullOrWhiteSpace(name))
 			return string.Empty;
 
-		string prefix = string.Empty;
-		string[] words = name.Split([' ', '-', '_', '.'], StringSplitOptions.RemoveEmptyEntries);
+		// Clean and normalize the input
+		var cleanName = new string(name.Where(c => char.IsLetter(c) || char.IsWhiteSpace(c)).ToArray())
+			.ToUpperInvariant()
+			.Trim();
 
+		if (string.IsNullOrEmpty(cleanName))
+			return string.Empty;
+
+		var words = cleanName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+		// For single words, use consonant-vowel pattern
 		if (words.Length == 1)
+			return GenerateConsonantCode(words[0], maxLength);
+
+		// For multiple words, take first 2 letters of each significant word
+		var result = new StringBuilder();
+		foreach (var word in words.Take(maxLength / 2))
 		{
-			// For single words, take first 4 characters (or available length)
-			var word = words[0];
-			for (int i = 0; i < Math.Min(4, word.Length); i++)
-				if (char.IsLetter(word[i]))
-					prefix += char.ToUpper(word[i]);
-		}
-		else
-		{
-			// For multiple words, take first letter of each word
-			foreach (var word in words)
-				if (word.Length > 0 && char.IsLetter(word[0]))
-					prefix += char.ToUpper(word[0]);
+			if (word.Length >= 2)
+				result.Append(word[..2]);
+			else
+				result.Append(word);
 		}
 
-		return prefix;
+		return result.ToString()[..Math.Min(result.Length, maxLength)];
+	}
+
+	private static string GenerateConsonantCode(string word, int maxLength)
+	{
+		var consonants = new StringBuilder();
+		var vowels = new StringBuilder();
+		var vowelSet = new HashSet<char> { 'A', 'E', 'I', 'O', 'U' };
+
+		// Separate consonants and vowels
+		foreach (char c in word)
+		{
+			if (vowelSet.Contains(c))
+				vowels.Append(c);
+			else
+				consonants.Append(c);
+		}
+
+		// Prefer consonants, then add vowels if needed
+		var result = consonants.ToString();
+		if (result.Length < maxLength && vowels.Length > 0)
+		{
+			result += vowels.ToString()[..(maxLength - result.Length)];
+		}
+
+		return result[..Math.Min(result.Length, maxLength)];
 	}
 
 	private static int GetNumberOfDigits(this int number) =>
@@ -52,7 +84,7 @@ public static class GenerateCodes
 	public static async Task<string> GenerateOrderBillNo(OrderModel order)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId);
-		var prefix = GenerateInitialsByName(location.Name);
+		var prefix = GeneratePhoneticCode(location.Name);
 		var year = $"{order.OrderDateTime:yy}";
 		if (order.OrderDateTime.Month <= 3)
 			year = $"{order.OrderDateTime.AddYears(-1):yy}";
@@ -79,7 +111,7 @@ public static class GenerateCodes
 	public static async Task<string> GenerateSaleBillNo(SaleModel sale)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, sale.LocationId);
-		var prefix = GenerateInitialsByName(location.Name);
+		var prefix = GeneratePhoneticCode(location.Name);
 		var year = $"{sale.SaleDateTime:yy}";
 		if (sale.SaleDateTime.Month <= 3)
 			year = $"{sale.SaleDateTime.AddYears(-1):yy}";
@@ -106,7 +138,7 @@ public static class GenerateCodes
 	public static async Task<string> GenerateSaleReturnTransactionNo(SaleReturnModel saleReturn)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, saleReturn.LocationId);
-		var prefix = GenerateInitialsByName(location.Name);
+		var prefix = GeneratePhoneticCode(location.Name);
 		var year = $"{saleReturn.ReturnDateTime:yy}";
 		if (saleReturn.ReturnDateTime.Month <= 3)
 			year = $"{saleReturn.ReturnDateTime.AddYears(-1):yy}";
@@ -133,7 +165,7 @@ public static class GenerateCodes
 	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenIssue.LocationId);
-		var prefix = GenerateInitialsByName(location.Name);
+		var prefix = GeneratePhoneticCode(location.Name);
 		var year = $"{kitchenIssue.IssueDate:yy}";
 		if (kitchenIssue.IssueDate.Month <= 3)
 			year = $"{kitchenIssue.IssueDate.AddYears(-1):yy}";
@@ -160,7 +192,7 @@ public static class GenerateCodes
 	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenProduction.LocationId);
-		var prefix = GenerateInitialsByName(location.Name);
+		var prefix = GeneratePhoneticCode(location.Name);
 		var year = $"{kitchenProduction.ProductionDate:yy}";
 		if (kitchenProduction.ProductionDate.Month <= 3)
 			year = $"{kitchenProduction.ProductionDate.AddYears(-1):yy}";
@@ -182,6 +214,29 @@ public static class GenerateCodes
 		}
 
 		return $"{prefix}{year}FP000001";
+	}
+
+	public static async Task<string> GenerateAccountingReferenceNo(int voucherId, DateOnly accountingDate)
+	{
+		var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, voucherId);
+		var financialYear = await FinancialYearData.LoadFinancialYearByDate(accountingDate);
+		var lastAccounting = await AccountingData.LoadLastAccountingByFinancialYearVoucher(financialYear.Id, voucherId);
+
+		var voucherPrefix = GeneratePhoneticCode(voucher.Name);
+		var year = financialYear.YearNo;
+
+		if (lastAccounting is not null)
+		{
+			var lastReferenceNo = lastAccounting.ReferenceNo;
+			if (lastReferenceNo.StartsWith($"FA{year}{voucherPrefix}"))
+			{
+				var lastNumber = int.Parse(lastReferenceNo[(2 + year.GetNumberOfDigits() + voucherPrefix.Length)..]);
+				int nextNumber = lastNumber + 1;
+				return $"FA{year}{voucherPrefix}{nextNumber:D6}";
+			}
+		}
+
+		return $"FA{year}{voucherPrefix}000001";
 	}
 
 	public static string GenerateRawMaterialCode(string lastRawMaterialCode)
@@ -233,28 +288,5 @@ public static class GenerateCodes
 		}
 
 		return $"{prefix}00001";
-	}
-
-	public static async Task<string> GenerateAccountingReferenceNo(int voucherId, DateOnly accountingDate)
-	{
-		var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, voucherId);
-		var financialYear = await FinancialYearData.LoadFinancialYearByDate(accountingDate);
-		var lastAccounting = await AccountingData.LoadLastAccountingByFinancialYearVoucher(financialYear.Id, voucherId);
-
-		var voucherPrefix = GenerateInitialsByName(voucher.Name);
-		var year = financialYear.YearNo;
-
-		if (lastAccounting is not null)
-		{
-			var lastReferenceNo = lastAccounting.ReferenceNo;
-			if (lastReferenceNo.StartsWith($"FA{year}{voucherPrefix}"))
-			{
-				var lastNumber = int.Parse(lastReferenceNo[(2 + year.GetNumberOfDigits() + voucherPrefix.Length)..]);
-				int nextNumber = lastNumber + 1;
-				return $"FA{year}{voucherPrefix}{nextNumber:D6}";
-			}
-		}
-
-		return $"FA{year}{voucherPrefix}000001";
 	}
 }

@@ -1,15 +1,8 @@
-﻿#if DEBUG
-using Microsoft.Extensions.Logging;
-#endif
-
-#if ANDROID
-using Plugin.LocalNotification;
-#endif
+﻿using Microsoft.Extensions.Logging;
 
 using PrimeOrdersLibrary.DataAccess;
 
-using Syncfusion.Maui.Core.Hosting;
-using Syncfusion.Maui.Toolkit.Hosting;
+using Syncfusion.Blazor;
 
 namespace PrimeBakes;
 
@@ -23,11 +16,6 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
-			.ConfigureSyncfusionToolkit()
-			.ConfigureSyncfusionCore()
-#if ANDROID
-			.UseLocalNotification()
-#endif
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");
@@ -36,7 +24,11 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+		builder.Services.AddMauiBlazorWebView();
+		builder.Services.AddSyncfusionBlazor();
+
 #if DEBUG
+		builder.Services.AddBlazorWebViewDeveloperTools();
 		builder.Logging.AddDebug();
 #endif
 
