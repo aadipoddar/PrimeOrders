@@ -1,7 +1,512 @@
 ﻿@page "/"
 
-<h1>Prime Bakes</h1>
+<PageTitle>Dashboard - Prime Bakes</PageTitle>
 
-Welcome to Prime Bakes.
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading dashboard...</p>
+	</div>
+}
+else
+{
+	<div class="dashboard-container">
+		<div class="dashboard-header">
+			<div class="logo-section">
+				<img src="images/logo.png" alt="Prime Bakes Logo" class="dashboard-logo" />
+				<span class="welcome-text">Welcome @_user.Name</span>
+			</div>
+			<div class="logout-section">
+				<button @onclick="Logout" class="logout-button">
+					<span class="logout-icon">⟲</span> Logout
+				</button>
+			</div>
+		</div>
 
-<button @onclick="Logout">Logout</button>
+		<!-- Main Dashboard Cards -->
+		<div class="dashboard-cards">
+			@if (_user.Order)
+			{
+				<div class="dashboard-card orders-card" @onclick='() => NavManager.NavigateTo("/Order")'>
+					<div class="card-background">
+						<div class="card-icon orders-icon">📋</div>
+						<div class="card-content">
+							<h3>Orders</h3>
+							<p>Place New Order</p>
+						</div>
+					</div>
+				</div>
+			}
+
+			@if (_user.Sales)
+			{
+				<div class="dashboard-card sales-card" @onclick='() => NavManager.NavigateTo("/Sales")'>
+					<div class="card-background">
+						<div class="card-icon sales-icon">📈</div>
+						<div class="card-content">
+							<h3>Sales</h3>
+							<p>Place New Sale</p>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+
+		<div class="dashboard-footer">
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--primary-light: #ff4d9f;
+		--secondary-color: #2c3e50;
+		--accent-color: #3498db;
+		--success-color: #27ae60;
+		--warning-color: #f39c12;
+		--light-bg: #f8f9fa;
+		--white: #ffffff;
+		--text-dark: #2c3e50;
+		--text-light: #7f8c8d;
+		--border-color: #e1e8ed;
+		--shadow: 0 4px 15px rgba(226, 19, 123, 0.1);
+		--shadow-hover: 0 8px 25px rgba(226, 19, 123, 0.2);
+		--border-radius: 16px;
+	}
+
+	/* General Layout */
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	body {
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		background-color: var(--light-bg);
+		color: var(--text-dark);
+		line-height: 1.6;
+	}
+
+	.dashboard-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		padding: 10px;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(52, 152, 219, 0.02) 100%);
+	}
+
+	/* Header Styles - Always horizontal layout */
+	.dashboard-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px 20px;
+		background: var(--white);
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow);
+		margin-bottom: 25px;
+		border: 1px solid var(--border-color);
+	}
+
+	.logo-section {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+		flex: 1; /* Take available space */
+		min-width: 0; /* Allow text to shrink if needed */
+	}
+
+	.dashboard-logo {
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 2px solid var(--primary-color);
+		flex-shrink: 0; /* Don't shrink the logo */
+	}
+
+	.welcome-text {
+		font-weight: 700;
+		color: var(--primary-color);
+		font-size: 24px;
+		letter-spacing: -0.5px;
+		white-space: nowrap; /* Prevent text wrapping */
+		overflow: hidden;
+		text-overflow: ellipsis; /* Add ellipsis if text is too long */
+	}
+
+	.logout-section {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0; /* Don't shrink the logout button */
+	}
+
+	.logout-button {
+		background-color: transparent;
+		border: 2px solid var(--primary-color);
+		color: var(--primary-color);
+		padding: 10px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		font-size: 14px;
+		white-space: nowrap; /* Prevent button text wrapping */
+	}
+
+		.logout-button:hover {
+			background-color: var(--primary-color);
+			color: var(--white);
+			transform: translateY(-2px);
+		}
+
+	.logout-icon {
+		font-size: 16px;
+	}
+
+	/* Dashboard Cards - Optimized for full width usage */
+	.dashboard-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 15px;
+		margin-bottom: 25px;
+		justify-content: center;
+		width: 100%;
+		max-width: none;
+	}
+
+	.dashboard-card {
+		background: var(--white);
+		border-radius: var(--border-radius);
+		overflow: hidden;
+		cursor: pointer;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		border: 1px solid var(--border-color);
+		position: relative;
+		width: 100%;
+	}
+
+		.dashboard-card:hover {
+			transform: translateY(-5px);
+			box-shadow: var(--shadow-hover);
+		}
+
+	.card-background {
+		padding: 25px;
+		position: relative;
+		height: 180px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+	}
+
+	.orders-card .card-background {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: var(--white);
+	}
+
+	.sales-card .card-background {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: var(--white);
+	}
+
+	.card-icon {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28px;
+		background: rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.3);
+		margin-bottom: 15px;
+	}
+
+	.card-content h3 {
+		font-size: 20px;
+		font-weight: 700;
+		margin-bottom: 8px;
+		letter-spacing: -0.5px;
+	}
+
+	.card-content p {
+		font-size: 14px;
+		opacity: 0.9;
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	.card-arrow {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		font-size: 20px;
+		opacity: 0.7;
+		transition: all 0.3s ease;
+	}
+
+	.dashboard-card:hover .card-arrow {
+		transform: translateX(3px);
+		opacity: 1;
+	}
+
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px 10px;
+		color: var(--text-light);
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--primary-dark);
+			text-decoration: underline;
+		}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--accent-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--text-dark);
+		font-size: 16px;
+		margin-top: 10px;
+		font-weight: 500;
+	}
+
+	/* Animations */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Responsive Design - Keep header horizontal on all screen sizes */
+	@@media (max-width: 768px) {
+		.dashboard-container {
+			padding: 8px;
+		}
+
+		.dashboard-header {
+			/* Removed flex-direction: column to keep horizontal layout */
+			padding: 12px 15px; /* Slightly reduced padding */
+			gap: 10px; /* Add gap between sections */
+		}
+
+		.logo-section {
+			gap: 10px; /* Reduced gap between logo and text */
+		}
+
+		.dashboard-logo {
+			width: 40px; /* Smaller logo on mobile */
+			height: 40px;
+		}
+
+		.welcome-text {
+			font-size: 18px; /* Smaller text on mobile */
+		}
+
+		.logout-button {
+			padding: 8px 12px; /* Smaller button padding */
+			font-size: 12px; /* Smaller button text */
+		}
+
+		.logout-icon {
+			font-size: 14px; /* Smaller icon */
+		}
+
+		.dashboard-cards {
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+			max-width: 100%;
+		}
+
+		.card-background {
+			padding: 20px 15px;
+			height: 160px;
+		}
+
+		.card-icon {
+			width: 50px;
+			height: 50px;
+			font-size: 24px;
+			margin-bottom: 12px;
+		}
+
+		.card-content h3 {
+			font-size: 16px;
+		}
+
+		.card-content p {
+			font-size: 12px;
+		}
+
+		.card-arrow {
+			font-size: 18px;
+			top: 15px;
+			right: 15px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.dashboard-container {
+			padding: 5px;
+		}
+
+		.dashboard-header {
+			padding: 10px 12px; /* Even more reduced padding */
+		}
+
+		.dashboard-logo {
+			width: 35px; /* Even smaller logo */
+			height: 35px;
+		}
+
+		.welcome-text {
+			font-size: 16px; /* Even smaller text */
+		}
+
+		.logout-button {
+			padding: 6px 10px; /* Even smaller button */
+			font-size: 11px;
+		}
+
+		.dashboard-cards {
+			gap: 8px;
+		}
+
+		.card-background {
+			height: 140px;
+			padding: 15px 10px;
+		}
+
+		.card-icon {
+			width: 45px;
+			height: 45px;
+			font-size: 22px;
+			margin-bottom: 10px;
+		}
+
+		.card-content h3 {
+			font-size: 14px;
+		}
+
+		.card-content p {
+			font-size: 11px;
+		}
+	}
+
+	/* Very small screens - ensure minimum functionality */
+	@@media (max-width: 320px) {
+		.logo-section {
+			gap: 8px;
+		}
+
+		.dashboard-logo {
+			width: 30px;
+			height: 30px;
+		}
+
+		.welcome-text {
+			font-size: 14px;
+			max-width: 150px; /* Limit text width on very small screens */
+		}
+
+		.logout-button {
+			padding: 5px 8px;
+			font-size: 10px;
+		}
+
+		.logout-icon {
+			font-size: 12px;
+		}
+	}
+
+	/* Accessibility */
+	@@media (prefers-reduced-motion: reduce) {
+		.dashboard-card, .logout-button {
+			transition: none;
+		}
+
+		.circular-dots-loader .dot {
+			animation: none;
+		}
+	}
+
+	/* High contrast mode support */
+	@@media (prefers-contrast: high) {
+		.dashboard-card {
+			border: 2px solid var(--text-dark);
+		}
+	}
+
+	/* Focus styles for better accessibility */
+	.dashboard-card:focus,
+	.logout-button:focus {
+		outline: 2px solid var(--primary-color);
+		outline-offset: 2px;
+	}
+</style>

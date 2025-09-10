@@ -11,10 +11,12 @@ public partial class Dashboard
 	[Inject] public NavigationManager NavManager { get; set; }
 
 	private UserModel _user;
+	private bool _isLoading = true;
 
 	protected override async Task OnInitializedAsync()
 	{
 		_user = await AuthService.AuthenticateCurrentUser(NavManager);
+		_isLoading = false;
 	}
 
 	private void Logout()
