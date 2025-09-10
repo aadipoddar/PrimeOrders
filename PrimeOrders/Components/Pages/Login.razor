@@ -1,282 +1,418 @@
 ﻿@page "/Login"
 
-<PageTitle>Login - Prime Orders</PageTitle>
-
 <div class="login-container">
 	<div class="login-card">
 		<div class="login-header">
-			<img src="images/order.gif" alt="Prime Orders Logo" class="login-logo" />
-			<h1 class="login-title">Prime Orders</h1>
-			<p class="login-subtitle">Enter your access code</p>
+			<div class="logo-container">
+				<img src="images/logo.png" alt="Prime Bakes Logo" class="login-logo" />
+			</div>
+			<h1 class="brand-title">Prime Bakes</h1>
+			<p class="login-subtitle">Enter your access code to continue</p>
 		</div>
 
-		<div class="otp-container">
+		<div class="otp-section">
 			<SfOtpInput Type="OtpInputType.Number"
 						OnInput="CheckPasscode"
 						Value="@_passcode"
-						Placeholder="CODE"
-						CssClass="otp-input" />
+						CssClass="custom-otp"
+						Placeholder="CODE" />
 		</div>
 
-		<div class="login-footer">
+		<div class="status-section">
 			@if (IsVerifying)
 			{
-				<div class="loader-container">
-					<div class="circular-dots-loader">
-						<span class="dot dot-1"></span>
-						<span class="dot dot-2"></span>
-						<span class="dot dot-3"></span>
+				<div class="verification-status">
+					<div class="loading-spinner">
+						<div class="spinner"></div>
 					</div>
-					<p class="loading-text">Verifying access code...</p>
+					<p class="status-text">Verifying your access code...</p>
 				</div>
 			}
 			else
 			{
-				<div class="login-dots">
-					<span class="dot dot1"></span>
-					<span class="dot dot2"></span>
-					<span class="dot dot3"></span>
+				<div class="instruction-section">
+					<p class="instruction-text">Enter your 4-digit access code</p>
 				</div>
-				<p class="login-hint">Enter your 4-digit access code to continue</p>
 			}
 		</div>
-		
-		<div class="copyright-footer">
-			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+
+		<div class="footer-section">
+			<p class="copyright">&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
 		</div>
+	</div>
+
+	<!-- Background decoration -->
+	<div class="bg-decoration">
+		<div class="decoration-circle circle-1"></div>
+		<div class="decoration-circle circle-2"></div>
+		<div class="decoration-circle circle-3"></div>
 	</div>
 </div>
 
 <style>
 	:root {
-		--dotnet-primary: #512BD4;
-		--dotnet-secondary: #68217A;
-		--dotnet-accent: #00A4EF;
-		--dotnet-light: #F7F7F7;
-		--dotnet-dark: #1E1E1E;
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--primary-light: #ff4d9f;
+		--secondary-color: #f8f9fa;
+		--text-dark: #2c3e50;
+		--text-light: #7f8c8d;
+		--white: #ffffff;
+		--shadow: 0 10px 40px rgba(226, 19, 123, 0.15);
+		--border-radius: 16px;
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
 	}
 
 	body {
-		background-color: var(--dotnet-light);
-		margin: 0;
-		padding: 0;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		background: linear-gradient(135deg, #667eea 0%, var(--primary-color) 100%);
 		height: 100vh;
 		overflow: hidden;
 	}
 
 	.login-container {
 		display: flex;
-		justify-content: center;
 		align-items: center;
-		height: 100vh;
-		background: linear-gradient(135deg, var(--dotnet-primary) 0%, var(--dotnet-secondary) 100%);
+		justify-content: center;
+		min-height: 100vh;
+		padding: 20px;
+		position: relative;
 	}
 
 	.login-card {
-		background-color: white;
-		border-radius: 20px;
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-		padding: 40px;
-		width: 90%;
-		max-width: 400px;
+		background: var(--white);
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow);
+		padding: 40px 32px;
+		width: 100%;
+		max-width: 420px;
+		position: relative;
+		z-index: 10;
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	/* Header Section */
+	.login-header {
 		text-align: center;
-		animation: fadeIn 0.5s ease-in;
+		margin-bottom: 40px;
+	}
+
+	.logo-container {
+		margin-bottom: 20px;
+		position: relative;
 	}
 
 	.login-logo {
-		width: 100px;
-		height: 100px;
-		margin: 0 auto 15px;
-		display: block;
+		width: 80px;
+		height: 80px;
 		border-radius: 50%;
-		box-shadow: 0 5px 15px rgba(81, 43, 212, 0.2);
-		background-color: white;
-		padding: 5px;
+		object-fit: cover;
+		box-shadow: 0 8px 24px rgba(226, 19, 123, 0.2);
+		border: 3px solid var(--white);
+		background: var(--white);
+		padding: 8px;
 	}
 
-	.login-title {
-		color: var(--dotnet-primary);
+	.brand-title {
 		font-size: 32px;
-		margin-bottom: 5px;
 		font-weight: 700;
+		color: var(--text-dark);
+		margin-bottom: 8px;
+		letter-spacing: -0.5px;
 	}
 
 	.login-subtitle {
-		color: var(--dotnet-dark);
+		color: var(--text-light);
 		font-size: 16px;
-		margin-bottom: 30px;
-		opacity: 0.8;
+		font-weight: 400;
+		line-height: 1.5;
 	}
 
-	.otp-container {
-		margin: 30px 0;
+	/* OTP Section */
+	.otp-section {
+		margin-bottom: 32px;
 	}
 
-	:deep(.otp-input) {
-		width: 100%;
-		justify-content: center;
-	}
-
-	:deep(.otp-input .e-control-wrapper .e-input-group) {
-		margin: 0 8px;
-	}
-
-	:deep(.otp-input .e-control-wrapper .e-input-group input) {
-		width: 50px !important;
-		height: 50px !important;
-		font-size: 24px;
-		font-weight: 700;
-		border: 2px solid var(--dotnet-primary);
-		border-radius: 10px;
-		background-color: rgba(81, 43, 212, 0.05);
-		color: var(--dotnet-dark);
-	}
-
-	:deep(.otp-input .e-control-wrapper .e-input-group input:focus) {
-		box-shadow: 0 0 0 3px rgba(81, 43, 212, 0.2);
-	}
-
-	.login-footer {
-		margin-top: 30px;
-		min-height: 90px;
-	}
-
-	.login-hint {
-		color: #666;
-		font-size: 14px;
-	}
-	
-	.copyright-footer {
-		margin-top: 15px;
-		text-align: center;
-		font-size: 13px;
-		color: #666;
-	}
-	
-	.footer-link {
-		color: var(--dotnet-primary);
-		text-decoration: none;
-		font-weight: 600;
-		transition: color 0.2s ease;
-	}
-	
-	.footer-link:hover {
-		color: var(--dotnet-secondary);
-		text-decoration: underline;
-	}
-
-	.login-dots {
+	/* Custom OTP Input Styling */
+	:deep(.custom-otp) {
 		display: flex;
 		justify-content: center;
-		margin-bottom: 15px;
+		gap: 12px;
+		margin: 0 auto;
 	}
 
-	.dot {
-		height: 10px;
-		width: 10px;
-		background-color: #ddd;
-		border-radius: 50%;
-		margin: 0 5px;
-		display: inline-block;
+	:deep(.custom-otp .e-control-wrapper) {
+		margin: 0;
 	}
 
-	.dot1 {
-		background-color: var(--dotnet-primary);
-		animation: pulse 1.5s infinite;
+	:deep(.custom-otp .e-input-group) {
+		width: 56px !important;
+		height: 56px !important;
+		border-radius: 12px !important;
+		border: 2px solid #e1e8ed !important;
+		background: var(--secondary-color) !important;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+		overflow: hidden;
 	}
 
-	.dot2 {
-		background-color: var(--dotnet-accent);
-		animation: pulse 1.5s infinite 0.2s;
+	:deep(.custom-otp .e-input-group:focus-within) {
+		border-color: var(--primary-color) !important;
+		background: var(--white) !important;
+		box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1) !important;
+		transform: scale(1.05);
 	}
 
-	.dot3 {
-		background-color: var(--dotnet-secondary);
-		animation: pulse 1.5s infinite 0.4s;
+	:deep(.custom-otp .e-input-group input) {
+		width: 100% !important;
+		height: 100% !important;
+		border: none !important;
+		background: transparent !important;
+		text-align: center !important;
+		font-size: 24px !important;
+		font-weight: 600 !important;
+		color: var(--text-dark) !important;
+		outline: none !important;
+		caret-color: var(--primary-color) !important;
 	}
 
-	/* Circular dots loader animation */
-	.loader-container {
+	:deep(.custom-otp .e-input-group input::placeholder) {
+		color: #cbd5e0 !important;
+		font-weight: 400 !important;
+	}
+
+	/* Status Section */
+	.status-section {
+		margin-bottom: 32px;
+		min-height: 80px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		animation: fadeIn 0.3s ease-in;
-		margin-top: 50px; /* Moves the animation lower */
 	}
 
-	.circular-dots-loader {
-		position: relative;
-		width: 60px;
-		height: 60px;
-		margin-bottom: 15px;
+	/* Verification Status */
+	.verification-status {
+		text-align: center;
 	}
 
-		.circular-dots-loader .dot {
-			position: absolute;
-			width: 12px;
-			height: 12px;
-			border-radius: 50%;
-			animation: rotate 1.5s infinite linear;
-		}
-
-		.circular-dots-loader .dot-1 {
-			background-color: var(--dotnet-primary);
-			animation-delay: 0s;
-		}
-
-		.circular-dots-loader .dot-2 {
-			background-color: var(--dotnet-accent);
-			animation-delay: -0.5s;
-		}
-
-		.circular-dots-loader .dot-3 {
-			background-color: var(--dotnet-secondary);
-			animation-delay: -1s;
-		}
-
-	.loading-text {
-		color: var(--dotnet-dark);
-		font-size: 14px;
-		margin-top: 10px;
+	.loading-spinner {
+		margin-bottom: 16px;
 	}
 
-	@@keyframes rotate {
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid rgba(226, 19, 123, 0.1);
+		border-left: 4px solid var(--primary-color);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin: 0 auto;
+	}
+
+	@@keyframes spin {
 		0% {
-			transform: rotate(0deg) translate(-24px) rotate(0deg);
+			transform: rotate(0deg);
 		}
 
 		100% {
-			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+			transform: rotate(360deg);
 		}
 	}
 
-	@@keyframes pulse {
-		0% {
-			transform: scale(1);
-			opacity: 1;
+	.status-text {
+		color: var(--primary-color);
+		font-size: 16px;
+		font-weight: 500;
+		margin: 0;
+	}
+
+	/* Instruction Section */
+	.instruction-section {
+		text-align: center;
+	}
+
+	.instruction-dots {
+		display: flex;
+		justify-content: center;
+		gap: 8px;
+		margin-bottom: 16px;
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: #e1e8ed;
+		transition: all 0.3s ease;
+		position: relative;
+	}
+
+		.dot.active {
+			background: var(--primary-color);
+			box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.2);
+		}
+
+			.dot.active::after {
+				content: '';
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 6px;
+				height: 6px;
+				background: var(--white);
+				border-radius: 50%;
+			}
+
+	.instruction-text {
+		color: var(--text-light);
+		font-size: 15px;
+		font-weight: 400;
+		margin: 0;
+	}
+
+	/* Footer Section */
+	.footer-section {
+		text-align: center;
+		padding-top: 24px;
+		border-top: 1px solid #e1e8ed;
+	}
+
+	.copyright {
+		font-size: 13px;
+		color: var(--text-light);
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	.footer-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--primary-dark);
+			text-decoration: underline;
+		}
+
+	/* Background Decoration */
+	.bg-decoration {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		z-index: 1;
+	}
+
+	.decoration-circle {
+		position: absolute;
+		border-radius: 50%;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.circle-1 {
+		width: 200px;
+		height: 200px;
+		top: -100px;
+		right: -100px;
+		animation: float 6s ease-in-out infinite;
+	}
+
+	.circle-2 {
+		width: 150px;
+		height: 150px;
+		bottom: -75px;
+		left: -75px;
+		animation: float 8s ease-in-out infinite reverse;
+	}
+
+	.circle-3 {
+		width: 100px;
+		height: 100px;
+		top: 50%;
+		left: -50px;
+		animation: float 10s ease-in-out infinite;
+	}
+
+	@@keyframes float {
+		0%, 100% {
+			transform: translateY(0px) rotate(0deg);
 		}
 
 		50% {
-			transform: scale(1.2);
-			opacity: 0.7;
-		}
-
-		100% {
-			transform: scale(1);
-			opacity: 1;
+			transform: translateY(-20px) rotate(180deg);
 		}
 	}
 
-	@@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
+	/* Responsive Design */
+	@@media (max-width: 480px) {
+		.login-card {
+			padding: 32px 24px;
+			margin: 16px;
 		}
 
-		to {
-			opacity: 1;
-			transform: translateY(0);
+		.brand-title {
+			font-size: 28px;
+		}
+
+		:deep(.custom-otp .e-input-group) {
+			width: 48px !important;
+			height: 48px !important;
+		}
+
+		:deep(.custom-otp .e-input-group input) {
+			font-size: 20px !important;
+		}
+
+		.instruction-dots {
+			gap: 6px;
+		}
+
+		.dot {
+			width: 10px;
+			height: 10px;
+		}
+	}
+
+	/* Accessibility */
+	@@media (prefers-reduced-motion: reduce) {
+		.spinner,
+		.decoration-circle {
+			animation: none;
+		}
+
+		:deep(.custom-otp .e-input-group:focus-within) {
+			transform: none;
+		}
+	}
+
+	/* Focus styles for better accessibility */
+	.footer-link:focus {
+		outline: 2px solid var(--primary-color);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+
+	/* High contrast mode support */
+	@@media (prefers-contrast: high) {
+		.login-card {
+			border: 2px solid var(--text-dark);
+		}
+
+		:deep(.custom-otp .e-input-group) {
+			border-width: 3px !important;
 		}
 	}
 </style>
