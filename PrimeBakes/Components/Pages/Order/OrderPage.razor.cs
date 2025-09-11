@@ -84,7 +84,11 @@ public partial class OrderPage
 		await _sfGrid.Refresh();
 		StateHasChanged();
 
-		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+		if (_cart.Where(x => x.Quantity > 0).Count() == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName)))
+			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName));
+		else
+			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
@@ -99,6 +103,6 @@ public partial class OrderPage
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
 
-		NavManager.NavigateTo("/Cart");
+		NavManager.NavigateTo("/OrderCart");
 	}
 }
