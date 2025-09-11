@@ -9,6 +9,7 @@ using PrimeBakes.Services;
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.DataAccess;
+using PrimeOrdersLibrary.Exporting.Order;
 using PrimeOrdersLibrary.Models.Common;
 using PrimeOrdersLibrary.Models.Order;
 
@@ -221,10 +222,10 @@ public partial class OrderCartPage
 		await LocalNotificationCenter.Current.Show(request);
 #endif
 
-		//var ms = await OrderA4Print.GenerateA4OrderDocument(order.Id);
-		//var fileName = $"Order_Bill_{order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		//SaveService saveService = new();
-		//var filePath = saveService.SaveAndView(fileName, "application/pdf", ms);
+		var ms = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
+		var fileName = $"Order_Bill_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		SaveService saveService = new();
+		var filePath = saveService.SaveAndView(fileName, "application/pdf", ms);
 
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));

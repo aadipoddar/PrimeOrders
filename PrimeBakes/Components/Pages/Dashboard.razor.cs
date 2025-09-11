@@ -1,3 +1,9 @@
+#if ANDROID
+using System.Reflection;
+
+using PrimeBakes.Services.Android;
+#endif
+
 using Microsoft.AspNetCore.Components;
 
 using PrimeBakes.Services;
@@ -12,9 +18,31 @@ public partial class Dashboard
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private string _isLoadingText = "Loading dashboard...";
 
 	protected override async Task OnInitializedAsync()
 	{
+
+#if ANDROID
+		try
+		{
+			var currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+			if (Task.Run(async () => await AadiSoftUpdater.CheckForUpdates("aadipoddar", "PrimeOrders", currentVersion)).Result)
+			{
+				_isLoadingText = "Updating application...";
+				StateHasChanged();
+				await Task.Run(async () => await AadiSoftUpdater.UpdateApp("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes"));
+			}
+		}
+		catch (Exception)
+		{
+			_isLoadingText = "Please check your Internet Connection.";
+			StateHasChanged();
+			return;
+		}
+#endif
+
 		_user = await AuthService.AuthenticateCurrentUser(NavManager);
 		_isLoading = false;
 	}
