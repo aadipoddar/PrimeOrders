@@ -40,6 +40,10 @@ public partial class LoginPage
 		}
 
 		await AuthService.SaveCurrentUser(user);
+
+		if (Vibration.Default.IsSupported)
+			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+
 		NavManager.NavigateTo("/");
 	}
 }

@@ -25,7 +25,7 @@
         <ApplicationTitle>PrimeBakes</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.primebakes</ApplicationId>
+        <ApplicationId>com.aadisoft.primebakes</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>

@@ -22,6 +22,10 @@ public partial class Dashboard
 	private void Logout()
 	{
 		SecureStorage.Default.RemoveAll();
+
+		if (Vibration.Default.IsSupported)
+			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+
 		NavManager.NavigateTo("/Login", true);
 	}
 }

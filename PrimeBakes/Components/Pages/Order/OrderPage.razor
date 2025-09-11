@@ -3,7 +3,7 @@
 <div class="order-container">
 	<div class="page-header">
 		<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
-			Back
+			🏠
 		</button>
 		<h1 class="page-title">Order Items</h1>
 	</div>
@@ -26,7 +26,7 @@
 						@{
 							var item = (context as OrderProductCartModel);
 						}
-						@if (item != null)
+						@if (item is not null)
 						{
 							<div class="quantity-section">
 								@if (item.Quantity == 0)
