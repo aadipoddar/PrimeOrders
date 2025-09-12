@@ -94,6 +94,13 @@ else
 
 					<div class="form-row">
 						<div class="form-group">
+							<label>Prefix Code Name</label>
+							<SfTextBox @bind-Value="_locationModel.PrefixCode"
+									   Placeholder="Enter Prefix Code"
+									   CssClass="form-control" />
+						</div>
+
+						<div class="form-group">
 							<label>Main Location</label>
 							<div class="checkbox-container">
 								<SfCheckBox @bind-Checked="_locationModel.MainLocation" Label="Main Location" CssClass="form-checkbox" />
@@ -135,6 +142,7 @@ else
 						<GridColumns>
 							<GridColumn Field=@nameof(LocationModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(LocationModel.Name) HeaderText="Name" Width="200" />
+							<GridColumn Field=@nameof(LocationModel.PrefixCode) HeaderText="Code" Width="120" />
 							<GridColumn Field=@nameof(LocationModel.Discount) HeaderText="Discount %" Width="120" Format="N2" TextAlign="TextAlign.Right" />
 							<GridColumn Field=@nameof(LocationModel.MainLocation) HeaderText="Main Location" Width="120" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(LocationModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />

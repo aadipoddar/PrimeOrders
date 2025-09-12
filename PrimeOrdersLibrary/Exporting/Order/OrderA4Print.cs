@@ -26,6 +26,7 @@ public static class OrderA4Print
 			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
 			orderProductCartModel.Add(new()
 			{
+				ProductCategoryId = product.ProductCategoryId,
 				ProductId = item.ProductId,
 				ProductName = product.Name,
 				Quantity = item.Quantity

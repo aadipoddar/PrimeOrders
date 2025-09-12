@@ -63,11 +63,58 @@ public partial class LocationPage
 
 	private async Task<bool> ValidateForm()
 	{
+		_locationModel.PrefixCode = _locationModel.PrefixCode.ToUpper();
+
 		if (string.IsNullOrWhiteSpace(_locationModel.Name))
 		{
 			_sfErrorToast.Content = "Location name is required.";
 			await _sfErrorToast.ShowAsync();
 			return false;
+		}
+
+		if (string.IsNullOrWhiteSpace(_locationModel.PrefixCode))
+		{
+			_sfErrorToast.Content = "Location Code is required.";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
+
+		if (_locationModel.Id > 0)
+		{
+			var existingLocation = _locations.FirstOrDefault(_ => _.Id != _locationModel.Id && _.PrefixCode.Equals(_locationModel.PrefixCode, StringComparison.OrdinalIgnoreCase));
+			if (existingLocation is not null)
+			{
+				_sfErrorToast.Content = "Location with the same prefix code already exists.";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
+
+			existingLocation = _locations.FirstOrDefault(_ => _.Id != _locationModel.Id && _.Name.Equals(_locationModel.Name, StringComparison.OrdinalIgnoreCase));
+			if (existingLocation is not null)
+			{
+				_sfErrorToast.Content = "Location with the same name already exists.";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
+		}
+
+		else
+		{
+			var existingLocation = _locations.FirstOrDefault(_ => _.PrefixCode.Equals(_locationModel.PrefixCode, StringComparison.OrdinalIgnoreCase));
+			if (existingLocation is not null)
+			{
+				_sfErrorToast.Content = "Location with the same prefix code already exists.";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
+
+			existingLocation = _locations.FirstOrDefault(_ => _.Name.Equals(_locationModel.Name, StringComparison.OrdinalIgnoreCase));
+			if (existingLocation is not null)
+			{
+				_sfErrorToast.Content = "Location with the same name already exists.";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
 		}
 
 		if (_locationModel.Discount < 0 || _locationModel.Discount > 100)

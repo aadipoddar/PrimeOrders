@@ -118,6 +118,7 @@ public partial class OrderPage
 			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
 			_orderProductCarts.Add(new()
 			{
+				ProductCategoryId = product.ProductCategoryId,
 				ProductId = product.Id,
 				ProductName = product.Name,
 				Quantity = detail.Quantity
@@ -307,6 +308,7 @@ public partial class OrderPage
 		else
 			_orderProductCarts.Add(new()
 			{
+				ProductCategoryId = _selectedProduct.ProductCategoryId,
 				ProductId = _selectedProduct.Id,
 				ProductName = _selectedProduct.Name,
 				Quantity = _selectedQuantity

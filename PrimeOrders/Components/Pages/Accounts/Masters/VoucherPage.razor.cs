@@ -63,6 +63,8 @@ public partial class VoucherPage
 
 	private async Task<bool> ValidateForm()
 	{
+		_voucherModel.PrefixCode = _voucherModel.PrefixCode.ToUpper();
+
 		if (string.IsNullOrWhiteSpace(_voucherModel.Name))
 		{
 			_sfErrorToast.Content = "Voucher name is required.";
@@ -70,28 +72,46 @@ public partial class VoucherPage
 			return false;
 		}
 
-		// Check for duplicate voucher names
-		if (_voucherModel.Id <= 0)
+		if (string.IsNullOrWhiteSpace(_voucherModel.PrefixCode))
 		{
-			var existingVoucher = _vouchers.FirstOrDefault(v =>
-				v.Name.Equals(_voucherModel.Name, StringComparison.OrdinalIgnoreCase));
+			_sfErrorToast.Content = "Voucher Code is required.";
+			await _sfErrorToast.ShowAsync();
+			return false;
+		}
 
+		if (_voucherModel.Id > 0)
+		{
+			var existingVoucher = _vouchers.FirstOrDefault(_ => _.Id != _voucherModel.Id && _.PrefixCode.Equals(_voucherModel.PrefixCode, StringComparison.OrdinalIgnoreCase));
 			if (existingVoucher is not null)
 			{
-				_sfErrorToast.Content = "A voucher with this name already exists.";
+				_sfErrorToast.Content = "Voucher with the same prefix code already exists.";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
+
+			existingVoucher = _vouchers.FirstOrDefault(_ => _.Id != _voucherModel.Id && _.Name.Equals(_voucherModel.Name, StringComparison.OrdinalIgnoreCase));
+			if (existingVoucher is not null)
+			{
+				_sfErrorToast.Content = "Voucher with the same name already exists.";
 				await _sfErrorToast.ShowAsync();
 				return false;
 			}
 		}
+
 		else
 		{
-			var existingVoucher = _vouchers.FirstOrDefault(v =>
-				v.Id != _voucherModel.Id &&
-				v.Name.Equals(_voucherModel.Name, StringComparison.OrdinalIgnoreCase));
-
+			var existingVoucher = _vouchers.FirstOrDefault(_ => _.PrefixCode.Equals(_voucherModel.PrefixCode, StringComparison.OrdinalIgnoreCase));
 			if (existingVoucher is not null)
 			{
-				_sfErrorToast.Content = "A voucher with this name already exists.";
+				_sfErrorToast.Content = "Voucher with the same prefix code already exists.";
+				await _sfErrorToast.ShowAsync();
+				return false;
+			}
+
+			existingVoucher = _vouchers.FirstOrDefault(_ => _.Name.Equals(_voucherModel.Name, StringComparison.OrdinalIgnoreCase));
+			if (existingVoucher is not null)
+			{
+				_sfErrorToast.Content = "Voucher with the same name already exists.";
 				await _sfErrorToast.ShowAsync();
 				return false;
 			}

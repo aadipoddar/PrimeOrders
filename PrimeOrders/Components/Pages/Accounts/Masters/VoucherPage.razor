@@ -82,6 +82,13 @@ else
                                        Placeholder="Enter Voucher Name"
                                        CssClass="form-control" />
                         </div>
+
+                        <div class="form-group">
+                            <label>Prefix Code *</label>
+                            <SfTextBox @bind-Value="_voucherModel.PrefixCode"
+                                       Placeholder="Enter Voucher Code"
+                                       CssClass="form-control" />
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -130,6 +137,7 @@ else
                         <GridColumns>
                             <GridColumn Field=@nameof(VoucherModel.Id) HeaderText="ID" Width="60" TextAlign="TextAlign.Center" />
                             <GridColumn Field=@nameof(VoucherModel.Name) HeaderText="Voucher Name" Width="250" />
+                            <GridColumn Field=@nameof(VoucherModel.PrefixCode) HeaderText="Prefix Code" Width="120" />
                             <GridColumn Field=@nameof(VoucherModel.Remarks) HeaderText="Remarks" Width="300" />
                             <GridColumn Field=@nameof(VoucherModel.Status) HeaderText="Active" Width="80" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
                         </GridColumns>
