@@ -24,6 +24,7 @@ public static class SaleA4Print
 			{
 				ProductId = item.ProductId,
 				ProductName = (await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId)).Name,
+				ProductCategoryId = (await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId)).ProductCategoryId,
 				Quantity = item.Quantity,
 				AfterDiscount = item.AfterDiscount,
 				Rate = item.Rate,

@@ -46,6 +46,7 @@ public class SaleProductCartModel
 {
 	public int ProductId { get; set; }
 	public string ProductName { get; set; }
+	public int ProductCategoryId { get; set; }
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }
 	public decimal BaseTotal { get; set; }

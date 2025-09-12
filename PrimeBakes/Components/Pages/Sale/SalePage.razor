@@ -1,11 +1,11 @@
-﻿@page "/Order"
+﻿@page "/Sale"
 
 <div class="order-container">
 	<div class="page-header">
 		<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
 			🏠
 		</button>
-		<h1 class="page-title">Order</h1>
+		<h1 class="page-title">Sale</h1>
 	</div>
 
 	<!-- Enhanced Category Filter Section -->
@@ -41,11 +41,11 @@
 			<GridPageSettings PageSize="4" />
 
 			<GridColumns>
-				<GridColumn Field="@nameof(OrderProductCartModel.ProductName)" HeaderText="Product" Width="50%" />
-				<GridColumn Field="@nameof(OrderProductCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
+				<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="50%" />
+				<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
 					<Template>
 						@{
-							var item = (context as OrderProductCartModel);
+							var item = (context as SaleProductCartModel);
 						}
 						@if (item is not null)
 						{

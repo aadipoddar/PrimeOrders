@@ -137,6 +137,7 @@ public partial class SalePage
 			{
 				ProductId = product.Id,
 				ProductName = product.Name,
+				ProductCategoryId = product.ProductCategoryId,
 				Quantity = item.Quantity,
 				Rate = item.Rate,
 				DiscPercent = item.DiscPercent,
@@ -358,6 +359,7 @@ public partial class SalePage
 					{
 						ProductId = product.Id,
 						ProductName = product.Name,
+						ProductCategoryId = product.ProductCategoryId,
 						Quantity = item.Quantity,
 						Rate = product.Rate,
 						DiscPercent = _sale.DiscPercent,
@@ -531,6 +533,7 @@ public partial class SalePage
 			{
 				ProductId = _selectedProduct.Id,
 				ProductName = _selectedProduct.Name,
+				ProductCategoryId = _selectedProduct.ProductCategoryId,
 				Quantity = _selectedQuantity,
 				Rate = _selectedProduct.Rate,
 				DiscPercent = _sale.DiscPercent,
