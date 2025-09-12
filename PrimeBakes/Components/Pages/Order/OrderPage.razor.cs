@@ -8,6 +8,7 @@ using PrimeOrdersLibrary.Models.Common;
 using PrimeOrdersLibrary.Models.Order;
 using PrimeOrdersLibrary.Models.Product;
 
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 
 namespace PrimeBakes.Components.Pages.Order;
@@ -21,6 +22,9 @@ public partial class OrderPage
 
 	private const string _fileName = "orderCart.json";
 
+	private int _selectedCategoryId = 0;
+
+	private List<ProductCategoryModel> _productCategories = [];
 	private readonly List<OrderProductCartModel> _cart = [];
 
 	private SfGrid<OrderProductCartModel> _sfGrid;
@@ -35,12 +39,26 @@ public partial class OrderPage
 
 	private async Task LoadData()
 	{
+		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
+		_productCategories.RemoveAll(r => r.LocationId != 1);
+
+		_productCategories.Add(new()
+		{
+			Id = 0,
+			Name = "All Categories"
+		});
+
+		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+
+		_selectedCategoryId = 0;
+
 		var allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
 		allProducts.RemoveAll(r => r.LocationId != 1);
 
 		foreach (var product in allProducts)
 			_cart.Add(new()
 			{
+				ProductCategoryId = product.ProductCategoryId,
 				ProductId = product.Id,
 				ProductName = product.Name,
 				Quantity = 0
@@ -59,6 +77,18 @@ public partial class OrderPage
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 
+		StateHasChanged();
+	}
+
+	private async Task OnProductCategoryChanged(ChangeEventArgs<int, ProductCategoryModel> args)
+	{
+		if (args is null || args.Value <= 0)
+			_selectedCategoryId = 0;
+
+		else
+			_selectedCategoryId = args.Value;
+
+		await _sfGrid.Refresh();
 		StateHasChanged();
 	}
 

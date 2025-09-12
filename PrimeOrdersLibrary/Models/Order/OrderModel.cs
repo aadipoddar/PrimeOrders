@@ -23,6 +23,7 @@ public class OrderDetailModel
 
 public class OrderProductCartModel
 {
+	public int ProductCategoryId { get; set; }
 	public int ProductId { get; set; }
 	public string ProductName { get; set; }
 	public decimal Quantity { get; set; }
