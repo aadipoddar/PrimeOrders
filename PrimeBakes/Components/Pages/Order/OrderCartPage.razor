@@ -3,11 +3,11 @@
 <div class="order-cart-container">
 	<!-- Header -->
 	<div class="page-header">
-		<button @onclick='() => NavManager.NavigateTo("/Order")' class="back-button">
+		<button @onclick='() => NavManager.NavigateTo("/Order")' class="back-button" disabled="@_isSaving">
 			←
 		</button>
 		<h1 class="page-title">Order Cart</h1>
-		<button @onclick='() => _orderDetailsDialogVisible = true' class="header-action-btn">
+		<button @onclick='() => _orderDetailsDialogVisible = true' class="header-action-btn" disabled="@_isSaving">
 			📄 Details
 		</button>
 	</div>
@@ -52,7 +52,8 @@
 																	  Step="1"
 																	  Format="N0"
 																	  Width="100%"
-																	  CssClass="quantity-input" />
+																	  CssClass="quantity-input"
+																	  Enabled="@(!_isSaving)" />
 												</div>
 											</div>
 										</div>
@@ -70,7 +71,7 @@
 				<div class="empty-icon">🛒</div>
 				<h3>Your cart is empty</h3>
 				<p>Add some items to your cart to continue</p>
-				<button @onclick='() => NavManager.NavigateTo("/Order")' class="continue-shopping-btn">
+				<button @onclick='() => NavManager.NavigateTo("/Order")' class="continue-shopping-btn" disabled="@_isSaving">
 					Continue Shopping
 				</button>
 			</div>
@@ -82,10 +83,10 @@
 	{
 		<div class="action-buttons-footer">
 			<div class="action-buttons">
-				<button @onclick="ClearCart" class="clear-button">
+				<button @onclick="ClearCart" class="clear-button" disabled="@_isSaving">
 					🗑️ Clear Cart
 				</button>
-				<button @onclick="() => _orderConfirmationDialogVisible = true" class="confirm-button">
+				<button @onclick="() => _orderConfirmationDialogVisible = true" class="confirm-button" disabled="@_isSaving">
 					✓ Confirm Order
 				</button>
 			</div>
@@ -176,7 +177,8 @@
 					<label>Order Date</label>
 					<SfDatePicker @bind-Value="_order.OrderDateTime"
 								  Placeholder="Select Order Date"
-								  CssClass="form-control" />
+								  CssClass="form-control"
+								  Enabled="@(!_isSaving)" />
 				</div>
 
 				@if (_user.Admin && _userLocation.MainLocation)
@@ -188,7 +190,8 @@
 									Placeholder="Select a Outlet / Franchise"
 									DataSource="_locations"
 									CssClass="form-control"
-									@bind-Value="_order.LocationId">
+									@bind-Value="_order.LocationId"
+									Enabled="@(!_isSaving)">
 							<ComboBoxFieldSettings Value="Id" Text="Name" />
 						</SfComboBox>
 					</div>
@@ -199,13 +202,14 @@
 					<SfTextBox @bind-Value="_order.Remarks"
 							   Placeholder="Add remarks (optional)"
 							   Multiline="true"
-							   CssClass="form-control" />
+							   CssClass="form-control"
+							   Enabled="@(!_isSaving)" />
 				</div>
 			</div>
 		</Content>
 		<FooterTemplate>
 			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" />
+				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" Disabled="@_isSaving" />
 			</div>
 		</FooterTemplate>
 	</DialogTemplates>
@@ -249,8 +253,8 @@
 		</Content>
 		<FooterTemplate>
 			<div class="dialog-footer confirmation-footer">
-				<SfButton Content="No, Cancel" OnClick="() => _orderConfirmationDialogVisible = false" CssClass="dialog-button cancel-button" />
-				<SfButton Content="Yes, Place Order" OnClick="SaveOrder" CssClass="dialog-button confirm-button-dialog" />
+				<SfButton Content="No, Cancel" OnClick="() => _orderConfirmationDialogVisible = false" CssClass="dialog-button cancel-button" Disabled="@_isSaving" />
+				<SfButton Content="@(_isSaving ? "⏳ Saving Order..." : "Yes, Place Order")" OnClick="SaveOrder" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
 			</div>
 		</FooterTemplate>
 	</DialogTemplates>
@@ -313,10 +317,16 @@
 		min-height: 44px;
 	}
 
-		.back-button:hover {
+		.back-button:hover:not(:disabled) {
 			background: var(--primary-dark);
 			transform: translateY(-1px);
 			box-shadow: var(--shadow-medium);
+		}
+
+		.back-button:disabled {
+			background: var(--text-light);
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	.page-title {
@@ -340,9 +350,15 @@
 		font-weight: 500;
 	}
 
-		.header-action-btn:hover {
+		.header-action-btn:hover:not(:disabled) {
 			background: var(--primary-color);
 			color: white;
+		}
+
+		.header-action-btn:disabled {
+			border-color: var(--text-light);
+			color: var(--text-light);
+			cursor: not-allowed;
 		}
 
 	/* Main Content - Add padding bottom for sticky buttons */
@@ -483,11 +499,19 @@
 		border: 2px solid var(--danger-color);
 	}
 
-		.clear-button:hover {
+		.clear-button:hover:not(:disabled) {
 			background: var(--danger-color);
 			color: white;
 			transform: translateY(-2px);
 			box-shadow: var(--shadow-medium);
+		}
+
+		.clear-button:disabled {
+			background: var(--bg-light);
+			color: var(--text-light);
+			border-color: var(--text-light);
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	.confirm-button {
@@ -495,10 +519,16 @@
 		color: white;
 	}
 
-		.confirm-button:hover {
+		.confirm-button:hover:not(:disabled) {
 			background: var(--primary-dark);
 			transform: translateY(-2px);
 			box-shadow: 0 6px 20px rgba(226, 19, 123, 0.3);
+		}
+
+		.confirm-button:disabled {
+			background: var(--text-light);
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	/* Empty Cart */
@@ -549,10 +579,16 @@
 		min-height: 48px;
 	}
 
-		.continue-shopping-btn:hover {
+		.continue-shopping-btn:hover:not(:disabled) {
 			background: var(--primary-dark);
 			transform: translateY(-2px);
 			box-shadow: var(--shadow-medium);
+		}
+
+		.continue-shopping-btn:disabled {
+			background: var(--text-light);
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	/* Grid Styling - Enhanced like OrderPage */
@@ -769,9 +805,13 @@
 		border: 2px solid var(--border-color);
 	}
 
-		.cancel-button:hover {
+		.cancel-button:hover:not(:disabled) {
 			background: var(--bg-light);
 			border-color: var(--text-light);
+		}
+
+		.cancel-button:disabled {
+			cursor: not-allowed;
 		}
 
 	.confirm-button-dialog {
@@ -779,10 +819,16 @@
 		color: white;
 	}
 
-		.confirm-button-dialog:hover {
+		.confirm-button-dialog:hover:not(:disabled) {
 			background: var(--primary-dark);
 			transform: translateY(-1px);
 			box-shadow: var(--shadow-light);
+		}
+
+		.confirm-button-dialog:disabled {
+			background: var(--text-light);
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	.error-fix-button {

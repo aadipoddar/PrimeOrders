@@ -24,6 +24,7 @@ public partial class OrderCartPage
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _isSaving = false;
 
 	private const string _fileName = "orderCart.json";
 
@@ -87,7 +88,7 @@ public partial class OrderCartPage
 
 	private async Task UpdateQuantity(OrderProductCartModel item, decimal newQuantity)
 	{
-		if (item is null)
+		if (item is null || _isSaving)
 			return;
 
 		item.Quantity = Math.Max(0, newQuantity);
@@ -108,6 +109,9 @@ public partial class OrderCartPage
 
 	private async Task ClearCart()
 	{
+		if (_isSaving)
+			return;
+
 		_cart.Clear();
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName));
 
@@ -118,13 +122,15 @@ public partial class OrderCartPage
 		StateHasChanged();
 	}
 
-	private async Task<bool> ValidateForm()
+	private bool ValidateForm()
 	{
 		_validationErrors.Clear();
 
 		_order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_order.OrderDateTime)
 			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
 			"India Standard Time");
+
+		_order.UserId = _user.Id;
 
 		if (!_user.Admin || !_userLocation.MainLocation)
 			_order.LocationId = _user.LocationId;
@@ -150,10 +156,6 @@ public partial class OrderCartPage
 		}
 
 		StateHasChanged();
-
-		_order.UserId = _user.Id;
-		_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
-
 		return true;
 	}
 
@@ -172,64 +174,87 @@ public partial class OrderCartPage
 
 	private async Task SaveOrder()
 	{
-		if (!await ValidateForm())
-		{
-			_validationErrorDialogVisible = true;
-			StateHasChanged();
+		if (_isSaving)
 			return;
-		}
 
+		_isSaving = true;
 		StateHasChanged();
 
-		_order.Id = await OrderData.InsertOrder(_order);
-		if (_order.Id <= 0)
+		try
+		{
+			if (!ValidateForm())
+			{
+				_validationErrorDialogVisible = true;
+				_orderConfirmationDialogVisible = false;
+				return;
+			}
+
+			_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
+			_order.Id = await OrderData.InsertOrder(_order);
+			if (_order.Id <= 0)
+			{
+				_validationErrors.Add(new()
+				{
+					Field = "Order",
+					Message = "Failed to save the order. Please try again."
+				});
+
+				_validationErrorDialogVisible = true;
+				_orderConfirmationDialogVisible = false;
+				return;
+			}
+
+			await InsertOrderDetails();
+
+			_cart.Clear();
+
+			var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+			if (File.Exists(fullPath))
+				File.Delete(fullPath);
+
+			if (Vibration.Default.IsSupported)
+				Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+
+#if ANDROID
+			if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+				await LocalNotificationCenter.Current.RequestNotificationPermission();
+
+			var request = new NotificationRequest
+			{
+				NotificationId = 101,
+				Title = "Order Placed",
+				Subtitle = "Order Confirmation",
+				Description = $"Your order #{_order.OrderNo} has been successfully placed. {_order.Remarks}",
+				Schedule = new NotificationRequestSchedule
+				{
+					NotifyTime = DateTime.Now.AddSeconds(5)
+				}
+			};
+
+			await LocalNotificationCenter.Current.Show(request);
+#endif
+
+			var ms = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
+			var fileName = $"Order_Bill_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+			SaveService saveService = new();
+			var filePath = saveService.SaveAndView(fileName, "application/pdf", ms);
+
+			NavManager.NavigateTo("/Order/Confirmed", true);
+		}
+		catch (Exception ex)
 		{
 			_validationErrors.Add(new()
 			{
-				Field = "Order",
-				Message = "Failed to save the order. Please try again."
+				Field = "Exception",
+				Message = $"An error occurred while saving the order: {ex.Message}"
 			});
-
 			_validationErrorDialogVisible = true;
-			StateHasChanged();
-			return;
+			_orderConfirmationDialogVisible = false;
 		}
-
-		await InsertOrderDetails();
-
-		_cart.Clear();
-
-		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
-		if (File.Exists(fullPath))
-			File.Delete(fullPath);
-
-#if ANDROID
-		if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
-			await LocalNotificationCenter.Current.RequestNotificationPermission();
-
-		var request = new NotificationRequest
+		finally
 		{
-			NotificationId = 101,
-			Title = "Order Placed",
-			Subtitle = "Order Confirmation",
-			Description = $"Your order #{_order.OrderNo} has been successfully placed. {_order.Remarks}",
-			Schedule = new NotificationRequestSchedule
-			{
-				NotifyTime = DateTime.Now.AddSeconds(5)
-			}
-		};
-
-		await LocalNotificationCenter.Current.Show(request);
-#endif
-
-		var ms = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
-		var fileName = $"Order_Bill_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		SaveService saveService = new();
-		var filePath = saveService.SaveAndView(fileName, "application/pdf", ms);
-
-		if (Vibration.Default.IsSupported)
-			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
-
-		NavManager.NavigateTo("/Order/Confirmed");
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 }
