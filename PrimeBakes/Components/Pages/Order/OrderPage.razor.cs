@@ -20,8 +20,6 @@ public partial class OrderPage
 	private UserModel _user;
 	private bool _isLoading = true;
 
-	private const string _fileName = "orderCart.json";
-
 	private int _selectedCategoryId = 0;
 
 	private List<ProductCategoryModel> _productCategories = [];
@@ -66,7 +64,7 @@ public partial class OrderPage
 
 		_cart.Sort((x, y) => string.Compare(x.ProductName, y.ProductName, StringComparison.Ordinal));
 
-		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart);
 		if (File.Exists(fullPath))
 		{
 			var items = System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(await File.ReadAllTextAsync(fullPath)) ?? [];
@@ -101,7 +99,7 @@ public partial class OrderPage
 		await _sfGrid.Refresh();
 		StateHasChanged();
 
-		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
 
@@ -114,10 +112,10 @@ public partial class OrderPage
 		await _sfGrid.Refresh();
 		StateHasChanged();
 
-		if (_cart.Where(x => x.Quantity > 0).Count() == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName)))
-			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName));
+		if (_cart.Where(x => x.Quantity > 0).Count() == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)))
+			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
 		else
-			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
@@ -127,7 +125,7 @@ public partial class OrderPage
 		if (_cart.Sum(x => x.Quantity) <= 0)
 			return;
 
-		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 		_cart.Clear();
 
 		if (Vibration.Default.IsSupported)

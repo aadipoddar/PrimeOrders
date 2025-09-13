@@ -1,95 +1,186 @@
 ﻿@page "/Sale"
 
-<div class="order-container">
-	<div class="page-header">
-		<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
-			🏠
-		</button>
-		<h1 class="page-title">Sale</h1>
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading sale page...</p>
 	</div>
+}
+else
+{
+	<div class="order-container">
+		<div class="page-header">
+			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
+				🏠
+			</button>
+			<h1 class="page-title">Sale</h1>
+			@if (_userLocation is not null && _userLocation.MainLocation)
+			{
+				<button @onclick="() => _partyDetailsDialogVisible = true" class="header-action-btn">
+					👥 Party
+				</button>
+			}
+			else
+			{
+				<!-- Empty spacer to maintain center alignment when party button is not shown -->
+				<div class="header-spacer"></div>
+			}
+		</div>
 
-	<!-- Enhanced Category Filter Section -->
-	<div class="filter-section">
-		<div class="filter-content">
-			<div class="category-filter-wrapper">
-				<SfComboBox TValue="int"
-							TItem="ProductCategoryModel"
-							FloatLabelType='@FloatLabelType.Auto'
-							Placeholder="Select a category to filter product"
-							DataSource="_productCategories"
-							Value="_selectedCategoryId"
-							CssClass="category-filter"
-							AllowFiltering="true"
-							FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-					<ComboBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="OnProductCategoryChanged" />
-					<ComboBoxFieldSettings Value="Id" Text="Name" />
-				</SfComboBox>
+		<!-- Enhanced Category Filter Section -->
+		<div class="filter-section">
+			<div class="filter-content">
+				<div class="category-filter-wrapper">
+					<SfComboBox TValue="int"
+								TItem="ProductCategoryModel"
+								FloatLabelType='@FloatLabelType.Auto'
+								Placeholder="Select a category to filter product"
+								DataSource="_productCategories"
+								Value="_selectedCategoryId"
+								CssClass="category-filter"
+								AllowFiltering="true"
+								FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+						<ComboBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="OnProductCategoryChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="grid-container">
-		<SfGrid ID="_sfGrid"
-				@ref="_sfGrid"
-				EnableAdaptiveUI="true"
-				DataSource="_selectedCategoryId == 0 ? _cart : _cart.Where(x => x.ProductCategoryId == _selectedCategoryId)"
-				AllowPaging="true"
-				AllowSorting="false"
-				AllowTextWrap=true
-				Toolbar="@(new List<string>() { "Search" })">
+		<div class="grid-container">
+			<SfGrid ID="_sfGrid"
+					@ref="_sfGrid"
+					EnableAdaptiveUI="true"
+					DataSource="_selectedCategoryId == 0 ? _cart : _cart.Where(x => x.ProductCategoryId == _selectedCategoryId)"
+					AllowPaging="true"
+					AllowSorting="false"
+					AllowTextWrap=true
+					Toolbar="@(new List<string>() { "Search" })">
 
-			<GridPageSettings PageSize="4" />
+				<GridPageSettings PageSize="4" />
 
-			<GridColumns>
-				<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="50%" />
-				<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
-					<Template>
-						@{
-							var item = (context as SaleProductCartModel);
-						}
-						@if (item is not null)
-						{
-							<div class="quantity-section">
-								@if (item.Quantity == 0)
-								{
-									<button class="add-button" @onclick="() => AddToCart(item)" @onclick:stopPropagation="true">
-										<span class="add-text">Add</span>
-									</button>
-								}
-								else
-								{
-									<div class="quantity-controls">
-										<div class="quantity-input-wrapper">
-											<SfNumericTextBox TValue="decimal"
-															  Value="@item.Quantity"
-															  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
-															  Min="0"
-															  Step="1"
-															  Format="N0"
-															  Width="100%"
-															  CssClass="quantity-input" />
+				<GridColumns>
+					<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="50%" />
+					<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
+						<Template>
+							@{
+								var item = (context as SaleProductCartModel);
+							}
+							@if (item is not null)
+							{
+								<div class="quantity-section">
+									@if (item.Quantity == 0)
+									{
+										<button class="add-button" @onclick="() => AddToCart(item)" @onclick:stopPropagation="true">
+											<span class="add-text">Add</span>
+										</button>
+									}
+									else
+									{
+										<div class="quantity-controls">
+											<div class="quantity-input-wrapper">
+												<SfNumericTextBox TValue="decimal"
+																  Value="@item.Quantity"
+																  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
+																  Min="0"
+																  Step="1"
+																  Format="N0"
+																  Width="100%"
+																  CssClass="quantity-input" />
+											</div>
 										</div>
-									</div>
-								}
-							</div>
-						}
-					</Template>
-				</GridColumn>
-			</GridColumns>
-		</SfGrid>
-	</div>
-
-	@if (_cart.Any(c => c.Quantity > 0))
-	{
-		<div class="cart-footer">
-			<button @onclick="() => GoToCart()" class="cart-button">
-				<i class="fas fa-shopping-cart"></i>
-				<span>Go to Cart</span>
-				<span class="cart-count">@_cart.Count(c => c.Quantity > 0)</span>
-			</button>
+									}
+								</div>
+							}
+						</Template>
+					</GridColumn>
+				</GridColumns>
+			</SfGrid>
 		</div>
-	}
-</div>
+
+		@if (_cart.Any(c => c.Quantity > 0))
+		{
+			<div class="cart-footer">
+				<button @onclick="() => GoToCart()" class="cart-button">
+					<i class="fas fa-shopping-cart"></i>
+					<span>Go to Cart</span>
+					<span class="cart-count">@_cart.Count(c => c.Quantity > 0)</span>
+				</button>
+			</div>
+		}
+	</div>
+}
+
+<!-- Party Details Dialog -->
+<SfDialog ID="_sfPartyDetailsDialog"
+		  @ref="_sfPartyDetailsDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_partyDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="party-icon">👥</span>
+				<span>Party & Order Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				<div class="form-group">
+					<SfAutoComplete TValue="LedgerModel?"
+									TItem="LedgerModel"
+									Value="@_selectedParty"
+									Placeholder="Search for a party..."
+									FloatLabelType='@FloatLabelType.Auto'
+									DataSource="@_parties"
+									CssClass="form-control"
+									AllowFiltering="true"
+									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+						<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel?" ValueChange="OnPartyChanged" />
+						<AutoCompleteFieldSettings Value="Name" />
+					</SfAutoComplete>
+				</div>
+
+				<div class="form-group">
+					<SfComboBox TValue="int?"
+								TItem="OrderModel"
+								Placeholder="Select an order (optional)"
+								DataSource="@_orders"
+								FloatLabelType='@FloatLabelType.Auto'
+								Value="@_sale.OrderId"
+								CssClass="form-control"
+								AllowFiltering="true"
+								FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+						<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="OnOrderChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
+						<ComboBoxTemplates TItem="OrderModel">
+							<ItemTemplate>
+								<div class="order-item-template">
+									<div class="order-number">@((context as OrderModel)?.OrderNo)</div>
+									<div class="order-date">@((context as OrderModel)?.OrderDateTime.ToString("dd/MM/yyyy"))</div>
+								</div>
+							</ItemTemplate>
+						</ComboBoxTemplates>
+					</SfComboBox>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _partyDetailsDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
 
 <style>
 	:root {
@@ -106,6 +197,64 @@
 		--info-color: #17a2b8;
 	}
 
+	/* Loading Animation - Add this to your existing styles */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--info-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--text-dark);
+		font-size: 16px;
+		margin-top: 10px;
+		font-weight: 500;
+	}
+
+	/* Animation keyframes */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
 	.order-container {
 		min-height: 100vh;
 		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
@@ -114,17 +263,17 @@
 		flex-direction: column;
 	}
 
-	/* Page Header */
+	/* Page Header - Updated to match OrderCartPage layout */
 	.page-header {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		padding: 15px 20px;
 		background: white;
 		box-shadow: var(--shadow-light);
 		position: sticky;
 		top: 0;
 		z-index: 100;
-		gap: 15px;
 	}
 
 	.back-button {
@@ -132,16 +281,17 @@
 		color: white;
 		border: none;
 		border-radius: 8px;
-		padding: 10px;
+		padding: 10px 15px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		box-shadow: var(--shadow-light);
+		font-size: 18px;
+		font-weight: bold;
 		min-width: 44px;
 		min-height: 44px;
-		font-size: 16px;
 	}
 
 		.back-button:hover {
@@ -157,9 +307,35 @@
 	.page-title {
 		margin: 0;
 		color: var(--text-dark);
-		font-size: 22px;
+		font-size: 24px;
 		font-weight: 600;
 		flex: 1;
+		text-align: center;
+	}
+
+	/* Header Action Button - Updated to match OrderCartPage style */
+	.header-action-btn {
+		background: transparent;
+		border: 2px solid var(--primary-color);
+		color: var(--primary-color);
+		border-radius: 8px;
+		padding: 10px 12px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-size: 14px;
+		font-weight: 500;
+		min-height: 44px;
+	}
+
+		.header-action-btn:hover {
+			background: var(--primary-color);
+			color: white;
+		}
+
+	/* Header spacer to maintain center alignment when party button is not shown */
+	.header-spacer {
+		min-width: 44px;
+		min-height: 44px;
 	}
 
 	/* Enhanced Filter Section */
@@ -299,6 +475,180 @@
 		font-weight: 500;
 		color: var(--text-dark);
 	}
+
+	/* Party Details Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--text-dark);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.party-icon {
+		font-size: 24px;
+	}
+
+	.dialog-content {
+		padding: 20px;
+		max-height: 70vh;
+		overflow-y: auto;
+	}
+
+	.party-details-section,
+	.order-details-section {
+		background-color: var(--bg-light);
+		border-radius: 12px;
+		padding: 20px;
+		margin-bottom: 20px;
+		border: 1px solid var(--border-color);
+	}
+
+	.section-title {
+		margin: 0 0 15px 0;
+		color: var(--text-dark);
+		font-size: 16px;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border-bottom: 2px solid var(--primary-color);
+		padding-bottom: 8px;
+	}
+
+	.section-icon {
+		font-size: 18px;
+		color: var(--primary-color);
+	}
+
+	.form-group {
+		margin-bottom: 15px;
+	}
+
+		.form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: var(--text-dark);
+		}
+
+	.form-control {
+		width: 100%;
+		border-radius: 6px;
+	}
+
+	/* Party and Order Info Cards */
+	.party-info-card,
+	.order-info-card {
+		background-color: white;
+		border-radius: 8px;
+		padding: 15px;
+		margin-top: 15px;
+		border: 1px solid var(--border-color);
+		box-shadow: var(--shadow-light);
+	}
+
+	.party-info-item,
+	.order-info-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+		.party-info-item:last-child,
+		.order-info-item:last-child {
+			border-bottom: none;
+		}
+
+	.info-label {
+		font-weight: 600;
+		color: var(--text-dark);
+		flex-shrink: 0;
+	}
+
+	.info-value {
+		color: var(--text-light);
+		font-weight: 500;
+		text-align: right;
+		word-break: break-word;
+	}
+
+	/* Order Item Template */
+	.order-item-template {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+	}
+
+	.order-number {
+		font-weight: 600;
+		color: var(--text-dark);
+	}
+
+	.order-date {
+		font-size: 12px;
+		color: var(--text-light);
+	}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--bg-light);
+		border-top: 1px solid var(--border-color);
+		gap: 10px;
+	}
+
+	.clear-button {
+		background-color: #dc3545;
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+		.clear-button:hover {
+			background-color: #c82333;
+		}
+
+	.apply-button {
+		background-color: var(--primary-color);
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+		.apply-button:hover {
+			background-color: var(--primary-dark);
+		}
+
+	.dialog-button {
+		background-color: var(--text-light);
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 6px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+		.dialog-button:hover {
+			background-color: #6c757d;
+		}
 
 	/* Syncfusion ComboBox Styling - Reduced Height */
 	::deep .category-filter .e-input-group {
@@ -641,13 +991,18 @@
 	}
 
 	/* Mobile Responsiveness */
-	@@media (max-width: 576px) {
+	@@media (max-width: 768px) {
 		.page-header {
 			padding: 12px 15px;
 		}
 
 		.page-title {
 			font-size: 18px;
+		}
+
+		.header-action-btn {
+			padding: 8px 10px;
+			font-size: 14px;
 		}
 
 		.filter-section {
@@ -735,6 +1090,78 @@
 			font-size: 14px;
 			height: 32px;
 		}
+		/* Dialog adjustments for mobile */
+		.dialog-footer {
+			flex-direction: column;
+			gap: 10px;
+		}
+
+			.dialog-footer button {
+				width: 100%;
+			}
+	}
+
+	@@media (max-width: 576px) {
+		.back-button, .header-action-btn {
+			padding: 8px 10px;
+			font-size: 14px;
+		}
+
+		.page-title {
+			font-size: 16px;
+		}
+
+		.control-btn {
+			width: 32px;
+			height: 32px;
+			font-size: 12px;
+		}
+
+		.add-button {
+			padding: 8px 16px;
+			font-size: 13px;
+			min-height: 36px;
+			min-width: 70px;
+			border-radius: 20px;
+		}
+
+		.add-text {
+			display: inline !important;
+			font-size: 12px;
+		}
+
+		.cart-footer {
+			padding: 12px 15px;
+		}
+
+		.cart-button {
+			padding: 12px 15px;
+			font-size: 14px;
+			min-height: 48px;
+		}
+
+		.cart-count {
+			width: 24px;
+			height: 24px;
+			font-size: 12px;
+			right: 12px;
+		}
+
+		::deep .e-grid .e-headercell {
+			padding: 12px 8px;
+			font-size: 14px;
+		}
+
+		::deep .e-grid .e-rowcell {
+			padding: 8px;
+			font-size: 14px;
+		}
+		/* Mobile combo box styling - standard height */
+		::deep .category-filter .e-input-group input {
+			padding: 8px 10px;
+			font-size: 14px;
+			height: 32px;
+		}
 	}
 
 	@@media (max-width: 400px) {
@@ -744,7 +1171,7 @@
 			font-size: 11px;
 		}
 
-		.back-button {
+		.back-button, .header-action-btn {
 			min-width: 40px;
 			min-height: 40px;
 			padding: 8px;
@@ -783,7 +1210,7 @@
 			min-width: 80px;
 		}
 
-		.back-button {
+		.back-button, .header-action-btn {
 			min-width: 48px;
 			min-height: 48px;
 		}
@@ -816,4 +1243,4 @@
 			font-size: 10px;
 		}
 	}
-</style>
+</style>		

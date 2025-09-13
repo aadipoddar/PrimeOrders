@@ -26,8 +26,6 @@ public partial class OrderCartPage
 	private bool _isLoading = true;
 	private bool _isSaving = false;
 
-	private const string _fileName = "orderCart.json";
-
 	private bool _orderDetailsDialogVisible = false;
 	private bool _orderConfirmationDialogVisible = false;
 	private bool _validationErrorDialogVisible = false;
@@ -70,7 +68,7 @@ public partial class OrderCartPage
 		_order.UserId = _user.Id;
 
 		_cart.Clear();
-		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart);
 		if (File.Exists(fullPath))
 		{
 			var items = System.Text.Json.JsonSerializer.Deserialize<List<OrderProductCartModel>>(await File.ReadAllTextAsync(fullPath)) ?? [];
@@ -99,10 +97,10 @@ public partial class OrderCartPage
 		await _sfGrid.Refresh();
 		StateHasChanged();
 
-		if (_cart.Count == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName)))
-			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName));
+		if (_cart.Count == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)))
+			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
 		else
-			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 	}
@@ -113,7 +111,7 @@ public partial class OrderCartPage
 			return;
 
 		_cart.Clear();
-		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, _fileName));
+		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
 
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
@@ -208,7 +206,7 @@ public partial class OrderCartPage
 
 			_cart.Clear();
 
-			var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, _fileName);
+			var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart);
 			if (File.Exists(fullPath))
 				File.Delete(fullPath);
 

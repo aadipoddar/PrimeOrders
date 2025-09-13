@@ -22,7 +22,6 @@ public partial class Dashboard
 
 	protected override async Task OnInitializedAsync()
 	{
-
 #if ANDROID
 		try
 		{
