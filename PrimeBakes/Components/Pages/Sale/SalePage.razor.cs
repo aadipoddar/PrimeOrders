@@ -51,7 +51,7 @@ public partial class SalePage
 	private List<LedgerModel> _parties = [];
 	private List<OrderModel> _orders = [];
 	private List<ProductCategoryModel> _productCategories = [];
-	private List<SaleProductCartModel> _cart = [];
+	private readonly List<SaleProductCartModel> _cart = [];
 	private readonly List<SaleProductCartModel> _allCart = [];
 
 	private SfGrid<SaleProductCartModel> _sfGrid;
@@ -102,6 +102,10 @@ public partial class SalePage
 				_orders = await OrderData.LoadOrderByLocation(_selectedParty.LocationId.Value);
 			}
 		}
+
+		_sale.LocationId = _user.LocationId;
+		_sale.UserId = _user.Id;
+		_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
 	}
 
 	private async Task LoadProductCategories()
@@ -219,7 +223,10 @@ public partial class SalePage
 			var orderDetails = await OrderData.LoadOrderDetailByOrder(_sale.OrderId.Value);
 
 			foreach (var item in orderDetails)
+			{
 				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().Quantity += item.Quantity;
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().DiscPercent = _sale.DiscPercent;
+			}
 		}
 
 		else _sale.OrderId = null;
@@ -310,6 +317,9 @@ public partial class SalePage
 	private async Task SaveSaleFile()
 	{
 		UpdateFinancialDetails();
+
+		_sale.LocationId = _user.LocationId;
+		_sale.UserId = _user.Id;
 
 		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale), System.Text.Json.JsonSerializer.Serialize(_sale));
 

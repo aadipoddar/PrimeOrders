@@ -210,16 +210,13 @@ public partial class OrderCartPage
 			if (File.Exists(fullPath))
 				File.Delete(fullPath);
 
-			if (Vibration.Default.IsSupported)
-				Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
-
 #if ANDROID
 			if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
 				await LocalNotificationCenter.Current.RequestNotificationPermission();
 
 			var request = new NotificationRequest
 			{
-				NotificationId = 101,
+				NotificationId = _order.Id,
 				Title = "Order Placed",
 				Subtitle = "Order Confirmation",
 				Description = $"Your order #{_order.OrderNo} has been successfully placed. {_order.Remarks}",

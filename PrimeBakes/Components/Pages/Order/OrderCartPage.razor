@@ -1,264 +1,278 @@
 ﻿@page "/OrderCart"
 
-<div class="order-cart-container">
-	<!-- Header -->
-	<div class="page-header">
-		<button @onclick='() => NavManager.NavigateTo("/Order")' class="back-button" disabled="@_isSaving">
-			←
-		</button>
-		<h1 class="page-title">Order Cart</h1>
-		<button @onclick='() => _orderDetailsDialogVisible = true' class="header-action-btn" disabled="@_isSaving">
-			📄 Details
-		</button>
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading sale page...</p>
 	</div>
+}
+else
+{
+	<div class="order-cart-container">
+		<!-- Header -->
+		<div class="page-header">
+			<button @onclick='() => NavManager.NavigateTo("/Order")' class="back-button" disabled="@_isSaving">
+				←
+			</button>
+			<h1 class="page-title">Order Cart</h1>
+			<button @onclick='() => _orderDetailsDialogVisible = true' class="header-action-btn" disabled="@_isSaving">
+				📄 Details
+			</button>
+		</div>
 
-	<!-- Main Content -->
-	<div class="main-content">
-		@if (_cart.Any())
-		{
-			<div class="cart-card">
-				<div class="card-header">
-					<p class="item-count">@_cart.Sum(x => x.Quantity) items</p>
-				</div>
+		<!-- Main Content -->
+		<div class="main-content">
+			@if (_cart.Any())
+			{
+				<div class="cart-card">
+					<div class="card-header">
+						<p class="item-count">@_cart.Sum(x => x.Quantity) items</p>
+					</div>
 
-				<div class="cart-grid-container">
-					<SfGrid ID="_sfGrid"
-							@ref="_sfGrid"
-							EnableAdaptiveUI="true"
-							DataSource="_cart"
-							AllowPaging="true"
-							AllowTextWrap=true
-							AllowSorting="false"
-							Height="auto">
+					<div class="cart-grid-container">
+						<SfGrid ID="_sfGrid"
+								@ref="_sfGrid"
+								EnableAdaptiveUI="true"
+								DataSource="_cart"
+								AllowPaging="true"
+								AllowTextWrap=true
+								AllowSorting="false"
+								Height="auto">
 
-						<GridPageSettings PageSize="4" />
+							<GridPageSettings PageSize="4" />
 
-						<GridColumns>
-							<GridColumn Field="@nameof(OrderProductCartModel.ProductName)" HeaderText="Product" Width="50%" />
-							<GridColumn Field="@nameof(OrderProductCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
-								<Template>
-									@{
-										var item = (context as OrderProductCartModel);
-									}
-									@if (item is not null)
-									{
-										<div class="quantity-section">
-											<div class="quantity-controls">
-												<div class="quantity-input-wrapper">
-													<SfNumericTextBox TValue="decimal"
-																	  Value="@item.Quantity"
-																	  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
-																	  Min="0"
-																	  Step="1"
-																	  Format="N0"
-																	  Width="100%"
-																	  CssClass="quantity-input"
-																	  Enabled="@(!_isSaving)" />
+							<GridColumns>
+								<GridColumn Field="@nameof(OrderProductCartModel.ProductName)" HeaderText="Product" Width="50%" />
+								<GridColumn Field="@nameof(OrderProductCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
+									<Template>
+										@{
+											var item = (context as OrderProductCartModel);
+										}
+										@if (item is not null)
+										{
+											<div class="quantity-section">
+												<div class="quantity-controls">
+													<div class="quantity-input-wrapper">
+														<SfNumericTextBox TValue="decimal"
+																		  Value="@item.Quantity"
+																		  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
+																		  Min="0"
+																		  Step="1"
+																		  Format="N0"
+																		  Width="100%"
+																		  CssClass="quantity-input"
+																		  Enabled="@(!_isSaving)" />
+													</div>
 												</div>
 											</div>
-										</div>
-									}
-								</Template>
-							</GridColumn>
-						</GridColumns>
-					</SfGrid>
+										}
+									</Template>
+								</GridColumn>
+							</GridColumns>
+						</SfGrid>
+					</div>
 				</div>
-			</div>
-		}
-		else
+			}
+			else
+			{
+				<div class="empty-cart">
+					<div class="empty-icon">🛒</div>
+					<h3>Your cart is empty</h3>
+					<p>Add some items to your cart to continue</p>
+					<button @onclick='() => NavManager.NavigateTo("/Order")' class="continue-shopping-btn" disabled="@_isSaving">
+						Continue Shopping
+					</button>
+				</div>
+			}
+		</div>
+
+		<!-- Sticky Action Buttons - Only show when cart has items -->
+		@if (_cart.Any())
 		{
-			<div class="empty-cart">
-				<div class="empty-icon">🛒</div>
-				<h3>Your cart is empty</h3>
-				<p>Add some items to your cart to continue</p>
-				<button @onclick='() => NavManager.NavigateTo("/Order")' class="continue-shopping-btn" disabled="@_isSaving">
-					Continue Shopping
-				</button>
+			<div class="action-buttons-footer">
+				<div class="action-buttons">
+					<button @onclick="ClearCart" class="clear-button" disabled="@_isSaving">
+						🗑️ Clear Cart
+					</button>
+					<button @onclick="() => _orderConfirmationDialogVisible = true" class="confirm-button" disabled="@_isSaving">
+						✓ Confirm Order
+					</button>
+				</div>
 			</div>
 		}
 	</div>
 
-	<!-- Sticky Action Buttons - Only show when cart has items -->
-	@if (_cart.Any())
-	{
-		<div class="action-buttons-footer">
-			<div class="action-buttons">
-				<button @onclick="ClearCart" class="clear-button" disabled="@_isSaving">
-					🗑️ Clear Cart
-				</button>
-				<button @onclick="() => _orderConfirmationDialogVisible = true" class="confirm-button" disabled="@_isSaving">
-					✓ Confirm Order
-				</button>
-			</div>
-		</div>
-	}
-</div>
-
-<!-- Validation Error Dialog -->
-<SfDialog ID="_sfValidationErrorDialog"
-		  @ref="_sfValidationErrorDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="false"
-		  EnableResize="false"
-		  @bind-Visible="_validationErrorDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header error-header">
-				<span class="error-icon">❌</span>
-				<span>Validation Errors</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content error-content">
-				<div class="error-message">
-					<h3>Please fix the following errors before proceeding:</h3>
-					<p>Review and correct the issues listed below to continue with your order.</p>
+	<!-- Validation Error Dialog -->
+	<SfDialog ID="_sfValidationErrorDialog"
+			  @ref="_sfValidationErrorDialog"
+			  Width="500px"
+			  Height="auto"
+			  AllowDragging="false"
+			  EnableResize="false"
+			  @bind-Visible="_validationErrorDialogVisible"
+			  IsModal="true">
+		<DialogPositionData X="Center" Y="Center" />
+		<DialogTemplates>
+			<Header>
+				<div class="dialog-header error-header">
+					<span class="error-icon">❌</span>
+					<span>Validation Errors</span>
 				</div>
+			</Header>
+			<Content>
+				<div class="dialog-content error-content">
+					<div class="error-message">
+						<h3>Please fix the following errors before proceeding:</h3>
+						<p>Review and correct the issues listed below to continue with your order.</p>
+					</div>
 
-				<div class="error-list">
-					@foreach (var error in _validationErrors)
-					{
-						<div class="error-item">
-							<div class="error-item-icon">⚠️</div>
-							<div class="error-item-content">
-								<div class="error-item-title">@error.Field</div>
-								<div class="error-item-message">@error.Message</div>
+					<div class="error-list">
+						@foreach (var error in _validationErrors)
+						{
+							<div class="error-item">
+								<div class="error-item-icon">⚠️</div>
+								<div class="error-item-content">
+									<div class="error-item-title">@error.Field</div>
+									<div class="error-item-message">@error.Message</div>
+								</div>
 							</div>
+						}
+					</div>
+
+					@if (_validationErrors.Count > 1)
+					{
+						<div class="error-summary">
+							<span class="error-count">@_validationErrors.Count errors found</span>
 						</div>
 					}
 				</div>
-
-				@if (_validationErrors.Count > 1)
-				{
-					<div class="error-summary">
-						<span class="error-count">@_validationErrors.Count errors found</span>
-					</div>
-				}
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer error-footer">
-				<SfButton Content="Fix Issues" OnClick="() => _validationErrorDialogVisible = false" CssClass="dialog-button error-fix-button" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Order Details Dialog -->
-<SfDialog ID="_sfOrderDetailsDialog"
-		  @ref="_sfOrderDetailsDialog"
-		  Width="500px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_orderDetailsDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span>Order Details</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				<div class="form-group">
-					<label>Order Number</label>
-					<SfTextBox Value="@_order.OrderNo"
-							   Placeholder="Order Number"
-							   Readonly=true
-							   CssClass="form-control" />
+			</Content>
+			<FooterTemplate>
+				<div class="dialog-footer error-footer">
+					<SfButton Content="Fix Issues" OnClick="() => _validationErrorDialogVisible = false" CssClass="dialog-button error-fix-button" />
 				</div>
+			</FooterTemplate>
+		</DialogTemplates>
+	</SfDialog>
 
-				<div class="form-group">
-					<label>Order Date</label>
-					<SfDatePicker @bind-Value="_order.OrderDateTime"
-								  Placeholder="Select Order Date"
-								  CssClass="form-control"
-								  Enabled="@(!_isSaving)" />
+	<!-- Order Details Dialog -->
+	<SfDialog ID="_sfOrderDetailsDialog"
+			  @ref="_sfOrderDetailsDialog"
+			  Width="500px"
+			  Height="auto"
+			  AllowDragging="true"
+			  EnableResize="false"
+			  @bind-Visible="_orderDetailsDialogVisible"
+			  IsModal="true">
+		<DialogPositionData X="Center" Y="Center" />
+		<DialogTemplates>
+			<Header>
+				<div class="dialog-header">
+					<span>Order Details</span>
 				</div>
-
-				@if (_user.Admin && _userLocation.MainLocation)
-				{
+			</Header>
+			<Content>
+				<div class="dialog-content">
 					<div class="form-group">
-						<label>Outlet / Franchise</label>
-						<SfComboBox TValue="int"
-									TItem="LocationModel"
-									Placeholder="Select a Outlet / Franchise"
-									DataSource="_locations"
-									CssClass="form-control"
-									@bind-Value="_order.LocationId"
-									Enabled="@(!_isSaving)">
-							<ComboBoxFieldSettings Value="Id" Text="Name" />
-						</SfComboBox>
+						<label>Order Number</label>
+						<SfTextBox Value="@_order.OrderNo"
+								   Placeholder="Order Number"
+								   Readonly=true
+								   CssClass="form-control" />
 					</div>
-				}
 
-				<div class="form-group full-width">
-					<label>Remarks</label>
-					<SfTextBox @bind-Value="_order.Remarks"
-							   Placeholder="Add remarks (optional)"
-							   Multiline="true"
-							   CssClass="form-control"
-							   Enabled="@(!_isSaving)" />
-				</div>
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" Disabled="@_isSaving" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Order Confirmation Dialog -->
-<SfDialog ID="_sfOrderConfirmationDialog"
-		  @ref="_sfOrderConfirmationDialog"
-		  Width="450px"
-		  Height="auto"
-		  AllowDragging="false"
-		  EnableResize="false"
-		  @bind-Visible="_orderConfirmationDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header confirmation-header">
-				<span class="confirmation-icon">⚠️</span>
-				<span>Confirm Order</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content confirmation-content">
-				<div class="confirmation-message">
-					<h3>Are you sure you want to place this order?</h3>
-					<p>This action cannot be undone. Please review your order before confirming.</p>
-				</div>
-
-				<div class="order-summary">
-					<div class="summary-item">
-						<span class="summary-label">Total Items:</span>
-						<span class="summary-value">@_cart.Sum(x => x.Quantity)</span>
+					<div class="form-group">
+						<label>Order Date</label>
+						<SfDatePicker @bind-Value="_order.OrderDateTime"
+									  Placeholder="Select Order Date"
+									  CssClass="form-control"
+									  Enabled="@(!_isSaving)" />
 					</div>
-					<div class="summary-item">
-						<span class="summary-label">Order Date:</span>
-						<span class="summary-value">@_order.OrderDateTime.ToShortDateString()</span>
+
+					@if (_user.Admin && _userLocation.MainLocation)
+					{
+						<div class="form-group">
+							<label>Outlet / Franchise</label>
+							<SfComboBox TValue="int"
+										TItem="LocationModel"
+										Placeholder="Select a Outlet / Franchise"
+										DataSource="_locations"
+										CssClass="form-control"
+										@bind-Value="_order.LocationId"
+										Enabled="@(!_isSaving)">
+								<ComboBoxFieldSettings Value="Id" Text="Name" />
+							</SfComboBox>
+						</div>
+					}
+
+					<div class="form-group full-width">
+						<label>Remarks</label>
+						<SfTextBox @bind-Value="_order.Remarks"
+								   Placeholder="Add remarks (optional)"
+								   Multiline="true"
+								   CssClass="form-control"
+								   Enabled="@(!_isSaving)" />
 					</div>
 				</div>
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer confirmation-footer">
-				<SfButton Content="No, Cancel" OnClick="() => _orderConfirmationDialogVisible = false" CssClass="dialog-button cancel-button" Disabled="@_isSaving" />
-				<SfButton Content="@(_isSaving ? "⏳ Saving Order..." : "Yes, Place Order")" OnClick="SaveOrder" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
+			</Content>
+			<FooterTemplate>
+				<div class="dialog-footer">
+					<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" Disabled="@_isSaving" />
+				</div>
+			</FooterTemplate>
+		</DialogTemplates>
+	</SfDialog>
+
+	<!-- Order Confirmation Dialog -->
+	<SfDialog ID="_sfOrderConfirmationDialog"
+			  @ref="_sfOrderConfirmationDialog"
+			  Width="450px"
+			  Height="auto"
+			  AllowDragging="false"
+			  EnableResize="false"
+			  @bind-Visible="_orderConfirmationDialogVisible"
+			  IsModal="true">
+		<DialogPositionData X="Center" Y="Center" />
+		<DialogTemplates>
+			<Header>
+				<div class="dialog-header confirmation-header">
+					<span class="confirmation-icon">⚠️</span>
+					<span>Confirm Order</span>
+				</div>
+			</Header>
+			<Content>
+				<div class="dialog-content confirmation-content">
+					<div class="confirmation-message">
+						<h3>Are you sure you want to place this order?</h3>
+						<p>This action cannot be undone. Please review your order before confirming.</p>
+					</div>
+
+					<div class="order-summary">
+						<div class="summary-item">
+							<span class="summary-label">Total Items:</span>
+							<span class="summary-value">@_cart.Sum(x => x.Quantity)</span>
+						</div>
+						<div class="summary-item">
+							<span class="summary-label">Order Date:</span>
+							<span class="summary-value">@_order.OrderDateTime.ToShortDateString()</span>
+						</div>
+					</div>
+				</div>
+			</Content>
+			<FooterTemplate>
+				<div class="dialog-footer confirmation-footer">
+					<SfButton Content="No, Cancel" OnClick="() => _orderConfirmationDialogVisible = false" CssClass="dialog-button cancel-button" Disabled="@_isSaving" />
+					<SfButton Content="@(_isSaving ? "⏳ Saving Order..." : "Yes, Place Order")" OnClick="SaveOrder" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
+				</div>
+			</FooterTemplate>
+		</DialogTemplates>
+	</SfDialog>
+}
 
 <style>
 	:root {
@@ -277,6 +291,7 @@
 		--error-color: #dc3545;
 		--error-bg: #f8d7da;
 		--error-border: #f5c6cb;
+		--info-color: #17a2b8;
 	}
 
 	.order-cart-container {
@@ -284,6 +299,64 @@
 		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
 		display: flex;
 		flex-direction: column;
+	}
+
+	/* Loading Animation - Add this to your existing styles */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--info-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--text-dark);
+		font-size: 16px;
+		margin-top: 10px;
+		font-weight: 500;
+	}
+
+	/* Animation keyframes */
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
 	}
 
 	/* Header */
