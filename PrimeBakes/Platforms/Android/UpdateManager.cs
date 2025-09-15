@@ -21,17 +21,34 @@ public static class AadiSoftUpdater
 		return await client.GetStringAsync(fileUrl);
 	}
 
-	public static async Task UpdateApp(string githubRepoOwner, string githubRepoName, string setupAPKName)
+	public static async Task UpdateApp(string githubRepoOwner, string githubRepoName, string setupAPKName, IProgress<int> progress = null)
 	{
 		var url = $"https://github.com/{githubRepoOwner}/{githubRepoName}/releases/latest/download/{setupAPKName}.apk";
 		var filePath = Path.Combine(Application.Context.GetExternalFilesDir(null).AbsolutePath, $"{setupAPKName}.apk");
 
-		using (HttpClient client = new())
-		using (var response = await client.GetAsync(url))
-		await using (var stream = await response.Content.ReadAsStreamAsync())
-		await using (var fileStream = new FileStream(filePath, FileMode.Create))
+		using HttpClient client = new();
+		using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+		response.EnsureSuccessStatusCode();
+
+		var totalBytes = response.Content.Headers.ContentLength ?? 0;
+		var downloadedBytes = 0L;
+
+		await using var stream = await response.Content.ReadAsStreamAsync();
+		await using var fileStream = new FileStream(filePath, FileMode.Create);
+
+		var buffer = new byte[8192];
+		int bytesRead;
+
+		while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
 		{
-			await stream.CopyToAsync(fileStream);
+			await fileStream.WriteAsync(buffer, 0, bytesRead);
+			downloadedBytes += bytesRead;
+
+			if (totalBytes > 0 && progress != null)
+			{
+				var percentage = (int)((downloadedBytes * 100) / totalBytes);
+				progress.Report(percentage);
+			}
 		}
 
 		InstallApk(filePath);
