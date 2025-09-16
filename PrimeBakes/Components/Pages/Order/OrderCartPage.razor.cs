@@ -49,6 +49,7 @@ public partial class OrderCartPage
 	private SfDialog _sfOrderConfirmationDialog;
 	private SfDialog _sfValidationErrorDialog;
 
+	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
 		_user = await AuthService.AuthenticateCurrentUser(NavManager);
@@ -83,7 +84,9 @@ public partial class OrderCartPage
 
 		StateHasChanged();
 	}
+	#endregion
 
+	#region Products
 	private async Task UpdateQuantity(OrderProductCartModel item, decimal newQuantity)
 	{
 		if (item is null || _isSaving)
@@ -119,7 +122,9 @@ public partial class OrderCartPage
 		await _sfGrid.Refresh();
 		StateHasChanged();
 	}
+	#endregion
 
+	#region Saving
 	private bool ValidateForm()
 	{
 		_validationErrors.Clear();
@@ -133,7 +138,7 @@ public partial class OrderCartPage
 		if (!_user.Admin || !_userLocation.MainLocation)
 			_order.LocationId = _user.LocationId;
 
-		if (_order.LocationId <= 0)
+		if (_order.LocationId <= 1)
 		{
 			_validationErrors.Add(new()
 			{
@@ -155,19 +160,6 @@ public partial class OrderCartPage
 
 		StateHasChanged();
 		return true;
-	}
-
-	private async Task InsertOrderDetails()
-	{
-		foreach (var cartItem in _cart)
-			await OrderData.InsertOrderDetail(new()
-			{
-				Id = 0,
-				OrderId = _order.Id,
-				ProductId = cartItem.ProductId,
-				Quantity = cartItem.Quantity,
-				Status = true
-			});
 	}
 
 	private async Task SaveOrder()
@@ -229,6 +221,19 @@ public partial class OrderCartPage
 		}
 	}
 
+	private async Task InsertOrderDetails()
+	{
+		foreach (var cartItem in _cart)
+			await OrderData.InsertOrderDetail(new()
+			{
+				Id = 0,
+				OrderId = _order.Id,
+				ProductId = cartItem.ProductId,
+				Quantity = cartItem.Quantity,
+				Status = true
+			});
+	}
+
 	private void DeleteCart()
 	{
 		_cart.Clear();
@@ -269,4 +274,5 @@ public partial class OrderCartPage
 		await LocalNotificationCenter.Current.Show(request);
 	}
 #endif
+	#endregion
 }

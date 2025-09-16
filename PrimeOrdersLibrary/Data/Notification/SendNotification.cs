@@ -2,28 +2,23 @@
 
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Order;
+using PrimeOrdersLibrary.Data.Sale;
+using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 namespace PrimeOrdersLibrary.Data.Notification;
 
 public static class SendNotification
 {
-	public static async Task SendOrderNotificationMainLocationAdmin(int orderId)
+	private static async Task SendNotificationToAPI(List<UserModel> users, string title, string text)
 	{
-		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
-
-		// Change to Main Location Admins instead of LocationId = 1
-		users = [.. users.Where(u => u.Admin && u.LocationId == 1)];
-
-		var order = await OrderData.LoadOrderOverviewByOrderId(orderId);
-
 		string endpoint = $"https://primebakesnotificationapi.azurewebsites.net/api/notifications/requests";
 		using var httpClient = new HttpClient();
 		httpClient.DefaultRequestHeaders.Add("apikey", Secrets.NotificationAPIKey);
 
 		var notificationPayload = new
 		{
-			Title = $"New Order Placed by {order.LocationName}",
-			Text = $"Order No: {order.OrderNo} | Total Items: {order.TotalProducts} | Total Qty: {order.TotalQuantity} | Location: {order.LocationName} | User: {order.UserName} | Date: {order.OrderDateTime:dd/MM/yy hh:mm tt} | Remarks: {order.Remarks}",
+			Title = title,
+			Text = text,
 			Action = "action_a",
 			Tags = users.Select(u => u.Id.ToString()).ToArray(),
 		};
@@ -36,5 +31,35 @@ public static class SendNotification
 
 		var content = new StringContent(jsonPayload, System.Text.Encoding.UTF8, "application/json");
 		var response = await httpClient.PostAsync(endpoint, content);
+	}
+
+	public static async Task SendOrderNotificationMainLocationAdmin(int orderId)
+	{
+		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
+		// Change to Main Location Admins instead of LocationId = 1
+		users = [.. users.Where(u => u.Admin && u.LocationId == 1)];
+
+		var order = await OrderData.LoadOrderOverviewByOrderId(orderId);
+		var title = $"New Order Placed by {order.LocationName}";
+		var text = $"Order No: {order.OrderNo} | Total Items: {order.TotalProducts} | Total Qty: {order.TotalQuantity} | Location: {order.LocationName} | User: {order.UserName} | Date: {order.OrderDateTime:dd/MM/yy hh:mm tt} | Remarks: {order.Remarks}";
+
+		await SendNotificationToAPI(users, title, text);
+	}
+
+	public static async Task SendSaleNotificationPartyAdmin(int saleId)
+	{
+		var sale = await SaleData.LoadSaleOverviewBySaleId(saleId);
+		var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
+
+		if (party.LocationId is null || party.LocationId <= 0)
+			return;
+
+		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
+		users = [.. users.Where(u => u.Admin && u.LocationId == party.LocationId)];
+
+		var title = $"New Sale Created for {party.Name}";
+		var text = $"Sale No: {sale.BillNo} | Party: {party.Name} | Total Items: {sale.TotalProducts} | Total Qty: {sale.TotalQuantity} | Total Amount: {sale.Total.FormatIndianCurrency()} | User: {sale.UserName} | Date: {sale.SaleDateTime:dd/MM/yy hh:mm tt} | Remarks: {sale.Remarks} | Order No: {sale.OrderNo}";
+
+		await SendNotificationToAPI(users, title, text);
 	}
 }

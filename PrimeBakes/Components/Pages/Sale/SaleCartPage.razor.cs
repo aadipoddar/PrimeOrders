@@ -10,6 +10,7 @@ using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Data.Common;
 using PrimeOrdersLibrary.Data.Inventory;
+using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.Data.Sale;
 using PrimeOrdersLibrary.DataAccess;
@@ -383,6 +384,66 @@ public partial class SaleCartPage
 			return false;
 		}
 
+		if (_sale.PartyId is not null && _sale.PartyId > 0)
+		{
+			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, _sale.PartyId.Value);
+
+			if (party is null || !party.Status)
+			{
+				_validationErrors.Add(new()
+				{
+					Field = "Party",
+					Message = "Please select a valid party for the order."
+				});
+				return false;
+			}
+
+			if (_sale.PartyId is not null && _sale.LocationId > 0)
+			{
+				var partyLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, party.LocationId.Value);
+
+				if (partyLocation is null || !partyLocation.Status || party.LocationId <= 1)
+				{
+					_validationErrors.Add(new()
+					{
+						Field = "Party",
+						Message = "The selected party does not have a valid location assigned. Please contact the administrator."
+					});
+					return false;
+				}
+			}
+		}
+
+		if (_sale.DiscPercent < 0 || _sale.DiscPercent > 100)
+		{
+			_validationErrors.Add(new()
+			{
+				Field = "Discount",
+				Message = "Discount percent must be between 0 and 100."
+			});
+			return false;
+		}
+
+		if (_sale.Cash < 0 || _sale.Card < 0 || _sale.UPI < 0 || _sale.Credit < 0)
+		{
+			_validationErrors.Add(new()
+			{
+				Field = "Payment",
+				Message = "Payment amounts cannot be negative."
+			});
+			return false;
+		}
+
+		if (_sale.Cash + _sale.Card + _sale.UPI + _sale.Credit != _total)
+		{
+			_validationErrors.Add(new()
+			{
+				Field = "Payment",
+				Message = "Total payment amount must equal the total sale amount."
+			});
+			return false;
+		}
+
 		return true;
 	}
 
@@ -434,7 +495,11 @@ public partial class SaleCartPage
 			await PrintSaleBill();
 
 			DeleteCartSale();
+			await SendNotification.SendSaleNotificationPartyAdmin(_sale.Id);
+
+#if ANDROID
 			await CreateNotification();
+#endif
 
 			NavManager.NavigateTo("/Sale/Confirmed", true);
 		}
@@ -626,9 +691,9 @@ public partial class SaleCartPage
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale));
 	}
 
+#if ANDROID
 	private async Task CreateNotification()
 	{
-#if ANDROID
 		if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
 			await LocalNotificationCenter.Current.RequestNotificationPermission();
 
@@ -645,7 +710,7 @@ public partial class SaleCartPage
 		};
 
 		await LocalNotificationCenter.Current.Show(request);
-#endif
 	}
+#endif
 	#endregion
 }
