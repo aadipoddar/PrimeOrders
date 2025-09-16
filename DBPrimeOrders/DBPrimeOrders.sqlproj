@@ -227,6 +227,7 @@
     <Build Include="StoredProcedures\LoadData\Common\Load_Customer_By_Number.sql" />
     <Build Include="Tables\Common\Customer.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_Customer.sql" />
+    <Build Include="StoredProcedures\LoadData\Order\Load_OrderOverview_By_OrderId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

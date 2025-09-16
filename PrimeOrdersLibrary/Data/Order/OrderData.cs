@@ -22,4 +22,7 @@ public static class OrderData
 
 	public static async Task<OrderModel> LoadOrderBySale(int SaleId) =>
 		(await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderBySale, new { SaleId })).FirstOrDefault();
+
+	public static async Task<OrderOverviewModel> LoadOrderOverviewByOrderId(int OrderId) =>
+		(await SqlDataAccess.LoadData<OrderOverviewModel, dynamic>(StoredProcedureNames.LoadOrderOverviewByOrderId, new { OrderId })).FirstOrDefault();
 }

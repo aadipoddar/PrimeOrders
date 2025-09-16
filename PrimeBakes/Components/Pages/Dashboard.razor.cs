@@ -37,6 +37,11 @@ public partial class Dashboard
 		"Fun fact: Automatic updates ensure you always have the latest features! 🆕"
 	];
 
+	readonly INotificationRegistrationService _notificationRegistrationService;
+
+	public Dashboard(INotificationRegistrationService service) =>
+		_notificationRegistrationService = service;
+
 	protected override async Task OnInitializedAsync()
 	{
 #if ANDROID
@@ -93,6 +98,12 @@ public partial class Dashboard
 #endif
 
 		_user = await AuthService.AuthenticateCurrentUser(NavManager);
+
+#if ANDROID
+		await Permissions.RequestAsync<Permissions.PostNotifications>();
+		await _notificationRegistrationService.RegisterDeviceAsync(_user.Id.ToString());
+#endif
+
 		_isLoading = false;
 	}
 
@@ -110,13 +121,15 @@ public partial class Dashboard
 		await OnInitializedAsync();
 	}
 
-	private void Logout()
+	private async Task Logout()
 	{
 		SecureStorage.Default.RemoveAll();
 
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart));
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale));
+
+		await _notificationRegistrationService.DeregisterDeviceAsync();
 
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));

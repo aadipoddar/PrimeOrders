@@ -7,6 +7,7 @@ using Plugin.LocalNotification;
 using PrimeBakes.Services;
 
 using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Exporting.Order;
@@ -37,7 +38,6 @@ public partial class OrderCartPage
 	private readonly OrderModel _order = new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "" };
 	private readonly List<ValidationError> _validationErrors = [];
 
-	// Validation Error Model
 	public class ValidationError
 	{
 		public string Field { get; set; } = string.Empty;
@@ -203,36 +203,12 @@ public partial class OrderCartPage
 			}
 
 			await InsertOrderDetails();
-
-			_cart.Clear();
-
-			var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart);
-			if (File.Exists(fullPath))
-				File.Delete(fullPath);
-
+			DeleteCart();
+			await PrintInvoice();
+			await SendNotification.SendOrderNotificationMainLocationAdmin(_order.Id);
 #if ANDROID
-			if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
-				await LocalNotificationCenter.Current.RequestNotificationPermission();
-
-			var request = new NotificationRequest
-			{
-				NotificationId = _order.Id,
-				Title = "Order Placed",
-				Subtitle = "Order Confirmation",
-				Description = $"Your order #{_order.OrderNo} has been successfully placed. {_order.Remarks}",
-				Schedule = new NotificationRequestSchedule
-				{
-					NotifyTime = DateTime.Now.AddSeconds(5)
-				}
-			};
-
-			await LocalNotificationCenter.Current.Show(request);
+			await SendLocalNotification();
 #endif
-
-			var ms = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
-			var fileName = $"Order_Bill_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-			SaveService saveService = new();
-			var filePath = saveService.SaveAndView(fileName, "application/pdf", ms);
 
 			NavManager.NavigateTo("/Order/Confirmed", true);
 		}
@@ -252,4 +228,45 @@ public partial class OrderCartPage
 			StateHasChanged();
 		}
 	}
+
+	private void DeleteCart()
+	{
+		_cart.Clear();
+
+		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart);
+		if (File.Exists(fullPath))
+			File.Delete(fullPath);
+	}
+
+	private async Task PrintInvoice()
+	{
+		var ms = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
+		var fileName = $"Order_Bill_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		SaveService saveService = new();
+		saveService.SaveAndView(fileName, "application/pdf", ms);
+	}
+
+#if ANDROID
+	private async Task SendLocalNotification()
+	{
+		if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+			await LocalNotificationCenter.Current.RequestNotificationPermission();
+
+		var order = await OrderData.LoadOrderOverviewByOrderId(_order.Id);
+
+		var request = new NotificationRequest
+		{
+			NotificationId = _order.Id,
+			Title = "Order Placed",
+			Subtitle = $"{order.OrderNo}",
+			Description = $"Your order #{order.OrderNo} has been successfully placed | Total Items: {order.TotalProducts} | Total Qty: {order.TotalQuantity} | Location: {order.LocationName} | User: {order.UserName} | Date: {order.OrderDateTime:dd/MM/yy hh:mm tt} | Remarks: {order.Remarks}",
+			Schedule = new NotificationRequestSchedule
+			{
+				NotifyTime = DateTime.Now.AddSeconds(5)
+			}
+		};
+
+		await LocalNotificationCenter.Current.Show(request);
+	}
+#endif
 }

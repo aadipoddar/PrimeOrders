@@ -1,3 +1,4 @@
+using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Exporting.Order;
 
 using Syncfusion.Blazor.Grids;
@@ -408,6 +409,7 @@ public partial class OrderPage
 		}
 
 		await InsertOrderDetails();
+		await SendNotification.SendOrderNotificationMainLocationAdmin(_order.Id);
 
 		return true;
 	}

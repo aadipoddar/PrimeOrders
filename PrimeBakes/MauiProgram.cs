@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿#if DEBUG
+using Microsoft.Extensions.Logging;
+#endif
+
+using PrimeBakes.Services;
 
 using PrimeOrdersLibrary.DataAccess;
 
@@ -16,6 +20,8 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.RegisterServices()
+			.RegisterViews()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");
@@ -33,5 +39,23 @@ public static class MauiProgram
 #endif
 
 		return builder.Build();
+	}
+
+	public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
+	{
+#if ANDROID
+		builder.Services.AddSingleton<IDeviceInstallationService, Platforms.Android.DeviceInstallationService>();
+#endif
+
+		builder.Services.AddSingleton<IPushDemoNotificationActionService, PushDemoNotificationActionService>();
+		builder.Services.AddSingleton<INotificationRegistrationService>(new NotificationRegistrationService(Config.BackendServiceEndpoint, Config.ApiKey));
+
+		return builder;
+	}
+
+	public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
+	{
+		builder.Services.AddSingleton<MainPage>();
+		return builder;
 	}
 }
