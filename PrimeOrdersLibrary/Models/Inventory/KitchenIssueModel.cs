@@ -9,6 +9,7 @@ public class KitchenIssueModel
 	public string TransactionNo { get; set; }
 	public DateTime IssueDate { get; set; }
 	public string Remarks { get; set; }
+	public DateTime CreatedAt { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -33,7 +34,7 @@ public class KitchenIssueOverviewModel
 	public string Remarks { get; set; }
 	public int TotalProducts { get; set; }
 	public decimal TotalQuantity { get; set; }
-	public bool Status { get; set; }
+	public DateTime CreatedAt { get; set; }
 }
 
 public class KitchenIssueRawMaterialCartModel

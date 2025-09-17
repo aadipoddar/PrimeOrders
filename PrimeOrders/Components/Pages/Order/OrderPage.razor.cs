@@ -1,4 +1,3 @@
-using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Exporting.Order;
 
 using Syncfusion.Blazor.Grids;
@@ -41,6 +40,7 @@ public partial class OrderPage
 		OrderDateTime = DateTime.Now,
 		Remarks = "",
 		SaleId = null,
+		CreatedAt = DateTime.Now,
 		Status = true
 	};
 
@@ -82,6 +82,8 @@ public partial class OrderPage
 	{
 		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 		_locations.Remove(_locations.FirstOrDefault(c => c.Id == 1));
+
+		_order.UserId = _user.Id;
 
 		if (_userLocation.MainLocation)
 			_order.LocationId = _locations.FirstOrDefault()?.Id ?? 0;
@@ -362,20 +364,6 @@ public partial class OrderPage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
-		_order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_order.OrderDateTime)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
-
-		_order.UserId = _user.Id;
-
-		StateHasChanged();
-
-		if (OrderId is null)
-			_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
-
-		if (!_user.Admin || !_userLocation.MainLocation)
-			_order.LocationId = _user.LocationId;
-
 		if (_order.LocationId <= 0)
 		{
 			_sfErrorToast.Content = "Please Select a Location for the Order";
@@ -393,51 +381,6 @@ public partial class OrderPage
 		return true;
 	}
 
-	private async Task<bool> SaveOrder()
-	{
-		if (!await ValidateForm())
-			return false;
-
-		StateHasChanged();
-
-		_order.Id = await OrderData.InsertOrder(_order);
-		if (_order.Id <= 0)
-		{
-			_sfErrorToast.Content = "Failed to save the order. Please try again.";
-			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
-			return false;
-		}
-
-		await InsertOrderDetails();
-		await SendNotification.SendOrderNotificationMainLocationAdmin(_order.Id);
-
-		return true;
-	}
-
-	private async Task InsertOrderDetails()
-	{
-		if (OrderId.HasValue && OrderId > 0)
-		{
-			var existingOrderDetails = await OrderData.LoadOrderDetailByOrder(_order.Id);
-			foreach (var existingDetail in existingOrderDetails)
-			{
-				existingDetail.Status = false;
-				await OrderData.InsertOrderDetail(existingDetail);
-			}
-		}
-
-		foreach (var cartItem in _orderProductCarts)
-			await OrderData.InsertOrderDetail(new()
-			{
-				Id = 0,
-				OrderId = _order.Id,
-				ProductId = cartItem.ProductId,
-				Quantity = cartItem.Quantity,
-				Status = true
-			});
-	}
-
 	private async Task ConfirmOrderSubmission()
 	{
 		if (_isSaving)
@@ -448,13 +391,19 @@ public partial class OrderPage
 
 		try
 		{
-			if (await SaveOrder())
-			{
-				_sfSuccessToast.Content = "Order saved successfully.";
-				await _sfSuccessToast.ShowAsync();
-			}
+			if (!await ValidateForm())
+				return;
+
+			_order.Id = await OrderData.SaveOrder(_order, _orderProductCarts);
+			_sfSuccessToast.Content = "Order saved successfully.";
+			await _sfSuccessToast.ShowAsync();
 
 			_orderSummaryDialogVisible = false;
+		}
+		catch (Exception ex)
+		{
+			_sfErrorToast.Content = $"Error saving order: {ex.Message}";
+			await _sfErrorToast.ShowAsync();
 		}
 		finally
 		{
@@ -473,14 +422,20 @@ public partial class OrderPage
 
 		try
 		{
-			if (await SaveOrder())
-			{
-				await PrintInvoice();
-				_sfSuccessToast.Content = "Order saved and invoice generated successfully.";
-				await _sfSuccessToast.ShowAsync();
-			}
+			if (!await ValidateForm())
+				return;
+
+			_order.Id = await OrderData.SaveOrder(_order, _orderProductCarts);
+			await PrintInvoice();
+			_sfSuccessToast.Content = "Order saved and invoice generated successfully.";
+			await _sfSuccessToast.ShowAsync();
 
 			_orderSummaryDialogVisible = false;
+		}
+		catch (Exception ex)
+		{
+			_sfErrorToast.Content = $"Error saving order: {ex.Message}";
+			await _sfErrorToast.ShowAsync();
 		}
 		finally
 		{

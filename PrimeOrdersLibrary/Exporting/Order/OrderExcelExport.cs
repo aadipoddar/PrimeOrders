@@ -28,7 +28,9 @@ public static class OrderExcelExport
 			nameof(OrderOverviewModel.TotalProducts),
 			nameof(OrderOverviewModel.TotalQuantity),
 			nameof(OrderOverviewModel.SaleId),
-			nameof(OrderOverviewModel.SaleBillNo)
+			nameof(OrderOverviewModel.SaleBillNo),
+			nameof(OrderOverviewModel.Remarks),
+			nameof(OrderOverviewModel.CreatedAt)
 		];
 
 		// Define custom column settings
@@ -96,6 +98,18 @@ public static class OrderExcelExport
 				DisplayName = "Sale Bill #",
 				Width = 15,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(OrderOverviewModel.Remarks)] = new()
+			{
+				DisplayName = "Remarks",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(OrderOverviewModel.CreatedAt)] = new()
+			{
+				DisplayName = "Created At",
+				Format = "dd-MMM-yyyy hh:mm",
+				Width = 15
 			}
 		};
 

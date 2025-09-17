@@ -128,6 +128,6 @@ public partial class OrderPage
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
 
-		NavManager.NavigateTo("/OrderCart");
+		NavManager.NavigateTo("/Order/Cart");
 	}
 }

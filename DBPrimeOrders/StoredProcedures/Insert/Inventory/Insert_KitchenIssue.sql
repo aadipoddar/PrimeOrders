@@ -6,6 +6,7 @@
 	@TransactionNo VARCHAR(20),
 	@IssueDate DATETIME,
 	@Remarks VARCHAR(250),
+	@CreatedAt DATETIME,
 	@Status BIT
 AS
 BEGIN

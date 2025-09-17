@@ -7,9 +7,7 @@ using Plugin.LocalNotification;
 using PrimeBakes.Services;
 
 using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Data.Inventory;
 using PrimeOrdersLibrary.Data.Inventory.Kitchen;
-using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Exporting.Kitchen;
 using PrimeOrdersLibrary.Models.Common;
@@ -35,7 +33,7 @@ public partial class KitchenIssueCartPage
 	private List<KitchenModel> _kitchens = [];
 	private readonly List<KitchenIssueRawMaterialCartModel> _cart = [];
 
-	private readonly KitchenIssueModel _kitchenIssue = new() { LocationId = 1, IssueDate = DateTime.Now, Id = 0, Status = true, Remarks = "" };
+	private readonly KitchenIssueModel _kitchenIssue = new() { LocationId = 1, IssueDate = DateTime.Now, Id = 0, Status = true, Remarks = "", CreatedAt = DateTime.Now };
 	private readonly List<ValidationError> _validationErrors = [];
 
 	public class ValidationError
@@ -127,13 +125,6 @@ public partial class KitchenIssueCartPage
 	{
 		_validationErrors.Clear();
 
-		_kitchenIssue.IssueDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_kitchenIssue.IssueDate)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
-
-		_kitchenIssue.LocationId = 1;
-		_kitchenIssue.UserId = _user.Id;
-
 		if (_kitchenIssue.KitchenId <= 0)
 		{
 			_validationErrors.Add(new()
@@ -175,26 +166,9 @@ public partial class KitchenIssueCartPage
 				return;
 			}
 
-			_kitchenIssue.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(_kitchenIssue);
-			_kitchenIssue.Id = await KitchenIssueData.InsertKitchenIssue(_kitchenIssue);
-			if (_kitchenIssue.Id <= 0)
-			{
-				_validationErrors.Add(new()
-				{
-					Field = "Kitchen Issue",
-					Message = "Failed to save the Kitchen Issue. Please try again."
-				});
-
-				_validationErrorDialogVisible = true;
-				_orderConfirmationDialogVisible = false;
-				return;
-			}
-
-			await InsertKitchenIssueDetails();
-			await InsertStock();
+			_kitchenIssue.Id = await KitchenIssueData.SaveKitchenIssue(_kitchenIssue, _cart);
 			DeleteCart();
 			await PrintInvoice();
-			await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(_kitchenIssue.Id);
 #if ANDROID
 			await SendLocalNotification();
 #endif
@@ -216,34 +190,6 @@ public partial class KitchenIssueCartPage
 			_isSaving = false;
 			StateHasChanged();
 		}
-	}
-
-	private async Task InsertKitchenIssueDetails()
-	{
-		foreach (var cartItem in _cart)
-			await KitchenIssueData.InsertKitchenIssueDetail(new()
-			{
-				Id = 0,
-				KitchenIssueId = _kitchenIssue.Id,
-				RawMaterialId = cartItem.RawMaterialId,
-				Quantity = cartItem.Quantity,
-				Status = true
-			});
-	}
-
-	private async Task InsertStock()
-	{
-		foreach (var item in _cart)
-			await StockData.InsertRawMaterialStock(new()
-			{
-				Id = 0,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = -item.Quantity,
-				Type = StockType.KitchenIssue.ToString(),
-				TransactionNo = _kitchenIssue.TransactionNo,
-				TransactionDate = DateOnly.FromDateTime(_kitchenIssue.IssueDate),
-				LocationId = _kitchenIssue.LocationId
-			});
 	}
 
 	private void DeleteCart()

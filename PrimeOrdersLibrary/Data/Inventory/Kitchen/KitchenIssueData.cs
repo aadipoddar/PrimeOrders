@@ -1,4 +1,6 @@
-﻿using PrimeOrdersLibrary.Models.Inventory;
+﻿using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Notification;
+using PrimeOrdersLibrary.Models.Inventory;
 
 namespace PrimeOrdersLibrary.Data.Inventory.Kitchen;
 
@@ -21,4 +23,67 @@ public static class KitchenIssueData
 
 	public static async Task<KitchenIssueOverviewModel> LoadKitchenIssueOverviewByKitchenIssueId(int KitchenIssueId) =>
 		(await SqlDataAccess.LoadData<KitchenIssueOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenIssueOverviewByKitchenIssueId, new { KitchenIssueId })).FirstOrDefault();
+
+	public static async Task<int> SaveKitchenIssue(KitchenIssueModel kitchenIssue, List<KitchenIssueRawMaterialCartModel> cart)
+	{
+		bool update = kitchenIssue.Id > 0;
+
+		kitchenIssue.LocationId = 1;
+		kitchenIssue.Status = true;
+		kitchenIssue.IssueDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(kitchenIssue.IssueDate)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
+		kitchenIssue.TransactionNo = update ?
+			kitchenIssue.TransactionNo :
+			await GenerateCodes.GenerateKitchenIssueTransactionNo(kitchenIssue);
+
+		kitchenIssue.Id = await InsertKitchenIssue(kitchenIssue);
+		await SaveKitchenIssueDetail(kitchenIssue, cart, update);
+		await SaveStock(kitchenIssue, cart, update);
+		await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(kitchenIssue.Id);
+
+		return kitchenIssue.Id;
+	}
+
+	private static async Task SaveKitchenIssueDetail(KitchenIssueModel kitchenIssue, List<KitchenIssueRawMaterialCartModel> cart, bool update)
+	{
+		if (update)
+		{
+			var existingKitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(kitchenIssue.Id);
+			foreach (var item in existingKitchenIssueDetails)
+			{
+				item.Status = false;
+				await KitchenIssueData.InsertKitchenIssueDetail(item);
+			}
+		}
+
+		foreach (var item in cart)
+			await KitchenIssueData.InsertKitchenIssueDetail(new()
+			{
+				Id = 0,
+				KitchenIssueId = kitchenIssue.Id,
+				RawMaterialId = item.RawMaterialId,
+				Quantity = item.Quantity,
+				Status = true
+			});
+	}
+
+	private static async Task SaveStock(KitchenIssueModel kitchenIssue, List<KitchenIssueRawMaterialCartModel> cart, bool update)
+	{
+		if (update)
+			await StockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+
+		if (kitchenIssue.Status)
+			foreach (var item in cart)
+				await StockData.InsertRawMaterialStock(new()
+				{
+					Id = 0,
+					RawMaterialId = item.RawMaterialId,
+					Quantity = -item.Quantity,
+					Type = StockType.KitchenIssue.ToString(),
+					TransactionNo = kitchenIssue.TransactionNo,
+					TransactionDate = DateOnly.FromDateTime(kitchenIssue.IssueDate),
+					LocationId = kitchenIssue.LocationId
+				});
+	}
 }

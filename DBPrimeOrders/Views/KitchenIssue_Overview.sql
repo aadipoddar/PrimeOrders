@@ -11,7 +11,9 @@
 		ki.Remarks,
 
 		COUNT(DISTINCT ki.Id) AS TotalProducts,
-		SUM(kid.Quantity) AS TotalQuantity
+		SUM(kid.Quantity) AS TotalQuantity,
+		
+		ki.CreatedAt
 
 	FROM
 		dbo.KitchenIssue ki
@@ -35,4 +37,5 @@
 		ki.IssueDate,
 		ki.UserId,
 		u.Name,
-		ki.Remarks
+		ki.Remarks,
+		ki.CreatedAt

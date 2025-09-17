@@ -9,6 +9,7 @@ public class OrderModel
 	public int UserId { get; set; }
 	public string Remarks { get; set; }
 	public int? SaleId { get; set; }
+	public DateTime CreatedAt { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -44,6 +45,7 @@ public class OrderOverviewModel
 	public int? SaleId { get; set; }
 	public string SaleBillNo { get; set; }
 	public DateTime? SaleDateTime { get; set; }
+	public DateTime CreatedAt { get; set; }
 }
 
 #region Chat and Helper Methods

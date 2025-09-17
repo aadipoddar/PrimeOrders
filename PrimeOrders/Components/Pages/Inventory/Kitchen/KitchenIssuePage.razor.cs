@@ -1,5 +1,4 @@
 using PrimeOrdersLibrary.Data.Inventory.Kitchen;
-using PrimeOrdersLibrary.Data.Notification;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -12,7 +11,6 @@ public partial class KitchenIssuePage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
-	[Inject] public IBrowserNotificationService BrowserNotificationService { get; set; }
 
 	[Parameter] public int? KitchenIssueId { get; set; }
 
@@ -44,7 +42,8 @@ public partial class KitchenIssuePage
 	{
 		IssueDate = DateTime.Now,
 		Status = true,
-		Remarks = ""
+		Remarks = "",
+		CreatedAt = DateTime.Now
 	};
 
 	private List<KitchenModel> _kitchens;
@@ -428,10 +427,6 @@ public partial class KitchenIssuePage
 	#region Saving
 	private async Task<bool> ValidateForm()
 	{
-		_kitchenIssue.IssueDate = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_kitchenIssue.IssueDate)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
-
 		if (_kitchenIssueRawMaterialCarts.Count == 0 || _kitchenIssueRawMaterialCarts is null)
 		{
 			_sfErrorToast.Content = "Please add at least one raw material to the kitchen issue.";
@@ -477,70 +472,20 @@ public partial class KitchenIssuePage
 			if (!await ValidateForm())
 				return;
 
-			_kitchenIssue.Id = await KitchenIssueData.InsertKitchenIssue(_kitchenIssue);
-			if (_kitchenIssue.Id <= 0)
-			{
-				_sfErrorToast.Content = "Failed to save kitchen issue.";
-				await _sfErrorToast.ShowAsync();
-				return;
-			}
-
-			await InsertKitchenIssueDetail();
-			await InsertStock();
-			await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(_kitchenIssue.Id);
-
+			_kitchenIssue.Id = await KitchenIssueData.SaveKitchenIssue(_kitchenIssue, _kitchenIssueRawMaterialCarts);
 			_kitchenIssueSummaryDialogVisible = false;
 			await _sfSuccessToast.ShowAsync();
+		}
+		catch (Exception ex)
+		{
+			_sfErrorToast.Content = $"An error occurred while saving the kitchen issue: {ex.Message}";
+			await _sfErrorToast.ShowAsync();
 		}
 		finally
 		{
 			_isSaving = false;
 			StateHasChanged();
 		}
-	}
-
-	private async Task InsertKitchenIssueDetail()
-	{
-		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
-		{
-			var existingKitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(KitchenIssueId.Value);
-			foreach (var item in existingKitchenIssueDetails)
-			{
-				item.Status = false;
-				await KitchenIssueData.InsertKitchenIssueDetail(item);
-			}
-		}
-
-		foreach (var item in _kitchenIssueRawMaterialCarts)
-			await KitchenIssueData.InsertKitchenIssueDetail(new()
-			{
-				Id = 0,
-				KitchenIssueId = _kitchenIssue.Id,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = item.Quantity,
-				Status = true
-			});
-	}
-
-	private async Task InsertStock()
-	{
-		if (KitchenIssueId.HasValue && KitchenIssueId.Value > 0)
-			await StockData.DeleteRawMaterialStockByTransactionNo(_kitchenIssue.TransactionNo);
-
-		if (!_kitchenIssue.Status)
-			return;
-
-		foreach (var item in _kitchenIssueRawMaterialCarts)
-			await StockData.InsertRawMaterialStock(new()
-			{
-				Id = 0,
-				RawMaterialId = item.RawMaterialId,
-				Quantity = -item.Quantity,
-				Type = StockType.KitchenIssue.ToString(),
-				TransactionNo = _kitchenIssue.TransactionNo,
-				TransactionDate = DateOnly.FromDateTime(_kitchenIssue.IssueDate),
-				LocationId = _kitchenIssue.LocationId
-			});
 	}
 	#endregion
 }

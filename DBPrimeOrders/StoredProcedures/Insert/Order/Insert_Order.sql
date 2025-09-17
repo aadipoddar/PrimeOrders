@@ -6,6 +6,7 @@
 	@UserId INT,
 	@Remarks VARCHAR(250),
 	@SaleId INT = NULL,
+	@CreatedAt DATETIME,
 	@Status BIT
 AS
 BEGIN

@@ -15,7 +15,8 @@
 
 		[o].[SaleId],
 		[s].[BillNo] AS SaleBillNo,
-		[s].[SaleDateTime]
+		[s].[SaleDateTime],
+		[o].[CreatedAt]
 
 	FROM
 		[dbo].[Order] o
@@ -43,4 +44,5 @@
 		[o].[Remarks],
 		[o].[SaleId],
 		[s].[BillNo],
-		[s].[SaleDateTime]
+		[s].[SaleDateTime],
+		[o].[CreatedAt]

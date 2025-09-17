@@ -1,4 +1,7 @@
-﻿namespace PrimeOrdersLibrary.Data.Order;
+﻿using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Notification;
+
+namespace PrimeOrdersLibrary.Data.Order;
 
 public static class OrderData
 {
@@ -25,4 +28,53 @@ public static class OrderData
 
 	public static async Task<OrderOverviewModel> LoadOrderOverviewByOrderId(int OrderId) =>
 		(await SqlDataAccess.LoadData<OrderOverviewModel, dynamic>(StoredProcedureNames.LoadOrderOverviewByOrderId, new { OrderId })).FirstOrDefault();
+
+	public static async Task<int> SaveOrder(OrderModel order, List<OrderProductCartModel> cart)
+	{
+		bool update = order.Id > 0;
+
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, order.UserId);
+		var userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, user.LocationId);
+
+		if (!user.Admin || !userLocation.MainLocation)
+			order.LocationId = user.LocationId;
+
+		order.Status = true;
+		order.CreatedAt = DateTime.Now;
+		order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(order.OrderDateTime)
+			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
+			"India Standard Time");
+		order.OrderNo = update ?
+			order.OrderNo :
+			await GenerateCodes.GenerateOrderBillNo(order);
+
+		order.Id = await InsertOrder(order);
+		await SaveOrderDetail(order, cart, update);
+		await SendNotification.SendOrderNotificationMainLocationAdmin(order.Id);
+
+		return order.Id;
+	}
+
+	private static async Task SaveOrderDetail(OrderModel order, List<OrderProductCartModel> cart, bool update)
+	{
+		if (update)
+		{
+			var existingOrderDetails = await OrderData.LoadOrderDetailByOrder(order.Id);
+			foreach (var existingDetail in existingOrderDetails)
+			{
+				existingDetail.Status = false;
+				await OrderData.InsertOrderDetail(existingDetail);
+			}
+		}
+
+		foreach (var cartItem in cart)
+			await InsertOrderDetail(new()
+			{
+				Id = 0,
+				OrderId = order.Id,
+				ProductId = cartItem.ProductId,
+				Quantity = cartItem.Quantity,
+				Status = true
+			});
+	}
 }

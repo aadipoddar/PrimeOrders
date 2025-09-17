@@ -126,6 +126,7 @@ public partial class Dashboard
 		SecureStorage.Default.RemoveAll();
 
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
+		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.KitchenIssueCart));
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart));
 		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale));
 

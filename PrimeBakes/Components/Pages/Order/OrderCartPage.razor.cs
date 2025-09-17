@@ -7,7 +7,6 @@ using Plugin.LocalNotification;
 using PrimeBakes.Services;
 
 using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Exporting.Order;
@@ -35,7 +34,7 @@ public partial class OrderCartPage
 	private readonly List<OrderProductCartModel> _cart = [];
 
 	private LocationModel _userLocation;
-	private readonly OrderModel _order = new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "" };
+	private readonly OrderModel _order = new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "", CreatedAt = DateTime.Now };
 	private readonly List<ValidationError> _validationErrors = [];
 
 	public class ValidationError
@@ -65,8 +64,8 @@ public partial class OrderCartPage
 		_locations.RemoveAll(c => c.MainLocation);
 
 		_order.LocationId = _user.LocationId == 1 ? _locations.FirstOrDefault().Id : _user.LocationId;
-		_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
 		_order.UserId = _user.Id;
+		_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
 
 		_cart.Clear();
 		var fullPath = Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart);
@@ -129,15 +128,6 @@ public partial class OrderCartPage
 	{
 		_validationErrors.Clear();
 
-		_order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_order.OrderDateTime)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
-
-		_order.UserId = _user.Id;
-
-		if (!_user.Admin || !_userLocation.MainLocation)
-			_order.LocationId = _user.LocationId;
-
 		if (_order.LocationId <= 1)
 		{
 			_validationErrors.Add(new()
@@ -179,25 +169,9 @@ public partial class OrderCartPage
 				return;
 			}
 
-			_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
-			_order.Id = await OrderData.InsertOrder(_order);
-			if (_order.Id <= 0)
-			{
-				_validationErrors.Add(new()
-				{
-					Field = "Order",
-					Message = "Failed to save the order. Please try again."
-				});
-
-				_validationErrorDialogVisible = true;
-				_orderConfirmationDialogVisible = false;
-				return;
-			}
-
-			await InsertOrderDetails();
+			_order.Id = await OrderData.SaveOrder(_order, _cart);
 			DeleteCart();
 			await PrintInvoice();
-			await SendNotification.SendOrderNotificationMainLocationAdmin(_order.Id);
 #if ANDROID
 			await SendLocalNotification();
 #endif
@@ -219,19 +193,6 @@ public partial class OrderCartPage
 			_isSaving = false;
 			StateHasChanged();
 		}
-	}
-
-	private async Task InsertOrderDetails()
-	{
-		foreach (var cartItem in _cart)
-			await OrderData.InsertOrderDetail(new()
-			{
-				Id = 0,
-				OrderId = _order.Id,
-				ProductId = cartItem.ProductId,
-				Quantity = cartItem.Quantity,
-				Status = true
-			});
 	}
 
 	private void DeleteCart()

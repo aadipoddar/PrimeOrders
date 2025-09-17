@@ -48,7 +48,8 @@ public static class KitchenIssueExcelExport
 			nameof(KitchenIssueOverviewModel.UserName),
 			nameof(KitchenIssueOverviewModel.TotalProducts),
 			nameof(KitchenIssueOverviewModel.TotalQuantity),
-			nameof(KitchenIssueOverviewModel.Remarks)
+			nameof(KitchenIssueOverviewModel.Remarks),
+			nameof(KitchenIssueOverviewModel.CreatedAt)
 		];
 
 		// Define custom column settings with professional styling
@@ -122,6 +123,13 @@ public static class KitchenIssueExcelExport
 				Width = 30,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
+			[nameof(KitchenIssueOverviewModel.CreatedAt)] = new()
+			{
+				DisplayName = "Created Date",
+				Format = "dd-MMM-yyyy HH:mm",
+				Width = 15,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			}
 		};
 
 		// Generate title based on kitchen selection if applicable
