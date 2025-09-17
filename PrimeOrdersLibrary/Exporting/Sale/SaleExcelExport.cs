@@ -51,6 +51,7 @@ public static class SaleExcelExport
 					nameof(SaleOverviewModel.OrderNo),
 					nameof(SaleOverviewModel.CustomerName),
 					nameof(SaleOverviewModel.CustomerNumber),
+					nameof(SaleOverviewModel.CreatedAt)
 			];
 
 		// Create a customized column settings for the report

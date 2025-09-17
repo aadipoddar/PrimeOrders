@@ -6,21 +6,12 @@ using Plugin.LocalNotification;
 
 using PrimeBakes.Services;
 
-using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
-using PrimeOrdersLibrary.Data.Accounts.Masters;
 using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Data.Inventory;
-using PrimeOrdersLibrary.Data.Notification;
-using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.Data.Sale;
 using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Exporting.Sale;
-using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Models.Accounts.Masters;
 using PrimeOrdersLibrary.Models.Common;
-using PrimeOrdersLibrary.Models.Inventory;
-using PrimeOrdersLibrary.Models.Order;
-using PrimeOrdersLibrary.Models.Product;
 using PrimeOrdersLibrary.Models.Sale;
 
 using Syncfusion.Blazor.Grids;
@@ -68,6 +59,7 @@ public partial class SaleCartPage
 		CustomerId = null,
 		DiscPercent = 0,
 		DiscReason = "",
+		CreatedAt = DateTime.Now,
 		Status = true,
 	};
 
@@ -356,13 +348,6 @@ public partial class SaleCartPage
 
 		_validationErrors.Clear();
 
-		_sale.SaleDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_sale.SaleDateTime)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
-
-		_sale.UserId = _user.Id;
-		_sale.LocationId = _user.LocationId;
-
 		if (!_cart.Any(x => x.Quantity > 0))
 		{
 			_validationErrors.Add(new()
@@ -465,37 +450,9 @@ public partial class SaleCartPage
 			}
 
 			await InsertCustomer();
-
-			_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
-			_sale.Id = await SaleData.InsertSale(_sale);
-			if (_sale.Id <= 0)
-			{
-				_validationErrors.Add(new()
-				{
-					Field = "Sale",
-					Message = "Failed to save the Sale. Please try again."
-				});
-
-				_validationErrorDialogVisible = true;
-				_saleConfirmationDialogVisible = false;
-				return;
-			}
-
-			await InsertSaleDetail();
-			await InsertStock();
-			await UpdateOrder();
-
-			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _sale.LocationId);
-			if (location.MainLocation)
-			{
-				int accountingId = await InsertAccounting();
-				await InsertAccountingDetails(accountingId);
-			}
-
+			_sale.Id = await SaleData.SaveSale(_sale, _cart);
 			await PrintSaleBill();
-
 			DeleteCartSale();
-			await SendNotification.SendSaleNotificationPartyAdmin(_sale.Id);
 
 #if ANDROID
 			await CreateNotification();
@@ -542,137 +499,6 @@ public partial class SaleCartPage
 		_customer.Id = await CustomerData.InsertCustomer(_customer);
 		if (_customer.Id > 0)
 			_sale.CustomerId = _customer.Id;
-	}
-
-	private async Task InsertSaleDetail()
-	{
-		foreach (var item in _cart)
-			await SaleData.InsertSaleDetail(new()
-			{
-				Id = 0,
-				SaleId = _sale.Id,
-				ProductId = item.ProductId,
-				Quantity = item.Quantity,
-				Rate = item.Rate,
-				BaseTotal = item.BaseTotal,
-				DiscPercent = item.DiscPercent,
-				DiscAmount = item.DiscAmount,
-				AfterDiscount = item.AfterDiscount,
-				CGSTPercent = item.CGSTPercent,
-				CGSTAmount = item.CGSTAmount,
-				SGSTPercent = item.SGSTPercent,
-				SGSTAmount = item.SGSTAmount,
-				IGSTPercent = item.IGSTPercent,
-				IGSTAmount = item.IGSTAmount,
-				Total = item.Total,
-				NetRate = item.NetRate,
-				Status = true
-			});
-	}
-
-	private async Task InsertStock()
-	{
-		foreach (var product in _cart)
-		{
-			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
-			if (item.LocationId != 1)
-				continue;
-
-			await StockData.InsertProductStock(new()
-			{
-				Id = 0,
-				ProductId = product.ProductId,
-				Quantity = -product.Quantity,
-				NetRate = product.NetRate,
-				TransactionNo = _sale.BillNo,
-				Type = StockType.Sale.ToString(),
-				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-				LocationId = _sale.LocationId
-			});
-		}
-
-		if (_sale.PartyId is null || _sale.PartyId <= 0)
-			return;
-
-		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, _sale.PartyId.Value);
-		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
-			foreach (var product in _cart)
-				await StockData.InsertProductStock(new()
-				{
-					Id = 0,
-					ProductId = product.ProductId,
-					Quantity = product.Quantity,
-					NetRate = product.NetRate,
-					Type = StockType.Purchase.ToString(),
-					TransactionNo = _sale.BillNo,
-					TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-					LocationId = supplier.LocationId.Value
-				});
-	}
-
-	private async Task UpdateOrder()
-	{
-		if (_sale.OrderId is null)
-			return;
-
-		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
-		if (order is not null && order.Status)
-		{
-			order.SaleId = _sale.Id;
-			await OrderData.InsertOrder(order);
-		}
-	}
-
-	private async Task<int> InsertAccounting() =>
-		await AccountingData.InsertAccounting(new()
-		{
-			Id = 0,
-			ReferenceNo = _sale.BillNo,
-			AccountingDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(_sale.SaleDateTime))).Id,
-			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId)).Value),
-			Remarks = _sale.Remarks,
-			UserId = _sale.UserId,
-			GeneratedModule = GeneratedModules.Sales.ToString(),
-			Status = true
-		});
-
-	private async Task InsertAccountingDetails(int accountingId)
-	{
-		var saleOverview = await SaleData.LoadSaleOverviewBySaleId(_sale.Id);
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = saleOverview.Credit > 0 ? saleOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
-			Debit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
-			Credit = null,
-			Remarks = $"Cash / Party Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
-			Debit = null,
-			Credit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
-			Remarks = $"Sales Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
-			Debit = null,
-			Credit = saleOverview.TotalTaxAmount,
-			Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
 	}
 
 	private async Task PrintSaleBill()

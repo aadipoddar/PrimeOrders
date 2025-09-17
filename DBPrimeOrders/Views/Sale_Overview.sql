@@ -40,7 +40,9 @@
 		[s].[Credit],
 		[s].[CustomerId],
 		[c].[Name] AS CustomerName,
-		[c].[Number] AS CustomerNumber
+		[c].[Number] AS CustomerNumber,
+		[s].[CreatedAt]
+
 	FROM
 		[dbo].[Sale] s
 	INNER JOIN
@@ -82,4 +84,5 @@
 		[s].[Status],
 		[s].[CustomerId],
 		[c].[Name],
-		[c].[Number];
+		[c].[Number],
+		[s].[CreatedAt];

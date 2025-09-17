@@ -17,6 +17,7 @@ public class SaleModel
 	public decimal UPI { get; set; }
 	public decimal Credit { get; set; }
 	public int? CustomerId { get; set; }
+	public DateTime CreatedAt { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -99,6 +100,7 @@ public class SaleOverviewModel
 	public int? CustomerId { get; set; }
 	public string? CustomerName { get; set; }
 	public string? CustomerNumber { get; set; }
+	public DateTime CreatedAt { get; set; }
 }
 
 #region Chart and Helper Models

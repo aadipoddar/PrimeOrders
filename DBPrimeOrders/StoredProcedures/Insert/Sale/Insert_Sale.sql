@@ -14,6 +14,7 @@
 	@UPI MONEY = 0,
 	@Credit MONEY = 0,
 	@CustomerId INT = NULL,
+	@CreatedAt DATETIME,
 	@Status BIT = 1
 AS
 BEGIN

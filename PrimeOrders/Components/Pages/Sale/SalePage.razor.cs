@@ -1,8 +1,4 @@
-using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
-using PrimeOrdersLibrary.Data.Accounts.Masters;
-using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Exporting.Sale;
-using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.DropDowns;
@@ -54,6 +50,7 @@ public partial class SalePage
 		SaleDateTime = DateTime.Now,
 		DiscReason = "",
 		Remarks = "",
+		CreatedAt = DateTime.Now,
 		Status = true
 	};
 
@@ -109,6 +106,7 @@ public partial class SalePage
 
 		_filteredProducts = [.. _products];
 
+		_sale.UserId = _user.Id;
 		_sale.LocationId = _user?.LocationId ?? 0;
 		_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
 
@@ -648,13 +646,6 @@ public partial class SalePage
 	{
 		await UpdateFinancialDetails();
 
-		_sale.SaleDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(_sale.SaleDateTime)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
-
-		if (SaleId is null)
-			_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
-
 		if (_saleProductCart?.Count == 0)
 		{
 			_sfErrorToast.Content = "Please add at least one Product to the Sale.";
@@ -683,36 +674,6 @@ public partial class SalePage
 		return true;
 	}
 
-	private async Task<bool> SaveSale()
-	{
-		await InsertCustomer();
-
-		_sale.Id = await SaleData.InsertSale(_sale);
-		if (_sale.Id <= 0)
-		{
-			_sfErrorToast.Content = "Failed to save Sale.";
-			await _sfErrorToast.ShowAsync();
-			_isSaving = false;
-			StateHasChanged();
-			return false;
-		}
-
-		await InsertSaleDetail();
-		await InsertStock();
-		await UpdateOrder();
-
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _sale.LocationId);
-		if (location.MainLocation)
-		{
-			int accountingId = await InsertAccounting();
-			await InsertAccountingDetails(accountingId);
-		}
-
-		await SendNotification.SendSaleNotificationPartyAdmin(_sale.Id);
-
-		return true;
-	}
-
 	private async Task InsertCustomer()
 	{
 		if (string.IsNullOrEmpty(_customer.Number) || string.IsNullOrEmpty(_customer.Name))
@@ -737,229 +698,93 @@ public partial class SalePage
 			_sale.CustomerId = _customer.Id;
 	}
 
-	private async Task InsertSaleDetail()
-	{
-		if (SaleId.HasValue && SaleId.Value > 0)
-		{
-			var existingSaleDetails = await SaleData.LoadSaleDetailBySale(_sale.Id);
-			foreach (var item in existingSaleDetails)
-			{
-				item.Status = false;
-				await SaleData.InsertSaleDetail(item);
-			}
-		}
-
-		foreach (var item in _saleProductCart)
-			await SaleData.InsertSaleDetail(new()
-			{
-				Id = 0,
-				SaleId = _sale.Id,
-				ProductId = item.ProductId,
-				Quantity = item.Quantity,
-				Rate = item.Rate,
-				BaseTotal = item.BaseTotal,
-				DiscPercent = item.DiscPercent,
-				DiscAmount = item.DiscAmount,
-				AfterDiscount = item.AfterDiscount,
-				CGSTPercent = item.CGSTPercent,
-				CGSTAmount = item.CGSTAmount,
-				SGSTPercent = item.SGSTPercent,
-				SGSTAmount = item.SGSTAmount,
-				IGSTPercent = item.IGSTPercent,
-				IGSTAmount = item.IGSTAmount,
-				Total = item.Total,
-				NetRate = item.NetRate,
-				Status = true
-			});
-	}
-
-	private async Task InsertStock()
-	{
-		if (SaleId.HasValue && SaleId.Value > 0)
-			await StockData.DeleteProductStockByTransactionNo(_sale.BillNo);
-
-		foreach (var product in _saleProductCart)
-		{
-			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
-			if (item.LocationId != 1)
-				continue;
-
-			await StockData.InsertProductStock(new()
-			{
-				Id = 0,
-				ProductId = product.ProductId,
-				Quantity = -product.Quantity,
-				NetRate = product.NetRate,
-				TransactionNo = _sale.BillNo,
-				Type = StockType.Sale.ToString(),
-				TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-				LocationId = _sale.LocationId
-			});
-		}
-
-		if (_sale.PartyId is null || _sale.PartyId <= 0)
-			return;
-
-		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, _sale.PartyId.Value);
-		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
-			foreach (var product in _saleProductCart)
-				await StockData.InsertProductStock(new()
-				{
-					Id = 0,
-					ProductId = product.ProductId,
-					Quantity = product.Quantity,
-					NetRate = product.NetRate,
-					Type = StockType.Purchase.ToString(),
-					TransactionNo = _sale.BillNo,
-					TransactionDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-					LocationId = supplier.LocationId.Value
-				});
-	}
-
-	private async Task UpdateOrder()
-	{
-		if (SaleId.HasValue && SaleId.Value > 0)
-		{
-			var existingOrder = await OrderData.LoadOrderBySale(_sale.Id);
-			if (existingOrder is not null && existingOrder.Id > 0)
-			{
-				existingOrder.SaleId = null;
-				await OrderData.InsertOrder(existingOrder);
-			}
-		}
-
-		if (_sale.OrderId is null)
-			return;
-
-		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
-		if (order is not null && order.Status)
-		{
-			order.SaleId = _sale.Id;
-			await OrderData.InsertOrder(order);
-		}
-	}
-
-	private async Task<int> InsertAccounting()
-	{
-		if (SaleId.HasValue && SaleId.Value > 0)
-		{
-			var existingAccounting = await AccountingData.LoadAccountingByReferenceNo(_sale.BillNo);
-			if (existingAccounting is not null && existingAccounting.Id > 0)
-			{
-				existingAccounting.Status = false;
-				await AccountingData.InsertAccounting(existingAccounting);
-			}
-		}
-
-		return await AccountingData.InsertAccounting(new()
-		{
-			Id = 0,
-			ReferenceNo = _sale.BillNo,
-			AccountingDate = DateOnly.FromDateTime(_sale.SaleDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(_sale.SaleDateTime))).Id,
-			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId)).Value),
-			Remarks = _sale.Remarks,
-			UserId = _sale.UserId,
-			GeneratedModule = GeneratedModules.Sales.ToString(),
-			Status = true
-		});
-	}
-
-	private async Task InsertAccountingDetails(int accountingId)
-	{
-		var saleOverview = await SaleData.LoadSaleOverviewBySaleId(_sale.Id);
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = saleOverview.Credit > 0 ? saleOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
-			Debit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
-			Credit = null,
-			Remarks = $"Cash / Party Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
-			Debit = null,
-			Credit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
-			Remarks = $"Sales Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
-			Debit = null,
-			Credit = saleOverview.TotalTaxAmount,
-			Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
-	}
-
 	// Button 1: Save Only
 	private async Task OnSaveOnlyClick()
 	{
-		if (!await ValidateForm())
-			return;
-
 		_isSaving = true;
 		StateHasChanged();
 
-		if (await SaveSale())
+		try
 		{
+			if (!await ValidateForm())
+				return;
+
+			await InsertCustomer();
+			_sale.Id = await SaleData.SaveSale(_sale, _saleProductCart);
 			_sfSuccessToast.Content = "Sale saved successfully.";
 			await _sfSuccessToast.ShowAsync();
 		}
-
-		_isSaving = false;
-		StateHasChanged();
+		catch (Exception ex)
+		{
+			_sfErrorToast.Content = $"Error saving Sale: {ex.Message}";
+			await _sfErrorToast.ShowAsync();
+			throw;
+		}
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 
 	// Button 2: Save and Thermal Print
 	private async Task OnSaveAndThermalPrintClick()
 	{
-		if (!await ValidateForm())
-			return;
-
 		_isSaving = true;
 		StateHasChanged();
 
-		if (await SaveSale())
+		try
 		{
+			if (!await ValidateForm())
+				return;
+
+			await InsertCustomer();
+			_sale.Id = await SaleData.SaveSale(_sale, _saleProductCart);
 			await PrintThermalBill();
 			_sfSuccessToast.Content = "Sale saved and thermal bill printed successfully.";
 			await _sfSuccessToast.ShowAsync();
 		}
-
-		_isSaving = false;
-		StateHasChanged();
+		catch (Exception ex)
+		{
+			_sfErrorToast.Content = $"Error saving Sale: {ex.Message}";
+			await _sfErrorToast.ShowAsync();
+			throw;
+		}
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 
 	// Button 3: Save and A4 Print
 	private async Task OnSaveAndA4PrintClick()
 	{
-		if (!await ValidateForm())
-			return;
-
 		_isSaving = true;
 		StateHasChanged();
 
-		if (await SaveSale())
+		try
 		{
+			if (!await ValidateForm())
+				return;
+
+			await InsertCustomer();
+			_sale.Id = await SaleData.SaveSale(_sale, _saleProductCart);
 			await PrintA4Bill();
 			_sfSuccessToast.Content = "Sale saved and A4 bill generated successfully.";
 			await _sfSuccessToast.ShowAsync();
 		}
-
-		_isSaving = false;
-		StateHasChanged();
+		catch (Exception ex)
+		{
+			_sfErrorToast.Content = $"Error saving Sale: {ex.Message}";
+			await _sfErrorToast.ShowAsync();
+			throw;
+		}
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 
 	private async Task PrintThermalBill()

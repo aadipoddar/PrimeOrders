@@ -15,6 +15,7 @@
     [UPI] MONEY NOT NULL DEFAULT 0, 
     [Credit] MONEY NOT NULL DEFAULT 0, 
     [CustomerId] INT NULL, 
+    [CreatedAt] DATETIME NOT NULL DEFAULT (((getdate() AT TIME ZONE 'UTC') AT TIME ZONE 'India Standard Time')), 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Sale_ToUser] FOREIGN KEY (UserId) REFERENCES [User](Id), 
     CONSTRAINT [FK_Sale_ToLocation] FOREIGN KEY (LocationId) REFERENCES [Location](Id), 

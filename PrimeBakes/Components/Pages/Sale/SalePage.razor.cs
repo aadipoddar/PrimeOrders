@@ -45,6 +45,7 @@ public partial class SalePage
 		CustomerId = null,
 		DiscPercent = 0,
 		DiscReason = "",
+		CreatedAt = DateTime.Now,
 		Status = true,
 	};
 
@@ -345,7 +346,7 @@ public partial class SalePage
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
 
-		NavManager.NavigateTo("/SaleCart");
+		NavManager.NavigateTo("/Sale/Cart");
 	}
 	#endregion
 }
