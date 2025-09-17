@@ -264,7 +264,7 @@ else
 			<FooterTemplate>
 				<div class="dialog-footer confirmation-footer">
 					<SfButton Content="No, Cancel" OnClick="() => _orderConfirmationDialogVisible = false" CssClass="dialog-button cancel-button" Disabled="@_isSaving" />
-					<SfButton Content="@(_isSaving ? "⏳ Saving Kitchen Issue..." : "Yes, Place Kitchen Issue")" OnClick="SaveOrder" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
+					<SfButton Content="@(_isSaving ? "⏳ Saving Kitchen Issue..." : "Yes, Place Kitchen Issue")" OnClick="SaveKitchenIssue" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
 				</div>
 			</FooterTemplate>
 		</DialogTemplates>

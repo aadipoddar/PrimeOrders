@@ -61,17 +61,17 @@ else
 
 		<div class="page-header">
 			<h1 class="page-title">Order Management</h1>
-			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button">
+			<button @onclick='() => NavManager.NavigateTo("/")' class="back-button" disabled="@_isSaving">
 				<span class="back-icon">←</span> Back to Dashboard
 			</button>
 		</div>
 
 		<div class="action-buttons">
-			<button @onclick="() => _orderDetailsDialogVisible = true" class="action-button">
+			<button @onclick="() => _orderDetailsDialogVisible = true" class="action-button" disabled="@_isSaving">
 				<span class="action-icon">📄</span> Order Details
 			</button>
-			<button @onclick="() => _orderSummaryDialogVisible = true" class="action-button action-button-primary">
-				<span class="action-icon">📊</span> Save
+			<button @onclick="() => _orderSummaryDialogVisible = true" class="action-button action-button-primary" disabled="@_isSaving">
+				<span class="action-icon">📊</span> @(_isSaving ? "Saving..." : "Save")
 			</button>
 		</div>
 
@@ -112,6 +112,7 @@ else
 										<button class="add-to-cart-btn"
 												@onclick="() => OnAddToCartButtonClick(product)"
 												@onclick:stopPropagation="true"
+												disabled="@_isSaving"
 												title="Add to Cart">
 											<span class="cart-icon">🛒</span>
 											<span class="cart-text">Add</span>
@@ -222,7 +223,7 @@ else
 		</Content>
 		<FooterTemplate>
 			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" />
+				<SfButton Content="Close" OnClick="() => _orderDetailsDialogVisible = false" CssClass="dialog-button" Disabled="@_isSaving" />
 			</div>
 		</FooterTemplate>
 	</DialogTemplates>
@@ -303,14 +304,14 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton Content="Submit Order" IsPrimary="true" OnClick="ConfirmOrderSubmission" CssClass="save-button-dialog" />
-					<SfButton CssClass="print-button-dialog" Content="Save & Print Invoice" OnClick="OnSaveAndPrintClick">
+					<SfButton Content="@(_isSaving ? "Saving..." : "Submit Order")" IsPrimary="true" OnClick="ConfirmOrderSubmission" CssClass="save-button-dialog" Disabled="@_isSaving" />
+					<SfButton CssClass="print-button-dialog" Content="@(_isSaving ? "Saving..." : "Submit & Print Invoice")" OnClick="OnSaveAndPrintClick" Disabled="@_isSaving">
 						<div class="button-content">
 							<span class="print-icon">🖨️</span>
-							<span>Submit & Print Invoice</span>
+							<span>@(_isSaving ? "Saving..." : "Submit & Print Invoice")</span>
 						</div>
 					</SfButton>
-					<SfButton Content="Edit Order" OnClick="() => _orderSummaryDialogVisible = false" CssClass="dialog-button" />
+					<SfButton Content="Edit Order" OnClick="() => _orderSummaryDialogVisible = false" CssClass="dialog-button" Disabled="@_isSaving" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -351,8 +352,8 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton Content="Add to Cart" IsPrimary="true" OnClick="OnAddToCartClick" CssClass="dialog-button" />
-					<SfButton Content="Cancel" OnClick="OnCancelQuantityDialogClick" CssClass="dialog-button" />
+					<SfButton Content="Add to Cart" IsPrimary="true" OnClick="OnAddToCartClick" CssClass="dialog-button" Disabled="@_isSaving" />
+					<SfButton Content="Cancel" OnClick="OnCancelQuantityDialogClick" CssClass="dialog-button" Disabled="@_isSaving" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -395,8 +396,8 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" />
-					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartProductManageClick" CssClass="dialog-button remove-button" />
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveProductManageClick" CssClass="dialog-button" Disabled="@_isSaving" />
+					<SfButton Content="Remove From Cart" OnClick="OnRemoveFromCartProductManageClick" CssClass="dialog-button remove-button" Disabled="@_isSaving" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -602,7 +603,7 @@ else
 		letter-spacing: 0.5px;
 	}
 
-		.add-to-cart-btn:hover {
+		.add-to-cart-btn:hover:not(:disabled) {
 			background-color: #4311a8;
 			border-color: #4311a8;
 			transform: scale(1.1);
@@ -611,6 +612,14 @@ else
 
 		.add-to-cart-btn:active {
 			transform: scale(0.95);
+		}
+
+		.add-to-cart-btn:disabled {
+			background-color: #a583c3;
+			border-color: #a583c3;
+			cursor: not-allowed;
+			transform: none;
+			opacity: 0.6;
 		}
 
 	.cart-icon {
@@ -683,9 +692,14 @@ else
 		transition: all 0.2s ease;
 	}
 
-		.back-button:hover {
+		.back-button:hover:not(:disabled) {
 			background-color: var(--dotnet-secondary);
 			color: white;
+		}
+
+		.back-button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
 		}
 
 	.back-icon {
@@ -718,9 +732,15 @@ else
 		justify-content: center;
 	}
 
-		.action-button:hover {
+		.action-button:hover:not(:disabled) {
 			transform: translateY(-3px);
 			box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+		}
+
+		.action-button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	.action-icon {
@@ -732,8 +752,12 @@ else
 		color: white;
 	}
 
-		.action-button-primary:hover {
+		.action-button-primary:hover:not(:disabled) {
 			background-color: #4311a8;
+		}
+
+		.action-button-primary:disabled {
+			background-color: #a583c3;
 		}
 
 	/* Main Content */
@@ -846,8 +870,13 @@ else
 		transition: all 0.2s ease;
 	}
 
-		.save-button-dialog:hover {
+		.save-button-dialog:hover:not(:disabled) {
 			background-color: #4311a8;
+		}
+
+		.save-button-dialog:disabled {
+			background-color: #a583c3;
+			cursor: not-allowed;
 		}
 
 	/* Remove Button Styling */
@@ -858,8 +887,13 @@ else
 		transition: all 0.2s ease;
 	}
 
-		.remove-button:hover {
+		.remove-button:hover:not(:disabled) {
 			background-color: #d32f2f;
+		}
+
+		.remove-button:disabled {
+			background-color: #f5c6cb;
+			cursor: not-allowed;
 		}
 
 	/* Dialog Styling */
@@ -927,10 +961,16 @@ else
 		justify-content: center;
 	}
 
-		.print-button-dialog:hover {
+		.print-button-dialog:hover:not(:disabled) {
 			background-color: #138496;
 			transform: translateY(-2px);
 			box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+		}
+
+		.print-button-dialog:disabled {
+			background-color: #7cc4d1;
+			cursor: not-allowed;
+			transform: none;
 		}
 
 	.print-icon {

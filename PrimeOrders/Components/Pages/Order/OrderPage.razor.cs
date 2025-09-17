@@ -17,6 +17,7 @@ public partial class OrderPage
 	private UserModel _user;
 	private LocationModel _userLocation;
 	private bool _isLoading = true;
+	private bool _isSaving = false;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
 	private bool _orderDetailsDialogVisible = false;
@@ -439,27 +440,53 @@ public partial class OrderPage
 
 	private async Task ConfirmOrderSubmission()
 	{
-		if (await SaveOrder())
-		{
-			_sfSuccessToast.Content = "Order saved successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
+		if (_isSaving)
+			return;
 
-		_orderSummaryDialogVisible = false;
+		_isSaving = true;
 		StateHasChanged();
+
+		try
+		{
+			if (await SaveOrder())
+			{
+				_sfSuccessToast.Content = "Order saved successfully.";
+				await _sfSuccessToast.ShowAsync();
+			}
+
+			_orderSummaryDialogVisible = false;
+		}
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 
 	private async Task OnSaveAndPrintClick()
 	{
-		if (await SaveOrder())
-		{
-			await PrintInvoice();
-			_sfSuccessToast.Content = "Order saved and invoice generated successfully.";
-			await _sfSuccessToast.ShowAsync();
-		}
+		if (_isSaving)
+			return;
 
-		_orderSummaryDialogVisible = false;
+		_isSaving = true;
 		StateHasChanged();
+
+		try
+		{
+			if (await SaveOrder())
+			{
+				await PrintInvoice();
+				_sfSuccessToast.Content = "Order saved and invoice generated successfully.";
+				await _sfSuccessToast.ShowAsync();
+			}
+
+			_orderSummaryDialogVisible = false;
+		}
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 
 	private async Task PrintInvoice()

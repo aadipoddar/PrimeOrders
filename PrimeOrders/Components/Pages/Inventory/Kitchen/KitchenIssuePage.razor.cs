@@ -12,11 +12,13 @@ public partial class KitchenIssuePage
 {
 	[Inject] public NavigationManager NavManager { get; set; }
 	[Inject] public IJSRuntime JS { get; set; }
+	[Inject] public IBrowserNotificationService BrowserNotificationService { get; set; }
 
 	[Parameter] public int? KitchenIssueId { get; set; }
 
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _isSaving = false;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
 	private bool _billDetailsDialogVisible = false;
@@ -462,26 +464,39 @@ public partial class KitchenIssuePage
 
 	private async Task OnSaveKitchenIssueClick()
 	{
-		UpdateFinancialDetails();
-
-		if (!await ValidateForm())
+		if (_isSaving)
 			return;
 
-		_kitchenIssue.Id = await KitchenIssueData.InsertKitchenIssue(_kitchenIssue);
-		if (_kitchenIssue.Id <= 0)
+		_isSaving = true;
+		StateHasChanged();
+
+		try
 		{
-			_sfErrorToast.Content = "Failed to save kitchen issue.";
-			await _sfErrorToast.ShowAsync();
-			StateHasChanged();
-			return;
+			UpdateFinancialDetails();
+
+			if (!await ValidateForm())
+				return;
+
+			_kitchenIssue.Id = await KitchenIssueData.InsertKitchenIssue(_kitchenIssue);
+			if (_kitchenIssue.Id <= 0)
+			{
+				_sfErrorToast.Content = "Failed to save kitchen issue.";
+				await _sfErrorToast.ShowAsync();
+				return;
+			}
+
+			await InsertKitchenIssueDetail();
+			await InsertStock();
+			await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(_kitchenIssue.Id);
+
+			_kitchenIssueSummaryDialogVisible = false;
+			await _sfSuccessToast.ShowAsync();
 		}
-
-		await InsertKitchenIssueDetail();
-		await InsertStock();
-		await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(_kitchenIssue.Id);
-
-		_kitchenIssueSummaryDialogVisible = false;
-		await _sfSuccessToast.ShowAsync();
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
 	}
 
 	private async Task InsertKitchenIssueDetail()
