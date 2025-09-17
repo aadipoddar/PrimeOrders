@@ -49,6 +49,10 @@ public static class SendNotification
 	public static async Task SendSaleNotificationPartyAdmin(int saleId)
 	{
 		var sale = await SaleData.LoadSaleOverviewBySaleId(saleId);
+
+		if (sale.PartyId is null || sale.PartyId <= 0)
+			return;
+
 		var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
 
 		if (party.LocationId is null || party.LocationId <= 0)
