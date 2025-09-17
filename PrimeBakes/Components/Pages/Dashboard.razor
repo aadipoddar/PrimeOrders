@@ -228,6 +228,19 @@ else
 					</div>
 				</div>
 			}
+
+			@if (_user.Inventory)
+			{
+				<div class="dashboard-card inventory-card" @onclick='() => NavManager.NavigateTo("/Inventory-Dashboard")'>
+					<div class="card-background">
+						<div class="card-icon inventory-icon">📦</div>
+						<div class="card-content">
+							<h3>Inventory</h3>
+							<p>Manage Stock & Purchases</p>
+						</div>
+					</div>
+				</div>
+			}
 		</div>
 
 		<div class="dashboard-footer">
@@ -258,6 +271,7 @@ else
 		--gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, #2980b9 100%);
 		--gradient-success: linear-gradient(135deg, var(--success-color) 0%, #229954 100%);
 		--gradient-error: linear-gradient(135deg, var(--error-color) 0%, #c0392b 100%);
+		--gradient-inventory: linear-gradient(135deg, #ff9500 0%, #ff7700 100%);
 	}
 
 	/* Error UI Styles */
@@ -1046,6 +1060,11 @@ else
 
 	.sales-card .card-background {
 		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: var(--white);
+	}
+
+	.inventory-card .card-background {
+		background: var(--gradient-inventory);
 		color: var(--white);
 	}
 

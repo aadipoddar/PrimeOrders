@@ -8,6 +8,7 @@
 		ki.IssueDate,
 		ki.UserId,
 		u.Name AS UserName,
+		ki.Remarks,
 
 		COUNT(DISTINCT ki.Id) AS TotalProducts,
 		SUM(kid.Quantity) AS TotalQuantity
@@ -33,4 +34,5 @@
 		k.Name,
 		ki.IssueDate,
 		ki.UserId,
-		u.Name
+		u.Name,
+		ki.Remarks

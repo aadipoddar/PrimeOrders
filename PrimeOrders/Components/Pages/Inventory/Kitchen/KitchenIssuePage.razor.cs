@@ -1,4 +1,5 @@
 using PrimeOrdersLibrary.Data.Inventory.Kitchen;
+using PrimeOrdersLibrary.Data.Notification;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -40,7 +41,8 @@ public partial class KitchenIssuePage
 	private KitchenIssueModel _kitchenIssue = new()
 	{
 		IssueDate = DateTime.Now,
-		Status = true
+		Status = true,
+		Remarks = ""
 	};
 
 	private List<KitchenModel> _kitchens;
@@ -113,6 +115,7 @@ public partial class KitchenIssuePage
 
 			_kitchenIssueRawMaterialCarts.Add(new()
 			{
+				RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
 				RawMaterialId = item.RawMaterialId,
 				RawMaterialName = rawMaterial.Name,
 				Quantity = item.Quantity,
@@ -475,6 +478,7 @@ public partial class KitchenIssuePage
 
 		await InsertKitchenIssueDetail();
 		await InsertStock();
+		await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(_kitchenIssue.Id);
 
 		_kitchenIssueSummaryDialogVisible = false;
 		await _sfSuccessToast.ShowAsync();
@@ -520,7 +524,7 @@ public partial class KitchenIssuePage
 				Type = StockType.KitchenIssue.ToString(),
 				TransactionNo = _kitchenIssue.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(_kitchenIssue.IssueDate),
-				LocationId = _user.LocationId
+				LocationId = _kitchenIssue.LocationId
 			});
 	}
 	#endregion

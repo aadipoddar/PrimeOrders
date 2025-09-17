@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 
 using PrimeOrdersLibrary.Data.Common;
+using PrimeOrdersLibrary.Data.Inventory.Kitchen;
 using PrimeOrdersLibrary.Data.Order;
 using PrimeOrdersLibrary.Data.Sale;
 using PrimeOrdersLibrary.Models.Accounts.Masters;
@@ -36,7 +37,6 @@ public static class SendNotification
 	public static async Task SendOrderNotificationMainLocationAdmin(int orderId)
 	{
 		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
-		// Change to Main Location Admins instead of LocationId = 1
 		users = [.. users.Where(u => u.Admin && u.LocationId == 1)];
 
 		var order = await OrderData.LoadOrderOverviewByOrderId(orderId);
@@ -59,6 +59,18 @@ public static class SendNotification
 
 		var title = $"New Sale Created for {party.Name}";
 		var text = $"Sale No: {sale.BillNo} | Party: {party.Name} | Total Items: {sale.TotalProducts} | Total Qty: {sale.TotalQuantity} | Total Amount: {sale.Total.FormatIndianCurrency()} | User: {sale.UserName} | Date: {sale.SaleDateTime:dd/MM/yy hh:mm tt} | Remarks: {sale.Remarks} | Order No: {sale.OrderNo}";
+
+		await SendNotificationToAPI(users, title, text);
+	}
+
+	public static async Task SendKitchenIssueNotificationMainLocationAdminInventory(int kitchenIssueId)
+	{
+		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
+		users = [.. users.Where(u => (u.Admin && u.LocationId == 1) || (u.Inventory && u.LocationId == 1))];
+
+		var kitchenIssue = await KitchenIssueData.LoadKitchenIssueOverviewByKitchenIssueId(kitchenIssueId);
+		var title = $"New Kitchen Issue Placed to {kitchenIssue.KitchenName}";
+		var text = $"Kitchen Issue No: {kitchenIssue.TransactionNo} | Total Items: {kitchenIssue.TotalProducts} | Total Qty: {kitchenIssue.TotalQuantity} | Kitchen: {kitchenIssue.KitchenName} | User: {kitchenIssue.UserName} | Date: {kitchenIssue.IssueDate:dd/MM/yy hh:mm tt} | Remarks: {kitchenIssue.Remarks}";
 
 		await SendNotificationToAPI(users, title, text);
 	}

@@ -80,8 +80,9 @@ public static class StoredProcedureNames
 	public static string LoadSaleReturnOverviewBySaleReturnId => "Load_SaleReturnOverview_By_SaleReturnId";
 
 	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
-	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
 	public static string LoadKitchenIssueDetailByKitchenIssue => "Load_KitchenIssueDetail_By_KitchenIssue";
+	public static string LoadKitchenIssueOverviewByKitchenIssueId => "Load_KitchenIssueOverview_By_KitchenIssueId";
+	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
 	public static string LoadKitchenProductionDetailByKitchenProduction => "Load_KitchenProductionDetail_By_KitchenProduction";
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";

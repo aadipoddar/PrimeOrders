@@ -1,5 +1,6 @@
 using PrimeOrdersLibrary.Data.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Data.Accounts.Masters;
+using PrimeOrdersLibrary.Data.Notification;
 using PrimeOrdersLibrary.Exporting.Sale;
 using PrimeOrdersLibrary.Models.Accounts.FinancialAccounting;
 using PrimeOrdersLibrary.Models.Accounts.Masters;
@@ -706,6 +707,8 @@ public partial class SalePage
 			int accountingId = await InsertAccounting();
 			await InsertAccountingDetails(accountingId);
 		}
+
+		await SendNotification.SendSaleNotificationPartyAdmin(_sale.Id);
 
 		return true;
 	}

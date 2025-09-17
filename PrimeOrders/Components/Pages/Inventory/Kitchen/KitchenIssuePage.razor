@@ -210,6 +210,14 @@ else
 						<ComboBoxFieldSettings Value="Id" Text="Name" />
 					</SfComboBox>
 				</div>
+
+				<div class="form-group">
+					<label>Remarks</label>
+					<SfTextBox @bind-Value="_kitchenIssue.Remarks"
+							   Placeholder="Remarks"
+							   Multiline=true
+							   CssClass="form-control" />
+				</div>
 			</div>
 		</Content>
 		<FooterTemplate>

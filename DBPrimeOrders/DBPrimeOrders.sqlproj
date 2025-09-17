@@ -228,6 +228,7 @@
     <Build Include="Tables\Common\Customer.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_Customer.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_OrderOverview_By_OrderId.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssueOverview_By_KitchenIssueId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\LocalDBPrimeOrders.publish.xml" />

@@ -39,15 +39,12 @@ public partial class OrderPage
 	{
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
 		_productCategories.RemoveAll(r => r.LocationId != 1);
-
 		_productCategories.Add(new()
 		{
 			Id = 0,
 			Name = "All Categories"
 		});
-
 		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-
 		_selectedCategoryId = 0;
 
 		var allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);

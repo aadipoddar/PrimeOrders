@@ -18,4 +18,7 @@ public static class KitchenIssueData
 
 	public static async Task<List<KitchenIssueDetailModel>> LoadKitchenIssueDetailByKitchenIssue(int KitchenIssueId) =>
 		await SqlDataAccess.LoadData<KitchenIssueDetailModel, dynamic>(StoredProcedureNames.LoadKitchenIssueDetailByKitchenIssue, new { KitchenIssueId });
+
+	public static async Task<KitchenIssueOverviewModel> LoadKitchenIssueOverviewByKitchenIssueId(int KitchenIssueId) =>
+		(await SqlDataAccess.LoadData<KitchenIssueOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenIssueOverviewByKitchenIssueId, new { KitchenIssueId })).FirstOrDefault();
 }

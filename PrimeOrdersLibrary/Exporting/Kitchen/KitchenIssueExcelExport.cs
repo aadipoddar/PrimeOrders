@@ -47,7 +47,8 @@ public static class KitchenIssueExcelExport
 			nameof(KitchenIssueOverviewModel.KitchenName),
 			nameof(KitchenIssueOverviewModel.UserName),
 			nameof(KitchenIssueOverviewModel.TotalProducts),
-			nameof(KitchenIssueOverviewModel.TotalQuantity)
+			nameof(KitchenIssueOverviewModel.TotalQuantity),
+			nameof(KitchenIssueOverviewModel.Remarks)
 		];
 
 		// Define custom column settings with professional styling
@@ -114,7 +115,13 @@ public static class KitchenIssueExcelExport
 								   qtyValue > 50 ? Syncfusion.Drawing.Color.FromArgb(255, 165, 0) : null
 					};
 				}
-			}
+			},
+			[nameof(KitchenIssueOverviewModel.Remarks)] = new()
+			{
+				DisplayName = "Remarks",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
 		};
 
 		// Generate title based on kitchen selection if applicable
