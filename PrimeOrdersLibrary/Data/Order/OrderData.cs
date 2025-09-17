@@ -34,9 +34,8 @@ public static class OrderData
 		bool update = order.Id > 0;
 
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, order.UserId);
-		var userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, user.LocationId);
 
-		if (!user.Admin || !userLocation.MainLocation)
+		if (!user.Admin || user.LocationId != 1)
 			order.LocationId = user.LocationId;
 
 		order.Status = true;

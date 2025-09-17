@@ -92,7 +92,7 @@ else
 						</div>
 					</div>
 
-					@if (_currentUserLocation.MainLocation)
+					@if (_currentUser.LocationId == 1)
 					{
 						<div class="form-row">
 							<div class="form-group">
@@ -120,7 +120,7 @@ else
 								</div>
 								<div class="checkbox-row">
 									<SfCheckBox @bind-Checked="_userModel.Inventory" Label="Inventory Access" CssClass="form-checkbox" />
-									@if (_currentUserLocation.MainLocation)
+									@if (_currentUser.LocationId == 1)
 									{
 										<SfCheckBox @bind-Checked="_userModel.Accounts" Label="Accounts Access" CssClass="form-checkbox" />
 									}
@@ -173,7 +173,7 @@ else
 							<GridColumn Field=@nameof(UserModel.Sales) HeaderText="Sales" Width="80" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(UserModel.Order) HeaderText="Order" Width="80" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
 							<GridColumn Field=@nameof(UserModel.Inventory) HeaderText="Inventory" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
-							@if (_currentUserLocation.MainLocation)
+							@if (_currentUser.LocationId == 1)
 							{
 								<GridColumn Field=@nameof(UserModel.Accounts) HeaderText="Accounts" Width="90" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
 							}

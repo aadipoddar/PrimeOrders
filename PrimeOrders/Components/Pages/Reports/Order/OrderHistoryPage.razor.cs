@@ -11,7 +11,6 @@ public partial class OrderHistoryPage
 	[Inject] private IJSRuntime JS { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private int _selectedLocationId = 0;
 	private bool _isLoading = true;
 	private bool _orderSummaryVisible = false;
@@ -39,8 +38,6 @@ public partial class OrderHistoryPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Order)).User) is not null))
 			return;
 
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
 		await LoadLocations();
 		await LoadData();
 
@@ -50,7 +47,7 @@ public partial class OrderHistoryPage
 
 	private async Task LoadLocations()
 	{
-		if (_userLocation.MainLocation)
+		if (_user.LocationId == 1)
 		{
 			_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 			_locations.RemoveAll(l => l.Id == 1);

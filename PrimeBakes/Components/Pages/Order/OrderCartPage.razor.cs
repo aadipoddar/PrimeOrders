@@ -33,7 +33,6 @@ public partial class OrderCartPage
 	private List<LocationModel> _locations = [];
 	private readonly List<OrderProductCartModel> _cart = [];
 
-	private LocationModel _userLocation;
 	private readonly OrderModel _order = new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "", CreatedAt = DateTime.Now };
 	private readonly List<ValidationError> _validationErrors = [];
 
@@ -60,8 +59,7 @@ public partial class OrderCartPage
 	private async Task LoadData()
 	{
 		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-		_userLocation = _locations.FirstOrDefault(c => c.Id == _user.LocationId);
-		_locations.RemoveAll(c => c.MainLocation);
+		_locations.RemoveAll(c => c.Id == 1);
 
 		_order.LocationId = _user.LocationId == 1 ? _locations.FirstOrDefault().Id : _user.LocationId;
 		_order.UserId = _user.Id;

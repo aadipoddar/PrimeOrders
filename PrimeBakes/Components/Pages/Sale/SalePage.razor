@@ -19,7 +19,7 @@ else
 				🏠
 			</button>
 			<h1 class="page-title">Sale</h1>
-			@if (_userLocation is not null && _userLocation.MainLocation)
+			@if (_user.LocationId == 1)
 			{
 				<button @onclick="() => _partyDetailsDialogVisible = true" class="header-action-btn">
 					👥 Party

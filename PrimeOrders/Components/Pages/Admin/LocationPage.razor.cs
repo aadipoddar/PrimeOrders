@@ -17,7 +17,6 @@ public partial class LocationPage
 	{
 		Name = "",
 		Discount = 0,
-		MainLocation = false,
 		Status = true
 	};
 

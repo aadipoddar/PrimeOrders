@@ -11,7 +11,6 @@ public partial class ProductStockAdjustmentPage
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
@@ -61,8 +60,6 @@ public partial class ProductStockAdjustmentPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Inventory)).User) is not null))
 			return;
 
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
 		await LoadData();
 		await JS.InvokeVoidAsync("setupProductStockAdjustmentPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
@@ -72,8 +69,7 @@ public partial class ProductStockAdjustmentPage
 
 	private async Task LoadData()
 	{
-		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
-		if (!_userLocation.MainLocation)
+		if (_user.LocationId != 1)
 			_selectedLocationId = _user.LocationId;
 
 		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
@@ -94,7 +90,7 @@ public partial class ProductStockAdjustmentPage
 
 	private async Task LoadStockDetails()
 	{
-		int locationId = _userLocation.MainLocation ? _selectedLocationId : _user.LocationId;
+		int locationId = _user.LocationId == 1 ? _selectedLocationId : _user.LocationId;
 
 		_stockDetails = await StockData.LoadProductStockDetailsByDateLocationId(
 			DateTime.Now.AddDays(-1),

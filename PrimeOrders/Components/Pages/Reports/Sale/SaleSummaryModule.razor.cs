@@ -86,8 +86,7 @@ public partial class SaleSummaryModule
 		await SaleData.InsertSale(sale);
 		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
 
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, sale.LocationId);
-		if (location.MainLocation)
+		if (sale.LocationId == 1)
 		{
 			var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
 			accounting.Status = false;

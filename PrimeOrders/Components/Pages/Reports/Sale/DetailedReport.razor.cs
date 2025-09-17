@@ -15,7 +15,6 @@ public partial class DetailedReport
 	[Inject] private IJSRuntime JS { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _saleSummaryVisible = false;
 
@@ -42,9 +41,7 @@ public partial class DetailedReport
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager)).User) is not null))
 			return;
 
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
-		if (LocationId.HasValue && LocationId.Value > 0 && _userLocation.MainLocation)
+		if (LocationId.HasValue && LocationId.Value > 0 && _user.LocationId == 1)
 			_selectedLocationId = LocationId.Value;
 
 		await LoadData();
@@ -68,7 +65,7 @@ public partial class DetailedReport
 
 	private async Task LoadData()
 	{
-		if (_userLocation.MainLocation)
+		if (_user.LocationId == 1)
 		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location, true);
 

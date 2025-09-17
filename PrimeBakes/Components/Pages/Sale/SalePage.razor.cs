@@ -23,7 +23,6 @@ public partial class SalePage
 	[Inject] public NavigationManager NavManager { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 
 	private int _selectedCategoryId = 0;
@@ -70,8 +69,6 @@ public partial class SalePage
 
 	private async Task LoadData()
 	{
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
 		_parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
 		_parties.RemoveAll(p => p.LocationId == _user.LocationId);
 

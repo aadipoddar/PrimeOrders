@@ -75,7 +75,7 @@ else
 			<button @onclick="() => _discountDialogVisible = true" class="action-button">
 				<span class="action-icon">💰</span> Discount
 			</button>
-			@if (_userLocation.MainLocation && (SaleId is null || _sale.OrderId is null))
+			@if (_user.LocationId == 1 && (SaleId is null || _sale.OrderId is null))
 			{
 				<button @onclick="() => _orderPartyDialogVisible = true" class="action-button">
 					<span class="action-icon">🏢</span> Order & Party

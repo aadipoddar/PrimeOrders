@@ -3,14 +3,13 @@
 	@Name VARCHAR(50),
 	@PrefixCode VARCHAR(10),
 	@Discount DECIMAL(5, 2),
-	@MainLocation BIT,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Location] (Name, PrefixCode, Discount, MainLocation, Status)
-		VALUES (@Name, @PrefixCode, @Discount, @MainLocation, @Status);
+		INSERT INTO [dbo].[Location] (Name, PrefixCode, Discount, Status)
+		VALUES (@Name, @PrefixCode, @Discount, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 
@@ -21,7 +20,6 @@ BEGIN
 			Name = @Name,
 			PrefixCode = @PrefixCode,
 			Discount = @Discount,
-			MainLocation = @MainLocation,
 			Status = @Status
 		WHERE Id = @Id;
 	END

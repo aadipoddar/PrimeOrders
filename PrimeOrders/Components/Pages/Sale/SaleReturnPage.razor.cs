@@ -91,7 +91,7 @@ public partial class SaleReturnPage
 	{
 		await LoadLocations();
 
-		if (_userLocation.MainLocation)
+		if (_user.LocationId == 1)
 			_saleReturn.LocationId = _locations.FirstOrDefault()?.Id ?? _user.LocationId;
 		else
 			_saleReturn.LocationId = _user.LocationId;
@@ -106,7 +106,7 @@ public partial class SaleReturnPage
 
 	private async Task LoadLocations()
 	{
-		if (_userLocation.MainLocation)
+		if (_user.LocationId == 1)
 		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 			_locations.RemoveAll(l => l.Id == 1);
@@ -588,7 +588,7 @@ public partial class SaleReturnPage
 	{
 		_saleReturn.UserId = _user.Id;
 
-		if (!_userLocation.MainLocation)
+		if (_user.LocationId != 1)
 			_saleReturn.LocationId = _user.LocationId;
 
 		if (_selectedSaleId == 0)

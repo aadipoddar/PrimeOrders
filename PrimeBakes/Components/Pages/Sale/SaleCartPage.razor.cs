@@ -43,7 +43,6 @@ public partial class SaleCartPage
 	private readonly List<SaleProductCartModel> _cart = [];
 	private readonly List<ValidationError> _validationErrors = [];
 
-	private LocationModel _userLocation;
 	private CustomerModel _customer = new();
 	private SaleModel _sale = new()
 	{
@@ -87,8 +86,6 @@ public partial class SaleCartPage
 
 	private async Task LoadData()
 	{
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
 		_paymentModes = PaymentModeData.GetPaymentModes();
 		_selectedPaymentModeId = _paymentModes.FirstOrDefault()?.Id ?? 1;
 
@@ -358,8 +355,7 @@ public partial class SaleCartPage
 			return false;
 		}
 
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _sale.LocationId);
-		if (location.MainLocation && _sale.Credit > 0 && _sale.PartyId is null)
+		if (_sale.Id == 1 && _sale.Credit > 0 && _sale.PartyId is null)
 		{
 			_validationErrors.Add(new()
 			{

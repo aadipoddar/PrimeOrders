@@ -194,7 +194,7 @@ else
 									  Enabled="@(!_isSaving)" />
 					</div>
 
-					@if (_user.Admin && _userLocation.MainLocation)
+					@if (_user.Admin && _user.LocationId == 1)
 					{
 						<div class="form-group">
 							<label>Outlet / Franchise</label>

@@ -16,7 +16,6 @@ public partial class SalePage
 	[Parameter] public int? SaleId { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _dialogVisible = false;
 	private bool _quantityDialogVisible = false;
@@ -82,8 +81,6 @@ public partial class SalePage
 
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Sales)).User) is not null))
 			return;
-
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
 
 		await LoadData();
 		await JS.InvokeVoidAsync("setupSalePageKeyboardHandlers", DotNetObjectReference.Create(this));
@@ -662,8 +659,7 @@ public partial class SalePage
 			return false;
 		}
 
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _sale.LocationId);
-		if (location.MainLocation && _sale.Credit > 0 && _sale.PartyId is null)
+		if (_sale.LocationId == 1 && _sale.Credit > 0 && _sale.PartyId is null)
 		{
 			_sfErrorToast.Content = "Party is required when Payment Mode is Credit.";
 			await _sfErrorToast.ShowAsync();

@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Components;
 
 using PrimeBakes.Services;
 
-using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.DataAccess;
 using PrimeOrdersLibrary.Models.Common;
 
 namespace PrimeBakes.Components.Pages.Inventory;
@@ -13,7 +11,6 @@ public partial class InventoryDashboard
 	[Inject] public NavigationManager NavManager { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 
 	protected override async Task OnInitializedAsync()
@@ -26,7 +23,6 @@ public partial class InventoryDashboard
 			return;
 		}
 
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
 		_isLoading = false;
 	}
 }

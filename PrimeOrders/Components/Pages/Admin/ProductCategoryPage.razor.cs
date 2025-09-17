@@ -9,7 +9,6 @@ public partial class ProductCategoryPage
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 
 	private ProductCategoryModel _categoryModel = new()
@@ -37,8 +36,6 @@ public partial class ProductCategoryPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Admin)).User) is not null))
 			return;
 
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
 		await LoadData();
 
 		_isLoading = false;
@@ -51,7 +48,7 @@ public partial class ProductCategoryPage
 		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 		_categoryModel.LocationId = _user.LocationId;
 
-		if (!_userLocation.MainLocation)
+		if (_user.LocationId != 1)
 			_categories = [.. _categories.Where(c => c.LocationId == _user.LocationId)];
 
 		if (_sfGrid is not null)
@@ -69,7 +66,7 @@ public partial class ProductCategoryPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (!_userLocation.MainLocation)
+		if (_user.LocationId != 1)
 			_categoryModel.LocationId = _user.LocationId;
 
 		if (_categoryModel.LocationId <= 0)

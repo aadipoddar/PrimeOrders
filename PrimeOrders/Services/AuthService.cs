@@ -55,7 +55,7 @@ public static class AuthService
 		if (primaryLocationRequirement.HasValue && primaryLocationRequirement.Value)
 		{
 			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, user.LocationId);
-			if (location is null || !location.MainLocation)
+			if (location is null || location.Id != 1)
 			{
 				navigationManager.NavigateTo("/");
 				return new AuthenticationResult(false, null, "User must be associated with a primary location");

@@ -14,7 +14,6 @@ public partial class OrderPage
 	[Parameter] public int? OrderId { get; set; }
 
 	private UserModel _user;
-	private LocationModel _userLocation;
 	private bool _isLoading = true;
 	private bool _isSaving = false;
 	private bool _dialogVisible = false;
@@ -69,8 +68,6 @@ public partial class OrderPage
 		if (!((_user = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Order)).User) is not null))
 			return;
 
-		_userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-
 		await LoadData();
 		await JS.InvokeVoidAsync("setupOrderPageKeyboardHandlers", DotNetObjectReference.Create(this));
 
@@ -85,7 +82,7 @@ public partial class OrderPage
 
 		_order.UserId = _user.Id;
 
-		if (_userLocation.MainLocation)
+		if (_user.LocationId == 1)
 			_order.LocationId = _locations.FirstOrDefault()?.Id ?? 0;
 		else
 			_order.LocationId = _user.LocationId;

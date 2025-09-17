@@ -35,7 +35,7 @@ else
 		</div>
 
 		<div class="dashboard-cards">
-			@if (_userLocation?.MainLocation == true)
+			@if (_user.LocationId == 1)
 			{
 				<div class="dashboard-card" @onclick='() => NavManager.NavigateTo("/Inventory/Purchase")'>
 					<div class="card-icon purchase-icon">🛒</div>

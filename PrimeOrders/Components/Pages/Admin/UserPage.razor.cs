@@ -9,7 +9,6 @@ public partial class UserPage
 	[Inject] public IJSRuntime JS { get; set; }
 
 	private UserModel _currentUser;
-	private LocationModel _currentUserLocation;
 	private bool _isLoading = true;
 
 	private UserModel _userModel = new()
@@ -42,8 +41,6 @@ public partial class UserPage
 		if (!((_currentUser = (await AuthService.ValidateUser(JS, NavManager, UserRoles.Admin)).User) is not null))
 			return;
 
-		_currentUserLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _currentUser.LocationId);
-
 		await LoadData();
 
 		_isLoading = false;
@@ -55,7 +52,7 @@ public partial class UserPage
 		_users = await CommonData.LoadTableData<UserModel>(TableNames.User);
 		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
-		if (!_currentUserLocation.MainLocation)
+		if (_currentUser.LocationId != 1)
 			_users = [.. _users.Where(u => u.LocationId == _currentUser.LocationId)];
 
 		_userModel.LocationId = _currentUser.LocationId;
@@ -75,14 +72,13 @@ public partial class UserPage
 
 	private async Task<bool> ValidateForm()
 	{
-		if (!_currentUserLocation.MainLocation)
+		if (_currentUser.LocationId != 1)
 		{
 			_userModel.LocationId = _currentUser.LocationId;
 			_userModel.Accounts = false;
 		}
 
-		var location = _locations.FirstOrDefault(l => l.Id == _userModel.LocationId);
-		if (!location.MainLocation)
+		if (_userModel.LocationId != 1)
 			_userModel.Accounts = false;
 
 		if (string.IsNullOrWhiteSpace(_userModel.Name))
