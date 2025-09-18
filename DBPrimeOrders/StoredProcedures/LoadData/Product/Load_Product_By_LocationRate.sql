@@ -21,4 +21,6 @@ BEGIN
 		[LocationId],
 		[Status]
 	FROM Product
+	WHERE Status = 1
+
 END
