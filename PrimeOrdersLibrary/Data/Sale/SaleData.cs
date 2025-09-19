@@ -36,7 +36,7 @@ public static class SaleData
 	{
 		bool update = sale.Id > 0;
 
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.Sale, sale.UserId);
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, sale.UserId);
 		sale.LocationId = user.LocationId;
 		sale.Status = true;
 		sale.CreatedAt = DateTime.Now;
