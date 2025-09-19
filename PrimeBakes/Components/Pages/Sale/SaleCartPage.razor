@@ -47,9 +47,9 @@ else
 							<GridPageSettings PageSize="4" />
 
 							<GridColumns>
-								<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="40%" />
-								<GridColumn Field="@nameof(SaleProductCartModel.Rate)" HeaderText="Price" Width="25%" Format="N2" TextAlign="TextAlign.Right" />
-								<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="35%" TextAlign="TextAlign.Right">
+								<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="30%" />
+								<GridColumn Field="@nameof(SaleProductCartModel.Rate)" HeaderText="Price" Width="20%" Format="N0" TextAlign="TextAlign.Right" />
+								<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="25%" TextAlign="TextAlign.Center">
 									<Template>
 										@{
 											var item = (context as SaleProductCartModel);
@@ -64,8 +64,10 @@ else
 																		  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
 																		  Min="0"
 																		  Step="1"
+																		  type="tel"
+																		  ShowSpinButton=false
 																		  Format="N0"
-																		  Width="100%"
+																		  Width="60px"
 																		  CssClass="quantity-input"
 																		  Enabled="@(!_isSaving)" />
 													</div>
@@ -74,6 +76,7 @@ else
 										}
 									</Template>
 								</GridColumn>
+								<GridColumn Field="@nameof(SaleProductCartModel.Total)" HeaderText="Total" Width="25%" Format="N0" TextAlign="TextAlign.Right" />
 							</GridColumns>
 						</SfGrid>
 					</div>
@@ -665,28 +668,28 @@ else
 		padding: 20px 0; /* Changed from padding: 20px; to remove left/right padding */
 	}
 
-	/* Quantity Section - Enhanced for larger numbers */
+	/* Quantity Section - Centered and compact */
 	.quantity-section {
 		display: flex;
-		justify-content: flex-end;
+		justify-content: center;
 		align-items: center;
 		width: 100%;
-		padding: 2px 0; /* Reduced from 4px 0 */
+		padding: 2px 0;
 	}
 
 	.quantity-controls {
 		display: flex;
 		align-items: center;
-		gap: 6px; /* Reduced from 8px */
+		gap: 4px;
 		width: 100%;
-		justify-content: flex-end;
-		max-width: 200px; /* Reduced from 250px */
+		justify-content: center;
+		max-width: 80px; /* Significantly reduced from 200px */
 	}
 
 	.quantity-input-wrapper {
 		flex: 1;
-		min-width: 120px; /* Reduced from 160px */
-		max-width: 150px; /* Reduced from 200px */
+		min-width: 60px; /* Reduced from 120px */
+		max-width: 80px; /* Reduced from 150px */
 	}
 
 	.quantity-input {
@@ -697,14 +700,14 @@ else
 			text-align: center !important;
 			border: 2px solid var(--border-color);
 			border-radius: 8px;
-			padding: 6px 10px !important; /* Reduced from 8px 12px */
+			padding: 6px 8px !important; /* Increased from 4px 6px */
 			font-weight: 600;
-			font-size: 12px !important; /* Reduced from 14px */
+			font-size: 16px !important; /* Increased from 11px */
 			color: var(--text-dark);
 			transition: all 0.2s ease;
-			height: 32px !important; /* Reduced from 36px */
+			height: 36px !important; /* Increased from 28px */
 			box-sizing: border-box;
-			letter-spacing: 0.3px; /* Reduced from 0.5px */
+			letter-spacing: 0.3px; /* Increased from 0.2px */
 		}
 
 			.quantity-input input:focus {
@@ -1378,14 +1381,14 @@ else
 		}
 
 		.quantity-input-wrapper {
-			min-width: 80px; /* Reduced from 100px */
-			max-width: 100px; /* Reduced from 120px */
+			min-width: 50px; /* Reduced from 80px */
+			max-width: 70px; /* Reduced from 100px */
 		}
 
 		.quantity-input input {
-			height: 28px !important; /* Reduced from 34px */
-			font-size: 11px !important; /* Reduced from 13px */
-			padding: 4px 8px !important; /* Reduced from 6px 10px */
+			height: 32px !important; /* Reduced from 36px for mobile */
+			font-size: 14px !important; /* Reduced from 16px for mobile */
+			padding: 5px 6px !important; /* Adjusted padding */
 		}
 
 		::deep .e-grid .e-headercell {
@@ -1460,14 +1463,14 @@ else
 		}
 
 		.quantity-input-wrapper {
-			min-width: 70px; /* Reduced from 90px */
-			max-width: 90px; /* Reduced from 110px */
+			min-width: 45px; /* Reduced from 70px */
+			max-width: 60px; /* Reduced from 90px */
 		}
 
 		.quantity-input input {
-			height: 26px !important; /* Reduced from 32px */
-			font-size: 10px !important; /* Reduced from 12px */
-			padding: 3px 6px !important; /* Reduced from 5px 8px */
+			height: 28px !important; /* Reduced from 32px for smaller mobile */
+			font-size: 12px !important; /* Reduced from 14px for smaller mobile */
+			padding: 4px 5px !important; /* Adjusted padding */
 		}
 
 		.empty-cart {
@@ -1500,14 +1503,14 @@ else
 		}
 
 		.quantity-input-wrapper {
-			min-width: 60px; /* Reduced from 80px */
-			max-width: 80px; /* Reduced from 100px */
+			min-width: 40px; /* Reduced from 60px */
+			max-width: 55px; /* Reduced from 80px */
 		}
 
 		.quantity-input input {
-			height: 24px !important; /* Reduced from 30px */
-			font-size: 9px !important; /* Reduced from 11px */
-			padding: 2px 4px !important; /* Reduced from 4px 6px */
+			height: 24px !important; /* Reduced from 28px for very small screens */
+			font-size: 10px !important; /* Reduced from 12px for very small screens */
+			padding: 3px 4px !important; /* Adjusted padding */
 		}
 
 		.dialog-action-btn {
@@ -1529,7 +1532,7 @@ else
 		}
 
 		.quantity-input input {
-			min-height: 32px !important; /* Reduced from 36px to match the new height */
+			min-height: 36px !important; /* Increased for touch-friendly input */
 		}
 
 		.back-button {

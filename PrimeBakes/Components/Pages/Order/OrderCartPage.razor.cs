@@ -94,15 +94,7 @@ public partial class OrderCartPage
 		if (item.Quantity == 0)
 			_cart.Remove(item);
 
-		await _sfGrid.Refresh();
-		StateHasChanged();
-
-		if (_cart.Count == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)))
-			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
-		else
-			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
-
-		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		await SaveOrderFile();
 	}
 
 	private async Task ClearCart()
@@ -111,17 +103,28 @@ public partial class OrderCartPage
 			return;
 
 		_cart.Clear();
-		File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
 
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
 
-		await _sfGrid.Refresh();
-		StateHasChanged();
+		await SaveOrderFile();
 	}
 	#endregion
 
 	#region Saving
+	private async Task SaveOrderFile()
+	{
+		if (!_cart.Any(x => x.Quantity > 0) && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)))
+			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
+		else
+			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+
+		await _sfGrid.Refresh();
+		StateHasChanged();
+	}
+
 	private bool ValidateForm()
 	{
 		_validationErrors.Clear();
@@ -160,6 +163,8 @@ public partial class OrderCartPage
 
 		try
 		{
+			await SaveOrderFile();
+
 			if (!ValidateForm())
 			{
 				_validationErrorDialogVisible = true;

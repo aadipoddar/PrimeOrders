@@ -93,11 +93,7 @@ public partial class OrderPage
 			return;
 
 		item.Quantity = 1;
-		await _sfGrid.Refresh();
-		StateHasChanged();
-
-		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
-		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		await SaveOrderFile();
 	}
 
 	private async Task UpdateQuantity(OrderProductCartModel item, decimal newQuantity)
@@ -106,27 +102,33 @@ public partial class OrderPage
 			return;
 
 		item.Quantity = Math.Max(0, newQuantity);
-		await _sfGrid.Refresh();
-		StateHasChanged();
+		await SaveOrderFile();
+	}
 
-		if (_cart.Where(x => x.Quantity > 0).Count() == 0 && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)))
+	private async Task SaveOrderFile()
+	{
+		if (!_cart.Any(x => x.Quantity > 0) && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)))
 			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart));
 		else
 			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 
 		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+
+		await _sfGrid.Refresh();
+		StateHasChanged();
 	}
 
 	private async Task GoToCart()
 	{
-		if (_cart.Sum(x => x.Quantity) <= 0)
-			return;
+		await SaveOrderFile();
 
-		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
-		_cart.Clear();
+		if (_cart.Sum(x => x.Quantity) <= 0 || File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.OrderCart)) == false)
+			return;
 
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+
+		_cart.Clear();
 
 		NavManager.NavigateTo("/Order/Cart");
 	}
