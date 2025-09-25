@@ -141,6 +141,9 @@ public static class SaleA4Print
 		if (sale.IGSTPercent > 0)
 			summaryItems[$"IGST ({sale.IGSTPercent:N1}%):"] = sale.IGSTAmount.FormatIndianCurrency();
 
+		if (sale.RoundOff != 0)
+			summaryItems["Round Off:"] = sale.RoundOff.FormatIndianCurrency();
+
 		var paymentMode = GetPaymentMode(sale);
 
 		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, sale.Total, paymentMode);

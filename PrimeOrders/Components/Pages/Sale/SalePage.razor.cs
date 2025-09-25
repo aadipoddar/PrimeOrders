@@ -445,10 +445,19 @@ public partial class SalePage
 			item.NetRate = item.Total / item.Quantity;
 		}
 
+
 		_baseTotal = _saleProductCart.Sum(c => c.BaseTotal);
 		_subTotal = _saleProductCart.Sum(c => c.AfterDiscount);
 		_discountAmount = _baseTotal - _subTotal;
-		_total = _saleProductCart.Sum(c => c.Total);
+		
+		// Calculate total before round off
+		decimal totalBeforeRoundOff = _saleProductCart.Sum(c => c.Total);
+		
+		// Calculate round off amount
+		_sale.RoundOff = Math.Round(totalBeforeRoundOff) - totalBeforeRoundOff;
+		
+		// Final total with round off
+		_total = totalBeforeRoundOff + _sale.RoundOff;
 
 		switch (_selectedPaymentModeId)
 		{

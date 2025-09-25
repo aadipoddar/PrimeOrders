@@ -30,6 +30,7 @@ public partial class SaleCartPage
 	private decimal _baseTotal = 0;
 	private decimal _discountAmount = 0;
 	private decimal _subTotal = 0;
+	private decimal _afterTax = 0;
 	private decimal _total = 0;
 	private int _selectedPaymentModeId = 1;
 
@@ -63,6 +64,7 @@ public partial class SaleCartPage
 		CustomerId = null,
 		DiscPercent = 0,
 		DiscReason = "",
+		RoundOff = 0,
 		CreatedAt = DateTime.Now,
 		Status = true,
 	};
@@ -286,10 +288,13 @@ public partial class SaleCartPage
 			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
 		}
 
+		_sale.RoundOff = Math.Round(_cart.Sum(x => x.Total)) - _cart.Sum(x => x.Total);
+
 		_baseTotal = _cart.Sum(c => c.BaseTotal);
 		_subTotal = _cart.Sum(c => c.AfterDiscount);
 		_discountAmount = _baseTotal - _subTotal;
-		_total = _cart.Sum(c => c.Total);
+		_afterTax = _cart.Sum(c => c.Total);
+		_total = _afterTax + _sale.RoundOff;
 
 		switch (_selectedPaymentModeId)
 		{

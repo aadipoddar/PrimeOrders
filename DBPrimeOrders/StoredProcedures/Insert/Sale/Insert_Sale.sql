@@ -3,6 +3,7 @@
 	@BillNo VARCHAR(20),
 	@DiscPercent DECIMAL(5, 2),
 	@DiscReason VARCHAR(250),
+	@RoundOff MONEY,
 	@Remarks VARCHAR(250),
 	@UserId INT,
 	@LocationId INT,
@@ -21,18 +22,19 @@ BEGIN
 	IF @Id = 0
 	BEGIN
 		INSERT INTO [dbo].[Sale] 
-			([BillNo], [DiscPercent], DiscReason, Remarks, UserId, LocationId, SaleDateTime, PartyId, OrderId, Cash, Card, UPI, Credit, CustomerId, Status)
+			([BillNo], [DiscPercent], DiscReason, RoundOff, Remarks, UserId, LocationId, SaleDateTime, PartyId, OrderId, Cash, Card, UPI, Credit, CustomerId, Status)
 		VALUES 
-			(@BillNo, @DiscPercent, @DiscReason, @Remarks, @UserId, @LocationId, @SaleDateTime, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @CustomerId, @Status);
+			(@BillNo, @DiscPercent, @DiscReason, @RoundOff, @Remarks, @UserId, @LocationId, @SaleDateTime, @PartyId, @OrderId, @Cash, @Card, @UPI, @Credit, @CustomerId, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
 	BEGIN
 		UPDATE [dbo].[Sale]
 		SET
-			[BillNo] = @BillNo,
-			[DiscPercent] = @DiscPercent,
+			BillNo = @BillNo,
+			DiscPercent = @DiscPercent,
 			DiscReason = @DiscReason,
+			RoundOff = @RoundOff,
 			Remarks = @Remarks,
 			UserId = @UserId,
 			LocationId = @LocationId,

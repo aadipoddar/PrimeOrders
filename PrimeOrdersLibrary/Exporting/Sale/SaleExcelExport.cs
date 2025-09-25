@@ -41,6 +41,7 @@ public static class SaleExcelExport
 					nameof(SaleOverviewModel.IGSTPercent),
 					nameof(SaleOverviewModel.IGSTAmount),
 					nameof(SaleOverviewModel.TotalTaxAmount),
+					nameof(SaleOverviewModel.RoundOff),
 					nameof(SaleOverviewModel.Total),
 					nameof(SaleOverviewModel.Cash),
 					nameof(SaleOverviewModel.Card),

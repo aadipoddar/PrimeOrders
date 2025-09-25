@@ -32,7 +32,9 @@
 
 		SUM(sd.BaseTotal) AS BaseTotal,
 		SUM(sd.AfterDiscount) AS SubTotal,
-		SUM(sd.Total) AS Total,
+		SUM(sd.Total) AS AfterTax,
+		[s].[RoundOff],
+		SUM(sd.Total) + [s].[RoundOff] AS Total,
 
 		[s].[Cash],
 		[s].[Card],
@@ -77,6 +79,7 @@
 		[s].[Remarks],
 		[s].[DiscPercent],
 		[s].[DiscReason],
+		[s].[RoundOff],
 		[s].[Cash],
 		[s].[Card],
 		[s].[UPI],

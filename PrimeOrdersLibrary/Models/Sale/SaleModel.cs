@@ -6,6 +6,7 @@ public class SaleModel
 	public string BillNo { get; set; }
 	public decimal DiscPercent { get; set; }
 	public string DiscReason { get; set; }
+	public decimal RoundOff { get; set; }
 	public string Remarks { get; set; }
 	public int UserId { get; set; }
 	public int LocationId { get; set; }
@@ -92,6 +93,8 @@ public class SaleOverviewModel
 	public decimal TotalTaxAmount { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal SubTotal { get; set; }
+	public decimal AfterTax { get; set; }
+	public decimal RoundOff { get; set; }
 	public decimal Total { get; set; }
 	public decimal Cash { get; set; }
 	public decimal Card { get; set; }

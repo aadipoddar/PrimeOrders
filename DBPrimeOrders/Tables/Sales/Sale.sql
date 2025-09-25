@@ -4,6 +4,7 @@
     [BillNo] VARCHAR(20) NOT NULL UNIQUE, 
     [DiscPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0,
     [DiscReason] VARCHAR(250) NOT NULL, 
+    [RoundOff] MONEY NOT NULL DEFAULT 0, 
     [Remarks] VARCHAR(250) NOT NULL, 
     [UserId] INT NOT NULL, 
     [LocationId] INT NOT NULL, 

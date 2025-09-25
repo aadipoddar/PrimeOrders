@@ -50,6 +50,7 @@ public partial class SalePage
 		CustomerId = null,
 		DiscPercent = 0,
 		DiscReason = "",
+		RoundOff = 0,
 		CreatedAt = DateTime.Now,
 		Status = true,
 	};
@@ -307,58 +308,6 @@ public partial class SalePage
 	}
 	#endregion
 
-	#region Saving
-	private void UpdateFinancialDetails()
-	{
-		foreach (var item in _cart)
-		{
-			item.BaseTotal = item.Rate * item.Quantity;
-			item.DiscAmount = item.BaseTotal * (item.DiscPercent / 100);
-			item.AfterDiscount = item.BaseTotal - item.DiscAmount;
-			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
-			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
-			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
-			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
-			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
-		}
-
-		_sfGrid?.Refresh();
-		StateHasChanged();
-	}
-
-	private async Task SaveSaleFile()
-	{
-		UpdateFinancialDetails();
-
-		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale), System.Text.Json.JsonSerializer.Serialize(_sale));
-
-		if (!_cart.Any(x => x.Quantity > 0) && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart)))
-			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart));
-		else
-			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
-
-		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-
-		await _sfGrid.Refresh();
-		StateHasChanged();
-	}
-
-	private async Task GoToCart()
-	{
-		await SaveSaleFile();
-
-		if (_cart.Sum(x => x.Quantity) <= 0 || File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart)) == false)
-			return;
-
-		if (Vibration.Default.IsSupported)
-			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
-
-		_cart.Clear();
-
-		NavManager.NavigateTo("/Sale/Cart");
-	}
-	#endregion
-
 	#region Product Details Dialog
 	private void OpenProductDetailsDialog(SaleProductCartModel item)
 	{
@@ -470,6 +419,60 @@ public partial class SalePage
 	{
 		_taxDetailsDialogVisible = false;
 		await SaveSaleFile();
+	}
+	#endregion
+
+	#region Saving
+	private void UpdateFinancialDetails()
+	{
+		foreach (var item in _cart)
+		{
+			item.BaseTotal = item.Rate * item.Quantity;
+			item.DiscAmount = item.BaseTotal * (item.DiscPercent / 100);
+			item.AfterDiscount = item.BaseTotal - item.DiscAmount;
+			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
+			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
+			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
+			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
+		}
+
+		_sale.RoundOff = Math.Round(_cart.Sum(x => x.Total)) - _cart.Sum(x => x.Total);
+
+		_sfGrid?.Refresh();
+		StateHasChanged();
+	}
+
+	private async Task SaveSaleFile()
+	{
+		UpdateFinancialDetails();
+
+		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale), System.Text.Json.JsonSerializer.Serialize(_sale));
+
+		if (!_cart.Any(x => x.Quantity > 0) && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart)))
+			File.Delete(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart));
+		else
+			await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart), System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
+
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+
+		await _sfGrid.Refresh();
+		StateHasChanged();
+	}
+
+	private async Task GoToCart()
+	{
+		await SaveSaleFile();
+
+		if (_cart.Sum(x => x.Quantity) <= 0 || File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart)) == false)
+			return;
+
+		if (Vibration.Default.IsSupported)
+			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
+
+		_cart.Clear();
+
+		NavManager.NavigateTo("/Sale/Cart");
 	}
 	#endregion
 }
