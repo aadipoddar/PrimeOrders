@@ -38,10 +38,15 @@ public partial class SaleCartPage
 	private bool _validationErrorDialogVisible = false;
 	private bool _discountDialogVisible = false;
 	private bool _customerDialogVisible = false;
+	private bool _productDetailsDialogVisible = false;
+	private bool _basicInfoDialogVisible = false;
+	private bool _discountDetailsDialogVisible = false;
+	private bool _taxDetailsDialogVisible = false;
 
 	private List<PaymentModeModel> _paymentModes = [];
 	private readonly List<SaleProductCartModel> _cart = [];
 	private readonly List<ValidationError> _validationErrors = [];
+	private SaleProductCartModel? _selectedProductForEdit;
 
 	private CustomerModel _customer = new();
 	private SaleModel _sale = new()
@@ -74,6 +79,10 @@ public partial class SaleCartPage
 	private SfDialog _sfValidationErrorDialog;
 	private SfDialog _sfDiscountDialog;
 	private SfDialog _sfCustomerDialog;
+	private SfDialog _sfProductDetailsDialog;
+	private SfDialog _sfBasicInfoDialog;
+	private SfDialog _sfDiscountDetailsDialog;
+	private SfDialog _sfTaxDetailsDialog;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
@@ -534,5 +543,119 @@ public partial class SaleCartPage
 		await LocalNotificationCenter.Current.Show(request);
 	}
 #endif
+	#endregion
+
+	#region Product Details Dialog
+	private void OpenProductDetailsDialog(SaleProductCartModel item)
+	{
+		if (item is null || item.Quantity <= 0)
+			return;
+
+		_selectedProductForEdit = item;
+		_productDetailsDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private void OpenBasicDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_basicInfoDialogVisible = true;
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		StateHasChanged();
+	}
+
+	private void OpenDiscountDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_discountDetailsDialogVisible = true;
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		StateHasChanged();
+	}
+
+	private void OpenTaxDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_taxDetailsDialogVisible = true;
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Basic Info Dialog
+	private async Task OnBasicRateChanged(decimal newRate)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.Rate = Math.Max(0, newRate);
+		await SaveSaleFile();
+	}
+
+	private async Task OnBasicQuantityChanged(decimal newQuantity)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.Quantity = Math.Max(0, newQuantity);
+		await SaveSaleFile();
+	}
+
+	private async Task OnSaveBasicInfoClick()
+	{
+		_basicInfoDialogVisible = false;
+		await SaveSaleFile();
+	}
+	#endregion
+
+	#region Discount Details Dialog
+	private async Task OnDiscountPercentChanged(decimal newDiscountPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.DiscPercent = Math.Max(0, Math.Min(100, newDiscountPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnSaveDiscountClick()
+	{
+		_discountDetailsDialogVisible = false;
+		await SaveSaleFile();
+	}
+	#endregion
+
+	#region Tax Details Dialog
+	private async Task OnCGSTPercentChanged(decimal newCGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.CGSTPercent = Math.Max(0, Math.Min(50, newCGSTPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnSGSTPercentChanged(decimal newSGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.SGSTPercent = Math.Max(0, Math.Min(50, newSGSTPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnIGSTPercentChanged(decimal newIGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.IGSTPercent = Math.Max(0, Math.Min(50, newIGSTPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnSaveTaxClick()
+	{
+		_taxDetailsDialogVisible = false;
+		await SaveSaleFile();
+	}
 	#endregion
 }

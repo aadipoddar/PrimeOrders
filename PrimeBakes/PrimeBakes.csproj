@@ -22,7 +22,7 @@
 		<Nullable>disable</Nullable>
 
 		<!-- Display name -->
-		<ApplicationTitle>PrimeBakes</ApplicationTitle>
+		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
@@ -32,7 +32,7 @@
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
-		<WindowsPackageType>None</WindowsPackageType>
+		<WindowsPackageType>MSIX</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -40,7 +40,15 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-		<AssemblyVersion>1.0.2.8</AssemblyVersion>
+		<AssemblyVersion>1.0.2.9</AssemblyVersion>
+		<PackageCertificateThumbprint>B29F998FC14796D2F8A30F71F79946B7A9BEF410</PackageCertificateThumbprint>
+		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+		<GenerateTestArtifacts>True</GenerateTestArtifacts>
+		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
@@ -120,10 +128,10 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
 		<PackageReference Include="Plugin.LocalNotification" Version="12.0.2" />
 		<PackageReference Include="Plugin.Maui.Audio" Version="4.0.0" />
-		<PackageReference Include="Syncfusion.Blazor.Grid" Version="31.1.19" />
-		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.1.19" />
-		<PackageReference Include="Syncfusion.Blazor.Popups" Version="31.1.19" />
-		<PackageReference Include="Syncfusion.Blazor.Themes" Version="31.1.19" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" Version="31.1.21" />
+		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.1.21" />
+		<PackageReference Include="Syncfusion.Blazor.Popups" Version="31.1.21" />
+		<PackageReference Include="Syncfusion.Blazor.Themes" Version="31.1.21" />
 	</ItemGroup>
 
 	<ItemGroup>

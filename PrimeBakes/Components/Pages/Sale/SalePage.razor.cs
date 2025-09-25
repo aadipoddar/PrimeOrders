@@ -28,8 +28,14 @@ public partial class SalePage
 	private int _selectedCategoryId = 0;
 
 	private bool _partyDetailsDialogVisible = false;
+	private bool _productDetailsDialogVisible = false;
+	private bool _basicInfoDialogVisible = false;
+	private bool _discountDetailsDialogVisible = false;
+	private bool _taxDetailsDialogVisible = false;
 
 	private LedgerModel? _selectedParty;
+	private SaleProductCartModel? _selectedProductForEdit;
+
 	private SaleModel _sale = new()
 	{
 		Id = 0,
@@ -57,18 +63,24 @@ public partial class SalePage
 	private SfGrid<SaleProductCartModel> _sfGrid;
 
 	private SfDialog _sfPartyDetailsDialog;
+	private SfDialog _sfProductDetailsDialog;
+	private SfDialog _sfBasicInfoDialog;
+	private SfDialog _sfDiscountDetailsDialog;
+	private SfDialog _sfTaxDetailsDialog;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
 		_user = await AuthService.AuthenticateCurrentUser(NavManager);
-
 		await LoadData();
 		_isLoading = false;
 	}
 
 	private async Task LoadData()
 	{
+		_sale.LocationId = _user.LocationId;
+		_sale.UserId = _user.Id;
+
 		_parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
 		_parties.RemoveAll(p => p.LocationId == _user.LocationId);
 
@@ -234,7 +246,7 @@ public partial class SalePage
 	}
 	#endregion
 
-	#region Products
+	#region Cart
 	private void ResetCart()
 	{
 		_cart.Clear();
@@ -293,7 +305,9 @@ public partial class SalePage
 		item.Quantity = Math.Max(0, newQuantity);
 		await SaveSaleFile();
 	}
+	#endregion
 
+	#region Saving
 	private void UpdateFinancialDetails()
 	{
 		foreach (var item in _cart)
@@ -316,9 +330,6 @@ public partial class SalePage
 	{
 		UpdateFinancialDetails();
 
-		_sale.LocationId = _user.LocationId;
-		_sale.UserId = _user.Id;
-
 		await File.WriteAllTextAsync(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.Sale), System.Text.Json.JsonSerializer.Serialize(_sale));
 
 		if (!_cart.Any(x => x.Quantity > 0) && File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart)))
@@ -334,16 +345,131 @@ public partial class SalePage
 
 	private async Task GoToCart()
 	{
-		if (_cart.Sum(x => x.Quantity) <= 0)
-			return;
-
 		await SaveSaleFile();
-		_cart.Clear();
+
+		if (_cart.Sum(x => x.Quantity) <= 0 || File.Exists(Path.Combine(FileSystem.Current.AppDataDirectory, StorageFileNames.SaleCart)) == false)
+			return;
 
 		if (Vibration.Default.IsSupported)
 			Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
 
+		_cart.Clear();
+
 		NavManager.NavigateTo("/Sale/Cart");
+	}
+	#endregion
+
+	#region Product Details Dialog
+	private void OpenProductDetailsDialog(SaleProductCartModel item)
+	{
+		if (item is null || item.Quantity <= 0)
+			return;
+
+		_selectedProductForEdit = item;
+		_productDetailsDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private void OpenBasicDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_basicInfoDialogVisible = true;
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		StateHasChanged();
+	}
+
+	private void OpenDiscountDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_discountDetailsDialogVisible = true;
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		StateHasChanged();
+	}
+
+	private void OpenTaxDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_taxDetailsDialogVisible = true;
+		HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Basic Info Dialog
+	private async Task OnBasicRateChanged(decimal newRate)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.Rate = Math.Max(0, newRate);
+		await SaveSaleFile();
+	}
+
+	private async Task OnBasicQuantityChanged(decimal newQuantity)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.Quantity = Math.Max(0, newQuantity);
+		await SaveSaleFile();
+	}
+
+	private async Task OnSaveBasicInfoClick()
+	{
+		_basicInfoDialogVisible = false;
+		await SaveSaleFile();
+	}
+	#endregion
+
+	#region Discount Details Dialog
+	private async Task OnDiscountPercentChanged(decimal newDiscountPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.DiscPercent = Math.Max(0, Math.Min(100, newDiscountPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnSaveDiscountClick()
+	{
+		_discountDetailsDialogVisible = false;
+		await SaveSaleFile();
+	}
+	#endregion
+
+	#region Tax Details Dialog
+	private async Task OnCGSTPercentChanged(decimal newCGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.CGSTPercent = Math.Max(0, Math.Min(50, newCGSTPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnSGSTPercentChanged(decimal newSGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.SGSTPercent = Math.Max(0, Math.Min(50, newSGSTPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnIGSTPercentChanged(decimal newIGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.IGSTPercent = Math.Max(0, Math.Min(50, newIGSTPercent));
+		await SaveSaleFile();
+	}
+
+	private async Task OnSaveTaxClick()
+	{
+		_taxDetailsDialogVisible = false;
+		await SaveSaleFile();
 	}
 	#endregion
 }

@@ -8,7 +8,7 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading sale page...</p>
+		<p class="loading-text">Loading Sale Page...</p>
 	</div>
 }
 else
@@ -65,9 +65,8 @@ else
 				<GridPageSettings PageSize="4" />
 
 				<GridColumns>
-					<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="30%" />
-					<GridColumn Field="@nameof(SaleProductCartModel.Rate)" HeaderText="Price" Width="15%" Format="N0" TextAlign="TextAlign.Right" />
-					<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="20%" TextAlign="TextAlign.Center">
+					<GridColumn Field="@nameof(SaleProductCartModel.ProductName)" HeaderText="Product" Width="35%" />
+					<GridColumn Field="@nameof(SaleProductCartModel.Quantity)" HeaderText="Quantity" Width="25%" TextAlign="TextAlign.Center">
 						<Template>
 							@{
 								var item = (context as SaleProductCartModel);
@@ -102,8 +101,39 @@ else
 							}
 						</Template>
 					</GridColumn>
-					<GridColumn Field="@nameof(SaleProductCartModel.Total)" HeaderText="Total" Width="20%" Format="N0" TextAlign="TextAlign.Right" />
-
+					<GridColumn HeaderText="Amount" Width="20%" TextAlign="TextAlign.Right">
+						<Template>
+							@{
+								var item = (context as SaleProductCartModel);
+							}
+							@if (item is not null)
+							{
+								<div class="price-total-column">
+									<div class="price-section">
+										<span class="price-label">Price:</span>
+										<span class="price-value">@item.Rate.FormatIndianCurrency()</span>
+									</div>
+									<div class="total-section">
+										<span class="total-label">Total:</span>
+										<span class="total-value">@item.Total.FormatIndianCurrency()</span>
+									</div>
+								</div>
+							}
+						</Template>
+					</GridColumn>
+					<GridColumn HeaderText="🖊️" Width="10%" TextAlign="TextAlign.Right">
+						<Template>
+							@{
+								var item = (context as SaleProductCartModel);
+							}
+							@if (item is not null && item.Quantity > 0)
+							{
+								<button class="edit-button" @onclick="() => OpenProductDetailsDialog(item)" @onclick:stopPropagation="true" title="Edit Product Details">
+									<span class="edit-icon">⚙️</span>
+								</button>
+							}
+						</Template>
+					</GridColumn>
 				</GridColumns>
 			</SfGrid>
 		</div>
@@ -187,6 +217,321 @@ else
 	</DialogTemplates>
 </SfDialog>
 
+<!-- Product Details Dialog -->
+<SfDialog ID="_sfProductDetailsDialog"
+		  @ref="_sfProductDetailsDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_productDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="product-icon">📦</span>
+				<span>Edit Product Details</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				@if (_selectedProductForEdit != null)
+				{
+					<div class="product-info-section">
+						<h4 class="product-title">@_selectedProductForEdit.ProductName</h4>
+						<div class="product-summary">
+							<span class="summary-item">Qty: <strong>@_selectedProductForEdit.Quantity.ToString("N0")</strong></span>
+							<span class="summary-item">Rate: <strong>₹@_selectedProductForEdit.Rate.ToString("N2")</strong></span>
+							<span class="summary-item">Total: <strong>₹@_selectedProductForEdit.Total.ToString("N2")</strong></span>
+						</div>
+					</div>
+
+					<div class="action-buttons-section">
+						<button class="detail-action-button basic-button" @onclick="() => OpenBasicDetails()">
+							<span class="button-icon">📋</span>
+							<span class="button-text">Basic</span>
+							<span class="button-description">Edit basic product info</span>
+						</button>
+
+						<button class="detail-action-button discount-button" @onclick="() => OpenDiscountDetails()">
+							<span class="button-icon">💰</span>
+							<span class="button-text">Discount</span>
+							<span class="button-description">Apply discounts</span>
+						</button>
+
+						<button class="detail-action-button tax-button" @onclick="() => OpenTaxDetails()">
+							<span class="button-icon">🧾</span>
+							<span class="button-text">Tax</span>
+							<span class="button-description">Configure tax settings</span>
+						</button>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<SfButton Content="Close" OnClick="() => _productDetailsDialogVisible = false" CssClass="dialog-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Basic Info Dialog -->
+<SfDialog ID="_sfBasicInfoDialog"
+		  @ref="_sfBasicInfoDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_basicInfoDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="product-icon">📋</span>
+				<span>Basic Info: </span>
+				<span class="material-name">@_selectedProductForEdit?.ProductName</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				@if (_selectedProductForEdit != null)
+				{
+					<div class="form-row">
+						<div class="form-group">
+							<label>Rate (₹)</label>
+							<SfNumericTextBox TValue="decimal"
+											  Value="_selectedProductForEdit.Rate"
+											  ValueChanged="OnBasicRateChanged"
+											  Min="0"
+											  Format="N2"
+											  CssClass="form-control" />
+						</div>
+
+						<div class="form-group">
+							<label>Quantity</label>
+							<SfNumericTextBox TValue="decimal"
+											  Value="_selectedProductForEdit.Quantity"
+											  ValueChanged="OnBasicQuantityChanged"
+											  Min="0"
+											  Format="N2"
+											  CssClass="form-control" />
+						</div>
+					</div>
+
+					<div class="basic-summary">
+						<div class="summary-card">
+							<div class="summary-row">
+								<span class="summary-label">Rate:</span>
+								<span class="summary-value">@_selectedProductForEdit.Rate.FormatIndianCurrency()</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">Quantity:</span>
+								<span class="summary-value">@_selectedProductForEdit.Quantity.ToString("N2")</span>
+							</div>
+							<div class="summary-divider"></div>
+							<div class="summary-row total-row">
+								<span class="summary-label">Base Total:</span>
+								<span class="summary-value total-value">@((_selectedProductForEdit.Rate * _selectedProductForEdit.Quantity).FormatIndianCurrency())</span>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveBasicInfoClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Discount Details Dialog -->
+<SfDialog ID="_sfDiscountDetailsDialog"
+		  @ref="_sfDiscountDetailsDialog"
+		  Width="600px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_discountDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="product-icon">💰</span>
+				<span>Discount Details: </span>
+				<span class="material-name">@_selectedProductForEdit?.ProductName</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				@if (_selectedProductForEdit != null)
+				{
+					<div class="form-row">
+						<div class="form-group">
+							<label>Discount Percentage (%)</label>
+							<SfNumericTextBox TValue="decimal"
+											  Value="_selectedProductForEdit.DiscPercent"
+											  ValueChanged="OnDiscountPercentChanged"
+											  Min="0"
+											  Max="100"
+											  Format="N2"
+											  CssClass="form-control" />
+						</div>
+					</div>
+
+					<div class="discount-summary">
+						<div class="summary-card">
+							<div class="summary-row">
+								<span class="summary-label">Base Amount:</span>
+								<span class="summary-value">@((_selectedProductForEdit.Rate * _selectedProductForEdit.Quantity).FormatIndianCurrency())</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">Discount (%):</span>
+								<span class="summary-value">@_selectedProductForEdit.DiscPercent.ToString("N2")%</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">Discount Amount:</span>
+								<span class="summary-value discount-value">-@((_selectedProductForEdit.Rate * _selectedProductForEdit.Quantity * _selectedProductForEdit.DiscPercent / 100).FormatIndianCurrency())</span>
+							</div>
+							<div class="summary-divider"></div>
+							<div class="summary-row total-row">
+								<span class="summary-label">After Discount:</span>
+								<span class="summary-value total-value">@(((_selectedProductForEdit.Rate * _selectedProductForEdit.Quantity) - (_selectedProductForEdit.Rate * _selectedProductForEdit.Quantity * _selectedProductForEdit.DiscPercent / 100)).FormatIndianCurrency())</span>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveDiscountClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Tax Details Dialog -->
+<SfDialog ID="_sfTaxDetailsDialog"
+		  @ref="_sfTaxDetailsDialog"
+		  Width="700px"
+		  Height="auto"
+		  AllowDragging="true"
+		  EnableResize="false"
+		  @bind-Visible="_taxDetailsDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header">
+				<span class="product-icon">🧾</span>
+				<span>Tax Details: </span>
+				<span class="material-name">@_selectedProductForEdit?.ProductName</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content">
+				@if (_selectedProductForEdit != null)
+				{
+					<div class="tax-grid">
+						<div class="tax-row">
+							<div class="tax-column">
+								<label>CGST Percentage (%)</label>
+								<SfNumericTextBox TValue="decimal"
+												  Value="_selectedProductForEdit.CGSTPercent"
+												  ValueChanged="OnCGSTPercentChanged"
+												  Min="0"
+												  Max="50"
+												  Format="N2"
+												  CssClass="form-control" />
+							</div>
+						</div>
+
+						<div class="tax-row">
+							<div class="tax-column">
+								<label>SGST Percentage (%)</label>
+								<SfNumericTextBox TValue="decimal"
+												  Value="_selectedProductForEdit.SGSTPercent"
+												  ValueChanged="OnSGSTPercentChanged"
+												  Min="0"
+												  Max="50"
+												  Format="N2"
+												  CssClass="form-control" />
+							</div>
+						</div>
+
+						<div class="tax-row">
+							<div class="tax-column">
+								<label>IGST Percentage (%)</label>
+								<SfNumericTextBox TValue="decimal"
+												  Value="_selectedProductForEdit.IGSTPercent"
+												  ValueChanged="OnIGSTPercentChanged"
+												  Min="0"
+												  Max="50"
+												  Format="N2"
+												  CssClass="form-control" />
+							</div>
+						</div>
+					</div>
+
+					<div class="tax-summary">
+						<div class="summary-card">
+							<div class="summary-row">
+								<span class="summary-label">Taxable Amount:</span>
+								<span class="summary-value">@_selectedProductForEdit.AfterDiscount.FormatIndianCurrency()</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">CGST Amount:</span>
+								<span class="summary-value">@_selectedProductForEdit.CGSTAmount.FormatIndianCurrency()</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">SGST Amount:</span>
+								<span class="summary-value">@_selectedProductForEdit.SGSTAmount.FormatIndianCurrency()</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">IGST Amount:</span>
+								<span class="summary-value">@_selectedProductForEdit.IGSTAmount.FormatIndianCurrency()</span>
+							</div>
+							<div class="summary-row">
+								<span class="summary-label">Total Tax:</span>
+								<span class="summary-value tax-value">@((_selectedProductForEdit.CGSTAmount + _selectedProductForEdit.SGSTAmount + _selectedProductForEdit.IGSTAmount).FormatIndianCurrency())</span>
+							</div>
+							<div class="summary-divider"></div>
+							<div class="summary-row total-row">
+								<span class="summary-label">Final Amount:</span>
+								<span class="summary-value total-value">@_selectedProductForEdit.Total.FormatIndianCurrency()</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="tax-info">
+						<div class="info-card">
+							<span class="info-icon">ℹ️</span>
+							<span class="info-text">Use CGST + SGST for intra-state transactions, or IGST for inter-state transactions.</span>
+						</div>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer">
+				<div class="footer-buttons">
+					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveTaxClick" CssClass="dialog-button" />
+				</div>
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
 <style>
 	:root {
 		--primary-color: #e2137b;
@@ -200,6 +545,9 @@ else
 		--shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
 		--success-color: #28a745;
 		--info-color: #17a2b8;
+		--warning-color: #ffc107;
+		--discount-color: #ff6b35;
+		--tax-color: #6f42c1;
 	}
 
 	/* Loading Animation - Add this to your existing styles */
@@ -479,6 +827,192 @@ else
 	.category-name {
 		font-weight: 500;
 		color: var(--text-dark);
+	}
+
+	/* Price/Total Combined Column Styling */
+	.price-total-column {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		align-items: flex-end;
+		font-size: 11px;
+	}
+
+	.price-section,
+	.total-section {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.price-label,
+	.total-label {
+		font-size: 9px;
+		color: var(--text-light);
+		font-weight: 500;
+		min-width: 30px;
+	}
+
+	.price-value {
+		font-weight: 600;
+		color: var(--text-dark);
+		font-size: 10px;
+	}
+
+	.total-value {
+		font-weight: 700;
+		color: var(--primary-color);
+		font-size: 11px;
+	}
+
+	/* Edit Button Styling */
+	.edit-button {
+		background: var(--info-color);
+		color: white;
+		border: none;
+		border-radius: 50%;
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-light);
+		font-size: 14px;
+	}
+
+		.edit-button:hover {
+			background: #138496;
+			transform: scale(1.1);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.edit-button:active {
+			transform: scale(0.95);
+		}
+
+	.edit-icon {
+		font-size: 12px;
+	}
+
+	/* Product Details Dialog Styling */
+	.product-icon {
+		font-size: 20px;
+		color: var(--primary-color);
+	}
+
+	.product-info-section {
+		margin-bottom: 25px;
+		padding: 20px;
+		background: var(--bg-light);
+		border-radius: 12px;
+		border: 1px solid var(--border-color);
+	}
+
+	.product-title {
+		margin: 0 0 15px 0;
+		color: var(--text-dark);
+		font-size: 18px;
+		font-weight: 600;
+		text-align: center;
+	}
+
+	.product-summary {
+		display: flex;
+		justify-content: space-around;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.summary-item {
+		font-size: 14px;
+		color: var(--text-light);
+		text-align: center;
+	}
+
+		.summary-item strong {
+			color: var(--text-dark);
+		}
+
+	/* Action Buttons Section */
+	.action-buttons-section {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+	}
+
+	.detail-action-button {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+		padding: 20px;
+		border: none;
+		border-radius: 12px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-align: left;
+		box-shadow: var(--shadow-light);
+		position: relative;
+		overflow: hidden;
+	}
+
+		.detail-action-button:hover {
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.detail-action-button:active {
+			transform: translateY(0);
+		}
+
+	.basic-button {
+		background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+		color: white;
+	}
+
+		.basic-button:hover {
+			background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+		}
+
+	.discount-button {
+		background: linear-gradient(135deg, var(--discount-color) 0%, #ff5722 100%);
+		color: white;
+	}
+
+		.discount-button:hover {
+			background: linear-gradient(135deg, #e55a4e 0%, #d84315 100%);
+		}
+
+	.tax-button {
+		background: linear-gradient(135deg, var(--tax-color) 0%, #5a39c5 100%);
+		color: white;
+	}
+
+		.tax-button:hover {
+			background: linear-gradient(135deg, #5e379b 0%, #483593 100%);
+		}
+
+	.button-icon {
+		font-size: 24px;
+		flex-shrink: 0;
+	}
+
+	.button-content {
+		flex: 1;
+	}
+
+	.button-text {
+		font-size: 18px;
+		font-weight: 600;
+		display: block;
+		margin-bottom: 4px;
+	}
+
+	.button-description {
+		font-size: 13px;
+		opacity: 0.9;
+		font-weight: 400;
 	}
 
 	/* Party Details Dialog Styling */
@@ -828,7 +1362,6 @@ else
 		transition: all 0.2s ease;
 		box-shadow: var(--shadow-light);
 		flex-shrink: 0;
-		font-size: 14px;
 	}
 
 		.control-btn:hover {
@@ -1161,6 +1694,55 @@ else
 			.dialog-footer button {
 				width: 100%;
 			}
+
+		.action-buttons-section {
+			gap: 12px;
+		}
+
+		.detail-action-button {
+			padding: 15px;
+			gap: 12px;
+		}
+
+		.button-icon {
+			font-size: 20px;
+		}
+
+		.button-text {
+			font-size: 16px;
+		}
+
+		.button-description {
+			font-size: 12px;
+		}
+
+		.price-total-column {
+			gap: 2px;
+			font-size: 10px;
+		}
+
+		.price-label,
+		.total-label {
+			font-size: 8px;
+			min-width: 25px;
+		}
+
+		.price-value {
+			font-size: 9px;
+		}
+
+		.total-value {
+			font-size: 10px;
+		}
+
+		.edit-button {
+			width: 28px;
+			height: 28px;
+		}
+
+		.edit-icon {
+			font-size: 10px;
+		}
 	}
 
 	@@media (max-width: 576px) {
@@ -1198,7 +1780,7 @@ else
 
 		.cart-button {
 			padding: 12px 15px;
-			font-size: 14px;
+			font_size: 14px;
 			min-height: 48px;
 		}
 
@@ -1241,7 +1823,7 @@ else
 		.control-btn {
 			width: 28px;
 			height: 28px;
-			font-size: 11px;
+			font-size: 10px;
 		}
 
 		.back-button, .header-action-btn {
@@ -1289,6 +1871,33 @@ else
 			height: 30px !important; /* Updated to match OrderCartPage */
 			padding: 4px 6px !important; /* Updated to match OrderCartPage */
 		}
+
+		.price-total-column {
+			font-size: 9px;
+		}
+
+		.price-label,
+		.total-label {
+			font-size: 7px;
+			min-width: 20px;
+		}
+
+		.price-value {
+			font-size: 8px;
+		}
+
+		.total-value {
+			font-size: 9px;
+		}
+
+		.edit-button {
+			width: 24px;
+			height: 24px;
+		}
+
+		.edit-icon {
+			font-size: 8px;
+		}
 	}
 
 	/* Improved touch targets for mobile */
@@ -1314,8 +1923,17 @@ else
 			height: 44px;
 		}
 
-		.quantity-input input {
+		quantity-input input {
 			min-height: 36px !important; /* Updated to match OrderCartPage */
+		}
+
+		.edit-button {
+			width: 40px;
+			height: 40px;
+		}
+
+		.detail-action-button {
+			min-height: 60px;
 		}
 	}
 
@@ -1341,10 +1959,232 @@ else
 			font-size: 10px;
 		}
 
-		.quantity-input input {
+		quantity-input input {
 			font-size: 8px !important; /* Extremely small for very tiny screens */
 			height: 20px !important;
 			padding: 2px 1px !important;
+		}
+	}
+
+	/* Additional styles for the new dialogs */
+
+	/* Form styling for dialogs */
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		margin-bottom: 20px;
+	}
+
+		.form-row .full-width {
+			grid-column: 1 / -1;
+		}
+
+	.readonly-field {
+		background-color: var(--bg-light) !important;
+		color: var(--text-light) !important;
+	}
+
+	/* Summary card styling */
+	.basic-summary,
+	.discount-summary,
+	.tax-summary {
+		margin-top: 25px;
+	}
+
+	.summary-card {
+		background-color: var(--bg-light);
+		border-radius: 12px;
+		padding: 20px;
+		border: 1px solid var(--border-color);
+		box-shadow: var(--shadow-light);
+	}
+
+	.summary-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+		.summary-row:last-child {
+			border-bottom: none;
+		}
+
+	.summary-label {
+		font-weight: 500;
+		color: var(--text-dark);
+		font-size: 14px;
+	}
+
+	.summary-value {
+		font-weight: 600;
+		color: var(--text-dark);
+		font-size: 14px;
+	}
+
+	.summary-divider {
+		height: 2px;
+		background-color: var(--border-color);
+		margin: 10px 0;
+		border-radius: 1px;
+	}
+
+	.total-row {
+		margin-top: 10px;
+		padding-top: 15px;
+		border-top: 2px solid var(--primary-color) !important;
+		border-bottom: none !important;
+	}
+
+		.total-row .summary-label,
+		.total-row .summary-value {
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+	.total-value {
+		color: var(--primary-color) !important;
+	}
+
+	.discount-value {
+		color: #dc3545 !important;
+	}
+
+	.tax-value {
+		color: var(--warning-color) !important;
+	}
+
+	/* Tax grid styling */
+	.tax-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		margin-bottom: 25px;
+	}
+
+	.tax-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		align-items: end;
+	}
+
+	.tax-column {
+		display: flex;
+		flex-direction: column;
+	}
+
+		.tax-column label {
+			margin-bottom: 8px;
+			font-weight: 500;
+			color: var(--text-dark);
+			font-size: 14px;
+		}
+
+	/* Tax info card */
+	.tax-info {
+		margin-top: 20px;
+	}
+
+	.info-card {
+		background-color: #e3f2fd;
+		border: 1px solid #2196f3;
+		border-radius: 8px;
+		padding: 15px;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.info-icon {
+		font-size: 18px;
+		flex-shrink: 0;
+	}
+
+	.info-text {
+		color: #1565c0;
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 1.4;
+	}
+
+	/* Clear button styling */
+	.clear-button {
+		background-color: #ffc107 !important;
+		color: #000 !important;
+		border: none;
+		transition: all 0.2s ease;
+	}
+
+		.clear-button:hover {
+			background-color: #e0a800 !important;
+			transform: translateY(-1px);
+			box-shadow: var(--shadow-medium);
+		}
+
+	/* Footer buttons styling */
+	.footer-buttons {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+		.footer-buttons .dialog-button {
+			min-width: 120px;
+		}
+
+	/* Responsive adjustments for dialogs */
+	@@media (max-width: 768px) {
+		.form-row {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.tax-row {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.footer-buttons {
+			flex-direction: column;
+		}
+
+			.footer-buttons .dialog-button {
+				width: 100%;
+			}
+
+		.summary-row {
+			padding: 8px 0;
+		}
+
+		.summary-label,
+		.summary-value {
+			font-size: 13px;
+		}
+
+		.total-row .summary-label,
+		.total-row .summary-value {
+			font-size: 15px;
+		}
+	}
+
+	@@media (max-width: 576px) {
+		.summary-card {
+			padding: 15px;
+		}
+
+		.tax-grid {
+			gap: 15px;
+		}
+
+		.info-card {
+			padding: 12px;
+		}
+
+		.info-text {
+			font-size: 13px;
 		}
 	}
 </style>
