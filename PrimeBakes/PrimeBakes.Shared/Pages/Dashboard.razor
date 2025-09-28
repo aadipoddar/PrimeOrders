@@ -1,0 +1,1620 @@
+﻿@page "/"
+@implements IDisposable
+
+<PageTitle>Dashboard - Prime Bakes</PageTitle>
+
+@if (_isLoading || _user is null)
+{
+	@if (_hasConnectionError)
+	{
+		<!-- Beautiful Connection Error UI -->
+		<div class="error-container">
+			<div class="error-card">
+				<div class="error-header">
+					<div class="error-icon-container">
+						<div class="error-icon">
+							<span class="wifi-icon">📶</span>
+							<div class="connection-lines">
+								<span class="line line-1"></span>
+								<span class="line line-2"></span>
+								<span class="line line-3"></span>
+							</div>
+						</div>
+					</div>
+					<h2 class="error-title">Connection Error</h2>
+					<p class="error-subtitle">Unable to connect to the internet</p>
+				</div>
+
+				<div class="error-body">
+					<div class="error-illustration">
+						<div class="cloud-container">
+							<div class="cloud cloud-1">☁️</div>
+							<div class="cloud cloud-2">☁️</div>
+							<div class="cloud cloud-3">⛅</div>
+						</div>
+						<div class="signal-waves">
+							<div class="wave-line wave-1"></div>
+							<div class="wave-line wave-2"></div>
+							<div class="wave-line wave-3"></div>
+						</div>
+					</div>
+
+					<div class="error-message">
+						<div class="message-icon">🌐</div>
+						<h3>No Internet Connection</h3>
+						<p>Please check your internet connection and try again. Make sure you're connected to Wi-Fi or mobile data.</p>
+					</div>
+
+					<div class="troubleshooting-tips">
+						<h4>Quick troubleshooting tips:</h4>
+						<ul class="tips-list">
+							<li>
+								<span class="tip-icon">📱</span>
+								<span>Check if mobile data or Wi-Fi is enabled</span>
+							</li>
+							<li>
+								<span class="tip-icon">🔄</span>
+								<span>Try turning airplane mode on and off</span>
+							</li>
+							<li>
+								<span class="tip-icon">📍</span>
+								<span>Move to an area with better signal</span>
+							</li>
+							<li>
+								<span class="tip-icon">⚡</span>
+								<span>Restart your device if the problem persists</span>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="error-footer">
+					<button @onclick="RetryConnection" class="retry-button">
+						<span class="retry-icon">🔄</span>
+						Try Again
+					</button>
+				</div>
+			</div>
+
+			<!-- Background Animation -->
+			<div class="error-background">
+				<div class="floating-particles">
+					<div class="particle particle-1"></div>
+					<div class="particle particle-2"></div>
+					<div class="particle particle-3"></div>
+					<div class="particle particle-4"></div>
+					<div class="particle particle-5"></div>
+				</div>
+			</div>
+		</div>
+	}
+	else if (_isUpdating || _isLoadingText.Contains("Updating application"))
+	{
+		<!-- Beautiful Update UI -->
+		<div class="update-container">
+			<div class="update-card">
+				<div class="update-header">
+					<div class="update-icon-container">
+						<div class="update-icon">
+							<span class="download-arrow">⬇</span>
+						</div>
+					</div>
+					<h2 class="update-title">Updating Prime Bakes</h2>
+					<p class="update-subtitle">Please wait while we download the latest version</p>
+				</div>
+
+				<div class="update-body">
+					<!-- Progress Ring -->
+					<div class="progress-ring-container">
+						<svg class="progress-ring" width="140" height="140">
+							<defs>
+								<linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+									<stop offset="0%" style="stop-color:#e2137b;stop-opacity:1" />
+									<stop offset="100%" style="stop-color:#c10e69;stop-opacity:1" />
+								</linearGradient>
+							</defs>
+							<circle class="progress-ring__circle-bg" cx="70" cy="70" r="60" />
+							<circle class="progress-ring__circle" cx="70" cy="70" r="60"
+									style="stroke-dasharray: @GetCircumference(); stroke-dashoffset: @GetStrokeOffset();" />
+						</svg>
+						<div class="progress-content">
+							<span class="progress-percentage">@_progressPercentage%</span>
+							<span class="progress-label">Downloaded</span>
+						</div>
+					</div>
+
+					<!-- Progress Bar -->
+					<div class="progress-bar-container">
+						<div class="progress-bar">
+							<div class="progress-fill" style="width: @(_progressPercentage)%"></div>
+							<div class="progress-glow" style="left: @(_progressPercentage)%"></div>
+						</div>
+						<div class="progress-text">
+							<span>@_isLoadingText</span>
+							<span class="eta">@_estimatedTime</span>
+						</div>
+					</div>
+
+					<!-- Fun Facts -->
+					<div class="fun-facts">
+						<div class="fact-container">
+							<div class="fact-icon">💡</div>
+							<p class="fun-fact">@_currentFunFact</p>
+						</div>
+					</div>
+
+					<!-- Animated Elements -->
+					<div class="update-animation">
+						<div class="floating-dots">
+							<span class="floating-dot" style="animation-delay: 0s;"></span>
+							<span class="floating-dot" style="animation-delay: 0.5s;"></span>
+							<span class="floating-dot" style="animation-delay: 1s;"></span>
+							<span class="floating-dot" style="animation-delay: 1.5s;"></span>
+						</div>
+					</div>
+				</div>
+
+				<div class="update-footer">
+					<div class="update-steps">
+						<div class="step @(_progressPercentage >= 10 ? "completed" : "active")">
+							<div class="step-icon">📦</div>
+							<span>Downloading</span>
+						</div>
+						<div class="step @(_progressPercentage >= 100 ? "completed" : _progressPercentage >= 10 ? "active" : "")">
+							<div class="step-icon">⚙️</div>
+							<span>Installing</span>
+						</div>
+						<div class="step @(_progressPercentage >= 100 ? "active" : "")">
+							<div class="step-icon">🚀</div>
+							<span>Launch</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Background Animation -->
+			<div class="update-background-animation">
+				<div class="wave wave1"></div>
+				<div class="wave wave2"></div>
+				<div class="wave wave3"></div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<!-- Regular Loading UI -->
+		<div class="loader-container">
+			<div class="circular-dots-loader">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>
+				<span class="dot dot-3"></span>
+			</div>
+			<p class="loading-text">@_isLoadingText</p>
+		</div>
+	}
+}
+else
+{
+	<!-- Dashboard Content -->
+	<div class="dashboard-container">
+		<div class="dashboard-header">
+			<div class="logo-section">
+				<img src="images/logo.png" alt="Prime Bakes Logo" class="dashboard-logo" />
+				<span class="welcome-text">Prime Bakes</span>
+			</div>
+			<div class="logout-section">
+				<button @onclick="Logout" class="logout-button">
+					<span class="logout-icon">⟲</span> Logout
+				</button>
+			</div>
+		</div>
+
+		<div class="dashboard-content">
+
+			<div class="dashboard-cards">
+
+				@if (_user.Order)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Order")'>
+						<div class="card-icon">📋</div>
+						<h3>Orders</h3>
+						<p>Manage customer orders</p>
+					</div>
+				}
+
+				@if (_user.Sales)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Sale")'>
+						<div class="card-icon">📈</div>
+						<h3>Sales</h3>
+						<p>Track sales performance</p>
+					</div>
+				}
+
+				@if (_user.Inventory)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory")'>
+						<div class="card-icon">📦</div>
+						<h3>Inventory</h3>
+						<p>Manage stock levels</p>
+					</div>
+				}
+			</div>
+		</div>
+
+		<!-- Device Information Card -->
+		<div class="device-info-card">
+			<div class="device-info-header">
+				<div class="device-icon">@DeviceType</div>
+				<h3>Device Information</h3>
+			</div>
+			<div class="device-info-grid">
+				<div class="info-item">
+					<span class="info-label">Platform</span>
+					<span class="info-value">@Platform</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">Form Factor</span>
+					<span class="info-value">@Factor</span>
+				</div>
+				<div class="info-item">
+					<span class="info-label">App Version</span>
+					<span class="info-value">@AppVersion</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="dashboard-footer">
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--primary-light: #ff4d9f;
+		--secondary-color: #2c3e50;
+		--accent-color: #3498db;
+		--success-color: #27ae60;
+		--warning-color: #f39c12;
+		--error-color: #e74c3c;
+		--light-bg: #f8f9fa;
+		--white: #ffffff;
+		--text-dark: #2c3e50;
+		--text-light: #7f8c8d;
+		--border-color: #e1e8ed;
+		--shadow: 0 4px 15px rgba(226, 19, 123, 0.1);
+		--shadow-hover: 0 8px 25px rgba(226, 19, 123, 0.2);
+		--border-radius: 16px;
+		--gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		--gradient-error: linear-gradient(135deg, var(--error-color) 0%, #c0392b 100%);
+		--gradient-device: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+	}
+
+	/* Error UI Styles */
+	.error-container {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		z-index: 1000;
+	}
+
+	.error-card {
+		background: var(--white);
+		border-radius: 24px;
+		padding: 40px;
+		max-width: 500px;
+		width: 90%;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+		position: relative;
+		z-index: 1001;
+		animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+		text-align: center;
+	}
+
+	.error-header {
+		margin-bottom: 30px;
+	}
+
+	.error-icon-container {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 20px;
+		position: relative;
+	}
+
+	.error-icon {
+		width: 80px;
+		height: 80px;
+		background: var(--gradient-error);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 32px;
+		color: var(--white);
+		animation: errorPulse 2s infinite;
+		position: relative;
+	}
+
+	.wifi-icon {
+		animation: fadeInOut 2s infinite;
+	}
+
+	.connection-lines {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 60px;
+		height: 60px;
+	}
+
+	.line {
+		position: absolute;
+		background: rgba(255, 255, 255, 0.3);
+		border-radius: 2px;
+		animation: connectionError 1.5s infinite;
+	}
+
+	.line-1 {
+		width: 20px;
+		height: 2px;
+		top: 20px;
+		left: 20px;
+		animation-delay: 0s;
+	}
+
+	.line-2 {
+		width: 2px;
+		height: 20px;
+		top: 10px;
+		left: 29px;
+		animation-delay: 0.5s;
+	}
+
+	.line-3 {
+		width: 15px;
+		height: 2px;
+		top: 35px;
+		left: 22px;
+		animation-delay: 1s;
+	}
+
+	.error-title {
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--text-dark);
+		margin-bottom: 8px;
+		letter-spacing: -0.5px;
+	}
+
+	.error-subtitle {
+		color: var(--text-light);
+		font-size: 16px;
+		margin: 0;
+	}
+
+	.error-body {
+		margin-bottom: 30px;
+	}
+
+	.error-illustration {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-bottom: 30px;
+		position: relative;
+		height: 120px;
+	}
+
+	.cloud-container {
+		display: flex;
+		gap: 20px;
+		align-items: center;
+	}
+
+	.cloud {
+		font-size: 24px;
+		animation: float 3s infinite ease-in-out;
+		filter: grayscale(0.5);
+	}
+
+	.cloud-1 {
+		animation-delay: 0s;
+	}
+
+	.cloud-2 {
+		animation-delay: 1s;
+		font-size: 20px;
+	}
+
+	.cloud-3 {
+		animation-delay: 2s;
+		font-size: 28px;
+	}
+
+	.signal-waves {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	.wave-line {
+		position: absolute;
+		width: 2px;
+		background: var(--error-color);
+		border-radius: 1px;
+		opacity: 0.3;
+		animation: signalError 2s infinite;
+	}
+
+	.wave-1 {
+		height: 20px;
+		left: -10px;
+		animation-delay: 0s;
+	}
+
+	.wave-2 {
+		height: 30px;
+		left: 0px;
+		animation-delay: 0.3s;
+	}
+
+	.wave-3 {
+		height: 25px;
+		left: 10px;
+		animation-delay: 0.6s;
+	}
+
+	.error-message {
+		background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, rgba(192, 57, 43, 0.05) 100%);
+		border-radius: 12px;
+		padding: 20px;
+		margin-bottom: 25px;
+		border-left: 4px solid var(--error-color);
+	}
+
+	.message-icon {
+		font-size: 24px;
+		margin-bottom: 10px;
+	}
+
+	.error-message h3 {
+		color: var(--text-dark);
+		font-size: 18px;
+		margin-bottom: 8px;
+		font-weight: 600;
+	}
+
+	.error-message p {
+		color: var(--text-light);
+		font-size: 14px;
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	.troubleshooting-tips {
+		text-align: left;
+		background: var(--light-bg);
+		border-radius: 12px;
+		padding: 20px;
+	}
+
+		.troubleshooting-tips h4 {
+			color: var(--text-dark);
+			font-size: 16px;
+			margin-bottom: 15px;
+			font-weight: 600;
+		}
+
+	.tips-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+		.tips-list li {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 12px;
+			color: var(--text-dark);
+			font-size: 14px;
+			line-height: 1.4;
+		}
+
+	.tip-icon {
+		font-size: 16px;
+		flex-shrink: 0;
+	}
+
+	.error-footer {
+		border-top: 1px solid var(--border-color);
+		padding-top: 20px;
+		text-align: center;
+	}
+
+	.retry-button {
+		background: var(--gradient-error);
+		color: var(--white);
+		border: none;
+		padding: 14px 28px;
+		border-radius: 12px;
+		cursor: pointer;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		font-size: 16px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+	}
+
+		.retry-button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+		}
+
+		.retry-button:active {
+			transform: translateY(0);
+		}
+
+	.retry-icon {
+		font-size: 18px;
+		animation: spin 2s infinite linear;
+	}
+
+	/* Update UI Styles */
+	.update-container {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		z-index: 1000;
+	}
+
+	.update-card {
+		background: var(--white);
+		border-radius: 24px;
+		padding: 40px;
+		max-width: 480px;
+		width: 90%;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+		position: relative;
+		z-index: 1001;
+		animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.update-header {
+		text-align: center;
+		margin-bottom: 30px;
+	}
+
+	.update-icon-container {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 20px;
+	}
+
+	.update-icon {
+		width: 80px;
+		height: 80px;
+		background: var(--gradient-primary);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 32px;
+		color: var(--white);
+		animation: pulse 2s infinite;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.download-arrow {
+		animation: bounce 1.5s infinite;
+	}
+
+	.update-title {
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--text-dark);
+		margin-bottom: 8px;
+		letter-spacing: -0.5px;
+	}
+
+	.update-subtitle {
+		color: var(--text-light);
+		font-size: 16px;
+		margin: 0;
+	}
+
+	.update-body {
+		margin-bottom: 30px;
+	}
+
+	/* Progress Ring */
+	.progress-ring-container {
+		position: relative;
+		display: flex;
+		justify-content: center;
+		margin-bottom: 30px;
+	}
+
+	.progress-ring {
+		transform: rotate(-90deg);
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+	}
+
+	.progress-ring__circle-bg {
+		stroke: #f0f0f0;
+		stroke-width: 6;
+		fill: transparent;
+	}
+
+	.progress-ring__circle {
+		stroke: url(#progressGradient);
+		stroke-width: 6;
+		stroke-linecap: round;
+		fill: transparent;
+		transition: stroke-dashoffset 0.3s ease;
+	}
+
+	.progress-content {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: center;
+	}
+
+	.progress-percentage {
+		display: block;
+		font-size: 32px;
+		font-weight: 700;
+		color: var(--primary-color);
+		line-height: 1;
+	}
+
+	.progress-label {
+		display: block;
+		font-size: 14px;
+		color: var(--text-light);
+		margin-top: 4px;
+	}
+
+	/* Progress Bar */
+	.progress-bar-container {
+		margin-bottom: 25px;
+	}
+
+	.progress-bar {
+		width: 100%;
+		height: 8px;
+		background-color: #f0f0f0;
+		border-radius: 4px;
+		overflow: hidden;
+		position: relative;
+		margin-bottom: 10px;
+	}
+
+	.progress-fill {
+		height: 100%;
+		background: var(--gradient-primary);
+		border-radius: 4px;
+		transition: width 0.3s ease;
+		position: relative;
+	}
+
+	.progress-glow {
+		position: absolute;
+		top: 0;
+		width: 20px;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+		transform: translateX(-50%);
+		animation: shimmer 2s infinite;
+	}
+
+	.progress-text {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 14px;
+	}
+
+	.eta {
+		color: var(--text-light);
+		font-style: italic;
+	}
+
+	/* Fun Facts */
+	.fun-facts {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
+		border-radius: 12px;
+		padding: 20px;
+		margin-bottom: 20px;
+		border-left: 4px solid var(--primary-color);
+	}
+
+	.fact-container {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.fact-icon {
+		font-size: 20px;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	.fun-fact {
+		color: var(--text-dark);
+		font-size: 14px;
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	/* Update Steps */
+	.update-footer {
+		border-top: 1px solid var(--border-color);
+		padding-top: 20px;
+	}
+
+	.update-steps {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.step {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		opacity: 0.5;
+		transition: all 0.3s ease;
+	}
+
+		.step.active {
+			opacity: 1;
+			color: var(--primary-color);
+		}
+
+		.step.completed {
+			opacity: 1;
+			color: var(--success-color);
+		}
+
+	.step-icon {
+		font-size: 20px;
+		transition: transform 0.3s ease;
+	}
+
+	.step.active .step-icon,
+	.step.completed .step-icon {
+		transform: scale(1.2);
+	}
+
+	.step span {
+		font-size: 12px;
+		font-weight: 500;
+	}
+
+	/* Floating Animation */
+	.update-animation {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		opacity: 0.3;
+	}
+
+	.floating-dots {
+		display: flex;
+		gap: 8px;
+	}
+
+	.floating-dot {
+		width: 8px;
+		height: 8px;
+		background: var(--primary-color);
+		border-radius: 50%;
+		animation: float 2s infinite ease-in-out;
+	}
+
+	/* Background Animations */
+	.error-background {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		overflow: hidden;
+	}
+
+	.floating-particles {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.particle {
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		background: rgba(255, 255, 255, 0.3);
+		border-radius: 50%;
+		animation: particleFloat 10s infinite linear;
+	}
+
+	.particle-1 {
+		top: 10%;
+		left: 10%;
+		animation-delay: 0s;
+		animation-duration: 12s;
+	}
+
+	.particle-2 {
+		top: 20%;
+		left: 80%;
+		animation-delay: 2s;
+		animation-duration: 8s;
+	}
+
+	.particle-3 {
+		top: 70%;
+		left: 20%;
+		animation-delay: 4s;
+		animation-duration: 15s;
+	}
+
+	.particle-4 {
+		top: 60%;
+		left: 90%;
+		animation-delay: 6s;
+		animation-duration: 10s;
+	}
+
+	.particle-5 {
+		top: 90%;
+		left: 50%;
+		animation-delay: 8s;
+		animation-duration: 11s;
+	}
+
+	.update-background-animation {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		overflow: hidden;
+	}
+
+	.wave {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 200%;
+		height: 100px;
+		background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+		animation: wave 8s infinite linear;
+	}
+
+	.wave1 {
+		animation-delay: 0s;
+		opacity: 0.3;
+	}
+
+	.wave2 {
+		animation-delay: -2s;
+		opacity: 0.2;
+		height: 80px;
+	}
+
+	.wave3 {
+		animation-delay: -4s;
+		opacity: 0.1;
+		height: 60px;
+	}
+
+	/* Regular Loading UI */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--accent-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--text-dark);
+		font-size: 16px;
+		margin-top: 10px;
+		font-weight: 500;
+	}
+
+	/* Dashboard Content */
+	.dashboard-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+		padding: 20px;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
+	}
+
+	.dashboard-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 15px 25px;
+		background: var(--white);
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow);
+		margin-bottom: 20px;
+		border: 1px solid var(--border-color);
+	}
+
+	.logo-section {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.dashboard-logo {
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 2px solid var(--primary-color);
+		flex-shrink: 0;
+	}
+
+	.welcome-text {
+		font-weight: 700;
+		color: var(--primary-color);
+		font-size: 24px;
+		letter-spacing: -0.5px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.logout-section {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.logout-button {
+		background-color: transparent;
+		border: 2px solid var(--primary-color);
+		color: var(--primary-color);
+		padding: 10px 16px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		font-size: 14px;
+		white-space: nowrap;
+	}
+
+		.logout-button:hover {
+			background-color: var(--primary-color);
+			color: var(--white);
+			transform: translateY(-2px);
+		}
+
+	.logout-icon {
+		font-size: 16px;
+	}
+
+	.logout-text {
+		display: inline;
+	}
+
+	/* Device Information Card */
+	.device-info-card {
+		background: var(--white);
+		border-radius: var(--border-radius);
+		padding: 25px;
+		box-shadow: var(--shadow);
+		margin-bottom: 20px;
+		border: 1px solid var(--border-color);
+		position: relative;
+		overflow: hidden;
+	}
+
+		.device-info-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 4px;
+			background: var(--gradient-device);
+		}
+
+	.device-info-header {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 20px;
+	}
+
+	.device-icon {
+		width: 40px;
+		height: 40px;
+		background: var(--gradient-device);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20px;
+		color: var(--white);
+		flex-shrink: 0;
+	}
+
+	.device-info-header h3 {
+		color: var(--text-dark);
+		font-size: 20px;
+		font-weight: 700;
+		margin: 0;
+		letter-spacing: -0.3px;
+	}
+
+	.device-info-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 15px;
+	}
+
+	.info-item {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 15px;
+		background: linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, rgba(0, 242, 254, 0.05) 100%);
+		border-radius: 10px;
+		border-left: 3px solid var(--accent-color);
+	}
+
+	.info-label {
+		font-size: 12px;
+		color: var(--text-light);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.info-value {
+		font-size: 16px;
+		color: var(--text-dark);
+		font-weight: 600;
+	}
+
+	.dashboard-content {
+		flex: 1;
+		padding: 30px;
+		background: var(--white);
+		border-radius: var(--border-radius);
+		box-shadow: var(--shadow);
+		margin-bottom: 20px;
+		border: 1px solid var(--border-color);
+	}
+
+		.dashboard-content h1 {
+			color: var(--text-dark);
+			font-size: 32px;
+			font-weight: 700;
+			margin-bottom: 8px;
+			letter-spacing: -0.5px;
+		}
+
+	.dashboard-description {
+		color: var(--text-light);
+		font-size: 16px;
+		margin-bottom: 30px;
+		line-height: 1.5;
+	}
+
+	.dashboard-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 25px;
+		margin-top: 30px;
+	}
+
+	.dashboard-card {
+		background: var(--white);
+		border-radius: var(--border-radius);
+		padding: 30px;
+		text-align: center;
+		box-shadow: var(--shadow);
+		cursor: pointer;
+		transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		min-height: 220px;
+		border: 1px solid var(--border-color);
+		position: relative;
+		overflow: hidden;
+	}
+
+		.dashboard-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s;
+		}
+
+		.dashboard-card:hover::before {
+			left: 100%;
+		}
+
+		.dashboard-card:hover {
+			transform: translateY(-8px);
+			box-shadow: var(--shadow-hover);
+		}
+
+	.card-icon {
+		font-size: 48px;
+		margin-bottom: 20px;
+		width: 90px;
+		height: 90px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background: var(--gradient-primary);
+		color: var(--white);
+		transition: all 0.3s ease;
+	}
+
+	.dashboard-card:hover .card-icon {
+		transform: scale(1.1);
+	}
+
+	.dashboard-card h3 {
+		color: var(--text-dark);
+		margin-bottom: 12px;
+		font-size: 20px;
+		font-weight: 700;
+		letter-spacing: -0.3px;
+	}
+
+	.dashboard-card p {
+		color: var(--text-light);
+		font-size: 14px;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 20px;
+		color: var(--text-light);
+		font-size: 14px;
+	}
+
+	.footer-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
+			color: var(--primary-dark);
+			text-decoration: underline;
+		}
+
+	/* Animations */
+	@@keyframes slideInUp {
+		from {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@@keyframes pulse {
+		0%, 100% {
+			transform: scale(1);
+		}
+
+		50% {
+			transform: scale(1.05);
+		}
+	}
+
+	@@keyframes errorPulse {
+		0%, 100% {
+			transform: scale(1);
+			box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+		}
+
+		50% {
+			transform: scale(1.05);
+			box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+		}
+	}
+
+	@@keyframes bounce {
+		0%, 20%, 50%, 80%, 100% {
+			transform: translateY(0);
+		}
+
+		40% {
+			transform: translateY(-8px);
+		}
+
+		60% {
+			transform: translateY(-4px);
+		}
+	}
+
+	@@keyframes shimmer {
+		0% {
+			transform: translateX(-100px);
+			opacity: 0;
+		}
+
+		50% {
+			opacity: 1;
+		}
+
+		100% {
+			transform: translateX(400px);
+			opacity: 0;
+		}
+	}
+
+	@@keyframes float {
+		0%, 100% {
+			transform: translateY(0);
+		}
+
+		50% {
+			transform: translateY(-10px);
+		}
+	}
+
+	@@keyframes wave {
+		0% {
+			transform: translateX(-100%);
+		}
+
+		100% {
+			transform: translateX(0%);
+		}
+	}
+
+	@@keyframes fadeInOut {
+		0%, 100% {
+			opacity: 1;
+		}
+
+		50% {
+			opacity: 0.3;
+		}
+	}
+
+	@@keyframes connectionError {
+		0%, 100% {
+			opacity: 0.3;
+			transform: scale(1);
+		}
+
+		50% {
+			opacity: 0.8;
+			transform: scale(1.1);
+		}
+	}
+
+	@@keyframes signalError {
+		0%, 100% {
+			height: 10px;
+			background: var(--error-color);
+		}
+
+		50% {
+			height: 5px;
+			background: #ff6b6b;
+		}
+	}
+
+	@@keyframes spin {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@@keyframes particleFloat {
+		0% {
+			transform: translateY(0px) translateX(0px);
+			opacity: 0;
+		}
+
+		10% {
+			opacity: 1;
+		}
+
+		90% {
+			opacity: 1;
+		}
+
+		100% {
+			transform: translateY(-100vh) translateX(50px);
+			opacity: 0;
+		}
+	}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 768px) {
+		.error-card, .update-card {
+			padding: 30px 20px;
+			max-width: 400px;
+		}
+
+		.error-title, .update-title {
+			font-size: 24px;
+		}
+
+		.progress-percentage {
+			font-size: 28px;
+		}
+
+		.troubleshooting-tips {
+			text-align: center;
+		}
+
+		.tips-list li {
+			justify-content: center;
+			text-align: left;
+		}
+
+		.dashboard-container {
+			padding: 15px;
+		}
+
+		.dashboard-header {
+			flex-direction: column;
+			gap: 15px;
+			padding: 20px;
+			text-align: center;
+		}
+
+		.logout-section {
+			width: 100%;
+			justify-content: center;
+		}
+
+		.device-info-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.dashboard-content {
+			padding: 25px 20px;
+		}
+
+			.dashboard-content h1 {
+				font-size: 28px;
+			}
+
+		.dashboard-cards {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+
+		.dashboard-card {
+			min-height: 200px;
+			padding: 25px 20px;
+		}
+
+		.card-icon {
+			width: 80px;
+			height: 80px;
+			font-size: 40px;
+			margin-bottom: 15px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.error-card, .update-card {
+			padding: 25px 15px;
+			max-width: 350px;
+		}
+
+		.error-title, .update-title {
+			font-size: 20px;
+		}
+
+		.update-steps {
+			flex-direction: column;
+			gap: 15px;
+		}
+
+		.step {
+			flex-direction: row;
+			gap: 12px;
+		}
+
+		.tips-list li {
+			font-size: 13px;
+		}
+
+		.dashboard-container {
+			padding: 10px;
+		}
+
+		.dashboard-header {
+			padding: 15px;
+		}
+
+		.dashboard-logo {
+			width: 40px;
+			height: 40px;
+		}
+
+		.welcome-text {
+			font-size: 18px;
+		}
+
+		.logout-button {
+			padding: 8px 12px;
+			font-size: 12px;
+		}
+
+		.device-info-card {
+			padding: 20px 15px;
+		}
+
+		.device-info-grid {
+			gap: 10px;
+		}
+
+		.info-item {
+			padding: 12px;
+		}
+
+		.dashboard-content {
+			padding: 20px 15px;
+		}
+
+			.dashboard-content h1 {
+				font-size: 24px;
+			}
+
+		.dashboard-cards {
+			gap: 15px;
+		}
+
+		.dashboard-card {
+			min-height: 180px;
+			padding: 20px 15px;
+		}
+
+		.card-icon {
+			width: 70px;
+			height: 70px;
+			font-size: 36px;
+		}
+	}
+
+	/* Accessibility */
+	@@media (prefers-reduced-motion: reduce) {
+		.dashboard-card, .update-icon, .download-arrow, .floating-dot, .wave, .progress-glow, .error-icon, .wifi-icon, .cloud, .particle, .retry-icon, .card-icon, .logout-button, .device-icon {
+			transition: none;
+			animation: none;
+		}
+
+			.dashboard-card::before {
+				display: none;
+			}
+	}
+
+	/* High contrast mode support */
+	@@media (prefers-contrast: high) {
+		.dashboard-card, .update-card, .error-card, .device-info-card {
+			border: 2px solid var(--text-dark);
+		}
+	}
+
+	/* Focus styles for better accessibility */
+	.dashboard-card:focus,
+	.retry-button:focus,
+	.logout-button:focus {
+		outline: 2px solid var(--primary-color);
+		outline-offset: 2px;
+	}
+</style>

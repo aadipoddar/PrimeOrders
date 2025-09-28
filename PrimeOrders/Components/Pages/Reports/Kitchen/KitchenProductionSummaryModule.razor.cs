@@ -1,5 +1,5 @@
-using PrimeOrdersLibrary.Data.Inventory.Kitchen;
-using PrimeOrdersLibrary.Exporting.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Exporting.Kitchen;
 
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -28,26 +28,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PrimeOrdersLibrary\PrimeOrdersLibrary.csproj" />
+    <ProjectReference Include="..\PrimeBakesLibrary\PrimeBakesLibrary.csproj" />
+    <ProjectReference Include="..\PrimeBakesLibrary\PrimeBakesLibrary.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Microsoft.AspNetCore.Components" />
     <Using Include="Microsoft.JSInterop" />
     <Using Include="PrimeOrders.Services" />
-    <Using Include="PrimeOrdersLibrary.Data" />
-    <Using Include="PrimeOrdersLibrary.Data.Common" />
-    <Using Include="PrimeOrdersLibrary.Data.Inventory" />
-    <Using Include="PrimeOrdersLibrary.Data.Order" />
-    <Using Include="PrimeOrdersLibrary.Data.Product" />
-    <Using Include="PrimeOrdersLibrary.Data.Sale" />
-    <Using Include="PrimeOrdersLibrary.DataAccess" />
-    <Using Include="PrimeOrdersLibrary.Models" />
-    <Using Include="PrimeOrdersLibrary.Models.Common" />
-    <Using Include="PrimeOrdersLibrary.Models.Inventory" />
-    <Using Include="PrimeOrdersLibrary.Models.Order" />
-    <Using Include="PrimeOrdersLibrary.Models.Product" />
-    <Using Include="PrimeOrdersLibrary.Models.Sale" />
+    <Using Include="PrimeBakesLibrary.Data" />
+    <Using Include="PrimeBakesLibrary.Data.Common" />
+    <Using Include="PrimeBakesLibrary.Data.Inventory" />
+    <Using Include="PrimeBakesLibrary.Data.Order" />
+    <Using Include="PrimeBakesLibrary.Data.Product" />
+    <Using Include="PrimeBakesLibrary.Data.Sale" />
+    <Using Include="PrimeBakesLibrary.DataAccess" />
+    <Using Include="PrimeBakesLibrary.Models" />
+    <Using Include="PrimeBakesLibrary.Models.Common" />
+    <Using Include="PrimeBakesLibrary.Models.Inventory" />
+    <Using Include="PrimeBakesLibrary.Models.Order" />
+    <Using Include="PrimeBakesLibrary.Models.Product" />
+    <Using Include="PrimeBakesLibrary.Models.Sale" />
   </ItemGroup>
 
 </Project>

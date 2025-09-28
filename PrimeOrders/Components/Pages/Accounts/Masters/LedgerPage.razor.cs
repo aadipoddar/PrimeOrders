@@ -1,5 +1,5 @@
-using PrimeOrdersLibrary.Data.Accounts.Masters;
-using PrimeOrdersLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Data.Accounts.Masters;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
