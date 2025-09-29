@@ -14,6 +14,20 @@
 
 <PageTitle>Order History - PrimeBakes</PageTitle>
 
+@if (_isLoading)
+{
+    <div class="loading-overlay">
+        <div class="loading-content">
+            <div class="circular-dots-loader">
+                <span class="dot dot-1"></span>
+                <span class="dot dot-2"></span>
+                <span class="dot dot-3"></span>
+            </div>
+            <p class="loading-text">Loading Order History...</p>
+        </div>
+    </div>
+}
+
 <div class="order-history-container">
     <!-- Page Header -->
     <div class="page-header">
@@ -260,7 +274,6 @@
                         AllowExcelExport="true"
                         AllowPdfExport="true"
                         CssClass="modern-grid">
-                    <GridEvents RowSelected="OnOrderRowSelected" TValue="OrderOverviewModel" />
                     <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
                     <GridColumns>
@@ -327,6 +340,24 @@
                                     <span class="@(order.SaleBillNo != null ? "bill-number" : "no-bill")">
                                         @(order.SaleBillNo ?? "-")
                                     </span>
+                                }
+                            </Template>
+                        </GridColumn>
+                        
+                        <GridColumn HeaderText="Actions" 
+                                   Width="120" 
+                                   TextAlign="TextAlign.Center" 
+                                   AllowFiltering="false"
+                                   AllowSorting="false">
+                            <Template>
+                                @{
+                                    var order = (context as OrderOverviewModel);
+                                    <button class="action-btn-grid view-details-btn" 
+                                            @onclick="() => ViewOrderDetails(order)"
+                                            title="View Order Details">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Details</span>
+                                    </button>
                                 }
                             </Template>
                         </GridColumn>
@@ -1121,4 +1152,37 @@
     .chart-card:nth-child(1) { animation-delay: 0.5s; }
     .chart-card:nth-child(2) { animation-delay: 0.6s; }
     .chart-card:nth-child(3) { animation-delay: 0.7s; }
+
+    /* Grid Action Button Styling */
+    .action-btn-grid {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, var(--primary-color), #218838);
+        color: var(--white);
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+        min-height: 32px;
+    }
+
+    .action-btn-grid:hover {
+        background: linear-gradient(135deg, #218838, #1e7e34);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .action-btn-grid i {
+        font-size: 13px;
+    }
+
+    .action-btn-grid span {
+        font-size: 11px;
+    }
 </style>

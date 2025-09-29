@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
@@ -15,9 +18,13 @@ namespace PrimeBakes.Shared.Pages.Reports.Order;
 
 public partial class OrderHistoryPage
 {
+	[Inject] private IJSRuntime JSRuntime { get; set; }
+
 	private UserModel _user;
 
 	private bool _isLoading = true;
+	private bool _showCharts = false; // Charts hidden by default
+	private bool _chartsLoading = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
@@ -29,6 +36,8 @@ public partial class OrderHistoryPage
 	private List<OrderOverviewModel> _orderOverviews = [];
 
 	private SfGrid<OrderOverviewModel> _sfGrid;
+
+
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
@@ -90,11 +99,8 @@ public partial class OrderHistoryPage
 		await LoadOrderHistory();
 	}
 
-	private async Task OnOrderRowSelected(RowSelectEventArgs<OrderOverviewModel> args)
-	{
-		// Handle row selection if needed
-		await Task.CompletedTask;
-	}
+	private void ViewOrderDetails(OrderOverviewModel order) =>
+		NavigationManager.NavigateTo($"/Reports/Order/View/{order.OrderId}");
 	#endregion
 
 	#region Excel
