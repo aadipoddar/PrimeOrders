@@ -13,8 +13,8 @@ AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Purchase] ([BillNo], [SupplierId], [BillDateTime], [CDPercent], [RoundOff], [Remarks], [UserId], [CreatedAt], [Status])
-		VALUES (@BillNo, @SupplierId, @BillDateTime, @CDPercent, @RoundOff, @Remarks, @UserId, @CreatedAt, @Status);
+		INSERT INTO [dbo].[Purchase] ([BillNo], [SupplierId], [BillDateTime], [CDPercent], [RoundOff], [Remarks], [UserId], [Status])
+		VALUES (@BillNo, @SupplierId, @BillDateTime, @CDPercent, @RoundOff, @Remarks, @UserId, @Status);
 
 		SET @Id = SCOPE_IDENTITY();
 	END
@@ -30,7 +30,6 @@ BEGIN
 			RoundOff = @RoundOff,
 			Remarks = @Remarks,
 			UserId = @UserId,
-			CreatedAt = @CreatedAt,
 			Status = @Status
 		WHERE Id = @Id;
 	END

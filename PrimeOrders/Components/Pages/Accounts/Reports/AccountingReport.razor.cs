@@ -59,9 +59,7 @@ public partial class AccountingReport
 	private async Task LoadAccountingData()
 	{
 		_accountingOverviews = await AccountingData.LoadAccountingDetailsByDate(_startDate.ToDateTime(TimeOnly.MinValue), _endDate.ToDateTime(TimeOnly.MaxValue));
-		_accountingOverviews = _accountingOverviews
-			.Where(a => (_selectedVoucherId == 0 || a.VoucherId == _selectedVoucherId))
-			.ToList();
+		_accountingOverviews = [.. _accountingOverviews.Where(a => (_selectedVoucherId == 0 || a.VoucherId == _selectedVoucherId))];
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();

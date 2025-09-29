@@ -242,6 +242,12 @@ else
 					<p>Manage stock levels and inventory control</p>
 				</div>
 			}
+
+			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")'>
+				<div class="card-icon reports-icon">📊</div>
+				<h3>Reports</h3>
+				<p>View and generate comprehensive business reports</p>
+			</div>
 		</div>
 
 		<!-- Device Information Card -->
@@ -475,6 +481,11 @@ else
 	.inventory-icon {
 		background-color: rgba(255, 77, 159, 0.1);
 		color: var(--primary-light);
+	}
+
+	.reports-icon {
+		background-color: rgba(23, 162, 184, 0.1);
+		color: var(--info-color);
 	}
 
 	.dashboard-card h3 {
