@@ -1,15 +1,18 @@
-@page "/Reports/Order/View/{OrderId:int}"
+﻿@page "/Reports/Sale/View/{SaleId:int}"
 
-@using PrimeBakesLibrary.Models.Order
+@using PrimeBakesLibrary.Models.Sale
 @using PrimeBakesLibrary.Models.Product
+@using PrimeBakesLibrary.Models.Common
+@using PrimeBakesLibrary.Models.Accounts
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Popups
 @using PrimeBakes.Shared.Services
 @using Microsoft.AspNetCore.Components
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-<PageTitle>Order Details - @(_orderOverview?.OrderNo ?? "Loading...") - PrimeBakes</PageTitle>
+<PageTitle>Sale Details - @(_saleOverview?.BillNo ?? "Loading...") - PrimeBakes</PageTitle>
 
 @if (_isLoading)
 {
@@ -20,75 +23,75 @@
                 <span class="dot dot-2"></span>
                 <span class="dot dot-3"></span>
             </div>
-            <p class="loading-text">Loading Order Details...</p>
+            <p class="loading-text">Loading Sale Details...</p>
         </div>
     </div>
 }
-else if (_orderOverview is null)
+else if (_saleOverview is null)
 {
     <div class="error-container">
         <div class="error-content">
             <i class="fas fa-exclamation-triangle"></i>
-            <h2>Order Not Found</h2>
-            <p>The requested order could not be found or may have been deleted.</p>
-            <button @onclick='() => NavigationManager.NavigateTo("/Reports/OrderHistory")' class="btn-back">
+            <h2>Sale Not Found</h2>
+            <p>The requested sale could not be found or may have been deleted.</p>
+            <button @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed")' class="btn-back">
                 <i class="fas fa-arrow-left"></i>
-                Back to Order History
+                Back to Sale Reports
             </button>
         </div>
     </div>
 }
 else
 {
-    <div class="order-view-container">
+    <div class="sale-view-container">
         <!-- Header Section -->
         <div class="page-header">
             <div class="header-actions">
-                <button @onclick='() => NavigationManager.NavigateTo("/Reports/OrderHistory")' class="back-btn">
+                <button @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed")' class="back-btn">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back to Order History</span>
+                    <span>Back to Sale Reports</span>
                 </button>
             </div>
             
             <div class="header-info">
-                <div class="order-title">
-                    <h1>Order Details</h1>
-                    <div class="order-number">@_orderOverview.OrderNo</div>
+                <div class="sale-title">
+                    <h1>Sale Details</h1>
+                    <div class="sale-number">@_saleOverview.BillNo</div>
                 </div>
-                <div class="order-status-header">
-                    <div class="status-badge @(_orderOverview.SaleId.HasValue ? "status-completed" : "status-pending")">
-                        <i class="@(_orderOverview.SaleId.HasValue ? "fas fa-check-circle" : "fas fa-clock")"></i>
-                        @(_orderOverview.SaleId.HasValue ? "Completed" : "Pending")
+                <div class="sale-status-header">
+                    <div class="status-badge status-completed">
+                        <i class="fas fa-check-circle"></i>
+                        Completed Sale
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Order Information Cards -->
-        <div class="order-info-section">
+        <!-- Sale Information Cards -->
+        <div class="sale-info-section">
             <div class="section-header">
-                <h2><i class="fas fa-info-circle"></i> Order Information</h2>
+                <h2><i class="fas fa-info-circle"></i> Sale Information</h2>
             </div>
             
             <div class="info-cards-grid">
-                <!-- Basic Order Info -->
+                <!-- Basic Sale Info -->
                 <div class="info-card-group">
                     <h3>Basic Details</h3>
                     <div class="info-cards">
                         <div class="info-card">
                             <div class="info-icon"><i class="fas fa-hashtag"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Order Number</div>
-                                <div class="info-value">@_orderOverview.OrderNo</div>
+                                <div class="info-label">Bill Number</div>
+                                <div class="info-value">@_saleOverview.BillNo</div>
                             </div>
                         </div>
                         
                         <div class="info-card">
                             <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Order Date & Time</div>
-                                <div class="info-value">@_orderOverview.OrderDateTime.ToString("dddd, dd MMMM yyyy")</div>
-                                <div class="info-subtext">@_orderOverview.OrderDateTime.ToString("hh:mm tt")</div>
+                                <div class="info-label">Sale Date & Time</div>
+                                <div class="info-value">@_saleOverview.SaleDateTime.ToString("dddd, dd MMMM yyyy")</div>
+                                <div class="info-subtext">@_saleOverview.SaleDateTime.ToString("hh:mm tt")</div>
                             </div>
                         </div>
                         
@@ -96,7 +99,7 @@ else
                             <div class="info-icon"><i class="fas fa-store"></i></div>
                             <div class="info-content">
                                 <div class="info-label">Location</div>
-                                <div class="info-value">@_orderOverview.LocationName</div>
+                                <div class="info-value">@_saleOverview.LocationName</div>
                             </div>
                         </div>
                         
@@ -104,21 +107,21 @@ else
                             <div class="info-icon"><i class="fas fa-user"></i></div>
                             <div class="info-content">
                                 <div class="info-label">Created By</div>
-                                <div class="info-value">@_orderOverview.UserName</div>
+                                <div class="info-value">@_saleOverview.UserName</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Order Statistics -->
+                <!-- Sale Statistics -->
                 <div class="info-card-group">
-                    <h3>Order Statistics</h3>
+                    <h3>Sale Statistics</h3>
                     <div class="info-cards">
                         <div class="info-card stat-card">
                             <div class="info-icon"><i class="fas fa-box"></i></div>
                             <div class="info-content">
                                 <div class="info-label">Total Products</div>
-                                <div class="info-value stat-number">@_orderOverview.TotalProducts</div>
+                                <div class="info-value stat-number">@_saleOverview.TotalProducts</div>
                             </div>
                         </div>
                         
@@ -126,15 +129,15 @@ else
                             <div class="info-icon"><i class="fas fa-balance-scale"></i></div>
                             <div class="info-content">
                                 <div class="info-label">Total Quantity</div>
-                                <div class="info-value stat-number">@_orderOverview.TotalQuantity.ToString("N2")</div>
+                                <div class="info-value stat-number">@_saleOverview.TotalQuantity.ToString("N2")</div>
                             </div>
                         </div>
                         
                         <div class="info-card stat-card">
                             <div class="info-icon"><i class="fas fa-rupee-sign"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Order Value</div>
-                                <div class="info-value stat-number">₹@_detailedOrderProducts.Sum(p => p.Total).ToString("N2")</div>
+                                <div class="info-label">Total Amount</div>
+                                <div class="info-value stat-number">₹@_saleOverview.Total.ToString("N2")</div>
                             </div>
                         </div>
                         
@@ -142,41 +145,195 @@ else
                             <div class="info-icon"><i class="fas fa-clock"></i></div>
                             <div class="info-content">
                                 <div class="info-label">Created At</div>
-                                <div class="info-value">@_orderOverview.CreatedAt.ToString("dd/MM/yyyy")</div>
-                                <div class="info-subtext">@_orderOverview.CreatedAt.ToString("hh:mm tt")</div>
+                                <div class="info-value">@_saleOverview.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                <div class="info-subtext">@_saleOverview.CreatedAt.ToString("hh:mm tt")</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sale Information (if completed) -->
-                @if (_orderOverview.SaleId.HasValue)
+                <!-- Customer Information (if exists) -->
+                @if (!string.IsNullOrEmpty(_saleOverview.CustomerName))
                 {
                     <div class="info-card-group">
-                        <h3>Sale Information</h3>
+                        <h3>Customer Information</h3>
                         <div class="info-cards">
-                            <div class="info-card sale-card">
-                                <div class="info-icon"><i class="fas fa-receipt"></i></div>
+                            <div class="info-card customer-card">
+                                <div class="info-icon"><i class="fas fa-user-circle"></i></div>
                                 <div class="info-content">
-                                    <div class="info-label">Sale Bill Number</div>
-                                    <div class="info-value">@_orderOverview.SaleBillNo</div>
+                                    <div class="info-label">Customer Name</div>
+                                    <div class="info-value">@_saleOverview.CustomerName</div>
                                 </div>
                             </div>
                             
-                            <div class="info-card sale-card">
-                                <div class="info-icon"><i class="fas fa-calendar-check"></i></div>
+                            @if (!string.IsNullOrEmpty(_saleOverview.CustomerNumber))
+                            {
+                                <div class="info-card customer-card">
+                                    <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                    <div class="info-content">
+                                        <div class="info-label">Customer Number</div>
+                                        <div class="info-value">@_saleOverview.CustomerNumber</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Party Information (if exists) -->
+                @if (!string.IsNullOrEmpty(_saleOverview.PartyName))
+                {
+                    <div class="info-card-group">
+                        <h3>Party Information</h3>
+                        <div class="info-cards">
+                            <div class="info-card party-card">
+                                <div class="info-icon"><i class="fas fa-handshake"></i></div>
                                 <div class="info-content">
-                                    <div class="info-label">Sale Date & Time</div>
-                                    <div class="info-value">@_orderOverview.SaleDateTime?.ToString("dd/MM/yyyy")</div>
-                                    <div class="info-subtext">@_orderOverview.SaleDateTime?.ToString("hh:mm tt")</div>
+                                    <div class="info-label">Party Name</div>
+                                    <div class="info-value">@_saleOverview.PartyName</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
 
+                <!-- Order Information (if linked to order) -->
+                @if (!string.IsNullOrEmpty(_saleOverview.OrderNo))
+                {
+                    <div class="info-card-group">
+                        <h3>Linked Order Information</h3>
+                        <div class="info-cards">
+                            <div class="info-card order-card">
+                                <div class="info-icon"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Order Number</div>
+                                    <div class="info-value">@_saleOverview.OrderNo</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Payment Breakdown -->
+                <div class="info-card-group full-width">
+                    <h3>Payment Breakdown</h3>
+                    <div class="payment-breakdown">
+                        @if (_saleOverview.Cash > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method cash">
+                                    <i class="fas fa-money-bill"></i>
+                                    <span>Cash</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleOverview.Cash.ToString("N2")</div>
+                            </div>
+                        }
+                        @if (_saleOverview.Card > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method card">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>Card</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleOverview.Card.ToString("N2")</div>
+                            </div>
+                        }
+                        @if (_saleOverview.UPI > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method upi">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>UPI</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleOverview.UPI.ToString("N2")</div>
+                            </div>
+                        }
+                        @if (_saleOverview.Credit > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method credit">
+                                    <i class="fas fa-handshake"></i>
+                                    <span>Credit</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleOverview.Credit.ToString("N2")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Financial Breakdown -->
+                <div class="info-card-group full-width">
+                    <h3>Financial Breakdown</h3>
+                    <div class="financial-breakdown">
+                        <div class="financial-row">
+                            <span class="financial-label">Base Total:</span>
+                            <span class="financial-value">₹@_saleOverview.BaseTotal.ToString("N2")</span>
+                        </div>
+                        @if (_saleOverview.DiscountAmount > 0)
+                        {
+                            <div class="financial-row discount">
+                                <span class="financial-label">
+                                    Discount (@_saleOverview.DiscountPercent.ToString("N2")%):
+                                    @if (!string.IsNullOrEmpty(_saleOverview.DiscountReason))
+                                    {
+                                        <small class="discount-reason">(@_saleOverview.DiscountReason)</small>
+                                    }
+                                </span>
+                                <span class="financial-value">-₹@_saleOverview.DiscountAmount.ToString("N2")</span>
+                            </div>
+                        }
+                        <div class="financial-row">
+                            <span class="financial-label">Sub Total:</span>
+                            <span class="financial-value">₹@_saleOverview.SubTotal.ToString("N2")</span>
+                        </div>
+                        @if (_saleOverview.CGSTAmount > 0)
+                        {
+                            <div class="financial-row tax">
+                                <span class="financial-label">CGST (@_saleOverview.CGSTPercent.ToString("N2")%):</span>
+                                <span class="financial-value">₹@_saleOverview.CGSTAmount.ToString("N2")</span>
+                            </div>
+                        }
+                        @if (_saleOverview.SGSTAmount > 0)
+                        {
+                            <div class="financial-row tax">
+                                <span class="financial-label">SGST (@_saleOverview.SGSTPercent.ToString("N2")%):</span>
+                                <span class="financial-value">₹@_saleOverview.SGSTAmount.ToString("N2")</span>
+                            </div>
+                        }
+                        @if (_saleOverview.IGSTAmount > 0)
+                        {
+                            <div class="financial-row tax">
+                                <span class="financial-label">IGST (@_saleOverview.IGSTPercent.ToString("N2")%):</span>
+                                <span class="financial-value">₹@_saleOverview.IGSTAmount.ToString("N2")</span>
+                            </div>
+                        }
+                        @if (_saleOverview.TotalTaxAmount > 0)
+                        {
+                            <div class="financial-row total-tax">
+                                <span class="financial-label">Total Tax:</span>
+                                <span class="financial-value">₹@_saleOverview.TotalTaxAmount.ToString("N2")</span>
+                            </div>
+                        }
+                        <div class="financial-row">
+                            <span class="financial-label">After Tax:</span>
+                            <span class="financial-value">₹@_saleOverview.AfterTax.ToString("N2")</span>
+                        </div>
+                        @if (_saleOverview.RoundOff != 0)
+                        {
+                            <div class="financial-row roundoff">
+                                <span class="financial-label">Round Off:</span>
+                                <span class="financial-value">@(_saleOverview.RoundOff >= 0 ? "+" : "")₹@_saleOverview.RoundOff.ToString("N2")</span>
+                            </div>
+                        }
+                        <div class="financial-row total">
+                            <span class="financial-label">Final Total:</span>
+                            <span class="financial-value">₹@_saleOverview.Total.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Remarks (if any) -->
-                @if (!string.IsNullOrEmpty(_orderOverview.Remarks))
+                @if (!string.IsNullOrEmpty(_saleOverview.Remarks))
                 {
                     <div class="info-card-group full-width">
                         <h3>Additional Information</h3>
@@ -185,17 +342,17 @@ else
                                 <i class="fas fa-sticky-note"></i>
                                 <span>Remarks</span>
                             </div>
-                            <div class="remarks-content">@_orderOverview.Remarks</div>
+                            <div class="remarks-content">@_saleOverview.Remarks</div>
                         </div>
                     </div>
                 }
             </div>
         </div>
 
-        <!-- Order Products Section -->
+        <!-- Sale Products Section -->
         <div class="products-section">
             <div class="section-header">
-                <h2><i class="fas fa-boxes"></i> Order Products (@_detailedOrderProducts.Count)</h2>
+                <h2><i class="fas fa-boxes"></i> Sale Products (@_detailedSaleProducts.Count)</h2>
             </div>
             
             <!-- Products Summary -->
@@ -203,7 +360,7 @@ else
                 <div class="summary-card">
                     <div class="summary-icon"><i class="fas fa-cube"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">@_detailedOrderProducts.Count</div>
+                        <div class="summary-value">@_detailedSaleProducts.Count</div>
                         <div class="summary-label">Unique Products</div>
                     </div>
                 </div>
@@ -211,7 +368,7 @@ else
                 <div class="summary-card">
                     <div class="summary-icon"><i class="fas fa-weight"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">@_detailedOrderProducts.Sum(p => p.Quantity).ToString("N0")</div>
+                        <div class="summary-value">@_detailedSaleProducts.Sum(p => p.Quantity).ToString("N0")</div>
                         <div class="summary-label">Total Quantity</div>
                     </div>
                 </div>
@@ -219,7 +376,7 @@ else
                 <div class="summary-card">
                     <div class="summary-icon"><i class="fas fa-tags"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">@_detailedOrderProducts.Select(p => p.CategoryName).Distinct().Count()</div>
+                        <div class="summary-value">@_detailedSaleProducts.Select(p => p.CategoryName).Distinct().Count()</div>
                         <div class="summary-label">Categories</div>
                     </div>
                 </div>
@@ -227,15 +384,15 @@ else
                 <div class="summary-card highlight">
                     <div class="summary-icon"><i class="fas fa-calculator"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">₹@_detailedOrderProducts.Sum(p => p.Total).ToString("N2")</div>
-                        <div class="summary-label">Total Value</div>
+                        <div class="summary-value">₹@_detailedSaleProducts.Sum(p => p.Total).ToString("N2")</div>
+                        <div class="summary-label">Products Total</div>
                     </div>
                 </div>
             </div>
             
             <!-- Products Grid -->
             <div class="products-grid-section">
-                <SfGrid DataSource="_detailedOrderProducts"
+                <SfGrid DataSource="_detailedSaleProducts"
                         AllowPaging="true"
                         AllowSorting="true"
                         AllowFiltering="true"
@@ -245,17 +402,17 @@ else
                     <GridPageSettings PageSize="10" PageSizes="@(new int[] { 5, 10, 15, 25, 50 })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
                     <GridColumns>
-                        <GridColumn Field="@nameof(DetailedOrderProductModel.ProductCode)" 
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.ProductCode)" 
                                    HeaderText="Code" 
                                    Width="100" 
                                    TextAlign="TextAlign.Center" />
                         
-                        <GridColumn Field="@nameof(DetailedOrderProductModel.ProductName)" 
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.ProductName)" 
                                    HeaderText="Product Name" 
                                    Width="250">
                             <Template>
                                 @{
-                                    var product = (context as DetailedOrderProductModel);
+                                    var product = (context as DetailedSaleProductModel);
                                     <div class="product-name-display">
                                         <i class="fas fa-cube product-icon"></i>
                                         <span class="product-name">@product.ProductName</span>
@@ -264,37 +421,67 @@ else
                             </Template>
                         </GridColumn>
                         
-                        <GridColumn Field="@nameof(DetailedOrderProductModel.CategoryName)" 
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.CategoryName)" 
                                    HeaderText="Category" 
                                    Width="150">
                             <Template>
                                 @{
-                                    var product = (context as DetailedOrderProductModel);
+                                    var product = (context as DetailedSaleProductModel);
                                     <span class="category-badge">@product.CategoryName</span>
                                 }
                             </Template>
                         </GridColumn>
                         
-                        <GridColumn Field="@nameof(DetailedOrderProductModel.Quantity)" 
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.Quantity)" 
                                    HeaderText="Quantity" 
                                    Width="100" 
                                    TextAlign="TextAlign.Right"
                                    Format="N2" />
                         
-                        <GridColumn Field="@nameof(DetailedOrderProductModel.Rate)" 
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.Rate)" 
                                    HeaderText="Rate (₹)" 
                                    Width="120" 
                                    TextAlign="TextAlign.Right"
                                    Format="N2" />
-                        
-                        <GridColumn Field="@nameof(DetailedOrderProductModel.Total)" 
-                                   HeaderText="Total (₹)" 
+
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.BaseTotal)" 
+                                   HeaderText="Base Total (₹)" 
                                    Width="130" 
+                                   TextAlign="TextAlign.Right"
+                                   Format="N2" />
+
+                        @if (_detailedSaleProducts.Any(p => p.DiscountAmount > 0))
+                        {
+                            <GridColumn Field="@nameof(DetailedSaleProductModel.DiscountPercent)" 
+                                       HeaderText="Disc %" 
+                                       Width="80" 
+                                       TextAlign="TextAlign.Right"
+                                       Format="N2" />
+
+                            <GridColumn Field="@nameof(DetailedSaleProductModel.DiscountAmount)" 
+                                       HeaderText="Disc Amt (₹)" 
+                                       Width="120" 
+                                       TextAlign="TextAlign.Right"
+                                       Format="N2" />
+                        }
+
+                        @if (_detailedSaleProducts.Any(p => p.TotalTaxAmount > 0))
+                        {
+                            <GridColumn Field="@nameof(DetailedSaleProductModel.TotalTaxAmount)" 
+                                       HeaderText="Tax (₹)" 
+                                       Width="100" 
+                                       TextAlign="TextAlign.Right"
+                                       Format="N2" />
+                        }
+                        
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.Total)" 
+                                   HeaderText="Final Total (₹)" 
+                                   Width="150" 
                                    TextAlign="TextAlign.Right"
                                    Format="N2">
                             <Template>
                                 @{
-                                    var product = (context as DetailedOrderProductModel);
+                                    var product = (context as DetailedSaleProductModel);
                                     <span class="total-amount">₹@product.Total.ToString("N2")</span>
                                 }
                             </Template>
@@ -311,92 +498,83 @@ else
             </div>
             
             <div class="action-buttons">
-                @if (_user.LocationId == 1 && _user.Admin)
+                @if ((_user.LocationId == 1 && _user.Admin) || _user.LocationId == _saleOverview.LocationId)
                 {
-                    <button class="action-btn btn-edit" @onclick="EditOrder" disabled="@(_isProcessing || _orderOverview.SaleId.HasValue)">
+                    <button class="action-btn btn-edit" @onclick="EditSale" disabled="@_isProcessing">
                         <i class="fas fa-edit"></i>
-                        <span>Edit Order</span>
+                        <span>Edit Sale</span>
                     </button>
                     
-                    <button class="action-btn btn-delete" @onclick="DeleteOrder" disabled="@(_isProcessing || _orderOverview.SaleId.HasValue)">
+                    <button class="action-btn btn-delete" @onclick="DeleteSale" disabled="@_isProcessing">
                         <i class="fas fa-trash-alt"></i>
-                        <span>Delete Order</span>
+                        <span>Delete Sale</span>
                     </button>
+                
+                    @if (_saleOverview?.OrderId.HasValue == true && !string.IsNullOrEmpty(_saleOverview?.OrderNo))
+                    {
+                        <button class="action-btn btn-unlink" @onclick="UnlinkOrder" disabled="@_isProcessing">
+                            <i class="fas fa-unlink"></i>
+                            <span>Unlink Order</span>
+                        </button>
+                    }
                 }
                 
-                <button class="action-btn btn-challan" @onclick="ExportChallan" disabled="@_isProcessing">
-                    <i class="fas fa-file-export"></i>
-                    <span>Export Challan</span>
+                <button class="action-btn btn-bill" @onclick="PrintBill" disabled="@_isProcessing">
+                    <i class="fas fa-receipt"></i>
+                    <span>Print Bill</span>
                 </button>
                 
-                <button class="action-btn btn-pdf" @onclick="PrintPDF" disabled="@_isProcessing">
-                    <i class="fas fa-print"></i>
-                    <span>Print PDF</span>
+                <button class="action-btn btn-pdf" @onclick="ExportPDF" disabled="@_isProcessing">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Export PDF</span>
                 </button>
-                
-                @if (_orderOverview.SaleId.HasValue)
-                {
-                    <button class="action-btn btn-view-sale" @onclick="ViewSale" disabled="@_isProcessing">
-                        <i class="fas fa-receipt"></i>
-                        <span>View Sale</span>
-                    </button>
-                }
             </div>
-            
-            @if (_orderOverview.SaleId.HasValue)
-            {
-                <div class="completion-notice">
-                    <i class="fas fa-info-circle"></i>
-                    <span>This order has been completed and linked to Sale: <strong>@_orderOverview.SaleBillNo</strong></span>
-                </div>
-            }
         </div>
     </div>
 }
 
 <!-- Delete Confirmation Dialog -->
-<SfDialog @ref="_deleteConfirmDialog" 
-          @bind-Visible="_showDeleteConfirm"
+<SfDialog @bind-Visible="_showConfirmation"
           Width="500px"
           Height="auto"
           IsModal="true"
           AllowDragging="false"
-          CssClass="delete-confirm-dialog">
+          CssClass="confirmation-dialog">
     <DialogTemplates>
         <Header>
             <div class="dialog-header">
                 <i class="fas fa-exclamation-triangle warning-icon"></i>
-                <span>Confirm Delete Order</span>
+                <span>@_confirmationTitle</span>
             </div>
         </Header>
         <Content>
             <div class="dialog-content">
                 <div class="warning-message">
-                    <p><strong>Are you sure you want to delete this order?</strong></p>
-                    <p>Order: <span class="order-highlight">@(_orderOverview?.OrderNo)</span></p>
+                    <p><strong>@_confirmationMessage</strong></p>
+                    <p>Sale: <span class="sale-highlight">@(_saleOverview?.BillNo)</span></p>
                     <div class="warning-notice">
                         <i class="fas fa-info-circle"></i>
-                        <span>This action cannot be reversed. The order will be permanently removed.</span>
+                        <span>@_confirmationDetails</span>
                     </div>
                 </div>
             </div>
         </Content>
         <FooterTemplate>
             <div class="dialog-footer">
-                <button class="dialog-btn btn-cancel" @onclick="CancelDeleteOrder" disabled="@_isProcessing">
+                <button class="dialog-btn btn-cancel" @onclick="CancelAction" disabled="@_isProcessing">
                     <i class="fas fa-times"></i>
                     Cancel
                 </button>
-                <button class="dialog-btn btn-confirm" @onclick="ConfirmDeleteOrder" disabled="@_isProcessing">
+                <button class="dialog-btn btn-confirm" @onclick="ConfirmAction" disabled="@_isProcessing">
                     @if (_isProcessing)
                     {
                         <i class="fas fa-spinner fa-spin"></i>
-                        <span>Deleting...</span>
+                        <span>Processing...</span>
                     }
                     else
                     {
-                        <i class="fas fa-trash-alt"></i>
-                        <span>Delete Order</span>
+                        <i class="@_confirmationIcon"></i>
+                        <span>@_confirmationButtonText</span>
                     }
                 </button>
             </div>
@@ -406,8 +584,8 @@ else
 
 <style>
     :root {
-        --primary-color: #28a745;
-        --primary-light: rgba(40, 167, 69, 0.1);
+        --primary-color: #e2137b;
+        --primary-light: rgba(226, 19, 123, 0.1);
         --secondary-color: #6c757d;
         --success-color: #28a745;
         --info-color: #17a2b8;
@@ -423,12 +601,12 @@ else
         --transition: all 0.3s ease;
     }
 
-    .order-view-container {
+    .sale-view-container {
         padding: 20px;
         background: 
-            radial-gradient(circle at 20% 20%, rgba(40, 167, 69, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(40, 167, 69, 0.08) 0%, transparent 50%),
-            linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #e8f5e8 100%);
+            radial-gradient(circle at 20% 20%, rgba(226, 19, 123, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(226, 19, 123, 0.08) 0%, transparent 50%),
+            linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #fce4ec 100%);
         min-height: 100vh;
         animation: fadeInUp 0.5s ease-out;
     }
@@ -454,7 +632,7 @@ else
         background: var(--white);
         border-radius: var(--border-radius-lg);
         box-shadow: var(--shadow-lg);
-        border: 1px solid rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(226, 19, 123, 0.1);
     }
 
     .circular-dots-loader {
@@ -546,7 +724,7 @@ else
         align-items: center;
         margin-bottom: 30px;
         padding: 25px 30px;
-        background: linear-gradient(135deg, var(--primary-color), #218838);
+        background: linear-gradient(135deg, var(--primary-color), #c91166);
         border-radius: var(--border-radius-lg);
         color: var(--white);
         box-shadow: var(--shadow-lg);
@@ -589,7 +767,7 @@ else
     }
 
     .btn-back:hover {
-        background: #218838;
+        background: #c91166;
         transform: translateY(-2px);
     }
 
@@ -599,19 +777,19 @@ else
         gap: 30px;
     }
 
-    .order-title h1 {
+    .sale-title h1 {
         margin: 0 0 5px 0;
         font-size: 28px;
         font-weight: 700;
     }
 
-    .order-number {
+    .sale-number {
         font-size: 18px;
         font-weight: 500;
         opacity: 0.9;
     }
 
-    .order-status-header .status-badge {
+    .sale-status-header .status-badge {
         padding: 10px 20px;
         border-radius: 25px;
         font-size: 14px;
@@ -624,13 +802,8 @@ else
     }
 
     .status-badge.status-completed {
-        background: rgba(34, 139, 34, 0.2);
+        background: rgba(40, 167, 69, 0.2);
         color: #90EE90;
-    }
-
-    .status-badge.status-pending {
-        background: rgba(255, 165, 0, 0.2);
-        color: #FFD700;
     }
 
     /* Section Headers */
@@ -654,8 +827,8 @@ else
         color: var(--primary-color);
     }
 
-    /* Order Information Section */
-    .order-info-section {
+    /* Sale Information Section */
+    .sale-info-section {
         margin-bottom: 40px;
     }
 
@@ -717,13 +890,23 @@ else
     }
 
     .info-card.stat-card {
-        background: linear-gradient(135deg, var(--primary-light), rgba(40, 167, 69, 0.05));
+        background: linear-gradient(135deg, var(--primary-light), rgba(226, 19, 123, 0.05));
         border-color: var(--primary-color);
     }
 
-    .info-card.sale-card {
+    .info-card.customer-card {
         background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));
         border-color: var(--info-color);
+    }
+
+    .info-card.party-card {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+        border-color: var(--warning-color);
+    }
+
+    .info-card.order-card {
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+        border-color: var(--success-color);
     }
 
     .info-icon {
@@ -739,8 +922,16 @@ else
         flex-shrink: 0;
     }
 
-    .sale-card .info-icon {
+    .customer-card .info-icon {
         background: var(--info-color);
+    }
+
+    .party-card .info-icon {
+        background: var(--warning-color);
+    }
+
+    .order-card .info-icon {
+        background: var(--success-color);
     }
 
     .info-content {
@@ -773,6 +964,110 @@ else
         font-size: 14px;
         color: var(--secondary-color);
         margin-top: 2px;
+    }
+
+    /* Payment Breakdown */
+    .payment-breakdown {
+        display: grid;
+        gap: 15px;
+    }
+
+    .payment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        border: 1px solid #e9ecef;
+    }
+
+    .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
+
+    .payment-method.cash {
+        color: #28a745;
+    }
+
+    .payment-method.card {
+        color: #007bff;
+    }
+
+    .payment-method.upi {
+        color: #6f42c1;
+    }
+
+    .payment-method.credit {
+        color: #fd7e14;
+    }
+
+    .payment-amount {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    /* Financial Breakdown */
+    .financial-breakdown {
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        padding: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .financial-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .financial-row:last-child {
+        border-bottom: none;
+    }
+
+    .financial-row.total {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary-color);
+        border-top: 2px solid var(--primary-color);
+        margin-top: 10px;
+        padding-top: 15px;
+    }
+
+    .financial-row.discount {
+        color: var(--danger-color);
+    }
+
+    .financial-row.tax {
+        color: var(--info-color);
+    }
+
+    .financial-row.total-tax {
+        font-weight: 600;
+        color: var(--info-color);
+    }
+
+    .financial-row.roundoff {
+        color: var(--warning-color);
+    }
+
+    .financial-label {
+        font-weight: 500;
+    }
+
+    .financial-value {
+        font-weight: 600;
+    }
+
+    .discount-reason {
+        font-style: italic;
+        color: var(--secondary-color);
     }
 
     /* Remarks Card */
@@ -830,7 +1125,7 @@ else
     }
 
     .summary-card.highlight {
-        background: linear-gradient(135deg, var(--primary-color), #218838);
+        background: linear-gradient(135deg, var(--primary-color), #c91166);
         color: var(--white);
         border: none;
     }
@@ -895,7 +1190,7 @@ else
     }
 
     .products-grid .e-grid .e-gridheader {
-        background: linear-gradient(135deg, var(--primary-color), #218838);
+        background: linear-gradient(135deg, var(--primary-color), #c91166);
         color: var(--white);
         border: none;
     }
@@ -1033,177 +1328,67 @@ else
     }
 
     .btn-delete {
-        background: linear-gradient(135deg, var(--danger-color), #c82333);
+        background: linear-gradient(135deg, var(--danger-color), #dc143c);
         color: var(--white);
         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
     }
 
     .btn-delete:hover:not(:disabled) {
+        background: linear-gradient(135deg, #dc143c, #b91c3c);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-unlink {
+        background: linear-gradient(135deg, var(--warning-color), #e0a800);
+        color: var(--dark-color);
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+    }
+
+    .btn-unlink:hover:not(:disabled) {
+        background: linear-gradient(135deg, #e0a800, #d39e00);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-bill {
+        background: linear-gradient(135deg, var(--primary-color), #c91166);
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.2);
+    }
+
+    .btn-bill:hover:not(:disabled) {
+        background: linear-gradient(135deg, #c91166, #b01058);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
+    }
+
+    .btn-pdf {
+        background: linear-gradient(135deg, var(--danger-color), #c82333);
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+    }
+
+    .btn-pdf:hover:not(:disabled) {
         background: linear-gradient(135deg, #c82333, #a71e2a);
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
     }
 
-    .btn-challan {
-        background: linear-gradient(135deg, #fd7e14, #e55a00);
-        color: var(--white);
-        box-shadow: 0 4px 15px rgba(253, 126, 20, 0.2);
-    }
-
-    .btn-challan:hover:not(:disabled) {
-        background: linear-gradient(135deg, #e55a00, #cc4b00);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(253, 126, 20, 0.3);
-    }
-
-    .btn-pdf {
-        background: linear-gradient(135deg, var(--primary-color), #218838);
+    .btn-excel {
+        background: linear-gradient(135deg, var(--success-color), #218838);
         color: var(--white);
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
     }
 
-    .btn-pdf:hover:not(:disabled) {
+    .btn-excel:hover:not(:disabled) {
         background: linear-gradient(135deg, #218838, #1e7e34);
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
     }
 
-    .btn-view-sale {
-        background: linear-gradient(135deg, #e2137b, #c91166);
-        color: var(--white);
-        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.2);
-    }
-
-    .btn-view-sale:hover:not(:disabled) {
-        background: linear-gradient(135deg, #c91166, #b00e5a);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
-    }
-
-    .completion-notice {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 18px 25px;
-        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-        border: 1px solid var(--warning-color);
-        border-radius: var(--border-radius);
-        color: #856404;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .completion-notice i {
-        color: var(--warning-color);
-        font-size: 18px;
-    }
-
-    /* Animations */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes dotPulse {
-        0%, 80%, 100% {
-            transform: scale(0);
-        }
-        40% {
-            transform: scale(1);
-        }
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 1024px) {
-        .info-cards {
-            grid-template-columns: 1fr;
-        }
-        
-        .products-summary {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .action-buttons {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .order-view-container {
-            padding: 15px;
-        }
-        
-        .page-header {
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
-        }
-        
-        .header-info {
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .products-summary {
-            grid-template-columns: 1fr;
-        }
-        
-        .action-buttons {
-            grid-template-columns: 1fr;
-        }
-        
-        .info-card-group {
-            padding: 20px;
-        }
-        
-        .summary-card {
-            padding: 15px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .order-view-container {
-            padding: 10px;
-        }
-        
-        .page-header {
-            padding: 20px;
-        }
-        
-        .order-title h1 {
-            font-size: 24px;
-        }
-        
-        .section-header h2 {
-            font-size: 18px;
-        }
-        
-        .info-card {
-            flex-direction: column;
-            text-align: center;
-            gap: 10px;
-        }
-        
-        .summary-card {
-            flex-direction: column;
-            text-align: center;
-            gap: 10px;
-        }
-        
-        .action-btn {
-            padding: 12px 20px;
-            font-size: 12px;
-        }
-    }
-
-    /* Delete Confirmation Dialog Styles */
-    .delete-confirm-dialog .e-dialog {
+    /* Confirmation Dialog Styles */
+    .confirmation-dialog .e-dialog {
         border-radius: var(--border-radius-lg);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         border: none;
@@ -1235,7 +1420,7 @@ else
         line-height: 1.5;
     }
 
-    .order-highlight {
+    .sale-highlight {
         font-weight: 700;
         color: var(--primary-color);
         background: var(--primary-light);
@@ -1304,12 +1489,12 @@ else
     }
 
     .btn-confirm {
-        background: linear-gradient(135deg, var(--danger-color), #c82333);
+        background: linear-gradient(135deg, var(--primary-color), #c91166);
         color: var(--white);
     }
 
     .btn-confirm:hover:not(:disabled) {
-        background: linear-gradient(135deg, #c82333, #a71e2a);
+        background: linear-gradient(135deg, #c91166, #b01058);
         transform: translateY(-2px);
     }
 
@@ -1317,8 +1502,122 @@ else
         animation: spin 1s linear infinite;
     }
 
+    /* Animations */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes dotPulse {
+        0%, 80%, 100% {
+            transform: scale(0);
+        }
+        40% {
+            transform: scale(1);
+        }
+    }
+
     @@keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .info-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .products-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .action-buttons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .sale-view-container {
+            padding: 15px;
+        }
+        
+        .page-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .header-info {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .products-summary {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+        }
+        
+        .info-card-group {
+            padding: 20px;
+        }
+        
+        .summary-card {
+            padding: 15px;
+        }
+        
+        .confirmation-dialog {
+            width: 95vw;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .sale-view-container {
+            padding: 10px;
+        }
+        
+        .page-header {
+            padding: 20px;
+        }
+        
+        .sale-title h1 {
+            font-size: 24px;
+        }
+        
+        .section-header h2 {
+            font-size: 18px;
+        }
+        
+        .info-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+        }
+        
+        .summary-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            padding: 12px 20px;
+            font-size: 12px;
+        }
+        
+        .payment-item {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
     }
 </style>

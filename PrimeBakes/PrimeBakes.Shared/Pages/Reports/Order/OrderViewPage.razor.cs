@@ -37,12 +37,6 @@ public partial class OrderViewPage
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Order);
 		_user = authResult.User;
 
-		if (_user.LocationId != 1 && _user.LocationId != _orderOverview.LocationId)
-		{
-			NavigationManager.NavigateTo("/Reports/OrderHistory");
-			return;
-		}
-
 		await LoadOrderDetails();
 		_isLoading = false;
 	}
@@ -50,6 +44,12 @@ public partial class OrderViewPage
 	private async Task LoadOrderDetails()
 	{
 		_orderOverview = await OrderData.LoadOrderOverviewByOrderId(OrderId);
+
+		if (_user.LocationId != 1 && _user.LocationId != _orderOverview.LocationId)
+		{
+			NavigationManager.NavigateTo("/Reports/OrderHistory");
+			return;
+		}
 
 		if (_orderOverview is not null)
 		{
@@ -156,6 +156,12 @@ public partial class OrderViewPage
 
 		_isProcessing = false;
 		StateHasChanged();
+	}
+
+	private void ViewSale()
+	{
+		if (_orderOverview?.SaleId.HasValue == true)
+			NavigationManager.NavigateTo($"/Reports/Sale/View/{_orderOverview.SaleId.Value}");
 	}
 
 	// Model class for detailed order products

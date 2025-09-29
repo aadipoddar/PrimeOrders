@@ -22,7 +22,7 @@ public class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthOptions>
 	{
 		string key = string.Empty;
 
-		if (Request.Headers[ApiKeyIdentifier].Any())
+		if (Request.Headers[ApiKeyIdentifier].Count != 0)
 		{
 			key = Request.Headers[ApiKeyIdentifier].FirstOrDefault();
 		}

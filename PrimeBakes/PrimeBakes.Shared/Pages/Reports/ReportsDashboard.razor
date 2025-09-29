@@ -35,14 +35,14 @@ else
 		</div>
 
 		<div class="dashboard-cards">
+			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Summary")'>
+				<div class="card-icon summary-report-icon">📊</div>
+				<h3>Sale Summary Reports</h3>
+				<p>View overall business performance metrics</p>
+			</div>
+
 			@if (_user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Summary")'>
-					<div class="card-icon summary-report-icon">📊</div>
-					<h3>Sale Summary Reports</h3>
-					<p>View overall business performance metrics</p>
-				</div>
-
 				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductSummary")'>
 					<div class="card-icon item-summary-icon">📋</div>
 					<h3>Finished Goods / Product Summary Report</h3>
@@ -50,7 +50,7 @@ else
 				</div>
 			}
 
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Detailed")'>
+			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed/")'>
 				<div class="card-icon detailed-report-icon">📈</div>
 				<h3>Sale Detailed Reports</h3>
 				<p>View comprehensive sales and transaction details</p>
