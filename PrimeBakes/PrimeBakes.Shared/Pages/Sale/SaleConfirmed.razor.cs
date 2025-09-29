@@ -12,6 +12,6 @@ public partial class SaleConfirmed
 
 		// Wait for 2 seconds then navigate to home
 		await Task.Delay(2000);
-		NavigationManager.NavigateTo("/", forceLoad: true);
+		NavigationManager.NavigateTo("/", true);
 	}
 }

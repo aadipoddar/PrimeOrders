@@ -7,9 +7,10 @@ public class PurchaseModel
 	public int SupplierId { get; set; }
 	public DateTime BillDateTime { get; set; }
 	public decimal CDPercent { get; set; }
-	public decimal CDAmount { get; set; }
+	public decimal RoundOff { get; set; }
 	public string Remarks { get; set; }
 	public int UserId { get; set; }
+	public DateTime CreatedAt { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -40,6 +41,7 @@ public class PurchaseRawMaterialCartModel
 {
 	public int RawMaterialId { get; set; }
 	public string RawMaterialName { get; set; }
+	public int RawMaterialCategoryId { get; set; }
 	public decimal Quantity { get; set; }
 	public string MeasurementUnit { get; set; }
 	public decimal Rate { get; set; }
@@ -81,7 +83,10 @@ public class PurchaseOverviewModel
 	public decimal TotalTaxAmount { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal SubTotal { get; set; }
+	public decimal AfterCashDiscount { get; set; }
+	public decimal RoundOff { get; set; }
 	public decimal Total { get; set; }
+	public DateTime CreatedAt { get; set; }
 }
 
 #region Chart and Helper Models

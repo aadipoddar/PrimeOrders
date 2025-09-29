@@ -313,7 +313,7 @@ else
 
 				<div class="form-group">
 					<label>Cash Discount Amount</label>
-					<div class="readonly-currency">@_purchase.CDAmount.FormatIndianCurrency()</div>
+					<div class="readonly-currency">@((_afterDiscounts * (_purchase.CDPercent / 100)).FormatIndianCurrency())</div>
 				</div>
 			</div>
 		</Content>
@@ -358,7 +358,7 @@ else
 					</div>
 					<div class="summary-row">
 						<span>Cash Discount:</span>
-						<span class="amount" style="color:green">-@_purchase.CDAmount.FormatIndianCurrency()</span>
+						<span class="amount" style="color:green">-@((_afterDiscounts * (_purchase.CDPercent / 100)).FormatIndianCurrency())</span>
 					</div>
 					<div class="summary-row total-row">
 						<span>Grand Total:</span>

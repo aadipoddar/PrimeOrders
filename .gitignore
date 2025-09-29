@@ -399,9 +399,6 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-PrimeOrdersLibrary/DataAccess/Secrets.cs
-/PrimeOrdersLibrary/DataAccess/google-services.json
-/PrimeOrdersLibrary/DataAccess/primebakes-7aad6-firebase-adminsdk-fbsvc-468eb53249.json
 /PrimeBakes/Platforms/Android/google-services.json
 /PrimeBakes/Config.local_secrets.cs
 /PrimeBakes/PrimeBakes/Platforms/Android/google-services.json

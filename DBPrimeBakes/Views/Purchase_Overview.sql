@@ -10,7 +10,7 @@ SELECT
 	[p].[BillDateTime],
 	[p].[Remarks],
 	[p].[CDPercent] AS CashDiscountPercent,
-	[p].[CDAmount]AS CashDiscountAmount,
+	SUM(pd.Total) * [p].[CDPercent] / 100 AS CashDiscountAmount,
 
 	COUNT(DISTINCT pd.Id) AS TotalItems,
 	SUM(pd.Quantity) AS TotalQuantity,
@@ -29,7 +29,11 @@ SELECT
 	SUM(pd.BaseTotal) AS BaseTotal,
 	SUM(pd.AfterDiscount) AS SubTotal,
 
-	SUM(pd.Total - p.CDAmount) AS Total
+	SUM(pd.Total) - (SUM(pd.Total) * [p].[CDPercent] / 100) AS AfterCashDiscount,
+	[p].[RoundOff],
+	SUM(pd.Total) - (SUM(pd.Total) * [p].[CDPercent] / 100) + [p].[RoundOff] AS Total,
+
+	[p].[CreatedAt]
 
 FROM
 	[dbo].[Purchase] AS p
@@ -54,4 +58,5 @@ GROUP BY
 	p.BillDateTime,
 	p.Remarks,
 	p.CDPercent,
-	p.CDAmount
+	p.RoundOff,
+	p.CreatedAt;

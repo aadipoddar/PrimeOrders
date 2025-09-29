@@ -348,14 +348,14 @@ public partial class PurchasePage
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
 			item.NetRate = (item.AfterDiscount - (item.AfterDiscount * (_purchase.CDPercent / 100))
-				+ (item.CGSTAmount + item.SGSTAmount + item.IGSTAmount)) / item.Quantity;
+				+ item.CGSTAmount + item.SGSTAmount + item.IGSTAmount) / item.Quantity;
 		}
 
 		_baseTotal = _purchaseRawMaterialCarts.Sum(c => c.BaseTotal);
 		_afterDiscounts = _purchaseRawMaterialCarts.Sum(c => c.AfterDiscount);
 		_subTotal = _purchaseRawMaterialCarts.Sum(c => c.Total);
-		_purchase.CDAmount = _subTotal * (_purchase.CDPercent / 100);
-		_total = _subTotal - _purchase.CDAmount;
+		var cashDiscountAmount = _afterDiscounts * (_purchase.CDPercent / 100);
+		_total = _subTotal - cashDiscountAmount;
 
 		_sfRawMaterialCartGrid?.Refresh();
 		_sfRawMaterialGrid?.Refresh();

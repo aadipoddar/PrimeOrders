@@ -4,16 +4,17 @@
 	@SupplierId INT,
 	@BillDateTime DATETIME,
 	@CDPercent DECIMAL(5, 2),
-	@CDAmount MONEY,
+	@RoundOff MONEY,
 	@Remarks VARCHAR(250),
 	@UserId INT,
+	@CreatedAt DATETIME,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Purchase] ([BillNo], [SupplierId], [BillDateTime], [CDPercent], [CDAmount], [Remarks], [UserId], [Status])
-		VALUES (@BillNo, @SupplierId, @BillDateTime, @CDPercent, @CDAmount, @Remarks, @UserId, @Status);
+		INSERT INTO [dbo].[Purchase] ([BillNo], [SupplierId], [BillDateTime], [CDPercent], [RoundOff], [Remarks], [UserId], [CreatedAt], [Status])
+		VALUES (@BillNo, @SupplierId, @BillDateTime, @CDPercent, @RoundOff, @Remarks, @UserId, @CreatedAt, @Status);
 
 		SET @Id = SCOPE_IDENTITY();
 	END
@@ -26,9 +27,10 @@ BEGIN
 			SupplierId = @SupplierId,
 			BillDateTime = @BillDateTime,
 			CDPercent = @CDPercent,
-			CDAmount = @CDAmount,
+			RoundOff = @RoundOff,
 			Remarks = @Remarks,
 			UserId = @UserId,
+			CreatedAt = @CreatedAt,
 			Status = @Status
 		WHERE Id = @Id;
 	END

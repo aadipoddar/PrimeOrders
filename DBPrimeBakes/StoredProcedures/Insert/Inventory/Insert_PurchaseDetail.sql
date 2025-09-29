@@ -81,7 +81,7 @@ BEGIN
 			CGSTPercent = @CGSTPercent,
 			CGSTAmount = @CGSTAmount,
 			SGSTPercent = @SGSTPercent,
-			SGStAmount = @SGSTAmount,
+			SGSTAmount = @SGSTAmount,
 			IGSTPercent = @IGSTPercent,
 			IGSTAmount = @IGSTAmount,
 			Total = @Total,
