@@ -16,15 +16,22 @@ public static class StockData
 	public static async Task DeleteProductStockByTransactionNo(string TransactionNo) =>
 		await SqlDataAccess.SaveData(StoredProcedureNames.DeleteProductStockByTransactionNo, new { TransactionNo });
 
-	public static async Task<List<RawMaterialStockDetailModel>> LoadRawMaterialStockDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
-		await SqlDataAccess.LoadData<RawMaterialStockDetailModel, dynamic>(StoredProcedureNames.LoadRawMaterialStockDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+	public static async Task<List<RawMaterialStockSummaryModel>> LoadRawMaterialStockSummaryByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<RawMaterialStockSummaryModel, dynamic>(StoredProcedureNames.LoadRawMaterialStockSummaryByDateLocationId, new { FromDate, ToDate, LocationId });
 
-	public static async Task<List<ProductStockDetailModel>> LoadProductStockDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
-		await SqlDataAccess.LoadData<ProductStockDetailModel, dynamic>(StoredProcedureNames.LoadProductStockDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+	public static async Task<List<RawMaterialStockDetailsModel>> LoadRawMaterialStockDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<RawMaterialStockDetailsModel, dynamic>(StoredProcedureNames.LoadRawMaterialStockDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+
+	public static async Task<List<ProductStockSummaryModel>> LoadProductStockSummaryByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<ProductStockSummaryModel, dynamic>(StoredProcedureNames.LoadProductStockSummaryByDateLocationId, new { FromDate, ToDate, LocationId });
+
+	public static async Task<List<ProductStockDetailsModel>> LoadProductStockDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
+		await SqlDataAccess.LoadData<ProductStockDetailsModel, dynamic>(StoredProcedureNames.LoadProductStockDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
 
 	public static async Task SaveRawMaterialStockAdjustment(List<StockAdjustmentRawMaterialCartModel> cart)
 	{
-		var stockDetails = await LoadRawMaterialStockDetailsByDateLocationId(
+		// Use the summary model to get closing stock values for adjustment calculation
+		var stockSummary = await LoadRawMaterialStockSummaryByDateLocationId(
 			DateTime.Now.AddDays(-1),
 			DateTime.Now.AddDays(1),
 			1);
@@ -32,7 +39,7 @@ public static class StockData
 		foreach (var item in cart)
 		{
 			decimal adjustmentQuantity = 0;
-			var existingStock = stockDetails.FirstOrDefault(s => s.RawMaterialId == item.RawMaterialId);
+			var existingStock = stockSummary.FirstOrDefault(s => s.RawMaterialId == item.RawMaterialId);
 
 			if (existingStock is null)
 				adjustmentQuantity = item.Quantity;

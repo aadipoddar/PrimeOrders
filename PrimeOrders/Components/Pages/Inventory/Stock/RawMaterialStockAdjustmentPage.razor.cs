@@ -32,13 +32,13 @@ public partial class RawMaterialStockAdjustmentPage
 	private StockAdjustmentRawMaterialCartModel _selectedRawMaterialCart = new();
 	private RawMaterialModel _selectedRawMaterial = new();
 
-	private List<RawMaterialStockDetailModel> _stockDetails = [];
+	private List<RawMaterialStockSummaryModel> _stockDetails = [];
 	private List<RawMaterialModel> _rawMaterials = [];
 	private readonly List<StockAdjustmentRawMaterialCartModel> _stockAdjustmentRawMaterialCarts = [];
 
 	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
 	private SfGrid<StockAdjustmentRawMaterialCartModel> _sfRawMaterialCartGrid;
-	private SfGrid<RawMaterialStockDetailModel> _sfStockGrid;
+	private SfGrid<RawMaterialStockSummaryModel> _sfStockGrid;
 
 	private SfDialog _sfStockDetailsDialog;
 	private SfDialog _sfAdjustmentSummaryDialog;

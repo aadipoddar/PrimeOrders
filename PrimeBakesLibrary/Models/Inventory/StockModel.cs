@@ -35,7 +35,35 @@ public enum StockType
 	KitchenProduction,
 }
 
-public class RawMaterialStockDetailModel
+public class RawMaterialStockDetailsModel
+{
+	public int Id { get; set; }
+	public int RawMaterialId { get; set; }
+	public string RawMaterialCode { get; set; }
+	public string RawMaterialName { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal? NetRate { get; set; }
+	public string Type { get; set; }
+	public string TransactionNo { get; set; }
+	public DateOnly TransactionDate { get; set; }
+	public int LocationId { get; set; }
+}
+
+public class ProductStockDetailsModel
+{
+	public int Id { get; set; }
+	public int ProductId { get; set; }
+	public string ProductCode { get; set; }
+	public string ProductName { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal? NetRate { get; set; }
+	public string Type { get; set; }
+	public string TransactionNo { get; set; }
+	public DateOnly TransactionDate { get; set; }
+	public int LocationId { get; set; }
+}
+
+public class RawMaterialStockSummaryModel
 {
 	public int RawMaterialId { get; set; }
 	public string RawMaterialName { get; set; }
@@ -53,7 +81,7 @@ public class RawMaterialStockDetailModel
 	public decimal LastPurchaseValue { get; set; }
 }
 
-public class ProductStockDetailModel
+public class ProductStockSummaryModel
 {
 	public int ProductId { get; set; }
 	public string ProductName { get; set; }

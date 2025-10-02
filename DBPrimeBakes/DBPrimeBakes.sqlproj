@@ -177,8 +177,8 @@
     <Build Include="StoredProcedures\Reports\Sale\Load_ProductDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Sale\Load_SaleDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Sale\Load_SaleReturnDetails_By_Date_LocationId.sql" />
-    <Build Include="StoredProcedures\Reports\Stock\Load_ProductStockDetails_By_Date_LocationId.sql" />
-    <Build Include="StoredProcedures\Reports\Stock\Load_RawMaterialStockDetails_By_Date_LocationId.sql" />
+    <Build Include="StoredProcedures\Reports\Stock\Load_ProductStockSummary_By_Date_LocationId.sql" />
+    <Build Include="StoredProcedures\Reports\Stock\Load_RawMaterialStockSummary_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Load_OrderDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Load_PurchaseDetails_By_Date.sql" />
     <Build Include="StoredProcedures\Settings\Load_Settings_By_Key.sql" />
@@ -228,6 +228,8 @@
     <Build Include="Views\Purchase_Overview.sql" />
     <Build Include="Views\Sale_Overview.sql" />
     <Build Include="Views\SaleReturn_Overview.sql" />
+    <Build Include="Views\RawMaterialStockDetails.sql" />
+    <Build Include="StoredProcedures\Reports\Stock\Load_RawMaterialStockDetails_By_Date_LocationId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

@@ -16,9 +16,9 @@ public partial class RawMaterialStockReport
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
 
-	private List<RawMaterialStockDetailModel> _stockDetails = [];
+	private List<RawMaterialStockSummaryModel> _stockDetails = [];
 
-	private SfGrid<RawMaterialStockDetailModel> _sfGrid;
+	private SfGrid<RawMaterialStockSummaryModel> _sfGrid;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -57,7 +57,7 @@ public partial class RawMaterialStockReport
 			return;
 		}
 
-		var memoryStream = StockExcelExport.ExportRawMaterialStockExcel(_stockDetails, _startDate, _endDate);
+		var memoryStream = StockExcelExport.ExportRawMaterialStockSummaryExcel(_stockDetails, _startDate, _endDate);
 		var fileName = $"Raw_material_Stock_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}

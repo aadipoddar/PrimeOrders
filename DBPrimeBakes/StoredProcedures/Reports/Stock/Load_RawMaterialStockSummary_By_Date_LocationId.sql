@@ -1,21 +1,21 @@
-﻿CREATE PROCEDURE [dbo].[Load_ProductStockDetails_By_Date_LocationId]
+﻿CREATE PROCEDURE [dbo].[Load_RawMaterialStockSummary_By_Date_LocationId]
 	@FromDate DATETIME,
 	@ToDate DATETIME,
 	@LocationId INT
 AS
 BEGIN
 	SELECT
-        s.ProductId,
-        p.[Name] AS ProductName,
-        p.Code AS ProductCode,
-        p.ProductCategoryId,
-        pc.[Name] ProductCategoryName,
+        s.RawMaterialId,
+        r.[Name] RawMaterialName,
+        r.Code RawMaterialCode,
+        r.RawMaterialCategoryId,
+        rc.[Name] RawMaterialCategoryName,
 
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM [ProductStock]
-            WHERE     ProductId = s.ProductId
+            FROM [RawMaterialStock]
+            WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate < @FromDate
                   AND LocationId = @LocationId),
            0) AS OpeningStock,
@@ -23,10 +23,10 @@ BEGIN
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM [ProductStock]
-            WHERE     ProductId = s.ProductId
+            FROM [RawMaterialStock]
+            WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND Type = 'Purchase'
                   AND LocationId = @LocationId),
            0) AS PurchaseStock,
@@ -34,10 +34,10 @@ BEGIN
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM [ProductStock]
-            WHERE     ProductId = s.ProductId
+            FROM [RawMaterialStock]
+            WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND Type = 'Sale'
                   AND LocationId = @LocationId),
            0) AS SaleStock,
@@ -45,39 +45,39 @@ BEGIN
         ISNULL
         (
            (SELECT SUM (Quantity)
-            FROM [ProductStock]
-            WHERE     ProductId = s.ProductId
+            FROM [RawMaterialStock]
+            WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND LocationId = @LocationId),
            0) AS MonthlyStock,
 
         (  ISNULL
            (
               (SELECT SUM (Quantity)
-               FROM [ProductStock]
-               WHERE     ProductId = s.ProductId
+               FROM [RawMaterialStock]
+               WHERE     RawMaterialId = s.RawMaterialId
                      AND TransactionDate < @FromDate
                      AND LocationId = @LocationId),
               0)
          + ISNULL
            (
               (SELECT SUM (Quantity)
-               FROM [ProductStock]
-               WHERE     ProductId = s.ProductId
+               FROM [RawMaterialStock]
+               WHERE     RawMaterialId = s.RawMaterialId
                      AND TransactionDate >= @FromDate
-                     AND TransactionDate < @ToDate
+                     AND TransactionDate <= @ToDate
                      AND LocationId = @LocationId),
               0)) AS ClosingStock,
 
         ISNULL
         (
             (SELECT AVG (NetRate)
-             FROM [ProductStock]
-             WHERE     ProductId = s.ProductId
+             FROM [RawMaterialStock]
+             WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId),
         0) AS AveragePrice,
@@ -85,15 +85,15 @@ BEGIN
         ISNULL
         (
             (SELECT TOP 1 NetRate
-             FROM [ProductStock]
-             WHERE     ProductId = s.ProductId
+             FROM [RawMaterialStock]
+             WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId
              ORDER BY TransactionDate DESC),
-        0) AS LastSalePrice,
+        0) AS LastPurchasePrice,
 
         ISNULL
         (
@@ -102,26 +102,26 @@ BEGIN
                     ISNULL
                       (
                          (SELECT SUM (Quantity)
-                          FROM [ProductStock]
-                          WHERE     ProductId = s.ProductId
+                          FROM [RawMaterialStock]
+                          WHERE     RawMaterialId = s.RawMaterialId
                                 AND TransactionDate < @FromDate
                                 AND LocationId = @LocationId),
                          0)
                     + ISNULL
                       (
                          (SELECT SUM (Quantity)
-                          FROM [ProductStock]
-                          WHERE     ProductId = s.ProductId
+                          FROM [RawMaterialStock]
+                          WHERE     RawMaterialId = s.RawMaterialId
                                 AND TransactionDate >= @FromDate
                                 AND TransactionDate <= @ToDate
                                 AND LocationId = @LocationId),
                          0)
                 )
-             FROM [ProductStock]
-             WHERE     ProductId = s.ProductId
+             FROM [RawMaterialStock]
+             WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId),
         0) AS WeightedAverageValue,
@@ -133,42 +133,43 @@ BEGIN
                     ISNULL
                       (
                          (SELECT SUM (Quantity)
-                          FROM [ProductStock]
-                          WHERE     ProductId = s.ProductId
+                          FROM [RawMaterialStock]
+                          WHERE     RawMaterialId = s.RawMaterialId
                                 AND TransactionDate < @FromDate
                                 AND LocationId = @LocationId),
                          0)
                     + ISNULL
                       (
                          (SELECT SUM (Quantity)
-                          FROM [ProductStock]
-                          WHERE     ProductId = s.ProductId
+                          FROM [RawMaterialStock]
+                          WHERE     RawMaterialId = s.RawMaterialId
                                 AND TransactionDate >= @FromDate
                                 AND TransactionDate <= @ToDate
                                 AND LocationId = @LocationId),
                          0)
                 )
-             FROM [ProductStock]
-             WHERE     ProductId = s.ProductId
+             FROM [RawMaterialStock]
+             WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Type = 'Purchase'
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId
              ORDER BY TransactionDate DESC),
-        0) AS LastSaleValue
-
+        0) AS LastPurchaseValue
     FROM
-        [ProductStock] s
+        [RawMaterialStock] s
 
     LEFT JOIN
-        dbo.Product p ON p.Id = s.ProductId
+        dbo.RawMaterial r ON r.Id = s.RawMaterialId
     LEFT JOIN
-        dbo.ProductCategory pc ON pc.Id = p.ProductCategoryId
+        dbo.RawMaterialCategory rc ON rc.Id = r.RawMaterialCategoryId
+    
+    WHERE s.LocationId = @LocationId
 
-    GROUP BY s.ProductId,
-            p.[Name],
-            p.Code,
-            p.ProductCategoryId,
-            pc.Name;
+    GROUP BY s.RawMaterialId,
+            r.[Name],
+            r.Code,
+            r.RawMaterialCategoryId,
+            rc.Name;
 END

@@ -89,6 +89,8 @@ public static class StoredProcedureNames
 	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
 	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
+	public static string LoadRawMaterialStockSummaryByDateLocationId => "Load_RawMaterialStockSummary_By_Date_LocationId";
+	public static string LoadProductStockSummaryByDateLocationId => "Load_ProductStockSummary_By_Date_LocationId";
 	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
 	public static string LoadPurchaseDetailsByDate => "Load_PurchaseDetails_By_Date";
 	public static string LoadKitchenIssueDetailsByDate => "Load_KitchenIssueDetails_By_Date";
@@ -170,4 +172,5 @@ public static class ViewNames
 	public static string KitchenProductionOverview => "KitchenProduction_Overview";
 	public static string AccountingOverview => "Accounting_Overview";
 	public static string LedgerOverview => "Ledger_Overview";
+	public static string RawMaterialStockDetails => "RawMaterialStockDetails";
 }

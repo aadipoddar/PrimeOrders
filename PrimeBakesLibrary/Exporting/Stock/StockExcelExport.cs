@@ -8,8 +8,8 @@ public static class StockExcelExport
 	/// <summary>
 	/// Exports raw material stock details to Excel
 	/// </summary>
-	public static MemoryStream ExportRawMaterialStockExcel(
-		List<RawMaterialStockDetailModel> stockDetails,
+	public static MemoryStream ExportRawMaterialStockSummaryExcel(
+		List<RawMaterialStockSummaryModel> stockDetails,
 		DateOnly startDate,
 		DateOnly endDate)
 	{
@@ -41,42 +41,42 @@ public static class StockExcelExport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-			nameof(RawMaterialStockDetailModel.RawMaterialCategoryName),
-			nameof(RawMaterialStockDetailModel.RawMaterialCode),
-			nameof(RawMaterialStockDetailModel.RawMaterialName),
-			nameof(RawMaterialStockDetailModel.OpeningStock),
-			nameof(RawMaterialStockDetailModel.PurchaseStock),
-			nameof(RawMaterialStockDetailModel.SaleStock),
-			nameof(RawMaterialStockDetailModel.MonthlyStock),
-			nameof(RawMaterialStockDetailModel.ClosingStock),
-			nameof(RawMaterialStockDetailModel.AveragePrice),
-			nameof(RawMaterialStockDetailModel.WeightedAverageValue),
-			nameof(RawMaterialStockDetailModel.LastPurchasePrice),
-			nameof(RawMaterialStockDetailModel.LastPurchaseValue)
+			nameof(RawMaterialStockSummaryModel.RawMaterialCategoryName),
+			nameof(RawMaterialStockSummaryModel.RawMaterialCode),
+			nameof(RawMaterialStockSummaryModel.RawMaterialName),
+			nameof(RawMaterialStockSummaryModel.OpeningStock),
+			nameof(RawMaterialStockSummaryModel.PurchaseStock),
+			nameof(RawMaterialStockSummaryModel.SaleStock),
+			nameof(RawMaterialStockSummaryModel.MonthlyStock),
+			nameof(RawMaterialStockSummaryModel.ClosingStock),
+			nameof(RawMaterialStockSummaryModel.AveragePrice),
+			nameof(RawMaterialStockSummaryModel.WeightedAverageValue),
+			nameof(RawMaterialStockSummaryModel.LastPurchasePrice),
+			nameof(RawMaterialStockSummaryModel.LastPurchaseValue)
 		];
 
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
-			[nameof(RawMaterialStockDetailModel.RawMaterialCategoryName)] = new()
+			[nameof(RawMaterialStockSummaryModel.RawMaterialCategoryName)] = new()
 			{
 				DisplayName = "Category",
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(RawMaterialStockDetailModel.RawMaterialCode)] = new()
+			[nameof(RawMaterialStockSummaryModel.RawMaterialCode)] = new()
 			{
 				DisplayName = "Item Code",
 				Width = 12,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(RawMaterialStockDetailModel.RawMaterialName)] = new()
+			[nameof(RawMaterialStockSummaryModel.RawMaterialName)] = new()
 			{
 				DisplayName = "Item Name",
 				Width = 30,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(RawMaterialStockDetailModel.OpeningStock)] = new()
+			[nameof(RawMaterialStockSummaryModel.OpeningStock)] = new()
 			{
 				DisplayName = "Opening Stock",
 				Format = "#,##0.00",
@@ -94,7 +94,7 @@ public static class StockExcelExport
 					};
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.PurchaseStock)] = new()
+			[nameof(RawMaterialStockSummaryModel.PurchaseStock)] = new()
 			{
 				DisplayName = "Purchases",
 				Format = "#,##0.00",
@@ -112,7 +112,7 @@ public static class StockExcelExport
 					};
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.SaleStock)] = new()
+			[nameof(RawMaterialStockSummaryModel.SaleStock)] = new()
 			{
 				DisplayName = "Sales",
 				Format = "#,##0.00",
@@ -130,7 +130,7 @@ public static class StockExcelExport
 					};
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.MonthlyStock)] = new()
+			[nameof(RawMaterialStockSummaryModel.MonthlyStock)] = new()
 			{
 				DisplayName = "Monthly Stock",
 				Format = "#,##0.00",
@@ -138,7 +138,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(RawMaterialStockDetailModel.ClosingStock)] = new()
+			[nameof(RawMaterialStockSummaryModel.ClosingStock)] = new()
 			{
 				DisplayName = "Closing Stock",
 				Format = "#,##0.00",
@@ -171,7 +171,7 @@ public static class StockExcelExport
 					return null;
 				}
 			},
-			[nameof(RawMaterialStockDetailModel.AveragePrice)] = new()
+			[nameof(RawMaterialStockSummaryModel.AveragePrice)] = new()
 			{
 				DisplayName = "Average Price",
 				Format = "₹#,##0.00",
@@ -180,7 +180,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(RawMaterialStockDetailModel.WeightedAverageValue)] = new()
+			[nameof(RawMaterialStockSummaryModel.WeightedAverageValue)] = new()
 			{
 				DisplayName = "Weighted Avg Value",
 				Format = "₹#,##0.00",
@@ -189,7 +189,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(RawMaterialStockDetailModel.LastPurchasePrice)] = new()
+			[nameof(RawMaterialStockSummaryModel.LastPurchasePrice)] = new()
 			{
 				DisplayName = "Last Purchase Price",
 				Format = "₹#,##0.00",
@@ -198,7 +198,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(RawMaterialStockDetailModel.LastPurchaseValue)] = new()
+			[nameof(RawMaterialStockSummaryModel.LastPurchaseValue)] = new()
 			{
 				DisplayName = "Last Purchase Value",
 				Format = "₹#,##0.00",
@@ -225,10 +225,200 @@ public static class StockExcelExport
 	}
 
 	/// <summary>
+	/// Exports raw material stock details to Excel
+	/// </summary>
+	public static MemoryStream ExportRawMaterialStockDetailsExcel(
+		List<RawMaterialStockDetailsModel> stockDetails,
+		DateOnly startDate,
+		DateOnly endDate)
+	{
+		if (stockDetails is null || stockDetails.Count == 0)
+			throw new ArgumentException("No data to export");
+
+		// Create summary items dictionary with transaction details
+		Dictionary<string, object> summaryItems = new()
+		{
+			{ "Total Transactions", stockDetails.Count },
+			{ "Total Quantity", stockDetails.Sum(s => s.Quantity) },
+			{ "Purchase Transactions", stockDetails.Count(s => s.Type == StockType.Purchase.ToString()) },
+			{ "Sale Transactions", stockDetails.Count(s => s.Type == StockType.Sale.ToString()) },
+			{ "Adjustment Transactions", stockDetails.Count(s => s.Type == StockType.Adjustment.ToString()) },
+			{ "Kitchen Issue Transactions", stockDetails.Count(s => s.Type == StockType.KitchenIssue.ToString()) },
+			{ "Production Transactions", stockDetails.Count(s => s.Type == StockType.KitchenProduction.ToString()) }
+		};
+
+		// Add top materials by transaction count
+		var topMaterials = stockDetails
+			.GroupBy(s => s.RawMaterialName)
+			.OrderByDescending(g => g.Count())
+			.Take(3)
+			.ToList();
+
+		foreach (var material in topMaterials)
+			summaryItems.Add($"Material: {material.Key}", material.Count());
+
+		// Define the column order for better readability
+		List<string> columnOrder = [
+			nameof(RawMaterialStockDetailsModel.Id),
+			nameof(RawMaterialStockDetailsModel.TransactionDate),
+			nameof(RawMaterialStockDetailsModel.TransactionNo),
+			nameof(RawMaterialStockDetailsModel.Type),
+			nameof(RawMaterialStockDetailsModel.RawMaterialCode),
+			nameof(RawMaterialStockDetailsModel.RawMaterialName),
+			nameof(RawMaterialStockDetailsModel.Quantity),
+			nameof(RawMaterialStockDetailsModel.NetRate)
+		];
+
+		// Define custom column settings
+		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		{
+			[nameof(RawMaterialStockDetailsModel.Id)] = new()
+			{
+				DisplayName = "Id",
+				Width = 8,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(RawMaterialStockDetailsModel.TransactionDate)] = new()
+			{
+				DisplayName = "Date",
+				Width = 12,
+				Format = "yyyy-mm-dd",
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(RawMaterialStockDetailsModel.TransactionNo)] = new()
+			{
+				DisplayName = "Transaction No",
+				Width = 15,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(RawMaterialStockDetailsModel.Type)] = new()
+			{
+				DisplayName = "Transaction Type",
+				Width = 15,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter,
+				FormatCallback = (value) =>
+				{
+					if (value is null) return null;
+
+					var type = value.ToString();
+					return type switch
+					{
+						"Purchase" => new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(56, 142, 60),
+							Bold = true
+						},
+						"Sale" => new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(239, 108, 0),
+							Bold = true
+						},
+						"Adjustment" => new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(33, 150, 243),
+							Bold = true
+						},
+						"KitchenIssue" => new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(156, 39, 176),
+							Bold = true
+						},
+						"KitchenProduction" => new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(76, 175, 80),
+							Bold = true
+						},
+						_ => null
+					};
+				}
+			},
+			[nameof(RawMaterialStockDetailsModel.RawMaterialCode)] = new()
+			{
+				DisplayName = "Item Code",
+				Width = 12,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
+			},
+			[nameof(RawMaterialStockDetailsModel.RawMaterialName)] = new()
+			{
+				DisplayName = "Item Name",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(RawMaterialStockDetailsModel.Quantity)] = new()
+			{
+				DisplayName = "Quantity",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value is null) return null;
+
+					var quantity = Convert.ToDecimal(value);
+					if (quantity > 0)
+					{
+						return new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(56, 142, 60),
+							Bold = true
+						};
+					}
+					else if (quantity < 0)
+					{
+						return new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(198, 40, 40),
+							Bold = true
+						};
+					}
+
+					return null;
+				}
+			},
+			[nameof(RawMaterialStockDetailsModel.NetRate)] = new()
+			{
+				DisplayName = "Net Rate",
+				Format = "₹#,##0.00",
+				Width = 15,
+				IsCurrency = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value is null)
+					{
+						return new ExcelExportUtil.FormatInfo
+						{
+							FontColor = Syncfusion.Drawing.Color.FromArgb(117, 117, 117),
+							Bold = false
+						};
+					}
+
+					return null;
+				}
+			}
+		};
+
+		// Generate title and worksheet name
+		string reportTitle = "Raw Material Stock Transaction Details";
+		string worksheetName = "Transaction Details";
+
+		return ExcelExportUtil.ExportToExcel(
+			stockDetails,
+			reportTitle,
+			worksheetName,
+			startDate,
+			endDate,
+			summaryItems,
+			columnSettings,
+			columnOrder);
+	}
+
+	/// <summary>
 	/// Exports finished product stock details to Excel
 	/// </summary>
 	public static MemoryStream ExportFinishedProductStockExcel(
-		List<ProductStockDetailModel> stockDetails,
+		List<ProductStockSummaryModel> stockDetails,
 		DateOnly startDate,
 		DateOnly endDate,
 		int selectedLocationId = 0,
@@ -269,42 +459,42 @@ public static class StockExcelExport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-			nameof(ProductStockDetailModel.ProductCategoryName),
-			nameof(ProductStockDetailModel.ProductCode),
-			nameof(ProductStockDetailModel.ProductName),
-			nameof(ProductStockDetailModel.OpeningStock),
-			nameof(ProductStockDetailModel.PurchaseStock),
-			nameof(ProductStockDetailModel.SaleStock),
-			nameof(ProductStockDetailModel.MonthlyStock),
-			nameof(ProductStockDetailModel.ClosingStock),
-			nameof(ProductStockDetailModel.AveragePrice),
-			nameof(ProductStockDetailModel.WeightedAverageValue),
-			nameof(ProductStockDetailModel.LastSalePrice),
-			nameof(ProductStockDetailModel.LastSaleValue)
+			nameof(ProductStockSummaryModel.ProductCategoryName),
+			nameof(ProductStockSummaryModel.ProductCode),
+			nameof(ProductStockSummaryModel.ProductName),
+			nameof(ProductStockSummaryModel.OpeningStock),
+			nameof(ProductStockSummaryModel.PurchaseStock),
+			nameof(ProductStockSummaryModel.SaleStock),
+			nameof(ProductStockSummaryModel.MonthlyStock),
+			nameof(ProductStockSummaryModel.ClosingStock),
+			nameof(ProductStockSummaryModel.AveragePrice),
+			nameof(ProductStockSummaryModel.WeightedAverageValue),
+			nameof(ProductStockSummaryModel.LastSalePrice),
+			nameof(ProductStockSummaryModel.LastSaleValue)
 		];
 
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
-			[nameof(ProductStockDetailModel.ProductCategoryName)] = new()
+			[nameof(ProductStockSummaryModel.ProductCategoryName)] = new()
 			{
 				DisplayName = "Category",
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(ProductStockDetailModel.ProductCode)] = new()
+			[nameof(ProductStockSummaryModel.ProductCode)] = new()
 			{
 				DisplayName = "Product Code",
 				Width = 12,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			},
-			[nameof(ProductStockDetailModel.ProductName)] = new()
+			[nameof(ProductStockSummaryModel.ProductName)] = new()
 			{
 				DisplayName = "Product Name",
 				Width = 30,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(ProductStockDetailModel.OpeningStock)] = new()
+			[nameof(ProductStockSummaryModel.OpeningStock)] = new()
 			{
 				DisplayName = "Opening Stock",
 				Format = "#,##0.00",
@@ -322,7 +512,7 @@ public static class StockExcelExport
 					};
 				}
 			},
-			[nameof(ProductStockDetailModel.PurchaseStock)] = new()
+			[nameof(ProductStockSummaryModel.PurchaseStock)] = new()
 			{
 				DisplayName = "Production",
 				Format = "#,##0.00",
@@ -340,7 +530,7 @@ public static class StockExcelExport
 					};
 				}
 			},
-			[nameof(ProductStockDetailModel.SaleStock)] = new()
+			[nameof(ProductStockSummaryModel.SaleStock)] = new()
 			{
 				DisplayName = "Sales",
 				Format = "#,##0.00",
@@ -358,7 +548,7 @@ public static class StockExcelExport
 					};
 				}
 			},
-			[nameof(ProductStockDetailModel.MonthlyStock)] = new()
+			[nameof(ProductStockSummaryModel.MonthlyStock)] = new()
 			{
 				DisplayName = "Monthly Stock",
 				Format = "#,##0.00",
@@ -366,7 +556,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(ProductStockDetailModel.ClosingStock)] = new()
+			[nameof(ProductStockSummaryModel.ClosingStock)] = new()
 			{
 				DisplayName = "Closing Stock",
 				Format = "#,##0.00",
@@ -399,7 +589,7 @@ public static class StockExcelExport
 					return null;
 				}
 			},
-			[nameof(ProductStockDetailModel.AveragePrice)] = new()
+			[nameof(ProductStockSummaryModel.AveragePrice)] = new()
 			{
 				DisplayName = "Average Price",
 				Format = "₹#,##0.00",
@@ -408,7 +598,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(ProductStockDetailModel.WeightedAverageValue)] = new()
+			[nameof(ProductStockSummaryModel.WeightedAverageValue)] = new()
 			{
 				DisplayName = "Weighted Avg Value",
 				Format = "₹#,##0.00",
@@ -417,7 +607,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(ProductStockDetailModel.LastSalePrice)] = new()
+			[nameof(ProductStockSummaryModel.LastSalePrice)] = new()
 			{
 				DisplayName = "Last Sale Price",
 				Format = "₹#,##0.00",
@@ -426,7 +616,7 @@ public static class StockExcelExport
 				IncludeInTotal = true,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
 			},
-			[nameof(ProductStockDetailModel.LastSaleValue)] = new()
+			[nameof(ProductStockSummaryModel.LastSaleValue)] = new()
 			{
 				DisplayName = "Last Sale Value",
 				Format = "₹#,##0.00",

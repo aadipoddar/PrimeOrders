@@ -19,9 +19,9 @@ public partial class FinishedProductStockReport
 
 	private List<LocationModel> _locations = [];
 	private int _selectedLocationId;
-	private List<ProductStockDetailModel> _stockDetails = [];
+	private List<ProductStockSummaryModel> _stockDetails = [];
 
-	private SfGrid<ProductStockDetailModel> _sfGrid;
+	private SfGrid<ProductStockSummaryModel> _sfGrid;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{

@@ -34,13 +34,13 @@ public partial class ProductStockAdjustmentPage
 	private ProductModel _selectedProduct = new();
 
 	private List<LocationModel> _locations = [];
-	private List<ProductStockDetailModel> _stockDetails = [];
+	private List<ProductStockSummaryModel> _stockDetails = [];
 	private List<ProductModel> _products = [];
 	private readonly List<StockAdjustmentProductCartModel> _productStockAdjustmentCarts = [];
 
 	private SfGrid<ProductModel> _sfProductGrid;
 	private SfGrid<StockAdjustmentProductCartModel> _sfProductCartGrid;
-	private SfGrid<ProductStockDetailModel> _sfStockGrid;
+	private SfGrid<ProductStockSummaryModel> _sfStockGrid;
 
 	private SfDialog _sfStockDetailsDialog;
 	private SfDialog _sfAdjustmentSummaryDialog;
