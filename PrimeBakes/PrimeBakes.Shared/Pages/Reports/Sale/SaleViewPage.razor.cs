@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
@@ -37,6 +38,7 @@ public partial class SaleViewPage
 	private string _confirmationIcon = "";
 	private string _currentAction = "";
 
+	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
@@ -94,61 +96,23 @@ public partial class SaleViewPage
 			});
 		}
 	}
+	#endregion
 
-	private void EditSale()
-	{
-		ShowConfirmation(
-			"Edit Sale",
-			"Are you sure you want to edit this sale?",
-			"This will redirect you to the sale editing page where you can modify the sale details.",
-			"Edit Sale",
-			"fas fa-edit",
-			"edit"
-		);
-	}
-
-	private void DeleteSale()
-	{
-		ShowConfirmation(
-			"Delete Sale",
-			"Are you sure you want to delete this sale?",
-			"This action cannot be undone. All sale data, including products and transactions, will be permanently removed.",
-			"Delete Sale",
-			"fas fa-trash-alt",
-			"delete"
-		);
-	}
-
-	private void UnlinkOrder()
-	{
-		ShowConfirmation(
-			"Unlink Order",
-			"Are you sure you want to unlink this sale from the order?",
-			"This will remove the connection between this sale and the associated order. The order status may be affected.",
-			"Unlink Order",
-			"fas fa-unlink",
-			"unlink"
-		);
-	}
-
-	private async Task PrintBill()
+	#region Exporting
+	private async Task PrintThermalBill()
 	{
 		_isProcessing = true;
 		StateHasChanged();
 
-		var saleModel = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, SaleId);
-		var thermalPrintData = await SaleThermalPrint.GenerateThermalBill(saleModel);
-		var fileName = $"Bill_{_saleOverview.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.html";
-
-		var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(thermalPrintData.ToString()));
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
-		VibrationService.VibrateWithTime(100);
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, SaleId);
+		var content = await SaleThermalPrint.GenerateThermalBill(sale);
+		await JSRuntime.InvokeVoidAsync("printToPrinter", content.ToString());
 
 		_isProcessing = false;
 		StateHasChanged();
 	}
 
-	private async Task ExportPDF()
+	private async Task PrintPDF()
 	{
 		_isProcessing = true;
 		StateHasChanged();
@@ -161,6 +125,38 @@ public partial class SaleViewPage
 		_isProcessing = false;
 		StateHasChanged();
 	}
+	#endregion
+
+	#region Sale Actions
+	private void EditSale() =>
+		ShowConfirmation(
+			"Edit Sale",
+			"Are you sure you want to edit this sale?",
+			"This will redirect you to the sale editing page where you can modify the sale details. This will Also Delete any Existing Sale Cart.",
+			"Edit Sale",
+			"fas fa-edit",
+			"edit"
+		);
+
+	private void DeleteSale() =>
+		ShowConfirmation(
+			"Delete Sale",
+			"Are you sure you want to delete this sale?",
+			"This action cannot be undone. All sale data, including products and transactions, will be permanently removed.",
+			"Delete Sale",
+			"fas fa-trash-alt",
+			"delete"
+		);
+
+	private void UnlinkOrder() =>
+		ShowConfirmation(
+			"Unlink Order",
+			"Are you sure you want to unlink this sale from the order?",
+			"This will remove the connection between this sale and the associated order. The order status may be affected.",
+			"Unlink Order",
+			"fas fa-unlink",
+			"unlink"
+		);
 
 	private void ShowConfirmation(string title, string message, string details, string buttonText, string icon, string action)
 	{
@@ -178,35 +174,36 @@ public partial class SaleViewPage
 		_isProcessing = true;
 		StateHasChanged();
 
-		try
+		switch (_currentAction)
 		{
-			switch (_currentAction)
-			{
-				case "edit":
-					NavigationManager.NavigateTo($"/Sale/{SaleId}");
-					break;
-				case "delete":
-					await DeleteSaleConfirmed();
-					break;
-				case "unlink":
-					await UnlinkOrderConfirmed();
-					break;
-			}
+			case "edit":
+				await EditSaleConfirmed();
+				break;
+			case "delete":
+				await DeleteSaleConfirmed();
+				break;
+			case "unlink":
+				await UnlinkOrderConfirmed();
+				break;
 		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(
-				SaleId,
-				"Error",
-				"Action Error",
-				$"Error: {ex.Message}");
-		}
-		finally
-		{
-			_isProcessing = false;
-			_showConfirmation = false;
-			StateHasChanged();
-		}
+
+		_isProcessing = false;
+		_showConfirmation = false;
+		StateHasChanged();
+	}
+
+	private async Task EditSaleConfirmed()
+	{
+		await DataStorageService.LocalRemove(StorageFileNames.SaleDataFileName);
+		await DataStorageService.LocalRemove(StorageFileNames.SaleCartDataFileName);
+
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, SaleId);
+		var saleDetails = await SaleData.LoadSaleDetailBySale(SaleId);
+
+		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleDataFileName, System.Text.Json.JsonSerializer.Serialize(sale));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleCartDataFileName, System.Text.Json.JsonSerializer.Serialize(saleDetails));
+
+		NavigationManager.NavigateTo("/Sale");
 	}
 
 	private async Task DeleteSaleConfirmed()
@@ -255,6 +252,7 @@ public partial class SaleViewPage
 		_showConfirmation = false;
 		_currentAction = "";
 	}
+	#endregion
 }
 
 // Model for detailed sale product display

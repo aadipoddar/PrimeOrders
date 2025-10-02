@@ -67,15 +67,6 @@ else
 				<h3>Finished Goods / Product Stock Adjustment</h3>
 				<p>Adjust and manage finished product inventory</p>
 			</div>
-
-			@if (_user.LocationId == 1)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Recipes")'>
-					<div class="card-icon recipe-icon">📝</div>
-					<h3>Recipes</h3>
-					<p>Manage baking recipes and formulations</p>
-				</div>
-			}
 		</div>
 
 		<div class="dashboard-footer">

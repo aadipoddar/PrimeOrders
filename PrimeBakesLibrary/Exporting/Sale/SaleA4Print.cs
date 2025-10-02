@@ -46,7 +46,7 @@ public static class SaleA4Print
 		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES INVOICE");
 		currentY = DrawInvoiceDetails(pdfPage, currentY, sale);
 		var result = DrawItemDetails(pdfPage, currentY, saleProductCartModel);
-		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, sale);
+		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, sale, saleDetails);
 
 		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
 	}
@@ -121,7 +121,7 @@ public static class SaleA4Print
 		return result;
 	}
 
-	private static float DrawSummary(PdfDocument pdfDocument, PdfPage pdfPage, float currentY, SaleOverviewModel sale)
+	private static float DrawSummary(PdfDocument pdfDocument, PdfPage pdfPage, float currentY, SaleOverviewModel sale, List<SaleDetailModel> saleDetails)
 	{
 		var summaryItems = new Dictionary<string, string>
 		{
@@ -130,17 +130,45 @@ public static class SaleA4Print
 			["Sub Total: "] = sale.BaseTotal.FormatIndianCurrency()
 		};
 
+		bool uniformDiscount = saleDetails.All(x => x.DiscPercent == sale.DiscountPercent);
+
+		// Check if tax rates are consistent across all items
+		bool uniformTaxRates = saleDetails.All(x =>
+			x.CGSTPercent == sale.CGSTPercent &&
+			x.SGSTPercent == sale.SGSTPercent &&
+			x.IGSTPercent == sale.IGSTPercent);
+
 		if (sale.DiscountAmount > 0)
-			summaryItems[$"Discount ({sale.DiscountPercent:N1}%):"] = $"-{sale.DiscountAmount.FormatIndianCurrency()}";
+		{
+			if (uniformDiscount)
+				summaryItems[$"Discount ({sale.DiscountPercent:N1}%):"] = $"-{sale.DiscountAmount.FormatIndianCurrency()}";
+			else
+				summaryItems[$"Discount:"] = $"-{sale.DiscountAmount.FormatIndianCurrency()}";
+		}
 
 		if (sale.CGSTPercent > 0)
-			summaryItems[$"CGST ({sale.CGSTPercent:N1}%):"] = sale.CGSTAmount.FormatIndianCurrency();
+		{
+			if (uniformTaxRates)
+				summaryItems[$"CGST ({sale.CGSTPercent:N1}%):"] = sale.CGSTAmount.FormatIndianCurrency();
+			else
+				summaryItems[$"CGST:"] = sale.CGSTAmount.FormatIndianCurrency();
+		}
 
 		if (sale.SGSTPercent > 0)
-			summaryItems[$"SGST ({sale.SGSTPercent:N1}%):"] = sale.SGSTAmount.FormatIndianCurrency();
+		{
+			if (uniformTaxRates)
+				summaryItems[$"SGST ({sale.SGSTPercent:N1}%):"] = sale.SGSTAmount.FormatIndianCurrency();
+			else
+				summaryItems[$"SGST:"] = sale.SGSTAmount.FormatIndianCurrency();
+		}
 
 		if (sale.IGSTPercent > 0)
-			summaryItems[$"IGST ({sale.IGSTPercent:N1}%):"] = sale.IGSTAmount.FormatIndianCurrency();
+		{
+			if (uniformTaxRates)
+				summaryItems[$"IGST ({sale.IGSTPercent:N1}%):"] = sale.IGSTAmount.FormatIndianCurrency();
+			else
+				summaryItems[$"IGST:"] = sale.IGSTAmount.FormatIndianCurrency();
+		}
 
 		if (sale.RoundOff != 0)
 			summaryItems["Round Off:"] = sale.RoundOff.FormatIndianCurrency();

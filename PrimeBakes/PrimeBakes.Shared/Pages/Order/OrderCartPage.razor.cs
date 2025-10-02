@@ -25,7 +25,7 @@ public partial class OrderCartPage
 	private List<LocationModel> _locations = [];
 	private readonly List<OrderProductCartModel> _cart = [];
 
-	private readonly OrderModel _order = new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "", CreatedAt = DateTime.Now };
+	private OrderModel _order = new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "", CreatedAt = DateTime.Now };
 	private readonly List<ValidationError> _validationErrors = [];
 
 	public class ValidationError
@@ -67,6 +67,10 @@ public partial class OrderCartPage
 
 		_cart.Sort((x, y) => string.Compare(x.ProductName, y.ProductName, StringComparison.Ordinal));
 
+		if (await DataStorageService.LocalExists(StorageFileNames.OrderDataFileName))
+			_order = System.Text.Json.JsonSerializer.Deserialize<OrderModel>(await DataStorageService.LocalGetAsync(StorageFileNames.OrderDataFileName)) ??
+				new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "", CreatedAt = DateTime.Now };
+
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 
@@ -102,6 +106,8 @@ public partial class OrderCartPage
 	#region Saving
 	private async Task SaveOrderFile()
 	{
+		await DataStorageService.LocalSaveAsync(StorageFileNames.OrderDataFileName, System.Text.Json.JsonSerializer.Serialize(_order));
+
 		if (!_cart.Any(x => x.Quantity > 0) && await DataStorageService.LocalExists(StorageFileNames.OrderCartDataFileName))
 			await DataStorageService.LocalRemove(StorageFileNames.OrderCartDataFileName);
 		else
@@ -185,6 +191,7 @@ public partial class OrderCartPage
 	private async Task DeleteCart()
 	{
 		_cart.Clear();
+		await DataStorageService.LocalRemove(StorageFileNames.OrderDataFileName);
 		await DataStorageService.LocalRemove(StorageFileNames.OrderCartDataFileName);
 	}
 

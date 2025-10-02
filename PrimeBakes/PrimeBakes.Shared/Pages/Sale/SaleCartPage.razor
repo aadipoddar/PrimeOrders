@@ -510,7 +510,8 @@ else
 			<FooterTemplate>
 				<div class="dialog-footer confirmation-footer">
 					<SfButton Content="No, Cancel" OnClick="CloseConfirmSaleDialog" CssClass="dialog-button cancel-button" Disabled="@_isSaving" />
-					<SfButton Content="@(_isSaving ? "⏳ Saving Sale..." : "Yes, Place Sale")" OnClick="SaveSale" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
+					<SfButton Content="@(_isSaving ? "⏳ Saving Sale..." : "Place Sale")" OnClick="() => SaveSale()" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
+					<SfButton Content="@(_isSaving ? "⏳ Saving Sale..." : "Thermal Sale")" OnClick="() => SaveSale(true)" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
 				</div>
 			</FooterTemplate>
 		</DialogTemplates>

@@ -18,7 +18,10 @@ public class KitchenIssueDetailModel
 	public int Id { get; set; }
 	public int KitchenIssueId { get; set; }
 	public int RawMaterialId { get; set; }
+	public string MeasurementUnit { get; set; }
 	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -34,6 +37,7 @@ public class KitchenIssueOverviewModel
 	public string Remarks { get; set; }
 	public int TotalProducts { get; set; }
 	public decimal TotalQuantity { get; set; }
+	public decimal TotalAmount { get; set; }
 	public DateTime CreatedAt { get; set; }
 }
 
@@ -42,6 +46,7 @@ public class KitchenIssueRawMaterialCartModel
 	public int RawMaterialCategoryId { get; set; }
 	public int RawMaterialId { get; set; }
 	public string RawMaterialName { get; set; }
+	public string MeasurementUnit { get; set; }
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }
 	public decimal Total { get; set; }

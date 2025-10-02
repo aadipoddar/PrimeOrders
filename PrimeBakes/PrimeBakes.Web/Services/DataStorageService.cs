@@ -23,11 +23,15 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 	{
 		await _protectedLocalStorage.DeleteAsync(StorageFileNames.UserDataFileName);
 
+		await LocalRemove(StorageFileNames.OrderDataFileName);
 		await LocalRemove(StorageFileNames.OrderCartDataFileName);
 		await LocalRemove(StorageFileNames.SaleDataFileName);
 		await LocalRemove(StorageFileNames.SaleCartDataFileName);
 		await LocalRemove(StorageFileNames.PurchaseDataFileName);
 		await LocalRemove(StorageFileNames.PurchaseCartDataFileName);
+		await LocalRemove(StorageFileNames.KitchenIssueDataFileName);
+		await LocalRemove(StorageFileNames.KitchenIssueCartDataFileName);
+		await LocalRemove(StorageFileNames.RawMaterialStockAdjustmentCartDataFileName);
 	}
 
 

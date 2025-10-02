@@ -74,7 +74,6 @@ public partial class OrderPage
 	{
 		if (args is null || args.Value <= 0)
 			_selectedCategoryId = 0;
-
 		else
 			_selectedCategoryId = args.Value;
 

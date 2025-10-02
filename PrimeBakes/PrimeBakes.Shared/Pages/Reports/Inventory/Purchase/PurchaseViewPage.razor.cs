@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
@@ -7,7 +6,6 @@ using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Purchase;
 using PrimeBakesLibrary.Models.Inventory;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Purchase;
 
@@ -19,8 +17,8 @@ public partial class PurchaseViewPage : ComponentBase
 	private bool _isProcessing = false;
 	private bool _showDeleteDialog = false;
 	private PurchaseOverviewModel _purchaseOverview;
-	private List<PurchaseDetailModel> _purchaseDetails = new();
-	private List<RawMaterialModel> _rawMaterials = new();
+	private List<PurchaseDetailModel> _purchaseDetails = [];
+	private List<RawMaterialModel> _rawMaterials = [];
 
 	private Syncfusion.Blazor.Popups.SfDialog _confirmDeleteDialog;
 
@@ -42,9 +40,7 @@ public partial class PurchaseViewPage : ComponentBase
 			// Load detailed purchase items
 			_purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(PurchaseId);
 
-			// Load raw materials for name mapping - this should be from CommonData
-			// For now, we'll use an empty list and show IDs
-			_rawMaterials = [];
+			_rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
 		}
 
 		_isLoading = false;
@@ -57,8 +53,19 @@ public partial class PurchaseViewPage : ComponentBase
 		return rawMaterial?.Name ?? $"Raw Material ID: {rawMaterialId}";
 	}
 
-	private void EditPurchase() =>
-		NavigationManager.NavigateTo($"/Inventory/Purchase/Edit/{PurchaseId}");
+	private async Task EditPurchase()
+	{
+		await DataStorageService.LocalRemove(StorageFileNames.PurchaseDataFileName);
+		await DataStorageService.LocalRemove(StorageFileNames.PurchaseCartDataFileName);
+
+		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, _purchaseOverview.PurchaseId);
+		var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(_purchaseOverview.PurchaseId);
+
+		await DataStorageService.LocalSaveAsync(StorageFileNames.PurchaseDataFileName, System.Text.Json.JsonSerializer.Serialize(purchase));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.PurchaseCartDataFileName, System.Text.Json.JsonSerializer.Serialize(purchaseDetails));
+
+		NavigationManager.NavigateTo("/Inventory/Purchase");
+	}
 
 	private void DeletePurchase()
 	{
@@ -74,64 +81,50 @@ public partial class PurchaseViewPage : ComponentBase
 
 	private async Task ConfirmDelete()
 	{
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
+		_isProcessing = true;
+		StateHasChanged();
 
-			var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, PurchaseId);
-			if (purchase is null)
-			{
-				await NotificationService.ShowLocalNotification(
-					PurchaseId,
-					"Error",
-					"Delete Error",
-					"Purchase not found."
-				);
-				return;
-			}
-
-			// Mark purchase as deleted
-			purchase.Status = false;
-			await PurchaseData.InsertPurchase(purchase);
-
-			// Reverse stock entries
-			await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
-
-			// Mark accounting entries as deleted
-			var accounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);
-			if (accounting != null)
-			{
-				accounting.Status = false;
-				await AccountingData.InsertAccounting(accounting);
-			}
-
-			// Show success notification
-			await NotificationService.ShowLocalNotification(
-				PurchaseId,
-				"Success",
-				"Purchase Deleted",
-				$"Purchase {_purchaseOverview.BillNo} has been successfully deleted."
-			);
-
-			// Close dialog and navigate back
-			_showDeleteDialog = false;
-			NavigationManager.NavigateTo("/Reports/Purchase");
-		}
-		catch (Exception ex)
+		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, PurchaseId);
+		if (purchase is null)
 		{
 			await NotificationService.ShowLocalNotification(
 				PurchaseId,
 				"Error",
 				"Delete Error",
-				$"Error deleting purchase: {ex.Message}"
+				"Purchase not found."
 			);
+			return;
 		}
-		finally
+
+		// Mark purchase as deleted
+		purchase.Status = false;
+		await PurchaseData.InsertPurchase(purchase);
+
+		// Reverse stock entries
+		await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
+
+		// Mark accounting entries as deleted
+		var accounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);
+		if (accounting != null)
 		{
-			_isProcessing = false;
-			StateHasChanged();
+			accounting.Status = false;
+			await AccountingData.InsertAccounting(accounting);
 		}
+
+		// Show success notification
+		await NotificationService.ShowLocalNotification(
+			PurchaseId,
+			"Success",
+			"Purchase Deleted",
+			$"Purchase {_purchaseOverview.BillNo} has been successfully deleted."
+		);
+
+		// Close dialog and navigate back
+		_showDeleteDialog = false;
+		NavigationManager.NavigateTo("/Reports/Purchase");
+
+		_isProcessing = false;
+		StateHasChanged();
 	}
 
 	private async Task PrintPurchase()

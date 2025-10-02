@@ -518,15 +518,15 @@ else
                         </button>
                     }
                 }
-                
-                <button class="action-btn btn-bill" @onclick="PrintBill" disabled="@_isProcessing">
+
+                <button class="action-btn btn-bill" @onclick="PrintThermalBill" disabled="@_isProcessing">
                     <i class="fas fa-receipt"></i>
-                    <span>Print Bill</span>
+                    <span>Print Thermal</span>
                 </button>
                 
-                <button class="action-btn btn-pdf" @onclick="ExportPDF" disabled="@_isProcessing">
+                <button class="action-btn btn-pdf" @onclick="PrintPDF" disabled="@_isProcessing">
                     <i class="fas fa-file-pdf"></i>
-                    <span>Export PDF</span>
+                    <span>Print PDF</span>
                 </button>
             </div>
         </div>

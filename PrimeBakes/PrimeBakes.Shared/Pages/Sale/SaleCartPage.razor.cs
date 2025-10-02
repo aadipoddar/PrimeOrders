@@ -1,3 +1,5 @@
+using Microsoft.JSInterop;
+
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
@@ -112,7 +114,7 @@ public partial class SaleCartPage
 
 		_sale.LocationId = _user.LocationId;
 		_sale.UserId = _user.Id;
-		_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
+		_sale.BillNo = _sale.Id > 0 ? _sale.BillNo : await GenerateCodes.GenerateSaleBillNo(_sale);
 	}
 
 	private async Task LoadCustomer()
@@ -570,7 +572,7 @@ public partial class SaleCartPage
 		return true;
 	}
 
-	private async Task SaveSale()
+	private async Task SaveSale(bool thermal = false)
 	{
 		if (_isSaving)
 			return;
@@ -589,6 +591,8 @@ public partial class SaleCartPage
 
 			await InsertCustomer();
 			_sale.Id = await SaleData.SaveSale(_sale, _cart);
+			if (thermal)
+				await PrintThermalBill();
 			await PrintSaleBill();
 			await DeleteCartSale();
 			await SendLocalNotification();
@@ -609,6 +613,12 @@ public partial class SaleCartPage
 			_isSaving = false;
 			StateHasChanged();
 		}
+	}
+
+	private async Task PrintThermalBill()
+	{
+		var content = await SaleThermalPrint.GenerateThermalBill(_sale);
+		await JSRuntime.InvokeVoidAsync("printToPrinter", content.ToString());
 	}
 
 	private async Task InsertCustomer()

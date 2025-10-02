@@ -142,6 +142,9 @@ public static class PurchaseA4Print
 		if (purchase.CashDiscountAmount > 0)
 			summaryItems[$"Cash Discount ({purchase.CashDiscountPercent:N1}%):"] = $"-{purchase.CashDiscountAmount.FormatIndianCurrency()}";
 
+		if (purchase.RoundOff != 0)
+			summaryItems["Round Off:"] = purchase.RoundOff.FormatIndianCurrency();
+
 		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, purchase.Total);
 	}
 }

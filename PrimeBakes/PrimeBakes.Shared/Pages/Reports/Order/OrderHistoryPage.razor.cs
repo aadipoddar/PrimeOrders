@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
@@ -18,8 +17,6 @@ namespace PrimeBakes.Shared.Pages.Reports.Order;
 
 public partial class OrderHistoryPage
 {
-	[Inject] private IJSRuntime JSRuntime { get; set; }
-
 	private UserModel _user;
 
 	private bool _isLoading = true;

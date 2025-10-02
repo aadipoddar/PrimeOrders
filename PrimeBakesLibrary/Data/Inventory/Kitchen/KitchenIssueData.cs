@@ -63,7 +63,10 @@ public static class KitchenIssueData
 				Id = 0,
 				KitchenIssueId = kitchenIssue.Id,
 				RawMaterialId = item.RawMaterialId,
+				MeasurementUnit = item.MeasurementUnit,
 				Quantity = item.Quantity,
+				Rate = item.Rate,
+				Total = item.Total,
 				Status = true
 			});
 	}

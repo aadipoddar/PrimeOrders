@@ -12,6 +12,7 @@
 
 		COUNT(DISTINCT ki.Id) AS TotalProducts,
 		SUM(kid.Quantity) AS TotalQuantity,
+		SUM(kid.Total) AS TotalAmount,
 		
 		ki.CreatedAt
 

@@ -73,6 +73,7 @@ public class ProductStockDetailModel
 
 public class StockAdjustmentRawMaterialCartModel
 {
+	public int RawMaterialCategoryId { get; set; }
 	public int RawMaterialId { get; set; }
 	public string RawMaterialName { get; set; }
 	public decimal Quantity { get; set; }
@@ -80,7 +81,7 @@ public class StockAdjustmentRawMaterialCartModel
 	public decimal Total { get; set; }
 }
 
-public class ProductStockAdjustmentCartModel
+public class StockAdjustmentProductCartModel
 {
 	public int ProductId { get; set; }
 	public string ProductName { get; set; }

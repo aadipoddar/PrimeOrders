@@ -27,9 +27,10 @@ public static class KitchenIssueA4Print
 			{
 				RawMaterialId = item.RawMaterialId,
 				RawMaterialName = rawMaterial.Name,
+				MeasurementUnit = rawMaterial.MeasurementUnit,
 				Quantity = item.Quantity,
-				Rate = rawMaterial.MRP,
-				Total = item.Quantity * rawMaterial.MRP
+				Rate = item.Rate,
+				Total = item.Total
 			});
 		}
 
@@ -67,8 +68,9 @@ public static class KitchenIssueA4Print
 		{
 			SNo = index + 1,
 			Name = item.RawMaterialName.ToString(),
+			Unit = item.MeasurementUnit,
 			Qty = item.Quantity.ToString("N2"),
-			Unit = "KG", // Default unit for raw materials
+			Rate = item.Rate,
 			Total = item.Total.ToString("N2")
 		}).ToList();
 
@@ -76,18 +78,20 @@ public static class KitchenIssueA4Print
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.08f, // S.No
-			tableWidth * 0.45f, // Name
-			tableWidth * 0.15f, // Qty
-			tableWidth * 0.12f, // Unit
-			tableWidth * 0.20f  // Total
+			tableWidth * 0.40f, // Name
+			tableWidth * 0.08f, // Unit
+			tableWidth * 0.12f, // Qty
+			tableWidth * 0.16f, // Rate
+			tableWidth * 0.16f  // Total
 		};
 
 		var columnAlignments = new PdfTextAlignment[]
 		{
 			PdfTextAlignment.Center, // S.No
 			PdfTextAlignment.Left,   // Name
-			PdfTextAlignment.Center, // Qty
 			PdfTextAlignment.Center, // Unit
+			PdfTextAlignment.Center, // Qty
+			PdfTextAlignment.Right,  // Rate
 			PdfTextAlignment.Right   // Total
 		};
 

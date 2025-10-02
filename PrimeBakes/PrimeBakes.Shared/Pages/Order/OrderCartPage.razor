@@ -200,7 +200,7 @@ else
 									  Enabled="@(!_isSaving)" />
 					</div>
 
-					@if (_user.Admin && _user.LocationId == 1)
+					@if (_user.Admin && _user.LocationId == 1 && _order.Id <= 0)
 					{
 						<div class="form-group">
 							<label>Outlet / Franchise</label>

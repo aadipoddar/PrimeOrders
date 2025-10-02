@@ -21,4 +21,36 @@ public static class StockData
 
 	public static async Task<List<ProductStockDetailModel>> LoadProductStockDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
 		await SqlDataAccess.LoadData<ProductStockDetailModel, dynamic>(StoredProcedureNames.LoadProductStockDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
+
+	public static async Task SaveRawMaterialStockAdjustment(List<StockAdjustmentRawMaterialCartModel> cart)
+	{
+		var stockDetails = await LoadRawMaterialStockDetailsByDateLocationId(
+			DateTime.Now.AddDays(-1),
+			DateTime.Now.AddDays(1),
+			1);
+
+		foreach (var item in cart)
+		{
+			decimal adjustmentQuantity = 0;
+			var existingStock = stockDetails.FirstOrDefault(s => s.RawMaterialId == item.RawMaterialId);
+
+			if (existingStock is null)
+				adjustmentQuantity = item.Quantity;
+			else
+				adjustmentQuantity = item.Quantity - existingStock.ClosingStock;
+
+			if (adjustmentQuantity != 0)
+				await InsertRawMaterialStock(new()
+				{
+					Id = 0,
+					RawMaterialId = item.RawMaterialId,
+					Quantity = adjustmentQuantity,
+					NetRate = null,
+					Type = StockType.Adjustment.ToString(),
+					TransactionNo = $"RMADJ{DateTime.Now:yyyyMMddHHmmss}",
+					TransactionDate = DateOnly.FromDateTime(DateTime.Now),
+					LocationId = 1
+				});
+		}
+	}
 }

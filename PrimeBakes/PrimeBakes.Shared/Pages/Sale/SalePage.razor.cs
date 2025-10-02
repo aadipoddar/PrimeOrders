@@ -131,7 +131,7 @@ public partial class SalePage
 
 		_sale.LocationId = _user.LocationId;
 		_sale.UserId = _user.Id;
-		_sale.BillNo = await GenerateCodes.GenerateSaleBillNo(_sale);
+		_sale.BillNo = _sale.Id > 0 ? _sale.BillNo : await GenerateCodes.GenerateSaleBillNo(_sale);
 	}
 
 	private async Task LoadProductCategories()

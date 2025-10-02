@@ -163,10 +163,10 @@ else
 							CssClass="cart-grid">
 						<GridEvents RowSelected="ProductCartRowSelectHandler" TValue="ProductStockAdjustmentCartModel" />
 						<GridColumns>
-							<GridColumn Field=@nameof(ProductStockAdjustmentCartModel.ProductName) HeaderText="Product" Width="200" />
-							<GridColumn Field=@nameof(ProductStockAdjustmentCartModel.Quantity) HeaderText="Target Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-							<GridColumn Field=@nameof(ProductStockAdjustmentCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
-							<GridColumn Field=@nameof(ProductStockAdjustmentCartModel.Total) HeaderText="Value" Width="150" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(StockAdjustmentProductCartModel.ProductName) HeaderText="Product" Width="200" />
+							<GridColumn Field=@nameof(StockAdjustmentProductCartModel.Quantity) HeaderText="Target Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(StockAdjustmentProductCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(StockAdjustmentProductCartModel.Total) HeaderText="Value" Width="150" Format="N2" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
 				</div>

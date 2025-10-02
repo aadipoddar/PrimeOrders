@@ -4,6 +4,7 @@ using NumericWordsConversion;
 
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Order;
 using PrimeBakesLibrary.Models.Product;
@@ -68,7 +69,7 @@ public class SaleThermalPrint
 
 		if (sale.PartyId.HasValue && sale.PartyId.Value > 0)
 		{
-			var party = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, sale.PartyId.Value);
+			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
 			if (party is not null)
 				content.AppendLine($"<div class='detail-row'><span class='detail-label'>Party:</span> <span class='detail-value'>{party.Name}</span></div>");
 		}
@@ -131,12 +132,14 @@ public class SaleThermalPrint
 		decimal cgstTotal = saleDetails.Sum(x => x.CGSTAmount);
 		decimal sgstTotal = saleDetails.Sum(x => x.SGSTAmount);
 		decimal igstTotal = saleDetails.Sum(x => x.IGSTAmount);
-		decimal grandTotal = saleDetails.Sum(x => x.Total);
+		decimal grandTotal = saleDetails.Sum(x => x.Total) + sale.RoundOff;
 
 		// Get tax percentages (check if all items have same tax rate)
 		var cgstPercent = saleDetails.FirstOrDefault()?.CGSTPercent ?? 0;
 		var sgstPercent = saleDetails.FirstOrDefault()?.SGSTPercent ?? 0;
 		var igstPercent = saleDetails.FirstOrDefault()?.IGSTPercent ?? 0;
+
+		bool uniformDiscount = saleDetails.All(x => x.DiscPercent == sale.DiscPercent);
 
 		// Check if tax rates are consistent across all items
 		bool uniformTaxRates = saleDetails.All(x =>
@@ -148,16 +151,39 @@ public class SaleThermalPrint
 		content.AppendLine($"<tr><td class='summary-label'>Sub Total:</td><td align='right' class='summary-value'>{baseTotal.FormatIndianCurrency()}</td></tr>");
 
 		if (discountTotal > 0)
-			content.AppendLine($"<tr><td class='summary-label'>Discount ({sale.DiscPercent}%):</td><td align='right' class='summary-value'>{discountTotal.FormatIndianCurrency()}</td></tr>");
+		{
+			if (uniformDiscount)
+				content.AppendLine($"<tr><td class='summary-label'>Discount ({sale.DiscPercent}%):</td><td align='right' class='summary-value'>{discountTotal.FormatIndianCurrency()}</td></tr>");
+			else
+				content.AppendLine($"<tr><td class='summary-label'>Discount:</td><td align='right' class='summary-value'>{discountTotal.FormatIndianCurrency()}</td></tr>");
+		}
 
 		if (cgstTotal > 0)
-			content.AppendLine($"<tr><td class='summary-label'>CGST ({cgstPercent}%):</td><td align='right' class='summary-value'>{cgstTotal.FormatIndianCurrency()}</td></tr>");
+		{
+			if (uniformTaxRates)
+				content.AppendLine($"<tr><td class='summary-label'>CGST ({cgstPercent}%):</td><td align='right' class='summary-value'>{cgstTotal.FormatIndianCurrency()}</td></tr>");
+			else
+				content.AppendLine($"<tr><td class='summary-label'>CGST:</td><td align='right' class='summary-value'>{cgstTotal.FormatIndianCurrency()}</td></tr>");
+		}
 
 		if (sgstTotal > 0)
-			content.AppendLine($"<tr><td class='summary-label'>SGST ({sgstPercent}%):</td><td align='right' class='summary-value'>{sgstTotal.FormatIndianCurrency()}</td></tr>");
+		{
+			if (uniformTaxRates)
+				content.AppendLine($"<tr><td class='summary-label'>SGST ({sgstPercent}%):</td><td align='right' class='summary-value'>{sgstTotal.FormatIndianCurrency()}</td></tr>");
+			else
+				content.AppendLine($"<tr><td class='summary-label'>SGST:</td><td align='right' class='summary-value'>{sgstTotal.FormatIndianCurrency()}</td></tr>");
+		}
 
 		if (igstTotal > 0)
-			content.AppendLine($"<tr><td class='summary-label'>IGST ({igstPercent}%):</td><td align='right' class='summary-value'>{igstTotal.FormatIndianCurrency()}</td></tr>");
+		{
+			if (uniformTaxRates)
+				content.AppendLine($"<tr><td class='summary-label'>IGST ({igstPercent}%):</td><td align='right' class='summary-value'>{igstTotal.FormatIndianCurrency()}</td></tr>");
+			else
+				content.AppendLine($"<tr><td class='summary-label'>IGST:</td><td align='right' class='summary-value'>{igstTotal.FormatIndianCurrency()}</td></tr>");
+		}
+
+		if (sale.RoundOff != 0)
+			content.AppendLine($"<tr><td class='summary-label'>Round Off:</td><td align='right' class='summary-value'>{sale.RoundOff.FormatIndianCurrency()}</td></tr>");
 
 		content.AppendLine("</table>");
 		content.AppendLine("<div class='bold-separator'></div>");

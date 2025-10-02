@@ -82,13 +82,57 @@ public partial class OrderViewPage
 		StateHasChanged();
 	}
 
-	private void EditOrder()
+	#region Exporting
+	private async Task ExportChallan()
+	{
+		if (_orderOverview is null || _isProcessing)
+			return;
+
+		_isProcessing = true;
+		StateHasChanged();
+
+		var orderDetails = await OrderData.LoadOrderDetailByOrder(_orderOverview.OrderId);
+		var memoryStream = await OrderExcelExport.ExportOrderChallanExcel(_orderOverview, orderDetails);
+		var fileName = $"Challan_{_orderOverview.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+
+		_isProcessing = false;
+		StateHasChanged();
+	}
+
+	private async Task PrintPDF()
+	{
+		if (_orderOverview == null || _isProcessing)
+			return;
+
+		_isProcessing = true;
+		StateHasChanged();
+
+		var memoryStream = await OrderA4Print.GenerateA4OrderDocument(_orderOverview.OrderId);
+		var fileName = $"Order_{_orderOverview.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
+
+		_isProcessing = false;
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Order Actions
+	private async Task EditOrder()
 	{
 		if (_orderOverview is null || _isProcessing || _orderOverview.SaleId.HasValue || _user.LocationId != 1 || !_user.Admin)
 			return;
 
-		// Navigate to order edit page
-		NavigationManager.NavigateTo($"/Order?OrderId={_orderOverview.OrderId}");
+		await DataStorageService.LocalRemove(StorageFileNames.OrderDataFileName);
+		await DataStorageService.LocalRemove(StorageFileNames.OrderCartDataFileName);
+
+		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _orderOverview.OrderId);
+		var orderDetails = await OrderData.LoadOrderDetailByOrder(_orderOverview.OrderId);
+
+		await DataStorageService.LocalSaveAsync(StorageFileNames.OrderDataFileName, System.Text.Json.JsonSerializer.Serialize(order));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.OrderCartDataFileName, System.Text.Json.JsonSerializer.Serialize(orderDetails));
+
+		NavigationManager.NavigateTo("/Order");
 	}
 
 	private void DeleteOrder()
@@ -125,44 +169,12 @@ public partial class OrderViewPage
 		StateHasChanged();
 	}
 
-	private async Task ExportChallan()
-	{
-		if (_orderOverview is null || _isProcessing)
-			return;
-
-		_isProcessing = true;
-		StateHasChanged();
-
-		var orderDetails = await OrderData.LoadOrderDetailByOrder(_orderOverview.OrderId);
-		var memoryStream = await OrderExcelExport.ExportOrderChallanExcel(_orderOverview, orderDetails);
-		var fileName = $"Challan_{_orderOverview.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
-
-		_isProcessing = false;
-		StateHasChanged();
-	}
-
-	private async Task PrintPDF()
-	{
-		if (_orderOverview == null || _isProcessing)
-			return;
-
-		_isProcessing = true;
-		StateHasChanged();
-
-		var memoryStream = await OrderA4Print.GenerateA4OrderDocument(_orderOverview.OrderId);
-		var fileName = $"Order_{_orderOverview.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
-
-		_isProcessing = false;
-		StateHasChanged();
-	}
-
 	private void ViewSale()
 	{
 		if (_orderOverview?.SaleId.HasValue == true)
 			NavigationManager.NavigateTo($"/Reports/Sale/View/{_orderOverview.SaleId.Value}");
 	}
+	#endregion
 
 	// Model class for detailed order products
 	public class DetailedOrderProductModel

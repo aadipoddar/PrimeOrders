@@ -17,7 +17,7 @@ public static class KitchenIssueExcelExport
 			{ "Total Transactions", kitchenIssueOverviews.Count },
 			{ "Total Products", kitchenIssueOverviews.Sum(_ => _.TotalProducts) },
 			{ "Total Quantity", kitchenIssueOverviews.Sum(_ => _.TotalQuantity) },
-			{ "Kitchens Active", kitchenIssueOverviews.Select(_ => _.KitchenId).Distinct().Count() },
+			{ "Total Amount", kitchenIssueOverviews.Sum(_ => _.TotalAmount) },
 			{ "Average Items per Transaction", kitchenIssueOverviews.Count > 0 ? kitchenIssueOverviews.Average(_ => _.TotalProducts) : 0 },
 			{ "Average Quantity per Transaction", kitchenIssueOverviews.Count > 0 ? kitchenIssueOverviews.Average(_ => _.TotalQuantity) : 0 }
 		};
@@ -48,6 +48,7 @@ public static class KitchenIssueExcelExport
 			nameof(KitchenIssueOverviewModel.UserName),
 			nameof(KitchenIssueOverviewModel.TotalProducts),
 			nameof(KitchenIssueOverviewModel.TotalQuantity),
+			nameof(KitchenIssueOverviewModel.TotalAmount),
 			nameof(KitchenIssueOverviewModel.Remarks),
 			nameof(KitchenIssueOverviewModel.CreatedAt)
 		];
@@ -114,6 +115,25 @@ public static class KitchenIssueExcelExport
 						Bold = qtyValue > 50,
 						FontColor = qtyValue > 100 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) :
 								   qtyValue > 50 ? Syncfusion.Drawing.Color.FromArgb(255, 165, 0) : null
+					};
+				}
+			},
+			[nameof(KitchenIssueOverviewModel.TotalAmount)] = new()
+			{
+				DisplayName = "Total Amount",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value == null) return null;
+					var amountValue = Convert.ToDecimal(value);
+					return new ExcelExportUtil.FormatInfo
+					{
+						Bold = amountValue > 1000,
+						FontColor = amountValue > 5000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) :
+								   amountValue > 1000 ? Syncfusion.Drawing.Color.FromArgb(255, 165, 0) : null
 					};
 				}
 			},

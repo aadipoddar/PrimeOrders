@@ -30,16 +30,16 @@ public partial class ProductStockAdjustmentPage
 	private bool _isProductSearchActive = false;
 	private bool _hasAddedProductViaSearch = true;
 
-	private ProductStockAdjustmentCartModel _selectedProductCart = new();
+	private StockAdjustmentProductCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
 
 	private List<LocationModel> _locations = [];
 	private List<ProductStockDetailModel> _stockDetails = [];
 	private List<ProductModel> _products = [];
-	private readonly List<ProductStockAdjustmentCartModel> _productStockAdjustmentCarts = [];
+	private readonly List<StockAdjustmentProductCartModel> _productStockAdjustmentCarts = [];
 
 	private SfGrid<ProductModel> _sfProductGrid;
-	private SfGrid<ProductStockAdjustmentCartModel> _sfProductCartGrid;
+	private SfGrid<StockAdjustmentProductCartModel> _sfProductCartGrid;
 	private SfGrid<ProductStockDetailModel> _sfStockGrid;
 
 	private SfDialog _sfStockDetailsDialog;
@@ -274,7 +274,7 @@ public partial class ProductStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	public void ProductCartRowSelectHandler(RowSelectEventArgs<ProductStockAdjustmentCartModel> args)
+	public void ProductCartRowSelectHandler(RowSelectEventArgs<StockAdjustmentProductCartModel> args)
 	{
 		_selectedProductCart = args.Data;
 		_dialogVisible = true;
