@@ -34,6 +34,9 @@ public static class SaleData
 	public static async Task<SaleOverviewModel> LoadSaleOverviewBySaleId(int SaleId) =>
 		(await SqlDataAccess.LoadData<SaleOverviewModel, dynamic>(StoredProcedureNames.LoadSaleOverviewBySaleId, new { SaleId })).FirstOrDefault();
 
+	public static async Task<SaleModel> LoadSaleByBillNo(string BillNo) =>
+		(await SqlDataAccess.LoadData<SaleModel, dynamic>(StoredProcedureNames.LoadSaleByBillNo, new { BillNo })).FirstOrDefault();
+
 	public static async Task<int> SaveSale(SaleModel sale, List<SaleProductCartModel> cart)
 	{
 		bool update = sale.Id > 0;

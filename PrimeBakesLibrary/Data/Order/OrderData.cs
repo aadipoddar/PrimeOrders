@@ -31,6 +31,9 @@ public static class OrderData
 	public static async Task<OrderOverviewModel> LoadOrderOverviewByOrderId(int OrderId) =>
 		(await SqlDataAccess.LoadData<OrderOverviewModel, dynamic>(StoredProcedureNames.LoadOrderOverviewByOrderId, new { OrderId })).FirstOrDefault();
 
+	public static async Task<OrderModel> LoadOrderByOrderNo(string OrderNo) =>
+		(await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByOrderNo, new { OrderNo })).FirstOrDefault();
+
 	public static async Task<int> SaveOrder(OrderModel order, List<OrderProductCartModel> cart)
 	{
 		bool update = order.Id > 0;

@@ -69,21 +69,27 @@ public static class StoredProcedureNames
 	public static string LoadLastOrderByLocation => "Load_LastOrder_By_Location";
 	public static string LoadOrderBySale => "Load_Order_By_Sale";
 	public static string LoadOrderOverviewByOrderId => "Load_OrderOverview_By_OrderId";
+	public static string LoadOrderByOrderNo => "Load_Order_By_OrderNo";
 
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 	public static string LoadLastSaleByLocation => "Load_LastSale_By_Location";
 	public static string LoadSaleOverviewBySaleId => "Load_SaleOverview_By_SaleId";
+	public static string LoadSaleByBillNo => "Load_Sale_By_BillNo";
 
 	public static string LoadSaleReturnDetailBySaleReturn => "Load_SaleReturnDetail_By_SaleReturn";
 	public static string LoadLastSaleReturnByLocation => "Load_LastSaleReturn_By_Location";
 	public static string LoadSaleReturnBySale => "Load_SaleReturn_By_Sale";
 	public static string LoadSaleReturnOverviewBySaleReturnId => "Load_SaleReturnOverview_By_SaleReturnId";
+	public static string LoadSaleReturnByTransactionNo => "Load_SaleReturn_By_TransactionNo";
 
 	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
 	public static string LoadKitchenIssueDetailByKitchenIssue => "Load_KitchenIssueDetail_By_KitchenIssue";
 	public static string LoadKitchenIssueOverviewByKitchenIssueId => "Load_KitchenIssueOverview_By_KitchenIssueId";
+	public static string LoadKitchenIssueByTransactionNo => "Load_KitchenIssue_By_TransactionNo";
+
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
 	public static string LoadKitchenProductionDetailByKitchenProduction => "Load_KitchenProductionDetail_By_KitchenProduction";
+	public static string LoadKitchenProductionByTransactionNo => "Load_KitchenProduction_By_TransactionNo";
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";

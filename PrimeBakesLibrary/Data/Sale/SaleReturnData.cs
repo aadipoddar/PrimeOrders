@@ -24,4 +24,7 @@ public static class SaleReturnData
 
 	public static async Task<SaleReturnOverviewModel> LoadSaleReturnOverviewBySaleReturnId(int SaleReturnId) =>
 		(await SqlDataAccess.LoadData<SaleReturnOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnOverviewBySaleReturnId, new { SaleReturnId })).FirstOrDefault();
+
+	public static async Task<SaleReturnModel> LoadSaleReturnByTransactionNo(string TransactionNo) =>
+		(await SqlDataAccess.LoadData<SaleReturnModel, dynamic>(StoredProcedureNames.LoadSaleReturnByTransactionNo, new { TransactionNo })).FirstOrDefault();
 }

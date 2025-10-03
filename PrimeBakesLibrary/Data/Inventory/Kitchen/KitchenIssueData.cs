@@ -26,6 +26,9 @@ public static class KitchenIssueData
 	public static async Task<KitchenIssueOverviewModel> LoadKitchenIssueOverviewByKitchenIssueId(int KitchenIssueId) =>
 		(await SqlDataAccess.LoadData<KitchenIssueOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenIssueOverviewByKitchenIssueId, new { KitchenIssueId })).FirstOrDefault();
 
+	public static async Task<KitchenIssueModel> LoadKitchenIssueByTransactionNo(string TransactionNo) =>
+		(await SqlDataAccess.LoadData<KitchenIssueModel, dynamic>(StoredProcedureNames.LoadKitchenIssueByTransactionNo, new { TransactionNo })).FirstOrDefault();
+
 	public static async Task<int> SaveKitchenIssue(KitchenIssueModel kitchenIssue, List<KitchenIssueRawMaterialCartModel> cart)
 	{
 		bool update = kitchenIssue.Id > 0;

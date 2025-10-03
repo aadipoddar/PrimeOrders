@@ -232,6 +232,11 @@
     <Build Include="StoredProcedures\Reports\Stock\Load_RawMaterialStockDetails_By_Date_LocationId.sql" />
     <Build Include="Views\ProductStockDetails.sql" />
     <Build Include="StoredProcedures\Reports\Stock\Load_ProductStockDetails_By_Date_LocationId.sql" />
+    <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_OrderNo.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_Sale_By_BillNo.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssue_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_By_TransactionNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

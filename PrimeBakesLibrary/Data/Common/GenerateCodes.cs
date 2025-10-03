@@ -24,6 +24,66 @@ public static class GenerateCodes
 			_ => 6
 		};
 
+	public enum CodeType
+	{
+		Order,
+		Sale,
+		SaleReturn,
+		KitchenIssue,
+		KitchenProduction,
+		Accounting
+	}
+
+	private static async Task<string> CheckDuplicateCode(string code, CodeType type)
+	{
+		var isDuplicate = true;
+
+		while (isDuplicate)
+		{
+			switch (type)
+			{
+				case CodeType.Order:
+					var item = await OrderData.LoadOrderByOrderNo(code);
+					isDuplicate = item is not null;
+					break;
+				case CodeType.Sale:
+					var sale = await SaleData.LoadSaleByBillNo(code);
+					isDuplicate = sale is not null;
+					break;
+				case CodeType.SaleReturn:
+					var saleReturn = await SaleReturnData.LoadSaleReturnByTransactionNo(code);
+					isDuplicate = saleReturn is not null;
+					break;
+				case CodeType.KitchenIssue:
+					var kitchenIssue = await KitchenIssueData.LoadKitchenIssueByTransactionNo(code);
+					isDuplicate = kitchenIssue == null;
+					break;
+				case CodeType.KitchenProduction:
+					var kitchenProduction = await KitchenProductionData.LoadKitchenProductionByTransactionNo(code);
+					isDuplicate = kitchenProduction is not null;
+					break;
+				case CodeType.Accounting:
+					var accounting = await AccountingData.LoadAccountingByReferenceNo(code);
+					isDuplicate = accounting is not null;
+					break;
+				default:
+					isDuplicate = false;
+					break;
+			}
+
+			if (!isDuplicate)
+				return code;
+
+			var prefix = code[..(code.Length - 6)];
+			var lastNumberPart = code[(code.Length - 6)..];
+			int lastNumber = int.Parse(lastNumberPart);
+			int nextNumber = lastNumber + 1;
+			code = $"{prefix}{nextNumber:D6}";
+		}
+
+		return code;
+	}
+
 	public static async Task<string> GenerateOrderBillNo(OrderModel order)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId);
@@ -42,12 +102,12 @@ public static class GenerateCodes
 				{
 					int lastNumber = int.Parse(lastOrderNo[(location.PrefixCode.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{location.PrefixCode}{year}OD{nextNumber:D6}";
+					return await CheckDuplicateCode($"{location.PrefixCode}{year}OD{nextNumber:D6}", CodeType.Order);
 				}
 			}
 		}
 
-		return $"{location.PrefixCode}{year}OD000001";
+		return await CheckDuplicateCode($"{location.PrefixCode}{year}OD000001", CodeType.Order);
 	}
 
 	public static async Task<string> GenerateSaleBillNo(SaleModel sale)
@@ -68,12 +128,12 @@ public static class GenerateCodes
 				{
 					int lastNumber = int.Parse(lastSaleNo[(location.PrefixCode.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{location.PrefixCode}{year}SL{nextNumber:D6}";
+					return await CheckDuplicateCode($"{location.PrefixCode}{year}SL{nextNumber:D6}", CodeType.Sale);
 				}
 			}
 		}
 
-		return $"{location.PrefixCode}{year}SL000001";
+		return await CheckDuplicateCode($"{location.PrefixCode}{year}SL000001", CodeType.Sale);
 	}
 
 	public static async Task<string> GenerateSaleReturnTransactionNo(SaleReturnModel saleReturn)
@@ -94,12 +154,12 @@ public static class GenerateCodes
 				{
 					int lastNumber = int.Parse(lastTransactionNo[(location.PrefixCode.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{location.PrefixCode}{year}SR{nextNumber:D6}";
+					return await CheckDuplicateCode($"{location.PrefixCode}{year}SR{nextNumber:D6}", CodeType.SaleReturn);
 				}
 			}
 		}
 
-		return $"{location.PrefixCode}{year}SR000001";
+		return await CheckDuplicateCode($"{location.PrefixCode}{year}SR000001", CodeType.SaleReturn);
 	}
 
 	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
@@ -120,12 +180,12 @@ public static class GenerateCodes
 				{
 					int lastNumber = int.Parse(lastSaleNo[(location.PrefixCode.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{location.PrefixCode}{year}RM{nextNumber:D6}";
+					return await CheckDuplicateCode($"{location.PrefixCode}{year}RM{nextNumber:D6}", CodeType.KitchenIssue);
 				}
 			}
 		}
 
-		return $"{location.PrefixCode}{year}RM000001";
+		return await CheckDuplicateCode($"{location.PrefixCode}{year}RM000001", CodeType.KitchenIssue);
 	}
 
 	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
@@ -146,12 +206,12 @@ public static class GenerateCodes
 				{
 					int lastNumber = int.Parse(lastSaleNo[(location.PrefixCode.Length + 4)..]);
 					int nextNumber = lastNumber + 1;
-					return $"{location.PrefixCode}{year}FP{nextNumber:D6}";
+					return await CheckDuplicateCode($"{location.PrefixCode}{year}FP{nextNumber:D6}", CodeType.KitchenProduction);
 				}
 			}
 		}
 
-		return $"{location.PrefixCode}{year}FP000001";
+		return await CheckDuplicateCode($"{location.PrefixCode}{year}FP000001", CodeType.KitchenProduction);
 	}
 
 	public static async Task<string> GenerateAccountingReferenceNo(int voucherId, DateOnly accountingDate)
@@ -168,11 +228,11 @@ public static class GenerateCodes
 			{
 				var lastNumber = int.Parse(lastReferenceNo[(2 + year.GetNumberOfDigits() + voucher.PrefixCode.Length)..]);
 				int nextNumber = lastNumber + 1;
-				return $"FA{year}{voucher.PrefixCode}{nextNumber:D6}";
+				return await CheckDuplicateCode($"FA{year}{voucher.PrefixCode}{nextNumber:D6}", CodeType.Accounting);
 			}
 		}
 
-		return $"FA{year}{voucher.PrefixCode}000001";
+		return await CheckDuplicateCode($"FA{year}{voucher.PrefixCode}000001", CodeType.Accounting);
 	}
 
 	public static string GenerateRawMaterialCode(string lastRawMaterialCode)
