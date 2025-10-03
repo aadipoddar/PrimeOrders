@@ -687,7 +687,7 @@ public partial class SaleReturnPage
 	private async Task InsertStock()
 	{
 		if (SaleReturnId.HasValue && SaleReturnId.Value > 0)
-			await RawMaterialStockData.DeleteProductStockByTransactionNo(_saleReturn.TransactionNo);
+			await ProductStockData.DeleteProductStockByTransactionNo(_saleReturn.TransactionNo);
 
 		foreach (var product in _saleReturnProductCart)
 		{
@@ -696,7 +696,7 @@ public partial class SaleReturnPage
 				continue;
 
 			// Remove stock from the return location (negative quantity)
-			await RawMaterialStockData.InsertProductStock(new()
+			await ProductStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = product.ProductId,
@@ -708,7 +708,7 @@ public partial class SaleReturnPage
 			});
 
 			// Add stock back to main location (positive quantity)
-			await RawMaterialStockData.InsertProductStock(new()
+			await ProductStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = product.ProductId,

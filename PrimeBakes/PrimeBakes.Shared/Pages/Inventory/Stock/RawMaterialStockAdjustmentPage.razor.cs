@@ -79,7 +79,8 @@ public partial class RawMaterialStockAdjustmentPage
 			1);
 
 		foreach (var item in stockSummary)
-			_cart.FirstOrDefault(c => c.RawMaterialId == item.RawMaterialId).Quantity = item.ClosingStock;
+			if (_cart.Any(c => c.RawMaterialId == item.RawMaterialId))
+				_cart.FirstOrDefault(c => c.RawMaterialId == item.RawMaterialId).Quantity = item.ClosingStock;
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();

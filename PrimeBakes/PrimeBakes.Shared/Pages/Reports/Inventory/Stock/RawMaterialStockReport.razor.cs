@@ -1,9 +1,9 @@
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Stock;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
@@ -49,8 +49,8 @@ public partial class RawMaterialStockReport
 		var startDate = (_fromDate ?? DateOnly.FromDateTime(DateTime.Now)).ToDateTime(new TimeOnly(0, 0));
 		var endDate = (_toDate ?? DateOnly.FromDateTime(DateTime.Now)).ToDateTime(new TimeOnly(23, 59));
 
-		_stockSummary = await StockData.LoadRawMaterialStockSummaryByDateLocationId(startDate, endDate, 1);
-		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(startDate, endDate, 1);
+		_stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDateLocationId(startDate, endDate, 1);
+		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDateLocationId(startDate, endDate, 1);
 
 		_isProcessing = false;
 		StateHasChanged();

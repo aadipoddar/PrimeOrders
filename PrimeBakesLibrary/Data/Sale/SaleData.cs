@@ -96,7 +96,7 @@ public static class SaleData
 	private static async Task SaveStock(SaleModel sale, List<SaleProductCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteProductStockByTransactionNo(sale.BillNo);
+			await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
 
 		foreach (var product in cart)
 		{
@@ -104,7 +104,7 @@ public static class SaleData
 			if (item.LocationId != 1)
 				continue;
 
-			await RawMaterialStockData.InsertProductStock(new()
+			await ProductStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = product.ProductId,
@@ -123,7 +123,7 @@ public static class SaleData
 		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
 		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
 			foreach (var product in cart)
-				await RawMaterialStockData.InsertProductStock(new()
+				await ProductStockData.InsertProductStock(new()
 				{
 					Id = 0,
 					ProductId = product.ProductId,

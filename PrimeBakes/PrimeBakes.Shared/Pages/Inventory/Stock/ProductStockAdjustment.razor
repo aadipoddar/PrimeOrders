@@ -1,3 +1,912 @@
-﻿<h3>ProductStockAdjustment</h3>
+﻿@page "/Inventory/ProductStockAdjustment"
+@using PrimeBakesLibrary.Models.Inventory
+@using PrimeBakesLibrary.Models.Inventory.Stock
+@using PrimeBakesLibrary.Models.Order
+@using PrimeBakesLibrary.Models.Product
+@using PrimeBakesLibrary.Models.Common
 
+<PageTitle>Product Stock Adjustment - PrimeBakes</PageTitle>
 
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading Products...</p>
+	</div>
+}
+else
+{
+	<div class="order-container">
+		<div class="page-header">
+			<button @onclick='() => NavigationManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
+				🏠
+			</button>
+			<h1 class="page-title">Product Stock Adjustment</h1>
+		</div>
+
+		<!-- Help Section -->
+		<div class="help-section">
+			<div class="help-content">
+				<div class="help-icon">ℹ️</div>
+				<div class="help-text">
+					<strong>Stock Adjustment Guide:</strong> Current Stock is Loaded by Default. Enter quantities to set exact stock level.
+				</div>
+			</div>
+		</div>
+
+		<!-- Location Selection (Only visible for location 1 users) -->
+		@if (_user.LocationId == 1 && _locations.Count > 1)
+		{
+			<div class="filter-section">
+				<div class="filter-content">
+					<div class="location-filter-wrapper">
+						<SfComboBox TValue="int"
+									TItem="LocationModel"
+									FloatLabelType='@FloatLabelType.Auto'
+									Placeholder="Select Location"
+									DataSource="_locations"
+									Value="_selectedLocationId"
+									CssClass="location-filter"
+									AllowFiltering="true"
+									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+							<ComboBoxEvents TItem="LocationModel" TValue="int" ValueChange="OnLocationChanged" />
+							<ComboBoxFieldSettings Value="Id" Text="Name" />
+						</SfComboBox>
+					</div>
+				</div>
+			</div>
+		}
+
+		<!-- Category Filter Section -->
+		<div class="filter-section">
+			<div class="filter-content">
+				<div class="category-filter-wrapper">
+					<SfComboBox TValue="int"
+								TItem="ProductCategoryModel"
+								FloatLabelType='@FloatLabelType.Auto'
+								Placeholder="Select a category to filter Products"
+								DataSource="_productCategories"
+								Value="_selectedCategoryId"
+								CssClass="category-filter"
+								AllowFiltering="true"
+								FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+						<ComboBoxEvents TItem="ProductCategoryModel" TValue="int" ValueChange="OnProductCategoryChanged" />
+						<ComboBoxFieldSettings Value="Id" Text="Name" />
+					</SfComboBox>
+				</div>
+			</div>
+		</div>
+
+		<div class="grid-container">
+			<SfGrid ID="_sfGrid"
+					@ref="_sfGrid"
+					EnableAdaptiveUI="true"
+					DataSource="_selectedCategoryId == 0 ? _cart : _cart.Where(x => x.ProductCategoryId == _selectedCategoryId)"
+					AllowPaging="true"
+					AllowSorting="false"
+					AllowTextWrap=true
+					Toolbar="@(new List<string>() { "Search" })">
+
+				<GridPageSettings PageSize="4" />
+
+				<GridColumns>
+					<GridColumn Field="@nameof(ProductStockAdjustmentCartModel.ProductName)" HeaderText="Product" Width="50%" />
+					<GridColumn Field="@nameof(ProductStockAdjustmentCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
+						<Template>
+							@{
+								var item = (context as ProductStockAdjustmentCartModel);
+							}
+							@if (item is not null)
+							{
+								<div class="quantity-section">
+									<div class="quantity-controls">
+										<div class="quantity-input-wrapper">
+											<SfNumericTextBox TValue="decimal"
+															  Value="@item.Quantity"
+															  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
+															  Step="1"
+															  type="tel"
+															  Format="N0"
+															  Width="100%"
+															  CssClass="quantity-input"
+															  Placeholder="0" />
+										</div>
+									</div>
+								</div>
+							}
+						</Template>
+					</GridColumn>
+				</GridColumns>
+			</SfGrid>
+		</div>
+
+		<div class="cart-footer">
+			<button @onclick="() => _adjustmentConfirmationDialogVisible = true" class="cart-button">
+				<i class="fas fa-shopping-cart"></i>
+				<span>Save Adjustment</span>
+				<span class="cart-count">@_cart.Count</span>
+			</button>
+		</div>
+	</div>
+}
+
+<!-- Stock Adjustment Confirmation Dialog -->
+<SfDialog ID="_sfAdjustmentConfirmationDialog"
+		  @ref="_sfAdjustmentConfirmationDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="false"
+		  EnableResize="false"
+		  @bind-Visible="_adjustmentConfirmationDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header confirmation-header">
+				<span class="confirmation-icon">⚠️</span>
+				<span>Confirm Stock Adjustment</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content confirmation-content">
+				<div class="confirmation-message">
+					<h3>Are you sure you want to apply this stock adjustment?</h3>
+					<p>This action will update the product stock levels and cannot be undone.</p>
+				</div>
+
+				<div class="adjustment-summary">
+					<div class="summary-item">
+						<span class="summary-label">Total Items :</span>
+						<span class="summary-value">@_cart.Count</span>
+					</div>
+					<div class="summary-item">
+						<span class="summary-label">Location:</span>
+						<span class="summary-value">@(_locations.FirstOrDefault(l => l.Id == _selectedLocationId)?.Name ?? "Unknown")</span>
+					</div>
+					<div class="summary-item">
+						<span class="summary-label">Adjustment Date:</span>
+						<span class="summary-value">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+					</div>
+				</div>
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer confirmation-footer">
+				<SfButton Content="Cancel" OnClick="CloseConfirmationDialog" CssClass="dialog-button cancel-button" Disabled="@_isSaving" />
+				<SfButton Content="@(_isSaving ? "⏳ Saving..." : "Apply Adjustment")" OnClick="ConfirmAdjustment" CssClass="dialog-button confirm-button-dialog" Disabled="@_isSaving" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<!-- Validation Error Dialog -->
+<SfDialog ID="_sfValidationErrorDialog"
+		  @ref="_sfValidationErrorDialog"
+		  Width="500px"
+		  Height="auto"
+		  AllowDragging="false"
+		  EnableResize="false"
+		  @bind-Visible="_validationErrorDialogVisible"
+		  IsModal="true">
+	<DialogPositionData X="Center" Y="Center" />
+	<DialogTemplates>
+		<Header>
+			<div class="dialog-header error-header">
+				<span class="error-icon">❌</span>
+				<span>Validation Errors</span>
+			</div>
+		</Header>
+		<Content>
+			<div class="dialog-content error-content">
+				<div class="error-message">
+					<h3>Please fix the following errors before proceeding:</h3>
+					<p>Review and correct the issues listed below to continue with your stock adjustment.</p>
+				</div>
+
+				<div class="error-list">
+					@foreach (var error in _validationErrors)
+					{
+						<div class="error-item">
+							<div class="error-item-icon">⚠️</div>
+							<div class="error-item-content">
+								<div class="error-item-title">@error.Field</div>
+								<div class="error-item-message">@error.Message</div>
+							</div>
+						</div>
+					}
+				</div>
+
+				@if (_validationErrors.Count > 1)
+				{
+					<div class="error-summary">
+						<span class="error-count">@_validationErrors.Count errors found</span>
+					</div>
+				}
+			</div>
+		</Content>
+		<FooterTemplate>
+			<div class="dialog-footer error-footer">
+				<SfButton Content="Fix Issues" OnClick="() => _validationErrorDialogVisible = false" CssClass="dialog-button error-fix-button" />
+			</div>
+		</FooterTemplate>
+	</DialogTemplates>
+</SfDialog>
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c71068;
+		--primary-light: #f5c2d3;
+		--text-dark: #2c3e50;
+		--text-light: #7f8c8d;
+		--bg-light: #f8f9fa;
+		--border-color: #e9ecef;
+		--shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+		--shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+		--success-color: #28a745;
+		--info-color: #17a2b8;
+	}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--info-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--text-dark);
+		font-size: 16px;
+		margin-top: 10px;
+		font-weight: 500;
+	}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	.order-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Page Header */
+	.page-header {
+		display: flex;
+		align-items: center;
+		padding: 15px 20px;
+		background: white;
+		box-shadow: var(--shadow-light);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		gap: 15px;
+	}
+
+	.back-button {
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		padding: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-light);
+		min-width: 44px;
+		min-height: 44px;
+		font-size: 16px;
+	}
+
+		.back-button:hover {
+			background: var(--primary-dark);
+			transform: translateY(-1px);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.back-button:active {
+			transform: translateY(0);
+		}
+
+	.page-title {
+		margin: 0;
+		color: var(--text-dark);
+		font-size: 22px;
+		font-weight: 600;
+		flex: 1;
+	}
+
+	/* Help Section */
+	.help-section {
+		background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+		margin: 15px;
+		padding: 15px 20px;
+		border-radius: 12px;
+		border: 1px solid #2196f3;
+		box-shadow: var(--shadow-light);
+	}
+
+	.help-content {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.help-icon {
+		font-size: 20px;
+		flex-shrink: 0;
+		color: #1976d2;
+	}
+
+	.help-text {
+		color: #1565c0;
+		font-size: 14px;
+		line-height: 1.4;
+	}
+
+		.help-text strong {
+			font-weight: 600;
+		}
+
+	/* Enhanced Filter Section */
+	.filter-section {
+		background: white;
+		margin: 15px;
+		padding: 20px;
+		border-radius: 16px;
+		box-shadow: var(--shadow-light);
+		border: 1px solid var(--border-color);
+		transition: all 0.3s ease;
+	}
+
+		.filter-section:hover {
+			box-shadow: var(--shadow-medium);
+		}
+
+	.filter-content {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.location-filter-wrapper,
+	.category-filter-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		position: relative;
+	}
+
+	.location-filter,
+	.category-filter {
+		flex: 1;
+	}
+
+	/* Syncfusion ComboBox Styling */
+	::deep .location-filter .e-input-group,
+	::deep .category-filter .e-input-group {
+		border: 2px solid var(--border-color);
+		border-radius: 12px;
+		transition: all 0.2s ease;
+		background: white;
+		height: auto;
+	}
+
+		::deep .location-filter .e-input-group:hover,
+		::deep .category-filter .e-input-group:hover {
+			border-color: var(--primary-light);
+		}
+
+		::deep .location-filter .e-input-group.e-input-focus,
+		::deep .category-filter .e-input-group.e-input-focus {
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+		}
+
+		::deep .location-filter .e-input-group input,
+		::deep .category-filter .e-input-group input {
+			padding: 10px 12px;
+			font-size: 14px;
+			color: var(--text-dark);
+			font-weight: 500;
+			border: none;
+			background: transparent;
+			height: 36px;
+		}
+
+			::deep .location-filter .e-input-group input::placeholder,
+			::deep .category-filter .e-input-group input::placeholder {
+				color: var(--text-light);
+				font-weight: 400;
+			}
+
+		::deep .location-filter .e-input-group .e-ddl-icon,
+		::deep .category-filter .e-input-group .e-ddl-icon {
+			color: var(--primary-color);
+			font-size: 16px;
+			margin-right: 8px;
+		}
+
+	/* Grid Container */
+	.grid-container {
+		flex: 1;
+		padding: 15px;
+		overflow: hidden;
+	}
+
+	/* Quantity Section */
+	.quantity-section {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		width: 100%;
+		padding: 8px 0;
+	}
+
+	/* Quantity Controls */
+	.quantity-controls {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		justify-content: flex-end;
+		max-width: 200px;
+	}
+
+	.quantity-input-wrapper {
+		flex: 1;
+		min-width: 80px;
+		max-width: 120px;
+	}
+
+	.quantity-input {
+		width: 100% !important;
+	}
+
+		.quantity-input input {
+			text-align: right !important;
+			border: 2px solid var(--border-color);
+			border-radius: 8px;
+			padding: 8px 12px !important;
+			font-weight: 600;
+			font-size: 16px;
+			color: var(--text-dark);
+			transition: all 0.2s ease;
+			height: 40px;
+			box-sizing: border-box;
+		}
+
+			.quantity-input input:focus {
+				border-color: var(--primary-color);
+				box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+				outline: none;
+			}
+
+	/* Cart Footer */
+	.cart-footer {
+		position: sticky;
+		bottom: 0;
+		background: white;
+		padding: 15px 20px;
+		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+		z-index: 100;
+		animation: slideUp 0.3s ease-out;
+	}
+
+	.cart-button {
+		width: 100%;
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: 12px;
+		padding: 15px 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 600;
+		font-size: 16px;
+		box-shadow: var(--shadow-medium);
+		position: relative;
+		min-height: 56px;
+	}
+
+		.cart-button:hover {
+			background: var(--primary-dark);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(226, 19, 123, 0.3);
+		}
+
+		.cart-button:active {
+			transform: translateY(0);
+		}
+
+	.cart-count {
+		background: white;
+		color: var(--primary-color);
+		border-radius: 50%;
+		width: 28px;
+		height: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+		font-size: 14px;
+		position: absolute;
+		right: 15px;
+		top: 50%;
+		transform: translateY(-50%);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Grid Styling */
+	::deep .e-grid {
+		border-radius: 12px;
+		overflow: hidden;
+		background: white;
+		box-shadow: var(--shadow-light);
+		border: none;
+	}
+
+		::deep .e-grid .e-gridheader {
+			background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		}
+
+		::deep .e-grid .e-headercell {
+			background: transparent;
+			color: white;
+			font-weight: 600;
+			border: none;
+			padding: 15px 12px;
+		}
+
+		::deep .e-grid .e-rowcell {
+			border: none;
+			border-bottom: 1px solid var(--border-color);
+			padding: 12px;
+			vertical-align: middle;
+		}
+
+		::deep .e-grid .e-row:nth-child(even) {
+			background-color: #fafafa;
+		}
+
+		::deep .e-grid .e-row:hover {
+			background-color: var(--primary-light);
+		}
+
+	/* Toolbar Styling */
+	::deep .e-toolbar {
+		background: white;
+		border-bottom: 1px solid var(--border-color);
+		padding: 10px 15px;
+	}
+
+		::deep .e-toolbar .e-input-group input {
+			border-radius: 25px;
+			border: 2px solid var(--border-color);
+			padding: 10px 15px;
+			font-size: 14px;
+		}
+
+			::deep .e-toolbar .e-input-group input:focus {
+				border-color: var(--primary-color);
+				box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+			}
+
+	/* Dialog Styling */
+	.dialog-header {
+		font-size: 20px;
+		font-weight: 600;
+		color: var(--text-dark);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.confirmation-header {
+		color: var(--primary-color);
+	}
+
+	.error-header {
+		color: #dc3545;
+	}
+
+	.confirmation-icon {
+		font-size: 24px;
+		color: var(--warning-color);
+	}
+
+	.error-icon {
+		font-size: 24px;
+		color: #dc3545;
+	}
+
+	.dialog-content {
+		padding: 20px;
+		max-height: 70vh;
+		overflow-y: auto;
+	}
+
+	/* Confirmation Dialog Styling */
+	.confirmation-content .confirmation-message {
+		margin-bottom: 25px;
+		text-align: center;
+	}
+
+		.confirmation-content .confirmation-message h3 {
+			margin: 0 0 10px 0;
+			color: var(--text-dark);
+			font-size: 18px;
+			font-weight: 600;
+		}
+
+		.confirmation-content .confirmation-message p {
+			margin: 0;
+			color: var(--text-light);
+			font-size: 14px;
+		}
+
+	.adjustment-summary {
+		background-color: var(--bg-light);
+		border-radius: 12px;
+		padding: 20px;
+		border: 1px solid var(--border-color);
+	}
+
+	.summary-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+		.summary-item:last-child {
+			border-bottom: none;
+		}
+
+	.summary-label {
+		font-weight: 500;
+		color: var(--text-dark);
+		font-size: 14px;
+	}
+
+	.summary-value {
+		font-weight: 600;
+		color: var(--primary-color);
+		font-size: 14px;
+	}
+
+	/* Error Dialog Styling */
+	.error-content .error-message {
+		margin-bottom: 25px;
+		text-align: center;
+	}
+
+		.error-content .error-message h3 {
+			margin: 0 0 10px 0;
+			color: var(--text-dark);
+			font-size: 18px;
+			font-weight: 600;
+		}
+
+		.error-content .error-message p {
+			margin: 0;
+			color: var(--text-light);
+			font-size: 14px;
+		}
+
+	.error-list {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+		margin-bottom: 20px;
+	}
+
+	.error-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 15px;
+		padding: 15px;
+		background-color: #ffeaea;
+		border: 1px solid #ff9999;
+		border-radius: 8px;
+	}
+
+	.error-item-icon {
+		font-size: 20px;
+		flex-shrink: 0;
+	}
+
+	.error-item-content {
+		flex: 1;
+	}
+
+	.error-item-title {
+		font-weight: 600;
+		color: #d73527;
+		font-size: 14px;
+		margin-bottom: 5px;
+	}
+
+	.error-item-message {
+		color: #721c24;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+
+	.error-summary {
+		text-align: center;
+		padding: 10px;
+		background-color: #f8d7da;
+		border: 1px solid #f5c6cb;
+		border-radius: 6px;
+	}
+
+	.error-count {
+		font-weight: 600;
+		color: #721c24;
+		font-size: 14px;
+	}
+
+	/* Dialog Footer */
+	.dialog-footer {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		padding: 15px 20px;
+		background-color: var(--bg-light);
+		border-top: 1px solid var(--border-color);
+		gap: 10px;
+	}
+
+	.dialog-button {
+		padding: 10px 20px;
+		border-radius: 6px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border: none;
+		min-width: 120px;
+	}
+
+	.cancel-button {
+		background-color: var(--text-light);
+		color: white;
+	}
+
+		.cancel-button:hover {
+			background-color: #6c757d;
+		}
+
+	.confirm-button-dialog {
+		background-color: var(--primary-color);
+		color: white;
+	}
+
+		.confirm-button-dialog:hover {
+			background-color: var(--primary-dark);
+		}
+
+	.error-fix-button {
+		background-color: #dc3545;
+		color: white;
+	}
+
+		.error-fix-button:hover {
+			background-color: #c82333;
+		}
+
+	/* Animations */
+	@@keyframes slideUp {
+		from {
+			transform: translateY(100%);
+			opacity: 0;
+		}
+
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	/* Mobile Responsiveness */
+	@@media (max-width: 576px) {
+		.page-header {
+			padding: 12px 15px;
+		}
+
+		.page-title {
+			font-size: 18px;
+		}
+
+		.help-section {
+			margin: 10px;
+			padding: 12px 15px;
+		}
+
+		.filter-section {
+			margin: 10px;
+			padding: 15px;
+		}
+
+		.grid-container {
+			padding: 10px;
+		}
+
+		.cart-footer {
+			padding: 12px 15px;
+		}
+
+		.cart-button {
+			padding: 12px 15px;
+			font-size: 14px;
+			min-height: 48px;
+		}
+
+		.cart-count {
+			width: 24px;
+			height: 24px;
+			font-size: 12px;
+			right: 12px;
+		}
+
+		::deep .location-filter .e-input-group input,
+		::deep .category-filter .e-input-group input {
+			padding: 8px 10px;
+			font-size: 14px;
+			height: 32px;
+		}
+	}
+</style>

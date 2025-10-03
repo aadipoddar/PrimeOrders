@@ -110,7 +110,8 @@ public partial class ProductStockAdjustment
 					_selectedLocationId);
 
 		foreach (var item in stockSummary)
-			_cart.FirstOrDefault(c => c.ProductId == item.ProductId).Quantity = item.ClosingStock;
+			if (_cart.Any(c => c.ProductId == item.ProductId))
+				_cart.FirstOrDefault(c => c.ProductId == item.ProductId).Quantity = item.ClosingStock;
 	}
 	#endregion
 
@@ -122,7 +123,26 @@ public partial class ProductStockAdjustment
 	}
 	#endregion
 
-	#region Products
+	#region Location and Products
+	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
+	{
+		if (args is null || args.Value <= 0)
+			return;
+
+		_selectedLocationId = args.Value;
+		_cart.Clear();
+
+		// Reload everything based on new location
+		await LoadCategories();
+		await LoadProducts();
+		await LoadStock();
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+
+		StateHasChanged();
+	}
+
 	private async Task OnProductCategoryChanged(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
 		if (args is null || args.Value <= 0)
@@ -214,9 +234,9 @@ public partial class ProductStockAdjustment
 	{
 		await NotificationService.ShowLocalNotification(
 			100,
-			 "Raw Material Stock Adjustment Saved",
+			 "Product Stock Adjustment Saved",
 			 "Stock Adjusted.",
-			   $"Raw Material Stock Adjustment has been successfully saved on {DateTime.Now:dd/MM/yy hh:mm tt}. Please check the Stock Adjustment report for details.");
+			   $"Product Stock Adjustment has been successfully saved on {DateTime.Now:dd/MM/yy hh:mm tt}. Please check the Stock Adjustment report for details.");
 	}
 	#endregion
 }
