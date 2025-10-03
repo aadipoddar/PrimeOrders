@@ -1,0 +1,441 @@
+﻿@page "/Admin-Dashboard"
+@using PrimeBakes.Shared.Components
+
+<PageTitle>Admin Dashboard - Prime Bakes</PageTitle>
+
+<div class="admin-dashboard-container">
+	<!-- Header Section -->
+	<div class="admin-dashboard-header">
+		<div class="header-content">
+			<div class="admin-logo-section">
+				<div class="admin-logo-icon">👑</div>
+				<div class="admin-header-text">
+					<h1 class="admin-title">Admin Dashboard</h1>
+					<p class="admin-subtitle">Comprehensive Business Management System</p>
+				</div>
+			</div>
+			<div class="header-actions">
+				<button @onclick='() => NavigationManager.NavigateTo("/")' class="back-to-dashboard-btn">
+					<span class="back-icon">←</span>
+					<span class="back-text">Back to Dashboard</span>
+				</button>
+				<div class="admin-stats">
+					<div class="stat-item">
+						<span class="stat-number">@TotalOutlets</span>
+						<span class="stat-label">Outlets</span>
+					</div>
+					<div class="stat-divider"></div>
+					<div class="stat-item">
+						<span class="stat-number">@ActiveUsers</span>
+						<span class="stat-label">Active Users</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="header-gradient-overlay"></div>
+	</div>
+
+	<!-- Management Cards Grid -->
+	<div class="management-section">
+		<div class="section-header">
+			<h2 class="section-title">Management Modules</h2>
+			<p class="section-description">Select a module to manage different aspects of your bakery business</p>
+		</div>
+
+		<div class="admin-cards-grid">
+			<!-- Outlet / Franchise Management -->
+			<AdminCard Title="Outlet Management"
+					   Description="Manage franchise locations, outlet operations, and regional performance tracking"
+					   Icon="🏪"
+					   IconClass="outlet-icon"
+					   BadgeColor="#ff9800"
+					   Count="@TotalOutlets.ToString()"
+					   ActionText="Manage Outlets"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
+
+			<!-- Raw Material Management -->
+			<AdminCard Title="Raw Materials"
+					   Description="Control inventory, suppliers, procurement processes, and stock levels"
+					   Icon="📦"
+					   IconClass="material-icon"
+					   BadgeColor="#4caf50"
+					   Count="@RawMaterialsCount.ToString()"
+					   ActionText="Manage Materials"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterials"))" />
+
+			<!-- Raw Material Category Management -->
+			<AdminCard Title="Raw Material Categories"
+					   Description="Organize and categorize raw materials for better inventory management"
+					   Icon="📋"
+					   IconClass="category-icon"
+					   BadgeColor="#9c27b0"
+					   Count="@MaterialCategoriesCount.ToString()"
+					   ActionText="Manage Categories"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialsCategories"))" />
+
+			<!-- Finished Product Management -->
+			<AdminCard Title="Finished Product Management"
+					   Description="Manage finished products, pricing, recipes, and production planning"
+					   Icon="🧁"
+					   IconClass="product-icon"
+					   BadgeColor="#2196f3"
+					   Count="@FinishedProductsCount.ToString()"
+					   ActionText="Manage Products"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Product"))" />
+
+			<!-- Finished Product Category Management -->
+			<AdminCard Title="Finished Product Categories"
+					   Description="Organize products into categories for better catalog management"
+					   Icon="🏷️"
+					   IconClass="category-icon"
+					   BadgeColor="#673ab7"
+					   Count="@ProductCategoriesCount.ToString()"
+					   ActionText="Manage Categories"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/ProductCategories"))" />
+
+			<!-- User Management -->
+			<AdminCard Title="User Management"
+					   Description="Manage user accounts, roles, permissions, and access control"
+					   Icon="👥"
+					   IconClass="user-icon"
+					   BadgeColor="#e91e63"
+					   Count="@ActiveUsers.ToString()"
+					   ActionText="Manage Users"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
+
+			<!-- Kitchen Management -->
+			<AdminCard Title="Kitchen Operations"
+					   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
+					   Icon="👨‍🍳"
+					   IconClass="kitchen-icon"
+					   BadgeColor="#ff5722"
+					   Count="@ActiveKitchens.ToString()"
+					   ActionText="Manage Kitchen"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
+		</div>
+	</div>
+
+
+
+	<!-- Footer -->
+	<div class="dashboard-footer">
+		<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+	</div>
+</div>
+
+<style>
+	:root {
+		--admin-primary: #e2137b;
+		--admin-primary-dark: #c10e69;
+		--admin-secondary: #2c3e50;
+		--admin-accent: #ffb3d1;
+		--admin-light-bg: #f8f9ff;
+		--admin-card-bg: #ffffff;
+		--text-primary: #2c3e50;
+		--text-secondary: #666;
+		--success: #4caf50;
+		--warning: #ff9800;
+		--info: #2196f3;
+		--danger: #f44336;
+	}
+
+	.admin-dashboard-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(193, 14, 105, 0.05) 100%);
+		padding: 0;
+	}
+
+	/* Header Styles */
+	.admin-dashboard-header {
+		background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-primary-dark) 100%);
+		color: white;
+		padding: 40px 30px;
+		position: relative;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(226, 19, 123, 0.3);
+	}
+
+	.header-gradient-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+		pointer-events: none;
+	}
+
+	.header-content {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 30px;
+	}
+
+	.back-to-dashboard-btn {
+		background: rgba(255, 255, 255, 0.15);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		color: white;
+		padding: 12px 20px;
+		border-radius: 12px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		backdrop-filter: blur(10px);
+		font-size: 14px;
+	}
+
+		.back-to-dashboard-btn:hover {
+			background: rgba(255, 255, 255, 0.25);
+			border-color: rgba(255, 255, 255, 0.5);
+			transform: translateY(-2px);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		}
+
+	.back-icon {
+		font-size: 16px;
+		font-weight: 700;
+		transition: transform 0.3s ease;
+	}
+
+	.back-to-dashboard-btn:hover .back-icon {
+		transform: translateX(-3px);
+	}
+
+	.back-text {
+		font-size: 14px;
+	}
+
+	.admin-logo-section {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.admin-logo-icon {
+		width: 80px;
+		height: 80px;
+		background: rgba(255, 255, 255, 0.15);
+		border-radius: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 36px;
+		backdrop-filter: blur(10px);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.admin-header-text h1 {
+		font-size: 36px;
+		font-weight: 800;
+		margin: 0 0 8px 0;
+		letter-spacing: -1px;
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.admin-header-text p {
+		font-size: 16px;
+		margin: 0;
+		opacity: 0.9;
+		font-weight: 400;
+	}
+
+	.admin-stats {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		background: rgba(255, 255, 255, 0.1);
+		padding: 20px 30px;
+		border-radius: 15px;
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.stat-item {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+	}
+
+	.stat-number {
+		font-size: 28px;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	.stat-label {
+		font-size: 12px;
+		opacity: 0.8;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		font-weight: 500;
+	}
+
+	.stat-divider {
+		width: 1px;
+		height: 40px;
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	/* Management Section */
+	.management-section {
+		padding: 60px 30px;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.section-header {
+		text-align: center;
+		margin-bottom: 50px;
+	}
+
+	.section-title {
+		font-size: 32px;
+		font-weight: 700;
+		color: var(--text-primary);
+		margin: 0 0 15px 0;
+		letter-spacing: -0.5px;
+	}
+
+	.section-description {
+		font-size: 16px;
+		color: var(--text-secondary);
+		margin: 0;
+		max-width: 600px;
+		margin: 0 auto;
+		line-height: 1.6;
+	}
+
+	.admin-cards-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 30px;
+		margin-bottom: 60px;
+	}
+
+
+
+		/* Footer */
+		.dashboard-footer {
+			margin-top: auto;
+			text-align: center;
+			padding: 25px;
+			color: var(--primary-dark);
+			font-size: 14px;
+			background-color: white;
+			border-radius: 15px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+		}
+
+		.footer-link {
+			color: var(--primary-color);
+			text-decoration: none;
+			font-weight: 600;
+			transition: color 0.2s ease;
+		}
+
+			.footer-link:hover {
+				color: var(--primary-dark);
+				text-decoration: underline;
+			}
+
+	/* Responsive Design */
+	@@media (max-width: 1024px) {
+		.admin-cards-grid {
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 25px;
+		}
+
+		.header-content {
+			flex-direction: column;
+			gap: 30px;
+			text-align: center;
+		}
+
+		.header-actions {
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		.admin-stats {
+			flex-direction: row;
+			justify-content: center;
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.admin-dashboard-header {
+			padding: 30px 20px;
+		}
+
+		.management-section,
+		.quick-actions-section {
+			padding-left: 20px;
+			padding-right: 20px;
+		}
+
+		.admin-header-text h1 {
+			font-size: 28px;
+		}
+
+		.admin-cards-grid {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+
+
+
+		.footer-content {
+			flex-direction: column;
+			gap: 15px;
+			text-align: center;
+		}
+
+		.admin-stats {
+			padding: 15px 20px;
+		}
+
+		.stat-number {
+			font-size: 24px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.admin-dashboard-header {
+			padding: 25px 15px;
+		}
+
+		.management-section,
+		.quick-actions-section {
+			padding-left: 15px;
+			padding-right: 15px;
+		}
+
+		.admin-header-text h1 {
+			font-size: 24px;
+		}
+
+		.admin-logo-icon {
+			width: 60px;
+			height: 60px;
+			font-size: 28px;
+		}
+
+		.section-title {
+			font-size: 24px;
+		}
+	}
+</style>

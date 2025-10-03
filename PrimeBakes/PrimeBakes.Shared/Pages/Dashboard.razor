@@ -248,6 +248,15 @@ else
 				<h3>Reports</h3>
 				<p>View and generate comprehensive business reports</p>
 			</div>
+
+			@if (_user.Admin)
+			{
+				<div class="dashboard-card admin-card" @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")'>
+					<div class="card-icon admin-icon">👑</div>
+					<h3>Admin Panel</h3>
+					<p>Access advanced management tools and system administration</p>
+				</div>
+			}
 		</div>
 
 		<!-- Device Information Card -->
@@ -487,6 +496,21 @@ else
 		background-color: rgba(23, 162, 184, 0.1);
 		color: var(--info-color);
 	}
+
+	.admin-icon {
+		background-color: rgba(255, 193, 7, 0.1);
+		color: #ff9800;
+	}
+
+	.admin-card {
+		background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
+		border-left: 5px solid #ff9800;
+	}
+
+		.admin-card:hover {
+			background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+			box-shadow: 0 15px 35px rgba(255, 152, 0, 0.3);
+		}
 
 	.dashboard-card h3 {
 		color: var(--dark-text);

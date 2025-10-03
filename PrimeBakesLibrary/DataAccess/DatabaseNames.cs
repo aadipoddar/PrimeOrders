@@ -179,4 +179,5 @@ public static class ViewNames
 	public static string AccountingOverview => "Accounting_Overview";
 	public static string LedgerOverview => "Ledger_Overview";
 	public static string RawMaterialStockDetails => "RawMaterialStockDetails";
+	public static string ProductStockDetails => "ProductStockDetails";
 }
