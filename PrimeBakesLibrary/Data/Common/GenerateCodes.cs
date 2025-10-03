@@ -56,7 +56,7 @@ public static class GenerateCodes
 					break;
 				case CodeType.KitchenIssue:
 					var kitchenIssue = await KitchenIssueData.LoadKitchenIssueByTransactionNo(code);
-					isDuplicate = kitchenIssue == null;
+					isDuplicate = kitchenIssue is not null;
 					break;
 				case CodeType.KitchenProduction:
 					var kitchenProduction = await KitchenProductionData.LoadKitchenProductionByTransactionNo(code);
