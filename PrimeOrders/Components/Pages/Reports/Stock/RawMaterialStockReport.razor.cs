@@ -59,7 +59,7 @@ public partial class RawMaterialStockReport
 			return;
 		}
 
-		var memoryStream = StockExcelExport.ExportRawMaterialStockSummaryExcel(_stockDetails, _startDate, _endDate);
+		var memoryStream = RawMaterialStockExcelExport.ExportRawMaterialStockSummaryExcel(_stockDetails, _startDate, _endDate);
 		var fileName = $"Raw_material_Stock_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}

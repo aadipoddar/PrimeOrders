@@ -1,36 +1,63 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Stock;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Calendars;
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Stock;
 
-public partial class RawMaterialStockReport
+public partial class ProductStockReport
 {
+	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showCharts = true;
 	private bool _showSummaryView = true; // true for Summary, false for Details
 
+	private int _selectedLocationId = 1;
 	private DateOnly? _fromDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly? _toDate = DateOnly.FromDateTime(DateTime.Now);
 
-	private List<RawMaterialStockSummaryModel> _stockSummary = [];
-	private List<RawMaterialStockDetailsModel> _stockDetails = [];
+	private List<LocationModel> _locations = [];
+	private List<ProductStockSummaryModel> _stockSummary = [];
+	private List<ProductStockDetailsModel> _stockDetails = [];
 
-	private SfGrid<RawMaterialStockSummaryModel> _sfStockSummaryGrid;
-	private SfGrid<RawMaterialStockDetailsModel> _sfStockDetailsGrid;
+	private SfGrid<ProductStockSummaryModel> _sfStockSummaryGrid;
+	private SfGrid<ProductStockDetailsModel> _sfStockDetailsGrid;
 
 	protected override async Task OnInitializedAsync()
 	{
-		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+		_user = authResult.User;
+		await LoadLocations();
 		await LoadStockReport();
 		_isLoading = false;
+	}
+
+	private async Task LoadLocations()
+	{
+		if (_user.LocationId == 1)
+		{
+			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		}
+
+		_selectedLocationId = _user.LocationId;
+	}
+
+	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
+	{
+		if (args is null || args.Value <= 0)
+			return;
+
+		_selectedLocationId = args.Value;
+		await LoadStockReport();
 	}
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly?> args)
@@ -43,14 +70,13 @@ public partial class RawMaterialStockReport
 	private async Task LoadStockReport()
 	{
 		_isProcessing = true;
-		_isProcessing = true;
 		StateHasChanged();
 
 		var startDate = (_fromDate ?? DateOnly.FromDateTime(DateTime.Now)).ToDateTime(new TimeOnly(0, 0));
 		var endDate = (_toDate ?? DateOnly.FromDateTime(DateTime.Now)).ToDateTime(new TimeOnly(23, 59));
 
-		_stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDateLocationId(startDate, endDate, 1);
-		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDateLocationId(startDate, endDate, 1);
+		_stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(startDate, endDate, _selectedLocationId);
+		_stockDetails = await ProductStockData.LoadProductStockDetailsByDateLocationId(startDate, endDate, _selectedLocationId);
 
 		_isProcessing = false;
 		StateHasChanged();
@@ -71,7 +97,7 @@ public partial class RawMaterialStockReport
 	#region Summary Card Methods
 	private int GetTotalStockItems() => _stockSummary.Count;
 	private decimal GetTotalOpeningStock() => _stockSummary.Sum(s => s.OpeningStock);
-	private decimal GetTotalPurchases() => _stockSummary.Sum(s => s.PurchaseStock);
+	private decimal GetTotalProduction() => _stockSummary.Sum(s => s.PurchaseStock);
 	private decimal GetTotalSales() => _stockSummary.Sum(s => s.SaleStock);
 	private decimal GetTotalClosingStock() => _stockSummary.Sum(s => s.ClosingStock);
 	private decimal GetTotalStockValue() => _stockSummary.Sum(s => s.WeightedAverageValue);
@@ -80,18 +106,18 @@ public partial class RawMaterialStockReport
 	#endregion
 
 	#region Chart Data Methods
-	private List<StockOverviewRawMaterialChartData> GetStockOverviewData() =>
+	private List<StockOverviewProductChartData> GetStockOverviewData() =>
 		[
 			new() { Component = "Opening Stock", Value = GetTotalOpeningStock() },
-			new() { Component = "Purchases", Value = GetTotalPurchases() },
+			new() { Component = "Production", Value = GetTotalProduction() },
 			new() { Component = "Sales", Value = GetTotalSales() },
 			new() { Component = "Closing Stock", Value = GetTotalClosingStock() }
 		];
 
-	private List<CategoryDistributionRawMaterialChartData> GetCategoryDistributionData() =>
+	private List<CategoryDistributionProductChartData> GetCategoryDistributionData() =>
 		[.. _stockSummary
-			.GroupBy(s => s.RawMaterialCategoryName)
-			.Select(group => new CategoryDistributionRawMaterialChartData
+			.GroupBy(s => s.ProductCategoryName)
+			.Select(group => new CategoryDistributionProductChartData
 			{
 				CategoryName = group.Key,
 				StockCount = group.Sum(s => s.ClosingStock)
@@ -99,21 +125,21 @@ public partial class RawMaterialStockReport
 			.OrderByDescending(c => c.StockCount)
 			.Take(10)];
 
-	private List<TopMovingItemsRawMaterialChartData> GetTopMovingItemsData() =>
+	private List<TopMovingItemsProductChartData> GetTopMovingItemsData() =>
 		[.. _stockSummary
-			.Select(s => new TopMovingItemsRawMaterialChartData
+			.Select(s => new TopMovingItemsProductChartData
 			{
-				ItemName = s.RawMaterialName,
+				ItemName = s.ProductName,
 				Movement = s.PurchaseStock + s.SaleStock
 			})
 			.OrderByDescending(i => i.Movement)
 			.Take(10)];
 
-	private List<OpeningClosingRawMaterialChartData> GetOpeningClosingData() =>
+	private List<OpeningClosingProductChartData> GetOpeningClosingData() =>
 		[.. _stockSummary
-			.Select(s => new OpeningClosingRawMaterialChartData
+			.Select(s => new OpeningClosingProductChartData
 			{
-				ItemName = s.RawMaterialName,
+				ItemName = s.ProductName,
 				OpeningStock = s.OpeningStock,
 				ClosingStock = s.ClosingStock
 			})
@@ -131,10 +157,14 @@ public partial class RawMaterialStockReport
 
 		var startDate = _fromDate ?? DateOnly.FromDateTime(DateTime.Now);
 		var endDate = _toDate ?? DateOnly.FromDateTime(DateTime.Now);
-		var memoryStream = RawMaterialStockExcelExport.ExportRawMaterialStockSummaryExcel(_stockSummary, startDate, endDate);
-		var fileName = $"Raw_Material_Stock_Summary_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";
+		var locationName = _locations.FirstOrDefault(l => l.Id == _selectedLocationId)?.Name ?? "Unknown Location";
+
+		var memoryStream = ProductStockExcelExport.ExportFinishedProductStockSummaryExcel(_stockSummary, startDate, endDate, _selectedLocationId, _locations);
+		var fileName = $"Product_Stock_Summary_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}_{locationName}.xlsx";
 		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+
 		VibrationService.VibrateWithTime(100);
+		await NotificationService.ShowLocalNotification(101, "Export", "Product Stock Summary Export", "Product stock summary has been exported successfully.");
 
 		_isProcessing = false;
 		StateHasChanged();
@@ -150,24 +180,43 @@ public partial class RawMaterialStockReport
 
 		var startDate = _fromDate ?? DateOnly.FromDateTime(DateTime.Now);
 		var endDate = _toDate ?? DateOnly.FromDateTime(DateTime.Now);
-		var memoryStream = RawMaterialStockExcelExport.ExportRawMaterialStockDetailsExcel(_stockDetails, startDate, endDate);
-		var fileName = $"Raw_Material_Stock_Details_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.xlsx";
+		var locationName = _locations.FirstOrDefault(l => l.Id == _selectedLocationId)?.Name ?? "Unknown Location";
+
+		var memoryStream = ProductStockExcelExport.ExportFinishedProductStockDetailsExcel(_stockDetails, startDate, endDate, _selectedLocationId, _locations);
+		var fileName = $"Product_Stock_Details_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}_{locationName}.xlsx";
 		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+
 		VibrationService.VibrateWithTime(100);
+		await NotificationService.ShowLocalNotification(102, "Export", "Product Stock Details Export", "Product stock details have been exported successfully.");
 
 		_isProcessing = false;
 		StateHasChanged();
 	}
-
-	#region Navigation Methods
-	private void NavigateToReports()
-	{
-		;
-	}
-
-	private void NavigateToStockAdjustment()
-	{
-		;
-	}
-	#endregion
 }
+
+#region Chart Data Models
+public class StockOverviewProductChartData
+{
+	public string Component { get; set; } = string.Empty;
+	public decimal Value { get; set; }
+}
+
+public class CategoryDistributionProductChartData
+{
+	public string CategoryName { get; set; } = string.Empty;
+	public decimal StockCount { get; set; }
+}
+
+public class TopMovingItemsProductChartData
+{
+	public string ItemName { get; set; } = string.Empty;
+	public decimal Movement { get; set; }
+}
+
+public class OpeningClosingProductChartData
+{
+	public string ItemName { get; set; } = string.Empty;
+	public decimal OpeningStock { get; set; }
+	public decimal ClosingStock { get; set; }
+}
+#endregion

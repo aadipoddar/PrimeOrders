@@ -77,7 +77,7 @@ public partial class FinishedProductStockReport
 			return;
 		}
 
-		var memoryStream = StockExcelExport.ExportFinishedProductStockExcel(_stockDetails, _startDate, _endDate);
+		var memoryStream = RawMaterialStockExcelExport.ExportFinishedProductStockExcel(_stockDetails, _startDate, _endDate);
 		var fileName = $"Finished_Product_Stock_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 		await JS.InvokeVoidAsync("saveExcel", Convert.ToBase64String(memoryStream.ToArray()), fileName);
 	}
