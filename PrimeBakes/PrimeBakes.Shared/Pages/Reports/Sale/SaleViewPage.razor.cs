@@ -5,7 +5,7 @@ using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
@@ -214,7 +214,7 @@ public partial class SaleViewPage
 
 		sale.Status = false;
 		await SaleData.InsertSale(sale);
-		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
+		await RawMaterialStockData.DeleteProductStockByTransactionNo(sale.BillNo);
 		if (sale.LocationId == 1)
 		{
 			var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);

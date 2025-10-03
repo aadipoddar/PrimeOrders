@@ -1,3 +1,6 @@
+using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Models.Inventory.Stock;
+
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -29,15 +32,15 @@ public partial class RawMaterialStockAdjustmentPage
 	private bool _isMaterialSearchActive = false;
 	private bool _hasAddedMaterialViaSearch = true;
 
-	private StockAdjustmentRawMaterialCartModel _selectedRawMaterialCart = new();
+	private RawMaterialStockAdjustmentCartModel _selectedRawMaterialCart = new();
 	private RawMaterialModel _selectedRawMaterial = new();
 
 	private List<RawMaterialStockSummaryModel> _stockDetails = [];
 	private List<RawMaterialModel> _rawMaterials = [];
-	private readonly List<StockAdjustmentRawMaterialCartModel> _stockAdjustmentRawMaterialCarts = [];
+	private readonly List<RawMaterialStockAdjustmentCartModel> _stockAdjustmentRawMaterialCarts = [];
 
 	private SfGrid<RawMaterialModel> _sfRawMaterialGrid;
-	private SfGrid<StockAdjustmentRawMaterialCartModel> _sfRawMaterialCartGrid;
+	private SfGrid<RawMaterialStockAdjustmentCartModel> _sfRawMaterialCartGrid;
 	private SfGrid<RawMaterialStockSummaryModel> _sfStockGrid;
 
 	private SfDialog _sfStockDetailsDialog;
@@ -81,7 +84,7 @@ public partial class RawMaterialStockAdjustmentPage
 
 	private async Task LoadStockDetails()
 	{
-		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(
+		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDateLocationId(
 			DateTime.Now.AddDays(-1),
 			DateTime.Now.AddDays(1),
 			1);
@@ -263,7 +266,7 @@ public partial class RawMaterialStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<StockAdjustmentRawMaterialCartModel> args)
+	public void RawMaterialCartRowSelectHandler(RowSelectEventArgs<RawMaterialStockAdjustmentCartModel> args)
 	{
 		_selectedRawMaterialCart = args.Data;
 		_dialogVisible = true;
@@ -401,7 +404,7 @@ public partial class RawMaterialStockAdjustmentPage
 				adjustmentQuantity = item.Quantity - existingStock.ClosingStock;
 
 			if (adjustmentQuantity != 0)
-				await StockData.InsertRawMaterialStock(new()
+				await RawMaterialStockData.InsertRawMaterialStock(new()
 				{
 					Id = 0,
 					RawMaterialId = item.RawMaterialId,

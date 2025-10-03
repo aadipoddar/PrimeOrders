@@ -1,4 +1,5 @@
 ﻿@page "/Inventory/RawMaterialStockAdjustment"
+@using PrimeBakesLibrary.Models.Inventory.Stock
 
 <PageTitle>Raw Material Stock Adjustment - Prime Orders</PageTitle>
 
@@ -146,10 +147,10 @@ else
 							CssClass="cart-grid">
 						<GridEvents RowSelected="RawMaterialCartRowSelectHandler" TValue="StockAdjustmentRawMaterialCartModel" />
 						<GridColumns>
-							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.RawMaterialName) HeaderText="Material" Width="200" />
-							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.Quantity) HeaderText="Target Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
-							<GridColumn Field=@nameof(StockAdjustmentRawMaterialCartModel.Total) HeaderText="Value" Width="150" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(RawMaterialStockAdjustmentCartModel.RawMaterialName) HeaderText="Material" Width="200" />
+							<GridColumn Field=@nameof(RawMaterialStockAdjustmentCartModel.Quantity) HeaderText="Target Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(RawMaterialStockAdjustmentCartModel.Rate) HeaderText="Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field=@nameof(RawMaterialStockAdjustmentCartModel.Total) HeaderText="Value" Width="150" Format="N2" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
 				</div>

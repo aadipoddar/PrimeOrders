@@ -5,7 +5,7 @@ using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Order;
 using PrimeBakesLibrary.Models.Sale;
 

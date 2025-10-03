@@ -1,4 +1,5 @@
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Sale;
 
 using Syncfusion.Blazor.Notifications;
@@ -84,7 +85,7 @@ public partial class SaleSummaryModule
 
 		sale.Status = false;
 		await SaleData.InsertSale(sale);
-		await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
+		await RawMaterialStockData.DeleteProductStockByTransactionNo(sale.BillNo);
 
 		if (sale.LocationId == 1)
 		{

@@ -1,6 +1,8 @@
 ﻿using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Notification;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 namespace PrimeBakesLibrary.Data.Inventory.Kitchen;
 
@@ -74,11 +76,11 @@ public static class KitchenIssueData
 	private static async Task SaveStock(KitchenIssueModel kitchenIssue, List<KitchenIssueRawMaterialCartModel> cart, bool update)
 	{
 		if (update)
-			await StockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
 
 		if (kitchenIssue.Status)
 			foreach (var item in cart)
-				await StockData.InsertRawMaterialStock(new()
+				await RawMaterialStockData.InsertRawMaterialStock(new()
 				{
 					Id = 0,
 					RawMaterialId = item.RawMaterialId,

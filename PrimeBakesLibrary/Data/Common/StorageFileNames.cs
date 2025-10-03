@@ -15,6 +15,4 @@ public static class StorageFileNames
 
 	public static string KitchenIssueDataFileName => "kitchen_issue_data.json";
 	public static string KitchenIssueCartDataFileName => "kitchen_issue_cart_data.json";
-
-	public static string RawMaterialStockAdjustmentCartDataFileName => "raw_material_stock_adjustment_cart_data.json";
 }

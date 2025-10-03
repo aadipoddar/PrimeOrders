@@ -7,7 +7,7 @@ using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Kitchen;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;

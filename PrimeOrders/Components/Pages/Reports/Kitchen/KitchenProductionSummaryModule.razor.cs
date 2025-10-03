@@ -1,5 +1,7 @@
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -62,7 +64,7 @@ public partial class KitchenProductionSummaryModule
 
 		kitchenProduction.Status = false;
 		await KitchenProductionData.InsertKitchenProduction(kitchenProduction);
-		await StockData.DeleteProductStockByTransactionNo(kitchenProduction.TransactionNo);
+		await RawMaterialStockData.DeleteProductStockByTransactionNo(kitchenProduction.TransactionNo);
 
 		_sfSuccessToast.Content = "Kitchen production deactivated successfully.";
 		await _sfSuccessToast.ShowAsync();

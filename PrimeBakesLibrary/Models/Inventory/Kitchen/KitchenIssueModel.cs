@@ -1,4 +1,4 @@
-﻿namespace PrimeBakesLibrary.Models.Inventory;
+﻿namespace PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 public class KitchenIssueModel
 {

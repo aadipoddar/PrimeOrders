@@ -1,4 +1,7 @@
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -492,13 +495,13 @@ public partial class KitchenProductionPage
 	private async Task InsertStock()
 	{
 		if (KitchenProductionId.HasValue && KitchenProductionId.Value > 0)
-			await StockData.DeleteProductStockByTransactionNo(_kitchenProduction.TransactionNo);
+			await RawMaterialStockData.DeleteProductStockByTransactionNo(_kitchenProduction.TransactionNo);
 
 		if (!_kitchenProduction.Status)
 			return;
 
 		foreach (var item in _kitchenProductionProductCarts)
-			await StockData.InsertProductStock(new()
+			await RawMaterialStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = item.ProductId,

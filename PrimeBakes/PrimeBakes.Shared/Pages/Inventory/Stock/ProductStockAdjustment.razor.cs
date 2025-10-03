@@ -4,8 +4,8 @@ using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Inventory.Stock;
+using PrimeBakesLibrary.Models.Product;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -13,18 +13,20 @@ using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Inventory.Stock;
 
-public partial class RawMaterialStockAdjustmentPage
+public partial class ProductStockAdjustment
 {
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isSaving = false;
 
+	private int _selectedLocationId = 1;
 	private int _selectedCategoryId = 0;
 	private bool _adjustmentConfirmationDialogVisible = false;
 	private bool _validationErrorDialogVisible = false;
 
-	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
-	private List<RawMaterialStockAdjustmentCartModel> _cart = [];
+	private List<LocationModel> _locations = [];
+	private List<ProductCategoryModel> _productCategories = [];
+	private readonly List<ProductStockAdjustmentCartModel> _cart = [];
 	private readonly List<ValidationError> _validationErrors = [];
 
 	public class ValidationError
@@ -33,7 +35,7 @@ public partial class RawMaterialStockAdjustmentPage
 		public string Message { get; set; } = string.Empty;
 	}
 
-	private SfGrid<RawMaterialStockAdjustmentCartModel> _sfGrid;
+	private SfGrid<ProductStockAdjustmentCartModel> _sfGrid;
 
 	private SfDialog _sfAdjustmentConfirmationDialog;
 	private SfDialog _sfValidationErrorDialog;
@@ -41,7 +43,7 @@ public partial class RawMaterialStockAdjustmentPage
 	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;
@@ -49,47 +51,79 @@ public partial class RawMaterialStockAdjustmentPage
 
 	private async Task LoadData()
 	{
-		_rawMaterialCategories = await CommonData.LoadTableDataByStatus<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
-		_rawMaterialCategories.Add(new()
-		{
-			Id = 0,
-			Name = "All Categories"
-		});
-		_rawMaterialCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-		_selectedCategoryId = 0;
-
-		var allProducts = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
-
-		foreach (var product in allProducts)
-			_cart.Add(new()
-			{
-				RawMaterialCategoryId = product.RawMaterialCategoryId,
-				RawMaterialId = product.Id,
-				RawMaterialName = product.Name,
-				Quantity = 0,
-				Rate = product.MRP,
-				Total = 0
-			});
-
-		_cart.Sort((x, y) => string.Compare(x.RawMaterialName, y.RawMaterialName, StringComparison.Ordinal));
-
-		var stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDateLocationId(
-			DateTime.Now.AddDays(-1),
-			DateTime.Now.AddDays(1),
-			1);
-
-		foreach (var item in stockSummary)
-			_cart.FirstOrDefault(c => c.RawMaterialId == item.RawMaterialId).Quantity = item.ClosingStock;
+		await LoadLocations();
+		await LoadCategories();
+		await LoadProducts();
+		await LoadStock();
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 
 		StateHasChanged();
 	}
+
+	private async Task LoadLocations()
+	{
+		if (_user.LocationId == 1)
+			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+
+		_selectedLocationId = _user.LocationId;
+	}
+
+	private async Task LoadCategories()
+	{
+		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
+		_productCategories.RemoveAll(c => c.LocationId != _selectedLocationId && c.LocationId != 1);
+		_productCategories.Add(new()
+		{
+			Id = 0,
+			Name = "All Categories"
+		});
+		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+		_selectedCategoryId = 0;
+	}
+
+	private async Task LoadProducts()
+	{
+		var allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
+		allProducts.RemoveAll(c => c.LocationId != _selectedLocationId && c.LocationId != 1);
+
+		foreach (var product in allProducts)
+			_cart.Add(new()
+			{
+				ProductCategoryId = product.ProductCategoryId,
+				ProductId = product.Id,
+				ProductName = product.Name,
+				Quantity = 0,
+				Rate = product.Rate,
+				Total = 0
+			});
+
+		_cart.Sort((x, y) => string.Compare(x.ProductName, y.ProductName, StringComparison.Ordinal));
+	}
+
+	private async Task LoadStock()
+	{
+		var stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(
+					DateTime.Now.AddDays(-1),
+					DateTime.Now.AddDays(1),
+					_selectedLocationId);
+
+		foreach (var item in stockSummary)
+			_cart.FirstOrDefault(c => c.ProductId == item.ProductId).Quantity = item.ClosingStock;
+	}
 	#endregion
 
-	#region Raw Material
-	private async Task OnRawMaterialCategoryChanged(ChangeEventArgs<int, RawMaterialCategoryModel> args)
+	#region Dialog Methods
+	private void CloseConfirmationDialog()
+	{
+		_adjustmentConfirmationDialogVisible = false;
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Products
+	private async Task OnProductCategoryChanged(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
 		if (args is null || args.Value <= 0)
 			_selectedCategoryId = 0;
@@ -99,21 +133,13 @@ public partial class RawMaterialStockAdjustmentPage
 		await SaveAdjustmentFile();
 	}
 
-	private async Task UpdateQuantity(RawMaterialStockAdjustmentCartModel item, decimal newQuantity)
+	private async Task UpdateQuantity(ProductStockAdjustmentCartModel item, decimal newQuantity)
 	{
 		if (item is null)
 			return;
 
 		item.Quantity = newQuantity;
 		await SaveAdjustmentFile();
-	}
-	#endregion
-
-	#region Dialog Methods
-	private void CloseConfirmationDialog()
-	{
-		_adjustmentConfirmationDialogVisible = false;
-		StateHasChanged();
 	}
 	#endregion
 
@@ -136,7 +162,7 @@ public partial class RawMaterialStockAdjustmentPage
 			_validationErrors.Add(new()
 			{
 				Field = "Large Negative Quantities",
-				Message = $"Some items have very large negative quantities. Please verify: {string.Join(", ", extremeNegativeItems.Select(x => $"{x.RawMaterialName} ({x.Quantity})"))}"
+				Message = $"Some items have very large negative quantities. Please verify: {string.Join(", ", extremeNegativeItems.Select(x => $"{x.ProductName} ({x.Quantity})"))}"
 			});
 		}
 
@@ -162,10 +188,10 @@ public partial class RawMaterialStockAdjustmentPage
 				return;
 			}
 
-			await RawMaterialStockData.SaveRawMaterialStockAdjustment(_cart);
+			await ProductStockData.SaveProductStockAdjustment(_cart, _selectedLocationId);
 			_cart.Clear();
 			await SendLocalNotification();
-			NavigationManager.NavigateTo("/Inventory/RawMaterialStockAdjustment/Confirmed", true);
+			NavigationManager.NavigateTo("/Inventory/ProductStockAdjustment/Confirmed", true);
 		}
 		catch (Exception ex)
 		{

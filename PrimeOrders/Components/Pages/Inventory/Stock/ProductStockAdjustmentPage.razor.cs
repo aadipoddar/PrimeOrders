@@ -1,3 +1,6 @@
+using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Models.Inventory.Stock;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -30,16 +33,16 @@ public partial class ProductStockAdjustmentPage
 	private bool _isProductSearchActive = false;
 	private bool _hasAddedProductViaSearch = true;
 
-	private StockAdjustmentProductCartModel _selectedProductCart = new();
+	private ProductStockAdjustmentCartModel _selectedProductCart = new();
 	private ProductModel _selectedProduct = new();
 
 	private List<LocationModel> _locations = [];
 	private List<ProductStockSummaryModel> _stockDetails = [];
 	private List<ProductModel> _products = [];
-	private readonly List<StockAdjustmentProductCartModel> _productStockAdjustmentCarts = [];
+	private readonly List<ProductStockAdjustmentCartModel> _productStockAdjustmentCarts = [];
 
 	private SfGrid<ProductModel> _sfProductGrid;
-	private SfGrid<StockAdjustmentProductCartModel> _sfProductCartGrid;
+	private SfGrid<ProductStockAdjustmentCartModel> _sfProductCartGrid;
 	private SfGrid<ProductStockSummaryModel> _sfStockGrid;
 
 	private SfDialog _sfStockDetailsDialog;
@@ -92,7 +95,7 @@ public partial class ProductStockAdjustmentPage
 	{
 		int locationId = _user.LocationId == 1 ? _selectedLocationId : _user.LocationId;
 
-		_stockDetails = await StockData.LoadProductStockDetailsByDateLocationId(
+		_stockDetails = await RawMaterialStockData.LoadProductStockDetailsByDateLocationId(
 			DateTime.Now.AddDays(-1),
 			DateTime.Now.AddDays(1),
 			locationId);
@@ -274,7 +277,7 @@ public partial class ProductStockAdjustmentPage
 		StateHasChanged();
 	}
 
-	public void ProductCartRowSelectHandler(RowSelectEventArgs<StockAdjustmentProductCartModel> args)
+	public void ProductCartRowSelectHandler(RowSelectEventArgs<ProductStockAdjustmentCartModel> args)
 	{
 		_selectedProductCart = args.Data;
 		_dialogVisible = true;
@@ -412,7 +415,7 @@ public partial class ProductStockAdjustmentPage
 				adjustmentQuantity = item.Quantity - existingStock.ClosingStock;
 
 			if (adjustmentQuantity != 0)
-				await StockData.InsertProductStock(new()
+				await RawMaterialStockData.InsertProductStock(new()
 				{
 					Id = 0,
 					ProductId = item.ProductId,

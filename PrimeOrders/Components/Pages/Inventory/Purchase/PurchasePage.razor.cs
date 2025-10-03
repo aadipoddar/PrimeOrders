@@ -1,8 +1,10 @@
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Purchase;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -636,10 +638,10 @@ public partial class PurchasePage
 	private async Task InsertStock()
 	{
 		if (PurchaseId.HasValue && PurchaseId.Value > 0)
-			await StockData.DeleteRawMaterialStockByTransactionNo(_purchase.BillNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(_purchase.BillNo);
 
 		foreach (var item in _purchaseRawMaterialCarts)
-			await StockData.InsertRawMaterialStock(new()
+			await RawMaterialStockData.InsertRawMaterialStock(new()
 			{
 				Id = 0,
 				RawMaterialId = item.RawMaterialId,

@@ -7,6 +7,7 @@ using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;

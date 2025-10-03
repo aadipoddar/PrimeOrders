@@ -1,5 +1,5 @@
 ﻿using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 namespace PrimeBakesLibrary.Exporting.Kitchen;
 

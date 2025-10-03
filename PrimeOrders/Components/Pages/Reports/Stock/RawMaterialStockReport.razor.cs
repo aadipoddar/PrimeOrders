@@ -1,4 +1,6 @@
-﻿using PrimeBakesLibrary.Exporting.Stock;
+﻿using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Exporting.Stock;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;
@@ -37,7 +39,7 @@ public partial class RawMaterialStockReport
 	}
 
 	private async Task LoadStockDetails() =>
-		_stockDetails = await StockData.LoadRawMaterialStockDetailsByDateLocationId(
+		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDateLocationId(
 			_startDate.ToDateTime(new TimeOnly(0, 0)),
 			_endDate.ToDateTime(new TimeOnly(23, 59)),
 			_user.LocationId);

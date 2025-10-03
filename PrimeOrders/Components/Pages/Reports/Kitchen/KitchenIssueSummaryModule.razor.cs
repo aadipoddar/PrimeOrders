@@ -1,10 +1,10 @@
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Kitchen;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
@@ -67,7 +67,7 @@ public partial class KitchenIssueSummaryModule
 
 		kitchenIssue.Status = false;
 		await KitchenIssueData.InsertKitchenIssue(kitchenIssue);
-		await StockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
 
 		_sfSuccessToast.Content = "Kitchen issue deactivated successfully.";
 		await _sfSuccessToast.ShowAsync();

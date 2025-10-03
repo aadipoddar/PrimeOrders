@@ -1,5 +1,6 @@
 ﻿@page "/Inventory/RawMaterialStockAdjustment"
 @using PrimeBakesLibrary.Models.Inventory
+@using PrimeBakesLibrary.Models.Inventory.Stock
 @using PrimeBakesLibrary.Models.Order
 @using PrimeBakesLibrary.Models.Product
 
@@ -19,20 +20,20 @@
 else
 {
 	<div class="order-container">
-	<div class="page-header">
-		<button @onclick='() => NavigationManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
-			🏠
-		</button>
-		<h1 class="page-title">Raw Material Adjustment</h1>
-	</div>
+		<div class="page-header">
+			<button @onclick='() => NavigationManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
+				🏠
+			</button>
+			<h1 class="page-title">Raw Material Adjustment</h1>
+		</div>
 
-	<!-- Enhanced Category Filter Section -->
+		<!-- Enhanced Category Filter Section -->
 		<!-- Help Section -->
 		<div class="help-section">
 			<div class="help-content">
 				<div class="help-icon">ℹ️</div>
 				<div class="help-text">
-					<strong>Stock Adjustment Guide:</strong> Click "Add" to select items for adjustment. Enter quantities to set exact stock level. Use × button to remove items from adjustment.
+					<strong>Stock Adjustment Guide:</strong> Current Stock is Loaded by Default. Enter quantities to set exact stock level.
 				</div>
 			</div>
 		</div>
@@ -55,35 +56,27 @@ else
 				</div>
 			</div>
 		</div>	<div class="grid-container">
-		<SfGrid ID="_sfGrid"
-				@ref="_sfGrid"
-				EnableAdaptiveUI="true"
-				DataSource="_selectedCategoryId == 0 ? _cart : _cart.Where(x => x.RawMaterialCategoryId == _selectedCategoryId)"
-				AllowPaging="true"
-				AllowSorting="false"
-				AllowTextWrap=true
-				Toolbar="@(new List<string>() { "Search" })">
+			<SfGrid ID="_sfGrid"
+					@ref="_sfGrid"
+					EnableAdaptiveUI="true"
+					DataSource="_selectedCategoryId == 0 ? _cart : _cart.Where(x => x.RawMaterialCategoryId == _selectedCategoryId)"
+					AllowPaging="true"
+					AllowSorting="false"
+					AllowTextWrap=true
+					Toolbar="@(new List<string>() { "Search" })">
 
-			<GridPageSettings PageSize="4" />
+				<GridPageSettings PageSize="4" />
 
-			<GridColumns>
-				<GridColumn Field="@nameof(StockAdjustmentRawMaterialCartModel.RawMaterialName)" HeaderText="Raw Material" Width="50%" />
-				<GridColumn Field="@nameof(StockAdjustmentRawMaterialCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
-					<Template>
-						@{
-							var item = (context as StockAdjustmentRawMaterialCartModel);
-						}
-						@if (item is not null)
-						{
-							<div class="quantity-section">
-								@if (!_selectedRawMaterialIds.Contains(item.RawMaterialId))
-								{
-									<button class="add-button" @onclick="() => AddToCart(item)" @onclick:stopPropagation="true">
-										<span class="add-text">Add</span>
-									</button>
-								}
-								else
-								{
+				<GridColumns>
+					<GridColumn Field="@nameof(RawMaterialStockAdjustmentCartModel.RawMaterialName)" HeaderText="Raw Material" Width="50%" />
+					<GridColumn Field="@nameof(RawMaterialStockAdjustmentCartModel.Quantity)" HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Right">
+						<Template>
+							@{
+								var item = (context as RawMaterialStockAdjustmentCartModel);
+							}
+							@if (item is not null)
+							{
+								<div class="quantity-section">
 									<div class="quantity-controls">
 										<div class="quantity-input-wrapper">
 											<SfNumericTextBox TValue="decimal"
@@ -96,30 +89,23 @@ else
 															  CssClass="quantity-input"
 															  Placeholder="0" />
 										</div>
-										<button class="remove-button" @onclick="() => RemoveFromCart(item)" @onclick:stopPropagation="true" title="Remove from adjustment">
-											×
-										</button>
 									</div>
-								}
-							</div>
-						}
-					</Template>
-				</GridColumn>
-			</GridColumns>
-		</SfGrid>
-	</div>
+								</div>
+							}
+						</Template>
+					</GridColumn>
+				</GridColumns>
+			</SfGrid>
+		</div>
 
-	@if (_selectedRawMaterialIds.Count > 0)
-	{
 		<div class="cart-footer">
 			<button @onclick="() => _adjustmentConfirmationDialogVisible = true" class="cart-button">
 				<i class="fas fa-shopping-cart"></i>
 				<span>Save Adjustment</span>
-				<span class="cart-count">@_selectedRawMaterialIds.Count</span>
+				<span class="cart-count">@_cart.Count</span>
 			</button>
 		</div>
-	}
-</div>
+	</div>
 }
 
 <!-- Stock Adjustment Confirmation Dialog -->
@@ -148,8 +134,8 @@ else
 
 				<div class="adjustment-summary">
 					<div class="summary-item">
-						<span class="summary-label">Total Items Selected:</span>
-						<span class="summary-value">@_selectedRawMaterialIds.Count</span>
+						<span class="summary-label">Total Items :</span>
+						<span class="summary-value">@_cart.Count</span>
 					</div>
 					<div class="summary-item">
 						<span class="summary-label">Adjustment Date:</span>

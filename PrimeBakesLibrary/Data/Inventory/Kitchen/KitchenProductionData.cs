@@ -1,4 +1,4 @@
-﻿using PrimeBakesLibrary.Models.Inventory;
+﻿using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 namespace PrimeBakesLibrary.Data.Inventory.Kitchen;
 

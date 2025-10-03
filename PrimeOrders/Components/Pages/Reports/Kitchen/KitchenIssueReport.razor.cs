@@ -1,5 +1,6 @@
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Exporting.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Grids;

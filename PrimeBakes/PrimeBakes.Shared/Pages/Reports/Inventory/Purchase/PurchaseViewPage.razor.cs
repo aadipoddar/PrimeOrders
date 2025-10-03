@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Purchase;
 using PrimeBakesLibrary.Models.Inventory;
@@ -101,7 +102,7 @@ public partial class PurchaseViewPage : ComponentBase
 		await PurchaseData.InsertPurchase(purchase);
 
 		// Reverse stock entries
-		await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
 
 		// Mark accounting entries as deleted
 		var accounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);

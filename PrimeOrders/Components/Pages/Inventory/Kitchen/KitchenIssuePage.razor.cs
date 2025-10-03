@@ -1,4 +1,5 @@
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;

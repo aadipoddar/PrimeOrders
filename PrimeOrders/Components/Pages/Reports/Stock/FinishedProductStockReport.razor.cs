@@ -1,4 +1,6 @@
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Stock;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
@@ -49,7 +51,7 @@ public partial class FinishedProductStockReport
 	}
 
 	private async Task LoadStockDetails() =>
-		_stockDetails = await StockData.LoadProductStockDetailsByDateLocationId(
+		_stockDetails = await RawMaterialStockData.LoadProductStockDetailsByDateLocationId(
 			_startDate.ToDateTime(new TimeOnly(0, 0)),
 			_endDate.ToDateTime(new TimeOnly(23, 59)),
 			_selectedLocationId);

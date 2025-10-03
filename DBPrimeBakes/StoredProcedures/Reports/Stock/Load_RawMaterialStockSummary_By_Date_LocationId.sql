@@ -38,7 +38,7 @@ BEGIN
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
                   AND TransactionDate <= @ToDate
-                  AND Type = 'Sale'
+                  AND Type = 'KitchenIssue'
                   AND LocationId = @LocationId),
            0) AS SaleStock,
 
@@ -52,23 +52,14 @@ BEGIN
                   AND LocationId = @LocationId),
            0) AS MonthlyStock,
 
-        (  ISNULL
-           (
-              (SELECT SUM (Quantity)
-               FROM [RawMaterialStock]
-               WHERE     RawMaterialId = s.RawMaterialId
-                     AND TransactionDate < @FromDate
-                     AND LocationId = @LocationId),
-              0)
-         + ISNULL
-           (
-              (SELECT SUM (Quantity)
-               FROM [RawMaterialStock]
-               WHERE     RawMaterialId = s.RawMaterialId
-                     AND TransactionDate >= @FromDate
-                     AND TransactionDate <= @ToDate
-                     AND LocationId = @LocationId),
-              0)) AS ClosingStock,
+        ISNULL
+        (
+           (SELECT SUM (Quantity)
+            FROM [RawMaterialStock]
+            WHERE     RawMaterialId = s.RawMaterialId
+                  AND TransactionDate <= @ToDate
+                  AND LocationId = @LocationId),
+           0) AS ClosingStock,
 
         ISNULL
         (
@@ -99,23 +90,14 @@ BEGIN
         (
             (SELECT AVG (NetRate) * 
                 (
-                    ISNULL
-                      (
-                         (SELECT SUM (Quantity)
-                          FROM [RawMaterialStock]
-                          WHERE     RawMaterialId = s.RawMaterialId
-                                AND TransactionDate < @FromDate
-                                AND LocationId = @LocationId),
-                         0)
-                    + ISNULL
-                      (
-                         (SELECT SUM (Quantity)
-                          FROM [RawMaterialStock]
-                          WHERE     RawMaterialId = s.RawMaterialId
-                                AND TransactionDate >= @FromDate
-                                AND TransactionDate <= @ToDate
-                                AND LocationId = @LocationId),
-                         0)
+                     ISNULL
+                     (
+                        (SELECT SUM (Quantity)
+                         FROM [RawMaterialStock]
+                         WHERE     RawMaterialId = s.RawMaterialId
+                               AND TransactionDate <= @ToDate
+                               AND LocationId = @LocationId),
+                        0)
                 )
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
@@ -131,22 +113,13 @@ BEGIN
             (SELECT TOP 1 NetRate *
                 (
                     ISNULL
-                      (
-                         (SELECT SUM (Quantity)
-                          FROM [RawMaterialStock]
-                          WHERE     RawMaterialId = s.RawMaterialId
-                                AND TransactionDate < @FromDate
-                                AND LocationId = @LocationId),
-                         0)
-                    + ISNULL
-                      (
-                         (SELECT SUM (Quantity)
-                          FROM [RawMaterialStock]
-                          WHERE     RawMaterialId = s.RawMaterialId
-                                AND TransactionDate >= @FromDate
-                                AND TransactionDate <= @ToDate
-                                AND LocationId = @LocationId),
-                         0)
+                     (
+                        (SELECT SUM (Quantity)
+                         FROM [RawMaterialStock]
+                         WHERE     RawMaterialId = s.RawMaterialId
+                               AND TransactionDate <= @ToDate
+                               AND LocationId = @LocationId),
+                        0)
                 )
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId

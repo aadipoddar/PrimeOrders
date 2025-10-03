@@ -1,9 +1,11 @@
 ﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 namespace PrimeBakesLibrary.Data.Inventory;
 
@@ -82,11 +84,11 @@ public class PurchaseData
 	private static async Task SaveRawMaterialStock(PurchaseModel purchase, List<PurchaseRawMaterialCartModel> cart, bool update)
 	{
 		if (update)
-			await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
 
 		foreach (var item in cart)
 		{
-			await StockData.InsertRawMaterialStock(new()
+			await RawMaterialStockData.InsertRawMaterialStock(new()
 			{
 				Id = 0,
 				RawMaterialId = item.RawMaterialId,

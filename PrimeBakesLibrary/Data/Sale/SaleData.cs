@@ -1,13 +1,13 @@
 ﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Notification;
 using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Order;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
@@ -96,7 +96,7 @@ public static class SaleData
 	private static async Task SaveStock(SaleModel sale, List<SaleProductCartModel> cart, bool update)
 	{
 		if (update)
-			await StockData.DeleteProductStockByTransactionNo(sale.BillNo);
+			await RawMaterialStockData.DeleteProductStockByTransactionNo(sale.BillNo);
 
 		foreach (var product in cart)
 		{
@@ -104,7 +104,7 @@ public static class SaleData
 			if (item.LocationId != 1)
 				continue;
 
-			await StockData.InsertProductStock(new()
+			await RawMaterialStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = product.ProductId,
@@ -123,7 +123,7 @@ public static class SaleData
 		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
 		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
 			foreach (var product in cart)
-				await StockData.InsertProductStock(new()
+				await RawMaterialStockData.InsertProductStock(new()
 				{
 					Id = 0,
 					ProductId = product.ProductId,

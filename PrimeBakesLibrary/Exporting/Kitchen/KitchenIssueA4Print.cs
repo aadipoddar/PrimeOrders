@@ -2,6 +2,7 @@
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;

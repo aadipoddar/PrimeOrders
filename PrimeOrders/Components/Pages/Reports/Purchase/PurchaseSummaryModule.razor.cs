@@ -1,4 +1,5 @@
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Purchase;
 
 using Syncfusion.Blazor.Notifications;
@@ -62,7 +63,7 @@ public partial class PurchaseSummaryModule
 
 		purchase.Status = false;
 		await PurchaseData.InsertPurchase(purchase);
-		await StockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
 
 		var accounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);
 		accounting.Status = false;

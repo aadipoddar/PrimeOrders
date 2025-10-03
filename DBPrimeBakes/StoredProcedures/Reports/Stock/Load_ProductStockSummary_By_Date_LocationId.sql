@@ -52,23 +52,14 @@ BEGIN
                   AND LocationId = @LocationId),
            0) AS MonthlyStock,
 
-        (  ISNULL
-           (
-              (SELECT SUM (Quantity)
-               FROM [ProductStock]
-               WHERE     ProductId = s.ProductId
-                     AND TransactionDate < @FromDate
-                     AND LocationId = @LocationId),
-              0)
-         + ISNULL
-           (
-              (SELECT SUM (Quantity)
-               FROM [ProductStock]
-               WHERE     ProductId = s.ProductId
-                     AND TransactionDate >= @FromDate
-                     AND TransactionDate < @ToDate
-                     AND LocationId = @LocationId),
-              0)) AS ClosingStock,
+        ISNULL
+        (
+           (SELECT SUM (Quantity)
+            FROM [ProductStock]
+            WHERE     ProductId = s.ProductId
+                  AND TransactionDate <= @ToDate
+                  AND LocationId = @LocationId),
+           0) AS ClosingStock,
 
         ISNULL
         (
@@ -104,15 +95,6 @@ BEGIN
                          (SELECT SUM (Quantity)
                           FROM [ProductStock]
                           WHERE     ProductId = s.ProductId
-                                AND TransactionDate < @FromDate
-                                AND LocationId = @LocationId),
-                         0)
-                    + ISNULL
-                      (
-                         (SELECT SUM (Quantity)
-                          FROM [ProductStock]
-                          WHERE     ProductId = s.ProductId
-                                AND TransactionDate >= @FromDate
                                 AND TransactionDate <= @ToDate
                                 AND LocationId = @LocationId),
                          0)
@@ -135,15 +117,6 @@ BEGIN
                          (SELECT SUM (Quantity)
                           FROM [ProductStock]
                           WHERE     ProductId = s.ProductId
-                                AND TransactionDate < @FromDate
-                                AND LocationId = @LocationId),
-                         0)
-                    + ISNULL
-                      (
-                         (SELECT SUM (Quantity)
-                          FROM [ProductStock]
-                          WHERE     ProductId = s.ProductId
-                                AND TransactionDate >= @FromDate
                                 AND TransactionDate <= @ToDate
                                 AND LocationId = @LocationId),
                          0)

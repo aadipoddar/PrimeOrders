@@ -1,4 +1,5 @@
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Exporting.Sale;
 
 using Syncfusion.Blazor.Notifications;
@@ -66,7 +67,7 @@ public partial class SaleReturnSummaryModule
 
 		saleReturn.Status = false;
 		await SaleReturnData.InsertSaleReturn(saleReturn);
-		await StockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
+		await RawMaterialStockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
 
 		var accounting = await AccountingData.LoadAccountingByReferenceNo(saleReturn.TransactionNo);
 		accounting.Status = false;

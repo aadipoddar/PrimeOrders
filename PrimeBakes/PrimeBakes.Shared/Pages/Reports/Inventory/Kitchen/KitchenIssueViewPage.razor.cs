@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Components;
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Kitchen;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Popups;
 
@@ -131,7 +132,7 @@ public partial class KitchenIssueViewPage
 
 		kitchenIssue.Status = false;
 		await KitchenIssueData.InsertKitchenIssue(kitchenIssue);
-		await StockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
 		VibrationService.VibrateWithTime(500);
 		NavigationManager.NavigateTo("/Reports/Kitchen-Issue");
 

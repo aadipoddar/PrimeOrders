@@ -1,7 +1,9 @@
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
@@ -685,7 +687,7 @@ public partial class SaleReturnPage
 	private async Task InsertStock()
 	{
 		if (SaleReturnId.HasValue && SaleReturnId.Value > 0)
-			await StockData.DeleteProductStockByTransactionNo(_saleReturn.TransactionNo);
+			await RawMaterialStockData.DeleteProductStockByTransactionNo(_saleReturn.TransactionNo);
 
 		foreach (var product in _saleReturnProductCart)
 		{
@@ -694,7 +696,7 @@ public partial class SaleReturnPage
 				continue;
 
 			// Remove stock from the return location (negative quantity)
-			await StockData.InsertProductStock(new()
+			await RawMaterialStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = product.ProductId,
@@ -706,7 +708,7 @@ public partial class SaleReturnPage
 			});
 
 			// Add stock back to main location (positive quantity)
-			await StockData.InsertProductStock(new()
+			await RawMaterialStockData.InsertProductStock(new()
 			{
 				Id = 0,
 				ProductId = product.ProductId,
