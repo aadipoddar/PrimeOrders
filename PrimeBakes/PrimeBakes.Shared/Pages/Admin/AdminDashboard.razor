@@ -76,6 +76,30 @@
 						   IconClass="kitchen-icon"
 						   ActionText="Manage Kitchen"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
+
+				<!-- States Management -->
+				<AdminCard Title="States Management"
+						   Description="Manage states, regions, and geographical locations for business operations"
+						   Icon="🗺️"
+						   IconClass="states-icon"
+						   ActionText="Manage States"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/States"))" />
+
+				<!-- Tax Management -->
+				<AdminCard Title="Tax Management"
+						   Description="Configure tax rates, GST settings, CGST, SGST, IGST percentages and tax policies"
+						   Icon="🧾"
+						   IconClass="tax-icon"
+						   ActionText="Manage Taxes"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Tax"))" />
+
+				<!-- Ledger / Party Management -->
+				<AdminCard Title="Ledger & Party Management"
+						   Description="Manage customer ledgers, supplier accounts, party details and financial records"
+						   Icon="📚"
+						   IconClass="ledger-icon"
+						   ActionText="Manage Ledgers"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Ledger"))" />
 			}
 
 			<!-- Finished Product Management -->
@@ -103,8 +127,6 @@
 					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
 		</div>
 	</div>
-
-
 
 	<!-- Footer -->
 	<div class="dashboard-footer">
