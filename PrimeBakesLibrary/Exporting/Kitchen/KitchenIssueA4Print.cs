@@ -35,9 +35,9 @@ public static class KitchenIssueA4Print
 			});
 		}
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document($"Kitchen Issue - {kitchen.Name}");
+		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
-		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "KITCHEN ISSUE");
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "KITCHEN ISSUE");
 		currentY = DrawIssueDetails(pdfPage, currentY, kitchenIssue, kitchen, user);
 		var result = DrawItemDetails(pdfPage, currentY, kitchenIssueDetailCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, kitchenIssueDetailCartModel);

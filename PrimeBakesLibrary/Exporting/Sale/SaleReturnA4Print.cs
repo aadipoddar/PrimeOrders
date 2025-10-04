@@ -41,9 +41,9 @@ public static class SaleReturnA4Print
 			});
 		}
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document($"Sale Return - {location.Name}");
+		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
-		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "SALE RETURN INVOICE");
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALE RETURN INVOICE");
 		currentY = DrawInvoiceDetails(pdfPage, currentY, saleReturnOverview, originalSale);
 		var result = DrawItemDetails(pdfPage, currentY, saleReturnProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, saleReturnOverview);

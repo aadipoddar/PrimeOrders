@@ -1,23 +1,23 @@
 ﻿using OfficeOpenXml;
 
-using PrimeOrdersLibrary.Data.Accounts.Masters;
-using PrimeOrdersLibrary.Data.Common;
-using PrimeOrdersLibrary.Data.Inventory;
-using PrimeOrdersLibrary.Data.Product;
-using PrimeOrdersLibrary.DataAccess;
-using PrimeOrdersLibrary.Models.Product;
+using PrimeBakesLibrary.Data.Accounts.Masters;
+using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Product;
+using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Product;
 
-FileInfo fileInfo = new(@"C:\Others\supplier.xlsx");
+// FileInfo fileInfo = new(@"C:\Others\supplier.xlsx");
 
-ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+// ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-using var package = new ExcelPackage(fileInfo);
+// using var package = new ExcelPackage(fileInfo);
 
-await package.LoadAsync(fileInfo);
+// await package.LoadAsync(fileInfo);
 
-var worksheet = package.Workbook.Worksheets[0];
+// var worksheet = package.Workbook.Worksheets[0];
 
-await InsertProducts(worksheet);
+// await InsertProducts(worksheet);
 
 // await UpdateProducts();
 
@@ -25,8 +25,8 @@ await InsertProducts(worksheet);
 
 // await InsertSupplier(worksheet);
 
-Console.WriteLine("Finished importing Items.");
-Console.ReadLine();
+// Console.WriteLine("Finished importing Items.");
+// Console.ReadLine();
 
 static async Task UpdateProducts()
 {

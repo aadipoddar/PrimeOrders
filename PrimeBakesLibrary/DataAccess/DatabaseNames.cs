@@ -119,6 +119,7 @@ public static class StoredProcedureNames
 	public static string InsertUser => "Insert_User";
 	public static string InsertLocation => "Insert_Location";
 	public static string InsertCustomer => "Insert_Customer";
+	public static string InsertState => "Insert_State";
 
 	public static string InsertTax => "Insert_Tax";
 

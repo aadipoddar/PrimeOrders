@@ -39,9 +39,9 @@ public static class PurchaseA4Print
 				NetRate = item.NetRate
 			});
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document($"Purchase from {purchase.SupplierName}");
+		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
-		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "PURCHASE INVOICE");
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "PURCHASE INVOICE");
 		currentY = DrawInvoiceDetails(pdfPage, currentY, purchase);
 		var result = DrawItemDetails(pdfPage, currentY, purchaseDetailCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, purchase);

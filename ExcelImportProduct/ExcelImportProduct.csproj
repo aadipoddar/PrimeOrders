@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PrimeOrdersLibrary\PrimeOrdersLibrary.csproj" />
+    <ProjectReference Include="..\PrimeBakesLibrary\PrimeBakesLibrary.csproj" />
   </ItemGroup>
 
 </Project>

@@ -36,10 +36,10 @@ public static class OrderA4Print
 		}
 
 		// Create PDF document
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document($"Order - {location.Name}");
+		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
 		// Draw sections
-		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "ORDER");
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "ORDER");
 		currentY = DrawOrderDetails(pdfPage, currentY, order, location, user);
 		var result = DrawItemDetails(pdfPage, currentY, orderProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, orderProductCartModel, order);

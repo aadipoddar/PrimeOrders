@@ -1,6 +1,8 @@
-﻿using PrimeBakesLibrary.Data.Common;
+﻿using PrimeBakesLibrary.Data.Accounts.Masters;
+using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Order;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
@@ -41,17 +43,135 @@ public static class SaleA4Print
 				Total = item.Total
 			});
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document(location.Name);
+		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
-		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES INVOICE");
-		currentY = DrawInvoiceDetails(pdfPage, currentY, sale);
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES INVOICE");
+
+		// Add outlet details if it's not the primary location (LocationId != 1)
+		if (sale.LocationId != 1)
+			currentY = await DrawOutletDetailsAsync(pdfPage, currentY, location);
+
+		currentY = await DrawInvoiceDetailsAsync(pdfPage, currentY, sale);
 		var result = DrawItemDetails(pdfPage, currentY, saleProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, sale, saleDetails);
 
 		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
 	}
 
-	private static float DrawInvoiceDetails(PdfPage pdfPage, float currentY, SaleOverviewModel sale)
+	/// <summary>
+	/// Draws outlet details section for non-primary locations
+	/// </summary>
+	private static async Task<float> DrawOutletDetailsAsync(PdfPage pdfPage, float currentY, LocationModel location)
+	{
+		// Calculate height based on content - basic height plus additional lines if needed
+		var baseHeight = 60f; // Base height for name, GST, and contact
+		var additionalHeight = 0f;
+
+		var outlet = await LedgerData.LoadLedgerByLocation(location.Id);
+
+		// Add height for address if it exists and is long
+		if (!string.IsNullOrEmpty(outlet.Address))
+		{
+			// Estimate additional height needed for address wrapping
+			var addressLength = outlet.Address.Length;
+			if (addressLength > 80) // If address is long, add more height
+				additionalHeight += 15f;
+		}
+
+		var totalHeight = baseHeight + additionalHeight;
+		var detailsRect = new RectangleF(15, currentY, pdfPage.GetClientSize().Width - 30, totalHeight);
+
+		// Draw the outlet box with a different background color to distinguish from main company
+		pdfPage.Graphics.DrawRectangle(new PdfPen(PDFExportUtil._accentColor, 1),
+			new PdfSolidBrush(Color.FromArgb(240, 248, 255)), detailsRect); // Light blue background
+
+		var leftX = 20f;
+		var detailY = currentY + 8f;
+
+		// Section title
+		pdfPage.Graphics.DrawString("Outlet Details", PDFExportUtil._subHeaderFont,
+			new PdfSolidBrush(PDFExportUtil._accentColor), new PointF(leftX, detailY));
+
+		detailY += 20f;
+
+		// Outlet name
+		pdfPage.Graphics.DrawString($"Outlet: {location.Name}", PDFExportUtil._normalFont,
+			new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+
+		detailY += 12f;
+
+		// Alias (if available)
+		if (!string.IsNullOrEmpty(outlet.Alias))
+		{
+			pdfPage.Graphics.DrawString(outlet.Alias, PDFExportUtil._normalFont,
+				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			detailY += 12f;
+		}
+
+		// GST Number (if available)
+		if (!string.IsNullOrEmpty(outlet.GSTNo))
+		{
+			pdfPage.Graphics.DrawString($"GST NO: {outlet.GSTNo}", PDFExportUtil._normalFont,
+				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			detailY += 12f;
+		}
+
+		// Address (if available)
+		if (!string.IsNullOrEmpty(outlet.Address))
+		{
+			// Handle long addresses with text wrapping
+			var availableWidth = detailsRect.Width - 20f; // Leave some margin
+			var addressRect = new RectangleF(leftX, detailY, availableWidth, 30f);
+
+			// Use a simple approach for address display
+			if (outlet.Address.Length > 80)
+			{
+				// For very long addresses, try to break at a reasonable point
+				var breakPoint = outlet.Address.LastIndexOf(' ', 80);
+				if (breakPoint > 0)
+				{
+					var firstLine = outlet.Address.Substring(0, breakPoint);
+					var secondLine = outlet.Address.Substring(breakPoint + 1);
+
+					pdfPage.Graphics.DrawString($"Address: {firstLine}", PDFExportUtil._normalFont,
+						new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+					detailY += 12f;
+					pdfPage.Graphics.DrawString(secondLine, PDFExportUtil._normalFont,
+						new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX + 60, detailY));
+				}
+				else
+				{
+					pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtil._normalFont,
+						new PdfSolidBrush(PDFExportUtil._darkGray), addressRect);
+				}
+			}
+			else
+			{
+				pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtil._normalFont,
+					new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			}
+			detailY += 12f;
+		}
+
+		// Contact information (if available)
+		if (!string.IsNullOrEmpty(outlet.Phone))
+		{
+			pdfPage.Graphics.DrawString($"Contact: {outlet.Phone}", PDFExportUtil._normalFont,
+				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			detailY += 12f;
+		}
+
+		// Email information (if available)
+		if (!string.IsNullOrEmpty(outlet.Email))
+		{
+			pdfPage.Graphics.DrawString($"Email: {outlet.Email}", PDFExportUtil._normalFont,
+				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+		}
+
+		return detailsRect.Y + detailsRect.Height + 15f; // Add some spacing after the outlet box
+	}
+
+	private static async Task<float> DrawInvoiceDetailsAsync(PdfPage pdfPage, float currentY, SaleOverviewModel sale)
 	{
 		var leftColumnDetails = new Dictionary<string, string>
 		{
@@ -60,22 +180,26 @@ public static class SaleA4Print
 			["User"] = sale.UserName ?? "N/A"
 		};
 
-		if (sale.CustomerId is not null)
+		if (sale.OrderId is not null)
 		{
-			leftColumnDetails["Cust. Name"] = sale.CustomerName ?? "N/A";
-			leftColumnDetails["Cust. No."] = sale.CustomerNumber ?? "N/A";
+			leftColumnDetails["Order No"] = sale.OrderNo ?? "N/A";
+			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, sale.OrderId.Value);
+			leftColumnDetails["Order Date"] = order.OrderDateTime.ToString("dddd, MMMM dd, yyyy hh:mm tt");
 		}
 
 		var rightColumnDetails = new Dictionary<string, string>();
 
-		if (sale.OrderId is not null)
-			rightColumnDetails["Order No"] = sale.OrderNo ?? "N/A";
+		if (sale.CustomerId is not null)
+		{
+			rightColumnDetails["Cust. Name"] = sale.CustomerName ?? "N/A";
+			rightColumnDetails["Cust. No."] = sale.CustomerNumber ?? "N/A";
+		}
 
 		if (sale.PartyId is not null)
 			rightColumnDetails["Party"] = sale.PartyName ?? "N/A";
 
 		if (!string.IsNullOrEmpty(sale.Remarks))
-			rightColumnDetails["Remarks"] = sale.Remarks;
+			leftColumnDetails["Remarks"] = sale.Remarks;
 
 		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Invoice Details", leftColumnDetails, rightColumnDetails);
 	}
@@ -89,6 +213,7 @@ public static class SaleA4Print
 			Qty = (int)item.Quantity,
 			Rate = (int)item.Rate,
 			Amount = (int)item.BaseTotal,
+			Discount = $"{item.DiscPercent} ({(int)item.DiscAmount})",
 			Total = (int)item.Total
 		}).ToList();
 
@@ -96,10 +221,11 @@ public static class SaleA4Print
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.08f, // S.No
-			tableWidth * 0.40f, // Name
-			tableWidth * 0.12f, // Qty
-			tableWidth * 0.15f, // Rate
+			tableWidth * 0.35f, // Name
+			tableWidth * 0.08f, // Qty
+			tableWidth * 0.12f, // Rate
 			tableWidth * 0.12f, // Amount
+			tableWidth * 0.12f, // Discount
 			tableWidth * 0.13f  // Total
 		};
 
@@ -110,6 +236,7 @@ public static class SaleA4Print
 			PdfTextAlignment.Center, // Qty
 			PdfTextAlignment.Right,  // Rate
 			PdfTextAlignment.Right,  // Amount
+			PdfTextAlignment.Right,  // Discount
 			PdfTextAlignment.Right   // Total
 		};
 

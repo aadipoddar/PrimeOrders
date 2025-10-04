@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -21,10 +20,12 @@ public partial class LedgerPage
 	{
 		Id = 0,
 		Name = "",
+		Alias = "",
 		Code = "",
 		GroupId = 0,
 		AccountTypeId = 0,
 		Phone = "",
+		Email = "",
 		Address = "",
 		GSTNo = "",
 		Remarks = "",
@@ -85,10 +86,12 @@ public partial class LedgerPage
 		{
 			Id = 0,
 			Name = "",
+			Alias = "",
 			Code = GenerateCodes.GenerateLedgerCode(_ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
 			GroupId = 0,
 			AccountTypeId = 0,
 			Phone = "",
+			Email = "",
 			Address = "",
 			GSTNo = "",
 			Remarks = "",
@@ -105,10 +108,12 @@ public partial class LedgerPage
 		{
 			Id = ledger.Id,
 			Name = ledger.Name,
+			Alias = ledger.Alias,
 			Code = ledger.Code,
 			GroupId = ledger.GroupId,
 			AccountTypeId = ledger.AccountTypeId,
 			Phone = ledger.Phone,
+			Email = ledger.Email,
 			Address = ledger.Address,
 			GSTNo = ledger.GSTNo,
 			Remarks = ledger.Remarks,

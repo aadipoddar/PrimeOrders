@@ -46,10 +46,10 @@ public static class AccountingA4Print
 		}
 
 		// Create PDF document and page
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document("Accounting Voucher");
+		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
 		// Draw company info and voucher header
-		float currentY = PDFExportUtil.DrawCompanyInformation(pdfPage, "ACCOUNTING VOUCHER");
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "ACCOUNTING VOUCHER");
 
 		// Draw voucher details section
 		currentY = DrawVoucherDetails(pdfPage, currentY, accounting, voucher, user);

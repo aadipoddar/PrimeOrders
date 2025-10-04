@@ -1,3 +1,617 @@
-﻿<h3>StatePage</h3>
+﻿@page "/Admin/State"
+@using PrimeBakes.Shared.Services
+@using PrimeBakesLibrary.Models.Common
+
+<PageTitle>State Management - Prime Bakes</PageTitle>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading states...</p>
+	</div>
+}
+else
+{
+	<div class="state-container">
+		<!-- Header -->
+		<div class="page-header">
+			<div class="header-content">
+				<div class="title-section">
+					<h1 class="page-title">🗺️ State & UT Management</h1>
+					<p class="page-subtitle">Manage states and union territories for your business operations</p>
+				</div>
+				<button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
+					<span class="back-icon">←</span>
+					<span class="back-text">Back to Admin</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="content-layout">
+			<!-- State Form Card -->
+			<div class="form-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						@(_stateModel.Id == 0 ? "Add New State/UT" : "Edit State/UT")
+					</h2>
+					<p class="card-subtitle">
+						@(_stateModel.Id == 0 ? "Create a new state or union territory" : "Update state/UT information")
+					</p>
+				</div>
+
+				<div class="card-body">
+					<div class="form-grid">
+						<div class="form-group span-2">
+							<label class="form-label">State/UT Name *</label>
+							<SfTextBox @bind-Value="_stateModel.Name"
+									   Placeholder="Enter state or union territory name"
+									   CssClass="custom-textbox" />
+							<small class="field-help">E.g., Maharashtra, Delhi, Puducherry, etc.</small>
+						</div>
+
+						<div class="form-group span-2">
+							<label class="form-label">Status</label>
+							<div class="checkbox-wrapper">
+								<SfCheckBox @bind-Checked="_stateModel.Status"
+											Label="Active State/UT"
+											CssClass="custom-checkbox" />
+							</div>
+						</div>
+					</div>
+
+					<div class="form-actions">
+						<button @onclick="OnAddState" class="btn btn-secondary" type="button">
+							<span class="btn-icon">🔄</span>
+							Clear Form
+						</button>
+						<button @onclick="SaveState" 
+								class="btn btn-primary" 
+								type="button"
+								disabled="@_isSubmitting">
+							@if (_isSubmitting)
+							{
+								<span class="spinner"></span>
+								<span>Saving...</span>
+							}
+							else
+							{
+								<span class="btn-icon">💾</span>
+								<span>@(_stateModel.Id == 0 ? "Add State/UT" : "Update State/UT")</span>
+							}
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- States Grid Card -->
+			<div class="grid-card">
+				<div class="card-header">
+					<h2 class="card-title">All States & Union Territories</h2>
+					<p class="card-subtitle">Click on a row to edit state/UT details</p>
+				</div>
+
+				<div class="card-body">
+					<SfGrid @ref="_sfGrid"
+							DataSource="@_states"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowPaging="true"
+							AllowResizing="true"
+							CssClass="custom-grid">
+						<GridPageSettings PageSize="15" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar" />
+						<GridEvents RowSelected="RowSelectHandler" TValue="StateModel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(StateModel.Id)" 
+									   HeaderText="ID" 
+									   Width="80" 
+									   TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(StateModel.Name)" 
+									   HeaderText="State/UT Name" 
+									   Width="300" />
+							<GridColumn Field="@nameof(StateModel.Status)" 
+									   HeaderText="Status" 
+									   Width="120" 
+									   TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var state = (context as StateModel);
+									}
+									<div class="status-badge @(state.Status ? "status-active" : "status-inactive")">
+										@(state.Status ? "Active" : "Inactive")
+									</div>
+								</Template>
+							</GridColumn>
+							<GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var state = (context as StateModel);
+									}
+									<div class="action-buttons">
+										<button @onclick="() => OnEditState(state)" 
+												class="btn-action btn-edit" 
+												title="Edit State/UT">
+											<span>✏️</span>
+										</button>
+										<button @onclick="() => ToggleStateStatus(state)" 
+												class="btn-action btn-toggle @(state.Status ? "btn-deactivate" : "btn-activate")" 
+												title="@(state.Status ? "Deactivate" : "Activate")">
+											<span>@(state.Status ? "🔴" : "🟢")</span>
+										</button>
+									</div>
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<!-- Toast Notifications -->
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Timeout="3000"
+		 ShowCloseButton="true">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Timeout="4000"
+		 ShowCloseButton="true">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--secondary-color: #2c3e50;
+		--success-color: #4caf50;
+		--warning-color: #ff9800;
+		--danger-color: #f44336;
+		--info-color: #2196f3;
+		--light-bg: #f8f9ff;
+		--card-bg: #ffffff;
+		--border-color: #e1e5e9;
+		--text-primary: #2c3e50;
+		--text-secondary: #666;
+		--text-muted: #999;
+	}
+
+	/* Loading Styles */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 50vh;
+		gap: 20px;
+	}
+
+	.circular-dots-loader {
+		display: flex;
+		gap: 8px;
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		animation: bounce 1.4s ease-in-out infinite both;
+	}
+
+	.dot-1 { animation-delay: -0.32s; }
+	.dot-2 { animation-delay: -0.16s; }
+	.dot-3 { animation-delay: 0s; }
+
+	@@keyframes bounce {
+		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+		40% { transform: scale(1.2); opacity: 1; }
+	}
+
+	.loading-text {
+		color: var(--text-secondary);
+		font-size: 16px;
+		margin: 0;
+	}
+
+	/* Main Container */
+	.state-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(193, 14, 105, 0.03) 100%);
+		padding: 0;
+	}
+
+	/* Header */
+	.page-header {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+		padding: 30px 20px;
+		box-shadow: 0 4px 20px rgba(226, 19, 123, 0.2);
+	}
+
+	.header-content {
+		max-width: 1200px;
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.title-section h1 {
+		font-size: 28px;
+		font-weight: 700;
+		margin: 0 0 8px 0;
+		letter-spacing: -0.5px;
+	}
+
+	.title-section p {
+		font-size: 14px;
+		margin: 0;
+		opacity: 0.9;
+	}
+
+	.back-button {
+		background: rgba(255, 255, 255, 0.15);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		color: white;
+		padding: 10px 20px;
+		border-radius: 10px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s ease;
+		backdrop-filter: blur(10px);
+	}
+
+	.back-button:hover {
+		background: rgba(255, 255, 255, 0.25);
+		border-color: rgba(255, 255, 255, 0.5);
+		transform: translateY(-2px);
+	}
+
+	.back-icon {
+		font-size: 16px;
+		font-weight: 700;
+	}
+
+	/* Content Layout */
+	.content-layout {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 30px 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
+	}
+
+	/* Cards */
+	.form-card, .grid-card {
+		background: var(--card-bg);
+		border-radius: 15px;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+		overflow: hidden;
+	}
+
+	.card-header {
+		background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+		padding: 20px 25px;
+		border-bottom: 2px solid var(--border-color);
+	}
+
+	.card-title {
+		font-size: 18px;
+		font-weight: 700;
+		color: var(--text-primary);
+		margin: 0 0 5px 0;
+	}
+
+	.card-subtitle {
+		font-size: 14px;
+		color: var(--text-secondary);
+		margin: 0;
+	}
+
+	.card-body {
+		padding: 25px;
+	}
+
+	/* Form Styles */
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+		margin-bottom: 25px;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.form-group.span-2 {
+		grid-column: span 2;
+	}
+
+	.form-label {
+		font-weight: 600;
+		color: var(--text-primary);
+		font-size: 14px;
+	}
+
+	.field-help {
+		color: var(--text-muted);
+		font-size: 11px;
+		margin-top: 2px;
+	}
+
+	.custom-textbox {
+		border-radius: 10px !important;
+		border: 2px solid var(--border-color) !important;
+		transition: all 0.3s ease !important;
+	}
+
+	.custom-textbox:focus-within {
+		border-color: var(--primary-color) !important;
+		box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1) !important;
+	}
+
+	.checkbox-wrapper {
+		display: flex;
+		align-items: center;
+		padding: 10px 0;
+	}
+
+	.custom-checkbox {
+		font-weight: 500 !important;
+	}
+
+	/* Buttons */
+	.form-actions {
+		display: flex;
+		gap: 15px;
+		justify-content: flex-end;
+	}
+
+	.btn {
+		padding: 12px 20px;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 14px;
+		cursor: pointer;
+		border: none;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s ease;
+		min-width: 140px;
+		justify-content: center;
+	}
+
+	.btn-primary {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
+	}
+
+	.btn-primary:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	.btn-secondary {
+		background: #6c757d;
+		color: white;
+	}
+
+	.btn-secondary:hover {
+		background: #545b62;
+		transform: translateY(-2px);
+	}
+
+	.btn-icon {
+		font-size: 16px;
+	}
+
+	.spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-top: 2px solid white;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	/* Grid Styles */
+	.custom-grid {
+		border-radius: 10px !important;
+		overflow: hidden !important;
+	}
+
+	.custom-grid .e-gridheader {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+		color: white !important;
+	}
+
+	.custom-grid .e-gridheader .e-headercell {
+		border-color: rgba(255, 255, 255, 0.2) !important;
+		font-weight: 600 !important;
+	}
+
+	.custom-grid .e-row:hover {
+		background: rgba(226, 19, 123, 0.05) !important;
+		cursor: pointer !important;
+	}
+
+	.custom-grid .e-row.e-selectionbackground {
+		background: rgba(226, 19, 123, 0.1) !important;
+	}
+
+	/* Status Badge */
+	.status-badge {
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-size: 12px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.status-active {
+		background: rgba(76, 175, 80, 0.1);
+		color: var(--success-color);
+		border: 1px solid rgba(76, 175, 80, 0.3);
+	}
+
+	.status-inactive {
+		background: rgba(244, 67, 54, 0.1);
+		color: var(--danger-color);
+		border: 1px solid rgba(244, 67, 54, 0.3);
+	}
+
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 8px;
+		justify-content: center;
+	}
+
+	.btn-action {
+		width: 32px;
+		height: 32px;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+		font-size: 14px;
+	}
+
+	.btn-edit {
+		background: rgba(33, 150, 243, 0.1);
+		color: var(--info-color);
+	}
+
+	.btn-edit:hover {
+		background: rgba(33, 150, 243, 0.2);
+		transform: scale(1.1);
+	}
+
+	.btn-toggle {
+		background: rgba(255, 152, 0, 0.1);
+		color: var(--warning-color);
+	}
+
+	.btn-toggle:hover {
+		background: rgba(255, 152, 0, 0.2);
+		transform: scale(1.1);
+	}
+
+	.btn-activate {
+		background: rgba(76, 175, 80, 0.1) !important;
+		color: var(--success-color) !important;
+	}
+
+	.btn-deactivate {
+		background: rgba(244, 67, 54, 0.1) !important;
+		color: var(--danger-color) !important;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 1024px) {
+		.content-layout {
+			gap: 20px;
+		}
+
+		.header-content {
+			flex-direction: column;
+			gap: 20px;
+			text-align: center;
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.page-header {
+			padding: 20px 15px;
+		}
+
+		.content-layout {
+			padding: 20px 15px;
+		}
+
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.form-group.span-2 {
+			grid-column: span 1;
+		}
+
+		.form-actions {
+			flex-direction: column;
+		}
+
+		.btn {
+			width: 100%;
+		}
+
+		.title-section h1 {
+			font-size: 24px;
+		}
+
+		.action-buttons {
+			flex-direction: column;
+			gap: 4px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.card-body {
+			padding: 20px;
+		}
+
+		.card-header {
+			padding: 15px 20px;
+		}
+
+		.btn-action {
+			width: 28px;
+			height: 28px;
+			font-size: 12px;
+		}
+	}
+</style>
 
 

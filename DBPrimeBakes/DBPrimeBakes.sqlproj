@@ -237,6 +237,7 @@
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssue_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\Insert\Common\Insert_State.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

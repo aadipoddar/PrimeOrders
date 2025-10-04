@@ -2,10 +2,12 @@
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [Name] VARCHAR(250) NOT NULL, 
+    [Alias] VARCHAR(250) NOT NULL, 
     [GroupId] INT NOT NULL, 
     [AccountTypeId] INT NOT NULL, 
     [Code] VARCHAR(10) NOT NULL UNIQUE, 
     [Phone] VARCHAR(20) NOT NULL, 
+    [Email] VARCHAR(250) NOT NULL, 
     [Address] VARCHAR(250) NOT NULL, 
     [GSTNo] VARCHAR(20) NOT NULL, 
     [Remarks] VARCHAR(250) NOT NULL, 

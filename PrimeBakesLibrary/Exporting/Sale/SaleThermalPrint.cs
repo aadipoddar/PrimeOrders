@@ -2,6 +2,7 @@
 
 using NumericWordsConversion;
 
+using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
@@ -18,7 +19,10 @@ public class SaleThermalPrint
 	{
 		StringBuilder content = new();
 
-		await AddHeader(sale.LocationId, content);
+		await AddHeader(content);
+
+		if (sale.LocationId != 1)
+			await AddOutletDetails(sale.LocationId, content);
 
 		await AddBillDetails(sale, content);
 
@@ -31,19 +35,89 @@ public class SaleThermalPrint
 		return content;
 	}
 
-	private static async Task AddHeader(int locationId, StringBuilder content)
+	private static async Task AddHeader(StringBuilder content)
 	{
-		string HeaderLine1 = "GST NO: XXXXXXX";
-		string HeaderLine2 = "Salasar Foods Guwahati";
-		string HeaderLine3 = "Mobile No: XXXXXX";
-
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, locationId);
+		var mainLocation = await LedgerData.LoadLedgerByLocation(1);
 
 		content.AppendLine("<div class='header'>");
-		content.AppendLine($"<div class='company-name'>{location.Name}</div>");
-		content.AppendLine($"<div class='header-line'>{HeaderLine1}</div>");
-		content.AppendLine($"<div class='header-line'>{HeaderLine2}</div>");
-		content.AppendLine($"<div class='header-line'>{HeaderLine3}</div>");
+		content.AppendLine($"<div class='company-name'>PRIME BAKES</div>");
+
+		if (!string.IsNullOrEmpty(mainLocation.Alias))
+			content.AppendLine($"<div class='header-line'>{mainLocation.Alias}</div>");
+
+		if (!string.IsNullOrEmpty(mainLocation.GSTNo))
+			content.AppendLine($"<div class='header-line'>GSTNO: {mainLocation.GSTNo}</div>");
+
+		if (!string.IsNullOrEmpty(mainLocation.Address))
+			content.AppendLine($"<div class='header-line'>{mainLocation.Address}</div>");
+
+		if (!string.IsNullOrEmpty(mainLocation.Email))
+			content.AppendLine($"<div class='header-line'>Email: {mainLocation.Email}</div>");
+
+		if (!string.IsNullOrEmpty(mainLocation.Phone))
+			content.AppendLine($"<div class='header-line'>Phone: {mainLocation.Phone}</div>");
+
+		content.AppendLine("</div>");
+		content.AppendLine("<div class='bold-separator'></div>");
+	}
+
+	/// <summary>
+	/// Adds outlet details section for non-primary locations
+	/// </summary>
+	private static async Task AddOutletDetails(int locationId, StringBuilder content)
+	{
+		var location = await LedgerData.LoadLedgerByLocation(locationId);
+
+		if (location is null)
+			return;
+
+		content.AppendLine("<div class='outlet-details'>");
+		content.AppendLine("<div class='outlet-header'>OUTLET DETAILS</div>");
+
+		// Outlet name
+		content.AppendLine($"<div class='outlet-line'>Outlet: {location.Name}</div>");
+
+		// GST Number (if available)
+		if (!string.IsNullOrEmpty(location.GSTNo))
+		{
+			content.AppendLine($"<div class='outlet-line'>GST NO: {location.GSTNo}</div>");
+		}
+
+		// Address (if available)
+		if (!string.IsNullOrEmpty(location.Address))
+		{
+			// For thermal printing, we might want to break long addresses
+			if (location.Address.Length > 40)
+			{
+				// Try to break the address at a reasonable point for thermal printing
+				var breakPoint = location.Address.LastIndexOf(' ', 40);
+				if (breakPoint > 0)
+				{
+					var firstLine = location.Address.Substring(0, breakPoint);
+					var secondLine = location.Address.Substring(breakPoint + 1);
+
+					content.AppendLine($"<div class='outlet-line'>Address: {firstLine}</div>");
+					content.AppendLine($"<div class='outlet-line'>         {secondLine}</div>");
+				}
+				else
+				{
+					content.AppendLine($"<div class='outlet-line'>Address: {location.Address}</div>");
+				}
+			}
+			else
+			{
+				content.AppendLine($"<div class='outlet-line'>Address: {location.Address}</div>");
+			}
+		}
+
+		// Contact information (if available)
+		if (!string.IsNullOrEmpty(location.Phone))
+			content.AppendLine($"<div class='outlet-line'>Contact: {location.Phone}</div>");
+
+		// Email (if available)
+		if (!string.IsNullOrEmpty(location.Email))
+			content.AppendLine($"<div class='outlet-line'>Email: {location.Email}</div>");
+
 		content.AppendLine("</div>");
 		content.AppendLine("<div class='bold-separator'></div>");
 	}

@@ -55,6 +55,14 @@ else
 						</div>
 
 						<div class="form-group">
+							<label class="form-label">Alias <span class="optional-text">(Optional)</span></label>
+							<SfTextBox @bind-Value="_ledgerModel.Alias"
+									   Placeholder="Enter ledger alias"
+									   CssClass="custom-textbox" />
+							<small class="field-help">Alternative name for the ledger</small>
+						</div>
+
+						<div class="form-group">
 							<label class="form-label">Ledger Code *</label>
 							<SfTextBox @bind-Value="_ledgerModel.Code"
 									   Placeholder="Enter ledger code"
@@ -107,6 +115,13 @@ else
 							<label class="form-label">Phone</label>
 							<SfTextBox @bind-Value="_ledgerModel.Phone"
 									   Placeholder="Enter phone number"
+									   CssClass="custom-textbox" />
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Email</label>
+							<SfTextBox @bind-Value="_ledgerModel.Email"
+									   Placeholder="Enter email address"
 									   CssClass="custom-textbox" />
 						</div>
 
@@ -190,7 +205,17 @@ else
 									   TextAlign="TextAlign.Center" />
 							<GridColumn Field="@nameof(LedgerModel.Name)" 
 									   HeaderText="Ledger Name" 
-									   Width="180" />
+									   Width="160" />
+							<GridColumn Field="@nameof(LedgerModel.Alias)" 
+									   HeaderText="Alias" 
+									   Width="120">
+								<Template>
+									@{
+										var ledger = (context as LedgerModel);
+									}
+									<span class="alias-text">@(string.IsNullOrWhiteSpace(ledger.Alias) ? "-" : ledger.Alias)</span>
+								</Template>
+							</GridColumn>
 							<GridColumn Field="@nameof(LedgerModel.Code)" 
 									   HeaderText="Code" 
 									   Width="100" />
@@ -239,6 +264,16 @@ else
 							<GridColumn Field="@nameof(LedgerModel.Phone)" 
 									   HeaderText="Phone" 
 									   Width="120" />
+							<GridColumn Field="@nameof(LedgerModel.Email)" 
+									   HeaderText="Email" 
+									   Width="160">
+								<Template>
+									@{
+										var ledger = (context as LedgerModel);
+									}
+									<span class="email-text">@(string.IsNullOrWhiteSpace(ledger.Email) ? "-" : ledger.Email)</span>
+								</Template>
+							</GridColumn>
 							<GridColumn Field="@nameof(LedgerModel.Status)" 
 									   HeaderText="Status" 
 									   Width="100" 

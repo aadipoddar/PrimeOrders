@@ -45,6 +45,33 @@ window.printToPrinter = function (content) {
                             margin-top: 5px;
                         }
                         
+                        /* Outlet Details */
+                        .outlet-details {
+                            text-align: center;
+                            margin-bottom: 10px;
+                            padding: 4px;
+                            background-color: #f5f5f5;
+                            border: 1px solid #000000;
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        .outlet-header {
+                            font-family: Arial, sans-serif;
+                            font-size: 16px;
+                            font-weight: bold;
+                            margin-bottom: 6px;
+                            text-decoration: underline;
+                            letter-spacing: 1px;
+                        }
+                        .outlet-line {
+                            font-family: 'Courier New', monospace;
+                            font-size: 13px;
+                            font-weight: bold;
+                            margin: 2px 0;
+                            text-align: left;
+                            padding: 1px 0;
+                        }
+                        
                         /* Separator */
                         .bold-separator {
                             border-bottom: 2px dashed #000000;
@@ -152,6 +179,15 @@ window.printToPrinter = function (content) {
                             font-weight: bold;
                             text-align: center;
                             padding: 2px;
+                        }
+
+                        /* Print-specific adjustments */
+                        @media print {
+                            .outlet-details {
+                                background-color: #f5f5f5 !important;
+                                -webkit-print-color-adjust: exact !important;
+                                print-color-adjust: exact !important;
+                            }
                         }
                     </style>
                 </head>
