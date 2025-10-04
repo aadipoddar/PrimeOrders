@@ -53,7 +53,7 @@ public static class ExcelExportUtil
 				// Apply document properties
 				workbook.BuiltInDocumentProperties.Title = reportTitle;
 				workbook.BuiltInDocumentProperties.Subject = worksheetName;
-				workbook.BuiltInDocumentProperties.Author = "Prime Orders";
+				workbook.BuiltInDocumentProperties.Author = "Prime Bakes";
 
 				// Get column info from data type if not provided
 				columnSettings ??= GetDefaultColumnSettings<T>();
@@ -292,46 +292,60 @@ public static class ExcelExportUtil
 		headerRange.CellStyle.Font.Bold = true;
 		headerRange.CellStyle.Font.Size = 20;
 		headerRange.CellStyle.Font.FontName = "Calibri";
-		headerRange.CellStyle.Font.RGBColor = Color.FromArgb(81, 43, 212); // Prime Orders primary color
+		headerRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Updated to app's main color #e2137b
 		headerRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
 
-		// Row 2: Date range if available
+		int currentRow = 2;
+
+		// Row 2: Company tagline
+		IRange taglineRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
+		taglineRange.Merge();
+		taglineRange.Text = "Celebrating happiness";
+		taglineRange.CellStyle.Font.Size = 11;
+		taglineRange.CellStyle.Font.FontName = "Calibri";
+		taglineRange.CellStyle.Font.Italic = true;
+		taglineRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
+		taglineRange.CellStyle.Font.RGBColor = Color.FromArgb(193, 14, 105); // Darker variant of primary color
+		currentRow++;
+
+		// Row 3: Date range if available
 		if (!string.IsNullOrEmpty(dateRangeText))
 		{
-			IRange dateRange = worksheet.Range[$"A2:{colLetter}2"];
+			IRange dateRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
 			dateRange.Merge();
 			dateRange.Text = dateRangeText;
 			dateRange.CellStyle.Font.Size = 12;
 			dateRange.CellStyle.Font.FontName = "Calibri";
 			dateRange.CellStyle.Font.Bold = true;
 			dateRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-			dateRange.CellStyle.Font.RGBColor = Color.FromArgb(104, 33, 122); // Secondary color
+			dateRange.CellStyle.Font.RGBColor = Color.FromArgb(193, 14, 105); // Secondary color
+			currentRow++;
 		}
 
-		// Row 3: Company Name
-		IRange companyRange = worksheet.Range[$"A{(string.IsNullOrEmpty(dateRangeText) ? 2 : 3)}:{colLetter}{(string.IsNullOrEmpty(dateRangeText) ? 2 : 3)}"];
+		// Company Name
+		IRange companyRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
 		companyRange.Merge();
-		companyRange.Text = "Prime Orders";
+		companyRange.Text = "Prime Bakes";
 		companyRange.CellStyle.Font.Size = 14;
 		companyRange.CellStyle.Font.FontName = "Calibri";
 		companyRange.CellStyle.Font.Bold = true;
 		companyRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		companyRange.CellStyle.Font.RGBColor = Color.FromArgb(0, 164, 239); // Accent color
+		companyRange.CellStyle.Font.RGBColor = Color.FromArgb(33, 150, 243); // Complementary blue
 
 		// Add decorative header background
-		int lastHeaderRow = string.IsNullOrEmpty(dateRangeText) ? 2 : 3;
-		IRange headerBackgroundRange = worksheet.Range[$"A1:{colLetter}{lastHeaderRow}"];
-		headerBackgroundRange.CellStyle.Color = Color.FromArgb(240, 244, 255); // Light blue background
+		IRange headerBackgroundRange = worksheet.Range[$"A1:{colLetter}{currentRow}"];
+		headerBackgroundRange.CellStyle.Color = Color.FromArgb(252, 228, 236); // Light pink background matching the theme
 
 		// Add border bottom for header section
-		IRange borderRange = worksheet.Range[$"A{lastHeaderRow}:{colLetter}{lastHeaderRow}"];
+		IRange borderRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
 		borderRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].LineStyle = ExcelLineStyle.Medium;
-		borderRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].ColorRGB = Color.FromArgb(81, 43, 212);
+		borderRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].ColorRGB = Color.FromArgb(226, 19, 123); // Primary color
 
 		// Space after header
-		worksheet.Range[$"A{lastHeaderRow + 1}:{colLetter}{lastHeaderRow + 1}"].RowHeight = 10;
+		currentRow++;
+		worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"].RowHeight = 10;
 
-		return lastHeaderRow + 2; // Return the next row to use
+		return currentRow + 1; // Return the next row to use
 	}
 
 	/// <summary>
@@ -353,8 +367,8 @@ public static class ExcelExportUtil
 		summaryTitleRange.CellStyle.Font.Bold = true;
 		summaryTitleRange.CellStyle.Font.Size = 12;
 		summaryTitleRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		summaryTitleRange.CellStyle.Color = Color.FromArgb(232, 245, 233); // Light green background
-		summaryTitleRange.CellStyle.Font.RGBColor = Color.FromArgb(27, 94, 32); // Dark green text
+		summaryTitleRange.CellStyle.Color = Color.FromArgb(252, 228, 236); // Light pink background matching theme
+		summaryTitleRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
 
 		startRow++;
 
@@ -390,8 +404,8 @@ public static class ExcelExportUtil
 				labelCell.Text = item.Key;
 				labelCell.CellStyle.Font.Bold = true;
 				labelCell.CellStyle.Font.Size = 11;
-				labelCell.CellStyle.Color = Color.FromArgb(232, 234, 246); // Light indigo
-				labelCell.CellStyle.Font.RGBColor = Color.FromArgb(81, 43, 212); // Prime Orders primary
+				labelCell.CellStyle.Color = Color.FromArgb(248, 215, 225); // Lighter pink
+				labelCell.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color
 				labelCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
 
 				// Value cell
@@ -411,7 +425,7 @@ public static class ExcelExportUtil
 						item.Key.Contains("UPI") || item.Key.Contains("Credit"))
 					{
 						valueCell.CellStyle.NumberFormat = "₹#,##0.00";
-						valueCell.CellStyle.Font.RGBColor = Color.FromArgb(46, 125, 50); // Green for money
+						valueCell.CellStyle.Font.RGBColor = Color.FromArgb(193, 14, 105); // Secondary color for money
 
 						// Highlight negative values in red
 						if (decimalValue < 0)
@@ -428,7 +442,7 @@ public static class ExcelExportUtil
 				else if (item.Value is int intValue)
 				{
 					valueCell.Number = intValue;
-					valueCell.CellStyle.Font.RGBColor = Color.FromArgb(21, 101, 192); // Blue for counts
+					valueCell.CellStyle.Font.RGBColor = Color.FromArgb(33, 150, 243); // Blue accent color for counts
 				}
 
 				else
@@ -472,8 +486,8 @@ public static class ExcelExportUtil
 		tableTitleRange.CellStyle.Font.Bold = true;
 		tableTitleRange.CellStyle.Font.Size = 12;
 		tableTitleRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		tableTitleRange.CellStyle.Color = Color.FromArgb(225, 245, 254); // Light blue background
-		tableTitleRange.CellStyle.Font.RGBColor = Color.FromArgb(13, 71, 161); // Dark blue text
+		tableTitleRange.CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
+		tableTitleRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
 
 		startRow++;
 
@@ -487,10 +501,10 @@ public static class ExcelExportUtil
 			IRange headerCell = worksheet.Range[cellAddress];
 			headerCell.Text = setting.DisplayName;
 			headerCell.CellStyle.Font.Bold = true;
-			headerCell.CellStyle.Color = Color.FromArgb(81, 43, 212); // Primary color background
+			headerCell.CellStyle.Color = Color.FromArgb(226, 19, 123); // Primary color background
 			headerCell.CellStyle.Font.RGBColor = Color.White;
 			headerCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-			headerCell.CellStyle.Borders.ColorRGB = Color.FromArgb(104, 33, 122);
+			headerCell.CellStyle.Borders.ColorRGB = Color.FromArgb(193, 14, 105); // Secondary color border
 		}
 
 		startRow++;
@@ -628,7 +642,7 @@ public static class ExcelExportUtil
 		if (columnsToTotal.Count > 0)
 		{
 			// Add grand total row
-			rowIndex += 1;
+		rowIndex += 1;
 
 			// Find where to start the total label based on the number of columns to total
 			int totalLabelColumnCount = Math.Max(1, columnOrder.Count - columnsToTotal.Count);
@@ -641,8 +655,8 @@ public static class ExcelExportUtil
 			totalLabelRange.Text = "GRAND TOTAL";
 			totalLabelRange.CellStyle.Font.Bold = true;
 			totalLabelRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignRight;
-			totalLabelRange.CellStyle.Color = Color.FromArgb(232, 234, 246); // Light indigo
-			totalLabelRange.CellStyle.Font.RGBColor = Color.FromArgb(40, 53, 147); // Dark indigo
+			totalLabelRange.CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
+			totalLabelRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
 
 			// Add the total formulas
 			foreach (var columnName in columnsToTotal)
@@ -661,10 +675,10 @@ public static class ExcelExportUtil
 
 					// Style total cells
 					worksheet.Range[cellAddress].CellStyle.Font.Bold = true;
-					worksheet.Range[cellAddress].CellStyle.Color = Color.FromArgb(232, 234, 246);
-					worksheet.Range[cellAddress].CellStyle.Font.RGBColor = Color.FromArgb(40, 53, 147);
+					worksheet.Range[cellAddress].CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
+					worksheet.Range[cellAddress].CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
 				}
-			}
+			};
 
 			rowIndex++;
 		}

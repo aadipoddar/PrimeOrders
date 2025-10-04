@@ -1,0 +1,1136 @@
+﻿@page "/Admin/Product"
+@using PrimeBakes.Shared.Services
+@using PrimeBakesLibrary.Models.Common
+@using PrimeBakesLibrary.Models.Product
+@using PrimeBakesLibrary.DataAccess
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+
+<PageTitle>Product Management - Prime Bakes</PageTitle>
+
+<!-- Success Toast -->
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Title="Success"
+		 Content="@_successMessage"
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<!-- Error Toast -->
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Title="Error"
+		 Content="@_errorMessage"
+		 Timeout="5000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading products...</p>
+	</div>
+}
+else
+{
+	<div class="product-container">
+		<!-- Header -->
+		<div class="page-header">
+			<div class="header-content">
+				<div class="title-section">
+					<h1 class="page-title">�️ Product Management</h1>
+					<p class="page-subtitle">Manage products, categories, and location-wise pricing</p>
+				</div>
+				<button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
+					<span class="back-icon">←</span>
+					<span class="back-text">Back to Admin</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="content-layout">
+			<!-- Product Form Card (First) -->
+			<div class="form-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						@(_productModel.Id == 0 ? "Add New Product" : "Edit Product")
+					</h2>
+					<p class="card-subtitle">
+						@(_productModel.Id == 0 ? "Create a new product with details" : "Update product information")
+					</p>
+				</div>
+
+				<div class="card-body">
+					<div class="form-grid">
+						<!-- Basic Information -->
+						<div class="form-group">
+							<label class="form-label">Product Code *</label>
+							<SfTextBox @bind-Value="_productModel.Code"
+									   Placeholder="Auto-generated code"
+									   Readonly="true"
+									   CssClass="custom-textbox readonly-field" />
+							<small class="field-help">Code will be auto-generated (FP0001, FP0002, etc.)</small>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Product Name *</label>
+							<SfTextBox @bind-Value="_productModel.Name"
+									   Placeholder="Enter product name"
+									   CssClass="custom-textbox" />
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Category *</label>
+							<SfDropDownList @bind-Value="_productModel.ProductCategoryId"
+											DataSource="@_productCategories"
+											Placeholder="Select category"
+											CssClass="custom-dropdown">
+								<DropDownListFieldSettings Value="Id" Text="Name" />
+							</SfDropDownList>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Base Rate (₹) *</label>
+							<SfNumericTextBox @bind-Value="_productModel.Rate"
+											  Format="N2"
+											  Placeholder="Enter base rate"
+											  Min="0"
+											  CssClass="custom-numeric" />
+							<small class="field-help">Base rate for the product</small>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Tax Type *</label>
+							<SfDropDownList @bind-Value="_productModel.TaxId"
+											DataSource="@_taxTypes"
+											Placeholder="Select tax type"
+											CssClass="custom-dropdown">
+								<DropDownListFieldSettings Value="Id" Text="Code" />
+							</SfDropDownList>
+						</div>
+
+						@* Location selection - only for primary location admin *@
+						@if (_userModel.LocationId == 1)
+						{
+							<div class="form-group">
+								<label class="form-label">Location *</label>
+								<SfDropDownList @bind-Value="_productModel.LocationId"
+												DataSource="@_locations"
+												Placeholder="Select location"
+												CssClass="custom-dropdown">
+									<DropDownListFieldSettings Value="Id" Text="Name" />
+								</SfDropDownList>
+							</div>
+						}
+
+						<!-- Status -->
+						<div class="form-group status-section">
+							<label class="form-label">Product Status</label>
+							<div class="status-toggle">
+								<SfCheckBox @bind-Checked="_productModel.Status" 
+										   Label="@(_productModel.Status ? "Active Product" : "Inactive Product")"
+										   CssClass="status-checkbox" />
+								<small class="status-help">@(_productModel.Status ? "Product is available for sale" : "Product is disabled")</small>
+							</div>
+						</div>
+
+						<!-- Action Buttons -->
+						<div class="form-actions span-2">
+							<button @onclick="OnProductFormSubmit" 
+									class="save-button @(_isSubmitting ? "submitting" : "")" 
+									disabled="@_isSubmitting">
+								@if (_isSubmitting)
+								{
+									<span class="spinner"></span>
+									<span>Saving...</span>
+								}
+								else
+								{
+									<span class="save-icon">💾</span>
+									<span>@(_productModel.Id == 0 ? "Add Product" : "Update Product")</span>
+								}
+							</button>
+
+							<button @onclick="ResetProductForm" class="clear-button" type="button">
+								<span class="clear-icon">🆕</span>
+								<span>Clear Form</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Location Rates Management Card (Second) -->
+			@if (_selectedProductId > 0 && ShouldShowLocationRates())
+			{
+				<div class="rates-card">
+					<div class="card-header">
+						<h2 class="card-title">Location Rates for "@_selectedProductName"</h2>
+						<p class="card-subtitle">Manage pricing for different locations</p>
+					</div>
+					<div class="card-body">
+						@if (CanManageRates())
+						{
+							<!-- Add New Rate Form -->
+							<div class="add-rate-form">
+								<div class="rate-form-grid">
+									<div class="form-group">
+										<label class="form-label">Location</label>
+										<SfDropDownList @bind-Value="_newLocationRateId"
+														DataSource="@_availableLocationsForRates"
+														Placeholder="Select location"
+														CssClass="custom-dropdown">
+											<DropDownListFieldSettings Value="Id" Text="Name" />
+										</SfDropDownList>
+									</div>
+									<div class="form-group">
+										<label class="form-label">Rate (₹)</label>
+										<SfNumericTextBox @bind-Value="_newLocationRate"
+														  Placeholder="Enter rate"
+														  Format="N2"
+														  CssClass="custom-numeric" />
+									</div>
+									<div class="form-group">
+										<button @onclick="AddLocationRate" class="add-rate-button">
+											<span class="add-icon">➕</span>
+											<span>Add Rate</span>
+										</button>
+									</div>
+								</div>
+							</div>
+						}
+
+						<!-- Existing Rates Grid -->
+						<div class="rates-grid">
+							<SfGrid DataSource="@_productRates"
+									@ref="_sfRatesGrid"
+									AllowSorting="true"
+									CssClass="custom-grid rates-grid-table">
+								<GridColumns>
+									<GridColumn Field="@nameof(ProductRateModel.LocationId)" 
+											   HeaderText="Location" 
+											   Width="200">
+										<Template>
+											@{
+												var rate = (context as ProductRateModel);
+											}
+											<span class="location-name">@GetLocationName(rate.LocationId)</span>
+										</Template>
+									</GridColumn>
+									<GridColumn Field="@nameof(ProductRateModel.Rate)" 
+											   HeaderText="Rate (₹)" 
+											   Width="120" 
+											   Format="C2" 
+											   TextAlign="TextAlign.Right" />
+									<GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center">
+										<Template>
+											@{
+												var rate = (context as ProductRateModel);
+											}
+											@if (CanManageRates() || rate.LocationId == _userModel.LocationId)
+											{
+												<button @onclick="() => RemoveLocationRate(rate.Id)" 
+														class="delete-rate-button" 
+														title="Remove rate">
+													<span>🗑️</span>
+												</button>
+											}
+										</Template>
+									</GridColumn>
+								</GridColumns>
+							</SfGrid>
+						</div>
+					</div>
+				</div>
+			}
+
+			<!-- Products Grid Card (Last) -->
+			<div class="grid-card">
+				<div class="card-header">
+					<h2 class="card-title">Products List</h2>
+					<p class="card-subtitle">Click on a row to view/edit product details and manage rates</p>
+				</div>
+				<div class="card-body">
+					<SfGrid DataSource="@_products"
+							@ref="_sfGrid"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowResizing="true"
+							AllowPaging="true"
+							CssClass="custom-grid">
+						<GridPageSettings PageSize="10"></GridPageSettings>
+						<GridEvents RowSelected="OnProductRowSelected" TValue="ProductModel" />
+						<GridColumns>
+							<GridColumn Field="@nameof(ProductModel.Id)" 
+									   HeaderText="ID" 
+									   Width="70" 
+									   TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(ProductModel.Code)" 
+									   HeaderText="Code" 
+									   Width="120" />
+							<GridColumn Field="@nameof(ProductModel.Name)" 
+									   HeaderText="Product Name" 
+									   Width="200" />
+							<GridColumn Field="@nameof(ProductModel.ProductCategoryId)" 
+									   HeaderText="Category" 
+									   Width="150">
+								<Template>
+									@{
+										var product = (context as ProductModel);
+									}
+									<span class="category-name">@GetCategoryName(product.ProductCategoryId)</span>
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(ProductModel.Rate)" 
+									   HeaderText="Base Rate (₹)" 
+									   Width="120" 
+									   Format="C2" 
+									   TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(ProductModel.TaxId)" 
+									   HeaderText="Tax" 
+									   Width="100">
+								<Template>
+									@{
+										var product = (context as ProductModel);
+									}
+									<span class="tax-code">@GetTaxCode(product.TaxId)</span>
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(ProductModel.LocationId)" 
+									   HeaderText="Location" 
+									   Width="120">
+								<Template>
+									@{
+										var product = (context as ProductModel);
+									}
+									<span class="location-name">@GetLocationName(product.LocationId)</span>
+								</Template>
+							</GridColumn>
+							<GridColumn Field="@nameof(ProductModel.Status)" 
+									   HeaderText="Status" 
+									   Width="100" 
+									   TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var product = (context as ProductModel);
+									}
+									<div class="status-badge @(product.Status ? "status-active" : "status-inactive")">
+										@(product.Status ? "Active" : "Inactive")
+									</div>
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<style>
+	/* Variables */
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--success-color: #4caf50;
+		--danger-color: #f44336;
+		--warning-color: #ff9800;
+		--card-bg: #ffffff;
+		--border-color: #e1e5e9;
+		--text-primary: #2c3e50;
+		--text-secondary: #666;
+		--text-muted: #999;
+	}
+
+	/* Loading Styles */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 50vh;
+		gap: 20px;
+	}
+
+	.circular-dots-loader {
+		display: flex;
+		gap: 8px;
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		animation: bounce 1.4s ease-in-out infinite both;
+	}
+
+	.dot-1 { animation-delay: -0.32s; }
+	.dot-2 { animation-delay: -0.16s; }
+	.dot-3 { animation-delay: 0s; }
+
+	@@keyframes bounce {
+		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+		40% { transform: scale(1.2); opacity: 1; }
+	}
+
+	.loading-text {
+		color: var(--text-secondary);
+		font-size: 16px;
+		margin: 0;
+	}
+
+	/* Main Container */
+	.product-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(193, 14, 105, 0.03) 100%);
+		padding: 0;
+	}
+
+	/* Header */
+	.page-header {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+		padding: 30px 20px;
+		box-shadow: 0 4px 20px rgba(226, 19, 123, 0.2);
+	}
+
+	.header-content {
+		max-width: 1200px;
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.title-section h1 {
+		font-size: 28px;
+		font-weight: 700;
+		margin: 0 0 8px 0;
+		letter-spacing: -0.5px;
+	}
+
+	.title-section p {
+		font-size: 14px;
+		margin: 0;
+		opacity: 0.9;
+	}
+
+	.back-button {
+		background: rgba(255, 255, 255, 0.15);
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		color: white;
+		padding: 10px 20px;
+		border-radius: 10px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s ease;
+		backdrop-filter: blur(10px);
+	}
+
+	.back-button:hover {
+		background: rgba(255, 255, 255, 0.25);
+		border-color: rgba(255, 255, 255, 0.5);
+		transform: translateY(-2px);
+	}
+
+	/* Content Layout */
+	.content-layout {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 30px 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
+	}
+
+	/* Cards */
+	.form-card,
+	.grid-card,
+	.rates-card {
+		background: var(--card-bg);
+		border-radius: 15px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--border-color);
+		overflow: hidden;
+	}
+
+	.card-header {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.1) 0%, rgba(193, 14, 105, 0.1) 100%);
+		border-bottom: 2px solid var(--primary-color);
+		padding: 20px 25px;
+	}
+
+	.card-title {
+		color: var(--primary-color);
+		font-size: 20px;
+		font-weight: 700;
+		margin: 0 0 5px 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.card-title::before {
+		content: "📋";
+		font-size: 18px;
+	}
+
+	.grid-card .card-title::before {
+		content: "📊";
+	}
+
+	.rates-card .card-title::before {
+		content: "💰";
+	}
+
+	.card-subtitle {
+		color: var(--text-secondary);
+		font-size: 14px;
+		margin: 0;
+	}
+
+	.card-body {
+		padding: 30px;
+	}
+
+	/* Form Grid */
+	.form-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 25px;
+		align-items: start;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form-group.span-2 {
+		grid-column: 1 / -1;
+	}
+
+	.form-label {
+		font-weight: 600;
+		margin-bottom: 8px;
+		color: var(--text-primary);
+		font-size: 14px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.form-label::before {
+		content: "•";
+		color: var(--primary-color);
+		font-weight: bold;
+	}
+
+	.field-help {
+		font-size: 12px;
+		color: var(--text-muted);
+		margin-top: 6px;
+		font-style: italic;
+	}
+
+	/* Custom Input Styles */
+	::deep .custom-textbox,
+	::deep .custom-numeric,
+	::deep .custom-dropdown {
+		border: 2px solid var(--border-color);
+		border-radius: 10px;
+		transition: all 0.3s ease;
+		font-size: 14px;
+		padding: 12px 15px;
+	}
+
+	::deep .custom-textbox:hover,
+	::deep .custom-numeric:hover,
+	::deep .custom-dropdown:hover {
+		border-color: rgba(226, 19, 123, 0.3);
+	}
+
+	::deep .custom-textbox:focus,
+	::deep .custom-numeric:focus,
+	::deep .custom-dropdown:focus {
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+		outline: none;
+	}
+
+	/* Role Selection */
+	.role-section {
+		grid-column: 1 / -1;
+	}
+
+	.role-buttons {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 15px;
+		margin-top: 10px;
+	}
+
+	.role-button {
+		border: 2px solid #e9ecef;
+		background: white;
+		padding: 20px;
+		border-radius: 12px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 8px;
+	}
+
+	.role-button.active {
+		border-color: var(--primary-color);
+		background: rgba(226, 19, 123, 0.05);
+	}
+
+	.role-button:hover {
+		border-color: var(--primary-color);
+		transform: translateY(-2px);
+	}
+
+	.role-icon {
+		font-size: 2rem;
+	}
+
+	.role-text {
+		font-weight: 600;
+		color: var(--secondary-color);
+	}
+
+	.role-desc {
+		font-size: 0.8rem;
+		color: #666;
+		margin: 0;
+	}
+
+	/* Permissions Section */
+	.permissions-section {
+		background: var(--light-bg);
+		padding: 20px;
+		border-radius: 12px;
+		border: 1px solid var(--border-color);
+	}
+
+	.permissions-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 20px;
+		margin-top: 15px;
+	}
+
+	.permission-category {
+		background: white;
+		padding: 15px;
+		border-radius: 8px;
+		border: 1px solid #e9ecef;
+	}
+
+	.category-title {
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0 0 12px 0;
+		color: var(--secondary-color);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.permission-checkboxes {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.checkbox-item {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.permission-desc {
+		font-size: 0.8rem;
+		color: #666;
+		margin-left: 24px;
+	}
+
+	/* Admin Notice */
+	.admin-notice {
+		background: #e8f5e8;
+		border: 1px solid #c3e6c3;
+		border-radius: 8px;
+		padding: 12px;
+		margin-top: 15px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.notice-icon {
+		font-size: 1.2rem;
+	}
+
+	.notice-text {
+		font-size: 0.9rem;
+		color: #2d5a2d;
+		font-weight: 500;
+	}
+
+	/* Status Section */
+	.status-section {
+		background: var(--light-bg);
+		padding: 15px;
+		border-radius: 8px;
+		border: 1px solid var(--border-color);
+	}
+
+	.status-toggle {
+		margin-top: 10px;
+	}
+
+	.status-help {
+		display: block;
+		margin-top: 5px;
+		font-size: 0.8rem;
+		color: #666;
+		margin-left: 24px;
+	}
+
+	/* Action Buttons */
+	.form-actions {
+		display: flex;
+		gap: 15px;
+		justify-content: flex-start;
+		margin-top: 20px;
+		padding-top: 20px;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.save-button,
+	.clear-button {
+		padding: 12px 30px;
+		border-radius: 10px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		border: none;
+		font-size: 14px;
+		min-width: 140px;
+		justify-content: center;
+	}
+
+	.save-button {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+		box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
+	}
+
+	.save-button:hover:not(:disabled) {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(226, 19, 123, 0.4);
+	}
+
+	.save-button:disabled,
+	.save-button.submitting {
+		background: #95a5a6;
+		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
+	}
+
+	.clear-button {
+		background: #6c757d;
+		color: white;
+		box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+	}
+
+	.clear-button:hover {
+		background: #5a6268;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+	}
+
+	.btn-icon {
+		font-size: 16px;
+	}
+
+	/* Spinner Animation */
+	.spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid transparent;
+		border-top: 2px solid white;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	/* Grid Styles */
+	.custom-grid {
+		border-radius: 10px !important;
+		overflow: hidden !important;
+	}
+
+	.custom-grid .e-gridheader {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+		color: white !important;
+	}
+
+	.custom-grid .e-gridheader .e-headercell {
+		border-color: rgba(255, 255, 255, 0.2) !important;
+		font-weight: 600 !important;
+	}
+
+	.custom-grid .e-row:hover {
+		background: rgba(226, 19, 123, 0.05) !important;
+		cursor: pointer !important;
+	}
+
+	.custom-grid .e-row.e-selectionbackground {
+		background: rgba(226, 19, 123, 0.1) !important;
+	}
+
+	/* Status Badge */
+	.status-badge {
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-size: 12px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.status-active {
+		background: rgba(76, 175, 80, 0.1);
+		color: var(--success-color);
+		border: 1px solid rgba(76, 175, 80, 0.3);
+	}
+
+	.status-inactive {
+		background: rgba(244, 67, 54, 0.1);
+		color: var(--danger-color);
+		border: 1px solid rgba(244, 67, 54, 0.3);
+	}
+
+	/* Grid Content Styles */
+	.location-name {
+		padding: 3px 8px;
+		border-radius: 6px;
+		font-size: 12px;
+		font-weight: 600;
+		background: rgba(226, 19, 123, 0.1);
+		color: var(--primary-color);
+	}
+
+	.permission-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.permission-badge.active {
+		background: rgba(76, 175, 80, 0.1);
+		color: var(--success-color);
+		border: 1px solid rgba(76, 175, 80, 0.3);
+	}
+
+	.permission-badge.inactive {
+		background: rgba(244, 67, 54, 0.1);
+		color: var(--danger-color);
+		border: 1px solid rgba(244, 67, 54, 0.3);
+	}
+
+	.admin-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		font-size: 14px;
+	}
+
+	.admin-badge.active {
+		background: rgba(255, 193, 7, 0.1);
+		color: #ff9800;
+		border: 1px solid rgba(255, 193, 7, 0.3);
+	}
+
+	.admin-badge.inactive {
+		background: rgba(158, 158, 158, 0.1);
+		color: var(--text-muted);
+		border: 1px solid rgba(158, 158, 158, 0.3);
+	}
+
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 8px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.edit-btn,
+	.toggle-btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 8px;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 14px;
+		transition: all 0.3s ease;
+		color: white;
+	}
+
+	.edit-btn {
+		background: linear-gradient(135deg, #3498db, #2980b9);
+		box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+	}
+
+	.edit-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+	}
+
+	.toggle-btn.activate {
+		background: linear-gradient(135deg, var(--success-color), #27ae60);
+		box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+	}
+
+	.toggle-btn.activate:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+	}
+
+	.toggle-btn.deactivate {
+		background: linear-gradient(135deg, var(--danger-color), #e74c3c);
+		box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+	}
+
+	.toggle-btn.deactivate:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+	}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 50vh;
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 20px;
+	}
+
+	.circular-dots-loader .dot {
+		position: absolute;
+		width: 12px;
+		height: 12px;
+		background-color: var(--primary-color);
+		border-radius: 50%;
+		animation: rotate 2s infinite linear;
+	}
+
+	.dot-1 { animation-delay: 0s; }
+	.dot-2 { animation-delay: 0.4s; }
+	.dot-3 { animation-delay: 0.8s; }
+
+	@@keyframes rotate {
+		0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+		100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+	}
+
+	.loading-text {
+		color: var(--text-secondary);
+		font-size: 16px;
+		font-weight: 500;
+	}
+
+	/* Spinner Animation for Save Button */
+	@@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	/* Toast Styles */
+	::deep .e-toast-success {
+		background: rgba(76, 175, 80, 0.1);
+		border-left: 4px solid var(--success-color);
+		color: var(--success-color);
+	}
+
+	::deep .e-toast-danger {
+		background: rgba(244, 67, 54, 0.1);
+		border-left: 4px solid var(--danger-color);
+		color: var(--danger-color);
+	}
+
+	::deep .e-toast-success .e-toast-title,
+	::deep .e-toast-danger .e-toast-title {
+		font-weight: 600;
+	}
+
+	::deep .e-toast-success .e-toast-content,
+	::deep .e-toast-danger .e-toast-content {
+		font-size: 14px;
+	}
+
+	/* Rates Card Specific Styles */
+	.add-rate-form {
+		background: #f8f9fa;
+		padding: 20px;
+		border-radius: 10px;
+		margin-bottom: 20px;
+		border: 2px solid #e9ecef;
+	}
+
+	.rate-form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr auto;
+		gap: 20px;
+		align-items: end;
+	}
+
+	.add-rate-button {
+		background: linear-gradient(135deg, #28a745, #20c997);
+		color: white;
+		border: none;
+		padding: 12px 20px;
+		border-radius: 8px;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		min-width: 120px;
+		justify-content: center;
+	}
+
+	.add-rate-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+	}
+
+	.delete-rate-button {
+		background: #dc3545;
+		color: white;
+		border: none;
+		padding: 8px 12px;
+		border-radius: 6px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-size: 14px;
+	}
+
+	.delete-rate-button:hover {
+		background: #c82333;
+		transform: scale(1.1);
+	}
+
+	.rates-grid-table {
+		margin-top: 15px;
+	}
+
+	/* Product-specific badge styles */
+	.category-name, .tax-code {
+		padding: 3px 8px;
+		border-radius: 6px;
+		font-size: 12px;
+		font-weight: 600;
+		background: rgba(226, 19, 123, 0.1);
+		color: var(--primary-color);
+	}
+
+	/* Readonly field styles */
+	.readonly-field {
+		background-color: #f8f9fa !important;
+		cursor: not-allowed !important;
+	}
+
+	.field-help {
+		color: #6c757d;
+		font-size: 0.875rem;
+		margin-top: 4px;
+		display: block;
+		font-style: italic;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 768px) {
+		.product-container {
+			padding: 15px;
+		}
+
+		.header-content {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.form-grid, .rate-form-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.role-buttons {
+			grid-template-columns: 1fr;
+		}
+
+		.permissions-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.form-actions {
+			flex-direction: column;
+		}
+	}
+</style>

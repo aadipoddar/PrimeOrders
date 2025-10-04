@@ -13,9 +13,9 @@ namespace PrimeBakesLibrary.Exporting;
 internal static class PDFExportUtil
 {
 	// Shared color constants
-	internal static readonly Color _primaryColor = Color.FromArgb(81, 43, 212);
-	internal static readonly Color _secondaryColor = Color.FromArgb(104, 33, 122);
-	internal static readonly Color _accentColor = Color.FromArgb(0, 164, 239);
+	internal static readonly Color _primaryColor = Color.FromArgb(226, 19, 123); // Changed to #e2137b
+	internal static readonly Color _secondaryColor = Color.FromArgb(193, 14, 105); // Darker variant of primary
+	internal static readonly Color _accentColor = Color.FromArgb(33, 150, 243); // Complementary blue
 	internal static readonly Color _lightGray = Color.FromArgb(245, 245, 245);
 	internal static readonly Color _darkGray = Color.FromArgb(64, 64, 64);
 
@@ -34,19 +34,31 @@ internal static class PDFExportUtil
 	/// </summary>
 	internal static PdfPageTemplateElement CreateHeader(PdfDocument doc, string headerTitle)
 	{
-		var headerRect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 40); // Reduced from 50
+		var headerRect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 50); // Increased height to accommodate tagline
 
 		PdfPageTemplateElement header = new(headerRect);
 		header.Graphics.DrawRectangle(new PdfSolidBrush(_primaryColor), headerRect);
 
-		PdfStringFormat format = new()
+		// Main title
+		PdfStringFormat titleFormat = new()
 		{
 			Alignment = PdfTextAlignment.Center,
 			LineAlignment = PdfVerticalAlignment.Middle
 		};
 
 		header.Graphics.DrawString(headerTitle, _titleFont, PdfBrushes.White,
-			new PointF(headerRect.Width / 2, headerRect.Height / 2), format);
+			new PointF(headerRect.Width / 2, headerRect.Height / 2 - 8), titleFormat);
+
+		// Company tagline
+		PdfStringFormat taglineFormat = new()
+		{
+			Alignment = PdfTextAlignment.Center,
+			LineAlignment = PdfVerticalAlignment.Middle
+		};
+
+		var taglineFont = new PdfStandardFont(PdfFontFamily.Helvetica, 9, PdfFontStyle.Italic);
+		header.Graphics.DrawString("Celebrating happiness", taglineFont, PdfBrushes.White,
+			new PointF(headerRect.Width / 2, headerRect.Height / 2 + 12), taglineFormat);
 
 		return header;
 	}
@@ -88,7 +100,7 @@ internal static class PDFExportUtil
 	/// </summary>
 	internal static async Task<float> DrawCompanyInformation(PdfPage pdfPage, string invoiceType)
 	{
-		RectangleF detailsRect = new(15, 8, pdfPage.GetClientSize().Width - 30, 65); // Reduced height from 80 and margin from 20
+		RectangleF detailsRect = new(15, 18, pdfPage.GetClientSize().Width - 30, 65); // Increased Y position from 8 to 18 to account for taller header
 		pdfPage.Graphics.DrawRectangle(new PdfPen(_lightGray, 1), new PdfSolidBrush(_lightGray), detailsRect);
 
 		var mainLocation = await LedgerData.LoadLedgerByLocation(1);

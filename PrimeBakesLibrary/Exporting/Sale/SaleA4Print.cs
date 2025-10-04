@@ -98,22 +98,20 @@ public static class SaleA4Print
 		pdfPage.Graphics.DrawString($"Outlet: {location.Name}", PDFExportUtil._normalFont,
 			new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
 
-		detailY += 12f;
-
 		// Alias (if available)
 		if (!string.IsNullOrEmpty(outlet.Alias))
 		{
+			detailY += 12f;
 			pdfPage.Graphics.DrawString(outlet.Alias, PDFExportUtil._normalFont,
 				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
-			detailY += 12f;
 		}
 
 		// GST Number (if available)
 		if (!string.IsNullOrEmpty(outlet.GSTNo))
 		{
+			detailY += 12f;
 			pdfPage.Graphics.DrawString($"GST NO: {outlet.GSTNo}", PDFExportUtil._normalFont,
 				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
-			detailY += 12f;
 		}
 
 		// Address (if available)
@@ -126,6 +124,8 @@ public static class SaleA4Print
 			// Use a simple approach for address display
 			if (outlet.Address.Length > 80)
 			{
+				detailY += 12f;
+
 				// For very long addresses, try to break at a reasonable point
 				var breakPoint = outlet.Address.LastIndexOf(' ', 80);
 				if (breakPoint > 0)
@@ -150,20 +150,20 @@ public static class SaleA4Print
 				pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtil._normalFont,
 					new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
 			}
-			detailY += 12f;
 		}
 
 		// Contact information (if available)
 		if (!string.IsNullOrEmpty(outlet.Phone))
 		{
+			detailY += 12f;
 			pdfPage.Graphics.DrawString($"Contact: {outlet.Phone}", PDFExportUtil._normalFont,
 				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
-			detailY += 12f;
 		}
 
 		// Email information (if available)
 		if (!string.IsNullOrEmpty(outlet.Email))
 		{
+			detailY += 12f;
 			pdfPage.Graphics.DrawString($"Email: {outlet.Email}", PDFExportUtil._normalFont,
 				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
 		}

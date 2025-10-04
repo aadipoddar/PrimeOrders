@@ -35,24 +35,17 @@
 		<div class="header-gradient-overlay"></div>
 	</div>
 
-	<!-- Management Cards Grid -->
+	<!-- Items Management Section -->
 	<div class="management-section">
 		<div class="section-header">
-			<h2 class="section-title">Management Modules</h2>
-			<p class="section-description">Select a module to manage different aspects of your bakery business</p>
+			<div class="section-icon">📦</div>
+			<h2 class="section-title">Items Management</h2>
+			<p class="section-description">Manage raw materials, finished products, and their categories</p>
 		</div>
 
 		<div class="admin-cards-grid">
 			@if (_user is not null && _user.LocationId == 1)
 			{
-				<!-- Outlet / Franchise Management -->
-				<AdminCard Title="Outlet Management"
-						   Description="Manage franchise locations, outlet operations, and regional performance tracking"
-						   Icon="🏪"
-						   IconClass="outlet-icon"
-						   ActionText="Manage Outlets"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
-
 				<!-- Raw Material Management -->
 				<AdminCard Title="Raw Materials"
 						   Description="Control inventory, suppliers, procurement processes, and stock levels"
@@ -64,18 +57,55 @@
 				<!-- Raw Material Category Management -->
 				<AdminCard Title="Raw Material Categories"
 						   Description="Organize and categorize raw materials for better inventory management"
-						   Icon="📋"
+						   Icon="�"
 						   IconClass="category-icon"
 						   ActionText="Manage Categories"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialCategory"))" />
+			}
 
-				<!-- Kitchen Management -->
-				<AdminCard Title="Kitchen Operations"
-						   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
-						   Icon="👨‍🍳"
-						   IconClass="kitchen-icon"
-						   ActionText="Manage Kitchen"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
+			<!-- Finished Product Management -->
+			<AdminCard Title="Finished Products"
+					   Description="Manage finished products, pricing, recipes, and production planning"
+					   Icon="🧁"
+					   IconClass="product-icon"
+					   ActionText="Manage Products"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Product"))" />
+
+			<!-- Finished Product Category Management -->
+			<AdminCard Title="Product Categories"
+					   Description="Organize products into categories for better catalog management"
+					   Icon="🏷️"
+					   IconClass="category-icon"
+					   ActionText="Manage Categories"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/ProductCategory"))" />
+		</div>
+	</div>
+
+	<!-- Common Management Section -->
+	@if (_user is not null && _user.LocationId == 1)
+	{
+		<div class="management-section">
+			<div class="section-header">
+				<div class="section-icon">⚙️</div>
+				<h2 class="section-title">Common Management</h2>
+				<p class="section-description">Manage common settings, locations, and operational parameters</p>
+			</div>
+
+			<div class="admin-cards-grid">
+				<!-- Outlet / Franchise Management -->
+				<AdminCard Title="Outlet Management"
+						   Description="Manage franchise locations, outlet operations, and regional performance tracking"
+						   Icon="�"
+						   IconClass="outlet-icon"
+						   ActionText="Manage Outlets"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
+
+				<AdminCard Title="User Management"
+						   Description="Manage user accounts, roles, permissions, and access control"
+						   Icon="👥"
+						   IconClass="user-icon"
+						   ActionText="Manage Users"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
 
 				<!-- States Management -->
 				<AdminCard Title="States Management"
@@ -93,6 +123,49 @@
 						   ActionText="Manage Taxes"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Tax"))" />
 
+				<!-- Kitchen Management -->
+				<AdminCard Title="Kitchen Operations"
+						   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
+						   Icon="�‍🍳"
+						   IconClass="kitchen-icon"
+						   ActionText="Manage Kitchen"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
+
+				<!-- Settings Management -->
+				<AdminCard Title="Settings"
+						   Description="Configure system settings, preferences, and application parameters"
+						   Icon="⚙️"
+						   IconClass="settings-icon"
+						   ActionText="Manage Settings"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Settings"))" />
+			</div>
+		</div>
+
+		<!-- Accounts Management Section -->
+		<div class="management-section">
+			<div class="section-header">
+				<div class="section-icon">💰</div>
+				<h2 class="section-title">Accounts Management</h2>
+				<p class="section-description">Manage financial accounts, ledgers, and accounting operations</p>
+			</div>
+
+			<div class="admin-cards-grid">
+				<!-- Account Groups Management -->
+				<AdminCard Title="Account Groups"
+						   Description="Manage chart of accounts, group hierarchies, and account classifications"
+						   Icon="🏦"
+						   IconClass="account-group-icon"
+						   ActionText="Manage Groups"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountGroup"))" />
+
+				<!-- Account Types Management -->
+				<AdminCard Title="Account Types"
+						   Description="Configure account types, ledger categories, and accounting structures"
+						   Icon="📊"
+						   IconClass="account-type-icon"
+						   ActionText="Manage Types"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountType"))" />
+
 				<!-- Ledger / Party Management -->
 				<AdminCard Title="Ledger & Party Management"
 						   Description="Manage customer ledgers, supplier accounts, party details and financial records"
@@ -101,32 +174,24 @@
 						   ActionText="Manage Ledgers"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Ledger"))" />
 
-				<!-- User Management -->
-				<AdminCard Title="User Management"
-						   Description="Manage user accounts, roles, permissions, and access control"
-						   Icon="👥"
-						   IconClass="user-icon"
-						   ActionText="Manage Users"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
-			}
+				<!-- Voucher Management -->
+				<AdminCard Title="Voucher Management"
+						   Description="Manage voucher types, numbering series, and transaction templates"
+						   Icon="🧾"
+						   IconClass="voucher-icon"
+						   ActionText="Manage Vouchers"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Voucher"))" />
 
-			<!-- Finished Product Management -->
-			<AdminCard Title="Finished Product Management"
-					   Description="Manage finished products, pricing, recipes, and production planning"
-					   Icon="🧁"
-					   IconClass="product-icon"
-					   ActionText="Manage Products"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Product"))" />
-
-			<!-- Finished Product Category Management -->
-			<AdminCard Title="Finished Product Categories"
-					   Description="Organize products into categories for better catalog management"
-					   Icon="🏷️"
-					   IconClass="category-icon"
-					   ActionText="Manage Categories"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/ProductCategory"))" />
+				<!-- Financial Years Management -->
+				<AdminCard Title="Financial Years"
+						   Description="Configure financial years, accounting periods, and fiscal calendar"
+						   Icon="📅"
+						   IconClass="financial-year-icon"
+						   ActionText="Manage Years"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/FinancialYear"))" />
+			</div>
 		</div>
-	</div>
+	}
 
 	<!-- Footer -->
 	<div class="dashboard-footer">
@@ -303,31 +368,63 @@
 
 	/* Management Section */
 	.management-section {
-		padding: 60px 30px;
+		padding: 40px 30px;
 		max-width: 1400px;
 		margin: 0 auto;
+		position: relative;
 	}
+
+		.management-section:not(:last-of-type) {
+			border-bottom: 2px solid rgba(226, 19, 123, 0.1);
+			margin-bottom: 20px;
+		}
 
 	.section-header {
 		text-align: center;
-		margin-bottom: 50px;
+		margin-bottom: 40px;
+		position: relative;
+		padding: 25px;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(193, 14, 105, 0.03) 100%);
+		border-radius: 20px;
+		border: 2px solid rgba(226, 19, 123, 0.1);
+	}
+
+	.section-icon {
+		font-size: 48px;
+		margin-bottom: 15px;
+		display: block;
+		filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 	}
 
 	.section-title {
-		font-size: 32px;
+		font-size: 28px;
 		font-weight: 700;
 		color: var(--text-primary);
-		margin: 0 0 15px 0;
+		margin: 0 0 12px 0;
 		letter-spacing: -0.5px;
+		position: relative;
 	}
 
+		.section-title::after {
+			content: '';
+			position: absolute;
+			bottom: -8px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 60px;
+			height: 3px;
+			background: linear-gradient(90deg, var(--admin-primary), var(--admin-primary-dark));
+			border-radius: 2px;
+		}
+
 	.section-description {
-		font-size: 16px;
+		font-size: 15px;
 		color: var(--text-secondary);
 		margin: 0;
-		max-width: 600px;
+		max-width: 500px;
 		margin: 0 auto;
 		line-height: 1.6;
+		font-weight: 500;
 	}
 
 	.admin-cards-grid {
@@ -392,10 +489,26 @@
 			padding: 30px 20px;
 		}
 
-		.management-section,
-		.quick-actions-section {
-			padding-left: 20px;
-			padding-right: 20px;
+		.management-section {
+			padding: 30px 20px;
+		}
+
+		.section-header {
+			padding: 20px;
+			margin-bottom: 30px;
+		}
+
+		.section-icon {
+			font-size: 40px;
+			margin-bottom: 12px;
+		}
+
+		.section-title {
+			font-size: 24px;
+		}
+
+		.section-description {
+			font-size: 14px;
 		}
 
 		.admin-header-text h1 {
@@ -405,14 +518,6 @@
 		.admin-cards-grid {
 			grid-template-columns: 1fr;
 			gap: 20px;
-		}
-
-
-
-		.footer-content {
-			flex-direction: column;
-			gap: 15px;
-			text-align: center;
 		}
 
 		.admin-stats {
@@ -429,10 +534,26 @@
 			padding: 25px 15px;
 		}
 
-		.management-section,
-		.quick-actions-section {
-			padding-left: 15px;
-			padding-right: 15px;
+		.management-section {
+			padding: 25px 15px;
+		}
+
+		.section-header {
+			padding: 15px;
+			margin-bottom: 25px;
+		}
+
+		.section-icon {
+			font-size: 36px;
+			margin-bottom: 10px;
+		}
+
+		.section-title {
+			font-size: 20px;
+		}
+
+		.section-description {
+			font-size: 13px;
 		}
 
 		.admin-header-text h1 {
@@ -443,10 +564,6 @@
 			width: 60px;
 			height: 60px;
 			font-size: 28px;
-		}
-
-		.section-title {
-			font-size: 24px;
 		}
 	}
 </style>

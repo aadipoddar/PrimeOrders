@@ -243,6 +243,15 @@ else
 				</div>
 			}
 
+			@if (_user.Accounts)
+			{
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Accounts-Dashboard")'>
+					<div class="card-icon accounts-icon">💰</div>
+					<h3>Accounts</h3>
+					<p>Manage financial accounts and accounting operations</p>
+				</div>
+			}
+
 			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")'>
 				<div class="card-icon reports-icon">📊</div>
 				<h3>Reports</h3>
@@ -490,6 +499,11 @@ else
 	.inventory-icon {
 		background-color: rgba(255, 77, 159, 0.1);
 		color: var(--primary-light);
+	}
+
+	.accounts-icon {
+		background-color: rgba(40, 167, 69, 0.1);
+		color: var(--success-color);
 	}
 
 	.reports-icon {
