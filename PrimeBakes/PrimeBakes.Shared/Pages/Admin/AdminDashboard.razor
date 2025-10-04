@@ -100,6 +100,14 @@
 						   IconClass="ledger-icon"
 						   ActionText="Manage Ledgers"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Ledger"))" />
+
+				<!-- User Management -->
+				<AdminCard Title="User Management"
+						   Description="Manage user accounts, roles, permissions, and access control"
+						   Icon="👥"
+						   IconClass="user-icon"
+						   ActionText="Manage Users"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
 			}
 
 			<!-- Finished Product Management -->
@@ -117,14 +125,6 @@
 					   IconClass="category-icon"
 					   ActionText="Manage Categories"
 					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/ProductCategories"))" />
-
-			<!-- User Management -->
-			<AdminCard Title="User Management"
-					   Description="Manage user accounts, roles, permissions, and access control"
-					   Icon="👥"
-					   IconClass="user-icon"
-					   ActionText="Manage Users"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
 		</div>
 	</div>
 
