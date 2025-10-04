@@ -43,35 +43,48 @@
 		</div>
 
 		<div class="admin-cards-grid">
-			<!-- Outlet / Franchise Management -->
-			<AdminCard Title="Outlet Management"
-					   Description="Manage franchise locations, outlet operations, and regional performance tracking"
-					   Icon="🏪"
-					   IconClass="outlet-icon"
-					   BadgeColor="#ff9800"
-					   Count="@TotalOutlets.ToString()"
-					   ActionText="Manage Outlets"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
+			@if (_user is not null && _user.LocationId == 1)
+			{
+				<!-- Outlet / Franchise Management -->
+				<AdminCard Title="Outlet Management"
+						   Description="Manage franchise locations, outlet operations, and regional performance tracking"
+						   Icon="🏪"
+						   IconClass="outlet-icon"
+						   BadgeColor="#ff9800"
+						   Count="@TotalOutlets.ToString()"
+						   ActionText="Manage Outlets"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
 
-			<!-- Raw Material Management -->
-			<AdminCard Title="Raw Materials"
-					   Description="Control inventory, suppliers, procurement processes, and stock levels"
-					   Icon="📦"
-					   IconClass="material-icon"
-					   BadgeColor="#4caf50"
-					   Count="@RawMaterialsCount.ToString()"
-					   ActionText="Manage Materials"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterials"))" />
+				<!-- Raw Material Management -->
+				<AdminCard Title="Raw Materials"
+						   Description="Control inventory, suppliers, procurement processes, and stock levels"
+						   Icon="📦"
+						   IconClass="material-icon"
+						   BadgeColor="#4caf50"
+						   Count="@RawMaterialsCount.ToString()"
+						   ActionText="Manage Materials"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterials"))" />
 
-			<!-- Raw Material Category Management -->
-			<AdminCard Title="Raw Material Categories"
-					   Description="Organize and categorize raw materials for better inventory management"
-					   Icon="📋"
-					   IconClass="category-icon"
-					   BadgeColor="#9c27b0"
-					   Count="@MaterialCategoriesCount.ToString()"
-					   ActionText="Manage Categories"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialsCategories"))" />
+				<!-- Raw Material Category Management -->
+				<AdminCard Title="Raw Material Categories"
+						   Description="Organize and categorize raw materials for better inventory management"
+						   Icon="📋"
+						   IconClass="category-icon"
+						   BadgeColor="#9c27b0"
+						   Count="@MaterialCategoriesCount.ToString()"
+						   ActionText="Manage Categories"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialsCategories"))" />
+
+				<!-- Kitchen Management -->
+				<AdminCard Title="Kitchen Operations"
+						   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
+						   Icon="👨‍🍳"
+						   IconClass="kitchen-icon"
+						   BadgeColor="#ff5722"
+						   Count="@ActiveKitchens.ToString()"
+						   ActionText="Manage Kitchen"
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
+			}
 
 			<!-- Finished Product Management -->
 			<AdminCard Title="Finished Product Management"
@@ -102,16 +115,6 @@
 					   Count="@ActiveUsers.ToString()"
 					   ActionText="Manage Users"
 					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
-
-			<!-- Kitchen Management -->
-			<AdminCard Title="Kitchen Operations"
-					   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
-					   Icon="👨‍🍳"
-					   IconClass="kitchen-icon"
-					   BadgeColor="#ff5722"
-					   Count="@ActiveKitchens.ToString()"
-					   ActionText="Manage Kitchen"
-					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
 		</div>
 	</div>
 
@@ -328,29 +331,29 @@
 
 
 
-		/* Footer */
-		.dashboard-footer {
-			margin-top: auto;
-			text-align: center;
-			padding: 25px;
+	/* Footer */
+	.dashboard-footer {
+		margin-top: auto;
+		text-align: center;
+		padding: 25px;
+		color: var(--primary-dark);
+		font-size: 14px;
+		background-color: white;
+		border-radius: 15px;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+	}
+
+	.footer-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.2s ease;
+	}
+
+		.footer-link:hover {
 			color: var(--primary-dark);
-			font-size: 14px;
-			background-color: white;
-			border-radius: 15px;
-			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+			text-decoration: underline;
 		}
-
-		.footer-link {
-			color: var(--primary-color);
-			text-decoration: none;
-			font-weight: 600;
-			transition: color 0.2s ease;
-		}
-
-			.footer-link:hover {
-				color: var(--primary-dark);
-				text-decoration: underline;
-			}
 
 	/* Responsive Design */
 	@@media (max-width: 1024px) {
