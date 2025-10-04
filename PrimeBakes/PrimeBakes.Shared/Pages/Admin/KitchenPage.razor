@@ -1,9 +1,9 @@
-﻿@page "/Admin/RawMaterialCategory"
+﻿@page "/Admin/Kitchen"
 @using PrimeBakes.Shared.Services
 @using PrimeBakesLibrary.Models.Common
-@using PrimeBakesLibrary.Models.Inventory
+@using PrimeBakesLibrary.Models.Inventory.Kitchen
 
-<PageTitle>Raw Material Category Management - Prime Bakes</PageTitle>
+<PageTitle>Kitchen Management - Prime Bakes</PageTitle>
 
 @if (_isLoading)
 {
@@ -13,18 +13,18 @@
 			<span class="dot dot-2"></span>
 			<span class="dot dot-3"></span>
 		</div>
-		<p class="loading-text">Loading categories...</p>
+		<p class="loading-text">Loading kitchens...</p>
 	</div>
 }
 else
 {
-	<div class="category-container">
+	<div class="kitchen-container">
 		<!-- Header -->
 		<div class="page-header">
 			<div class="header-content">
 				<div class="title-section">
-					<h1 class="page-title">📂 Category Management</h1>
-					<p class="page-subtitle">Manage raw material categories for better organization</p>
+					<h1 class="page-title">👨‍🍳 Kitchen Management</h1>
+					<p class="page-subtitle">Manage your bakery kitchen units and production areas</p>
 				</div>
 				<button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
 					<span class="back-icon">←</span>
@@ -34,42 +34,42 @@ else
 		</div>
 
 		<div class="content-layout">
-			<!-- Category Form Card -->
+			<!-- Kitchen Form Card -->
 			<div class="form-card">
 				<div class="card-header">
 					<h2 class="card-title">
-						@(_rawMaterialCategoryModel.Id == 0 ? "Add New Category" : "Edit Category")
+						@(_kitchenModel.Id == 0 ? "Add New Kitchen" : "Edit Kitchen")
 					</h2>
 					<p class="card-subtitle">
-						@(_rawMaterialCategoryModel.Id == 0 ? "Create a new raw material category" : "Update category information")
+						@(_kitchenModel.Id == 0 ? "Create a new kitchen unit" : "Update kitchen information")
 					</p>
 				</div>
 
 				<div class="card-body">
 					<div class="form-grid">
 						<div class="form-group">
-							<label class="form-label">Category Name *</label>
-							<SfTextBox @bind-Value="_rawMaterialCategoryModel.Name"
-									   Placeholder="Enter category name"
+							<label class="form-label">Kitchen Name *</label>
+							<SfTextBox @bind-Value="_kitchenModel.Name"
+									   Placeholder="Enter kitchen name"
 									   CssClass="custom-textbox" />
 						</div>
 
 						<div class="form-group">
 							<label class="form-label">Status</label>
 							<div class="checkbox-wrapper">
-								<SfCheckBox @bind-Checked="_rawMaterialCategoryModel.Status"
-											Label="Active Category"
+								<SfCheckBox @bind-Checked="_kitchenModel.Status"
+											Label="Active Kitchen"
 											CssClass="custom-checkbox" />
 							</div>
 						</div>
 					</div>
 
 					<div class="form-actions">
-						<button @onclick="OnAddCategory" class="btn btn-secondary" type="button">
+						<button @onclick="OnAddKitchen" class="btn btn-secondary" type="button">
 							<span class="btn-icon">🔄</span>
 							Clear Form
 						</button>
-						<button @onclick="SaveRawMaterialCategory" 
+						<button @onclick="SaveKitchen" 
 								class="btn btn-primary" 
 								type="button"
 								disabled="@_isSubmitting">
@@ -81,23 +81,23 @@ else
 							else
 							{
 								<span class="btn-icon">💾</span>
-								<span>@(_rawMaterialCategoryModel.Id == 0 ? "Add Category" : "Update Category")</span>
+								<span>@(_kitchenModel.Id == 0 ? "Add Kitchen" : "Update Kitchen")</span>
 							}
 						</button>
 					</div>
 				</div>
 			</div>
 
-			<!-- Categories Grid Card -->
+			<!-- Kitchens Grid Card -->
 			<div class="grid-card">
 				<div class="card-header">
-					<h2 class="card-title">All Categories</h2>
-					<p class="card-subtitle">Click on a row to edit category details</p>
+					<h2 class="card-title">All Kitchens</h2>
+					<p class="card-subtitle">Click on a row to edit kitchen details</p>
 				</div>
 
 				<div class="card-body">
 					<SfGrid @ref="_sfGrid"
-							DataSource="@_rawMaterialCategories"
+							DataSource="@_kitchens"
 							AllowSorting="true"
 							AllowFiltering="true"
 							AllowPaging="true"
@@ -105,43 +105,43 @@ else
 							CssClass="custom-grid">
 						<GridPageSettings PageSize="10" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar" />
-						<GridEvents RowSelected="RowSelectHandler" TValue="RawMaterialCategoryModel" />
+						<GridEvents RowSelected="RowSelectHandler" TValue="KitchenModel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(RawMaterialCategoryModel.Id)" 
+							<GridColumn Field="@nameof(KitchenModel.Id)" 
 									   HeaderText="ID" 
 									   Width="80" 
 									   TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(RawMaterialCategoryModel.Name)" 
-									   HeaderText="Category Name" 
+							<GridColumn Field="@nameof(KitchenModel.Name)" 
+									   HeaderText="Kitchen Name" 
 									   Width="300" />
-							<GridColumn Field="@nameof(RawMaterialCategoryModel.Status)" 
+							<GridColumn Field="@nameof(KitchenModel.Status)" 
 									   HeaderText="Status" 
 									   Width="120" 
 									   TextAlign="TextAlign.Center">
 								<Template>
 									@{
-										var category = (context as RawMaterialCategoryModel);
+										var kitchen = (context as KitchenModel);
 									}
-									<div class="status-badge @(category.Status ? "status-active" : "status-inactive")">
-										@(category.Status ? "Active" : "Inactive")
+									<div class="status-badge @(kitchen.Status ? "status-active" : "status-inactive")">
+										@(kitchen.Status ? "Active" : "Inactive")
 									</div>
 								</Template>
 							</GridColumn>
 							<GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
 								<Template>
 									@{
-										var category = (context as RawMaterialCategoryModel);
+										var kitchen = (context as KitchenModel);
 									}
 									<div class="action-buttons">
-										<button @onclick="() => OnEditCategory(category)" 
+										<button @onclick="() => OnEditKitchen(kitchen)" 
 												class="btn-action btn-edit" 
-												title="Edit Category">
+												title="Edit Kitchen">
 											<span>✏️</span>
 										</button>
-										<button @onclick="() => ToggleCategoryStatus(category)" 
-												class="btn-action btn-toggle @(category.Status ? "btn-deactivate" : "btn-activate")" 
-												title="@(category.Status ? "Deactivate" : "Activate")">
-											<span>@(category.Status ? "🔴" : "🟢")</span>
+										<button @onclick="() => ToggleKitchenStatus(kitchen)" 
+												class="btn-action btn-toggle @(kitchen.Status ? "btn-deactivate" : "btn-activate")" 
+												title="@(kitchen.Status ? "Deactivate" : "Activate")">
+											<span>@(kitchen.Status ? "🔴" : "🟢")</span>
 										</button>
 									</div>
 								</Template>
@@ -233,7 +233,7 @@ else
 	}
 
 	/* Main Container */
-	.category-container {
+	.kitchen-container {
 		min-height: 100vh;
 		background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(193, 14, 105, 0.03) 100%);
 		padding: 0;
