@@ -13,8 +13,6 @@ namespace PrimeBakes.Shared.Pages.Admin;
 
 public partial class LocationPage
 {
-
-	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isSubmitting = false;
 
@@ -39,7 +37,6 @@ public partial class LocationPage
 	protected override async Task OnInitializedAsync()
 	{
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
-		_user = authResult.User;
 		await LoadLocations();
 
 		_isLoading = false;
@@ -48,18 +45,10 @@ public partial class LocationPage
 
 	private async Task LoadLocations()
 	{
-		try
-		{
-			_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
-			if (_sfGrid is not null)
-				await _sfGrid.Refresh();
-			StateHasChanged();
-		}
-		catch (Exception ex)
-		{
-			_errorMessage = $"Failed to load locations: {ex.Message}";
-			await ShowErrorToast();
-		}
+		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+		StateHasChanged();
 	}
 
 	private void OnAddLocation()

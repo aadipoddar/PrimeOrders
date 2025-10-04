@@ -50,8 +50,6 @@
 						   Description="Manage franchise locations, outlet operations, and regional performance tracking"
 						   Icon="🏪"
 						   IconClass="outlet-icon"
-						   BadgeColor="#ff9800"
-						   Count="@TotalOutlets.ToString()"
 						   ActionText="Manage Outlets"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
 
@@ -60,18 +58,14 @@
 						   Description="Control inventory, suppliers, procurement processes, and stock levels"
 						   Icon="📦"
 						   IconClass="material-icon"
-						   BadgeColor="#4caf50"
-						   Count="@RawMaterialsCount.ToString()"
 						   ActionText="Manage Materials"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterials"))" />
+						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterial"))" />
 
 				<!-- Raw Material Category Management -->
 				<AdminCard Title="Raw Material Categories"
 						   Description="Organize and categorize raw materials for better inventory management"
 						   Icon="📋"
 						   IconClass="category-icon"
-						   BadgeColor="#9c27b0"
-						   Count="@MaterialCategoriesCount.ToString()"
 						   ActionText="Manage Categories"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialsCategories"))" />
 
@@ -80,8 +74,6 @@
 						   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
 						   Icon="👨‍🍳"
 						   IconClass="kitchen-icon"
-						   BadgeColor="#ff5722"
-						   Count="@ActiveKitchens.ToString()"
 						   ActionText="Manage Kitchen"
 						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
 			}
@@ -91,8 +83,6 @@
 					   Description="Manage finished products, pricing, recipes, and production planning"
 					   Icon="🧁"
 					   IconClass="product-icon"
-					   BadgeColor="#2196f3"
-					   Count="@FinishedProductsCount.ToString()"
 					   ActionText="Manage Products"
 					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Product"))" />
 
@@ -101,8 +91,6 @@
 					   Description="Organize products into categories for better catalog management"
 					   Icon="🏷️"
 					   IconClass="category-icon"
-					   BadgeColor="#673ab7"
-					   Count="@ProductCategoriesCount.ToString()"
 					   ActionText="Manage Categories"
 					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/ProductCategories"))" />
 
@@ -111,8 +99,6 @@
 					   Description="Manage user accounts, roles, permissions, and access control"
 					   Icon="👥"
 					   IconClass="user-icon"
-					   BadgeColor="#e91e63"
-					   Count="@ActiveUsers.ToString()"
 					   ActionText="Manage Users"
 					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
 		</div>

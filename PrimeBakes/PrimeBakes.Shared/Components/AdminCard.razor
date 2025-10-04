@@ -5,12 +5,6 @@
         <div class="admin-card-icon @IconClass">
             @Icon
         </div>
-        <div class="admin-card-badge" style="background-color: @BadgeColor;">
-            @if (!string.IsNullOrEmpty(Count))
-            {
-                <span class="badge-count">@Count</span>
-            }
-        </div>
     </div>
     <div class="admin-card-content">
         <h3 class="admin-card-title">@Title</h3>
@@ -29,8 +23,6 @@
     [Parameter] public string Description { get; set; } = string.Empty;
     [Parameter] public string Icon { get; set; } = "⚙️";
     [Parameter] public string IconClass { get; set; } = string.Empty;
-    [Parameter] public string BadgeColor { get; set; } = "#e2137b";
-    [Parameter] public string Count { get; set; } = string.Empty;
     [Parameter] public string ActionText { get; set; } = "Manage";
     [Parameter] public string CssClass { get; set; } = string.Empty;
     [Parameter] public EventCallback OnClick { get; set; }
