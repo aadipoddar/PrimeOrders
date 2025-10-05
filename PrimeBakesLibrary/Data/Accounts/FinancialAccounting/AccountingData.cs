@@ -37,7 +37,11 @@ public static class AccountingData
 		accounting.Status = true;
 		accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
 		accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(accounting.AccountingDate)).Id;
-		accounting.ReferenceNo = await GenerateCodes.GenerateAccountingReferenceNo(accounting.VoucherId, accounting.AccountingDate);
+
+		if (update)
+			accounting.ReferenceNo = (await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accounting.Id)).ReferenceNo;
+		else
+			accounting.ReferenceNo = await GenerateCodes.GenerateAccountingReferenceNo(accounting.VoucherId, accounting.AccountingDate);
 
 		accounting.Id = await InsertAccounting(accounting);
 		await SaveAccountingDetails(accounting, cart, update);

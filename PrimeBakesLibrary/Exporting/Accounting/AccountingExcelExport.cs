@@ -57,7 +57,8 @@ public static class AccountingExcelExport
 			nameof(AccountingOverviewModel.TotalDebitAmount),
 			nameof(AccountingOverviewModel.TotalCreditAmount),
 			nameof(AccountingOverviewModel.TotalAmount),
-			nameof(AccountingOverviewModel.Remarks)
+			nameof(AccountingOverviewModel.Remarks),
+			nameof(AccountingOverviewModel.CreatedAt)
 		];
 
 		// Define custom column settings
@@ -173,6 +174,13 @@ public static class AccountingExcelExport
 				DisplayName = "Remarks",
 				Width = 30,
 				Alignment = ExcelHAlign.HAlignLeft
+			},
+			[nameof(AccountingOverviewModel.CreatedAt)] = new()
+			{
+				DisplayName = "Created At",
+				Format = "dd-MMM-yyyy HH:mm",
+				Width = 18,
+				Alignment = ExcelHAlign.HAlignCenter
 			}
 		};
 

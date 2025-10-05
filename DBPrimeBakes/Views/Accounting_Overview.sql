@@ -21,7 +21,10 @@ SELECT
     SUM(ad.Debit) AS TotalDebitAmount,
     SUM(ad.Credit) AS TotalCreditAmount,
 
-    SUM(ad.Debit) + SUM(ad.Credit) AS TotalAmount
+    SUM(ad.Debit) + SUM(ad.Credit) AS TotalAmount,
+
+    [a].[CreatedAt]
+
 FROM
     [dbo].[Accounting] a
 INNER JOIN
@@ -47,4 +50,5 @@ GROUP BY
     [a].[GeneratedModule],
     [a].[Remarks],
     [fy].[StartDate],
-    [fy].[EndDate]
+    [fy].[EndDate],
+    [a].[CreatedAt]

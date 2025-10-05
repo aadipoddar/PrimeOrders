@@ -7,6 +7,7 @@
 	@FinancialYearId INT,
 	@GeneratedModule VARCHAR(20),
 	@UserId INT,
+	@CreatedAt DATETIME,
 	@Status BIT
 AS
 BEGIN
@@ -21,6 +22,7 @@ BEGIN
 			FinancialYearId,
 			UserId,
 			GeneratedModule,
+			CreatedAt,
 			Status
 		) VALUES
 		(
@@ -31,6 +33,7 @@ BEGIN
 			@FinancialYearId,
 			@UserId,
 			@GeneratedModule,
+			@CreatedAt,
 			@Status
 		)
 
@@ -48,6 +51,7 @@ BEGIN
 			FinancialYearId = @FinancialYearId,
 			UserId = @UserId,
 			GeneratedModule = @GeneratedModule,
+			CreatedAt = @CreatedAt,
 			Status = @Status
 		WHERE Id = @Id
 	END

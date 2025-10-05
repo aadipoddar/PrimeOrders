@@ -116,6 +116,12 @@ public partial class FinancialAccountingReportPage
 			Console.WriteLine($"Error exporting to Excel: {ex.Message}");
 		}
 	}
+
+	private void ViewAccountingDetails(AccountingOverviewModel accounting)
+	{
+		if (accounting?.AccountingId > 0)
+			NavigationManager.NavigateTo($"/Reports/Financial/Accounting/View/{accounting.AccountingId}");
+	}
 	#endregion
 
 	#region Summary Calculations

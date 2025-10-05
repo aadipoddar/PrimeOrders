@@ -8,6 +8,7 @@
     [FinancialYearId] INT NOT NULL, 
     [UserId] INT NOT NULL, 
     [GeneratedModule] VARCHAR(20) NOT NULL , 
+    [CreatedAt] DATETIME NOT NULL DEFAULT (((getdate() AT TIME ZONE 'UTC') AT TIME ZONE 'India Standard Time')), 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_Accounting_ToVoucher] FOREIGN KEY (VoucherId) REFERENCES [Voucher](Id), 
     CONSTRAINT [FK_Accounting_ToFinancialYear] FOREIGN KEY (FinancialYearId) REFERENCES [FinancialYear](Id), 

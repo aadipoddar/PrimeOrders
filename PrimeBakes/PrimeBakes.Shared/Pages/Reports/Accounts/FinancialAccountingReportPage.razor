@@ -364,6 +364,23 @@ else
                                         Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
                             <GridColumn Field="@nameof(AccountingOverviewModel.Remarks)" HeaderText="Remarks" 
                                         Width="150"></GridColumn>
+                            <GridColumn HeaderText="Actions" 
+                                       Width="120" 
+                                       TextAlign="TextAlign.Center" 
+                                       AllowFiltering="false"
+                                       AllowSorting="false">
+                                <Template>
+                                    @{
+                                        var accounting = (context as AccountingOverviewModel);
+                                        <button class="action-btn-grid view-details-btn" 
+                                                @onclick="() => ViewAccountingDetails(accounting)"
+                                                title="View Accounting Details">
+                                            <i class="fas fa-eye"></i>
+                                            <span>View</span>
+                                        </button>
+                                    }
+                                </Template>
+                            </GridColumn>
                         </GridColumns>
                     </SfGrid>
                 </div>
@@ -862,6 +879,47 @@ else
         line-height: 1.5;
     }
 
+    /* Action Button Styles */
+    .action-btn-grid {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        min-width: 80px;
+        justify-content: center;
+    }
+
+    .action-btn-grid:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
+    }
+
+    .action-btn-grid:active {
+        transform: translateY(0);
+    }
+
+    .view-details-btn {
+        background: var(--primary-color);
+    }
+
+    .view-details-btn:hover {
+        background: var(--primary-dark);
+    }
+
+    .action-btn-grid i {
+        font-size: 12px;
+    }
+
     /* Responsive Design */
     @@media (max-width: 768px) {
         .header-content {
@@ -903,6 +961,20 @@ else
         .data-section,
         .filter-section {
             padding: 0 20px;
+        }
+
+        .action-btn-grid {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: 70px;
+        }
+
+        .action-btn-grid span {
+            display: none;
+        }
+
+        .action-btn-grid i {
+            font-size: 14px;
         }
     }
 

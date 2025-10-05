@@ -10,6 +10,7 @@ public class AccountingModel
 	public int FinancialYearId { get; set; }
 	public int UserId { get; set; }
 	public string GeneratedModule { get; set; }
+	public DateTime CreatedAt { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -63,6 +64,7 @@ public class AccountingOverviewModel
 	public decimal TotalCreditAmount { get; set; }
 	public decimal TotalDebitAmount { get; set; }
 	public decimal TotalAmount { get; set; }
+	public DateTime CreatedAt { get; set; }
 }
 
 #region Charts and Helper Models

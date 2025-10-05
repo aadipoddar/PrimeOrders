@@ -1,0 +1,1085 @@
+﻿@page "/Reports/Financial/Accounting/View/{AccountingId:int}"
+
+@using PrimeBakesLibrary.Models.Common
+@using PrimeBakesLibrary.Models.Accounts.FinancialAccounting
+@using PrimeBakesLibrary.Models.Accounts.Masters
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Buttons
+@using PrimeBakes.Shared.Services
+
+<HeadContent>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</HeadContent>
+
+<PageTitle>Financial Accounting Details - PrimeBakes</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="loading-overlay">
+        <div class="loading-content">
+            <div class="circular-dots-loader">
+                <span class="dot dot-1"></span>
+                <span class="dot dot-2"></span>
+                <span class="dot dot-3"></span>
+            </div>
+            <p class="loading-text">Loading Accounting Details...</p>
+        </div>
+    </div>
+}
+else if (_accountingOverview == null)
+{
+    <div class="error-container">
+        <div class="error-content">
+            <i class="fas fa-exclamation-triangle error-icon"></i>
+            <h2>Accounting Not Found</h2>
+            <p>The requested financial accounting record could not be found.</p>
+            <button @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/Accounting")' class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Reports
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="view-container">
+        <!-- Header Section -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/Accounting")' class="back-button">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="header-info">
+                        <div class="title-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <div class="title-info">
+                            <h1>Financial Accounting Details</h1>
+                            <p>Reference: @_accountingOverview.ReferenceNo</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    @if ((_user.LocationId == 1 && _user.Admin))
+                    {
+                        <button class="action-btn btn-edit" @onclick="EditAccounting" disabled="@_isProcessing">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit</span>
+                        </button>
+                        
+                        <button class="action-btn btn-delete" @onclick="DeleteAccounting" disabled="@_isProcessing">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Delete</span>
+                        </button>
+                    }
+                    
+                    <button class="action-btn btn-print" @onclick="PrintAccounting" disabled="@_isProcessing">
+                        <i class="fas fa-print"></i>
+                        <span>Print</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview Cards Section -->
+        <div class="overview-section">
+            <div class="overview-cards">
+                <!-- Accounting Information Card -->
+                <div class="overview-card primary-card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h3>Accounting Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="label">Reference No:</span>
+                                <span class="value">@_accountingOverview.ReferenceNo</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Date:</span>
+                                <span class="value">@_accountingOverview.AccountingDate.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Voucher Type:</span>
+                                <span class="value">@_accountingOverview.VoucherName</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Module:</span>
+                                <span class="value">@_accountingOverview.GeneratedModule</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Summary Card -->
+                <div class="overview-card financial-card">
+                    <div class="card-header">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Financial Summary</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="financial-summary">
+                            <div class="financial-item debit-item">
+                                <span class="label">Total Debit:</span>
+                                <span class="value debit-value">₹@_accountingOverview.TotalDebitAmount.ToString("N2")</span>
+                            </div>
+                            <div class="financial-item credit-item">
+                                <span class="label">Total Credit:</span>
+                                <span class="value credit-value">₹@_accountingOverview.TotalCreditAmount.ToString("N2")</span>
+                            </div>
+                            <div class="financial-item total-item">
+                                <span class="label">Total Amount:</span>
+                                <span class="value total-value">₹@_accountingOverview.TotalAmount.ToString("N2")</span>
+                            </div>
+                            <div class="financial-item balance-item">
+                                <span class="label">Balance:</span>
+                                <span class="value balance-value">₹@((_accountingOverview.TotalDebitAmount - _accountingOverview.TotalCreditAmount).ToString("N2"))</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Details Card -->
+                <div class="overview-card transaction-card">
+                    <div class="card-header">
+                        <i class="fas fa-list"></i>
+                        <h3>Transaction Details</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="label">Total Ledgers:</span>
+                                <span class="value">@_accountingOverview.TotalLedgers</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Created Date:</span>
+                                <span class="value">@_accountingOverview.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_accountingOverview.Remarks))
+                            {
+                                <div class="info-item full-width">
+                                    <span class="label">Remarks:</span>
+                                    <span class="value">@_accountingOverview.Remarks</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger Details Section -->
+        @if (_accountingDetails.Any())
+        {
+            <div class="details-section">
+                <div class="section-header">
+                    <div class="header-info">
+                        <h2>
+                            <i class="fas fa-book"></i>
+                            Ledger Entries
+                        </h2>
+                        <div class="record-count">
+                            @_accountingDetails.Count Entries
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-container">
+                    <SfGrid @ref="_sfGrid" DataSource="_accountingDetails" 
+                            AllowPaging="true" AllowSorting="true" AllowFiltering="true" 
+                            AllowSelection="true" AllowResizing="true" GridLines="GridLine.Both"
+                            Height="400">
+                        <GridPageSettings PageSize="10" PageSizes="new int[] { 5, 10, 20, 50 }"></GridPageSettings>
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                        <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+                        
+                        <GridColumns>
+                            <GridColumn Field="@nameof(AccountingDetailModel.Serial)" HeaderText="Serial" 
+                                        Width="80" TextAlign="TextAlign.Center"></GridColumn>
+                            <GridColumn Field="@nameof(AccountingDetailModel.LedgerName)" HeaderText="Ledger" 
+                                        Width="200"></GridColumn>
+                            <GridColumn Field="@nameof(AccountingDetailModel.GroupName)" HeaderText="Group" 
+                                        Width="150"></GridColumn>
+                            <GridColumn Field="@nameof(AccountingDetailModel.AccountTypeName)" HeaderText="Account Type" 
+                                        Width="150"></GridColumn>
+                            <GridColumn Field="@nameof(AccountingDetailModel.Debit)" HeaderText="Debit Amount" 
+                                        Format="C2" Width="130" TextAlign="TextAlign.Right">
+                                <Template>
+                                    @{
+                                        var detail = (context as AccountingDetailModel);
+                                        <span class="amount-cell @(detail.Debit > 0 ? "debit-amount" : "")">
+                                            @(detail.Debit > 0 ? $"₹{detail.Debit:N2}" : "-")
+                                        </span>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(AccountingDetailModel.Credit)" HeaderText="Credit Amount" 
+                                        Format="C2" Width="130" TextAlign="TextAlign.Right">
+                                <Template>
+                                    @{
+                                        var detail = (context as AccountingDetailModel);
+                                        <span class="amount-cell @(detail.Credit > 0 ? "credit-amount" : "")">
+                                            @(detail.Credit > 0 ? $"₹{detail.Credit:N2}" : "-")
+                                        </span>
+                                    }
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(AccountingDetailModel.Remarks)" HeaderText="Remarks" 
+                                        Width="200">
+                                <Template>
+                                    @{
+                                        var detail = (context as AccountingDetailModel);
+                                        <span class="remarks-cell" title="@detail.Remarks">
+                                            @(string.IsNullOrEmpty(detail.Remarks) ? "-" : 
+                                              detail.Remarks.Length > 30 ? $"{detail.Remarks.Substring(0, 30)}..." : detail.Remarks)
+                                        </span>
+                                    }
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="no-data-section">
+                <div class="no-data-content">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No Ledger Entries</h3>
+                    <p>No ledger entries found for this accounting record.</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Confirmation Dialog -->
+    @if (_showConfirmation)
+    {
+        <div class="confirmation-overlay" @onclick="() => _showConfirmation = false">
+            <div class="confirmation-dialog" @onclick:stopPropagation="true">
+                <div class="confirmation-header">
+                    <div class="confirmation-icon">
+                        <i class="@_confirmationIcon"></i>
+                    </div>
+                    <h3>@_confirmationTitle</h3>
+                </div>
+                
+                <div class="confirmation-content">
+                    <p class="confirmation-message">@_confirmationMessage</p>
+                    <div class="confirmation-details">
+                        <p>@_confirmationDetails</p>
+                    </div>
+                </div>
+                
+                <div class="confirmation-actions">
+                    <button class="btn-cancel" @onclick="() => _showConfirmation = false" disabled="@_isProcessing">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button class="btn-confirm" @onclick="ConfirmAction" disabled="@_isProcessing">
+                        <i class="@_confirmationIcon"></i>
+                        @_confirmationButtonText
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<style>
+    :root {
+        --primary-color: #e2137b;
+        --primary-light: rgba(226, 19, 123, 0.1);
+        --primary-dark: #c71068;
+        --secondary-color: #f5c2d3;
+        --accent-color: #ff6b9d;
+        --success-color: #00c853;
+        --warning-color: #ff9100;
+        --danger-color: #ff1744;
+        --dark-color: #2c2c54;
+        --light-color: #fef7f9;
+        --white: #ffffff;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --border-radius: 8px;
+        --border-radius-lg: 12px;
+        --border-radius-xl: 16px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Loading Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-content {
+        text-align: center;
+        padding: 40px;
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .circular-dots-loader {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 20px;
+    }
+
+    .circular-dots-loader .dot {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: rotate 1.8s infinite linear;
+    }
+
+    .circular-dots-loader .dot-1 {
+        background-color: var(--primary-color);
+        animation-delay: 0s;
+    }
+
+    .circular-dots-loader .dot-2 {
+        background-color: var(--primary-dark);
+        animation-delay: -0.6s;
+    }
+
+    .circular-dots-loader .dot-3 {
+        background-color: var(--accent-color);
+        animation-delay: -1.2s;
+    }
+
+    @@keyframes rotate {
+        0% {
+            transform: rotate(0deg) translate(-24px) rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg) translate(-24px) rotate(-360deg);
+        }
+    }
+
+    .loading-text {
+        font-size: 16px;
+        color: var(--gray-600);
+        margin: 0;
+    }
+
+    /* Error Container */
+    .error-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: var(--light-color);
+        padding: 20px;
+    }
+
+    .error-content {
+        text-align: center;
+        background: var(--white);
+        padding: 60px 40px;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-lg);
+        max-width: 500px;
+    }
+
+    .error-icon {
+        font-size: 64px;
+        color: var(--warning-color);
+        margin-bottom: 20px;
+    }
+
+    .error-content h2 {
+        font-size: 28px;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .error-content p {
+        color: var(--gray-600);
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+        padding: 12px 24px;
+        border-radius: var(--border-radius);
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .back-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    /* Main Container */
+    .view-container {
+        min-height: 100vh;
+        background: var(--light-color);
+        padding: 0;
+    }
+
+    /* Header Section */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: var(--white);
+        padding: 20px;
+        margin-bottom: 0;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .back-button {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        color: var(--white);
+        width: 50px;
+        height: 50px;
+        border-radius: var(--border-radius-lg);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .header-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .title-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+    }
+
+    .title-info h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .title-info p {
+        font-size: 16px;
+        opacity: 0.9;
+        margin: 5px 0 0 0;
+        font-weight: 300;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 14px;
+        text-decoration: none;
+        min-width: 100px;
+        justify-content: center;
+    }
+
+    .btn-edit {
+        background: rgba(0, 200, 83, 0.1);
+        color: var(--white);
+        border-color: rgba(0, 200, 83, 0.3);
+    }
+
+    .btn-edit:hover {
+        background: var(--success-color);
+        border-color: var(--success-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: rgba(255, 23, 68, 0.1);
+        color: var(--white);
+        border-color: rgba(255, 23, 68, 0.3);
+    }
+
+    .btn-delete:hover {
+        background: var(--danger-color);
+        border-color: var(--danger-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-print {
+        background: rgba(255, 145, 0, 0.1);
+        color: var(--white);
+        border-color: rgba(255, 145, 0, 0.3);
+    }
+
+    .btn-print:hover {
+        background: var(--warning-color);
+        border-color: var(--warning-color);
+        transform: translateY(-2px);
+    }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Overview Section */
+    .overview-section {
+        padding: 30px 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .overview-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+    }
+
+    .overview-card {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .overview-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+        background: var(--primary-light);
+        padding: 20px 25px;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-header i {
+        color: var(--primary-color);
+        font-size: 20px;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        color: var(--dark-color);
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .card-content {
+        padding: 25px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .info-item .label {
+        font-size: 14px;
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .info-item .value {
+        font-size: 16px;
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.active {
+        background: var(--success-color);
+        color: var(--white);
+    }
+
+    .status-badge.inactive {
+        background: var(--gray-400);
+        color: var(--white);
+    }
+
+    /* Financial Summary */
+    .financial-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .financial-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 15px;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-200);
+    }
+
+    .financial-item .label {
+        font-size: 14px;
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    .financial-item .value {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .debit-item {
+        background: rgba(0, 200, 83, 0.05);
+        border-color: rgba(0, 200, 83, 0.2);
+    }
+
+    .debit-value {
+        color: var(--success-color);
+    }
+
+    .credit-item {
+        background: rgba(255, 23, 68, 0.05);
+        border-color: rgba(255, 23, 68, 0.2);
+    }
+
+    .credit-value {
+        color: var(--danger-color);
+    }
+
+    .total-item {
+        background: var(--primary-light);
+        border-color: var(--primary-color);
+    }
+
+    .total-value {
+        color: var(--primary-color);
+    }
+
+    .balance-item {
+        background: rgba(255, 145, 0, 0.05);
+        border-color: rgba(255, 145, 0, 0.2);
+    }
+
+    .balance-value {
+        color: var(--warning-color);
+    }
+
+    /* Details Section */
+    .details-section {
+        padding: 0 20px 30px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .section-header {
+        background: var(--white);
+        padding: 20px 25px;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .header-info h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-info h2 i {
+        color: var(--primary-color);
+    }
+
+    .record-count {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        padding: 8px 16px;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .grid-container {
+        background: var(--white);
+        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    /* Grid Cell Styles */
+    .amount-cell {
+        font-weight: 600;
+    }
+
+    .debit-amount {
+        color: var(--success-color);
+    }
+
+    .credit-amount {
+        color: var(--danger-color);
+    }
+
+    .remarks-cell {
+        display: block;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* No Data Section */
+    .no-data-section {
+        padding: 60px 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .no-data-content {
+        text-align: center;
+        padding: 60px 40px;
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        max-width: 400px;
+    }
+
+    .no-data-content i {
+        font-size: 48px;
+        color: var(--gray-400);
+        margin-bottom: 20px;
+    }
+
+    .no-data-content h3 {
+        margin: 0 0 10px 0;
+        font-size: 20px;
+        color: var(--gray-700);
+    }
+
+    .no-data-content p {
+        margin: 0;
+        color: var(--gray-500);
+        line-height: 1.5;
+    }
+
+    /* Confirmation Dialog */
+    .confirmation-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+
+    .confirmation-dialog {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        max-width: 500px;
+        width: 100%;
+        overflow: hidden;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .confirmation-header {
+        padding: 25px;
+        text-align: center;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .confirmation-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 24px;
+        background: var(--primary-light);
+        color: var(--primary-color);
+    }
+
+    .confirmation-header h3 {
+        margin: 0;
+        font-size: 20px;
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    .confirmation-content {
+        padding: 25px;
+    }
+
+    .confirmation-message {
+        font-size: 16px;
+        color: var(--gray-700);
+        margin: 0 0 15px 0;
+        text-align: center;
+    }
+
+    .confirmation-details {
+        background: var(--gray-50);
+        padding: 15px;
+        border-radius: var(--border-radius);
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .confirmation-details p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--gray-600);
+        line-height: 1.5;
+    }
+
+    .confirmation-actions {
+        padding: 25px;
+        display: flex;
+        gap: 15px;
+        justify-content: flex-end;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .btn-cancel,
+    .btn-confirm {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 14px;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+    .btn-cancel {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+
+    .btn-cancel:hover {
+        background: var(--gray-200);
+        border-color: var(--gray-400);
+    }
+
+    .btn-confirm {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    .btn-confirm:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel:disabled,
+    .btn-confirm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .header-left {
+            width: 100%;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: auto;
+        }
+
+        .overview-cards {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .financial-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .overview-section,
+        .details-section {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .page-header {
+            padding: 20px 15px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .title-info h1 {
+            font-size: 24px;
+        }
+
+        .title-info p {
+            font-size: 14px;
+        }
+
+        .header-info {
+            gap: 15px;
+        }
+
+        .title-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .confirmation-dialog {
+            margin: 15px;
+        }
+    }
+</style>
