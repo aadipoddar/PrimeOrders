@@ -58,7 +58,7 @@ public static class ProductExcelExport
 			nameof(ProductOverviewModel.ProductName),
 			nameof(ProductOverviewModel.ProductCode),
 			nameof(ProductOverviewModel.ProductCategoryName),
-			nameof(ProductOverviewModel.SaleId),
+			nameof(ProductOverviewModel.BillNo),
 			nameof(ProductOverviewModel.BillDateTime),
 			nameof(ProductOverviewModel.QuantitySold),
 			nameof(ProductOverviewModel.AveragePrice),
@@ -92,7 +92,7 @@ public static class ProductExcelExport
 				Width = 20,
 				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
 			},
-			[nameof(ProductOverviewModel.SaleId)] = new()
+			[nameof(ProductOverviewModel.BillNo)] = new()
 			{
 				DisplayName = "Bill No",
 				Width = 12,

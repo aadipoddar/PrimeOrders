@@ -76,10 +76,10 @@ public partial class ProductCategoryPage
 			if (_currentUser.LocationId != 1)
 			{
 				// Non-location-1 users can only see their own categories
-				_categories = _categories.Where(c => c.LocationId == _currentUser.LocationId).ToList();
+				_categories = [.. _categories.Where(c => c.LocationId == _currentUser.LocationId)];
 
 				// Non-location-1 users can only create categories for their location
-				_locations = _locations.Where(l => l.Id == _currentUser.LocationId).ToList();
+				_locations = [.. _locations.Where(l => l.Id == _currentUser.LocationId)];
 			}
 
 			// Refresh grid if it exists

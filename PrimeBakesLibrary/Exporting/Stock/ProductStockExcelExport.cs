@@ -427,7 +427,7 @@ public static class ProductStockExcelExport
 
 		// Generate title and worksheet name based on location
 		string reportTitle = "Finished Product Stock Transaction Details";
-		
+
 		if (selectedLocationId > 0 && locations is not null)
 		{
 			var location = locations.FirstOrDefault(l => l.Id == selectedLocationId);

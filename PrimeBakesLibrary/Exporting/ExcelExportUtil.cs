@@ -642,7 +642,7 @@ public static class ExcelExportUtil
 		if (columnsToTotal.Count > 0)
 		{
 			// Add grand total row
-		rowIndex += 1;
+			rowIndex += 1;
 
 			// Find where to start the total label based on the number of columns to total
 			int totalLabelColumnCount = Math.Max(1, columnOrder.Count - columnsToTotal.Count);
@@ -678,7 +678,8 @@ public static class ExcelExportUtil
 					worksheet.Range[cellAddress].CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
 					worksheet.Range[cellAddress].CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
 				}
-			};
+			}
+			;
 
 			rowIndex++;
 		}

@@ -61,7 +61,7 @@ public partial class UserPage
 			// If current user is not from primary location, filter users
 			if (_currentUser.LocationId != 1)
 			{
-				_users = _users.Where(u => u.LocationId == _currentUser.LocationId).ToList();
+				_users = [.. _users.Where(u => u.LocationId == _currentUser.LocationId)];
 				_userModel.LocationId = _currentUser.LocationId;
 			}
 

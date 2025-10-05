@@ -233,9 +233,7 @@ public partial class ProductPage
 		// Get locations that don't already have active rates for the selected product
 		var existingLocationIds = _productRates.Where(r => r.Status).Select(r => r.LocationId).ToHashSet();
 
-		_availableLocationsForRates = _locations
-			.Where(location => !existingLocationIds.Contains(location.Id))
-			.ToList();
+		_availableLocationsForRates = [.. _locations.Where(location => !existingLocationIds.Contains(location.Id))];
 
 		// Reset the selected location if it's no longer available
 		if (_newLocationRateId > 0 && !_availableLocationsForRates.Any(l => l.Id == _newLocationRateId))

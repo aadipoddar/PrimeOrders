@@ -20,7 +20,7 @@ public partial class KitchenIssueReportPage
 	private UserModel _user;
 
 	private bool _isLoading = true;
-	private bool _showCharts = false; // Charts hidden by default
+	private bool _showCharts = true; // Charts hidden by default
 	private bool _chartsLoading = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));

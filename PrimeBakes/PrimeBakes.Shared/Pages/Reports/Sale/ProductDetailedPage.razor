@@ -1,0 +1,1494 @@
+﻿@page "/Reports/Sale/ProductDetailed"
+
+@using PrimeBakesLibrary.Models.Product
+@using PrimeBakesLibrary.Models.Common
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Data
+@using PrimeBakes.Shared.Services
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<PageTitle>Product Detailed Analysis - PrimeBakes</PageTitle>
+
+@if (_isLoading || _user is null)
+{
+    <div class="loading-overlay">
+        <div class="loading-content">
+            <div class="circular-dots-loader">
+                <span class="dot dot-1"></span>
+                <span class="dot dot-2"></span>
+                <span class="dot dot-3"></span>
+            </div>
+            <p class="loading-text">Loading Product Details...</p>
+        </div>
+    </div>
+}
+
+<div class="product-detailed-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <button @onclick="@(() => NavigationManager.NavigateTo("/Reports-Dashboard"))" class="back-to-dashboard-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+            </button>
+            <div class="title-section">
+                <div class="icon-wrapper">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="title-text">
+                    <h1>Product Detailed Analysis</h1>
+                    <p>Comprehensive product performance and sales analytics dashboard</p>
+                    @if (_selectedLocation != null)
+                    {
+                        <div class="location-badge">
+                            <i class="fas fa-map-marker-alt"></i>
+                            @_selectedLocation.Name
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="header-actions">
+                <button @onclick="ExportToExcel" class="export-btn" disabled="@_isLoading">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Export Excel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="filters-container">
+            <div class="filter-group">
+                <div class="date-filter">
+                    <label class="filter-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Date Range
+                    </label>
+                    <SfDateRangePicker TValue="DateOnly" @bind-StartDate="_startDate" @bind-EndDate="_endDate" 
+                                       Format="dd/MM/yyyy" ShowClearButton="true" AllowEdit="true">
+                        <DateRangePickerEvents TValue="DateOnly" ValueChange="OnDateRangeChanged"></DateRangePickerEvents>
+                    </SfDateRangePicker>
+                </div>
+            </div>
+
+            @if (_user is not null && _user.LocationId == 1)
+            {
+                <div class="filter-group">
+                    <label class="filter-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location
+                    </label>
+                    <SfComboBox TValue="int?" 
+                                TItem="LocationModel"
+                                Placeholder="Select Location"
+                                AllowFiltering="true"
+                                DataSource="_locations"
+                                Value="@_selectedLocationId"
+                                PopupHeight="300px">
+                        <ComboBoxFieldSettings Value="Id" Text="Name" />
+                        <ComboBoxEvents TItem="LocationModel" TValue="int?" ValueChange="OnLocationChanged" />
+                    </SfComboBox>
+                </div>
+            }
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-tags"></i>
+                    Product Category
+                </label>
+                <SfDropDownList TValue="int" TItem="ProductCategoryModel" @bind-Value="_selectedCategoryId" 
+                                DataSource="_productCategories" Query="@(new Query())" 
+                                PopupHeight="300px" AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                    <DropDownListEvents TValue="int" TItem="ProductCategoryModel" ValueChange="OnCategoryChanged"></DropDownListEvents>
+                </SfDropDownList>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-cube"></i>
+                    Product
+                </label>
+                <SfDropDownList TValue="int" TItem="ProductModel" @bind-Value="_selectedProductId" 
+                                DataSource="_filteredProducts" Query="@(new Query())" 
+                                PopupHeight="300px" AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                    <DropDownListFieldSettings Value="Id" Text="Name"></DropDownListFieldSettings>
+                    <DropDownListEvents TValue="int" TItem="ProductModel" ValueChange="OnProductChanged"></DropDownListEvents>
+                </SfDropDownList>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards Section -->
+    @if (_filteredProductOverviews.Any())
+    {
+        <div class="summary-section">
+            <div class="summary-cards">
+                <div class="summary-card sales-card">
+                    <div class="card-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-value">₹@GetTotalProductSales().ToString("N0")</div>
+                        <div class="card-label">Total Sales</div>
+                    </div>
+                </div>
+
+                <div class="summary-card quantity-card">
+                    <div class="card-icon">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-value">@GetTotalQuantity().ToString("N0")</div>
+                        <div class="card-label">Total Quantity</div>
+                    </div>
+                </div>
+
+                <div class="summary-card products-card">
+                    <div class="card-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-value">@GetUniqueProducts()</div>
+                        <div class="card-label">Unique Products</div>
+                    </div>
+                </div>
+
+                <div class="summary-card average-card">
+                    <div class="card-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-value">₹@GetAverageProductValue().ToString("N0")</div>
+                        <div class="card-label">Avg. Product Value</div>
+                    </div>
+                </div>
+
+                <div class="summary-card discount-card">
+                    <div class="card-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-value">₹@GetTotalDiscount().ToString("N0")</div>
+                        <div class="card-label">Total Discount (@GetDiscountPercentage().ToString("F1")%)</div>
+                    </div>
+                </div>
+
+                <div class="summary-card tax-card">
+                    <div class="card-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-value">₹@GetTotalTax().ToString("N0")</div>
+                        <div class="card-label">Total Tax (@GetTaxPercentage().ToString("F1")%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Performance Section -->
+        @if (GetCategorySummary().Any())
+        {
+            <div class="category-section">
+                <div class="section-header">
+                    <h3>
+                        <i class="fas fa-chart-pie"></i>
+                        Category Performance Analysis
+                    </h3>
+                </div>
+                <div class="category-grid">
+                    @foreach (var category in GetCategorySummary().Take(6))
+                    {
+                        <div class="category-card">
+                            <div class="category-header">
+                                <h4>@category.CategoryName</h4>
+                                <div class="category-percentage">@GetCategoryPercentage(category.TotalSales).ToString("F1")%</div>
+                            </div>
+                            <div class="category-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-rupee-sign"></i>
+                                    <span>₹@category.TotalSales.ToString("N0")</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-cube"></i>
+                                    <span>@category.ProductCount Products</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-weight-hanging"></i>
+                                    <span>@category.TotalQuantity.ToString("N0") Qty</span>
+                                </div>
+                            </div>
+                            <div class="category-progress">
+                                <div class="progress-bar" style="width: @(GetCategoryPercentage(category.TotalSales))%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Top Products Section -->
+        @if (GetTopProducts().Any())
+        {
+            <div class="top-products-section">
+                <div class="section-header">
+                    <h3>
+                        <i class="fas fa-trophy"></i>
+                        Top Performing Products
+                    </h3>
+                </div>
+                <div class="top-products-grid">
+                    @foreach (var product in GetTopProducts().Take(8))
+                    {
+                        <div class="product-card">
+                            <div class="product-rank">
+                                @(GetTopProducts().ToList().IndexOf(product) + 1)
+                            </div>
+                            <div class="product-info">
+                                <h4>@product.ProductName</h4>
+                                <p>@product.ProductCode</p>
+                            </div>
+                            <div class="product-stats">
+                                <div class="stat-value">₹@product.TotalSales.ToString("N0")</div>
+                                <div class="stat-label">Sales</div>
+                            </div>
+                            <div class="product-metrics">
+                                <span class="metric">
+                                    <i class="fas fa-cubes"></i>
+                                    @product.TotalQuantity.ToString("N0")
+                                </span>
+                                <span class="metric">
+                                    <i class="fas fa-tag"></i>
+                                    ₹@product.AveragePrice.ToString("N0")
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Charts Section -->
+        @if (_showCharts)
+        {
+            <div class="charts-section">
+                <div class="charts-grid">
+                    <!-- Top Products Pie Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4>Top Products Distribution</h4>
+                            <p>Sales share by top products</p>
+                        </div>
+                        <div class="chart-container">
+                            <SfAccumulationChart EnableSmartLabels="true">
+                                <AccumulationChartSeriesCollection>
+                                    <AccumulationChartSeries DataSource="GetTopProductsChartData()" 
+                                                           XName="ProductName" 
+                                                           YName="Sales" 
+                                                           Name="Product Sales"
+                                                           InnerRadius="30%">
+                                        <AccumulationDataLabelSettings Visible="true" 
+                                                                     Name="ProductName" 
+                                                                     Position="AccumulationLabelPosition.Outside" />
+                                        <AccumulationChartAnimation Enable="true" />
+                                    </AccumulationChartSeries>
+                                </AccumulationChartSeriesCollection>
+                                <AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
+                                <AccumulationChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y} (${point.percentage}%)" />
+                            </SfAccumulationChart>
+                        </div>
+                    </div>
+                    
+                    <!-- Category Sales Column Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4>Category Sales Performance</h4>
+                            <p>Sales comparison by category</p>
+                        </div>
+                        <div class="chart-container">
+                            <SfChart>
+                                <ChartArea>
+                                    <ChartAreaBorder Width="0" />
+                                </ChartArea>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                    <ChartAxisLabelStyle Color="#666" />
+                                </ChartPrimaryXAxis>
+                                <ChartPrimaryYAxis LabelFormat="₹{value}">
+                                    <ChartAxisLabelStyle Color="#666" />
+                                </ChartPrimaryYAxis>
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="GetCategorySalesChartData()" 
+                                               XName="CategoryName" 
+                                               YName="Sales" 
+                                               Type="ChartSeriesType.Column"
+                                               Name="Category Sales"
+                                               Fill="#e2137b">
+                                        <ChartMarker>
+                                            <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Middle" />
+                                        </ChartMarker>
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                                <ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
+                            </SfChart>
+                        </div>
+                    </div>
+                    
+                    <!-- Monthly Sales Trend -->
+                    <div class="chart-card wide-chart">
+                        <div class="chart-header">
+                            <h4>Monthly Sales Trend</h4>
+                            <p>Product sales performance over time</p>
+                        </div>
+                        <div class="chart-container">
+                            <SfChart>
+                                <ChartArea>
+                                    <ChartAreaBorder Width="0" />
+                                </ChartArea>
+                                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                    <ChartAxisLabelStyle Color="#666" />
+                                </ChartPrimaryXAxis>
+                                <ChartPrimaryYAxis LabelFormat="₹{value}">
+                                    <ChartAxisLabelStyle Color="#666" />
+                                </ChartPrimaryYAxis>
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="GetMonthlySalesChartData()" 
+                                               XName="Month" 
+                                               YName="Sales" 
+                                               Type="ChartSeriesType.SplineArea"
+                                               Name="Monthly Sales"
+                                               Fill="#e2137b"
+                                               Opacity="0.7">
+                                        <ChartMarker Visible="true" Fill="#e2137b" />
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                                <ChartTooltipSettings Enable="true" Format="Month: ${point.x}<br/>Sales: ₹${point.y}" />
+                            </SfChart>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity vs Revenue Scatter Chart -->
+                    <div class="chart-card wide-chart">
+                        <div class="chart-header">
+                            <h4>Quantity vs Revenue Analysis</h4>
+                            <p>Product performance correlation</p>
+                        </div>
+                        <div class="chart-container">
+                            <SfChart>
+                                <ChartArea>
+                                    <ChartAreaBorder Width="0" />
+                                </ChartArea>
+                                <ChartPrimaryXAxis Title="Quantity Sold">
+                                    <ChartAxisLabelStyle Color="#666" />
+                                </ChartPrimaryXAxis>
+                                <ChartPrimaryYAxis Title="Revenue (₹)" LabelFormat="₹{value}">
+                                    <ChartAxisLabelStyle Color="#666" />
+                                </ChartPrimaryYAxis>
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="GetQuantityRevenueChartData()" 
+                                               XName="Quantity" 
+                                               YName="Revenue" 
+                                               Type="ChartSeriesType.Scatter"
+                                               Name="Product Performance"
+                                               Fill="#e2137b">
+                                        <ChartMarker Visible="true" Height="8" Width="8" Fill="#e2137b" />
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                                <ChartTooltipSettings Enable="true" Format="Quantity: ${point.x}<br/>Revenue: ₹${point.y}" />
+                            </SfChart>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (_showCharts && !_filteredProductOverviews.Any())
+        {
+            <div class="no-charts-message">
+                <div class="no-charts-content">
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>No Data for Charts</h3>
+                    <p>Charts will appear when product data is available for the selected period.</p>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Data Grid Section -->
+    <div class="grid-section">
+        <div class="section-header">
+            <div class="header-info">
+                <h2>
+                    <i class="fas fa-table"></i>
+                    Product Transaction Details
+                </h2>
+                <div class="record-count">
+                    @_filteredProductOverviews.Count Records Found
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn charts-btn" @onclick="ToggleCharts">
+                    <i class="fas @(_showCharts ? "fa-chart-bar" : "fa-chart-line")"></i>
+                    @(_showCharts ? "Hide Charts" : "Show Charts")
+                </button>
+                <button class="action-btn export-btn" @onclick="ExportToExcel">
+                    <i class="fas fa-file-excel"></i>
+                    Export to Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <SfGrid @ref="_sfGrid" DataSource="_filteredProductOverviews" 
+                    AllowPaging="true" AllowSorting="true" AllowFiltering="true" 
+                    AllowSelection="true" AllowResizing="true" GridLines="GridLine.Both"
+                    Height="600">
+                <GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }"></GridPageSettings>
+                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+                <GridEvents TValue="ProductOverviewModel" RowSelected="OnProductRowSelected"></GridEvents>
+                
+                <GridColumns>
+                    <GridColumn Field="@nameof(ProductOverviewModel.BillDateTime)" HeaderText="Date" 
+                                Format="dd/MM/yyyy" Width="120" Type="ColumnType.Date"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.BillNo)" HeaderText="Bill No" Width="120"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.ProductName)" HeaderText="Product Name" Width="200"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.ProductCode)" HeaderText="Product Code" Width="120"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.ProductCategoryName)" HeaderText="Category" Width="150"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.QuantitySold)" HeaderText="Quantity" 
+                                Width="100" Format="N0" TextAlign="TextAlign.Right"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.AveragePrice)" HeaderText="Avg Rate" 
+                                Width="100" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.BaseTotal)" HeaderText="Base Total" 
+                                Width="120" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.DiscountAmount)" HeaderText="Discount" 
+                                Width="100" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.TotalTaxAmount)" HeaderText="Tax" 
+                                Width="100" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.TotalAmount)" HeaderText="Total Amount" 
+                                Width="130" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                    <GridColumn Field="@nameof(ProductOverviewModel.AveragePrice)" HeaderText="Avg Price" 
+                                Width="110" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    @if (_selectedProductDetail != null)
+    {
+        <div class="product-detail-modal" @onclick="CloseProductDetail">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h3>
+                        <i class="fas fa-cube"></i>
+                        Product Transaction Detail
+                    </h3>
+                    <button @onclick="CloseProductDetail" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="detail-grid">
+                        <div class="detail-row">
+                            <span class="detail-label">Bill No:</span>
+                            <span class="detail-value">@_selectedProductDetail.BillNo</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date:</span>
+                            <span class="detail-value">@_selectedProductDetail.BillDateTime.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Product Name:</span>
+                            <span class="detail-value">@_selectedProductDetail.ProductName</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Product Code:</span>
+                            <span class="detail-value">@_selectedProductDetail.ProductCode</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Category:</span>
+                            <span class="detail-value">@_selectedProductDetail.ProductCategoryName</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Quantity Sold:</span>
+                            <span class="detail-value">@_selectedProductDetail.QuantitySold.ToString("N0")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Avg Rate:</span>
+                            <span class="detail-value">₹@_selectedProductDetail.AveragePrice.ToString("N2")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Base Total:</span>
+                            <span class="detail-value">₹@_selectedProductDetail.BaseTotal.ToString("N2")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Discount Amount:</span>
+                            <span class="detail-value">₹@_selectedProductDetail.DiscountAmount.ToString("N2")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tax Amount:</span>
+                            <span class="detail-value">₹@_selectedProductDetail.TotalTaxAmount.ToString("N2")</span>
+                        </div>
+                        <div class="detail-row total-row">
+                            <span class="detail-label">Total Amount:</span>
+                            <span class="detail-value">₹@_selectedProductDetail.TotalAmount.ToString("N2")</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Average Price:</span>
+                            <span class="detail-value">₹@_selectedProductDetail.AveragePrice.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    :root {
+        --primary-color: #e2137b;
+        --primary-light: rgba(226, 19, 123, 0.1);
+        --primary-dark: #c71068;
+        --secondary-color: #f5c2d3;
+        --accent-color: #ff6b9d;
+        --success-color: #00c853;
+        --warning-color: #ff9100;
+        --error-color: #f44336;
+        --info-color: #2196f3;
+        --dark-color: #1a202c;
+        --gray-900: #1a202c;
+        --gray-800: #2d3748;
+        --gray-700: #4a5568;
+        --gray-600: #718096;
+        --gray-500: #a0aec0;
+        --gray-400: #cbd5e0;
+        --gray-300: #e2e8f0;
+        --gray-200: #edf2f7;
+        --gray-100: #f7fafc;
+        --gray-50: #fafbfc;
+        --white: #ffffff;
+        --light-color: #f8fafc;
+        --border-radius: 8px;
+        --border-radius-lg: 12px;
+        --border-radius-xl: 16px;
+        --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+        --transition: all 0.3s ease;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .product-detailed-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--light-color) 0%, var(--gray-50) 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Loading Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-content {
+        text-align: center;
+        padding: 40px;
+        border-radius: var(--border-radius-xl);
+        background: var(--white);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .circular-dots-loader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        animation: bounce 1.4s ease-in-out infinite both;
+    }
+
+    .dot-1 { animation-delay: -0.32s; }
+    .dot-2 { animation-delay: -0.16s; }
+    .dot-3 { animation-delay: 0s; }
+
+    @@keyframes bounce {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .loading-text {
+        color: var(--gray-600);
+        font-size: 16px;
+        margin: 0;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: var(--white);
+        padding: 20px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0 auto;
+        gap: 20px;
+    }
+
+    .back-to-dashboard-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: var(--white);
+        padding: 12px 20px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 14px;
+        font-weight: var(--font-weight-medium);
+        text-decoration: none;
+    }
+
+    .back-to-dashboard-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .title-section {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+    }
+
+    .icon-wrapper {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-wrapper i {
+        font-size: 24px;
+    }
+
+    .title-text h1 {
+        font-size: 28px;
+        font-weight: var(--font-weight-bold);
+        margin: 0 0 8px 0;
+    }
+
+    .title-text p {
+        font-size: 16px;
+        opacity: 0.9;
+        margin: 0 0 8px 0;
+    }
+
+    .location-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 12px;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        font-weight: var(--font-weight-medium);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .export-btn {
+        background: var(--success-color);
+        border: none;
+        color: var(--white);
+        padding: 12px 20px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 14px;
+        font-weight: var(--font-weight-medium);
+    }
+
+    .export-btn:hover:not(:disabled) {
+        background: #00a646;
+        transform: translateY(-2px);
+    }
+
+    .export-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Filters Section */
+    .filters-section {
+        background: var(--white);
+        padding: 20px;
+        margin: 20px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+    }
+
+    .filters-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: var(--font-weight-semibold);
+        color: var(--gray-700);
+        font-size: 14px;
+    }
+
+    .filter-label i {
+        color: var(--primary-color);
+        font-size: 16px;
+    }
+
+    .date-filter .e-input-group {
+        border: 2px solid var(--gray-300);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+    }
+
+    .date-filter .e-input-group:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Grid Section */
+    .grid-section {
+        background: var(--white);
+        margin: 20px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+        padding: 20px;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--gray-800);
+        font-size: 20px;
+        font-weight: var(--font-weight-bold);
+        margin: 0;
+    }
+
+    .section-header h2 i {
+        color: var(--primary-color);
+        font-size: 22px;
+    }
+
+    .record-count {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        padding: 8px 16px;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        font-weight: var(--font-weight-semibold);
+    }
+
+    .grid-container {
+        padding: 20px;
+    }
+
+    /* Product Detail Modal */
+    .product-detail-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+    }
+
+    .modal-content {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-xl);
+        max-width: 600px;
+        width: 100%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: var(--white);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    }
+
+    .modal-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-size: 18px;
+        font-weight: var(--font-weight-bold);
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--white);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+    }
+
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .detail-grid {
+        display: grid;
+        gap: 16px;
+    }
+
+    .detail-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row.total-row {
+        background: var(--primary-light);
+        padding: 16px;
+        border-radius: var(--border-radius);
+        border: none;
+        margin-top: 8px;
+    }
+
+    .detail-label {
+        font-weight: var(--font-weight-semibold);
+        color: var(--gray-700);
+        font-size: 14px;
+    }
+
+    .detail-value {
+        color: var(--gray-900);
+        font-size: 14px;
+        font-weight: var(--font-weight-medium);
+    }
+
+    .total-row .detail-label,
+    .total-row .detail-value {
+        color: var(--primary-color);
+        font-weight: var(--font-weight-bold);
+        font-size: 16px;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1200px) {
+        .header-content {
+            padding: 15px;
+        }
+        
+        .filters-container {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            padding: 15px;
+        }
+        
+        .header-content {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .title-section {
+            text-align: center;
+        }
+        
+        .filters-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .filters-section, .grid-section {
+            margin: 15px;
+        }
+        
+        .detail-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .detail-label {
+            font-weight: var(--font-weight-bold);
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .title-text h1 {
+            font-size: 24px;
+        }
+        
+        .title-text p {
+            font-size: 14px;
+        }
+        
+        .modal-content {
+            margin: 10px;
+            max-height: 90vh;
+        }
+        
+        .modal-header {
+            padding: 15px;
+        }
+        
+        .modal-body {
+            padding: 15px;
+        }
+
+        .summary-cards,
+        .category-grid,
+        .top-products-grid,
+        .charts-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .chart-card.wide-chart {
+            grid-column: 1;
+        }
+    }
+
+    /* Summary Cards Styles */
+    .summary-section {
+        margin: 30px;
+        margin-bottom: 40px;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .summary-card {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        padding: 25px;
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, transparent, var(--primary-light));
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-light);
+        border-radius: var(--border-radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .card-content {
+        flex: 1;
+        z-index: 1;
+    }
+
+    .card-value {
+        font-size: 28px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+        margin-bottom: 5px;
+        line-height: 1.2;
+    }
+
+    .card-label {
+        font-size: 14px;
+        color: var(--gray-600);
+        font-weight: var(--font-weight-medium);
+    }
+
+    /* Category Performance Styles */
+    .category-section {
+        margin: 30px;
+        margin-bottom: 40px;
+    }
+
+    .category-section .section-header {
+        background: var(--white);
+        padding: 25px 30px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        margin-bottom: 25px;
+    }
+
+    .category-section h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .category-section h3 i {
+        color: var(--primary-color);
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .category-card {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        padding: 25px;
+        box-shadow: var(--shadow);
+        border-top: 3px solid var(--primary-color);
+        transition: var(--transition);
+    }
+
+    .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .category-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+    }
+
+    .category-percentage {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        padding: 6px 12px;
+        border-radius: var(--border-radius);
+        font-weight: var(--font-weight-bold);
+        font-size: 14px;
+    }
+
+    .category-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--gray-700);
+    }
+
+    .stat-item i {
+        color: var(--primary-color);
+        width: 16px;
+    }
+
+    .category-progress {
+        width: 100%;
+        height: 6px;
+        background: var(--gray-200);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        border-radius: 3px;
+        transition: width 0.8s ease;
+    }
+
+    /* Top Products Styles */
+    .top-products-section {
+        margin: 30px;
+        margin-bottom: 40px;
+    }
+
+    .top-products-section .section-header {
+        background: var(--white);
+        padding: 25px 30px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        margin-bottom: 25px;
+    }
+
+    .top-products-section h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .top-products-section h3 i {
+        color: var(--warning-color);
+    }
+
+    .top-products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        padding: 25px;
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--warning-color);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, transparent, rgba(255, 145, 0, 0.1));
+        border-radius: 50%;
+        transform: translate(25px, -25px);
+    }
+
+    .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .product-rank {
+        width: 40px;
+        height: 40px;
+        background: var(--warning-color);
+        color: var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: var(--font-weight-bold);
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .product-info {
+        flex: 1;
+        z-index: 1;
+    }
+
+    .product-info h4 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+        line-height: 1.3;
+    }
+
+    .product-info p {
+        margin: 0;
+        font-size: 12px;
+        color: var(--gray-500);
+        font-weight: var(--font-weight-medium);
+    }
+
+    .product-stats {
+        text-align: right;
+        z-index: 1;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+        margin-bottom: 2px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+
+    .product-metrics {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+        z-index: 1;
+    }
+
+    .metric {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+
+    .metric i {
+        color: var(--primary-color);
+    }
+
+    /* Charts Section Styles */
+    .charts-section {
+        margin: 30px;
+        margin-bottom: 40px;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .chart-card {
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .chart-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .chart-card.wide-chart {
+        grid-column: span 2;
+    }
+
+    .chart-header {
+        padding: 25px 30px 15px;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .chart-header h4 {
+        margin: 0 0 5px 0;
+        font-size: 20px;
+        font-weight: var(--font-weight-bold);
+        color: var(--dark-color);
+    }
+
+    .chart-header p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--gray-600);
+    }
+
+    .chart-container {
+        padding: 20px;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .no-charts-message {
+        margin: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+    }
+
+    .no-charts-content {
+        text-align: center;
+        padding: 40px;
+        background: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        max-width: 400px;
+    }
+
+    .no-charts-content i {
+        font-size: 48px;
+        color: var(--gray-400);
+        margin-bottom: 20px;
+    }
+
+    .no-charts-content h3 {
+        margin: 0 0 10px 0;
+        font-size: 20px;
+        color: var(--gray-700);
+    }
+
+    .no-charts-content p {
+        margin: 0;
+        color: var(--gray-500);
+        line-height: 1.5;
+    }
+
+    /* Action Buttons */
+    .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: var(--font-weight-medium);
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .charts-btn {
+        background: var(--primary-light);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+    }
+
+    .charts-btn:hover {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    .export-btn {
+        background: var(--success-color);
+        color: var(--white);
+    }
+
+    .export-btn:hover {
+        background: #00a843;
+        transform: translateY(-1px);
+    }
+    }
+</style>

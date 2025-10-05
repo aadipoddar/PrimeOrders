@@ -20,6 +20,7 @@ public class ProductOverviewModel
 	public int ProductCategoryId { get; set; }
 	public string ProductCategoryName { get; set; }
 	public int SaleId { get; set; }
+	public string BillNo { get; set; }
 	public DateTime BillDateTime { get; set; }
 	public int LocationId { get; set; }
 	public decimal QuantitySold { get; set; }

@@ -1,6 +1,12 @@
-﻿@page "/Reports-Dashboard"
+@page "/Reports-Dashboard"
 
 <PageTitle>Reports Dashboard - Prime Bakes</PageTitle>
+
+<HeadContent>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</HeadContent>
 
 @if (_isLoading || _user is null)
 {
@@ -24,89 +30,142 @@ else
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
 				<button @onclick='() => NavigationManager.NavigateTo("/")' class="back-button">
-					<span class="back-icon">←</span> Back to Dashboard
+					<i class="fas fa-arrow-left"></i> Back to Dashboard
 				</button>
 			</div>
 		</div>
 
 		<div class="welcome-section">
-			<h2>Reports Management</h2>
-			<p>Select an option below to view various reports and analytics</p>
+			<h2><i class="fas fa-chart-line"></i> Reports Management</h2>
+			<p>Comprehensive analytics and reporting dashboard for business insights</p>
 		</div>
 
-		<div class="dashboard-cards">
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Summary")'>
-				<div class="card-icon summary-report-icon">📊</div>
-				<h3>Sale Summary Reports</h3>
-				<p>View overall business performance metrics</p>
+		<!-- Sales Reports Section -->
+		<div class="reports-section">
+			<div class="section-title">
+				<h3><i class="fas fa-chart-bar"></i> Sales & Revenue Reports</h3>
+				<p>Monitor sales performance and revenue analytics</p>
 			</div>
-
-			@if (_user.LocationId == 1)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductSummary")'>
-					<div class="card-icon item-summary-icon">📋</div>
-					<h3>Finished Goods / Product Summary Report</h3>
-					<p>View aggregated product sales analytics</p>
-				</div>
-			}
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed/")'>
-				<div class="card-icon detailed-report-icon">📈</div>
-				<h3>Sale Detailed Reports</h3>
-				<p>View comprehensive sales and transaction details</p>
-			</div>
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductDetail")'>
-				<div class="card-icon item-report-icon">📦</div>
-				<h3>Finished Goods / Product Detailed Reports</h3>
-				<p>Track individual product performance</p>
-			</div>
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/OrderHistory")'>
-				<div class="card-icon order-history-icon">📜</div>
-				<h3>Order History</h3>
-				<p>Track and analyze customer order records</p>
-			</div>
-
-			@if (_user.LocationId == 1)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Purchase")'>
-					<div class="card-icon purchase-report-icon">🛒</div>
-					<h3>Raw Material Purchase Report</h3>
-					<p>Track and analyze procurement activities and expenditures</p>
+			<div class="dashboard-cards">
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Summary")'>
+					<div class="card-icon summary-report-icon">
+						<i class="fas fa-chart-pie"></i>
+					</div>
+					<h3>Sale Summary Reports</h3>
+					<p>View overall business performance metrics and KPIs</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Kitchen-Issue")'>
-					<div class="card-icon kitchen-issue-icon">🔔</div>
-					<h3>Kitchen Issue Report</h3>
-					<p>Track and manage kitchen-related issues and incidents</p>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed/")'>
+					<div class="card-icon detailed-report-icon">
+						<i class="fas fa-list-alt"></i>
+					</div>
+					<h3>Sale Detailed Reports</h3>
+					<p>Comprehensive transaction-level sales analysis</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/KitchenProduction")'>
-					<div class="card-icon kitchen-production-icon">👨‍🍳</div>
-					<h3>Kitchen Production Report</h3>
-					<p>Monitor kitchen output and production efficiency</p>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/OrderHistory")'>
+					<div class="card-icon order-history-icon">
+						<i class="fas fa-history"></i>
+					</div>
+					<h3>Order History</h3>
+					<p>Track customer orders and purchase patterns</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/RawMaterialStock")'>
-					<div class="card-icon stock-report-icon">🧮</div>
-					<h3>Raw Material Stock Reports</h3>
-					<p>Monitor inventory levels and stock status</p>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
+					<div class="card-icon sale-return-icon">
+						<i class="fas fa-undo"></i>
+					</div>
+					<h3>Sale Return Report</h3>
+					<p>Monitor product returns and refund activities</p>
 				</div>
-			}
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductStock")'>
-				<div class="card-icon product-stock-icon">📦</div>
-				<h3>Finished Goods / Product Stock Report</h3>
-				<p>View finished product inventory levels and stock status</p>
-			</div>
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
-				<div class="card-icon sale-return-icon">🔄</div>
-				<h3>Sale Return Report</h3>
-				<p>Track and analyze product returns and refund activities</p>
 			</div>
 		</div>
+
+		<!-- Product Reports Section -->
+		<div class="reports-section">
+			<div class="section-title">
+				<h3><i class="fas fa-boxes"></i> Product & Inventory Reports</h3>
+				<p>Analyze product performance and stock levels</p>
+			</div>
+			<div class="dashboard-cards">
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductSummary")'>
+					<div class="card-icon item-summary-icon">
+						<i class="fas fa-cube"></i>
+					</div>
+					<h3>Product Summary Report</h3>
+					<p>Aggregated product sales analytics with charts</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductDetailed")'>
+					<div class="card-icon item-report-icon">
+						<i class="fas fa-cubes"></i>
+					</div>
+					<h3>Product Detailed Report</h3>
+					<p>Individual product performance tracking</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductStock")'>
+					<div class="card-icon product-stock-icon">
+						<i class="fas fa-warehouse"></i>
+					</div>
+					<h3>Product Stock Report</h3>
+					<p>Monitor finished goods inventory levels</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Kitchen & Production Reports Section -->
+		@if (_user.LocationId == 1)
+		{
+			<div class="reports-section">
+				<div class="section-title">
+					<h3><i class="fas fa-utensils"></i> Kitchen & Production Reports</h3>
+					<p>Track kitchen operations and production efficiency</p>
+				</div>
+				<div class="dashboard-cards">
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Kitchen-Issue")'>
+						<div class="card-icon kitchen-issue-icon">
+							<i class="fas fa-exclamation-triangle"></i>
+						</div>
+						<h3>Kitchen Issue Report</h3>
+						<p>Monitor kitchen incidents and issue tracking</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/KitchenProduction")'>
+						<div class="card-icon kitchen-production-icon">
+							<i class="fas fa-industry"></i>
+						</div>
+						<h3>Kitchen Production Report</h3>
+						<p>Track production output and efficiency metrics</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Raw Materials & Procurement Section -->
+			<div class="reports-section">
+				<div class="section-title">
+					<h3><i class="fas fa-shopping-cart"></i> Procurement & Raw Materials</h3>
+					<p>Manage supply chain and raw material analytics</p>
+				</div>
+				<div class="dashboard-cards">
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Purchase")'>
+						<div class="card-icon purchase-report-icon">
+							<i class="fas fa-receipt"></i>
+						</div>
+						<h3>Purchase Report</h3>
+						<p>Track procurement activities and expenditures</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/RawMaterialStock")'>
+						<div class="card-icon stock-report-icon">
+							<i class="fas fa-boxes"></i>
+						</div>
+						<h3>Raw Material Stock Report</h3>
+						<p>Monitor raw material inventory levels</p>
+					</div>
+				</div>
+			</div>
+		}
 
 		<div class="dashboard-footer">
 			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
@@ -197,20 +256,65 @@ else
 	.welcome-section {
 		text-align: center;
 		margin-bottom: 40px;
-		padding: 20px;
-		background-color: white;
-		border-radius: 15px;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+		padding: 30px;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+		color: white;
+		border-radius: 20px;
+		box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
 	}
 
 		.welcome-section h2 {
-			color: var(--primary-color);
-			margin-bottom: 10px;
-			font-size: 24px;
-			font-weight: 600;
+			margin-bottom: 15px;
+			font-size: 28px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 15px;
+		}
+
+		.welcome-section h2 i {
+			font-size: 32px;
 		}
 
 		.welcome-section p {
+			opacity: 0.95;
+			font-size: 18px;
+			margin: 0;
+			font-weight: 400;
+		}
+
+	/* Reports Sections */
+	.reports-section {
+		margin-bottom: 50px;
+	}
+
+	.section-title {
+		text-align: center;
+		margin-bottom: 30px;
+		padding: 25px;
+		background-color: white;
+		border-radius: 15px;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+		border-left: 5px solid var(--primary-color);
+	}
+
+		.section-title h3 {
+			color: var(--primary-color);
+			margin-bottom: 10px;
+			font-size: 22px;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 12px;
+		}
+
+		.section-title h3 i {
+			font-size: 24px;
+		}
+
+		.section-title p {
 			color: var(--dark-text);
 			opacity: 0.8;
 			font-size: 16px;
@@ -239,8 +343,8 @@ else
 			transform: translateY(-1px);
 		}
 
-	.back-icon {
-		font-size: 16px;
+	.back-button i {
+		font-size: 14px;
 	}
 
 	/* Dashboard cards */
@@ -291,8 +395,6 @@ else
 		}
 
 	.card-icon {
-		font-size: 45px;
-		margin-bottom: 20px;
 		width: 90px;
 		height: 90px;
 		display: flex;
@@ -300,62 +402,99 @@ else
 		justify-content: center;
 		border-radius: 50%;
 		margin: 0 auto 20px auto;
+		font-size: 36px;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
 	}
 
-	/* Custom icons for report pages */
+		.card-icon::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: inherit;
+			border-radius: 50%;
+			opacity: 0.1;
+			transition: opacity 0.3s ease;
+		}
+
+		.dashboard-card:hover .card-icon::before {
+			opacity: 0.2;
+		}
+
+		.card-icon i {
+			position: relative;
+			z-index: 1;
+		}
+
+	/* Custom icon colors for different report categories */
 	.summary-report-icon {
-		background-color: rgba(0, 164, 239, 0.1);
-		color: var(--info-color);
+		background: linear-gradient(135deg, rgba(0, 164, 239, 0.15), rgba(0, 164, 239, 0.05));
+		color: #00a4ef;
+		border: 2px solid rgba(0, 164, 239, 0.2);
 	}
 
 	.detailed-report-icon {
-		background-color: rgba(104, 33, 122, 0.1);
-		color: var(--primary-dark);
+		background: linear-gradient(135deg, rgba(104, 33, 122, 0.15), rgba(104, 33, 122, 0.05));
+		color: #68217a;
+		border: 2px solid rgba(104, 33, 122, 0.2);
 	}
 
 	.item-report-icon {
-		background-color: rgba(81, 43, 212, 0.1);
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.15), rgba(226, 19, 123, 0.05));
 		color: var(--primary-color);
-	}
-
-	.stock-report-icon {
-		background-color: rgba(46, 196, 134, 0.1);
-		color: #2EC486;
+		border: 2px solid rgba(226, 19, 123, 0.2);
 	}
 
 	.item-summary-icon {
-		background-color: rgba(255, 153, 0, 0.1);
-		color: #FF9900;
+		background: linear-gradient(135deg, rgba(255, 153, 0, 0.15), rgba(255, 153, 0, 0.05));
+		color: #ff9900;
+		border: 2px solid rgba(255, 153, 0, 0.2);
 	}
 
 	.order-history-icon {
-		background-color: rgba(255, 87, 51, 0.1);
-		color: #FF5733;
-	}
-
-	.product-stock-icon {
-		background-color: rgba(41, 128, 185, 0.1);
-		color: #2980B9;
-	}
-
-	.kitchen-issue-icon {
-		background-color: rgba(231, 76, 60, 0.1);
-		color: #E74C3C;
-	}
-
-	.kitchen-production-icon {
-		background-color: rgba(155, 89, 182, 0.1);
-		color: #9B59B6;
-	}
-
-	.purchase-report-icon {
-		background-color: rgba(39, 174, 96, 0.1);
-		color: #27AE60;
+		background: linear-gradient(135deg, rgba(255, 87, 51, 0.15), rgba(255, 87, 51, 0.05));
+		color: #ff5733;
+		border: 2px solid rgba(255, 87, 51, 0.2);
 	}
 
 	.sale-return-icon {
-		background-color: rgba(220, 53, 69, 0.1);
+		background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05));
 		color: #dc3545;
+		border: 2px solid rgba(220, 53, 69, 0.2);
+	}
+
+	.product-stock-icon {
+		background: linear-gradient(135deg, rgba(41, 128, 185, 0.15), rgba(41, 128, 185, 0.05));
+		color: #2980b9;
+		border: 2px solid rgba(41, 128, 185, 0.2);
+	}
+
+	.kitchen-issue-icon {
+		background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.05));
+		color: #e74c3c;
+		border: 2px solid rgba(231, 76, 60, 0.2);
+	}
+
+	.kitchen-production-icon {
+		background: linear-gradient(135deg, rgba(155, 89, 182, 0.15), rgba(155, 89, 182, 0.05));
+		color: #9b59b6;
+		border: 2px solid rgba(155, 89, 182, 0.2);
+	}
+
+	.purchase-report-icon {
+		background: linear-gradient(135deg, rgba(39, 174, 96, 0.15), rgba(39, 174, 96, 0.05));
+		color: #27ae60;
+		border: 2px solid rgba(39, 174, 96, 0.2);
+	}
+
+	.stock-report-icon {
+		background: linear-gradient(135deg, rgba(46, 196, 134, 0.15), rgba(46, 196, 134, 0.05));
+		color: #2ec486;
+		border: 2px solid rgba(46, 196, 134, 0.2);
 	}
 
 	.dashboard-card h3 {
@@ -505,5 +644,3 @@ else
 		}
 	}
 </style>
-
-

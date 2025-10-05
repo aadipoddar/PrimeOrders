@@ -17,7 +17,7 @@ public partial class SaleSummaryPage
 	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
-	private bool _showCharts = false; // Charts hidden by default
+	private bool _showCharts = true; // Charts hidden by default
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);

@@ -7,6 +7,7 @@ SELECT
 	[pc].[Id] AS ProductCategoryId,
 	[pc].[Name] AS ProductCategoryName,
 	[s].[Id] AS SaleId,
+	[s].[BillNo] AS BillNo,
 	[s].[SaleDateTime] AS BillDateTime,
 	[s].[LocationId] AS LocationId,
 
@@ -46,5 +47,6 @@ GROUP BY
 	[pc].[Id],
 	[pc].[Name],
 	[s].[Id],
+	[s].[BillNo],
 	[s].[SaleDateTime],
 	[s].[LocationId];

@@ -449,13 +449,13 @@ public partial class SalePage
 		_baseTotal = _saleProductCart.Sum(c => c.BaseTotal);
 		_subTotal = _saleProductCart.Sum(c => c.AfterDiscount);
 		_discountAmount = _baseTotal - _subTotal;
-		
+
 		// Calculate total before round off
 		decimal totalBeforeRoundOff = _saleProductCart.Sum(c => c.Total);
-		
+
 		// Calculate round off amount
 		_sale.RoundOff = Math.Round(totalBeforeRoundOff) - totalBeforeRoundOff;
-		
+
 		// Final total with round off
 		_total = totalBeforeRoundOff + _sale.RoundOff;
 
