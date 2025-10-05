@@ -1,0 +1,20 @@
+/* Cart Page Additional Responsive Styles */
+@media (max-width: 768px) {
+  .amount-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+  }
+
+  .dialog-button {
+    width: 100%;
+  }
+}

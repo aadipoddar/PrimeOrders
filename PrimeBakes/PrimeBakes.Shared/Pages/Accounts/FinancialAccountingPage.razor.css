@@ -1,0 +1,41 @@
+/* Validation and Confirmation Dialog Additional Styles */
+@media (max-width: 768px) {
+  .cart-actions {
+    flex-direction: column;
+  }
+
+  .validate-button,
+  .cart-button {
+    width: 100%;
+    height: 50px;
+    font-size: 14px;
+  }
+
+  .dialog-footer {
+    flex-direction: column;
+  }
+
+  .dialog-button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .dialog-button:last-child {
+    margin-bottom: 0;
+  }
+
+  .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    text-align: left;
+  }
+
+  .confirmation-message h3 {
+    font-size: 16px;
+  }
+
+  .confirmation-message p {
+    font-size: 13px;
+  }
+}
