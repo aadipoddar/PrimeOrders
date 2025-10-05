@@ -1,0 +1,720 @@
+﻿@page "/Admin/Settings"
+@using PrimeBakes.Shared.Services
+@using PrimeBakesLibrary.Models.Common
+@using PrimeBakesLibrary.Models.Accounts.Masters
+
+<PageTitle>Settings Management - Prime Bakes</PageTitle>
+
+<!-- Success Toast -->
+<SfToast @ref="_sfSuccessToast"
+         ID="toast_success"
+         Title="Success"
+         Content="Settings saved successfully!"
+         Timeout="3000"
+         ShowCloseButton="true"
+         CssClass="e-toast-success">
+    <ToastPosition X="Right" Y="Top" />
+    <ToastEvents Closed="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)" />
+    <ToastAnimationSettings>
+        <ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+        <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+    </ToastAnimationSettings>
+</SfToast>
+
+<!-- Reset Toast -->
+<SfToast @ref="_sfResetToast"
+         ID="toast_reset"
+         Title="Settings Reset"
+         Content="Settings have been reset to default values!"
+         Timeout="3000"
+         ShowCloseButton="true"
+         CssClass="e-toast-warning">
+    <ToastPosition X="Right" Y="Top" />
+    <ToastEvents Closed="() => NavManager.NavigateTo(NavManager.Uri, forceLoad: true)" />
+    <ToastAnimationSettings>
+        <ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+        <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+    </ToastAnimationSettings>
+</SfToast>
+
+@if (_isLoading)
+{
+    <div class="loader-container">
+        <div class="circular-dots-loader">
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+        </div>
+        <p class="loading-text">Loading settings...</p>
+    </div>
+}
+else
+{
+    <div class="settings-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="title-section">
+                    <h1 class="page-title">⚙️ System Settings</h1>
+                    <p class="page-subtitle">Configure system-wide settings, vouchers, and ledger associations</p>
+                </div>
+                <button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">Back to Admin</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content-layout">
+            <!-- Settings Configuration Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2 class="card-title">Configuration Settings</h2>
+                    <p class="card-subtitle">Configure default vouchers and ledgers for system operations</p>
+                </div>
+
+                <div class="card-body">
+                    <div class="settings-sections">
+                        <!-- Voucher Settings Section -->
+                        <div class="settings-section">
+                            <div class="section-header">
+                                <h3 class="section-title">📄 Voucher Configuration</h3>
+                                <p class="section-description">Set default voucher types for different transaction types</p>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <label class="setting-label">Sales Voucher</label>
+                                    <SfDropDownList @bind-Value="_salesVoucherId"
+                                                    DataSource="_vouchers"
+                                                    Placeholder="Select sales voucher"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default voucher for sales transactions</small>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label class="setting-label">Purchase Voucher</label>
+                                    <SfDropDownList @bind-Value="_purchaseVoucherId"
+                                                    DataSource="_vouchers"
+                                                    Placeholder="Select purchase voucher"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default voucher for purchase transactions</small>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label class="setting-label">Sale Return Voucher</label>
+                                    <SfDropDownList @bind-Value="_saleReturnVoucherId"
+                                                    DataSource="_vouchers"
+                                                    Placeholder="Select sale return voucher"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default voucher for sales return transactions</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ledger Settings Section -->
+                        <div class="settings-section">
+                            <div class="section-header">
+                                <h3 class="section-title">📚 Ledger Configuration</h3>
+                                <p class="section-description">Set default ledger accounts for automatic posting</p>
+                            </div>
+
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <label class="setting-label">Sales Ledger</label>
+                                    <SfDropDownList @bind-Value="_saleLedgerId"
+                                                    DataSource="_ledgers"
+                                                    Placeholder="Select sales ledger"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default ledger for sales entries</small>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label class="setting-label">Purchase Ledger</label>
+                                    <SfDropDownList @bind-Value="_purchaseLedgerId"
+                                                    DataSource="_ledgers"
+                                                    Placeholder="Select purchase ledger"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default ledger for purchase entries</small>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label class="setting-label">Cash Ledger</label>
+                                    <SfDropDownList @bind-Value="_cashLedgerId"
+                                                    DataSource="_ledgers"
+                                                    Placeholder="Select cash ledger"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default cash ledger for cash transactions</small>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label class="setting-label">GST Ledger</label>
+                                    <SfDropDownList @bind-Value="_gstLedgerId"
+                                                    DataSource="_ledgers"
+                                                    Placeholder="Select GST ledger"
+                                                    CssClass="custom-dropdown">
+                                        <DropDownListFieldSettings Value="Id" Text="Name" />
+                                    </SfDropDownList>
+                                    <small class="setting-help">Default ledger for GST/tax entries</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-section">
+                        <div class="action-buttons">
+                            <button @onclick="OnSaveClick" 
+                                    class="save-button @(_isSaving ? "submitting" : "")" 
+                                    disabled="@_isSaving">
+                                @if (_isSaving)
+                                {
+                                    <span class="spinner"></span>
+                                    <span>Saving...</span>
+                                }
+                                else
+                                {
+                                    <span class="save-icon">💾</span>
+                                    <span>Save Settings</span>
+                                }
+                            </button>
+
+                            <button @onclick="OnResetClick" 
+                                    class="reset-button @(_isSaving ? "submitting" : "")" 
+                                    disabled="@_isSaving">
+                                @if (_isSaving)
+                                {
+                                    <span class="spinner"></span>
+                                    <span>Resetting...</span>
+                                }
+                                else
+                                {
+                                    <span class="reset-icon">🔄</span>
+                                    <span>Reset to Defaults</span>
+                                }
+                            </button>
+                        </div>
+
+                        <div class="action-info">
+                            <div class="info-item">
+                                <span class="info-icon">ℹ️</span>
+                                <span class="info-text">Changes will be applied system-wide immediately after saving</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-icon">⚠️</span>
+                                <span class="info-text">Reset will restore all settings to their default values</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    /* Variables */
+    :root {
+        --primary-color: #e2137b;
+        --primary-dark: #c10e69;
+        --success-color: #4caf50;
+        --warning-color: #ff9800;
+        --danger-color: #f44336;
+        --info-color: #2196f3;
+        --card-bg: #ffffff;
+        --border-color: #e1e5e9;
+        --text-primary: #2c3e50;
+        --text-secondary: #666;
+        --text-muted: #999;
+        --light-bg: #f8f9ff;
+    }
+
+    /* Loading Styles */
+    .loader-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 50vh;
+        gap: 20px;
+    }
+
+    .circular-dots-loader {
+        display: flex;
+        gap: 8px;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        animation: bounce 1.4s ease-in-out infinite both;
+    }
+
+    .dot-1 { animation-delay: -0.32s; }
+    .dot-2 { animation-delay: -0.16s; }
+    .dot-3 { animation-delay: 0s; }
+
+    @@keyframes bounce {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .loading-text {
+        color: var(--text-secondary);
+        font-size: 16px;
+        margin: 0;
+    }
+
+    /* Main Container */
+    .settings-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(193, 14, 105, 0.03) 100%);
+        padding: 0;
+    }
+
+    /* Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 30px 20px;
+        box-shadow: 0 4px 20px rgba(226, 19, 123, 0.2);
+    }
+
+    .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .title-section h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .title-section p {
+        font-size: 14px;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .back-button {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .back-icon {
+        font-size: 16px;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+    }
+
+    .back-button:hover .back-icon {
+        transform: translateX(-3px);
+    }
+
+    /* Content Layout */
+    .content-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    /* Settings Card */
+    .settings-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.1) 0%, rgba(193, 14, 105, 0.1) 100%);
+        border-bottom: 2px solid var(--primary-color);
+        padding: 25px 30px;
+    }
+
+    .card-title {
+        color: var(--primary-color);
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-title::before {
+        content: "⚙️";
+        font-size: 20px;
+    }
+
+    .card-subtitle {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .card-body {
+        padding: 35px;
+    }
+
+    /* Settings Sections */
+    .settings-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 35px;
+    }
+
+    .settings-section {
+        background: var(--light-bg);
+        border-radius: 12px;
+        padding: 25px;
+        border: 1px solid var(--border-color);
+    }
+
+    .section-header {
+        margin-bottom: 25px;
+        text-align: center;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(226, 19, 123, 0.1);
+    }
+
+    .section-title {
+        color: var(--primary-color);
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .section-description {
+        color: var(--text-secondary);
+        font-size: 13px;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    /* Settings Grid */
+    .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+    }
+
+    .setting-item {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .setting-item:hover {
+        border-color: rgba(226, 19, 123, 0.3);
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .setting-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .setting-label::before {
+        content: "•";
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .setting-help {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-style: italic;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Custom Dropdown Styles */
+    ::deep .custom-dropdown {
+        border: 2px solid var(--border-color) !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        font-size: 14px !important;
+        padding: 10px 12px !important;
+    }
+
+    ::deep .custom-dropdown:hover {
+        border-color: rgba(226, 19, 123, 0.3) !important;
+    }
+
+    ::deep .custom-dropdown:focus,
+    ::deep .custom-dropdown.e-input-focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1) !important;
+    }
+
+    ::deep .custom-dropdown .e-input-group-icon {
+        color: var(--primary-color) !important;
+    }
+
+    /* Action Section */
+    .action-section {
+        margin-top: 35px;
+        padding-top: 25px;
+        border-top: 2px solid rgba(226, 19, 123, 0.1);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 25px;
+    }
+
+    .save-button,
+    .reset-button {
+        padding: 15px 35px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: none;
+        font-size: 15px;
+        min-width: 160px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .save-button {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .save-button:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
+    }
+
+    .reset-button {
+        background: linear-gradient(135deg, var(--warning-color) 0%, #f57c00 100%);
+        color: white;
+    }
+
+    .reset-button:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
+    }
+
+    .save-button:disabled,
+    .reset-button:disabled,
+    .save-button.submitting,
+    .reset-button.submitting {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .save-icon,
+    .reset-icon {
+        font-size: 18px;
+    }
+
+    /* Spinner Animation */
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Action Info */
+    .action-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: rgba(33, 150, 243, 0.05);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid var(--info-color);
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .info-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .info-text {
+        line-height: 1.5;
+    }
+
+    /* Toast Styles */
+    ::deep .e-toast-success {
+        background: rgba(76, 175, 80, 0.1) !important;
+        border-left: 4px solid var(--success-color) !important;
+        color: var(--success-color) !important;
+    }
+
+    ::deep .e-toast-warning {
+        background: rgba(255, 152, 0, 0.1) !important;
+        border-left: 4px solid var(--warning-color) !important;
+        color: var(--warning-color) !important;
+    }
+
+    ::deep .e-toast-success .e-toast-title,
+    ::deep .e-toast-warning .e-toast-title {
+        font-weight: 600 !important;
+    }
+
+    ::deep .e-toast-success .e-toast-content,
+    ::deep .e-toast-warning .e-toast-content {
+        font-size: 14px !important;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .content-layout {
+            padding: 25px 15px;
+        }
+
+        .header-content {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .settings-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            padding: 25px 15px;
+        }
+
+        .card-body {
+            padding: 25px 20px;
+        }
+
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .save-button,
+        .reset-button {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .title-section h1 {
+            font-size: 24px;
+        }
+
+        .section-title {
+            font-size: 16px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .page-header {
+            padding: 20px 10px;
+        }
+
+        .content-layout {
+            padding: 20px 10px;
+        }
+
+        .card-body {
+            padding: 20px 15px;
+        }
+
+        .settings-section {
+            padding: 20px 15px;
+        }
+
+        .setting-item {
+            padding: 15px;
+        }
+
+        .action-info {
+            padding: 15px;
+        }
+
+        .title-section h1 {
+            font-size: 22px;
+        }
+    }
+</style>
