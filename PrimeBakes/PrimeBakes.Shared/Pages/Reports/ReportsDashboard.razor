@@ -77,17 +77,6 @@ else
 						<p>Track customer orders and purchase patterns</p>
 					</div>
 				}
-
-				@if (_user.Sales)
-				{
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
-						<div class="card-icon sale-return-icon">
-							<i class="fas fa-undo"></i>
-						</div>
-						<h3>Sale Return Report</h3>
-						<p>Monitor product returns and refund activities</p>
-					</div>
-				}
 			</div>
 		</div>
 
@@ -215,30 +204,6 @@ else
 						<h3>Trial Balance</h3>
 						<p>Account balances and trial balance verification</p>
 					</div>
-
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/ProfitLoss")'>
-						<div class="card-icon profit-loss-icon">
-							<i class="fas fa-chart-area"></i>
-						</div>
-						<h3>Profit & Loss Statement</h3>
-						<p>Income statement and profitability analysis</p>
-					</div>
-
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/BalanceSheet")'>
-						<div class="card-icon balance-sheet-icon">
-							<i class="fas fa-clipboard-list"></i>
-						</div>
-						<h3>Balance Sheet</h3>
-						<p>Assets, liabilities and equity statement</p>
-					</div>
-
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/CashFlow")'>
-						<div class="card-icon cashflow-icon">
-							<i class="fas fa-money-bill-wave"></i>
-						</div>
-						<h3>Cash Flow Statement</h3>
-						<p>Cash inflows and outflows analysis</p>
-					</div>
 				</div>
 			</div>
 		}
@@ -270,7 +235,6 @@ else
 		padding: 0;
 		background-color: var(--light-bg);
 		color: var(--dark-text);
-		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		overflow-x: hidden;
 	}
 

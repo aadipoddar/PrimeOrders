@@ -18,4 +18,7 @@ public static class StorageFileNames
 
 	public static string FinancialAccountingDataFileName => "financial_accounting_data.json";
 	public static string FinancialAccountingCartDataFileName => "financial_accounting_cart_data.json";
+
+	public static string SaleReturnDataFileName => "sale_return_data.json";
+	public static string SaleReturnCartDataFileName => "sale_return_cart_data.json";
 }
