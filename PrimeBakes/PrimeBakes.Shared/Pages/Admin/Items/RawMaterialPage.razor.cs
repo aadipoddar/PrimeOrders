@@ -10,7 +10,7 @@ using PrimeBakesLibrary.Models.Product;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeBakes.Shared.Pages.Admin;
+namespace PrimeBakes.Shared.Pages.Admin.Items;
 
 public partial class RawMaterialPage
 {

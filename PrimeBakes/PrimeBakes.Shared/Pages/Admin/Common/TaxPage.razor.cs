@@ -9,7 +9,7 @@ using PrimeBakesLibrary.Models.Product;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeBakes.Shared.Pages.Admin;
+namespace PrimeBakes.Shared.Pages.Admin.Common;
 
 public partial class TaxPage
 {
@@ -214,7 +214,7 @@ public partial class TaxPage
 		}
 
 		// If using CGST or SGST, typically both should be used together for domestic transactions
-		if (((_taxModel.CGST > 0 && _taxModel.SGST == 0) || (_taxModel.CGST == 0 && _taxModel.SGST > 0)) && _taxModel.IGST == 0)
+		if ((_taxModel.CGST > 0 && _taxModel.SGST == 0 || _taxModel.CGST == 0 && _taxModel.SGST > 0) && _taxModel.IGST == 0)
 		{
 			ShowValidationError("For domestic transactions, both CGST and SGST should be used together.");
 			return false;

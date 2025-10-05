@@ -1,0 +1,627 @@
+﻿@page "/Admin/FinancialYear"
+@using PrimeBakesLibrary.Models.Accounts.Masters
+
+<PageTitle>Financial Years - Prime Bakes</PageTitle>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading financial years...</p>
+	</div>
+}
+else
+{
+	<div class="financial-year-container">
+		<!-- Header -->
+		<div class="page-header">
+			<div class="header-content">
+				<div class="title-section">
+					<div class="page-icon">📅</div>
+					<div class="title-text">
+						<h1 class="page-title">Financial Year Management</h1>
+						<p class="page-subtitle">Manage accounting periods and financial year configurations</p>
+					</div>
+				</div>
+				<button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
+					<span class="back-icon">←</span>
+					<span class="back-text">Back to Admin</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="content-layout">
+			<!-- Financial Year Form Card -->
+			<div class="form-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						@(_financialYearModel.Id == 0 ? "Add New Financial Year" : "Edit Financial Year")
+					</h2>
+					<p class="card-subtitle">
+						@(_financialYearModel.Id == 0 ? "Create a new financial year period" : "Update financial year information")
+					</p>
+				</div>
+
+				<div class="card-body">
+					<div class="form-grid">
+						<div class="form-group">
+							<label class="form-label">Start Date *</label>
+							<SfDatePicker @bind-Value="_financialYearModel.StartDate"
+										  Placeholder="Select start date"
+										  CssClass="custom-datepicker"
+										  Format="dd/MM/yyyy">
+								<DatePickerEvents TValue="DateOnly" ValueChange="OnStartDateChanged" />
+							</SfDatePicker>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">End Date *</label>
+							<SfDatePicker @bind-Value="_financialYearModel.EndDate"
+										  Placeholder="Select end date"
+										  CssClass="custom-datepicker"
+										  Format="dd/MM/yyyy">
+								<DatePickerEvents TValue="DateOnly" ValueChange="OnEndDateChanged" />
+							</SfDatePicker>
+						</div>
+					</div>
+
+					<div class="form-grid">
+						<div class="form-group">
+							<label class="form-label">Year Number *</label>
+							<SfNumericTextBox @bind-Value="_financialYearModel.YearNo"
+											  Placeholder="Enter year number"
+											  Min="1"
+											  Format="N0"
+											  CssClass="custom-numeric" />
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Financial Year Display</label>
+							<SfTextBox Value="@GetFinancialYearDisplay()"
+									   Readonly="true"
+									   CssClass="custom-textbox readonly-field" />
+						</div>
+					</div>
+
+					<div class="form-grid">
+						<div class="form-group">
+							<label class="form-label">Status</label>
+							<SfCheckBox @bind-Checked="_financialYearModel.Status" 
+									   Label="Active" 
+									   CssClass="status-checkbox" />
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Duration</label>
+							<SfTextBox Value="@GetDurationDisplay()"
+									   Readonly="true"
+									   CssClass="custom-textbox readonly-field" />
+						</div>
+					</div>
+
+					<div class="form-group full-width">
+						<label class="form-label">Remarks</label>
+						<SfTextBox @bind-Value="_financialYearModel.Remarks"
+								   Placeholder="Enter remarks (optional)"
+								   Multiline="true"
+								   CssClass="custom-textbox multiline" />
+					</div>
+
+					<div class="form-actions">
+						<button @onclick="OnAddFinancialYear" class="btn btn-secondary" type="button">
+							<span class="btn-icon">🔄</span>
+							Clear Form
+						</button>
+						<button @onclick="OnGenerateYearClick" class="btn btn-info" type="button">
+							<span class="btn-icon">⚡</span>
+							Auto Generate
+						</button>
+						<button @onclick="SaveFinancialYear" 
+								class="btn btn-primary" 
+								type="button"
+								disabled="@_isSubmitting">
+							@if (_isSubmitting)
+							{
+								<span class="spinner"></span>
+								<span>Saving...</span>
+							}
+							else
+							{
+								<span class="btn-icon">💾</span>
+								<span>@(_financialYearModel.Id == 0 ? "Add Financial Year" : "Update Financial Year")</span>
+							}
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Financial Years Grid Card -->
+			<div class="grid-card">
+				<div class="card-header">
+					<h2 class="card-title">All Financial Years</h2>
+					<p class="card-subtitle">Click on a row to edit financial year details</p>
+				</div>
+
+				<div class="card-body">
+					<SfGrid @ref="_sfGrid"
+							DataSource="@_financialYears"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowPaging="true"
+							AllowResizing="true"
+							CssClass="custom-grid">
+						<GridPageSettings PageSize="10" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar" />
+						<GridEvents RowSelected="OnRowSelected" TValue="FinancialYearModel" />
+						<GridColumns>
+							<GridColumn Field=@nameof(FinancialYearModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field=@nameof(FinancialYearModel.YearNo) HeaderText="Year No" Width="100" TextAlign="TextAlign.Center" />
+							<GridColumn HeaderText="Financial Year" Width="180" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var fy = (context as FinancialYearModel);
+									}
+									<span class="financial-year-display">@($"{fy.StartDate:yyyy}-{fy.EndDate:yy}")</span>
+								</Template>
+							</GridColumn>
+							<GridColumn Field=@nameof(FinancialYearModel.StartDate) HeaderText="Start Date" Width="120" Format="dd/MM/yyyy" TextAlign="TextAlign.Center" />
+							<GridColumn Field=@nameof(FinancialYearModel.EndDate) HeaderText="End Date" Width="120" Format="dd/MM/yyyy" TextAlign="TextAlign.Center" />
+							<GridColumn HeaderText="Duration" Width="100" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var fy = (context as FinancialYearModel);
+										var duration = fy.EndDate.DayNumber - fy.StartDate.DayNumber + 1;
+									}
+									<span class="duration-display">@duration days</span>
+								</Template>
+							</GridColumn>
+							<GridColumn Field=@nameof(FinancialYearModel.Remarks) HeaderText="Remarks" Width="200" />
+							<GridColumn Field=@nameof(FinancialYearModel.Status) HeaderText="Active" Width="80" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
+							<GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var financialYear = (context as FinancialYearModel);
+									}
+									<button @onclick="() => OnEditFinancialYear(financialYear)" class="btn-action btn-edit" title="Edit Financial Year">
+										<span>✏️</span>
+									</button>
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--secondary-color: #2c3e50;
+		--success-color: #4caf50;
+		--warning-color: #ff9800;
+		--danger-color: #f44336;
+		--info-color: #2196f3;
+		--light-bg: #f8f9ff;
+		--card-bg: #ffffff;
+		--border-color: #e1e5e9;
+		--text-primary: #2c3e50;
+		--text-secondary: #666;
+		--text-muted: #999;
+	}
+
+	/* Loading Styles */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 50vh;
+		gap: 20px;
+	}
+
+	.circular-dots-loader {
+		display: flex;
+		gap: 8px;
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		animation: bounce 1.4s ease-in-out infinite both;
+	}
+
+	.dot-1 { animation-delay: -0.32s; }
+	.dot-2 { animation-delay: -0.16s; }
+	.dot-3 { animation-delay: 0s; }
+
+	@@keyframes bounce {
+		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+		40% { transform: scale(1.2); opacity: 1; }
+	}
+
+	.loading-text {
+		color: var(--text-secondary);
+		font-size: 16px;
+		margin: 0;
+	}
+
+	/* Main Container */
+	.financial-year-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, #f8f9ff 0%, #e8e9f3 100%);
+		padding: 0;
+	}
+
+	/* Page Header */
+	.page-header {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+		padding: 30px 40px;
+		box-shadow: 0 4px 20px rgba(226, 19, 123, 0.2);
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.title-section {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.page-icon {
+		font-size: 48px;
+		opacity: 0.9;
+	}
+
+	.page-title {
+		font-size: 32px;
+		font-weight: 700;
+		margin: 0;
+		letter-spacing: -0.5px;
+	}
+
+	.page-subtitle {
+		font-size: 16px;
+		opacity: 0.9;
+		margin: 5px 0 0 0;
+		font-weight: 300;
+	}
+
+	.back-button {
+		background: rgba(255, 255, 255, 0.1);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		color: white;
+		padding: 12px 20px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s ease;
+		backdrop-filter: blur(10px);
+	}
+
+	.back-button:hover {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.4);
+		transform: translateY(-2px);
+	}
+
+	/* Content Layout */
+	.content-layout {
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
+		padding: 40px;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	/* Cards */
+	.form-card, .grid-card {
+		background: var(--card-bg);
+		border-radius: 16px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--border-color);
+		overflow: hidden;
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+	}
+
+	.form-card:hover, .grid-card:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+	}
+
+	.card-header {
+		background: linear-gradient(135deg, #f8f9ff 0%, #e8e9f3 100%);
+		padding: 24px 32px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.card-title {
+		color: var(--text-primary);
+		font-size: 20px;
+		font-weight: 600;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.card-subtitle {
+		color: var(--text-secondary);
+		font-size: 14px;
+		margin: 5px 0 0 0;
+		font-weight: 400;
+	}
+
+	.card-body {
+		padding: 32px;
+	}
+
+	/* Form Styles */
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 24px;
+		margin-bottom: 24px;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form-group.full-width {
+		grid-column: 1 / -1;
+	}
+
+	.form-label {
+		color: var(--text-primary);
+		font-weight: 600;
+		font-size: 14px;
+		margin-bottom: 8px;
+		letter-spacing: 0.25px;
+	}
+
+	.custom-textbox, .custom-datepicker, .custom-numeric {
+		border: 2px solid var(--border-color);
+		border-radius: 8px;
+		transition: all 0.3s ease;
+	}
+
+	.custom-textbox:focus-within, .custom-datepicker:focus-within, .custom-numeric:focus-within {
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+	}
+
+	.readonly-field {
+		background-color: #f8f9fa;
+		color: var(--text-secondary);
+	}
+
+	.multiline {
+		min-height: 80px;
+	}
+
+	.status-checkbox {
+		margin-top: 10px;
+	}
+
+	/* Special Display Fields */
+	.financial-year-display {
+		font-weight: 600;
+		color: var(--primary-color);
+		background: rgba(226, 19, 123, 0.1);
+		padding: 4px 8px;
+		border-radius: 4px;
+		font-size: 12px;
+	}
+
+	.duration-display {
+		color: var(--info-color);
+		font-weight: 500;
+		font-size: 12px;
+	}
+
+	/* Action Buttons */
+	.form-actions {
+		display: flex;
+		gap: 16px;
+		justify-content: flex-end;
+		align-items: center;
+		padding-top: 24px;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.btn {
+		padding: 12px 24px;
+		border-radius: 8px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border: none;
+		font-size: 14px;
+		letter-spacing: 0.25px;
+	}
+
+	.btn-primary {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(226, 19, 123, 0.3);
+	}
+
+	.btn-primary:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.btn-secondary {
+		background: transparent;
+		color: var(--text-secondary);
+		border: 2px solid var(--border-color);
+	}
+
+	.btn-secondary:hover {
+		background: var(--light-bg);
+		border-color: var(--primary-color);
+		color: var(--primary-color);
+		transform: translateY(-2px);
+	}
+
+	.btn-info {
+		background: linear-gradient(135deg, var(--info-color) 0%, #1976d2 100%);
+		color: white;
+	}
+
+	.btn-info:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(33, 150, 243, 0.3);
+	}
+
+	.spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-top: 2px solid white;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	/* Grid Styles */
+	.custom-grid {
+		border-radius: 8px;
+		overflow: hidden;
+		border: 1px solid var(--border-color);
+	}
+
+	.btn-action {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 8px;
+		border-radius: 6px;
+		transition: all 0.2s ease;
+		font-size: 16px;
+	}
+
+	.btn-edit:hover {
+		background: rgba(226, 19, 123, 0.1);
+		transform: scale(1.1);
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 1024px) {
+		.content-layout {
+			padding: 30px 20px;
+		}
+
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.header-content {
+			flex-direction: column;
+			gap: 20px;
+			text-align: center;
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.page-header {
+			padding: 20px 15px;
+		}
+
+		.content-layout {
+			padding: 20px 15px;
+		}
+
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.form-actions {
+			flex-direction: column;
+		}
+
+		.btn {
+			width: 100%;
+		}
+
+		.title-section h1 {
+			font-size: 24px;
+		}
+
+		.action-buttons {
+			flex-direction: column;
+			gap: 4px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.card-body {
+			padding: 20px;
+		}
+
+		.card-header {
+			padding: 15px 20px;
+		}
+
+		.btn-action {
+			width: 28px;
+			height: 28px;
+			font-size: 12px;
+		}
+	}
+</style>
+
+<!-- Toast Notifications -->
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Timeout="3000"
+		 ShowCloseButton="true">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Timeout="4000"
+		 ShowCloseButton="true">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+	</ToastAnimationSettings>
+</SfToast>

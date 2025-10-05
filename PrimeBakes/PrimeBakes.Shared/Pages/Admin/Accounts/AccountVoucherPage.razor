@@ -1,0 +1,543 @@
+﻿@page "/Admin/AccountVoucher"
+@using PrimeBakesLibrary.Models.Accounts.Masters
+
+<PageTitle>Account Vouchers - Prime Bakes</PageTitle>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading account vouchers...</p>
+	</div>
+}
+else
+{
+	<div class="voucher-container">
+		<!-- Header -->
+		<div class="page-header">
+			<div class="header-content">
+				<div class="title-section">
+					<div class="page-icon">🧾</div>
+					<div class="title-text">
+						<h1 class="page-title">Voucher Management</h1>
+						<p class="page-subtitle">Manage voucher types, numbering series, and transaction templates</p>
+					</div>
+				</div>
+				<button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
+					<span class="back-icon">←</span>
+					<span class="back-text">Back to Admin</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="content-layout">
+			<!-- Voucher Form Card -->
+			<div class="form-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						@(_voucherModel.Id == 0 ? "Add New Voucher" : "Edit Voucher")
+					</h2>
+					<p class="card-subtitle">
+						@(_voucherModel.Id == 0 ? "Create a new voucher type" : "Update voucher information")
+					</p>
+				</div>
+
+				<div class="card-body">
+					<div class="form-grid">
+						<div class="form-group">
+							<label class="form-label">Voucher Name *</label>
+							<SfTextBox @bind-Value="_voucherModel.Name"
+									   Placeholder="Enter voucher name"
+									   CssClass="custom-textbox" />
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Prefix Code *</label>
+							<SfTextBox @bind-Value="_voucherModel.PrefixCode"
+									   Placeholder="Enter prefix code"
+									   CssClass="custom-textbox" />
+						</div>
+					</div>
+
+					<div class="form-grid">
+						<div class="form-group">
+							<label class="form-label">Status</label>
+							<SfCheckBox @bind-Checked="_voucherModel.Status" 
+									   Label="Active" 
+									   CssClass="status-checkbox" />
+						</div>
+					</div>
+
+					<div class="form-group full-width">
+						<label class="form-label">Remarks</label>
+						<SfTextBox @bind-Value="_voucherModel.Remarks"
+								   Placeholder="Enter remarks (optional)"
+								   Multiline="true"
+								   CssClass="custom-textbox multiline" />
+					</div>
+
+					<div class="form-actions">
+						<button @onclick="OnAddVoucher" class="btn btn-secondary" type="button">
+							<span class="btn-icon">🔄</span>
+							Clear Form
+						</button>
+						<button @onclick="SaveVoucher" 
+								class="btn btn-primary" 
+								type="button"
+								disabled="@_isSubmitting">
+							@if (_isSubmitting)
+							{
+								<span class="spinner"></span>
+								<span>Saving...</span>
+							}
+							else
+							{
+								<span class="btn-icon">💾</span>
+								<span>@(_voucherModel.Id == 0 ? "Add Voucher" : "Update Voucher")</span>
+							}
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Vouchers Grid Card -->
+			<div class="grid-card">
+				<div class="card-header">
+					<h2 class="card-title">All Vouchers</h2>
+					<p class="card-subtitle">Click on a row to edit voucher details</p>
+				</div>
+
+				<div class="card-body">
+					<SfGrid @ref="_sfGrid"
+							DataSource="@_vouchers"
+							AllowSorting="true"
+							AllowFiltering="true"
+							AllowPaging="true"
+							AllowResizing="true"
+							CssClass="custom-grid">
+						<GridPageSettings PageSize="10" />
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar" />
+						<GridEvents RowSelected="OnRowSelected" TValue="VoucherModel" />
+						<GridColumns>
+							<GridColumn Field=@nameof(VoucherModel.Id) HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field=@nameof(VoucherModel.Name) HeaderText="Voucher Name" Width="200" />
+							<GridColumn Field=@nameof(VoucherModel.PrefixCode) HeaderText="Prefix Code" Width="150" />
+							<GridColumn Field=@nameof(VoucherModel.Remarks) HeaderText="Remarks" Width="250" />
+							<GridColumn Field=@nameof(VoucherModel.Status) HeaderText="Active" Width="100" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" />
+							<GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center">
+								<Template>
+									@{
+										var voucher = (context as VoucherModel);
+									}
+									<button @onclick="() => OnEditVoucher(voucher)" class="btn-action btn-edit" title="Edit Voucher">
+										<span>✏️</span>
+									</button>
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c10e69;
+		--secondary-color: #2c3e50;
+		--success-color: #4caf50;
+		--warning-color: #ff9800;
+		--danger-color: #f44336;
+		--info-color: #2196f3;
+		--light-bg: #f8f9ff;
+		--card-bg: #ffffff;
+		--border-color: #e1e5e9;
+		--text-primary: #2c3e50;
+		--text-secondary: #666;
+		--text-muted: #999;
+	}
+
+	/* Loading Styles */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 50vh;
+		gap: 20px;
+	}
+
+	.circular-dots-loader {
+		display: flex;
+		gap: 8px;
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--primary-color);
+		animation: bounce 1.4s ease-in-out infinite both;
+	}
+
+	.dot-1 { animation-delay: -0.32s; }
+	.dot-2 { animation-delay: -0.16s; }
+	.dot-3 { animation-delay: 0s; }
+
+	@@keyframes bounce {
+		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+		40% { transform: scale(1.2); opacity: 1; }
+	}
+
+	.loading-text {
+		color: var(--text-secondary);
+		font-size: 16px;
+		margin: 0;
+	}
+
+	/* Main Container */
+	.voucher-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, #f8f9ff 0%, #e8e9f3 100%);
+		padding: 0;
+	}
+
+	/* Page Header */
+	.page-header {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+		padding: 30px 40px;
+		box-shadow: 0 4px 20px rgba(226, 19, 123, 0.2);
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	.title-section {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.page-icon {
+		font-size: 48px;
+		opacity: 0.9;
+	}
+
+	.page-title {
+		font-size: 32px;
+		font-weight: 700;
+		margin: 0;
+		letter-spacing: -0.5px;
+	}
+
+	.page-subtitle {
+		font-size: 16px;
+		opacity: 0.9;
+		margin: 5px 0 0 0;
+		font-weight: 300;
+	}
+
+	.back-button {
+		background: rgba(255, 255, 255, 0.1);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		color: white;
+		padding: 12px 20px;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		transition: all 0.3s ease;
+		backdrop-filter: blur(10px);
+	}
+
+	.back-button:hover {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.4);
+		transform: translateY(-2px);
+	}
+
+	/* Content Layout */
+	.content-layout {
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
+		padding: 40px;
+		max-width: 1200px;
+		margin: 0 auto;
+	}
+
+	/* Cards */
+	.form-card, .grid-card {
+		background: var(--card-bg);
+		border-radius: 16px;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--border-color);
+		overflow: hidden;
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+	}
+
+	.form-card:hover, .grid-card:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+	}
+
+	.card-header {
+		background: linear-gradient(135deg, #f8f9ff 0%, #e8e9f3 100%);
+		padding: 24px 32px;
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.card-title {
+		color: var(--text-primary);
+		font-size: 20px;
+		font-weight: 600;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.card-subtitle {
+		color: var(--text-secondary);
+		font-size: 14px;
+		margin: 5px 0 0 0;
+		font-weight: 400;
+	}
+
+	.card-body {
+		padding: 32px;
+	}
+
+	/* Form Styles */
+	.form-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 24px;
+		margin-bottom: 24px;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form-group.full-width {
+		grid-column: 1 / -1;
+	}
+
+	.form-label {
+		color: var(--text-primary);
+		font-weight: 600;
+		font-size: 14px;
+		margin-bottom: 8px;
+		letter-spacing: 0.25px;
+	}
+
+	.custom-textbox {
+		border: 2px solid var(--border-color);
+		border-radius: 8px;
+		transition: all 0.3s ease;
+	}
+
+	.custom-textbox:focus-within {
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+	}
+
+	.multiline {
+		min-height: 80px;
+	}
+
+	.status-checkbox {
+		margin-top: 10px;
+	}
+
+	/* Action Buttons */
+	.form-actions {
+		display: flex;
+		gap: 16px;
+		justify-content: flex-end;
+		align-items: center;
+		padding-top: 24px;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.btn {
+		padding: 12px 24px;
+		border-radius: 8px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border: none;
+		font-size: 14px;
+		letter-spacing: 0.25px;
+	}
+
+	.btn-primary {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(226, 19, 123, 0.3);
+	}
+
+	.btn-primary:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.btn-secondary {
+		background: transparent;
+		color: var(--text-secondary);
+		border: 2px solid var(--border-color);
+	}
+
+	.btn-secondary:hover {
+		background: var(--light-bg);
+		border-color: var(--primary-color);
+		color: var(--primary-color);
+		transform: translateY(-2px);
+	}
+
+	.spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-top: 2px solid white;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+
+	/* Grid Styles */
+	.custom-grid {
+		border-radius: 8px;
+		overflow: hidden;
+		border: 1px solid var(--border-color);
+	}
+
+	.btn-action {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 8px;
+		border-radius: 6px;
+		transition: all 0.2s ease;
+		font-size: 16px;
+	}
+
+	.btn-edit:hover {
+		background: rgba(226, 19, 123, 0.1);
+		transform: scale(1.1);
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 1024px) {
+		.content-layout {
+			padding: 30px 20px;
+		}
+
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.header-content {
+			flex-direction: column;
+			gap: 20px;
+			text-align: center;
+		}
+	}
+
+	@@media (max-width: 768px) {
+		.page-header {
+			padding: 20px 15px;
+		}
+
+		.content-layout {
+			padding: 20px 15px;
+		}
+
+		.form-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.form-actions {
+			flex-direction: column;
+		}
+
+		.btn {
+			width: 100%;
+		}
+
+		.title-section h1 {
+			font-size: 24px;
+		}
+
+		.action-buttons {
+			flex-direction: column;
+			gap: 4px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.card-body {
+			padding: 20px;
+		}
+
+		.card-header {
+			padding: 15px 20px;
+		}
+
+		.btn-action {
+			width: 28px;
+			height: 28px;
+			font-size: 12px;
+		}
+	}
+</style>
+
+<!-- Toast Notifications -->
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Timeout="3000"
+		 ShowCloseButton="true">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Timeout="4000"
+		 ShowCloseButton="true">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+	</ToastAnimationSettings>
+</SfToast>

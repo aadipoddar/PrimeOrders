@@ -9,7 +9,7 @@ using PrimeBakesLibrary.Models.Product;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeBakes.Shared.Pages.Admin;
+namespace PrimeBakes.Shared.Pages.Admin.Items;
 
 public partial class ProductPage
 {
@@ -232,7 +232,7 @@ public partial class ProductPage
 	{
 		// Get locations that don't already have active rates for the selected product
 		var existingLocationIds = _productRates.Where(r => r.Status).Select(r => r.LocationId).ToHashSet();
-		
+
 		_availableLocationsForRates = _locations
 			.Where(location => !existingLocationIds.Contains(location.Id))
 			.ToList();

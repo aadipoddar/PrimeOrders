@@ -9,7 +9,7 @@ using PrimeBakesLibrary.Models.Common;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeBakes.Shared.Pages.Admin;
+namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
 public partial class LedgerPage
 {
