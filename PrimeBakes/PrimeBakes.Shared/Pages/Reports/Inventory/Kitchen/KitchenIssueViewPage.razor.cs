@@ -34,7 +34,7 @@ public partial class KitchenIssueViewPage
 	{
 		_isLoading = true;
 
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		_user = authResult.User;
 
 		await LoadKitchenIssueDetails();

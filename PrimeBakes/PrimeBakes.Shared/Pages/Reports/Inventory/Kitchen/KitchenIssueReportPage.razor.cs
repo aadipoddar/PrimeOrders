@@ -37,7 +37,7 @@ public partial class KitchenIssueReportPage
 	protected override async Task OnInitializedAsync()
 	{
 		_isLoading = true;
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;

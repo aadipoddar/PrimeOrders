@@ -30,7 +30,7 @@ public partial class SaleSummaryPage
 	protected override async Task OnInitializedAsync()
 	{
 		_isLoading = true;
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;

@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Components;
 
+using PrimeBakes.Shared.Services;
+
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Purchase;
+using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Purchase;
@@ -25,6 +28,7 @@ public partial class PurchaseViewPage : ComponentBase
 
 	protected override async Task OnInitializedAsync()
 	{
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		await LoadData();
 	}
 

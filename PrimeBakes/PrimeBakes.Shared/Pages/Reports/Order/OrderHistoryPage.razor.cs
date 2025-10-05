@@ -34,13 +34,11 @@ public partial class OrderHistoryPage
 
 	private SfGrid<OrderOverviewModel> _sfGrid;
 
-
-
 	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
 		_isLoading = true;
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Order);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;

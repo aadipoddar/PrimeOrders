@@ -3,9 +3,9 @@
 <PageTitle>Reports Dashboard - Prime Bakes</PageTitle>
 
 <HeadContent>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		  integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+		  crossorigin="anonymous" referrerpolicy="no-referrer" />
 </HeadContent>
 
 @if (_isLoading || _user is null)
@@ -47,37 +47,47 @@ else
 				<p>Monitor sales performance and revenue analytics</p>
 			</div>
 			<div class="dashboard-cards">
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Summary")'>
-					<div class="card-icon summary-report-icon">
-						<i class="fas fa-chart-pie"></i>
-					</div>
-					<h3>Sale Summary Reports</h3>
-					<p>View overall business performance metrics and KPIs</p>
-				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed/")'>
-					<div class="card-icon detailed-report-icon">
-						<i class="fas fa-list-alt"></i>
+				@if (_user.Sales)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Summary")'>
+						<div class="card-icon summary-report-icon">
+							<i class="fas fa-chart-pie"></i>
+						</div>
+						<h3>Sale Summary Reports</h3>
+						<p>View overall business performance metrics and KPIs</p>
 					</div>
-					<h3>Sale Detailed Reports</h3>
-					<p>Comprehensive transaction-level sales analysis</p>
-				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/OrderHistory")'>
-					<div class="card-icon order-history-icon">
-						<i class="fas fa-history"></i>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed/")'>
+						<div class="card-icon detailed-report-icon">
+							<i class="fas fa-list-alt"></i>
+						</div>
+						<h3>Sale Detailed Reports</h3>
+						<p>Comprehensive transaction-level sales analysis</p>
 					</div>
-					<h3>Order History</h3>
-					<p>Track customer orders and purchase patterns</p>
-				</div>
+				}
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
-					<div class="card-icon sale-return-icon">
-						<i class="fas fa-undo"></i>
+				@if (_user.Order)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/OrderHistory")'>
+						<div class="card-icon order-history-icon">
+							<i class="fas fa-history"></i>
+						</div>
+						<h3>Order History</h3>
+						<p>Track customer orders and purchase patterns</p>
 					</div>
-					<h3>Sale Return Report</h3>
-					<p>Monitor product returns and refund activities</p>
-				</div>
+				}
+
+				@if (_user.Sales)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
+						<div class="card-icon sale-return-icon">
+							<i class="fas fa-undo"></i>
+						</div>
+						<h3>Sale Return Report</h3>
+						<p>Monitor product returns and refund activities</p>
+					</div>
+				}
 			</div>
 		</div>
 
@@ -88,34 +98,40 @@ else
 				<p>Analyze product performance and stock levels</p>
 			</div>
 			<div class="dashboard-cards">
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductSummary")'>
-					<div class="card-icon item-summary-icon">
-						<i class="fas fa-cube"></i>
+				@if (_user.Sales)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductSummary")'>
+						<div class="card-icon item-summary-icon">
+							<i class="fas fa-cube"></i>
+						</div>
+						<h3>Product Summary Report</h3>
+						<p>Aggregated product sales analytics with charts</p>
 					</div>
-					<h3>Product Summary Report</h3>
-					<p>Aggregated product sales analytics with charts</p>
-				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductDetailed")'>
-					<div class="card-icon item-report-icon">
-						<i class="fas fa-cubes"></i>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductDetailed")'>
+						<div class="card-icon item-report-icon">
+							<i class="fas fa-cubes"></i>
+						</div>
+						<h3>Product Detailed Report</h3>
+						<p>Individual product performance tracking</p>
 					</div>
-					<h3>Product Detailed Report</h3>
-					<p>Individual product performance tracking</p>
-				</div>
+				}
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductStock")'>
-					<div class="card-icon product-stock-icon">
-						<i class="fas fa-warehouse"></i>
+				@if (_user.Inventory)
+				{
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/ProductStock")'>
+						<div class="card-icon product-stock-icon">
+							<i class="fas fa-warehouse"></i>
+						</div>
+						<h3>Product Stock Report</h3>
+						<p>Monitor finished goods inventory levels</p>
 					</div>
-					<h3>Product Stock Report</h3>
-					<p>Monitor finished goods inventory levels</p>
-				</div>
+				}
 			</div>
 		</div>
 
 		<!-- Kitchen & Production Reports Section -->
-		@if (_user.LocationId == 1)
+		@if (_user.LocationId == 1 && _user.Inventory)
 		{
 			<div class="reports-section">
 				<div class="section-title">
@@ -162,6 +178,66 @@ else
 						</div>
 						<h3>Raw Material Stock Report</h3>
 						<p>Monitor raw material inventory levels</p>
+					</div>
+				</div>
+			</div>
+		}
+
+		<!-- Financial Accounting Section -->
+		@if (_user.LocationId == 1 && _user.Accounts)
+		{
+			<div class="reports-section">
+				<div class="section-title">
+					<h3><i class="fas fa-calculator"></i> Financial Accounting & Reports</h3>
+					<p>Comprehensive financial reporting and accounting analytics</p>
+				</div>
+				<div class="dashboard-cards">
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/Accounting")'>
+						<div class="card-icon accounting-report-icon">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<h3>Financial Accounting Reports</h3>
+						<p>Complete financial statements and accounting reports</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/Ledger")'>
+						<div class="card-icon ledger-report-icon">
+							<i class="fas fa-book"></i>
+						</div>
+						<h3>Ledger Reports</h3>
+						<p>Detailed general ledger and account-wise transactions</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/TrialBalance")'>
+						<div class="card-icon trial-balance-icon">
+							<i class="fas fa-balance-scale"></i>
+						</div>
+						<h3>Trial Balance</h3>
+						<p>Account balances and trial balance verification</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/ProfitLoss")'>
+						<div class="card-icon profit-loss-icon">
+							<i class="fas fa-chart-area"></i>
+						</div>
+						<h3>Profit & Loss Statement</h3>
+						<p>Income statement and profitability analysis</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/BalanceSheet")'>
+						<div class="card-icon balance-sheet-icon">
+							<i class="fas fa-clipboard-list"></i>
+						</div>
+						<h3>Balance Sheet</h3>
+						<p>Assets, liabilities and equity statement</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Financial/CashFlow")'>
+						<div class="card-icon cashflow-icon">
+							<i class="fas fa-money-bill-wave"></i>
+						</div>
+						<h3>Cash Flow Statement</h3>
+						<p>Cash inflows and outflows analysis</p>
 					</div>
 				</div>
 			</div>
@@ -273,9 +349,9 @@ else
 			gap: 15px;
 		}
 
-		.welcome-section h2 i {
-			font-size: 32px;
-		}
+			.welcome-section h2 i {
+				font-size: 32px;
+			}
 
 		.welcome-section p {
 			opacity: 0.95;
@@ -310,9 +386,9 @@ else
 			gap: 12px;
 		}
 
-		.section-title h3 i {
-			font-size: 24px;
-		}
+			.section-title h3 i {
+				font-size: 24px;
+			}
 
 		.section-title p {
 			color: var(--dark-text);
@@ -343,9 +419,9 @@ else
 			transform: translateY(-1px);
 		}
 
-	.back-button i {
-		font-size: 14px;
-	}
+		.back-button i {
+			font-size: 14px;
+		}
 
 	/* Dashboard cards */
 	.dashboard-cards {
@@ -421,14 +497,14 @@ else
 			transition: opacity 0.3s ease;
 		}
 
-		.dashboard-card:hover .card-icon::before {
-			opacity: 0.2;
-		}
+	.dashboard-card:hover .card-icon::before {
+		opacity: 0.2;
+	}
 
-		.card-icon i {
-			position: relative;
-			z-index: 1;
-		}
+	.card-icon i {
+		position: relative;
+		z-index: 1;
+	}
 
 	/* Custom icon colors for different report categories */
 	.summary-report-icon {
@@ -495,6 +571,43 @@ else
 		background: linear-gradient(135deg, rgba(46, 196, 134, 0.15), rgba(46, 196, 134, 0.05));
 		color: #2ec486;
 		border: 2px solid rgba(46, 196, 134, 0.2);
+	}
+
+	/* Financial Accounting Icons */
+	.accounting-report-icon {
+		background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(52, 152, 219, 0.05));
+		color: #3498db;
+		border: 2px solid rgba(52, 152, 219, 0.2);
+	}
+
+	.ledger-report-icon {
+		background: linear-gradient(135deg, rgba(142, 68, 173, 0.15), rgba(142, 68, 173, 0.05));
+		color: #8e44ad;
+		border: 2px solid rgba(142, 68, 173, 0.2);
+	}
+
+	.trial-balance-icon {
+		background: linear-gradient(135deg, rgba(230, 126, 34, 0.15), rgba(230, 126, 34, 0.05));
+		color: #e67e22;
+		border: 2px solid rgba(230, 126, 34, 0.2);
+	}
+
+	.profit-loss-icon {
+		background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(46, 204, 113, 0.05));
+		color: #2ecc71;
+		border: 2px solid rgba(46, 204, 113, 0.2);
+	}
+
+	.balance-sheet-icon {
+		background: linear-gradient(135deg, rgba(52, 73, 94, 0.15), rgba(52, 73, 94, 0.05));
+		color: #34495e;
+		border: 2px solid rgba(52, 73, 94, 0.2);
+	}
+
+	.cashflow-icon {
+		background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(241, 196, 15, 0.05));
+		color: #f1c40f;
+		border: 2px solid rgba(241, 196, 15, 0.2);
 	}
 
 	.dashboard-card h3 {
