@@ -19,22 +19,22 @@ internal static class PDFExportUtil
 	internal static readonly Color _lightGray = Color.FromArgb(245, 245, 245);
 	internal static readonly Color _darkGray = Color.FromArgb(64, 64, 64);
 
-	// Shared font constants - Reduced font sizes for more compact layout
-	internal static readonly PdfStandardFont _titleFont = new(PdfFontFamily.Helvetica, 18, PdfFontStyle.Bold); // Reduced from 24
-	internal static readonly PdfStandardFont _headerFont = new(PdfFontFamily.Helvetica, 12, PdfFontStyle.Bold); // Reduced from 16
-	internal static readonly PdfStandardFont _subHeaderFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold); // Reduced from 12
-	internal static readonly PdfStandardFont _normalFont = new(PdfFontFamily.Helvetica, 8); // Reduced from 10
-	internal static readonly PdfStandardFont _boldFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold); // Reduced from 10
-	internal static readonly PdfStandardFont _smallFont = new(PdfFontFamily.Helvetica, 7); // Reduced from 8
+	// Shared font constants - Optimized font sizes for compact but readable layout
+	internal static readonly PdfStandardFont _titleFont = new(PdfFontFamily.Helvetica, 16, PdfFontStyle.Bold); // Slightly increased for better readability
+	internal static readonly PdfStandardFont _headerFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold); // Slightly increased for better readability  
+	internal static readonly PdfStandardFont _subHeaderFont = new(PdfFontFamily.Helvetica, 9, PdfFontStyle.Bold); // Slightly increased for better readability
+	internal static readonly PdfStandardFont _normalFont = new(PdfFontFamily.Helvetica, 8); // Slightly increased to prevent clipping
+	internal static readonly PdfStandardFont _boldFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold); // Slightly increased to prevent clipping
+	internal static readonly PdfStandardFont _smallFont = new(PdfFontFamily.Helvetica, 7); // Slightly increased for better readability
 
-	internal const float _pageMargin = 15f; // Reduced from 20f for more space
+	internal const float _pageMargin = 10f; // Reduced from 15f for more space
 
 	/// <summary>
 	/// Creates a common PDF document header with customizable title
 	/// </summary>
 	internal static PdfPageTemplateElement CreateHeader(PdfDocument doc, string headerTitle)
 	{
-		var headerRect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 50); // Increased height to accommodate tagline
+		var headerRect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 40); // Reduced height for more compact layout
 
 		PdfPageTemplateElement header = new(headerRect);
 		header.Graphics.DrawRectangle(new PdfSolidBrush(_primaryColor), headerRect);
@@ -56,7 +56,7 @@ internal static class PDFExportUtil
 			LineAlignment = PdfVerticalAlignment.Middle
 		};
 
-		var taglineFont = new PdfStandardFont(PdfFontFamily.Helvetica, 9, PdfFontStyle.Italic);
+		var taglineFont = new PdfStandardFont(PdfFontFamily.Helvetica, 7, PdfFontStyle.Italic);
 		header.Graphics.DrawString("Celebrating happiness", taglineFont, PdfBrushes.White,
 			new PointF(headerRect.Width / 2, headerRect.Height / 2 + 12), taglineFormat);
 
@@ -100,7 +100,7 @@ internal static class PDFExportUtil
 	/// </summary>
 	internal static async Task<float> DrawCompanyInformation(PdfPage pdfPage, string invoiceType)
 	{
-		RectangleF detailsRect = new(15, 18, pdfPage.GetClientSize().Width - 30, 65); // Increased Y position from 8 to 18 to account for taller header
+		RectangleF detailsRect = new(15, 18, pdfPage.GetClientSize().Width - 30, 50); // Reduced height for more compact layout
 		pdfPage.Graphics.DrawRectangle(new PdfPen(_lightGray, 1), new PdfSolidBrush(_lightGray), detailsRect);
 
 		var mainLocation = await LedgerData.LoadLedgerByLocation(1);
@@ -109,16 +109,16 @@ internal static class PDFExportUtil
 			pdfPage.Graphics.DrawString(mainLocation.Alias, _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 8)); // Reduced margin
 
 		if (!string.IsNullOrEmpty(mainLocation.GSTNo))
-			pdfPage.Graphics.DrawString($"GST NO: {mainLocation.GSTNo}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 20)); // Reduced spacing
+			pdfPage.Graphics.DrawString($"GST NO: {mainLocation.GSTNo}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 16)); // Further reduced spacing
 
 		if (!string.IsNullOrEmpty(mainLocation.Address))
-			pdfPage.Graphics.DrawString($"Address: {mainLocation.Address}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 32)); // Reduced spacing
+			pdfPage.Graphics.DrawString($"Address: {mainLocation.Address}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 26)); // Further reduced spacing
 
 		if (!string.IsNullOrEmpty(mainLocation.Email))
-			pdfPage.Graphics.DrawString($"Email: {mainLocation.Email}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 44)); // Reduced spacing
+			pdfPage.Graphics.DrawString($"Email: {mainLocation.Email}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 36)); // Further reduced spacing
 
 		if (!string.IsNullOrEmpty(mainLocation.Phone))
-			pdfPage.Graphics.DrawString($"Phone: {mainLocation.Phone}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 56)); // Reduced spacing
+			pdfPage.Graphics.DrawString($"Phone: {mainLocation.Phone}", _normalFont, new PdfSolidBrush(_darkGray), new PointF(20, detailsRect.Y + 46)); // Further reduced spacing
 
 		var invoiceTitleSize = _headerFont.MeasureString(invoiceType);
 		pdfPage.Graphics.DrawString(invoiceType, _headerFont, new PdfSolidBrush(_secondaryColor), new PointF(pdfPage.GetClientSize().Width - invoiceTitleSize.Width - 20, detailsRect.Y + 12)); // Moved up from Y + 24 to Y + 12
@@ -140,17 +140,21 @@ internal static class PDFExportUtil
 		for (int i = 0; i < columnWidths.Length && i < pdfGrid.Columns.Count; i++)
 			pdfGrid.Columns[i].Width = columnWidths[i];
 
-		// Apply header styling with smaller padding
+		// Apply header styling with adequate padding for readability
 		pdfGrid.Headers.ApplyStyle(new PdfGridCellStyle
 		{
 			Font = _boldFont,
 			TextBrush = PdfBrushes.White,
-			CellPadding = new PdfPaddings(3, 3, 3, 3), // Reduced from 5
+			CellPadding = new PdfPaddings(4, 3, 4, 3), // Increased to prevent text clipping
 			BackgroundBrush = new PdfSolidBrush(_primaryColor),
 			Borders = new PdfBorders { All = new PdfPen(Color.Black, 0.5f) }
 		});
 
-		// Apply alternating row colors
+		// Set minimum height for header row
+		if (pdfGrid.Headers.Count > 0)
+			pdfGrid.Headers[0].Height = Math.Max(pdfGrid.Headers[0].Height, 20f);
+
+		// Apply alternating row colors and ensure minimum row height
 		int index = 0;
 		foreach (var row in pdfGrid.Rows)
 		{
@@ -159,14 +163,17 @@ internal static class PDFExportUtil
 				row.Style.BackgroundBrush = new PdfSolidBrush(_lightGray);
 			else
 				row.Style.BackgroundBrush = new PdfSolidBrush(Color.White);
+
+			// Set minimum row height to prevent text clipping
+			row.Height = Math.Max(row.Height, 18f); // Minimum height for readability
 		}
 
-		// Apply grid styling with smaller padding
+		// Apply grid styling with adequate padding for readability
 		pdfGrid.Style = new()
 		{
 			Font = _normalFont,
 			TextBrush = PdfBrushes.Black,
-			CellPadding = new PdfPaddings(3, 3, 3, 3), // Reduced from 5
+			CellPadding = new PdfPaddings(4, 3, 4, 3), // Increased to prevent text clipping
 		};
 
 		// Set column alignments
@@ -214,11 +221,11 @@ internal static class PDFExportUtil
 		summaryY += 20; // Reduced from 25
 		var grandTotalRect = new RectangleF(summaryX + 4, summaryY - 4, summaryWidth - 8, 20); // Reduced height from 25
 		pdfPage.Graphics.DrawRectangle(new PdfPen(_primaryColor, 2), new PdfSolidBrush(_primaryColor), grandTotalRect);
-		pdfPage.Graphics.DrawString("Grand Total: ", new PdfStandardFont(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold), // Reduced from 12
+		pdfPage.Graphics.DrawString("Grand Total: ", new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold), // Reduced from 10
 			PdfBrushes.White, new PointF(summaryX + 8, summaryY)); // Reduced margin
 
 		var grandTotalText = grandTotal.FormatIndianCurrency();
-		var grandTotalFont = new PdfStandardFont(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold); // Reduced from 12
+		var grandTotalFont = new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold); // Reduced from 10
 		var grandTotalSize = grandTotalFont.MeasureString(grandTotalText);
 
 		pdfPage.Graphics.DrawString(grandTotalText, grandTotalFont,
@@ -252,7 +259,7 @@ internal static class PDFExportUtil
 	internal static void DrawWrappedText(PdfPage pdfPage, string text, PdfFont font, PdfBrush brush,
 		RectangleF bounds, PdfTextAlignment alignment, ref float currentY)
 	{
-		const float lineSpacing = 12f; // Reduced from 15f
+		const float lineSpacing = 9f; // Reduced from 12f
 		string[] words = text.Split(' ');
 		string line = string.Empty;
 
@@ -296,43 +303,43 @@ internal static class PDFExportUtil
 	internal static float DrawInvoiceDetailsSection(PdfPage pdfPage, float currentY, string sectionTitle,
 		Dictionary<string, string> leftColumnDetails, Dictionary<string, string> rightColumnDetails)
 	{
-		var detailsRect = new RectangleF(15, currentY, pdfPage.GetClientSize().Width - 30, 75); // Reduced from 90 and margin from 20
+		var detailsRect = new RectangleF(15, currentY, pdfPage.GetClientSize().Width - 30, 60); // Further reduced from 75
 
 		if (leftColumnDetails.Count > 3)
-			detailsRect = new RectangleF(15, currentY, pdfPage.GetClientSize().Width - 30, 100); // Reduced from 120
+			detailsRect = new RectangleF(15, currentY, pdfPage.GetClientSize().Width - 30, 85); // Further reduced from 100
 
 		pdfPage.Graphics.DrawRectangle(new PdfPen(Color.Black, 1), detailsRect);
 
 		var leftX = 20; // Reduced from 30
 		var rightX = pdfPage.GetClientSize().Width / 2 + 15; // Reduced from 20
-		var detailY = currentY + 8; // Reduced from 10
+		var detailY = currentY + 6; // Further reduced from 8
 
 		// Section title
 		pdfPage.Graphics.DrawString(sectionTitle, _subHeaderFont, new PdfSolidBrush(_primaryColor), new PointF(leftX, detailY));
 
 		// Left column details with smaller spacing
-		detailY += 20; // Reduced from 25
+		detailY += 16; // Further reduced from 20
 		foreach (var detail in leftColumnDetails)
 		{
 			if (!string.IsNullOrEmpty(detail.Value))
 			{
 				pdfPage.Graphics.DrawString($"{detail.Key}: ", _normalFont, PdfBrushes.Black, new PointF(leftX, detailY));
-				pdfPage.Graphics.DrawString(detail.Value, _boldFont, new PdfSolidBrush(_secondaryColor), new PointF(leftX + 50, detailY)); // Reduced from 60
-				detailY += 12; // Reduced from 15
+				pdfPage.Graphics.DrawString(detail.Value, _boldFont, new PdfSolidBrush(_secondaryColor), new PointF(leftX + 45, detailY)); // Further reduced from 50
+				detailY += 10; // Further reduced from 12
 			}
 		}
 
 		// Right column details with smaller spacing
-		detailY = currentY + 28; // Reduced from 35
+		detailY = currentY + 22; // Further reduced from 28
 		foreach (var detail in rightColumnDetails)
 			if (!string.IsNullOrEmpty(detail.Value))
 			{
 				pdfPage.Graphics.DrawString($"{detail.Key}: ", _normalFont, PdfBrushes.Black, new PointF(rightX, detailY));
 
 				// Handle longer text for cash discount
-				var valueWidth = detail.Key.Contains("Cash Discount") ? 85 : 50; // Reduced from 100 and 60
+				var valueWidth = detail.Key.Contains("Cash Discount") ? 75 : 45; // Further reduced from 85 and 50
 				pdfPage.Graphics.DrawString(detail.Value, _boldFont, new PdfSolidBrush(_secondaryColor), new PointF(rightX + valueWidth, detailY));
-				detailY += 12; // Reduced from 15
+				detailY += 10; // Further reduced from 12
 			}
 
 		return detailsRect.Height + detailsRect.Y + 15; // Reduced from 20
