@@ -676,6 +676,7 @@ public partial class PurchasePage
 			Remarks = _purchase.Remarks,
 			UserId = _purchase.UserId,
 			GeneratedModule = GeneratedModules.Purchase.ToString(),
+			CreatedAt = DateTime.Now,
 			Status = true
 		});
 	}

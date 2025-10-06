@@ -187,6 +187,7 @@ public static class SaleData
 			Remarks = sale.Remarks,
 			UserId = sale.UserId,
 			GeneratedModule = GeneratedModules.Sales.ToString(),
+			CreatedAt = DateTime.Now,
 			Status = true
 		});
 

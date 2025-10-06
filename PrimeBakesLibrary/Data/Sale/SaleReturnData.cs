@@ -147,6 +147,7 @@ public static class SaleReturnData
 			Remarks = saleReturn.Remarks,
 			UserId = saleReturn.UserId,
 			GeneratedModule = GeneratedModules.SaleReturn.ToString(),
+			CreatedAt = DateTime.Now,
 			Status = true
 		});
 

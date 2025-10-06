@@ -124,6 +124,7 @@ public class PurchaseData
 			Remarks = purchase.Remarks,
 			UserId = purchase.UserId,
 			GeneratedModule = GeneratedModules.Purchase.ToString(),
+			CreatedAt = DateTime.Now,
 			Status = true
 		});
 

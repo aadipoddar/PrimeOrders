@@ -218,6 +218,8 @@ public partial class SaleViewPage
 		if (sale.LocationId == 1)
 		{
 			var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
+			if (accounting is null)
+				return;
 			accounting.Status = false;
 			await AccountingData.InsertAccounting(accounting);
 		}
