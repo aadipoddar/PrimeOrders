@@ -523,7 +523,7 @@ public partial class SaleCartPage
 				return false;
 			}
 
-			if (_sale.PartyId is not null && _sale.LocationId > 0)
+			if (_sale.PartyId is not null && _sale.LocationId > 1)
 			{
 				var partyLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, party.LocationId.Value);
 
