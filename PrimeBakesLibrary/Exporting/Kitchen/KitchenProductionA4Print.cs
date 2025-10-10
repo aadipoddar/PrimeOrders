@@ -55,7 +55,8 @@ public static class KitchenProductionA4Print
 
 		var rightColumnDetails = new Dictionary<string, string>
 		{
-			["Kitchen"] = kitchen.Name ?? "N/A"
+			["Kitchen"] = kitchen.Name ?? "N/A",
+			["Remarks"] = string.IsNullOrWhiteSpace(kitchenProduction.Remarks) ? "N/A" : kitchenProduction.Remarks
 		};
 
 		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Production Details", leftColumnDetails, rightColumnDetails);

@@ -47,7 +47,10 @@ public static class KitchenProductionExcelExport
 			nameof(KitchenProductionOverviewModel.KitchenName),
 			nameof(KitchenProductionOverviewModel.UserName),
 			nameof(KitchenProductionOverviewModel.TotalProducts),
-			nameof(KitchenProductionOverviewModel.TotalQuantity)
+			nameof(KitchenProductionOverviewModel.TotalQuantity),
+			nameof(KitchenProductionOverviewModel.TotalAmount),
+			nameof(KitchenProductionOverviewModel.Remarks),
+			nameof(KitchenProductionOverviewModel.CreatedAt)
 		];
 
 		// Define custom column settings with professional styling
@@ -114,6 +117,38 @@ public static class KitchenProductionExcelExport
 								   qtyValue > 50 ? Syncfusion.Drawing.Color.FromArgb(255, 165, 0) : null
 					};
 				}
+			},
+			[nameof(KitchenProductionOverviewModel.TotalAmount)] = new()
+			{
+				DisplayName = "Total Amount",
+				Format = "#,##0.00",
+				Width = 15,
+				IncludeInTotal = true,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
+				FormatCallback = (value) =>
+				{
+					if (value == null) return null;
+					var amountValue = Convert.ToDecimal(value);
+					return new ExcelExportUtil.FormatInfo
+					{
+						Bold = amountValue > 1000,
+						FontColor = amountValue > 5000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) :
+								   amountValue > 1000 ? Syncfusion.Drawing.Color.FromArgb(255, 165, 0) : null
+					};
+				}
+			},
+			[nameof(KitchenProductionOverviewModel.Remarks)] = new()
+			{
+				DisplayName = "Remarks",
+				Width = 30,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
+			},
+			[nameof(KitchenProductionOverviewModel.CreatedAt)] = new()
+			{
+				DisplayName = "Created At",
+				Format = "dd-MMM-yyyy HH:mm",
+				Width = 15,
+				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
 			}
 		};
 
