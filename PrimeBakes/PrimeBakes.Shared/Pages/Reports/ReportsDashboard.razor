@@ -65,6 +65,14 @@ else
 						<h3>Sale Detailed Reports</h3>
 						<p>Comprehensive transaction-level sales analysis</p>
 					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
+						<div class="card-icon sale-return-icon">
+							<i class="fas fa-undo-alt"></i>
+						</div>
+						<h3>Sale Return Reports</h3>
+						<p>Track product returns and refund analytics</p>
+					</div>
 				}
 
 				@if (_user.Order)

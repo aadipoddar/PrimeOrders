@@ -3,6 +3,7 @@ using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Product;
@@ -48,7 +49,8 @@ public static class SaleReturnData
 		saleReturn.Id = await InsertSaleReturn(saleReturn);
 		await SaveSaleReturnDetail(saleReturn, cart, update);
 		await SaveStock(saleReturn, cart, update);
-		await SaveAccounting(saleReturn, cart, update);
+		if (saleReturn.LocationId == 1)
+			await SaveAccounting(saleReturn, cart, update);
 
 		return saleReturn.Id;
 	}
@@ -64,6 +66,7 @@ public static class SaleReturnData
 				await InsertSaleReturnDetail(existingDetail);
 			}
 		}
+
 		foreach (var cartItem in cart)
 			await InsertSaleReturnDetail(new()
 			{
@@ -93,6 +96,11 @@ public static class SaleReturnData
 		if (update)
 			await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
 
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleReturn.SaleId);
+		LedgerModel party = null;
+		if (sale.PartyId is not null && sale.PartyId > 1)
+			party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
+
 		foreach (var product in cart)
 		{
 			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
@@ -100,18 +108,19 @@ public static class SaleReturnData
 				continue;
 
 			// Remove stock from the return location (negative quantity)
-			await ProductStockData.InsertProductStock(new()
-			{
-				Id = 0,
-				ProductId = product.ProductId,
-				Quantity = -product.Quantity,
-				TransactionNo = saleReturn.TransactionNo,
-				Type = StockType.SaleReturn.ToString(),
-				TransactionDate = DateOnly.FromDateTime(saleReturn.ReturnDateTime),
-				LocationId = saleReturn.LocationId
-			});
+			if (sale.PartyId is not null && sale.PartyId > 1 && party is not null && party.LocationId > 1)
+				await ProductStockData.InsertProductStock(new()
+				{
+					Id = 0,
+					ProductId = product.ProductId,
+					Quantity = -product.Quantity,
+					TransactionNo = saleReturn.TransactionNo,
+					Type = StockType.SaleReturn.ToString(),
+					TransactionDate = DateOnly.FromDateTime(saleReturn.ReturnDateTime),
+					LocationId = party.LocationId.Value
+				});
 
-			// Add stock back to main location (positive quantity)
+			// Add stock back to Sale location (positive quantity)
 			await ProductStockData.InsertProductStock(new()
 			{
 				Id = 0,
@@ -120,7 +129,7 @@ public static class SaleReturnData
 				TransactionNo = saleReturn.TransactionNo,
 				Type = StockType.SaleReturn.ToString(),
 				TransactionDate = DateOnly.FromDateTime(saleReturn.ReturnDateTime),
-				LocationId = 1
+				LocationId = saleReturn.LocationId
 			});
 		}
 	}

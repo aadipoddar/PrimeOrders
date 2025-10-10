@@ -1,0 +1,928 @@
+﻿@page "/Reports/SaleReturn"
+@page "/Reports/SaleReturn/{SelectedLocationId:int?}"
+
+@using PrimeBakesLibrary.Models.Sale
+@using PrimeBakesLibrary.Models.Common
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Inputs
+@using PrimeBakes.Shared.Services
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<PageTitle>Sale Return Analysis - PrimeBakes</PageTitle>
+
+@if (_isLoading || _user is null)
+{
+	<div class="loading-overlay">
+		<div class="loading-content">
+			<div class="circular-dots-loader">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>
+				<span class="dot dot-3"></span>
+			</div>
+			<p class="loading-text">Loading Sale Return Details...</p>
+		</div>
+	</div>
+}
+
+<div class="sale-return-detailed-container">
+	<!-- Page Header -->
+	<div class="page-header">
+		<div class="header-content">
+			<button @onclick="@(() => NavigationManager.NavigateTo("/Reports-Dashboard"))" class="back-to-dashboard-btn">
+				<i class="fas fa-arrow-left"></i>
+				<span>Back to Dashboard</span>
+			</button>
+			<div class="title-section">
+				<div class="icon-wrapper">
+					<i class="fas fa-undo-alt"></i>
+				</div>
+				<div class="title-text">
+					<h1>Sale Return Analysis</h1>
+					<p>Comprehensive return analytics and performance dashboard</p>
+					@if (_selectedLocation != null)
+					{
+						<div class="location-badge">
+							<i class="fas fa-map-marker-alt"></i>
+							@_selectedLocation.Name
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Filters Section -->
+	<div class="filters-section">
+		<div class="filters-container">
+			<div class="filter-group">
+				<label class="filter-label">Date Range</label>
+				<SfDateRangePicker @bind-StartDate="_startDate"
+								   @bind-EndDate="_endDate"
+								   Placeholder="Select date range"
+								   FloatLabelType='@FloatLabelType.Auto'
+								   CssClass="filter-control date-range"
+								   Width="100%">
+					<DateRangePickerEvents TValue="DateOnly" ValueChange="DateRangeChanged" />
+				</SfDateRangePicker>
+			</div>
+
+			@if (_user is not null && _user.LocationId == 1)
+			{
+				<div class="filter-group">
+					<label class="filter-label">Location</label>
+					<SfComboBox TValue="int?"
+								TItem="LocationModel"
+								Placeholder="Select Location"
+								FloatLabelType='@FloatLabelType.Auto'
+								DataSource="_locations"
+								Value="@_selectedLocationId"
+								CssClass="filter-control">
+						<ComboBoxFieldSettings Text="Name" Value="Id" />
+						<ComboBoxEvents TItem="LocationModel" TValue="int?" ValueChange="OnLocationFilterChanged" />
+					</SfComboBox>
+				</div>
+			}
+
+			<div class="filter-actions">
+				<SfButton Content="Export Excel" CssClass="e-success" OnClick="ExportExcel" />
+			</div>
+		</div>
+	</div>
+
+	<!-- Analytics Cards -->
+	<div class="analytics-section">
+		<div class="analytics-grid">
+			<!-- Total Returns Card -->
+			<div class="analytics-card primary-card">
+				<div class="card-icon">
+					<i class="fas fa-undo-alt"></i>
+				</div>
+				<div class="card-content">
+					<h3>Total Returns</h3>
+					<p class="amount">@_saleReturnOverviews.Count</p>
+				</div>
+			</div>
+
+			<!-- Total Amount Card -->
+			<div class="analytics-card success-card">
+				<div class="card-icon">
+					<i class="fas fa-rupee-sign"></i>
+				</div>
+				<div class="card-content">
+					<h3>Return Amount</h3>
+					<p class="amount">@_saleReturnOverviews.Sum(_ => _.Total).ToString("C2")</p>
+				</div>
+			</div>
+
+			<!-- Products Returned Card -->
+			<div class="analytics-card warning-card">
+				<div class="card-icon">
+					<i class="fas fa-box"></i>
+				</div>
+				<div class="card-content">
+					<h3>Products Returned</h3>
+					<p class="amount">@_saleReturnOverviews.Sum(_ => _.TotalProducts)</p>
+				</div>
+			</div>
+
+			<!-- Quantity Returned Card -->
+			<div class="analytics-card info-card">
+				<div class="card-icon">
+					<i class="fas fa-cubes"></i>
+				</div>
+				<div class="card-content">
+					<h3>Total Quantity</h3>
+					<p class="amount">@_saleReturnOverviews.Sum(_ => _.TotalQuantity).ToString("N0")</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Charts Section -->
+	@if (_saleReturnOverviews.Any())
+	{
+		<div class="charts-section">
+			<div class="charts-grid">
+				<!-- Daily Returns Chart -->
+				<div class="chart-card">
+					<div class="chart-header">
+						<h3 class="chart-title">Daily Returns Trend</h3>
+					</div>
+					<div class="chart-body">
+						<SfChart ID="dailyReturnsChart" Width="100%" Height="300px">
+							<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime"
+											   LabelFormat="dd/MM"
+											   IntervalType="IntervalType.Days" />
+							<ChartPrimaryYAxis Title="Return Amount" />
+							<ChartTooltipSettings Enable="true" />
+							<ChartLegendSettings Visible="true" />
+							<ChartSeriesCollection>
+								<ChartSeries DataSource="@GetDailyReturnData()"
+											 XName="Date"
+											 YName="Amount"
+											 Type="ChartSeriesType.Column"
+											 Name="Return Amount">
+								</ChartSeries>
+							</ChartSeriesCollection>
+						</SfChart>
+					</div>
+				</div>
+
+				<!-- Location-wise Returns Chart -->
+				@if (_user.LocationId == 1 && _locations.Count > 2)
+				{
+					<div class="chart-card">
+						<div class="chart-header">
+							<h3 class="chart-title">Location-wise Returns</h3>
+						</div>
+						<div class="chart-body">
+							<SfChart ID="locationReturnsChart" Width="100%" Height="300px">
+								<ChartPrimaryXAxis Title="Location" ValueType="Syncfusion.Blazor.Charts.ValueType.Category" />
+								<ChartPrimaryYAxis Title="Return Amount" />
+								<ChartTooltipSettings Enable="true" />
+								<ChartSeriesCollection>
+									<ChartSeries DataSource="@GetLocationReturnData()"
+												 XName="LocationName"
+												 YName="Amount"
+												 Type="ChartSeriesType.Bar"
+												 Name="Returns">
+									</ChartSeries>
+								</ChartSeriesCollection>
+							</SfChart>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	}
+
+	<!-- Detailed Grid -->
+	<div class="detailed-grid-section">
+		<div class="detailed-grid-card">
+			<div class="card-header">
+				<h3 class="chart-title">Return Transaction Details</h3>
+			</div>
+			<div class="card-body">
+				<SfGrid ID="_sfGrid"
+						@ref="_sfGrid"
+						DataSource="_saleReturnOverviews"
+						AllowSorting="true"
+						AllowFiltering="true"
+						AllowResizing="true"
+						AllowPaging="true"
+						AllowExcelExport="true"
+						AllowPdfExport="true"
+						CssClass="modern-grid">
+					<GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
+					<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+					<GridColumns>
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.TransactionNo)"
+									HeaderText="Transaction #"
+									Width="140"
+									TextAlign="TextAlign.Center"
+									AllowFiltering="true" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.ReturnDateTime)"
+									HeaderText="Return Date"
+									Width="140"
+									Format="dd/MM/yyyy hh:mm tt"
+									AllowFiltering="true" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.OriginalBillNo)"
+									HeaderText="Original Bill #"
+									Width="130"
+									TextAlign="TextAlign.Center"
+									AllowFiltering="true" />
+
+						@if (_user is not null && _user.LocationId == 1)
+						{
+							<GridColumn Field="@nameof(SaleReturnOverviewModel.LocationName)"
+										HeaderText="Location"
+										Width="120"
+										AllowFiltering="true" />
+						}
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.UserName)"
+									HeaderText="User"
+									Width="120"
+									AllowFiltering="true" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.TotalProducts)"
+									HeaderText="Products"
+									Width="100"
+									TextAlign="TextAlign.Right"
+									Format="N0" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.TotalQuantity)"
+									HeaderText="Qty"
+									Width="80"
+									Format="N0"
+									TextAlign="TextAlign.Right" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.BaseTotal)"
+									HeaderText="Base Amount"
+									Width="120"
+									Format="C2"
+									TextAlign="TextAlign.Right" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.DiscountAmount)"
+									HeaderText="Discount"
+									Width="100"
+									Format="C2"
+									TextAlign="TextAlign.Right" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.TotalTaxAmount)"
+									HeaderText="Tax"
+									Width="100"
+									Format="C2"
+									TextAlign="TextAlign.Right" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.Total)"
+									HeaderText="Total Amount"
+									Width="130"
+									Format="C2"
+									TextAlign="TextAlign.Right" />
+
+						<GridColumn Field="@nameof(SaleReturnOverviewModel.Remarks)"
+									HeaderText="Remarks"
+									Width="150"
+									AllowFiltering="true" />
+
+						<GridColumn HeaderText="Actions"
+									Width="100"
+									TextAlign="TextAlign.Center"
+									AllowFiltering="false"
+									AllowSorting="false">
+							<Template>
+								@{
+									var returnRecord = (context as SaleReturnOverviewModel);
+									<div class="action-buttons">
+										<button class="action-btn-grid view-btn"
+												@onclick="() => ViewReturnDetails(returnRecord.SaleReturnId)"
+												title="View Details">
+											<i class="fas fa-eye"></i>
+										</button>
+									</div>
+								}
+							</Template>
+						</GridColumn>
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
+	</div>
+
+	@if (!_saleReturnOverviews.Any() && !_isLoading)
+	{
+		<div class="no-data-section">
+			<div class="no-data-card">
+				<div class="no-data-icon">
+					<i class="fas fa-chart-bar"></i>
+				</div>
+				<h3>No Return Data Available</h3>
+				<p>No sale return records found for the selected criteria.</p>
+				<p class="suggestion">Try adjusting your filters or date range to view data.</p>
+			</div>
+		</div>
+	}
+</div>
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c71068;
+		--primary-light: #f5c2d3;
+		--success-color: #28a745;
+		--info-color: #17a2b8;
+		--warning-color: #ffc107;
+		--danger-color: #dc3545;
+		--text-dark: #2c3e50;
+		--text-light: #7f8c8d;
+		--bg-light: #f8f9fa;
+		--border-color: #e9ecef;
+		--shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+		--shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+		--return-primary: #e2137b;
+		--return-secondary: #c71068;
+	}
+
+	/* Reset margins and padding for full screen */
+	* {
+		box-sizing: border-box;
+	}
+
+	body, html {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		overflow-x: hidden;
+	}
+
+	/* Loading Animation */
+	.loading-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: rgba(255, 255, 255, 0.9);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+	}
+
+	.loading-content {
+		text-align: center;
+		color: var(--text-dark);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin: 0 auto 20px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--info-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	.loading-text {
+		font-size: 16px;
+		font-weight: 500;
+		margin: 0;
+	}
+
+	/* Main Container */
+	.sale-return-detailed-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+		padding: 0;
+		margin: 0;
+		width: 100vw;
+		overflow-x: hidden;
+	}
+
+	/* Page Header */
+	.page-header {
+		background: white;
+		padding: 15px 0;
+		box-shadow: var(--shadow-light);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		width: 100%;
+	}
+
+	.header-content {
+		width: 100%;
+		margin: 0;
+		padding: 0 15px;
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.back-to-dashboard-btn {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 20px;
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 500;
+		transition: all 0.3s ease;
+		cursor: pointer;
+	}
+
+		.back-to-dashboard-btn:hover {
+			background: var(--primary-dark);
+			transform: translateY(-1px);
+			box-shadow: var(--shadow-medium);
+		}
+
+	.title-section {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+		flex: 1;
+	}
+
+	.icon-wrapper {
+		width: 60px;
+		height: 60px;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: white;
+		font-size: 24px;
+		box-shadow: var(--shadow-light);
+	}
+
+	.title-text h1 {
+		margin: 0 0 5px 0;
+		color: var(--text-dark);
+		font-size: 28px;
+		font-weight: 700;
+	}
+
+	.title-text p {
+		margin: 0 0 10px 0;
+		color: var(--text-light);
+		font-size: 14px;
+	}
+
+	.location-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		background: var(--primary-light);
+		color: var(--primary-color);
+		padding: 4px 12px;
+		border-radius: 20px;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	/* Filters Section */
+	.filters-section {
+		width: 100%;
+		margin: 0;
+		padding: 15px;
+	}
+
+	.filters-container {
+		background: white;
+		padding: 20px;
+		border-radius: 12px;
+		box-shadow: var(--shadow-light);
+		display: grid;
+		grid-template-columns: 1fr 1fr auto;
+		gap: 20px;
+		align-items: end;
+	}
+
+	.filter-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.filter-label {
+		font-weight: 600;
+		color: var(--text-dark);
+		font-size: 14px;
+	}
+
+	.filter-control {
+		border: 2px solid var(--border-color);
+		border-radius: 8px;
+		transition: all 0.2s ease;
+	}
+
+		.filter-control:focus {
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+		}
+
+	.filter-actions {
+		display: flex;
+		gap: 10px;
+	}
+
+	/* Analytics Section */
+	.analytics-section {
+		width: 100%;
+		margin: 0;
+		padding: 0 15px 15px;
+	}
+
+	.analytics-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 20px;
+	}
+
+	.analytics-card {
+		background: white;
+		padding: 25px;
+		border-radius: 16px;
+		box-shadow: var(--shadow-light);
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		transition: all 0.3s ease;
+		position: relative;
+		overflow: hidden;
+	}
+
+		.analytics-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: var(--primary-color);
+		}
+
+		.analytics-card:hover {
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.analytics-card.success-card::before {
+			background: var(--success-color);
+		}
+
+		.analytics-card.warning-card::before {
+			background: var(--warning-color);
+		}
+
+		.analytics-card.info-card::before {
+			background: var(--info-color);
+		}
+
+	.card-icon {
+		width: 60px;
+		height: 60px;
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		color: white;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+	}
+
+	.success-card .card-icon {
+		background: linear-gradient(135deg, var(--success-color), #218838);
+	}
+
+	.warning-card .card-icon {
+		background: linear-gradient(135deg, var(--warning-color), #e0a800);
+	}
+
+	.info-card .card-icon {
+		background: linear-gradient(135deg, var(--info-color), #138496);
+	}
+
+	.card-content h3 {
+		margin: 0 0 8px 0;
+		color: var(--text-dark);
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.card-content .amount {
+		margin: 0;
+		color: var(--text-dark);
+		font-size: 28px;
+		font-weight: 800;
+	}
+
+	/* Charts Section */
+	.charts-section {
+		width: 100%;
+		margin: 0;
+		padding: 0 15px 15px;
+	}
+
+	.charts-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+		gap: 15px;
+	}
+
+	.chart-card {
+		background: white;
+		border-radius: 12px;
+		box-shadow: var(--shadow-light);
+		overflow: hidden;
+	}
+
+	.chart-header {
+		padding: 20px;
+		border-bottom: 1px solid var(--border-color);
+		background: var(--bg-light);
+	}
+
+	.chart-title {
+		margin: 0;
+		color: var(--text-dark);
+		font-size: 18px;
+		font-weight: 600;
+	}
+
+	.chart-body {
+		padding: 20px;
+	}
+
+	/* Detailed Grid Section */
+	.detailed-grid-section {
+		width: 100%;
+		margin: 0;
+		padding: 0 15px 15px;
+	}
+
+	.detailed-grid-card {
+		background: white;
+		border-radius: 12px;
+		box-shadow: var(--shadow-light);
+		overflow: hidden;
+	}
+
+	.card-header {
+		padding: 20px;
+		background: var(--bg-light);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.card-body {
+		padding: 0;
+	}
+
+	/* Grid Styling */
+	::deep .modern-grid {
+		border: none;
+		border-radius: 0;
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	}
+
+		::deep .modern-grid .e-gridheader {
+			background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+			border: none;
+		}
+
+		::deep .modern-grid .e-headercell {
+			background: transparent;
+			color: white;
+			font-weight: 600;
+			border-right: 1px solid rgba(255, 255, 255, 0.1);
+			padding: 15px 10px;
+		}
+
+		::deep .modern-grid .e-rowcell {
+			border-bottom: 1px solid var(--border-color);
+			border-right: 1px solid var(--border-color);
+			padding: 12px 10px;
+			vertical-align: middle;
+		}
+
+		::deep .modern-grid .e-row:nth-child(even) {
+			background-color: #fafafa;
+		}
+
+		::deep .modern-grid .e-row:hover {
+			background-color: var(--primary-light) !important;
+		}
+
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 8px;
+		justify-content: center;
+	}
+
+	.action-btn-grid {
+		width: 32px;
+		height: 32px;
+		border: none;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-size: 12px;
+	}
+
+	.view-btn {
+		background: var(--info-color);
+		color: white;
+	}
+
+		.view-btn:hover {
+			background: #138496;
+			transform: scale(1.1);
+		}
+
+	/* No Data Section */
+	.no-data-section {
+		width: 100%;
+		margin: 0;
+		padding: 30px 15px;
+	}
+
+	.no-data-card {
+		background: white;
+		padding: 60px 40px;
+		border-radius: 16px;
+		box-shadow: var(--shadow-light);
+		text-align: center;
+	}
+
+	.no-data-icon {
+		font-size: 64px;
+		color: var(--text-light);
+		margin-bottom: 20px;
+		opacity: 0.5;
+	}
+
+	.no-data-card h3 {
+		margin: 0 0 10px 0;
+		color: var(--text-dark);
+		font-size: 24px;
+		font-weight: 600;
+	}
+
+	.no-data-card p {
+		margin: 0 0 10px 0;
+		color: var(--text-light);
+		font-size: 16px;
+	}
+
+	.suggestion {
+		font-style: italic;
+		font-size: 14px !important;
+	}
+
+	/* Mobile Responsiveness */
+	@@media (max-width: 768px) {
+		.filters-container {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.filter-actions {
+			justify-content: center;
+		}
+
+		.analytics-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.charts-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.header-content {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 15px;
+			padding: 0 10px;
+		}
+
+		.title-section {
+			width: 100%;
+		}
+
+		.icon-wrapper {
+			width: 50px;
+			height: 50px;
+			font-size: 20px;
+		}
+
+		.title-text h1 {
+			font-size: 24px;
+		}
+
+		.analytics-card {
+			padding: 15px;
+			gap: 15px;
+		}
+
+		.card-icon {
+			width: 50px;
+			height: 50px;
+			font-size: 20px;
+		}
+
+		.card-content .amount {
+			font-size: 24px;
+		}
+
+		.filters-section,
+		.analytics-section,
+		.charts-section,
+		.detailed-grid-section,
+		.no-data-section {
+			padding-left: 10px;
+			padding-right: 10px;
+		}
+	}
+
+	@@media (max-width: 576px) {
+		.filters-section,
+		.analytics-section,
+		.charts-section,
+		.detailed-grid-section,
+		.no-data-section {
+			padding-left: 8px;
+			padding-right: 8px;
+		}
+
+		.filters-container,
+		.analytics-card,
+		.chart-card,
+		.detailed-grid-card {
+			border-radius: 8px;
+		}
+
+		.header-content {
+			padding: 0 8px;
+		}
+
+		.page-header {
+			padding: 10px 0;
+		}
+
+		.analytics-grid {
+			gap: 10px;
+		}
+
+		.charts-grid {
+			gap: 10px;
+		}
+	}
+</style>

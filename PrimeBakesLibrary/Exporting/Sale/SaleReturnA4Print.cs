@@ -37,7 +37,6 @@ public static class SaleReturnA4Print
 				Quantity = item.Quantity,
 				MaxQuantity = 0, // Not needed for printing
 				SoldQuantity = 0, // Not needed for printing
-				AlreadyReturnedQuantity = 0 // Not needed for printing
 			});
 		}
 

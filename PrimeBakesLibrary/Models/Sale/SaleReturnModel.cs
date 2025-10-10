@@ -41,7 +41,6 @@ public class SaleReturnProductCartModel
 	public decimal Quantity { get; set; }
 	public decimal MaxQuantity { get; set; }
 	public decimal SoldQuantity { get; set; }
-	public decimal AlreadyReturnedQuantity { get; set; }
 	public decimal Rate { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal DiscPercent { get; set; }

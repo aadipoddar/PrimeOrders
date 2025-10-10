@@ -234,6 +234,15 @@ else
 				</div>
 			}
 
+			@if (_user.Sales)
+			{
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/SaleReturn")'>
+					<div class="card-icon sale-return-icon">↩️</div>
+					<h3>Sale Return</h3>
+					<p>Process returns and refunds for customer purchases</p>
+				</div>
+			}
+
 			@if (_user.Inventory)
 			{
 				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory-Dashboard")'>
