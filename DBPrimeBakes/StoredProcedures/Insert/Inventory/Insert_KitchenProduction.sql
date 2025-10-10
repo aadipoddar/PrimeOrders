@@ -5,13 +5,15 @@
 	@UserId INT,
 	@TransactionNo VARCHAR(20),
 	@ProductionDate DATETIME,
+	@Remarks VARCHAR(250),
+	@CreatedAt DATETIME,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[KitchenProduction] (KitchenId, LocationId, UserId, TransactionNo, ProductionDate, Status)
-		VALUES (@KitchenId, @LocationId, @UserId, @TransactionNo, @ProductionDate, @Status);
+		INSERT INTO [dbo].[KitchenProduction] (KitchenId, LocationId, UserId, TransactionNo, ProductionDate, Remarks, CreatedAt, Status)
+		VALUES (@KitchenId, @LocationId, @UserId, @TransactionNo, @ProductionDate, @Remarks, @CreatedAt, @Status);
 
 		SET @Id = SCOPE_IDENTITY();
 	END
@@ -24,6 +26,7 @@ BEGIN
 			UserId = @UserId,
 			TransactionNo = @TransactionNo,
 			ProductionDate = @ProductionDate,
+			Remarks = @Remarks,
 			Status = @Status
 		WHERE Id = @Id;
 	END

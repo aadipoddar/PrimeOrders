@@ -31,10 +31,11 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 		await LocalRemove(StorageFileNames.PurchaseCartDataFileName);
 		await LocalRemove(StorageFileNames.KitchenIssueDataFileName);
 		await LocalRemove(StorageFileNames.KitchenIssueCartDataFileName);
+		await LocalRemove(StorageFileNames.KitchenProductionDataFileName);
+		await LocalRemove(StorageFileNames.KitchenProductionCartDataFileName);
 		await LocalRemove(StorageFileNames.FinancialAccountingDataFileName);
 		await LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
 		await LocalRemove(StorageFileNames.SaleReturnDataFileName);
-		await LocalRemove(StorageFileNames.SaleReturnCartDataFileName);
 	}
 
 

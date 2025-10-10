@@ -79,4 +79,16 @@ public static class SendNotification
 
 		await SendNotificationToAPI(users, title, text);
 	}
+
+	public static async Task SendKitchenProductionNotificationMainLocationAdminInventory(int kitchenProductionId)
+	{
+		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
+		users = [.. users.Where(u => u.Admin && u.LocationId == 1 || u.Inventory && u.LocationId == 1)];
+
+		var kitchenProduction = await KitchenProductionData.LoadKitchenProductionOverviewByKitchenProductionId(kitchenProductionId);
+		var title = $"New Kitchen Production Placed to {kitchenProduction.KitchenName}";
+		var text = $"Kitchen Production No: {kitchenProduction.TransactionNo} | Total Items: {kitchenProduction.TotalProducts} | Total Qty: {kitchenProduction.TotalQuantity} | Kitchen: {kitchenProduction.KitchenName} | User: {kitchenProduction.UserName} | Date: {kitchenProduction.ProductionDate:dd/MM/yy hh:mm tt} | Remarks: {kitchenProduction.Remarks}";
+
+		await SendNotificationToAPI(users, title, text);
+	}
 }

@@ -90,6 +90,7 @@ public static class StoredProcedureNames
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
 	public static string LoadKitchenProductionDetailByKitchenProduction => "Load_KitchenProductionDetail_By_KitchenProduction";
 	public static string LoadKitchenProductionByTransactionNo => "Load_KitchenProduction_By_TransactionNo";
+	public static string LoadKitchenProductionOverviewByKitchenProductionId => "Load_KitchenProductionOverview_By_KitchenProductionId";
 
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";

@@ -91,7 +91,7 @@ public static class KitchenIssueData
 					Type = StockType.KitchenIssue.ToString(),
 					TransactionNo = kitchenIssue.TransactionNo,
 					TransactionDate = DateOnly.FromDateTime(kitchenIssue.IssueDate),
-					LocationId = kitchenIssue.LocationId
+					LocationId = 1
 				});
 	}
 }

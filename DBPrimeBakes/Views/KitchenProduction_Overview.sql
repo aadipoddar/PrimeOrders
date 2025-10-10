@@ -8,9 +8,13 @@
 		kp.ProductionDate,
 		kp.UserId,
 		u.Name AS UserName,
+		kp.Remarks,
 
 		COUNT(DISTINCT kp.Id) AS TotalProducts,
-		SUM(kpd.Quantity) AS TotalQuantity
+		SUM(kpd.Quantity) AS TotalQuantity,
+		SUM(kpd.Total) AS TotalAmount,
+
+		kp.CreatedAt
 
 	FROM
 		dbo.KitchenProduction kp
@@ -33,4 +37,6 @@
 		k.Name,
 		kp.ProductionDate,
 		kp.UserId,
+		kp.Remarks,
+		kp.CreatedAt,
 		u.Name
