@@ -88,26 +88,3 @@ public class PurchaseOverviewModel
 	public decimal Total { get; set; }
 	public DateTime CreatedAt { get; set; }
 }
-
-#region Chart and Helper Models
-public class PurchaseDetailDisplayModel
-{
-	public string RawMaterialName { get; set; } = "";
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal Total { get; set; }
-}
-
-public class DailyPurchaseChartData
-{
-	public string Date { get; set; }
-	public decimal Amount { get; set; }
-}
-
-public class VendorDistributionChartData
-{
-	public int SupplierId { get; set; }
-	public string SupplierName { get; set; }
-	public decimal Amount { get; set; }
-}
-#endregion

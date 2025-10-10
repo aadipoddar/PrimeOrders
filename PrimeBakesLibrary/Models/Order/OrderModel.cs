@@ -65,28 +65,10 @@ public class ProductOrderSummary
 	public decimal TotalValue => ProductRate * TotalQuantity;  // Calculated total value
 }
 
-public class OrderDetailDisplayModel
-{
-	public string ProductName { get; set; } = string.Empty;
-	public decimal Quantity { get; set; }
-}
-
 public class ChallanItemModel
 {
 	public string ProductCode { get; set; } = string.Empty;
 	public string ProductName { get; set; } = string.Empty;
 	public decimal Quantity { get; set; }
-}
-
-public class OrderChartChartData
-{
-	public string Date { get; set; }
-	public int Count { get; set; }
-}
-
-public class OrderStatusChartData
-{
-	public string Status { get; set; }
-	public int Count { get; set; }
 }
 #endregion

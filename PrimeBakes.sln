@@ -13,8 +13,6 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DBPrimeBakes", "DBPrimeBake
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrimeBakesLibrary", "PrimeBakesLibrary\PrimeBakesLibrary.csproj", "{9212BD16-A853-4B37-8E29-8CB78F6BF82D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrimeOrders", "PrimeOrders\PrimeOrders.csproj", "{D0FDB74F-7BEA-776B-69FA-278259EB773E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PushNotificationsAPI", "PushNotificationsAPI\PushNotificationsAPI.csproj", "{88B73A45-8821-9972-95B0-0D0465EB6FA3}"
 EndProject
 Global
@@ -47,10 +45,6 @@ Global
 		{9212BD16-A853-4B37-8E29-8CB78F6BF82D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9212BD16-A853-4B37-8E29-8CB78F6BF82D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9212BD16-A853-4B37-8E29-8CB78F6BF82D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0FDB74F-7BEA-776B-69FA-278259EB773E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0FDB74F-7BEA-776B-69FA-278259EB773E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0FDB74F-7BEA-776B-69FA-278259EB773E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0FDB74F-7BEA-776B-69FA-278259EB773E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{88B73A45-8821-9972-95B0-0D0465EB6FA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{88B73A45-8821-9972-95B0-0D0465EB6FA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88B73A45-8821-9972-95B0-0D0465EB6FA3}.Release|Any CPU.ActiveCfg = Release|Any CPU

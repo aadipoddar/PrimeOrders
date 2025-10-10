@@ -90,29 +90,4 @@ public class OpeningClosingRawMaterialChartData
 	public decimal OpeningStock { get; set; }
 	public decimal ClosingStock { get; set; }
 }
-
-public class StockOverviewProductChartData
-{
-	public string Component { get; set; }
-	public decimal Value { get; set; }
-}
-
-public class CategoryDistributionProductChartData
-{
-	public string CategoryName { get; set; }
-	public decimal StockCount { get; set; }
-}
-
-public class TopMovingItemsProductChartData
-{
-	public string ItemName { get; set; }
-	public decimal Movement { get; set; }
-}
-
-public class OpeningClosingProductChartData
-{
-	public string ItemName { get; set; }
-	public decimal OpeningStock { get; set; }
-	public decimal ClosingStock { get; set; }
-}
 #endregion

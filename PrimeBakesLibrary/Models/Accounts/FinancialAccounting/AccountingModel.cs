@@ -66,30 +66,3 @@ public class AccountingOverviewModel
 	public decimal TotalAmount { get; set; }
 	public DateTime CreatedAt { get; set; }
 }
-
-#region Charts and Helper Models
-public class VoucherWiseChartData
-{
-	public string VoucherName { get; set; }
-	public int EntryCount { get; set; }
-}
-
-public class DebitCreditChartData
-{
-	public string Type { get; set; }
-	public decimal Amount { get; set; }
-}
-
-public class DailyEntryChartData
-{
-	public string Date { get; set; }
-	public int EntryCount { get; set; }
-}
-
-public class MonthlyAmountChartData
-{
-	public string Month { get; set; }
-	public decimal DebitAmount { get; set; }
-	public decimal CreditAmount { get; set; }
-}
-#endregion

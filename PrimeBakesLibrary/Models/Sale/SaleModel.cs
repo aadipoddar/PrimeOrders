@@ -119,20 +119,6 @@ public class LocationSalesSummaryChartData
 	public decimal Amount { get; set; }
 }
 
-public class SaleDetailDisplayModel
-{
-	public string ProductName { get; set; } = "";
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal Total { get; set; }
-}
-
-public class SalePaymentMethodChartData
-{
-	public string PaymentMethod { get; set; }
-	public decimal Amount { get; set; }
-}
-
 public class DailySalesChartData
 {
 	public string Date { get; set; }
