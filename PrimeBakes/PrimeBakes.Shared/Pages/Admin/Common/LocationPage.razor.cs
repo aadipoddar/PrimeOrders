@@ -262,6 +262,8 @@ public partial class LocationPage
 				Code = ledger?.Code ?? GenerateCodes.GenerateLedgerCode(ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
 				AccountTypeId = 3,
 				GroupId = 1,
+				Alias = "",
+				Email = "",
 				Remarks = "",
 				Address = "",
 				GSTNo = "",
