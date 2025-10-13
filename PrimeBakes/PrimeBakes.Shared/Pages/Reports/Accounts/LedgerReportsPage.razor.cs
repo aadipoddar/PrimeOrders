@@ -21,14 +21,9 @@ public partial class LedgerReportsPage
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
-	private int _selectedAccountTypeId = 0;
-	private int _selectedGroupId = 0;
-	private int _selectedLedgerId = 0;
+	private LedgerModel _selectedLedger;
 
-	private List<AccountTypeModel> _accountTypes = [];
-	private List<GroupModel> _groups = [];
 	private List<LedgerModel> _ledgers = [];
-	private List<LedgerModel> _filteredLedgers = [];
 	private List<LedgerOverviewModel> _ledgerOverviews = [];
 	private SfGrid<LedgerOverviewModel> _sfGrid;
 
@@ -45,37 +40,17 @@ public partial class LedgerReportsPage
 			return;
 		}
 
-		await LoadInitialData();
 		await LoadData();
 		_isLoading = false;
-	}
-
-	private async Task LoadInitialData()
-	{
-		try
-		{
-			_accountTypes = await CommonData.LoadTableDataByStatus<AccountTypeModel>(TableNames.AccountType, true);
-			_groups = await CommonData.LoadTableDataByStatus<GroupModel>(TableNames.Group, true);
-			_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger, true);
-
-			// Add "All" options for dropdowns
-			_accountTypes.Insert(0, new AccountTypeModel { Id = 0, Name = "All Account Types" });
-			_groups.Insert(0, new GroupModel { Id = 0, Name = "All Groups" });
-
-			_filteredLedgers = [.. _ledgers];
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error loading initial data: {ex.Message}");
-		}
 	}
 
 	private async Task LoadData()
 	{
 		try
 		{
+			_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger, true);
 			await LoadLedgerData();
-			await ApplyFilters();
+			ApplyFilters();
 			StateHasChanged();
 		}
 		catch (Exception ex)
@@ -84,40 +59,30 @@ public partial class LedgerReportsPage
 		}
 	}
 
-	private async Task LoadLedgerData()
-	{
+	private async Task LoadLedgerData() =>
 		_ledgerOverviews = await LedgerData.LoadLedgerDetailsByDateLedger(
 			_startDate.ToDateTime(TimeOnly.MinValue),
 			_endDate.ToDateTime(TimeOnly.MaxValue),
-			_selectedLedgerId);
-	}
+			0);
 
-	private async Task ApplyFilters()
+	private void ApplyFilters()
 	{
-		// Filter ledgers based on selected group and account type
-		if (_selectedGroupId > 0)
-			_filteredLedgers = [.. _ledgers.Where(l => l.GroupId == _selectedGroupId)];
-		else
-			_filteredLedgers = [.. _ledgers];
+		if (_selectedLedger is null || _selectedLedger.Id <= 0)
+			return;
 
-		if (_selectedAccountTypeId > 0)
-			_filteredLedgers = [.. _filteredLedgers.Where(l => l.AccountTypeId == _selectedAccountTypeId)];
+		List<LedgerOverviewModel> filteredOverviews = [];
+		var filteredLedgers = _ledgerOverviews.Where(l => l.LedgerId == _selectedLedger.Id).ToList();
 
-		// Apply filters to overview data
-		var filteredOverviews = _ledgerOverviews.AsEnumerable();
+		foreach (var item in filteredLedgers)
+		{
+			var referenceLedgers = _ledgerOverviews
+				.Where(l => (l.ReferenceId == item.ReferenceId && l.ReferenceNo == item.ReferenceNo && l.ReferenceType == item.ReferenceType) || l.AccountingId == item.AccountingId)
+				.ToList();
+			foreach (var ledger in referenceLedgers)
+				filteredOverviews.Add(ledger);
+		}
 
-		if (_selectedGroupId > 0)
-			filteredOverviews = filteredOverviews.Where(o => o.GroupId == _selectedGroupId);
-
-		if (_selectedAccountTypeId > 0)
-			filteredOverviews = filteredOverviews.Where(o => o.AccountTypeId == _selectedAccountTypeId);
-
-		if (_selectedLedgerId > 0)
-			filteredOverviews = filteredOverviews.Where(o => o.LedgerId == _selectedLedgerId);
-
-		_ledgerOverviews = filteredOverviews.ToList();
-
-		await Task.CompletedTask;
+		_ledgerOverviews = [.. filteredOverviews];
 	}
 
 	#region Event Handlers
@@ -131,24 +96,9 @@ public partial class LedgerReportsPage
 		}
 	}
 
-	private async Task OnAccountTypeChanged(ChangeEventArgs<int, AccountTypeModel> args)
+	private async Task OnLedgerChanged(ChangeEventArgs<LedgerModel, LedgerModel> args)
 	{
-		_selectedAccountTypeId = args.Value;
-		_selectedGroupId = 0; // Reset group filter
-		_selectedLedgerId = 0; // Reset ledger filter
-		await LoadData();
-	}
-
-	private async Task OnGroupChanged(ChangeEventArgs<int, GroupModel> args)
-	{
-		_selectedGroupId = args.Value;
-		_selectedLedgerId = 0; // Reset ledger filter
-		await LoadData();
-	}
-
-	private async Task OnLedgerChanged(ChangeEventArgs<int, LedgerModel> args)
-	{
-		_selectedLedgerId = args.Value;
+		_selectedLedger = args.Value;
 		await LoadData();
 	}
 
@@ -162,40 +112,23 @@ public partial class LedgerReportsPage
 	{
 		try
 		{
-			if (!_ledgerOverviews.Any())
-			{
+			if (_ledgerOverviews.Count == 0)
 				return;
-			}
-
-			// Use the existing ledger export functionality
-			var selectedLedger = _selectedLedgerId > 0 ? _ledgers.FirstOrDefault(l => l.Id == _selectedLedgerId) : null;
 
 			var memoryStream = LedgerExcelExport.ExportLedgerDetailExcel(
 				_ledgerOverviews,
 				_startDate,
 				_endDate,
-				selectedLedger,
-				_selectedGroupId,
-				_groups,
-				_selectedAccountTypeId,
-				_accountTypes);
+				_selectedLedger,
+				0,
+				null,
+				0,
+				null);
 
 			// Generate filename based on filters
 			string filenameSuffix = string.Empty;
-			if (selectedLedger != null)
-				filenameSuffix = $"_{selectedLedger.Name}";
-			else if (_selectedGroupId > 0)
-			{
-				var group = _groups.FirstOrDefault(g => g.Id == _selectedGroupId);
-				if (group != null)
-					filenameSuffix = $"_{group.Name}";
-			}
-			else if (_selectedAccountTypeId > 0)
-			{
-				var accountType = _accountTypes.FirstOrDefault(a => a.Id == _selectedAccountTypeId);
-				if (accountType != null)
-					filenameSuffix = $"_{accountType.Name}";
-			}
+			if (_selectedLedger != null)
+				filenameSuffix = $"_{_selectedLedger.Name}";
 
 			var fileName = $"Ledger_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 

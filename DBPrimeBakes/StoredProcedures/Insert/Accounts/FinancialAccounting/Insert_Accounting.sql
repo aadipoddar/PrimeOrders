@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Accounting]
 	@Id INT OUTPUT,
-	@ReferenceNo VARCHAR(20),
+	@TransactionNo VARCHAR(20),
 	@VoucherId INT,
 	@Remarks VARCHAR(500),
 	@AccountingDate DATE,
@@ -15,7 +15,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[Accounting]
 		(
-			ReferenceNo,
+			[TransactionNo],
 			VoucherId,
 			Remarks,
 			AccountingDate,
@@ -26,7 +26,7 @@ BEGIN
 			Status
 		) VALUES
 		(
-			@ReferenceNo,
+			@TransactionNo,
 			@VoucherId,
 			@Remarks,
 			@AccountingDate,
@@ -44,7 +44,7 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[Accounting]
 		SET
-			ReferenceNo = @ReferenceNo,
+			[TransactionNo] = @TransactionNo,
 			VoucherId = @VoucherId,
 			Remarks = @Remarks,
 			AccountingDate = @AccountingDate,

@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
@@ -7,39 +8,38 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Accounts;
 
 public partial class FinancialAccountingPage
 {
-	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _isRetrieving = false;
 
-	private int _selectedGroupId = 0;
-	private int _selectedAccountTypeId = 0;
+	private UserModel _user;
+	private FinancialYearModel _financialYear;
+	private LedgerModel _selectedLedger;
+	private LedgerOverviewModel? _selectedLedgerReference;
+	private AccountingCartModel _selectedCart;
+	private AccountingModel _accounting = new()
+	{
+		Id = 0,
+		TransactionNo = string.Empty,
+		VoucherId = 0,
+		AccountingDate = DateOnly.FromDateTime(DateTime.Now),
+		CreatedAt = DateTime.Now,
+		FinancialYearId = 0,
+		GeneratedModule = GeneratedModules.FinancialAccounting.ToString(),
+		Remarks = string.Empty,
+		UserId = 0,
+		Status = true,
+	};
 
-	private List<GroupModel> _groups = [];
-	private List<AccountTypeModel> _accountTypes = [];
-	private readonly List<AccountingCartModel> _cart = [];
+	private List<LedgerModel> _ledgers;
+	private List<VoucherModel> _vouchers;
+	private List<LedgerOverviewModel> _ledgerReferences = [];
 
-	private SfGrid<AccountingCartModel> _sfGrid;
-
-	// Accounting model for transaction details
-	private AccountingModel _accounting = new();
-
-	// Validation dialog
-	private SfDialog _validationDialog;
-	private bool _validationDialogVisible = false;
-	private List<string> _validationErrors = [];
-
-	// Confirmation dialog
-	private SfDialog _confirmationDialog;
-	private bool _confirmationDialogVisible = false;
-
-	private decimal TotalDebit => _cart.Sum(x => x.Debit) ?? 0;
-	private decimal TotalCredit => _cart.Sum(x => x.Credit) ?? 0;
-	private decimal BalanceDifference => TotalDebit - TotalCredit;
+	private SfGrid<AccountingCartModel> _sfAccountingCart;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
@@ -48,244 +48,180 @@ public partial class FinancialAccountingPage
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;
+		StateHasChanged();
 	}
 
 	private async Task LoadData()
 	{
-		await LoadGroups();
-		await LoadAccountTypes();
-		await LoadLedgers();
-		await LoadExistingCart();
-		await LoadExistingAccounting();
+		_vouchers = await CommonData.LoadTableDataByStatus<VoucherModel>(TableNames.Voucher);
+		_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
 
-		StateHasChanged();
+		await LoadAccountingFromCart();
 	}
 
-	private async Task LoadGroups()
+	private async Task LoadAccountingFromCart()
 	{
-		_groups = await CommonData.LoadTableDataByStatus<GroupModel>(TableNames.Group);
-		_groups.Add(new GroupModel { Id = 0, Name = "All Groups" });
-		_groups.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-		_selectedGroupId = 0;
+		if (await DataStorageService.LocalExists(StorageFileNames.FinancialAccountingDataFileName))
+			_accounting = System.Text.Json.JsonSerializer.Deserialize<AccountingModel>(
+				await DataStorageService.LocalGetAsync(StorageFileNames.FinancialAccountingDataFileName));
+
+		else
+		{
+			_accounting.UserId = _user.Id;
+			_accounting.AccountingDate = DateOnly.FromDateTime(DateTime.Now);
+			_accounting.VoucherId = _vouchers.FirstOrDefault().Id;
+			_accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
+			_accounting.Status = true;
+			_accounting.Remarks = string.Empty;
+			_accounting.CreatedAt = DateTime.Now;
+		}
+
+		await SaveAccountingToCart();
+	}
+	#endregion
+
+	#region Event Change
+	private async Task OnAccountingDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateOnly> args)
+	{
+		_accounting.AccountingDate = args.Value;
+		_financialYear = await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate);
+		_accounting.FinancialYearId = _financialYear.Id;
+		await SaveAccountingToCart();
 	}
 
-	private async Task LoadAccountTypes()
+	private async Task OnVoucherTypeChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, VoucherModel> args)
 	{
-		_accountTypes = await CommonData.LoadTableDataByStatus<AccountTypeModel>(TableNames.AccountType);
-		_accountTypes.Add(new AccountTypeModel { Id = 0, Name = "All Account Types" });
-		_accountTypes.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-		_selectedAccountTypeId = 0;
+		_accounting.VoucherId = args.Value;
+		await SaveAccountingToCart();
 	}
 
-	private async Task LoadLedgers()
+	private async Task OnLedgerChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
 	{
-		_cart.Clear();
+		_selectedLedger = args.Value;
 
-		var allLedgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
-
-		foreach (var ledger in allLedgers)
-			_cart.Add(new()
+		if (_selectedLedger is not null)
+			_selectedCart = new()
 			{
-				AccountTypeId = ledger.AccountTypeId,
-				GroupId = ledger.GroupId,
 				Serial = 0,
-				Id = ledger.Id,
-				Name = ledger.Name,
+				Id = _selectedLedger.Id,
+				Name = _selectedLedger.Name,
+				GroupId = _selectedLedger.GroupId,
+				AccountTypeId = _selectedLedger.AccountTypeId,
+				ReferenceId = null,
+				ReferenceType = null,
+				ReferenceNo = null,
 				Debit = 0,
 				Credit = 0,
 				Remarks = string.Empty
-			});
-
-		_cart.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-	}
-
-	private async Task LoadExistingCart()
-	{
-		if (await DataStorageService.LocalExists(StorageFileNames.FinancialAccountingCartDataFileName))
-		{
-			var items = System.Text.Json.JsonSerializer.Deserialize<List<AccountingCartModel>>(
-				await DataStorageService.LocalGetAsync(StorageFileNames.FinancialAccountingCartDataFileName)) ?? [];
-			foreach (var item in items)
-			{
-				_cart.Where(x => x.Id == item.Id).FirstOrDefault().Debit = item.Debit;
-				_cart.Where(x => x.Id == item.Id).FirstOrDefault().Credit = item.Credit;
-				_cart.Where(x => x.Id == item.Id).FirstOrDefault().Remarks = item.Remarks;
-			}
-		}
-	}
-
-	private async Task LoadExistingAccounting()
-	{
-		if (await DataStorageService.LocalExists(StorageFileNames.FinancialAccountingDataFileName))
-		{
-			var accountingJson = await DataStorageService.LocalGetAsync(StorageFileNames.FinancialAccountingDataFileName);
-			var accounting = System.Text.Json.JsonSerializer.Deserialize<AccountingModel>(accountingJson);
-			if (accounting != null)
-			{
-				_accounting = accounting;
-			}
-		}
-		else
-		{
-			// Initialize with default values
-			_accounting = new AccountingModel
-			{
-				UserId = _user.Id,
-				AccountingDate = DateOnly.FromDateTime(DateTime.Now),
-				VoucherId = 0,
-				Remarks = string.Empty
 			};
-			await SaveAccountingModel();
-		}
-	}
-	#endregion
-
-	#region Saving
-	private async Task SaveAccountingFile()
-	{
-		if (!_cart.Any(x => x.Debit > 0 || x.Credit > 0) && await DataStorageService.LocalExists(StorageFileNames.FinancialAccountingCartDataFileName))
-			await DataStorageService.LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
 		else
-			await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingCartDataFileName, System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Debit > 0 || _.Credit > 0)));
+			_selectedCart = null;
 
-		// Also save accounting model
-		await SaveAccountingModel();
+		_selectedLedgerReference = null;
+		_ledgerReferences = [];
 
-		VibrationService.VibrateHapticClick();
+		await SaveAccountingToCart();
+	}
 
-		await _sfGrid.Refresh();
+	private void OnDebitChanged(Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal?> args)
+	{
+		if (_selectedCart is not null)
+		{
+			_selectedCart.Credit = null;
+			_selectedCart.Debit = args.Value;
+		}
+
 		StateHasChanged();
 	}
 
-	private async Task SaveAccountingModel()
+	private void OnCreditChanged(Syncfusion.Blazor.Inputs.ChangeEventArgs<decimal?> args)
 	{
-		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingDataFileName,
-			System.Text.Json.JsonSerializer.Serialize(_accounting));
-	}
+		if (_selectedCart is not null)
+		{
+			_selectedCart.Debit = null;
+			_selectedCart.Credit = args.Value;
+		}
 
-	private async Task UpdateDebit(AccountingCartModel item, decimal? value)
-	{
-		item.Debit = value ?? 0;
-		// Clear credit if debit is entered (accounting principle)
-		if (item.Debit > 0)
-			item.Credit = 0;
-
-		await SaveAccountingFile();
-		VibrationService.VibrateHapticClick();
-	}
-
-	private async Task UpdateCredit(AccountingCartModel item, decimal? value)
-	{
-		item.Credit = value ?? 0;
-		// Clear debit if credit is entered (accounting principle)
-		if (item.Credit > 0)
-			item.Debit = 0;
-
-		await SaveAccountingFile();
-		VibrationService.VibrateHapticClick();
-	}
-
-	private async Task UpdateRemarks(AccountingCartModel item, string value)
-	{
-		item.Remarks = value ?? string.Empty;
-		await SaveAccountingFile();
-	}
-	#endregion
-
-	#region Filtering
-	private async Task OnAccountTypeChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, AccountTypeModel> args)
-	{
-		_selectedAccountTypeId = args.Value;
-		await _sfGrid.Refresh();
 		StateHasChanged();
 	}
 
-	private async Task OnGroupChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int, GroupModel> args)
+	private void OnRemarksChanged(string args)
 	{
-		_selectedGroupId = args.Value;
-		await _sfGrid.Refresh();
+		if (_selectedCart is not null)
+			_selectedCart.Remarks = args;
+
 		StateHasChanged();
 	}
 
-	private List<AccountingCartModel> GetFilteredLedgers()
+	private async Task RetrieveReferences()
 	{
-		var filtered = _cart.AsEnumerable();
+		if (_selectedCart is null || _isRetrieving)
+			return;
 
-		if (_selectedAccountTypeId > 0)
-			filtered = filtered.Where(x => x.AccountTypeId == _selectedAccountTypeId);
+		_isRetrieving = true;
 
-		if (_selectedGroupId > 0)
-			filtered = filtered.Where(x => x.GroupId == _selectedGroupId);
+		_ledgerReferences = await LedgerData.LoadLedgerDetailsByDateLedger(
+			_accounting.AccountingDate.AddYears(-10).ToDateTime(TimeOnly.MinValue),
+			_accounting.AccountingDate.ToDateTime(TimeOnly.MaxValue),
+			_selectedCart.Id);
 
-		return filtered.ToList();
+		List<LedgerOverviewModel> unbalancedLedgers = [];
+		foreach (var item in _ledgerReferences)
+		{
+			if (unbalancedLedgers.Where(x => x.ReferenceNo == item.ReferenceNo && x.ReferenceType == item.ReferenceType && x.ReferenceId == item.ReferenceId).FirstOrDefault() is not null)
+			{
+				unbalancedLedgers.Where(x => x.ReferenceNo == item.ReferenceNo && x.ReferenceType == item.ReferenceType && x.ReferenceId == item.ReferenceId).FirstOrDefault().Credit
+					= unbalancedLedgers.Where(x => x.ReferenceNo == item.ReferenceNo && x.ReferenceType == item.ReferenceType && x.ReferenceId == item.ReferenceId).FirstOrDefault().Credit + (item.Credit ?? 0);
+				unbalancedLedgers.Where(x => x.ReferenceNo == item.ReferenceNo && x.ReferenceType == item.ReferenceType && x.ReferenceId == item.ReferenceId).FirstOrDefault().Debit
+					= unbalancedLedgers.Where(x => x.ReferenceNo == item.ReferenceNo && x.ReferenceType == item.ReferenceType && x.ReferenceId == item.ReferenceId).FirstOrDefault().Debit + (item.Debit ?? 0);
+			}
+			else
+				unbalancedLedgers.Add(item);
+		}
+
+		_ledgerReferences = [.. unbalancedLedgers.Where(x => (x.Debit ?? 0) != (x.Credit ?? 0))];
+		_isRetrieving = false;
+
+		StateHasChanged();
+	}
+
+	private void OnReferenceChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerOverviewModel?, LedgerOverviewModel> args)
+	{
+		_selectedLedgerReference = args.Value;
+		if (_selectedCart is not null && _selectedLedgerReference is not null)
+		{
+			_selectedCart.ReferenceId = _selectedLedgerReference.ReferenceId;
+			_selectedCart.ReferenceType = _selectedLedgerReference.ReferenceType;
+			_selectedCart.ReferenceNo = _selectedLedgerReference.ReferenceNo;
+		}
+		else
+		{
+			_selectedCart.ReferenceId = null;
+			_selectedCart.ReferenceType = null;
+			_selectedCart.ReferenceNo = null;
+		}
+
+		StateHasChanged();
 	}
 	#endregion
 
 	#region Cart
-	private async Task GoToCart()
+	private async Task AddToCart()
 	{
-		await SaveAccountingFile();
-
-		if (!ValidateForm())
-		{
-			_validationDialogVisible = true;
-			VibrationService.VibrateWithTime(300);
+		if (_isRetrieving || _selectedCart is null || (_selectedCart.Debit is null && _selectedCart.Credit is null) || (_selectedCart.Debit is not null && _selectedCart.Credit is not null))
 			return;
-		}
-
-		// Show confirmation dialog before proceeding to cart
-		_confirmationDialogVisible = true;
-		VibrationService.VibrateHapticClick();
 	}
+	#endregion
 
-	// Confirmation dialog methods
-	private void CloseConfirmationDialog()
+	#region Saving
+	private async Task SaveAccountingToCart()
 	{
-		_confirmationDialogVisible = false;
+		_financialYear = await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate);
+		_accounting.FinancialYearId = _financialYear.Id;
+		_accounting.TransactionNo = await GenerateCodes.GenerateAccountingTransactionNo(_accounting);
+
+		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingDataFileName, System.Text.Json.JsonSerializer.Serialize(_accounting));
 		StateHasChanged();
-	}
-
-	private void ConfirmGoToCart()
-	{
-		_confirmationDialogVisible = false;
-		VibrationService.VibrateWithTime(500);
-		NavigationManager.NavigateTo("/Accounting/Cart");
-	}
-
-	// Form validation method similar to other pages
-	private bool ValidateForm()
-	{
-		_validationErrors.Clear();
-
-		// Check if cart has entries
-		if (!_cart.Any(x => (x.Debit ?? 0) > 0 || (x.Credit ?? 0) > 0))
-			_validationErrors.Add("Please add at least one ledger entry with debit or credit amount.");
-
-		// Check balance
-		if (BalanceDifference != 0)
-			_validationErrors.Add($"Transaction is not balanced. Difference: ₹{Math.Abs(BalanceDifference):N2} {(BalanceDifference > 0 ? "(Debit heavy)" : "(Credit heavy)")}");
-
-		// Check for very small amounts (potential data entry errors)
-		var smallAmounts = _cart.Where(x => ((x.Debit ?? 0) > 0 && (x.Debit ?? 0) < 0.01m) || ((x.Credit ?? 0) > 0 && (x.Credit ?? 0) < 0.01m)).Count();
-		if (smallAmounts > 0)
-			_validationErrors.Add($"{smallAmounts} entries have very small amounts (less than ₹0.01). Please verify these amounts.");
-
-		return _validationErrors.Count == 0;
-	}
-
-	// Validation dialog methods
-	private void CloseValidationDialog()
-	{
-		_validationDialogVisible = false;
-		StateHasChanged();
-	}
-
-	private void GoToCartFromValidation()
-	{
-		CloseValidationDialog();
-		// Show confirmation dialog after validation passes
-		_confirmationDialogVisible = true;
-		VibrationService.VibrateHapticClick();
 	}
 	#endregion
 }

@@ -3,6 +3,7 @@
 @using PrimeBakesLibrary.Models.Common
 @using PrimeBakesLibrary.Models.Accounts.Masters
 @using PrimeBakesLibrary.Models.Accounts.FinancialAccounting
+@using PrimeBakesLibrary.Data.Common
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Charts
 @using Syncfusion.Blazor.DropDowns
@@ -35,25 +36,23 @@
 else
 {
     <div class="ledger-report-container">
-        <!-- Header Section -->
+        <!-- Page Header -->
         <div class="page-header">
             <div class="header-content">
-                <div class="header-title">
-                    <div class="title-icon">
+                <div class="title-section">
+                    <div class="icon-wrapper">
                         <i class="fas fa-book"></i>
                     </div>
-                    <div class="title-info">
+                    <div class="title-text">
                         <h1>Ledger Reports & Analysis</h1>
                         <p>Comprehensive ledger analytics and transaction insights</p>
                     </div>
                 </div>
                 
-                <div class="header-actions">
-                    <button @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")' class="dashboard-btn">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Back to Dashboard</span>
-                    </button>
-                </div>
+                <button @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")' class="back-to-dashboard-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </button>
             </div>
         </div>
 
@@ -76,42 +75,19 @@ else
                     </div>
 
                     <div class="filter-group">
-                        <label>Account Type</label>
-                        <SfDropDownList @bind-Value="_selectedAccountTypeId" 
-                                      DataSource="_accountTypes" 
-                                      TValue="int" 
-                                      TItem="AccountTypeModel"
-                                      Placeholder="All Account Types"
-                                      CssClass="account-dropdown">
-                            <DropDownListFieldSettings Value="Id" Text="Name" />
-                            <DropDownListEvents TValue="int" TItem="AccountTypeModel" ValueChange="OnAccountTypeChanged" />
-                        </SfDropDownList>
-                    </div>
-
-                    <div class="filter-group">
-                        <label>Group</label>
-                        <SfDropDownList @bind-Value="_selectedGroupId" 
-                                      DataSource="_groups" 
-                                      TValue="int" 
-                                      TItem="GroupModel"
-                                      Placeholder="All Groups"
-                                      CssClass="group-dropdown">
-                            <DropDownListFieldSettings Value="Id" Text="Name" />
-                            <DropDownListEvents TValue="int" TItem="GroupModel" ValueChange="OnGroupChanged" />
-                        </SfDropDownList>
-                    </div>
-
-                    <div class="filter-group">
                         <label>Ledger</label>
-                        <SfDropDownList @bind-Value="_selectedLedgerId" 
-                                      DataSource="_filteredLedgers" 
-                                      TValue="int" 
-                                      TItem="LedgerModel"
-                                      Placeholder="All Ledgers"
-                                      CssClass="ledger-dropdown">
-                            <DropDownListFieldSettings Value="Id" Text="Name" />
-                            <DropDownListEvents TValue="int" TItem="LedgerModel" ValueChange="OnLedgerChanged" />
-                        </SfDropDownList>
+                        <SfAutoComplete TValue="LedgerModel"
+                                        TItem="LedgerModel"
+                                        @bind-Value="_selectedLedger"
+                                        Placeholder="All Ledgers"
+                                        DataSource="_ledgers"
+                                        CssClass="form-control"
+                                        AllowFiltering="true"
+                                        FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                        FloatLabelType='@FloatLabelType.Never'>
+                            <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnLedgerChanged" />
+                            <AutoCompleteFieldSettings Value="Name" />
+                        </SfAutoComplete>
                     </div>
 
                     <div class="filter-actions">
@@ -138,7 +114,7 @@ else
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <div class="card-content">
-                            <div class="card-value">₹@GetTotalDebitAmount().ToString("N0")</div>
+                            <div class="card-value">@GetTotalDebitAmount().FormatIndianCurrency()</div>
                             <div class="card-label">Total Debits</div>
                         </div>
                     </div>
@@ -148,7 +124,7 @@ else
                             <i class="fas fa-minus-circle"></i>
                         </div>
                         <div class="card-content">
-                            <div class="card-value">₹@GetTotalCreditAmount().ToString("N0")</div>
+                            <div class="card-value">@GetTotalCreditAmount().FormatIndianCurrency()</div>
                             <div class="card-label">Total Credits</div>
                         </div>
                     </div>
@@ -158,7 +134,7 @@ else
                             <i class="fas fa-balance-scale"></i>
                         </div>
                         <div class="card-content">
-                            <div class="card-value">₹@GetNetBalance().ToString("N0")</div>
+                            <div class="card-value">@GetNetBalance().FormatIndianCurrency()</div>
                             <div class="card-label">Net Balance</div>
                         </div>
                     </div>
@@ -188,7 +164,7 @@ else
                             <i class="fas fa-chart-bar"></i>
                         </div>
                         <div class="card-content">
-                            <div class="card-value">₹@GetAverageTransactionAmount().ToString("N0")</div>
+                            <div class="card-value">@GetAverageTransactionAmount().FormatIndianCurrency()</div>
                             <div class="card-label">Avg Transaction</div>
                         </div>
                     </div>
@@ -350,48 +326,148 @@ else
                 </div>
             }
 
-            <!-- Ledger Overview Data Grid -->
-            <div class="data-section">
-                <div class="section-header">
-                    <div class="header-info">
-                        <h2>
+            <!-- Data Grid -->
+            <div class="grid-section">
+                <div class="grid-card">
+                    <div class="grid-header">
+                        <h3>
                             <i class="fas fa-table"></i>
                             Ledger Transactions
-                        </h2>
-                        <div class="record-count">
-                            @_ledgerOverviews.Count Transactions
-                        </div>
+                        </h3>
+                        <p>Detailed view of ledger transactions for the selected period</p>
                     </div>
-                </div>
+                    
+                    <div class="grid-content">
+                        <SfGrid @ref="_sfGrid" 
+                                DataSource="_ledgerOverviews" 
+                                AllowPaging="true" 
+                                AllowSorting="true" 
+                                AllowFiltering="true" 
+                                AllowSelection="true" 
+                                AllowResizing="true" 
+                                AllowGrouping="true"
+                                GridLines="GridLine.Horizontal"
+                                CssClass="modern-grid"
+                                Height="auto">
+                            
+                            <GridPageSettings PageSize="25" PageSizes="new int[] { 10, 25, 50, 100, 200 }"></GridPageSettings>
+                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+                            <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+                            <GridGroupSettings Columns="new string[] { nameof(LedgerOverviewModel.ReferenceNo) }" ShowGroupedColumn="false">
+                            </GridGroupSettings>
+                            <GridAggregates>
+                                <GridAggregate>
+                                    <GridAggregateColumns>
+                                        <GridAggregateColumn Field="@nameof(LedgerOverviewModel.Debit)" Type="AggregateType.Sum" Format="N2">
+                                            <GroupFooterTemplate>
+                                                @{
+                                                    var aggregateContext = context as AggregateTemplateContext;
+                                                    var debitSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
+                                                }
+                                                <div class="transaction-summary-debit">
+                                                    <strong>Total Debit: @(debitSum.FormatIndianCurrency())</strong>
+                                                </div>
+                                            </GroupFooterTemplate>
+                                        </GridAggregateColumn>
+                                        <GridAggregateColumn Field="@nameof(LedgerOverviewModel.Credit)" Type="AggregateType.Sum" Format="N2">
+                                            <GroupFooterTemplate>
+                                                @{
+                                                    var aggregateContext = context as AggregateTemplateContext;
+                                                    var creditSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
+                                                }
+                                                <div class="transaction-summary-credit">
+                                                    <strong>Total Credit: @(creditSum.FormatIndianCurrency())</strong>
+                                                </div>
+                                            </GroupFooterTemplate>
+                                        </GridAggregateColumn>
+                                    </GridAggregateColumns>
+                                </GridAggregate>
+                            </GridAggregates>
+                            
+                            <GridColumns>
+                                <GridColumn Field="@nameof(LedgerOverviewModel.AccountingDate)" 
+                                            HeaderText="Date" 
+                                            Format="dd/MM/yyyy" 
+                                            Width="100" 
+                                            Type="ColumnType.Date">
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.TransactionNo)" 
+                                            HeaderText="Transaction No" 
+                                            Width="130">
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceNo)" 
+                                            HeaderText="Reference No" 
+                                            Width="120">
+                                </GridColumn>
 
-                <div class="grid-container">
-                    <SfGrid @ref="_sfGrid" DataSource="_ledgerOverviews" 
-                            AllowPaging="true" AllowSorting="true" AllowFiltering="true" 
-                            AllowSelection="true" AllowResizing="true" GridLines="GridLine.Both"
-                            Height="400">
-                        <GridPageSettings PageSize="10" PageSizes="new int[] { 5, 10, 20, 50 }"></GridPageSettings>
-                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
-                        <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
-                        
-                        <GridColumns>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.AccountingDate)" HeaderText="Date" 
-                                        Format="dd/MM/yyyy" Width="100" Type="ColumnType.Date"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceNo)" HeaderText="Reference No" 
-                                        Width="120"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.LedgerName)" HeaderText="Ledger Name" 
-                                        Width="180"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.AccountTypeName)" HeaderText="Account Type" 
-                                        Width="120"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.GroupName)" HeaderText="Group" 
-                                        Width="120"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.Debit)" HeaderText="Debit" 
-                                        Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.Credit)" HeaderText="Credit" 
-                                        Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
-                            <GridColumn Field="@nameof(LedgerOverviewModel.Remarks)" HeaderText="Remarks" 
-                                        Width="150"></GridColumn>
-                        </GridColumns>
-                    </SfGrid>
+                                <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceType)"
+                                            HeaderText="Reference Type"
+                                            Width="120">
+                                </GridColumn>
+
+                                <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceDate)"
+                                            HeaderText="Ref Date"
+                                            Format="dd/MM/yyyy"
+                                            Width="100"
+                                            Type="ColumnType.Date">
+                                </GridColumn>
+
+                                <GridColumn Field="@nameof(LedgerOverviewModel.LedgerName)" 
+                                            HeaderText="Ledger Name" 
+                                            Width="180">
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.AccountTypeName)" 
+                                            HeaderText="Account Type" 
+                                            Width="120">
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.GroupName)" 
+                                            HeaderText="Group" 
+                                            Width="120">
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.Debit)" 
+                                            HeaderText="Debit"
+                                            Width="120" 
+                                            TextAlign="TextAlign.Right">
+                                    <Template>
+                                        @{
+                                            var ledger = (context as LedgerOverviewModel);
+                                            var debitValue = ledger?.Debit;
+                                        }
+                                        @if (debitValue.HasValue && debitValue.Value > 0)
+                                        {
+                                            @debitValue.Value.FormatIndianCurrency()
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.Credit)" 
+                                            HeaderText="Credit"
+                                            Width="120" 
+                                            TextAlign="TextAlign.Right">
+                                    <Template>
+                                        @{
+                                            var ledger = (context as LedgerOverviewModel);
+                                            var creditValue = ledger?.Credit;
+                                        }
+                                        @if (creditValue.HasValue && creditValue.Value > 0)
+                                        {
+                                            @creditValue.Value.FormatIndianCurrency()
+                                        }
+                                    </Template>
+                                </GridColumn>
+                                
+                                <GridColumn Field="@nameof(LedgerOverviewModel.Remarks)" 
+                                            HeaderText="Remarks" 
+                                            Width="150">
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
                 </div>
             </div>
         }
@@ -509,77 +585,139 @@ else
 
     /* Main Container */
     .ledger-report-container {
+        padding: 20px;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(226, 19, 123, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(226, 19, 123, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(255, 107, 157, 0.02) 0%, transparent 50%),
+            linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #fef7f9 100%);
         min-height: 100vh;
-        background: var(--light-color);
-        padding: 0;
-        margin: 0;
+        position: relative;
     }
 
-    /* Header Styles */
+    .ledger-report-container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 10% 20%, rgba(226, 19, 123, 0.02) 0%, transparent 20%),
+            radial-gradient(circle at 80% 80%, rgba(255, 107, 157, 0.02) 0%, transparent 20%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .ledger-report-container > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Page Header */
     .page-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: var(--white);
-        padding: 15px;
-        margin-bottom: 0;
+        margin-bottom: 30px;
     }
 
     .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        margin: 0;
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+        padding: 30px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: 
+            0 10px 25px rgba(226, 19, 123, 0.08),
+            0 4px 10px rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        border-left: 5px solid var(--primary-color);
+        border-top: 1px solid rgba(226, 19, 123, 0.1);
+        position: relative;
+        overflow: hidden;
     }
 
-    .header-title {
+    .header-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(226, 19, 123, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+
+    .title-section {
         display: flex;
         align-items: center;
         gap: 20px;
     }
 
-    .title-icon {
+    .icon-wrapper {
         width: 60px;
         height: 60px;
-        background: rgba(255, 255, 255, 0.1);
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
         border-radius: var(--border-radius-lg);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-    }
-
-    .title-info h1 {
-        font-size: 32px;
-        font-weight: 700;
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-
-    .title-info p {
-        font-size: 16px;
-        opacity: 0.9;
-        margin: 5px 0 0 0;
-        font-weight: 300;
-    }
-
-    .dashboard-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.2);
         color: var(--white);
-        padding: 12px 24px;
-        border-radius: var(--border-radius);
-        cursor: pointer;
+        font-size: 24px;
+        box-shadow: 0 3px 10px rgba(226, 19, 123, 0.2);
+    }
+
+    .title-text h1 {
+        margin: 0;
+        color: var(--dark-color);
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .title-text p {
+        margin: 5px 0 0;
+        color: var(--gray-600);
         font-size: 14px;
-        font-weight: 500;
-        transition: var(--transition);
+    }
+
+    /* Back to Dashboard Button */
+    .back-to-dashboard-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, var(--gray-600), #5a6268);
+        color: var(--white);
+        border: none;
+        padding: 10px 16px;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 10;
     }
 
-    .dashboard-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.3);
+    .back-to-dashboard-btn:hover {
+        background: linear-gradient(135deg, #5a6268, #495057);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+    }
+
+    .back-to-dashboard-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
+    }
+
+    .back-to-dashboard-btn i {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .back-to-dashboard-btn:hover i {
+        transform: translateX(-2px);
     }
 
     /* Filter Section */
@@ -811,47 +949,68 @@ else
         margin: 0;
     }
 
-    /* Data Section */
-    .data-section {
+    /* Grid Section */
+    .grid-section {
         margin: 0;
         padding: 10px;
     }
 
-    .section-header {
-        background: var(--white);
-        padding: 15px 20px;
-        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-        box-shadow: var(--shadow);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 4px solid var(--primary-color);
+    .grid-card {
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+        border-radius: var(--border-radius-lg);
+        box-shadow: 
+            0 10px 25px rgba(226, 19, 123, 0.08),
+            0 4px 10px rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(226, 19, 123, 0.05);
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
     }
 
-    .header-info h2 {
-        margin: 0;
+    .grid-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), transparent, var(--primary-color));
+        opacity: 0.1;
+    }
+
+    .grid-card:hover {
+        box-shadow: 
+            0 20px 40px rgba(226, 19, 123, 0.12),
+            0 8px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .grid-header {
+        padding: 25px 30px 20px;
+        border-bottom: 1px solid rgba(226, 19, 123, 0.1);
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(255, 255, 255, 0.8) 100%);
+    }
+
+    .grid-header h3 {
+        margin: 0 0 8px;
         font-size: 24px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--dark-color);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
 
-    .record-count {
-        background: var(--primary-light);
-        color: var(--primary-color);
-        padding: 8px 16px;
-        border-radius: var(--border-radius);
+    .grid-header p {
+        margin: 0;
         font-size: 14px;
-        font-weight: 600;
+        color: var(--gray-600);
+        font-weight: 400;
     }
 
-    .grid-container {
+    .grid-content {
+        padding: 0;
         background: var(--white);
-        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        overflow: hidden;
     }
 
     .no-data-message {
@@ -882,6 +1041,164 @@ else
         margin: 0;
     }
 
+    /* Modern Grid Styling */
+    .modern-grid .e-grid .e-gridheader {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+        border-bottom: 2px solid rgba(226, 19, 123, 0.1);
+    }
+
+    .modern-grid .e-grid .e-headercell {
+        border-right: 1px solid rgba(226, 19, 123, 0.08);
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .modern-grid .e-grid .e-row:hover {
+        background-color: rgba(226, 19, 123, 0.03);
+        transition: var(--transition);
+    }
+
+    .modern-grid .e-grid .e-altrow {
+        background-color: rgba(226, 19, 123, 0.01);
+    }
+
+    .modern-grid .e-grid .e-gridcontent {
+        border: none;
+    }
+
+    .modern-grid .e-grid .e-content table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .modern-grid .e-grid .e-rowcell {
+        border-right: 1px solid rgba(226, 19, 123, 0.05);
+        border-bottom: 1px solid rgba(226, 19, 123, 0.05);
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .modern-grid .e-pager {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(255, 255, 255, 0.95) 100%);
+        border-top: 1px solid rgba(226, 19, 123, 0.1);
+        padding: 15px;
+    }
+
+    .modern-grid .e-pager .e-pagercontainer {
+        border: none;
+    }
+
+    .modern-grid .e-pager .e-numericitem,
+    .modern-grid .e-pager .e-currentitem {
+        border: 1px solid rgba(226, 19, 123, 0.2);
+        margin: 0 2px;
+        border-radius: 4px;
+        min-width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modern-grid .e-pager .e-currentitem {
+        background: var(--primary-color);
+        color: var(--white);
+        border-color: var(--primary-color);
+    }
+
+    .modern-grid .e-pager .e-numericitem:hover {
+        background: rgba(226, 19, 123, 0.1);
+        border-color: var(--primary-color);
+    }
+
+    /* Transaction Summary Styling */
+    .transaction-summary-debit,
+    .transaction-summary-credit {
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin: 2px;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .transaction-summary-debit {
+        background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.05));
+        border-left: 3px solid var(--success-color);
+        color: var(--success-color);
+    }
+
+    .transaction-summary-credit {
+        background: linear-gradient(135deg, rgba(255, 23, 68, 0.1), rgba(255, 23, 68, 0.05));
+        border-left: 3px solid var(--danger-color);
+        color: var(--danger-color);
+    }
+
+    /* Group Header Styling */
+    .modern-grid .e-grid .e-groupheadercell {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.08) 0%, rgba(226, 19, 123, 0.03) 100%);
+        border-bottom: 2px solid rgba(226, 19, 123, 0.15);
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .modern-grid .e-grid .e-recordplusexpand,
+    .modern-grid .e-grid .e-recordpluscollapse {
+        color: var(--primary-color);
+    }
+
+    /* Group Footer Styling */
+    .modern-grid .e-grid .e-groupfooter {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+        border-top: 1px solid rgba(226, 19, 123, 0.1);
+        border-bottom: 2px solid rgba(226, 19, 123, 0.15);
+    }
+
+    .modern-grid .e-grid .e-groupfooter .e-rowcell {
+        border-right: none;
+        border-bottom: none;
+    }
+
+    /* Animation Keyframes */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    .summary-card,
+    .chart-card,
+    .grid-card {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .summary-card:nth-child(1) { animation-delay: 0.1s; }
+    .summary-card:nth-child(2) { animation-delay: 0.2s; }
+    .summary-card:nth-child(3) { animation-delay: 0.3s; }
+    .summary-card:nth-child(4) { animation-delay: 0.4s; }
+    .summary-card:nth-child(5) { animation-delay: 0.5s; }
+    .summary-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .chart-card:nth-child(1) { animation-delay: 0.7s; }
+    .chart-card:nth-child(2) { animation-delay: 0.8s; }
+    .chart-card:nth-child(3) { animation-delay: 0.9s; }
+    .chart-card:nth-child(4) { animation-delay: 1.0s; }
+
+    .grid-card { animation-delay: 1.1s; }
+
     /* Responsive Design */
     @@media (max-width: 768px) {
         .page-header {
@@ -900,13 +1217,13 @@ else
 
         .summary-section,
         .charts-section,
-        .data-section,
+        .grid-section,
         .filter-section {
             padding: 10px;
         }
 
         .filter-content {
-            flex-direction: column;
+            grid-template-columns: 1fr;
             gap: 15px;
         }
 
@@ -924,6 +1241,36 @@ else
 
         .summary-cards {
             grid-template-columns: 1fr;
+        }
+
+        .grid-header {
+            padding: 20px 15px;
+        }
+
+        .grid-header h3 {
+            font-size: 20px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .title-info h1 {
+            font-size: 20px;
+        }
+
+        .summary-card {
+            padding: 20px 15px;
+        }
+
+        .card-value {
+            font-size: 24px;
+        }
+
+        .grid-header {
+            padding: 15px;
+        }
+
+        .grid-header h3 {
+            font-size: 18px;
         }
     }
 </style>

@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[Accounting]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [ReferenceNo] VARCHAR(20) NOT NULL, 
+    [TransactionNo] VARCHAR(20) NOT NULL, 
     [VoucherId] INT NOT NULL, 
     [Remarks] VARCHAR(500) NOT NULL, 
     [AccountingDate] DATE NOT NULL, 

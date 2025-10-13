@@ -132,12 +132,11 @@
     <Build Include="StoredProcedures\Insert\Sale\Insert_SaleDetail.sql" />
     <Build Include="StoredProcedures\Insert\Sale\Insert_SaleReturn.sql" />
     <Build Include="StoredProcedures\Insert\Sale\Insert_SaleReturnDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_Accounting_By_ReferenceNo.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingDetails_By_Accounting.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingOverview_By_AccountingId.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_FinancialYear_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_LastAccounting_By_FinancialYear_Voucher.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_Ledger_By_Location].sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_Ledger_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_Customer_By_Number.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
@@ -239,6 +238,8 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_State.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionOverview_By_KitchenProductionId.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_Accounting_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Load_LedgerOverview_By_AccountingId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

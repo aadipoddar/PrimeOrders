@@ -26,24 +26,8 @@ public static class AccountingA4Print
 		// Load user
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, accounting.UserId);
 
-		// Load ledger details
-		var details = await AccountingData.LoadAccountingDetailsByAccounting(accountingId);
-
 		// Prepare ledger display list
-		var ledgerRows = new List<AccountingCartModel>();
-		foreach (var detail in details)
-		{
-			var ledger = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, detail.LedgerId);
-			ledgerRows.Add(new()
-			{
-				Serial = ledgerRows.Count + 1,
-				Id = ledger.Id,
-				Name = ledger.Name,
-				Debit = detail.Debit,
-				Credit = detail.Credit,
-				Remarks = detail.Remarks
-			});
-		}
+		var ledgerRows = await AccountingData.LoadLedgerOverviewByAccountingId(accountingId);
 
 		// Create PDF document and page
 		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
@@ -68,7 +52,7 @@ public static class AccountingA4Print
 	{
 		var leftColumnDetails = new Dictionary<string, string>
 		{
-			["Ref No"] = accounting.ReferenceNo ?? "N/A",
+			["Transaction No"] = accounting.TransactionNo ?? "N/A",
 			["Date"] = accounting.AccountingDate.ToString("dddd, MMMM dd, yyyy"),
 			["Voucher"] = voucher?.Name ?? "N/A"
 		};
@@ -85,12 +69,13 @@ public static class AccountingA4Print
 		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Voucher Details", leftColumnDetails, rightColumnDetails);
 	}
 
-	private static PdfGridLayoutResult DrawLedgerTable(PdfPage pdfPage, float currentY, List<AccountingCartModel> ledgerRows)
+	private static PdfGridLayoutResult DrawLedgerTable(PdfPage pdfPage, float currentY, List<LedgerOverviewModel> ledgerRows)
 	{
 		var dataSource = ledgerRows.Select((item, index) => new
 		{
 			SNo = index + 1,
-			Ledger = item.Name,
+			Ledger = item.LedgerName,
+			ReferenceNo = item.ReferenceNo ?? "",
 			Debit = item.Debit > 0 ? item.Debit.FormatIndianCurrency() : "",
 			Credit = item.Credit > 0 ? item.Credit.FormatIndianCurrency() : "",
 			Remarks = item.Remarks ?? ""
@@ -99,17 +84,19 @@ public static class AccountingA4Print
 		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
 		var columnWidths = new float[]
 		{
-			tableWidth * 0.08f, // S.No
-            tableWidth * 0.38f, // Ledger
-            tableWidth * 0.18f, // Debit
-            tableWidth * 0.18f, // Credit
-            tableWidth * 0.18f  // Remarks
+			tableWidth * 0.07f,  // S.No
+			tableWidth * 0.30f,  // Ledger
+			tableWidth * 0.18f,  // Reference No
+			tableWidth * 0.15f,  // Debit
+			tableWidth * 0.15f,  // Credit
+			tableWidth * 0.15f   // Remarks			
         };
 
 		var columnAlignments = new PdfTextAlignment[]
 		{
 			PdfTextAlignment.Center, // S.No
             PdfTextAlignment.Left,   // Ledger
+			PdfTextAlignment.Center, // Reference No
             PdfTextAlignment.Right,  // Debit
             PdfTextAlignment.Right,  // Credit
             PdfTextAlignment.Left    // Remarks
@@ -123,7 +110,7 @@ public static class AccountingA4Print
 		return result;
 	}
 
-	private static float DrawSummary(PdfDocument pdfDocument, PdfPage pdfPage, float currentY, AccountingOverviewModel accounting, List<AccountingCartModel> ledgerRows)
+	private static float DrawSummary(PdfDocument pdfDocument, PdfPage pdfPage, float currentY, AccountingOverviewModel accounting, List<LedgerOverviewModel> ledgerRows)
 	{
 		var totalDebit = ledgerRows.Sum(x => x.Debit);
 		var totalCredit = ledgerRows.Sum(x => x.Credit);

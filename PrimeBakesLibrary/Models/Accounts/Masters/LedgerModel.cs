@@ -39,8 +39,13 @@ public class LedgerOverviewModel
 	public string LedgerLocationName { get; set; }
 	public int AccountingId { get; set; }
 	public DateOnly AccountingDate { get; set; }
-	public string ReferenceNo { get; set; }
+	public string TransactionNo { get; set; }
 	public string AccountingRemarks { get; set; }
+	public int? ReferenceId { get; set; }
+	public string? ReferenceType { get; set; }
+	public string? ReferenceNo { get; set; }
+	public DateTime? ReferenceDate { get; set; }
+	public decimal? ReferenceAmount { get; set; }
 	public decimal? Debit { get; set; }
 	public decimal? Credit { get; set; }
 	public string Remarks { get; set; }

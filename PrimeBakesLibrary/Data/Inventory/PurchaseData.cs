@@ -106,7 +106,7 @@ public class PurchaseData
 	{
 		if (update)
 		{
-			var existingAccounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);
+			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchase.BillNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -114,10 +114,14 @@ public class PurchaseData
 			}
 		}
 
+		var purchaseOverview = await LoadPurchaseOverviewByPurchaseId(purchase.Id);
+		if (purchaseOverview.Total <= 0 && purchaseOverview.TotalTaxAmount <= 0)
+			return;
+
 		int accountingId = await AccountingData.InsertAccounting(new()
 		{
 			Id = 0,
-			ReferenceNo = purchase.BillNo,
+			TransactionNo = purchase.BillNo,
 			AccountingDate = DateOnly.FromDateTime(purchase.BillDateTime),
 			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(purchase.BillDateTime))).Id,
 			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId)).Value),
@@ -128,50 +132,54 @@ public class PurchaseData
 			Status = true
 		});
 
-		await InsertAccountingDetails(purchase, accountingId);
+		await InsertAccountingDetails(purchaseOverview, accountingId);
 	}
 
-	private static async Task InsertAccountingDetails(PurchaseModel purchase, int accountingId)
+	private static async Task InsertAccountingDetails(PurchaseOverviewModel purchaseOverview, int accountingId)
 	{
-		var purchaseOverview = await LoadPurchaseOverviewByPurchaseId(purchase.Id);
-
 		// Supplier Account Posting (Credit)
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = purchaseOverview.SupplierId,
-			Debit = null,
-			Credit = purchaseOverview.Total,
-			Remarks = $"Supplier Account Posting For Purchase Bill {purchaseOverview.BillNo}",
-			Status = true
-		});
+		if (purchaseOverview.Total > 0)
+			await AccountingData.InsertAccountingDetails(new()
+			{
+				Id = 0,
+				AccountingId = accountingId,
+				LedgerId = purchaseOverview.SupplierId,
+				ReferenceId = purchaseOverview.PurchaseId,
+				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				Debit = null,
+				Credit = purchaseOverview.Total,
+				Remarks = $"Supplier Account Posting For Purchase Bill {purchaseOverview.BillNo}",
+				Status = true
+			});
 
 		// Purchase Account Posting (Debit)
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value),
-			Debit = purchaseOverview.Total - purchaseOverview.TotalTaxAmount,
-			Credit = null,
-			Remarks = $"Purchase Account Posting For Purchase Bill {purchaseOverview.BillNo}",
-			Status = true
-		});
+		if (purchaseOverview.Total - purchaseOverview.TotalTaxAmount > 0)
+			await AccountingData.InsertAccountingDetails(new()
+			{
+				Id = 0,
+				AccountingId = accountingId,
+				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value),
+				ReferenceId = purchaseOverview.PurchaseId,
+				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				Debit = purchaseOverview.Total - purchaseOverview.TotalTaxAmount,
+				Credit = null,
+				Remarks = $"Purchase Account Posting For Purchase Bill {purchaseOverview.BillNo}",
+				Status = true
+			});
 
 		// GST Account Posting (Debit)
 		if (purchaseOverview.TotalTaxAmount > 0)
-		{
 			await AccountingData.InsertAccountingDetails(new()
 			{
 				Id = 0,
 				AccountingId = accountingId,
 				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
+				ReferenceId = purchaseOverview.PurchaseId,
+				ReferenceType = ReferenceTypes.Purchase.ToString(),
 				Debit = purchaseOverview.TotalTaxAmount,
 				Credit = null,
 				Remarks = $"GST Account Posting For Purchase Bill {purchaseOverview.BillNo}",
 				Status = true
 			});
-		}
 	}
 }

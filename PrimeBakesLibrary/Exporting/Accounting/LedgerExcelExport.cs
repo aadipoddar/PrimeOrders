@@ -58,10 +58,15 @@ public static class LedgerExcelExport
 			nameof(LedgerOverviewModel.AccountTypeName),
 			nameof(LedgerOverviewModel.GroupName),
 			nameof(LedgerOverviewModel.AccountingDate),
+			nameof(LedgerOverviewModel.TransactionNo),
 			nameof(LedgerOverviewModel.ReferenceNo),
+			nameof(LedgerOverviewModel.ReferenceType),
+			nameof(LedgerOverviewModel.ReferenceDate),
+			nameof(LedgerOverviewModel.ReferenceAmount),
 			nameof(LedgerOverviewModel.Debit),
 			nameof(LedgerOverviewModel.Credit),
 			nameof(LedgerOverviewModel.Remarks),
+			nameof(LedgerOverviewModel.AccountingRemarks),
 			nameof(LedgerOverviewModel.LedgerRemarks)
 		];
 
@@ -99,11 +104,38 @@ public static class LedgerExcelExport
 				Width = 15,
 				Alignment = ExcelHAlign.HAlignCenter
 			},
+			[nameof(LedgerOverviewModel.TransactionNo)] = new()
+			{
+				DisplayName = "Transaction No",
+				Width = 18,
+				Alignment = ExcelHAlign.HAlignCenter
+			},
 			[nameof(LedgerOverviewModel.ReferenceNo)] = new()
 			{
 				DisplayName = "Reference No",
 				Width = 18,
 				Alignment = ExcelHAlign.HAlignCenter
+			},
+			[nameof(LedgerOverviewModel.ReferenceType)] = new()
+			{
+				DisplayName = "Reference Type",
+				Width = 20,
+				Alignment = ExcelHAlign.HAlignLeft
+			},
+			[nameof(LedgerOverviewModel.ReferenceDate)] = new()
+			{
+				DisplayName = "Reference Date",
+				Format = "dd-MMM-yyyy",
+				Width = 15,
+				Alignment = ExcelHAlign.HAlignCenter
+			},
+			[nameof(LedgerOverviewModel.ReferenceAmount)] = new()
+			{
+				DisplayName = "Reference Amount",
+				Format = "₹#,##0.00",
+				Width = 18,
+				IsCurrency = true,
+				Alignment = ExcelHAlign.HAlignRight
 			},
 			[nameof(LedgerOverviewModel.Debit)] = new()
 			{
@@ -146,6 +178,12 @@ public static class LedgerExcelExport
 			[nameof(LedgerOverviewModel.Remarks)] = new()
 			{
 				DisplayName = "Entry Remarks",
+				Width = 30,
+				Alignment = ExcelHAlign.HAlignLeft
+			},
+			[nameof(LedgerOverviewModel.AccountingRemarks)] = new()
+			{
+				DisplayName = "Accounting Remarks",
 				Width = 30,
 				Alignment = ExcelHAlign.HAlignLeft
 			},

@@ -1,8 +1,10 @@
 ﻿CREATE TABLE [dbo].[AccountingDetails]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [AccountingId] INT NOT NULL, 
+    [AccountingId] INT NOT NULL,
     [LedgerId] INT NOT NULL, 
+    [ReferenceType] VARCHAR(20) NULL, 
+    [ReferenceId] INT NULL, 
     [Debit] MONEY NULL, 
     [Credit] MONEY NULL, 
     [Remarks] VARCHAR(500) NOT NULL, 

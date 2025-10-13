@@ -59,7 +59,7 @@ else
                         </div>
                         <div class="title-info">
                             <h1>Financial Accounting Details</h1>
-                            <p>Reference: @_accountingOverview.ReferenceNo</p>
+                            <p>Reference: @_accountingOverview.TransactionNo</p>
                         </div>
                     </div>
                 </div>
@@ -98,8 +98,8 @@ else
                     <div class="card-content">
                         <div class="info-grid">
                             <div class="info-item">
-                                <span class="label">Reference No:</span>
-                                <span class="value">@_accountingOverview.ReferenceNo</span>
+                                <span class="label">Transaction No:</span>
+                                <span class="value">@_accountingOverview.TransactionNo</span>
                             </div>
                             <div class="info-item">
                                 <span class="label">Date:</span>
@@ -200,41 +200,43 @@ else
                         <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
                         
                         <GridColumns>
-                            <GridColumn Field="@nameof(AccountingDetailModel.Serial)" HeaderText="Serial" 
-                                        Width="80" TextAlign="TextAlign.Center"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingDetailModel.LedgerName)" HeaderText="Ledger" 
+                            <GridColumn Field="@nameof(LedgerOverviewModel.LedgerName)" HeaderText="Ledger"
                                         Width="200"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingDetailModel.GroupName)" HeaderText="Group" 
+                            <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceNo)" HeaderText="Reference No"
+                                        Width="200"></GridColumn>
+                            <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceType)" HeaderText="Reference Type"
+                                        Width="200"></GridColumn>
+                            <GridColumn Field="@nameof(LedgerOverviewModel.GroupName)" HeaderText="Group"
                                         Width="150"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingDetailModel.AccountTypeName)" HeaderText="Account Type" 
+                            <GridColumn Field="@nameof(LedgerOverviewModel.AccountTypeName)" HeaderText="Account Type"
                                         Width="150"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingDetailModel.Debit)" HeaderText="Debit Amount" 
+                            <GridColumn Field="@nameof(LedgerOverviewModel.Debit)" HeaderText="Debit Amount" 
                                         Format="C2" Width="130" TextAlign="TextAlign.Right">
                                 <Template>
                                     @{
-                                        var detail = (context as AccountingDetailModel);
+                                        var detail = (context as LedgerOverviewModel);
                                         <span class="amount-cell @(detail.Debit > 0 ? "debit-amount" : "")">
                                             @(detail.Debit > 0 ? $"₹{detail.Debit:N2}" : "-")
                                         </span>
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="@nameof(AccountingDetailModel.Credit)" HeaderText="Credit Amount" 
+                            <GridColumn Field="@nameof(LedgerOverviewModel.Credit)" HeaderText="Credit Amount"
                                         Format="C2" Width="130" TextAlign="TextAlign.Right">
                                 <Template>
                                     @{
-                                        var detail = (context as AccountingDetailModel);
+                                        var detail = (context as LedgerOverviewModel);
                                         <span class="amount-cell @(detail.Credit > 0 ? "credit-amount" : "")">
                                             @(detail.Credit > 0 ? $"₹{detail.Credit:N2}" : "-")
                                         </span>
                                     }
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="@nameof(AccountingDetailModel.Remarks)" HeaderText="Remarks" 
+                            <GridColumn Field="@nameof(LedgerOverviewModel.Remarks)" HeaderText="Remarks"
                                         Width="200">
                                 <Template>
                                     @{
-                                        var detail = (context as AccountingDetailModel);
+                                        var detail = (context as LedgerOverviewModel);
                                         <span class="remarks-cell" title="@detail.Remarks">
                                             @(string.IsNullOrEmpty(detail.Remarks) ? "-" : 
                                               detail.Remarks.Length > 30 ? $"{detail.Remarks.Substring(0, 30)}..." : detail.Remarks)

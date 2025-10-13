@@ -109,11 +109,12 @@ public static class StoredProcedureNames
 
 	public static string LoadLastAccountingByFinancialYearVoucher => "Load_LastAccounting_By_FinancialYear_Voucher";
 	public static string LoadAccountingDetailsByAccounting => "Load_AccountingDetails_By_Accounting";
-	public static string LoadAccountingByReferenceNo => "Load_Accounting_By_ReferenceNo";
+	public static string LoadAccountingByTransactionNo => "Load_Accounting_By_TransactionNo";
 
 	public static string LoadAccountingDetailsByDate => "Load_AccountingDetails_By_Date";
 	public static string LoadAccountingOverviewByAccountingId => "Load_AccountingOverview_By_AccountingId";
 
+	public static string LoadLedgerOverviewByAccountingId => "Load_LedgerOverview_By_AccountingId";
 	public static string LoadLedgerDetailsByDateLedger => "Load_LedgerDetails_By_Date_Ledger";
 	public static string LoadTrialBalanceByDate => "Load_TrialBalance_By_Date";
 

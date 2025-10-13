@@ -2,7 +2,7 @@
 AS
 SELECT
     [a].[Id] AS AccountingId,
-    [a].[ReferenceNo],
+    [a].[TransactionNo],
     [a].[UserId],
     [u].[Name] AS UserName,
     [a].[AccountingDate],
@@ -40,7 +40,7 @@ WHERE
     AND [ad].[Status] = 1
 GROUP BY
     [a].[Id],
-    [a].[ReferenceNo],
+    [a].[TransactionNo],
     [a].[UserId],
     [u].[Name],
     [a].[AccountingDate],

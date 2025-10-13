@@ -20,8 +20,37 @@ SELECT
 	[lo].[Name] AS LedgerLocationName,
 	[a].[Id] AS AccountingId,
 	[a].[AccountingDate],
-	[a].[ReferenceNo],
+	[a].[TransactionNo],
 	[a].[Remarks] AS AccountingRemarks,
+	[ad].[ReferenceId],
+	[ad].[ReferenceType],
+
+	(CASE 
+		WHEN [ad].[ReferenceType] = 'Sales' THEN
+			(SELECT BillNo FROM [dbo].[Sale_Overview] WHERE SaleId = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'Purchase' THEN
+			(SELECT BillNo FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
+			(SELECT TransactionNo FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+	END) AS ReferenceNo,
+
+	(CASE
+		WHEN [ad].[ReferenceType] = 'Sales' THEN
+			(SELECT SaleDateTime FROM [dbo].[Sale_Overview] WHERE SaleId = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'Purchase' THEN
+			(SELECT BillDateTime FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
+			(SELECT ReturnDateTime FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+	END) AS ReferenceDate,
+
+	(CASE
+		WHEN [ad].[ReferenceType] = 'Sales' THEN
+			(SELECT Total FROM [dbo].[Sale_Overview] WHERE SaleId = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'Purchase' THEN
+			(SELECT Total FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
+			(SELECT Total FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+	END) AS ReferenceAmount,
 
 	SUM([ad].[Debit]) AS Debit,
 	SUM([ad].[Credit]) AS Credit,
@@ -68,5 +97,7 @@ GROUP BY
 	[l].[LocationId],
 	[lo].[Name],
 	[a].[AccountingDate],
-	[a].[ReferenceNo],
+	[a].[TransactionNo],
+	[ad].[ReferenceId],
+	[ad].[ReferenceType],
 	[a].[Remarks]

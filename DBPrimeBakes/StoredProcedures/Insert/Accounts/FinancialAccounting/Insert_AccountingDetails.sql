@@ -2,6 +2,8 @@
 	@Id INT,
 	@AccountingId INT,
 	@LedgerId INT,
+	@ReferenceType VARCHAR(20) = NULL,
+	@ReferenceId INT = NULL,
 	@Debit MONEY,
 	@Credit MONEY,
 	@Remarks VARCHAR(250),
@@ -14,6 +16,8 @@ BEGIN
 		(
 			AccountingId,
 			LedgerId,
+			ReferenceType,
+			ReferenceId,
 			Debit,
 			Credit,
 			Remarks,
@@ -22,6 +26,8 @@ BEGIN
 		(
 			@AccountingId,
 			@LedgerId,
+			@ReferenceType,
+			@ReferenceId,
 			@Debit,
 			@Credit,
 			@Remarks,
@@ -35,6 +41,8 @@ BEGIN
 		SET
 			AccountingId = @AccountingId,
 			LedgerId = @LedgerId,
+			ReferenceType = @ReferenceType,
+			ReferenceId = @ReferenceId,
 			Debit = @Debit,
 			Credit = @Credit,
 			Remarks = @Remarks,

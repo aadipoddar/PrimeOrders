@@ -45,7 +45,7 @@ public static class AccountingExcelExport
 		// Define the column order for better readability
 		List<string> columnOrder = [
 			nameof(AccountingOverviewModel.AccountingId),
-			nameof(AccountingOverviewModel.ReferenceNo),
+			nameof(AccountingOverviewModel.TransactionNo),
 			nameof(AccountingOverviewModel.AccountingDate),
 			nameof(AccountingOverviewModel.VoucherName),
 			nameof(AccountingOverviewModel.FinancialYearPeriod),
@@ -70,9 +70,9 @@ public static class AccountingExcelExport
 				Width = 12,
 				Alignment = ExcelHAlign.HAlignCenter
 			},
-			[nameof(AccountingOverviewModel.ReferenceNo)] = new()
+			[nameof(AccountingOverviewModel.TransactionNo)] = new()
 			{
-				DisplayName = "Reference No",
+				DisplayName = "Transaction No",
 				Width = 18,
 				Alignment = ExcelHAlign.HAlignCenter
 			},

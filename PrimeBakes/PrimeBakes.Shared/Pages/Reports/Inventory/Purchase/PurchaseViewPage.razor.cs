@@ -109,8 +109,8 @@ public partial class PurchaseViewPage : ComponentBase
 		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchase.BillNo);
 
 		// Mark accounting entries as deleted
-		var accounting = await AccountingData.LoadAccountingByReferenceNo(purchase.BillNo);
-		if (accounting != null)
+		var accounting = await AccountingData.LoadAccountingByTransactionNo(purchase.BillNo);
+		if (accounting is not null)
 		{
 			accounting.Status = false;
 			await AccountingData.InsertAccounting(accounting);

@@ -60,7 +60,7 @@ public partial class PurchasePage
 	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;

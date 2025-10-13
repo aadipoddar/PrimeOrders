@@ -41,18 +41,29 @@ public static class SaleData
 	{
 		bool update = sale.Id > 0;
 
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, sale.UserId);
-		sale.LocationId = user.LocationId;
 		sale.Status = true;
 		sale.CreatedAt = DateTime.Now;
 		sale.SaleDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(sale.SaleDateTime)
 			.ToDateTime(new TimeOnly(sale.SaleDateTime.Hour, sale.SaleDateTime.Minute, sale.SaleDateTime.Second)),
 			"India Standard Time");
-		sale.BillNo = update ? sale.BillNo : await GenerateCodes.GenerateSaleBillNo(sale);
+
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, sale.UserId);
+
+		if (update)
+		{
+			var existingSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, sale.Id);
+			sale.LocationId = existingSale.LocationId;
+			sale.BillNo = existingSale.BillNo;
+		}
+		else
+		{
+			sale.LocationId = user.LocationId;
+			sale.BillNo = await GenerateCodes.GenerateSaleBillNo(sale);
+		}
 
 		sale.Id = await InsertSale(sale);
 		await SaveSaleDetail(sale, cart, update);
-		await SaveStock(sale, cart, update);
+		await SaveProductStock(sale, cart, update);
 		await UpdateOrder(sale, update);
 		await InsertAccounting(sale, update);
 		await SendNotification.SendSaleNotificationPartyAdmin(sale.Id);
@@ -96,7 +107,7 @@ public static class SaleData
 			});
 	}
 
-	private static async Task SaveStock(SaleModel sale, List<SaleProductCartModel> cart, bool update)
+	private static async Task SaveProductStock(SaleModel sale, List<SaleProductCartModel> cart, bool update)
 	{
 		if (update)
 			await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
@@ -169,7 +180,7 @@ public static class SaleData
 
 		if (update)
 		{
-			var existingAccounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
+			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(sale.BillNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -177,10 +188,15 @@ public static class SaleData
 			}
 		}
 
+		var saleOverview = await LoadSaleOverviewBySaleId(sale.Id);
+
+		if ((saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit) <= 0 && saleOverview.TotalTaxAmount <= 0)
+			return;
+
 		int accountingId = await AccountingData.InsertAccounting(new()
 		{
 			Id = 0,
-			ReferenceNo = sale.BillNo,
+			TransactionNo = sale.BillNo,
 			AccountingDate = DateOnly.FromDateTime(sale.SaleDateTime),
 			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(sale.SaleDateTime))).Id,
 			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId)).Value),
@@ -191,44 +207,51 @@ public static class SaleData
 			Status = true
 		});
 
-		await InsertAccountingDetails(sale, accountingId);
+		await InsertAccountingDetails(saleOverview, accountingId);
 	}
 
-	private static async Task InsertAccountingDetails(SaleModel sale, int accountingId)
+	private static async Task InsertAccountingDetails(SaleOverviewModel saleOverview, int accountingId)
 	{
-		var saleOverview = await LoadSaleOverviewBySaleId(sale.Id);
+		if (saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit > 0)
+			await AccountingData.InsertAccountingDetails(new()
+			{
+				Id = 0,
+				AccountingId = accountingId,
+				LedgerId = saleOverview.Credit > 0 ? saleOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
+				ReferenceId = saleOverview.SaleId,
+				ReferenceType = ReferenceTypes.Sales.ToString(),
+				Debit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
+				Credit = null,
+				Remarks = $"Cash / Party Account Posting For Sale Bill {saleOverview.BillNo}",
+				Status = true
+			});
 
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = saleOverview.Credit > 0 ? saleOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
-			Debit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit,
-			Credit = null,
-			Remarks = $"Cash / Party Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
+		if (saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount > 0)
+			await AccountingData.InsertAccountingDetails(new()
+			{
+				Id = 0,
+				AccountingId = accountingId,
+				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
+				ReferenceId = saleOverview.SaleId,
+				ReferenceType = ReferenceTypes.Sales.ToString(),
+				Debit = null,
+				Credit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
+				Remarks = $"Sales Account Posting For Sale Bill {saleOverview.BillNo}",
+				Status = true
+			});
 
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
-			Debit = null,
-			Credit = saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit - saleOverview.TotalTaxAmount,
-			Remarks = $"Sales Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
-
-		await AccountingData.InsertAccountingDetails(new()
-		{
-			Id = 0,
-			AccountingId = accountingId,
-			LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
-			Debit = null,
-			Credit = saleOverview.TotalTaxAmount,
-			Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
-			Status = true
-		});
+		if (saleOverview.TotalTaxAmount > 0)
+			await AccountingData.InsertAccountingDetails(new()
+			{
+				Id = 0,
+				AccountingId = accountingId,
+				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
+				ReferenceId = saleOverview.SaleId,
+				ReferenceType = ReferenceTypes.Sales.ToString(),
+				Debit = null,
+				Credit = saleOverview.TotalTaxAmount,
+				Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
+				Status = true
+			});
 	}
 }

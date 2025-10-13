@@ -3,6 +3,7 @@ using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Data.Sale;
+using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
@@ -63,7 +64,7 @@ public static class GenerateCodes
 					isDuplicate = kitchenProduction is not null;
 					break;
 				case CodeType.Accounting:
-					var accounting = await AccountingData.LoadAccountingByReferenceNo(code);
+					var accounting = await AccountingData.LoadAccountingByTransactionNo(code);
 					isDuplicate = accounting is not null;
 					break;
 				default:
@@ -214,19 +215,19 @@ public static class GenerateCodes
 		return await CheckDuplicateCode($"{location.PrefixCode}{year}FP000001", CodeType.KitchenProduction);
 	}
 
-	public static async Task<string> GenerateAccountingReferenceNo(int voucherId, DateOnly accountingDate)
+	public static async Task<string> GenerateAccountingTransactionNo(AccountingModel accounting)
 	{
-		var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, voucherId);
-		var financialYear = await FinancialYearData.LoadFinancialYearByDate(accountingDate);
-		var lastAccounting = await AccountingData.LoadLastAccountingByFinancialYearVoucher(financialYear.Id, voucherId);
+		var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, accounting.VoucherId);
+		var financialYear = await FinancialYearData.LoadFinancialYearByDate(accounting.AccountingDate);
+		var lastAccounting = await AccountingData.LoadLastAccountingByFinancialYearVoucher(financialYear.Id, accounting.VoucherId);
 		var year = financialYear.YearNo;
 
 		if (lastAccounting is not null)
 		{
-			var lastReferenceNo = lastAccounting.ReferenceNo;
-			if (lastReferenceNo.StartsWith($"FA{year}{voucher.PrefixCode}"))
+			var lastTransactionNo = lastAccounting.TransactionNo;
+			if (lastTransactionNo.StartsWith($"FA{year}{voucher.PrefixCode}"))
 			{
-				var lastNumber = int.Parse(lastReferenceNo[(2 + year.GetNumberOfDigits() + voucher.PrefixCode.Length)..]);
+				var lastNumber = int.Parse(lastTransactionNo[(2 + year.GetNumberOfDigits() + voucher.PrefixCode.Length)..]);
 				int nextNumber = lastNumber + 1;
 				return await CheckDuplicateCode($"FA{year}{voucher.PrefixCode}{nextNumber:D6}", CodeType.Accounting);
 			}

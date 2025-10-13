@@ -1,6 +1,7 @@
 ﻿using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 
 namespace PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 
@@ -18,14 +19,17 @@ public static class AccountingData
 	public static async Task<List<AccountingDetailsModel>> LoadAccountingDetailsByAccounting(int AccountingId) =>
 		await SqlDataAccess.LoadData<AccountingDetailsModel, dynamic>(StoredProcedureNames.LoadAccountingDetailsByAccounting, new { AccountingId });
 
-	public static async Task<AccountingModel> LoadAccountingByReferenceNo(string ReferenceNo) =>
-		(await SqlDataAccess.LoadData<AccountingModel, dynamic>(StoredProcedureNames.LoadAccountingByReferenceNo, new { ReferenceNo })).FirstOrDefault();
+	public static async Task<AccountingModel> LoadAccountingByTransactionNo(string TransactionNo) =>
+		(await SqlDataAccess.LoadData<AccountingModel, dynamic>(StoredProcedureNames.LoadAccountingByTransactionNo, new { TransactionNo })).FirstOrDefault();
 
 	public static async Task<List<AccountingOverviewModel>> LoadAccountingDetailsByDate(DateTime FromDate, DateTime ToDate) =>
 		await SqlDataAccess.LoadData<AccountingOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingDetailsByDate, new { FromDate, ToDate });
 
 	public static async Task<AccountingOverviewModel> LoadAccountingOverviewByAccountingId(int AccountingId) =>
 		(await SqlDataAccess.LoadData<AccountingOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingOverviewByAccountingId, new { AccountingId })).FirstOrDefault();
+
+	public static async Task<List<LedgerOverviewModel>> LoadLedgerOverviewByAccountingId(int AccountingId) =>
+		await SqlDataAccess.LoadData<LedgerOverviewModel, dynamic>(StoredProcedureNames.LoadLedgerOverviewByAccountingId, new { AccountingId });
 
 	public static async Task<List<TrialBalanceModel>> LoadTrialBalanceByDate(DateTime FromDate, DateTime ToDate) =>
 		await SqlDataAccess.LoadData<TrialBalanceModel, dynamic>(StoredProcedureNames.LoadTrialBalanceByDate, new { FromDate, ToDate });
@@ -39,9 +43,9 @@ public static class AccountingData
 		accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(accounting.AccountingDate)).Id;
 
 		if (update)
-			accounting.ReferenceNo = (await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accounting.Id)).ReferenceNo;
+			accounting.TransactionNo = (await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accounting.Id)).TransactionNo;
 		else
-			accounting.ReferenceNo = await GenerateCodes.GenerateAccountingReferenceNo(accounting.VoucherId, accounting.AccountingDate);
+			accounting.TransactionNo = await GenerateCodes.GenerateAccountingTransactionNo(accounting);
 
 		accounting.Id = await InsertAccounting(accounting);
 		await SaveAccountingDetails(accounting, cart, update);
@@ -67,6 +71,8 @@ public static class AccountingData
 				Id = 0,
 				AccountingId = accounting.Id,
 				LedgerId = item.Id,
+				ReferenceId = item.ReferenceId,
+				ReferenceType = item.ReferenceType,
 				Debit = item.Debit,
 				Credit = item.Credit,
 				Remarks = item.Remarks ?? string.Empty,

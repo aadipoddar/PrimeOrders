@@ -242,12 +242,12 @@ public partial class SaleReturnViewPage
 		try
 		{
 			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, SaleReturnId);
-			if (saleReturn != null)
+			if (saleReturn is not null)
 			{
 				saleReturn.Status = false;
 				await SaleReturnData.InsertSaleReturn(saleReturn);
 				await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
-				var accounting = await AccountingData.LoadAccountingByReferenceNo(saleReturn.TransactionNo);
+				var accounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.TransactionNo);
 				if (accounting is not null)
 				{
 					accounting.Status = false;

@@ -24,10 +24,10 @@ public partial class FinancialAccountingViewPage
 
 	// Data models
 	private AccountingOverviewModel _accountingOverview;
-	private readonly List<AccountingDetailModel> _accountingDetails = [];
+	private List<LedgerOverviewModel> _accountingDetails = [];
 
 	// Grid reference
-	private SfGrid<AccountingDetailModel> _sfGrid;
+	private SfGrid<LedgerOverviewModel> _sfGrid;
 
 	// Dialog properties
 	private bool _showConfirmation = false;
@@ -74,32 +74,7 @@ public partial class FinancialAccountingViewPage
 		try
 		{
 			_accountingDetails.Clear();
-
-			// Load detailed accounting entries for this accounting record
-			var details = await AccountingData.LoadAccountingDetailsByAccounting(AccountingId);
-
-			// Convert to AccountingDetailModel with ledger information
-			var serial = 1;
-			foreach (var detail in details)
-			{
-				var ledger = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, detail.LedgerId);
-				if (ledger != null)
-				{
-					var group = await CommonData.LoadTableDataById<GroupModel>(TableNames.Group, ledger.GroupId);
-					var accountType = await CommonData.LoadTableDataById<AccountTypeModel>(TableNames.AccountType, ledger.AccountTypeId);
-
-					_accountingDetails.Add(new AccountingDetailModel
-					{
-						Serial = serial++,
-						LedgerName = ledger.Name,
-						GroupName = group?.Name ?? "",
-						AccountTypeName = accountType?.Name ?? "",
-						Debit = detail.Debit ?? 0,
-						Credit = detail.Credit ?? 0,
-						Remarks = detail.Remarks ?? ""
-					});
-				}
-			}
+			_accountingDetails = await AccountingData.LoadLedgerOverviewByAccountingId(AccountingId);
 		}
 		catch (Exception ex)
 		{
@@ -219,7 +194,7 @@ public partial class FinancialAccountingViewPage
 		{
 			// Generate PDF for accounting record
 			var memoryStream = await AccountingA4Print.GenerateA4AccountingVoucher(AccountingId);
-			var fileName = $"Accounting_{_accountingOverview.ReferenceNo}_{DateTime.Now:yyyy-MM-dd}.pdf";
+			var fileName = $"Accounting_{_accountingOverview.TransactionNo}_{DateTime.Now:yyyy-MM-dd}.pdf";
 			await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
 		}
 		catch (Exception ex)
@@ -228,16 +203,4 @@ public partial class FinancialAccountingViewPage
 		}
 	}
 	#endregion
-}
-
-// Model class for accounting detail display
-public class AccountingDetailModel
-{
-	public int Serial { get; set; }
-	public string LedgerName { get; set; } = string.Empty;
-	public string GroupName { get; set; } = string.Empty;
-	public string AccountTypeName { get; set; } = string.Empty;
-	public decimal Debit { get; set; }
-	public decimal Credit { get; set; }
-	public string Remarks { get; set; } = string.Empty;
 }

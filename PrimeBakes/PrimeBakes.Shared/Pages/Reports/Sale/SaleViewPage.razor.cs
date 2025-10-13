@@ -217,7 +217,7 @@ public partial class SaleViewPage
 		await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
 		if (sale.LocationId == 1)
 		{
-			var accounting = await AccountingData.LoadAccountingByReferenceNo(sale.BillNo);
+			var accounting = await AccountingData.LoadAccountingByTransactionNo(sale.BillNo);
 			if (accounting is null)
 				return;
 			accounting.Status = false;
