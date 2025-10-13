@@ -38,19 +38,30 @@ public static class OrderData
 	{
 		bool update = order.Id > 0;
 
-		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, order.UserId);
-
-		if (!user.Admin || user.LocationId != 1)
-			order.LocationId = user.LocationId;
-
 		order.Status = true;
 		order.CreatedAt = DateTime.Now;
 		order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(order.OrderDateTime)
 			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
 			"India Standard Time");
-		order.OrderNo = update ?
-			order.OrderNo :
-			await GenerateCodes.GenerateOrderBillNo(order);
+
+		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, order.UserId);
+
+		if (update)
+		{
+			if (user.LocationId != 1)
+				return 0;
+
+			var existingOrder = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, order.Id);
+			order.LocationId = existingOrder.LocationId;
+			order.OrderNo = existingOrder.OrderNo;
+		}
+		else
+		{
+			if (!user.Admin || user.LocationId != 1)
+				order.LocationId = user.LocationId;
+
+			order.OrderNo = await GenerateCodes.GenerateOrderBillNo(order);
+		}
 
 		order.Id = await InsertOrder(order);
 		await SaveOrderDetail(order, cart, update);
@@ -63,11 +74,11 @@ public static class OrderData
 	{
 		if (update)
 		{
-			var existingOrderDetails = await OrderData.LoadOrderDetailByOrder(order.Id);
+			var existingOrderDetails = await LoadOrderDetailByOrder(order.Id);
 			foreach (var existingDetail in existingOrderDetails)
 			{
 				existingDetail.Status = false;
-				await OrderData.InsertOrderDetail(existingDetail);
+				await InsertOrderDetail(existingDetail);
 			}
 		}
 
