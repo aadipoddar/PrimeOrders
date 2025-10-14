@@ -52,7 +52,7 @@ public static class GenerateCodes
 					isDuplicate = sale is not null;
 					break;
 				case CodeType.SaleReturn:
-					var saleReturn = await SaleReturnData.LoadSaleReturnByTransactionNo(code);
+					var saleReturn = await SaleReturnData.LoadSaleReturnByBillNo(code);
 					isDuplicate = saleReturn is not null;
 					break;
 				case CodeType.KitchenIssue:
@@ -137,17 +137,17 @@ public static class GenerateCodes
 		return await CheckDuplicateCode($"{location.PrefixCode}{year}SL000001", CodeType.Sale);
 	}
 
-	public static async Task<string> GenerateSaleReturnTransactionNo(SaleReturnModel saleReturn)
+	public static async Task<string> GenerateSaleReturnBillNo(SaleReturnModel saleReturn)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, saleReturn.LocationId);
-		var year = $"{saleReturn.ReturnDateTime:yy}";
-		if (saleReturn.ReturnDateTime.Month <= 3)
-			year = $"{saleReturn.ReturnDateTime.AddYears(-1):yy}";
+		var year = $"{saleReturn.SaleReturnDateTime:yy}";
+		if (saleReturn.SaleReturnDateTime.Month <= 3)
+			year = $"{saleReturn.SaleReturnDateTime.AddYears(-1):yy}";
 
 		var lastSaleReturn = await SaleReturnData.LoadLastSaleReturnByLocation(saleReturn.LocationId);
 		if (lastSaleReturn is not null)
 		{
-			var lastTransactionNo = lastSaleReturn.TransactionNo;
+			var lastTransactionNo = lastSaleReturn.BillNo;
 			if (lastTransactionNo.StartsWith(location.PrefixCode))
 			{
 				var lastYear = lastTransactionNo.Substring(location.PrefixCode.Length, 2);

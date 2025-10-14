@@ -1,8 +1,9 @@
-﻿@page "/Reports/SaleReturnView/{SaleReturnId:int}"
+﻿@page "/Reports/SaleReturn/View/{SaleReturnId:int}"
 
 @using PrimeBakesLibrary.Models.Sale
 @using PrimeBakesLibrary.Models.Product
 @using PrimeBakesLibrary.Models.Common
+@using PrimeBakesLibrary.Models.Accounts
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Popups
@@ -11,7 +12,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-<PageTitle>Sale Return Details - @(_saleReturnOverview?.TransactionNo ?? "Loading...") - PrimeBakes</PageTitle>
+<PageTitle>Sale Return Details - @(_saleReturnOverview?.BillNo ?? "Loading...") - PrimeBakes</PageTitle>
 
 @if (_isLoading)
 {
@@ -31,8 +32,8 @@ else if (_saleReturnOverview is null)
     <div class="error-container">
         <div class="error-content">
             <i class="fas fa-exclamation-triangle"></i>
-            <h2>Sale Return Not Found</h2>
-            <p>The requested sale return could not be found or may have been deleted.</p>
+            <h2>Sale Not Found</h2>
+            <p>The requested sale could not be found or may have been deleted.</p>
             <button @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")' class="btn-back">
                 <i class="fas fa-arrow-left"></i>
                 Back to Sale Return Reports
@@ -42,66 +43,58 @@ else if (_saleReturnOverview is null)
 }
 else
 {
-    <div class="sale-return-view-container">
+    <div class="sale-view-container">
         <!-- Header Section -->
         <div class="page-header">
             <div class="header-actions">
                 <button @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")' class="back-btn">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Back to Sale Return Reports</span>
+                    <span>Back to Sale Reports</span>
                 </button>
             </div>
-            
+
             <div class="header-info">
-                <div class="return-title">
-                    <h1>Sale Return Details</h1>
-                    <div class="return-number">@_saleReturnOverview.TransactionNo</div>
+                <div class="sale-title">
+                    <h1>Sale Details</h1>
+                    <div class="sale-number">@_saleReturnOverview.BillNo</div>
                 </div>
-                <div class="return-status-header">
-                    <div class="status-badge status-returned">
-                        <i class="fas fa-undo-alt"></i>
-                        Completed Return
+                <div class="sale-status-header">
+                    <div class="status-badge status-completed">
+                        <i class="fas fa-check-circle"></i>
+                        Completed Sale
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sale Return Information Cards -->
-        <div class="return-info-section">
+        <!-- Sale Information Cards -->
+        <div class="sale-info-section">
             <div class="section-header">
-                <h2><i class="fas fa-info-circle"></i> Return Information</h2>
+                <h2><i class="fas fa-info-circle"></i> Sale Information</h2>
             </div>
-            
+
             <div class="info-cards-grid">
-                <!-- Basic Return Info -->
+                <!-- Basic Sale Info -->
                 <div class="info-card-group">
                     <h3>Basic Details</h3>
                     <div class="info-cards">
                         <div class="info-card">
                             <div class="info-icon"><i class="fas fa-hashtag"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Transaction Number</div>
-                                <div class="info-value">@_saleReturnOverview.TransactionNo</div>
+                                <div class="info-label">Bill Number</div>
+                                <div class="info-value">@_saleReturnOverview.BillNo</div>
                             </div>
                         </div>
-                        
-                        <div class="info-card">
-                            <div class="info-icon"><i class="fas fa-receipt"></i></div>
-                            <div class="info-content">
-                                <div class="info-label">Original Bill Number</div>
-                                <div class="info-value">@_saleReturnOverview.OriginalBillNo</div>
-                            </div>
-                        </div>
-                        
+
                         <div class="info-card">
                             <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Return Date & Time</div>
-                                <div class="info-value">@_saleReturnOverview.ReturnDateTime.ToString("dddd, dd MMMM yyyy")</div>
-                                <div class="info-subtext">@_saleReturnOverview.ReturnDateTime.ToString("hh:mm tt")</div>
+                                <div class="info-label">Sale Date & Time</div>
+                                <div class="info-value">@_saleReturnOverview.SaleReturnDateTime.ToString("dddd, dd MMMM yyyy")</div>
+                                <div class="info-subtext">@_saleReturnOverview.SaleReturnDateTime.ToString("hh:mm tt")</div>
                             </div>
                         </div>
-                        
+
                         <div class="info-card">
                             <div class="info-icon"><i class="fas fa-store"></i></div>
                             <div class="info-content">
@@ -109,20 +102,20 @@ else
                                 <div class="info-value">@_saleReturnOverview.LocationName</div>
                             </div>
                         </div>
-                        
+
                         <div class="info-card">
                             <div class="info-icon"><i class="fas fa-user"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Processed By</div>
+                                <div class="info-label">Created By</div>
                                 <div class="info-value">@_saleReturnOverview.UserName</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Return Statistics -->
+                <!-- Sale Statistics -->
                 <div class="info-card-group">
-                    <h3>Return Statistics</h3>
+                    <h3>Sale Statistics</h3>
                     <div class="info-cards">
                         <div class="info-card stat-card">
                             <div class="info-icon"><i class="fas fa-box"></i></div>
@@ -131,7 +124,7 @@ else
                                 <div class="info-value stat-number">@_saleReturnOverview.TotalProducts</div>
                             </div>
                         </div>
-                        
+
                         <div class="info-card stat-card">
                             <div class="info-icon"><i class="fas fa-balance-scale"></i></div>
                             <div class="info-content">
@@ -139,22 +132,115 @@ else
                                 <div class="info-value stat-number">@_saleReturnOverview.TotalQuantity.ToString("N2")</div>
                             </div>
                         </div>
-                        
+
                         <div class="info-card stat-card">
                             <div class="info-icon"><i class="fas fa-rupee-sign"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Return Amount</div>
+                                <div class="info-label">Total Amount</div>
                                 <div class="info-value stat-number">₹@_saleReturnOverview.Total.ToString("N2")</div>
                             </div>
                         </div>
-                        
+
                         <div class="info-card stat-card">
-                            <div class="info-icon"><i class="fas fa-tags"></i></div>
+                            <div class="info-icon"><i class="fas fa-clock"></i></div>
                             <div class="info-content">
-                                <div class="info-label">Tax Amount</div>
-                                <div class="info-value stat-number">₹@_saleReturnOverview.TotalTaxAmount.ToString("N2")</div>
+                                <div class="info-label">Created At</div>
+                                <div class="info-value">@_saleReturnOverview.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                <div class="info-subtext">@_saleReturnOverview.CreatedAt.ToString("hh:mm tt")</div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information (if exists) -->
+                @if (!string.IsNullOrEmpty(_saleReturnOverview.CustomerName))
+                {
+                    <div class="info-card-group">
+                        <h3>Customer Information</h3>
+                        <div class="info-cards">
+                            <div class="info-card customer-card">
+                                <div class="info-icon"><i class="fas fa-user-circle"></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Customer Name</div>
+                                    <div class="info-value">@_saleReturnOverview.CustomerName</div>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(_saleReturnOverview.CustomerNumber))
+                            {
+                                <div class="info-card customer-card">
+                                    <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                    <div class="info-content">
+                                        <div class="info-label">Customer Number</div>
+                                        <div class="info-value">@_saleReturnOverview.CustomerNumber</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Party Information (if exists) -->
+                @if (!string.IsNullOrEmpty(_saleReturnOverview.PartyName))
+                {
+                    <div class="info-card-group">
+                        <h3>Party Information</h3>
+                        <div class="info-cards">
+                            <div class="info-card party-card">
+                                <div class="info-icon"><i class="fas fa-handshake"></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Party Name</div>
+                                    <div class="info-value">@_saleReturnOverview.PartyName</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Payment Breakdown -->
+                <div class="info-card-group full-width">
+                    <h3>Payment Breakdown</h3>
+                    <div class="payment-breakdown">
+                        @if (_saleReturnOverview.Cash > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method cash">
+                                    <i class="fas fa-money-bill"></i>
+                                    <span>Cash</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleReturnOverview.Cash.ToString("N2")</div>
+                            </div>
+                        }
+                        @if (_saleReturnOverview.Card > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method card">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>Card</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleReturnOverview.Card.ToString("N2")</div>
+                            </div>
+                        }
+                        @if (_saleReturnOverview.UPI > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method upi">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>UPI</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleReturnOverview.UPI.ToString("N2")</div>
+                            </div>
+                        }
+                        @if (_saleReturnOverview.Credit > 0)
+                        {
+                            <div class="payment-item">
+                                <div class="payment-method credit">
+                                    <i class="fas fa-handshake"></i>
+                                    <span>Credit</span>
+                                </div>
+                                <div class="payment-amount">₹@_saleReturnOverview.Credit.ToString("N2")</div>
+                            </div>
+                        }
                     </div>
                 </div>
 
@@ -169,7 +255,13 @@ else
                         @if (_saleReturnOverview.DiscountAmount > 0)
                         {
                             <div class="financial-row discount">
-                                <span class="financial-label">Discount Amount:</span>
+                                <span class="financial-label">
+                                    Discount (@_saleReturnOverview.DiscountPercent.ToString("N2")%):
+                                    @if (!string.IsNullOrEmpty(_saleReturnOverview.DiscountReason))
+                                    {
+                                        <small class="discount-reason">(@_saleReturnOverview.DiscountReason)</small>
+                                    }
+                                </span>
                                 <span class="financial-value">-₹@_saleReturnOverview.DiscountAmount.ToString("N2")</span>
                             </div>
                         }
@@ -205,6 +297,17 @@ else
                                 <span class="financial-value">₹@_saleReturnOverview.TotalTaxAmount.ToString("N2")</span>
                             </div>
                         }
+                        <div class="financial-row">
+                            <span class="financial-label">After Tax:</span>
+                            <span class="financial-value">₹@_saleReturnOverview.AfterTax.ToString("N2")</span>
+                        </div>
+                        @if (_saleReturnOverview.RoundOff != 0)
+                        {
+                            <div class="financial-row roundoff">
+                                <span class="financial-label">Round Off:</span>
+                                <span class="financial-value">@(_saleReturnOverview.RoundOff >= 0 ? "+" : "")₹@_saleReturnOverview.RoundOff.ToString("N2")</span>
+                            </div>
+                        }
                         <div class="financial-row total">
                             <span class="financial-label">Final Total:</span>
                             <span class="financial-value">₹@_saleReturnOverview.Total.ToString("N2")</span>
@@ -229,50 +332,50 @@ else
             </div>
         </div>
 
-        <!-- Return Products Section -->
+        <!-- Sale Products Section -->
         <div class="products-section">
             <div class="section-header">
-                <h2><i class="fas fa-boxes"></i> Returned Products (@_detailedReturnProducts.Count)</h2>
+                <h2><i class="fas fa-boxes"></i> Sale Products (@_detailedSaleProducts.Count)</h2>
             </div>
-            
+
             <!-- Products Summary -->
             <div class="products-summary">
                 <div class="summary-card">
                     <div class="summary-icon"><i class="fas fa-cube"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">@_detailedReturnProducts.Count</div>
+                        <div class="summary-value">@_detailedSaleProducts.Count</div>
                         <div class="summary-label">Unique Products</div>
                     </div>
                 </div>
-                
+
                 <div class="summary-card">
                     <div class="summary-icon"><i class="fas fa-weight"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">@_detailedReturnProducts.Sum(p => p.Quantity).ToString("N0")</div>
+                        <div class="summary-value">@_detailedSaleProducts.Sum(p => p.Quantity).ToString("N0")</div>
                         <div class="summary-label">Total Quantity</div>
                     </div>
                 </div>
-                
+
                 <div class="summary-card">
                     <div class="summary-icon"><i class="fas fa-tags"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">@_detailedReturnProducts.Select(p => p.CategoryName).Distinct().Count()</div>
+                        <div class="summary-value">@_detailedSaleProducts.Select(p => p.CategoryName).Distinct().Count()</div>
                         <div class="summary-label">Categories</div>
                     </div>
                 </div>
-                
+
                 <div class="summary-card highlight">
                     <div class="summary-icon"><i class="fas fa-calculator"></i></div>
                     <div class="summary-content">
-                        <div class="summary-value">₹@_detailedReturnProducts.Sum(p => p.Total).ToString("N2")</div>
+                        <div class="summary-value">₹@_detailedSaleProducts.Sum(p => p.Total).ToString("N2")</div>
                         <div class="summary-label">Products Total</div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Products Grid -->
             <div class="products-grid-section">
-                <SfGrid DataSource="_detailedReturnProducts"
+                <SfGrid DataSource="_detailedSaleProducts"
                         AllowPaging="true"
                         AllowSorting="true"
                         AllowFiltering="true"
@@ -282,17 +385,17 @@ else
                     <GridPageSettings PageSize="10" PageSizes="@(new int[] { 5, 10, 15, 25, 50 })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
                     <GridColumns>
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.ProductCode)" 
-                                   HeaderText="Code" 
-                                   Width="100" 
-                                   TextAlign="TextAlign.Center" />
-                        
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.ProductName)" 
-                                   HeaderText="Product Name" 
-                                   Width="250">
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.ProductCode)"
+                                    HeaderText="Code"
+                                    Width="100"
+                                    TextAlign="TextAlign.Center" />
+
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.ProductName)"
+                                    HeaderText="Product Name"
+                                    Width="250">
                             <Template>
                                 @{
-                                    var product = (context as DetailedSaleReturnProductModel);
+                                    var product = (context as DetailedSaleProductModel);
                                     <div class="product-name-display">
                                         <i class="fas fa-cube product-icon"></i>
                                         <span class="product-name">@product.ProductName</span>
@@ -300,68 +403,68 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.CategoryName)" 
-                                   HeaderText="Category" 
-                                   Width="150">
+
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.CategoryName)"
+                                    HeaderText="Category"
+                                    Width="150">
                             <Template>
                                 @{
-                                    var product = (context as DetailedSaleReturnProductModel);
+                                    var product = (context as DetailedSaleProductModel);
                                     <span class="category-badge">@product.CategoryName</span>
                                 }
                             </Template>
                         </GridColumn>
-                        
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.Quantity)" 
-                                   HeaderText="Returned Qty" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Right"
-                                   Format="N2" />
-                        
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.Rate)" 
-                                   HeaderText="Rate (₹)" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Right"
-                                   Format="N2" />
 
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.BaseTotal)" 
-                                   HeaderText="Base Total (₹)" 
-                                   Width="130" 
-                                   TextAlign="TextAlign.Right"
-                                   Format="N2" />
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.Quantity)"
+                                    HeaderText="Quantity"
+                                    Width="100"
+                                    TextAlign="TextAlign.Right"
+                                    Format="N2" />
 
-                        @if (_detailedReturnProducts.Any(p => p.DiscountAmount > 0))
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.Rate)"
+                                    HeaderText="Rate (₹)"
+                                    Width="120"
+                                    TextAlign="TextAlign.Right"
+                                    Format="N2" />
+
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.BaseTotal)"
+                                    HeaderText="Base Total (₹)"
+                                    Width="130"
+                                    TextAlign="TextAlign.Right"
+                                    Format="N2" />
+
+                        @if (_detailedSaleProducts.Any(p => p.DiscountAmount > 0))
                         {
-                            <GridColumn Field="@nameof(DetailedSaleReturnProductModel.DiscountPercent)" 
-                                       HeaderText="Disc %" 
-                                       Width="80" 
-                                       TextAlign="TextAlign.Right"
-                                       Format="N2" />
+                            <GridColumn Field="@nameof(DetailedSaleProductModel.DiscountPercent)"
+                                        HeaderText="Disc %"
+                                        Width="80"
+                                        TextAlign="TextAlign.Right"
+                                        Format="N2" />
 
-                            <GridColumn Field="@nameof(DetailedSaleReturnProductModel.DiscountAmount)" 
-                                       HeaderText="Disc Amt (₹)" 
-                                       Width="120" 
-                                       TextAlign="TextAlign.Right"
-                                       Format="N2" />
+                            <GridColumn Field="@nameof(DetailedSaleProductModel.DiscountAmount)"
+                                        HeaderText="Disc Amt (₹)"
+                                        Width="120"
+                                        TextAlign="TextAlign.Right"
+                                        Format="N2" />
                         }
 
-                        @if (_detailedReturnProducts.Any(p => p.TotalTaxAmount > 0))
+                        @if (_detailedSaleProducts.Any(p => p.TotalTaxAmount > 0))
                         {
-                            <GridColumn Field="@nameof(DetailedSaleReturnProductModel.TotalTaxAmount)" 
-                                       HeaderText="Tax (₹)" 
-                                       Width="100" 
-                                       TextAlign="TextAlign.Right"
-                                       Format="N2" />
+                            <GridColumn Field="@nameof(DetailedSaleProductModel.TotalTaxAmount)"
+                                        HeaderText="Tax (₹)"
+                                        Width="100"
+                                        TextAlign="TextAlign.Right"
+                                        Format="N2" />
                         }
-                        
-                        <GridColumn Field="@nameof(DetailedSaleReturnProductModel.Total)" 
-                                   HeaderText="Final Total (₹)" 
-                                   Width="150" 
-                                   TextAlign="TextAlign.Right"
-                                   Format="N2">
+
+                        <GridColumn Field="@nameof(DetailedSaleProductModel.Total)"
+                                    HeaderText="Final Total (₹)"
+                                    Width="150"
+                                    TextAlign="TextAlign.Right"
+                                    Format="N2">
                             <Template>
                                 @{
-                                    var product = (context as DetailedSaleReturnProductModel);
+                                    var product = (context as DetailedSaleProductModel);
                                     <span class="total-amount">₹@product.Total.ToString("N2")</span>
                                 }
                             </Template>
@@ -376,24 +479,24 @@ else
             <div class="actions-header">
                 <h2><i class="fas fa-tools"></i> Actions</h2>
             </div>
-            
+
             <div class="action-buttons">
                 @if ((_user.LocationId == 1 && _user.Admin) || _user.LocationId == _saleReturnOverview.LocationId)
                 {
-                    <button class="action-btn btn-edit" @onclick="EditSaleReturn" disabled="@_isProcessing">
+                    <button class="action-btn btn-edit" @onclick="EditSale" disabled="@_isProcessing">
                         <i class="fas fa-edit"></i>
-                        <span>Edit Return</span>
+                        <span>Edit Sale Return</span>
                     </button>
-                    
-                    <button class="action-btn btn-delete" @onclick="DeleteSaleReturn" disabled="@_isProcessing">
+
+                    <button class="action-btn btn-delete" @onclick="DeleteSale" disabled="@_isProcessing">
                         <i class="fas fa-trash-alt"></i>
-                        <span>Delete Return</span>
+                        <span>Delete Sale Return</span>
                     </button>
                 }
 
                 <button class="action-btn btn-pdf" @onclick="PrintPDF" disabled="@_isProcessing">
                     <i class="fas fa-file-pdf"></i>
-                    <span>Download PDF</span>
+                    <span>Print PDF</span>
                 </button>
             </div>
         </div>
@@ -418,7 +521,7 @@ else
             <div class="dialog-content">
                 <div class="warning-message">
                     <p><strong>@_confirmationMessage</strong></p>
-                    <p>Return: <span class="return-highlight">@(_saleReturnOverview?.TransactionNo)</span></p>
+                    <p>Sale: <span class="sale-highlight">@(_saleReturnOverview?.BillNo)</span></p>
                     <div class="warning-notice">
                         <i class="fas fa-info-circle"></i>
                         <span>@_confirmationDetails</span>
@@ -468,12 +571,9 @@ else
         --transition: all 0.3s ease;
     }
 
-    .sale-return-view-container {
+    .sale-view-container {
         padding: 20px;
-        background: 
-            radial-gradient(circle at 20% 20%, rgba(226, 19, 123, 0.05) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(226, 19, 123, 0.08) 0%, transparent 50%),
-            linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #fce4ec 100%);
+        background: radial-gradient(circle at 20% 20%, rgba(226, 19, 123, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(226, 19, 123, 0.08) 0%, transparent 50%), linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #fce4ec 100%);
         min-height: 100vh;
         animation: fadeInUp 0.5s ease-out;
     }
@@ -510,36 +610,36 @@ else
         margin-bottom: 20px;
     }
 
-    .circular-dots-loader .dot {
-        display: block;
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        animation: dotPulse 1.2s infinite ease-in-out both;
-    }
+        .circular-dots-loader .dot {
+            display: block;
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            animation: dotPulse 1.2s infinite ease-in-out both;
+        }
 
-    .circular-dots-loader .dot-1 {
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        animation-delay: -0.6s;
-    }
+        .circular-dots-loader .dot-1 {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: -0.6s;
+        }
 
-    .circular-dots-loader .dot-2 {
-        top: 50%;
-        right: 0;
-        transform: translateY(-50%);
-        animation-delay: -0.4s;
-    }
+        .circular-dots-loader .dot-2 {
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            animation-delay: -0.4s;
+        }
 
-    .circular-dots-loader .dot-3 {
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        animation-delay: -0.2s;
-    }
+        .circular-dots-loader .dot-3 {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: -0.2s;
+        }
 
     .loading-text {
         color: var(--dark-color);
@@ -566,23 +666,23 @@ else
         max-width: 500px;
     }
 
-    .error-content i {
-        font-size: 64px;
-        color: var(--warning-color);
-        margin-bottom: 20px;
-    }
+        .error-content i {
+            font-size: 64px;
+            color: var(--warning-color);
+            margin-bottom: 20px;
+        }
 
-    .error-content h2 {
-        color: var(--dark-color);
-        margin-bottom: 15px;
-        font-size: 28px;
-    }
+        .error-content h2 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
 
-    .error-content p {
-        color: var(--secondary-color);
-        margin-bottom: 30px;
-        font-size: 16px;
-    }
+        .error-content p {
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
 
     /* Header Section */
     .page-header {
@@ -613,10 +713,10 @@ else
         backdrop-filter: blur(10px);
     }
 
-    .back-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
-    }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
 
     .btn-back {
         display: inline-flex;
@@ -633,10 +733,10 @@ else
         transition: var(--transition);
     }
 
-    .btn-back:hover {
-        background: #c91166;
-        transform: translateY(-2px);
-    }
+        .btn-back:hover {
+            background: #c91166;
+            transform: translateY(-2px);
+        }
 
     .header-info {
         display: flex;
@@ -644,19 +744,19 @@ else
         gap: 30px;
     }
 
-    .return-title h1 {
+    .sale-title h1 {
         margin: 0 0 5px 0;
         font-size: 28px;
         font-weight: 700;
     }
 
-    .return-number {
+    .sale-number {
         font-size: 18px;
         font-weight: 500;
         opacity: 0.9;
     }
 
-    .return-status-header .status-badge {
+    .sale-status-header .status-badge {
         padding: 10px 20px;
         border-radius: 25px;
         font-size: 14px;
@@ -668,9 +768,9 @@ else
         backdrop-filter: blur(10px);
     }
 
-    .status-badge.status-returned {
-        background: rgba(255, 193, 7, 0.2);
-        color: #ffd43b;
+    .status-badge.status-completed {
+        background: rgba(40, 167, 69, 0.2);
+        color: #90EE90;
     }
 
     /* Section Headers */
@@ -678,24 +778,24 @@ else
         margin-bottom: 25px;
     }
 
-    .section-header h2 {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin: 0;
-        padding-bottom: 10px;
-        border-bottom: 3px solid var(--primary-color);
-    }
+        .section-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-color);
+        }
 
-    .section-header h2 i {
-        color: var(--primary-color);
-    }
+            .section-header h2 i {
+                color: var(--primary-color);
+            }
 
-    /* Return Information Section */
-    .return-info-section {
+    /* Sale Information Section */
+    .sale-info-section {
         margin-bottom: 40px;
     }
 
@@ -713,25 +813,25 @@ else
         transition: var(--transition);
     }
 
-    .info-card-group:hover {
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-2px);
-    }
+        .info-card-group:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
 
-    .info-card-group.full-width {
-        grid-column: 1 / -1;
-    }
+        .info-card-group.full-width {
+            grid-column: 1 / -1;
+        }
 
-    .info-card-group h3 {
-        margin: 0 0 20px 0;
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--primary-color);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid var(--primary-light);
-        padding-bottom: 8px;
-    }
+        .info-card-group h3 {
+            margin: 0 0 20px 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
 
     .info-cards {
         display: grid;
@@ -750,16 +850,31 @@ else
         transition: var(--transition);
     }
 
-    .info-card:hover {
-        background: var(--primary-light);
-        border-color: var(--primary-color);
-        transform: translateY(-1px);
-    }
+        .info-card:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
 
-    .info-card.stat-card {
-        background: linear-gradient(135deg, var(--primary-light), rgba(226, 19, 123, 0.05));
-        border-color: var(--primary-color);
-    }
+        .info-card.stat-card {
+            background: linear-gradient(135deg, var(--primary-light), rgba(226, 19, 123, 0.05));
+            border-color: var(--primary-color);
+        }
+
+        .info-card.customer-card {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));
+            border-color: var(--info-color);
+        }
+
+        .info-card.party-card {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+            border-color: var(--warning-color);
+        }
+
+        .info-card.order-card {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+            border-color: var(--success-color);
+        }
 
     .info-icon {
         width: 40px;
@@ -772,6 +887,18 @@ else
         justify-content: center;
         font-size: 16px;
         flex-shrink: 0;
+    }
+
+    .customer-card .info-icon {
+        background: var(--info-color);
+    }
+
+    .party-card .info-icon {
+        background: var(--warning-color);
+    }
+
+    .order-card .info-icon {
+        background: var(--success-color);
     }
 
     .info-content {
@@ -794,16 +921,61 @@ else
         line-height: 1.2;
     }
 
-    .info-value.stat-number {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--primary-color);
-    }
+        .info-value.stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
 
     .info-subtext {
         font-size: 14px;
         color: var(--secondary-color);
         margin-top: 2px;
+    }
+
+    /* Payment Breakdown */
+    .payment-breakdown {
+        display: grid;
+        gap: 15px;
+    }
+
+    .payment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        border: 1px solid #e9ecef;
+    }
+
+    .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
+
+        .payment-method.cash {
+            color: #28a745;
+        }
+
+        .payment-method.card {
+            color: #007bff;
+        }
+
+        .payment-method.upi {
+            color: #6f42c1;
+        }
+
+        .payment-method.credit {
+            color: #fd7e14;
+        }
+
+    .payment-amount {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary-color);
     }
 
     /* Financial Breakdown */
@@ -822,31 +994,35 @@ else
         border-bottom: 1px solid #dee2e6;
     }
 
-    .financial-row:last-child {
-        border-bottom: none;
-    }
+        .financial-row:last-child {
+            border-bottom: none;
+        }
 
-    .financial-row.total {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--primary-color);
-        border-top: 2px solid var(--primary-color);
-        margin-top: 10px;
-        padding-top: 15px;
-    }
+        .financial-row.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            border-top: 2px solid var(--primary-color);
+            margin-top: 10px;
+            padding-top: 15px;
+        }
 
-    .financial-row.discount {
-        color: var(--danger-color);
-    }
+        .financial-row.discount {
+            color: var(--danger-color);
+        }
 
-    .financial-row.tax {
-        color: var(--info-color);
-    }
+        .financial-row.tax {
+            color: var(--info-color);
+        }
 
-    .financial-row.total-tax {
-        font-weight: 600;
-        color: var(--info-color);
-    }
+        .financial-row.total-tax {
+            font-weight: 600;
+            color: var(--info-color);
+        }
+
+        .financial-row.roundoff {
+            color: var(--warning-color);
+        }
 
     .financial-label {
         font-weight: 500;
@@ -854,6 +1030,11 @@ else
 
     .financial-value {
         font-weight: 600;
+    }
+
+    .discount-reason {
+        font-style: italic;
+        color: var(--secondary-color);
     }
 
     /* Remarks Card */
@@ -905,16 +1086,16 @@ else
         transition: var(--transition);
     }
 
-    .summary-card:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-lg);
-    }
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
 
-    .summary-card.highlight {
-        background: linear-gradient(135deg, var(--primary-color), #c91166);
-        color: var(--white);
-        border: none;
-    }
+        .summary-card.highlight {
+            background: linear-gradient(135deg, var(--primary-color), #c91166);
+            color: var(--white);
+            border: none;
+        }
 
     .summary-icon {
         width: 50px;
@@ -975,39 +1156,39 @@ else
         border: none;
     }
 
-    .products-grid .e-grid .e-gridheader {
-        background: linear-gradient(135deg, var(--primary-color), #c91166);
-        color: var(--white);
-        border: none;
-    }
+        .products-grid .e-grid .e-gridheader {
+            background: linear-gradient(135deg, var(--primary-color), #c91166);
+            color: var(--white);
+            border: none;
+        }
 
-    .products-grid .e-grid .e-headercell {
-        background: transparent;
-        color: var(--white);
-        font-weight: 700;
-        border-right: 1px solid rgba(255, 255, 255, 0.2);
-        border-bottom: none;
-    }
+        .products-grid .e-grid .e-headercell {
+            background: transparent;
+            color: var(--white);
+            font-weight: 700;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: none;
+        }
 
-    .products-grid .e-grid .e-headercell:last-child {
-        border-right: none;
-    }
+            .products-grid .e-grid .e-headercell:last-child {
+                border-right: none;
+            }
 
-    .products-grid .e-grid .e-row {
-        border-bottom: 1px solid #f1f3f4;
-    }
+        .products-grid .e-grid .e-row {
+            border-bottom: 1px solid #f1f3f4;
+        }
 
-    .products-grid .e-grid .e-row:hover {
-        background: var(--primary-light);
-    }
+            .products-grid .e-grid .e-row:hover {
+                background: var(--primary-light);
+            }
 
-    .products-grid .e-grid .e-altrow {
-        background: #f8f9fa;
-    }
+        .products-grid .e-grid .e-altrow {
+            background: #f8f9fa;
+        }
 
-    .products-grid .e-grid .e-altrow:hover {
-        background: var(--primary-light);
-    }
+            .products-grid .e-grid .e-altrow:hover {
+                background: var(--primary-light);
+            }
 
     .product-name-display {
         display: flex;
@@ -1080,26 +1261,26 @@ else
         overflow: hidden;
     }
 
-    .action-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none !important;
-    }
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
 
-    .action-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
 
-    .action-btn:hover:not(:disabled)::before {
-        left: 100%;
-    }
+        .action-btn:hover:not(:disabled)::before {
+            left: 100%;
+        }
 
     .btn-edit {
         background: linear-gradient(135deg, #007bff, #0056b3);
@@ -1107,11 +1288,11 @@ else
         box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
     }
 
-    .btn-edit:hover:not(:disabled) {
-        background: linear-gradient(135deg, #0056b3, #004085);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
-    }
+        .btn-edit:hover:not(:disabled) {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+        }
 
     .btn-delete {
         background: linear-gradient(135deg, var(--danger-color), #dc143c);
@@ -1119,11 +1300,35 @@ else
         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
     }
 
-    .btn-delete:hover:not(:disabled) {
-        background: linear-gradient(135deg, #dc143c, #b91c3c);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        .btn-delete:hover:not(:disabled) {
+            background: linear-gradient(135deg, #dc143c, #b91c3c);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
+
+    .btn-unlink {
+        background: linear-gradient(135deg, var(--warning-color), #e0a800);
+        color: var(--dark-color);
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
     }
+
+        .btn-unlink:hover:not(:disabled) {
+            background: linear-gradient(135deg, #e0a800, #d39e00);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+        }
+
+    .btn-bill {
+        background: linear-gradient(135deg, var(--primary-color), #c91166);
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.2);
+    }
+
+        .btn-bill:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c91166, #b01058);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
+        }
 
     .btn-pdf {
         background: linear-gradient(135deg, var(--danger-color), #c82333);
@@ -1131,11 +1336,11 @@ else
         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
     }
 
-    .btn-pdf:hover:not(:disabled) {
-        background: linear-gradient(135deg, #c82333, #a71e2a);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
-    }
+        .btn-pdf:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c82333, #a71e2a);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+        }
 
     .btn-excel {
         background: linear-gradient(135deg, var(--success-color), #218838);
@@ -1143,11 +1348,11 @@ else
         box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
     }
 
-    .btn-excel:hover:not(:disabled) {
-        background: linear-gradient(135deg, #218838, #1e7e34);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
-    }
+        .btn-excel:hover:not(:disabled) {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
 
     /* Confirmation Dialog Styles */
     .confirmation-dialog .e-dialog {
@@ -1182,7 +1387,7 @@ else
         line-height: 1.5;
     }
 
-    .return-highlight {
+    .sale-highlight {
         font-weight: 700;
         color: var(--primary-color);
         background: var(--primary-light);
@@ -1201,17 +1406,17 @@ else
         margin-top: 20px;
     }
 
-    .warning-notice i {
-        color: var(--warning-color);
-        margin-top: 2px;
-        flex-shrink: 0;
-    }
+        .warning-notice i {
+            color: var(--warning-color);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
 
-    .warning-notice span {
-        font-size: 14px;
-        color: #856404;
-        font-weight: 500;
-    }
+        .warning-notice span {
+            font-size: 14px;
+            color: #856404;
+            font-weight: 500;
+        }
 
     .dialog-footer {
         display: flex;
@@ -1235,30 +1440,30 @@ else
         justify-content: center;
     }
 
-    .dialog-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+        .dialog-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
     .btn-cancel {
         background: #6c757d;
         color: var(--white);
     }
 
-    .btn-cancel:hover:not(:disabled) {
-        background: #5a6268;
-        transform: translateY(-2px);
-    }
+        .btn-cancel:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
 
     .btn-confirm {
         background: linear-gradient(135deg, var(--primary-color), #c91166);
         color: var(--white);
     }
 
-    .btn-confirm:hover:not(:disabled) {
-        background: linear-gradient(135deg, #c91166, #b01058);
-        transform: translateY(-2px);
-    }
+        .btn-confirm:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c91166, #b01058);
+            transform: translateY(-2px);
+        }
 
     .fa-spinner {
         animation: spin 1s linear infinite;
@@ -1270,6 +1475,7 @@ else
             opacity: 0;
             transform: translateY(30px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -1280,14 +1486,20 @@ else
         0%, 80%, 100% {
             transform: scale(0);
         }
+
         40% {
             transform: scale(1);
         }
     }
 
     @@keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     /* Responsive Design */
@@ -1295,88 +1507,88 @@ else
         .info-cards {
             grid-template-columns: 1fr;
         }
-        
+
         .products-summary {
             grid-template-columns: repeat(2, 1fr);
         }
-        
+
         .action-buttons {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
     @@media (max-width: 768px) {
-        .sale-return-view-container {
+        .sale-view-container {
             padding: 15px;
         }
-        
+
         .page-header {
             flex-direction: column;
             gap: 20px;
             text-align: center;
         }
-        
+
         .header-info {
             flex-direction: column;
             gap: 15px;
         }
-        
+
         .products-summary {
             grid-template-columns: 1fr;
         }
-        
+
         .action-buttons {
             grid-template-columns: 1fr;
         }
-        
+
         .info-card-group {
             padding: 20px;
         }
-        
+
         .summary-card {
             padding: 15px;
         }
-        
+
         .confirmation-dialog {
             width: 95vw;
         }
     }
 
     @@media (max-width: 480px) {
-        .sale-return-view-container {
+        .sale-view-container {
             padding: 10px;
         }
-        
+
         .page-header {
             padding: 20px;
         }
-        
-        .return-title h1 {
+
+        .sale-title h1 {
             font-size: 24px;
         }
-        
+
         .section-header h2 {
             font-size: 18px;
         }
-        
+
         .info-card {
             flex-direction: column;
             text-align: center;
             gap: 10px;
         }
-        
+
         .summary-card {
             flex-direction: column;
             text-align: center;
             gap: 10px;
         }
-        
+
         .action-btn {
             padding: 12px 20px;
             font-size: 12px;
         }
-        
-        .financial-row {
+
+        .payment-item {
             flex-direction: column;
             gap: 10px;
             text-align: center;

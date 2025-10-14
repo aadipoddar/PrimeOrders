@@ -234,7 +234,7 @@ else
 				</div>
 			}
 
-			@if (_user.Sales)
+			@if (_user.Sales && _user.LocationId == 1)
 			{
 				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/SaleReturn")'>
 					<div class="card-icon sale-return-icon">↩️</div>

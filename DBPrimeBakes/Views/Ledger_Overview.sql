@@ -31,7 +31,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
 			(SELECT BillNo FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
-			(SELECT TransactionNo FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+			(SELECT BillNo FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
 	END) AS ReferenceNo,
 
 	(CASE
@@ -40,7 +40,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
 			(SELECT BillDateTime FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
-			(SELECT ReturnDateTime FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+			(SELECT SaleReturnDateTime FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
 	END) AS ReferenceDate,
 
 	(CASE

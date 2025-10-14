@@ -22,9 +22,6 @@ public static class SaleReturnData
 	public static async Task<List<SaleReturnDetailModel>> LoadSaleReturnDetailBySaleReturn(int SaleReturnId) =>
 		await SqlDataAccess.LoadData<SaleReturnDetailModel, dynamic>(StoredProcedureNames.LoadSaleReturnDetailBySaleReturn, new { SaleReturnId });
 
-	public static async Task<List<SaleReturnModel>> LoadSaleReturnBySale(int SaleId) =>
-		await SqlDataAccess.LoadData<SaleReturnModel, dynamic>(StoredProcedureNames.LoadSaleReturnBySale, new { SaleId });
-
 	public static async Task<List<SaleReturnOverviewModel>> LoadSaleReturnDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
 		await SqlDataAccess.LoadData<SaleReturnOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnDetailsByDateLocationId, new { FromDate, ToDate, LocationId });
 
@@ -34,17 +31,24 @@ public static class SaleReturnData
 	public static async Task<SaleReturnOverviewModel> LoadSaleReturnOverviewBySaleReturnId(int SaleReturnId) =>
 		(await SqlDataAccess.LoadData<SaleReturnOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnOverviewBySaleReturnId, new { SaleReturnId })).FirstOrDefault();
 
-	public static async Task<SaleReturnModel> LoadSaleReturnByTransactionNo(string TransactionNo) =>
-		(await SqlDataAccess.LoadData<SaleReturnModel, dynamic>(StoredProcedureNames.LoadSaleReturnByTransactionNo, new { TransactionNo })).FirstOrDefault();
+	public static async Task<SaleReturnModel> LoadSaleReturnByBillNo(string BillNo) =>
+		(await SqlDataAccess.LoadData<SaleReturnModel, dynamic>(StoredProcedureNames.LoadSaleReturnByBillNo, new { BillNo })).FirstOrDefault();
 
 	public static async Task<int> SaveSaleReturn(SaleReturnModel saleReturn, List<SaleReturnProductCartModel> cart)
 	{
 		bool update = saleReturn.Id > 0;
 
+		saleReturn.Status = true;
+		saleReturn.CreatedAt = DateTime.Now;
+		saleReturn.LocationId = 1;
+		saleReturn.SaleReturnDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(saleReturn.SaleReturnDateTime)
+			.ToDateTime(new TimeOnly(saleReturn.SaleReturnDateTime.Hour, saleReturn.SaleReturnDateTime.Minute, saleReturn.SaleReturnDateTime.Second)),
+			"India Standard Time");
+
 		if (update)
-			saleReturn.TransactionNo = (await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturn.Id)).TransactionNo;
+			saleReturn.BillNo = (await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturn.Id)).BillNo;
 		else
-			saleReturn.TransactionNo = await GenerateCodes.GenerateSaleReturnTransactionNo(saleReturn);
+			saleReturn.BillNo = await GenerateCodes.GenerateSaleReturnBillNo(saleReturn);
 
 		saleReturn.Id = await InsertSaleReturn(saleReturn);
 		await SaveSaleReturnDetail(saleReturn, cart, update);
@@ -94,12 +98,11 @@ public static class SaleReturnData
 	private static async Task SaveStock(SaleReturnModel saleReturn, List<SaleReturnProductCartModel> cart, bool update)
 	{
 		if (update)
-			await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
+			await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
 
-		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleReturn.SaleId);
 		LedgerModel party = null;
-		if (sale.PartyId is not null && sale.PartyId > 1)
-			party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
+		if (saleReturn.PartyId is not null && saleReturn.PartyId > 1)
+			party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, saleReturn.PartyId.Value);
 
 		foreach (var product in cart)
 		{
@@ -108,15 +111,15 @@ public static class SaleReturnData
 				continue;
 
 			// Remove stock from the return location (negative quantity)
-			if (sale.PartyId is not null && sale.PartyId > 1 && party is not null && party.LocationId > 1)
+			if (saleReturn.PartyId is not null && saleReturn.PartyId > 1 && party is not null && party.LocationId > 1)
 				await ProductStockData.InsertProductStock(new()
 				{
 					Id = 0,
 					ProductId = product.ProductId,
 					Quantity = -product.Quantity,
-					TransactionNo = saleReturn.TransactionNo,
+					TransactionNo = saleReturn.BillNo,
 					Type = StockType.SaleReturn.ToString(),
-					TransactionDate = DateOnly.FromDateTime(saleReturn.ReturnDateTime),
+					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
 					LocationId = party.LocationId.Value
 				});
 
@@ -126,9 +129,9 @@ public static class SaleReturnData
 				Id = 0,
 				ProductId = product.ProductId,
 				Quantity = product.Quantity,
-				TransactionNo = saleReturn.TransactionNo,
+				TransactionNo = saleReturn.BillNo,
 				Type = StockType.SaleReturn.ToString(),
-				TransactionDate = DateOnly.FromDateTime(saleReturn.ReturnDateTime),
+				TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
 				LocationId = saleReturn.LocationId
 			});
 		}
@@ -138,7 +141,7 @@ public static class SaleReturnData
 	{
 		if (update)
 		{
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.TransactionNo);
+			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.BillNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -154,9 +157,9 @@ public static class SaleReturnData
 		int accountingId = await AccountingData.InsertAccounting(new()
 		{
 			Id = 0,
-			TransactionNo = saleReturn.TransactionNo,
-			AccountingDate = DateOnly.FromDateTime(saleReturn.ReturnDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(saleReturn.ReturnDateTime))).Id,
+			TransactionNo = saleReturn.BillNo,
+			AccountingDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(saleReturn.SaleReturnDateTime))).Id,
 			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
 			Remarks = saleReturn.Remarks,
 			UserId = saleReturn.UserId,
@@ -170,31 +173,31 @@ public static class SaleReturnData
 
 	private static async Task SaveAccountingDetails(SaleReturnOverviewModel saleReturnOverview, int accountingId)
 	{
-		if (saleReturnOverview.Total > 0)
+		if (saleReturnOverview.Cash + saleReturnOverview.Card + saleReturnOverview.UPI + saleReturnOverview.Credit > 0)
 			await AccountingData.InsertAccountingDetails(new()
 			{
 				Id = 0,
 				AccountingId = accountingId,
-				LedgerId = (await LedgerData.LoadLedgerByLocation(saleReturnOverview.LocationId)).Id,
+				LedgerId = saleReturnOverview.Credit > 0 ? saleReturnOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
 				ReferenceId = saleReturnOverview.SaleReturnId,
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
-				Credit = saleReturnOverview.Total,
 				Debit = null,
-				Remarks = $"Cash / Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+				Credit = saleReturnOverview.Cash + saleReturnOverview.Card + saleReturnOverview.UPI + saleReturnOverview.Credit,
+				Remarks = $"Cash / Party Account Posting For Sale Return Bill {saleReturnOverview.BillNo}",
 				Status = true
 			});
 
-		if (saleReturnOverview.Total - saleReturnOverview.TotalTaxAmount > 0)
+		if (saleReturnOverview.Cash + saleReturnOverview.Card + saleReturnOverview.UPI + saleReturnOverview.Credit - saleReturnOverview.TotalTaxAmount > 0)
 			await AccountingData.InsertAccountingDetails(new()
 			{
 				Id = 0,
 				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
+				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
 				ReferenceId = saleReturnOverview.SaleReturnId,
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
-				Debit = saleReturnOverview.Total - saleReturnOverview.TotalTaxAmount,
+				Debit = saleReturnOverview.Cash + saleReturnOverview.Card + saleReturnOverview.UPI + saleReturnOverview.Credit - saleReturnOverview.TotalTaxAmount,
 				Credit = null,
-				Remarks = $"Sales Return Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+				Remarks = $"Sales Return Account Posting For Sale Return Bill {saleReturnOverview.BillNo}",
 				Status = true
 			});
 
@@ -208,7 +211,7 @@ public static class SaleReturnData
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
 				Debit = saleReturnOverview.TotalTaxAmount,
 				Credit = null,
-				Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+				Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.BillNo}",
 				Status = true
 			});
 	}

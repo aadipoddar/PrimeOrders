@@ -102,8 +102,24 @@ public partial class KitchenIssueViewPage
 		var kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, _kitchenIssueOverview.KitchenIssueId);
 		var kitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(_kitchenIssueOverview.KitchenIssueId);
 
+		List<KitchenIssueRawMaterialCartModel> cart = [];
+		foreach (var detail in kitchenIssueDetails)
+		{
+			var rawMaterial = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, detail.RawMaterialId);
+			cart.Add(new()
+			{
+				RawMaterialId = detail.RawMaterialId,
+				RawMaterialName = rawMaterial.Name,
+				MeasurementUnit = detail.MeasurementUnit ?? rawMaterial.MeasurementUnit ?? "Unit",
+				RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				Total = detail.Total
+			});
+		}
+
 		await DataStorageService.LocalSaveAsync(StorageFileNames.KitchenIssueDataFileName, System.Text.Json.JsonSerializer.Serialize(kitchenIssue));
-		await DataStorageService.LocalSaveAsync(StorageFileNames.KitchenIssueCartDataFileName, System.Text.Json.JsonSerializer.Serialize(kitchenIssueDetails));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.KitchenIssueCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
 
 		NavigationManager.NavigateTo("/Inventory/Kitchen-Issue");
 	}

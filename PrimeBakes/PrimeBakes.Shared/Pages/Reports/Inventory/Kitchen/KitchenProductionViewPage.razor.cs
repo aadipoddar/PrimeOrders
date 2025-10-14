@@ -101,8 +101,23 @@ public partial class KitchenProductionViewPage
 		var kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, _kitchenProductionOverview.KitchenProductionId);
 		var kitchenProductionDetails = await KitchenProductionData.LoadKitchenProductionDetailByKitchenProduction(_kitchenProductionOverview.KitchenProductionId);
 
+		List<KitchenProductionProductCartModel> cart = [];
+		foreach (var detail in kitchenProductionDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			cart.Add(new()
+			{
+				ProductId = detail.ProductId,
+				ProductName = product.Name,
+				ProductCategoryId = product.ProductCategoryId,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				Total = detail.Total,
+			});
+		}
+
 		await DataStorageService.LocalSaveAsync(StorageFileNames.KitchenProductionDataFileName, System.Text.Json.JsonSerializer.Serialize(kitchenProduction));
-		await DataStorageService.LocalSaveAsync(StorageFileNames.KitchenProductionCartDataFileName, System.Text.Json.JsonSerializer.Serialize(kitchenProductionDetails));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.KitchenProductionCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
 
 		NavigationManager.NavigateTo("/Inventory/Kitchen-Production");
 	}

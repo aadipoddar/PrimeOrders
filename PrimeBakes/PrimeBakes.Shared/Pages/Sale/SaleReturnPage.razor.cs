@@ -1,14 +1,13 @@
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Sale;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Exporting.Sale;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
-using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
@@ -19,52 +18,53 @@ public partial class SaleReturnPage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
-	private bool _isSaving = false;
 
-	// Dialog visibility flags
-	private bool _returnDetailsDialogVisible = false;
-	private bool _confirmReturnDialogVisible = false;
-	private bool _validationErrorDialogVisible = false;
+	private int _selectedCategoryId = 0;
 
-	// Validation errors
-	private List<ValidationError> _validationErrors = new();
+	private bool _partyDetailsDialogVisible = false;
+	private bool _productDetailsDialogVisible = false;
+	private bool _basicInfoDialogVisible = false;
+	private bool _discountDetailsDialogVisible = false;
+	private bool _taxDetailsDialogVisible = false;
 
-	public class ValidationError
-	{
-		public string Field { get; set; }
-		public string Message { get; set; }
-	}
+	private LedgerModel? _selectedParty;
+	private SaleReturnProductCartModel? _selectedProductForEdit;
 
-	private DateOnly _saleDate = DateOnly.FromDateTime(DateTime.Now);
 	private SaleReturnModel _saleReturn = new()
 	{
 		Id = 0,
-		LocationId = 1,
-		SaleId = 0,
-		UserId = 0,
-		TransactionNo = string.Empty,
-		ReturnDateTime = DateTime.Now,
-		Remarks = string.Empty,
-		Status = true
+		SaleReturnDateTime = DateTime.Now,
+		Remarks = "",
+		Cash = 0,
+		Card = 0,
+		UPI = 0,
+		Credit = 0,
+		PartyId = null,
+		CustomerId = null,
+		DiscPercent = 0,
+		DiscReason = "",
+		RoundOff = 0,
+		CreatedAt = DateTime.Now,
+		Status = true,
 	};
 
-	private List<LocationModel> _locations = [];
-	private List<SaleOverviewModel> _availableSales = [];
-	private List<SaleReturnProductCartModel> _products = [];
-	private List<SaleReturnProductCartModel> _availableSaleProducts = [];
-	private List<SaleReturnProductCartModel> _saleReturnProductCart = [];
+	private List<LedgerModel> _parties = [];
+	private List<ProductCategoryModel> _productCategories = [];
+	private readonly List<SaleReturnProductCartModel> _cart = [];
+	private readonly List<SaleReturnProductCartModel> _allCart = [];
 
-	private SfGrid<SaleReturnProductCartModel> _sfProductGrid;
+	private SfGrid<SaleReturnProductCartModel> _sfGrid;
 
-	// Dialog references
-	private SfDialog _sfValidationErrorDialog;
-	private SfDialog _sfReturnDetailsDialog;
-	private SfDialog _sfConfirmReturnDialog;
+	private SfDialog _sfPartyDetailsDialog;
+	private SfDialog _sfProductDetailsDialog;
+	private SfDialog _sfBasicInfoDialog;
+	private SfDialog _sfDiscountDetailsDialog;
+	private SfDialog _sfTaxDetailsDialog;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales, true);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;
@@ -72,17 +72,21 @@ public partial class SaleReturnPage
 
 	private async Task LoadData()
 	{
+		_saleReturn.LocationId = _user.LocationId;
+		_saleReturn.UserId = _user.Id;
+
+		_parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
+		_parties.RemoveAll(p => p.LocationId == _user.LocationId);
+
 		await LoadSaleReturn();
-		await LoadLocations();
-		await LoadAvailableSales();
+		await LoadProductCategories();
+		await LoadProducts();
+		await LoadExistingCart();
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
 
 		StateHasChanged();
-	}
-
-	private async Task LoadLocations()
-	{
-		_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-		_saleReturn.LocationId = _user.LocationId;
 	}
 
 	private async Task LoadSaleReturn()
@@ -93,42 +97,152 @@ public partial class SaleReturnPage
 				new()
 				{
 					Id = 0,
-					LocationId = _user.LocationId,
-					SaleId = 0,
-					UserId = _user.Id,
-					TransactionNo = await GenerateCodes.GenerateSaleReturnTransactionNo(_saleReturn),
-					ReturnDateTime = DateTime.Now,
-					Remarks = string.Empty,
-					Status = true
+					SaleReturnDateTime = DateTime.Now,
+					Remarks = "",
+					Cash = 0,
+					Card = 0,
+					UPI = 0,
+					Credit = 0,
+					PartyId = null,
+					CustomerId = null,
+					DiscPercent = 0,
+					DiscReason = "",
+					RoundOff = 0,
+					CreatedAt = DateTime.Now,
+					Status = true,
 				};
 
-		if (_saleReturn.SaleId > 0)
-			await LoadSaleForReturn();
+		if (_saleReturn.PartyId is not null && _saleReturn.PartyId > 0)
+		{
+			_selectedParty = _parties.FirstOrDefault(p => p.Id == _saleReturn.PartyId);
 
-		_saleReturnProductCart.Clear();
+			if (_selectedParty is not null && _selectedParty.LocationId is not null)
+			{
+				var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _selectedParty.LocationId.Value);
+				_saleReturn.DiscPercent = location.Discount;
+			}
+		}
 
-		if (_saleReturn.Id != 0)
-			await LoadExistingSaleReturn();
-
-		StateHasChanged();
+		_saleReturn.LocationId = _user.LocationId;
+		_saleReturn.UserId = _user.Id;
+		_saleReturn.BillNo = _saleReturn.Id > 0 ? _saleReturn.BillNo : await GenerateCodes.GenerateSaleReturnBillNo(_saleReturn);
 	}
 
-	private async Task LoadExistingSaleReturn()
+	private async Task LoadProductCategories()
 	{
-		var saleReturnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(_saleReturn.Id);
-		foreach (var item in saleReturnDetails)
-		{
-			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
-			var cartItem = _availableSaleProducts.FirstOrDefault(p => p.ProductId == item.ProductId);
+		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
+		_productCategories.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
+		_productCategories.Add(new() { Id = 0, Name = "All Categories" });
+		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
+		_selectedCategoryId = 0;
+	}
 
-			_saleReturnProductCart.Add(new()
+	private async Task LoadProducts()
+	{
+		_allCart.Clear();
+
+		var allProducts = await ProductData.LoadProductByLocationRate(_user.LocationId);
+		allProducts.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
+
+		var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
+
+		foreach (var product in allProducts)
+		{
+			var productTax = taxes.FirstOrDefault(t => t.Id == product.TaxId) ?? new TaxModel();
+
+			_allCart.Add(new()
 			{
 				ProductId = product.Id,
 				ProductName = product.Name,
-				Quantity = item.Quantity,
-				MaxQuantity = cartItem?.SoldQuantity ?? item.Quantity,
-				SoldQuantity = cartItem?.SoldQuantity ?? item.Quantity,
+				ProductCategoryId = product.ProductCategoryId,
+				Rate = product.Rate,
+				Quantity = 0,
+				BaseTotal = 0,
+				DiscPercent = _saleReturn.DiscPercent,
+				DiscAmount = 0,
+				AfterDiscount = 0,
+				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
+				CGSTAmount = 0,
+				SGSTPercent = productTax.Extra ? productTax.SGST : 0,
+				SGSTAmount = 0,
+				IGSTPercent = productTax.Extra ? productTax.IGST : 0,
+				IGSTAmount = 0,
+				Total = 0,
+				NetRate = 0
+			});
+		}
+
+		ResetCart();
+		UpdateFinancialDetails();
+	}
+
+	private async Task LoadExistingCart()
+	{
+		_cart.Sort((x, y) => string.Compare(x.ProductName, y.ProductName, StringComparison.Ordinal));
+
+		if (await DataStorageService.LocalExists(StorageFileNames.SaleReturnCartDataFileName))
+		{
+			var items = System.Text.Json.JsonSerializer.Deserialize<List<SaleReturnProductCartModel>>(
+				await DataStorageService.LocalGetAsync(StorageFileNames.SaleReturnCartDataFileName)) ?? [];
+			foreach (var item in items)
+			{
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().Rate = item.Rate;
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().Quantity = item.Quantity;
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().DiscPercent = item.DiscPercent;
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().CGSTPercent = item.CGSTPercent;
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().SGSTPercent = item.SGSTPercent;
+				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().IGSTPercent = item.IGSTPercent;
+			}
+		}
+
+		UpdateFinancialDetails();
+	}
+	#endregion
+
+	#region Party Order
+	private async Task OnPartyChanged(ChangeEventArgs<LedgerModel?, LedgerModel> args)
+	{
+		_selectedParty = args.Value;
+
+		if (args.ItemData is not null && args.ItemData.Id > 0)
+		{
+			_saleReturn.PartyId = args.ItemData.Id;
+
+			if (args.ItemData.LocationId is not null)
+			{
+				var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, args.ItemData.LocationId.Value);
+				_saleReturn.DiscPercent = location.Discount;
+			}
+		}
+
+		else
+		{
+			_saleReturn.PartyId = null;
+			_saleReturn.DiscPercent = 0;
+		}
+
+
+		foreach (var item in _cart)
+			item.DiscPercent = _saleReturn.DiscPercent;
+
+		await SaveSaleFile();
+		StateHasChanged();
+	}
+	#endregion
+
+	#region Cart
+	private void ResetCart()
+	{
+		_cart.Clear();
+
+		foreach (var item in _allCart)
+			_cart.Add(new()
+			{
+				ProductId = item.ProductId,
+				ProductName = item.ProductName,
+				ProductCategoryId = item.ProductCategoryId,
 				Rate = item.Rate,
+				Quantity = item.Quantity,
 				BaseTotal = item.BaseTotal,
 				DiscPercent = item.DiscPercent,
 				DiscAmount = item.DiscAmount,
@@ -139,243 +253,162 @@ public partial class SaleReturnPage
 				SGSTAmount = item.SGSTAmount,
 				IGSTPercent = item.IGSTPercent,
 				IGSTAmount = item.IGSTAmount,
-				NetRate = item.NetRate,
 				Total = item.Total,
+				NetRate = item.NetRate
 			});
-		}
+
+		_cart.Sort((x, y) => string.Compare(x.ProductName, y.ProductName, StringComparison.Ordinal));
 	}
 
-	private async Task LoadSaleForReturn()
+	private async Task OnProductCategoryChanged(ChangeEventArgs<int, ProductCategoryModel> args)
 	{
-		if (_saleReturn.SaleId <= 0)
-			return;
+		if (args is null || args.Value <= 0)
+			_selectedCategoryId = 0;
 
-		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, _saleReturn.SaleId);
-		var saleDetails = await SaleData.LoadSaleDetailBySale(_saleReturn.SaleId);
+		else
+			_selectedCategoryId = args.Value;
 
-		_saleDate = DateOnly.FromDateTime(sale.SaleDateTime);
-
-		_availableSaleProducts.Clear();
-
-		foreach (var detail in saleDetails)
-		{
-			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
-
-			_availableSaleProducts.Add(new()
-			{
-				ProductId = product.Id,
-				ProductName = product.Name,
-				Quantity = 0,
-				MaxQuantity = detail.Quantity,
-				SoldQuantity = detail.Quantity,
-				Rate = detail.Rate,
-				BaseTotal = detail.BaseTotal,
-				DiscPercent = detail.DiscPercent,
-				DiscAmount = detail.DiscAmount,
-				AfterDiscount = detail.AfterDiscount,
-				CGSTPercent = detail.CGSTPercent,
-				CGSTAmount = detail.CGSTAmount,
-				SGSTPercent = detail.SGSTPercent,
-				SGSTAmount = detail.SGSTAmount,
-				IGSTPercent = detail.IGSTPercent,
-				IGSTAmount = detail.IGSTAmount,
-				NetRate = detail.NetRate,
-				Total = detail.Total
-			});
-		}
-
-		_products = [];
-		foreach (var availableProduct in _availableSaleProducts)
-			_products.Add(availableProduct);
-
-		// Refresh the grid to show new products
-		_sfProductGrid?.Refresh();
+		await _sfGrid.Refresh();
 		StateHasChanged();
 	}
 
-	private async Task LoadAvailableSales()
+	private async Task AddToCart(SaleReturnProductCartModel item)
 	{
-		_availableSales = await SaleData.LoadSaleDetailsByDateLocationId(
-			_saleDate.ToDateTime(new TimeOnly(0, 0)),
-			_saleDate.ToDateTime(new TimeOnly(23, 59)),
-			_user.LocationId);
+		if (item is null)
+			return;
 
+		item.Quantity = 1;
+		await SaveSaleFile();
+	}
+
+	private async Task UpdateQuantity(SaleReturnProductCartModel item, decimal newQuantity)
+	{
+		if (item is null)
+			return;
+
+		item.Quantity = Math.Max(0, newQuantity);
+		await SaveSaleFile();
+	}
+	#endregion
+
+	#region Product Details Dialog
+	private void OpenProductDetailsDialog(SaleReturnProductCartModel item)
+	{
+		if (item is null || item.Quantity <= 0)
+			return;
+
+		_selectedProductForEdit = item;
+		_productDetailsDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private void OpenBasicDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_basicInfoDialogVisible = true;
+		VibrationService.VibrateHapticClick();
+		StateHasChanged();
+	}
+
+	private void OpenDiscountDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_discountDetailsDialogVisible = true;
+		VibrationService.VibrateHapticClick();
+		StateHasChanged();
+	}
+
+	private void OpenTaxDetails()
+	{
+		_productDetailsDialogVisible = false;
+		_taxDetailsDialogVisible = true;
+		VibrationService.VibrateHapticClick();
 		StateHasChanged();
 	}
 	#endregion
 
-	#region Fields Selection
-	private async Task DateChanged(ChangedEventArgs<DateOnly> args)
+	#region Basic Info Dialog
+	private async Task OnBasicRateChanged(decimal newRate)
 	{
-		_saleDate = args.Value;
-		await LoadAvailableSales();
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.Rate = Math.Max(0, newRate);
+		await SaveSaleFile();
 	}
 
-	private async Task OnSaleSelected(ChangeEventArgs<int, SaleOverviewModel> args)
+	private async Task OnBasicQuantityChanged(decimal newQuantity)
 	{
-		if (args.Value > 0)
-			_saleReturn.SaleId = args.Value;
-		else
-			_saleReturn.SaleId = 0;
+		if (_selectedProductForEdit is null)
+			return;
 
-		// Clear the return cart when selecting a different sale
-		_saleReturnProductCart.Clear();
-
-		await LoadSaleForReturn();
-		StateHasChanged();
+		_selectedProductForEdit.Quantity = Math.Max(0, newQuantity);
+		await SaveSaleFile();
 	}
 
-	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
+	private async Task OnSaveBasicInfoClick()
 	{
-		_saleReturn.LocationId = args.Value;
-		_saleReturn.SaleId = 0;
-
-		// Clear products and return cart when location changes
-		_availableSaleProducts.Clear();
-		_saleReturnProductCart.Clear();
-
-		await LoadAvailableSales();
-		StateHasChanged();
+		_basicInfoDialogVisible = false;
+		await SaveSaleFile();
 	}
 	#endregion
 
-	#region Products
-	private async Task AddProductToReturn(SaleReturnProductCartModel product)
+	#region Discount Details Dialog
+	private async Task OnDiscountPercentChanged(decimal newDiscountPercent)
 	{
-		if (product.MaxQuantity <= 0)
-		{
-			await NotificationService.ShowLocalNotification(999, "Warning", "No quantity available", "No quantity available for return");
+		if (_selectedProductForEdit is null)
 			return;
-		}
 
-		var existingItem = _saleReturnProductCart.FirstOrDefault(c => c.ProductId == product.ProductId);
-		if (existingItem != null)
-		{
-			if (existingItem.Quantity < existingItem.MaxQuantity)
-			{
-				existingItem.Quantity += 1;
-				UpdateFinancialDetails();
-			}
-			else
-			{
-				await NotificationService.ShowLocalNotification(999, "Warning", "Maximum quantity reached", "Cannot exceed maximum available quantity");
-			}
-		}
-		else
-		{
-			_saleReturnProductCart.Add(new SaleReturnProductCartModel
-			{
-				ProductId = product.ProductId,
-				ProductName = product.ProductName,
-				Quantity = 1,
-				MaxQuantity = product.MaxQuantity,
-				SoldQuantity = product.SoldQuantity,
-				Rate = product.Rate,
-				DiscPercent = product.DiscPercent,
-				CGSTPercent = product.CGSTPercent,
-				SGSTPercent = product.SGSTPercent,
-				IGSTPercent = product.IGSTPercent
-			});
-		}
-
-		UpdateFinancialDetails();
-		StateHasChanged();
+		_selectedProductForEdit.DiscPercent = Math.Max(0, Math.Min(100, newDiscountPercent));
+		await SaveSaleFile();
 	}
 
-	private async Task UpdateReturnQuantity(SaleReturnProductCartModel item, decimal newQuantity)
+	private async Task OnSaveDiscountClick()
 	{
-		if (newQuantity < 0)
-		{
-			await NotificationService.ShowLocalNotification(999, "Warning", "Invalid quantity", "Quantity cannot be negative");
-			return;
-		}
+		_discountDetailsDialogVisible = false;
+		await SaveSaleFile();
+	}
+	#endregion
 
-		if (newQuantity > item.MaxQuantity)
-		{
-			await NotificationService.ShowLocalNotification(999, "Warning", "Maximum exceeded", $"Cannot exceed maximum available quantity ({item.MaxQuantity})");
+	#region Tax Details Dialog
+	private async Task OnCGSTPercentChanged(decimal newCGSTPercent)
+	{
+		if (_selectedProductForEdit is null)
 			return;
-		}
 
-		if (newQuantity == 0)
-		{
-			RemoveFromReturn(item);
-			return;
-		}
-
-		item.Quantity = newQuantity;
-		UpdateFinancialDetails();
-		StateHasChanged();
+		_selectedProductForEdit.CGSTPercent = Math.Max(0, Math.Min(50, newCGSTPercent));
+		await SaveSaleFile();
 	}
 
-	private async Task HandleQuantityChange(SaleReturnProductCartModel product, decimal newQuantity)
+	private async Task OnSGSTPercentChanged(decimal newSGSTPercent)
 	{
-		if (newQuantity < 0)
-		{
-			await NotificationService.ShowLocalNotification(999, "Warning", "Invalid quantity", "Quantity cannot be negative");
+		if (_selectedProductForEdit is null)
 			return;
-		}
 
-		if (newQuantity > product.MaxQuantity)
-		{
-			await NotificationService.ShowLocalNotification(999, "Warning", "Maximum exceeded", $"Cannot exceed maximum available quantity ({product.MaxQuantity})");
-			return;
-		}
-
-		var existingItem = _saleReturnProductCart.FirstOrDefault(c => c.ProductId == product.ProductId);
-
-		if (newQuantity == 0)
-		{
-			if (existingItem != null)
-			{
-				RemoveFromReturn(existingItem);
-			}
-			return;
-		}
-
-		if (existingItem != null)
-		{
-			// Update existing item
-			existingItem.Quantity = newQuantity;
-		}
-		else
-		{
-			// Add new item to cart
-			_saleReturnProductCart.Add(new SaleReturnProductCartModel
-			{
-				ProductId = product.ProductId,
-				ProductName = product.ProductName,
-				Quantity = newQuantity,
-				MaxQuantity = product.MaxQuantity,
-				SoldQuantity = product.SoldQuantity,
-				Rate = product.Rate,
-				DiscPercent = product.DiscPercent,
-				CGSTPercent = product.CGSTPercent,
-				SGSTPercent = product.SGSTPercent,
-				IGSTPercent = product.IGSTPercent
-			});
-		}
-
-		UpdateFinancialDetails();
-		StateHasChanged();
+		_selectedProductForEdit.SGSTPercent = Math.Max(0, Math.Min(50, newSGSTPercent));
+		await SaveSaleFile();
 	}
 
-	private void RemoveFromReturn(SaleReturnProductCartModel item)
+	private async Task OnIGSTPercentChanged(decimal newIGSTPercent)
 	{
-		_saleReturnProductCart.Remove(item);
-		UpdateFinancialDetails();
-		StateHasChanged();
+		if (_selectedProductForEdit is null)
+			return;
+
+		_selectedProductForEdit.IGSTPercent = Math.Max(0, Math.Min(50, newIGSTPercent));
+		await SaveSaleFile();
 	}
 
-	private void ClearReturnCart()
+	private async Task OnSaveTaxClick()
 	{
-		_saleReturnProductCart.Clear();
-		UpdateFinancialDetails();
-		StateHasChanged();
+		_taxDetailsDialogVisible = false;
+		await SaveSaleFile();
 	}
+	#endregion
 
-	private async void UpdateFinancialDetails()
+	#region Saving
+	private void UpdateFinancialDetails()
 	{
-		foreach (var item in _saleReturnProductCart)
+		foreach (var item in _cart)
 		{
 			item.BaseTotal = item.Rate * item.Quantity;
 			item.DiscAmount = item.BaseTotal * (item.DiscPercent / 100);
@@ -387,118 +420,39 @@ public partial class SaleReturnPage
 			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
 		}
 
-		_sfProductGrid?.Refresh();
+		_saleReturn.RoundOff = Math.Round(_cart.Sum(x => x.Total)) - _cart.Sum(x => x.Total);
+
+		_sfGrid?.Refresh();
 		StateHasChanged();
+	}
 
-		// Save to storage after financial calculations
+	private async Task SaveSaleFile()
+	{
+		UpdateFinancialDetails();
+
 		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleReturnDataFileName, System.Text.Json.JsonSerializer.Serialize(_saleReturn));
-	}
-	#endregion
 
-	#region Saving
-	private async Task<bool> ValidateForm()
-	{
-		_validationErrors.Clear();
+		if (!_cart.Any(x => x.Quantity > 0) && await DataStorageService.LocalExists(StorageFileNames.SaleReturnCartDataFileName))
+			await DataStorageService.LocalRemove(StorageFileNames.SaleReturnCartDataFileName);
+		else
+			await DataStorageService.LocalSaveAsync(StorageFileNames.SaleReturnCartDataFileName, System.Text.Json.JsonSerializer.Serialize(_cart.Where(_ => _.Quantity > 0)));
 
-		// Basic validations
-		if (_saleReturn.SaleId <= 0)
-		{
-			_validationErrors.Add(new ValidationError { Field = "Sale Selection", Message = "Please select a sale to process returns" });
-		}
+		VibrationService.VibrateHapticClick();
 
-		if (_saleReturnProductCart.Count == 0)
-		{
-			_validationErrors.Add(new ValidationError { Field = "Return Cart", Message = "Please add at least one product to the return cart" });
-		}
-
-		if (_saleReturn.LocationId <= 0)
-		{
-			_validationErrors.Add(new ValidationError { Field = "Location", Message = "Please select a valid location" });
-		}
-
-		// Validate each product in cart
-		foreach (var item in _saleReturnProductCart)
-		{
-			if (item.Quantity <= 0)
-			{
-				_validationErrors.Add(new ValidationError { Field = $"Product: {item.ProductName}", Message = "Return quantity must be greater than zero" });
-			}
-			else if (item.Quantity > item.MaxQuantity)
-			{
-				_validationErrors.Add(new ValidationError { Field = $"Product: {item.ProductName}", Message = $"Return quantity cannot exceed maximum available ({item.MaxQuantity})" });
-			}
-		}
-
-		// Show validation errors if any
-		if (_validationErrors.Count != 0)
-		{
-			_validationErrorDialogVisible = true;
-			StateHasChanged();
-			return false;
-		}
-
-		// Set required fields if validation passes
-		_saleReturn.UserId = _user.Id;
-		return true;
+		await _sfGrid.Refresh();
+		StateHasChanged();
 	}
 
-	private async Task ConfirmSaleReturn()
+	private async Task GoToCart()
 	{
-		// Validate form first
-		if (!await ValidateForm())
+		await SaveSaleFile();
+
+		if (_cart.Sum(x => x.Quantity) <= 0 || await DataStorageService.LocalExists(StorageFileNames.SaleReturnCartDataFileName) == false)
 			return;
 
-		// Close confirmation dialog and start saving
-		_confirmReturnDialogVisible = false;
-		_isSaving = true;
-		StateHasChanged();
-
-		try
-		{
-			// Save the return
-			_saleReturn.Id = await SaleReturnData.SaveSaleReturn(_saleReturn, _saleReturnProductCart);
-
-			// Print invoice
-			await PrintInvoice();
-
-			// Send notifications
-			await SendLocalNotification();
-
-			// Clear local storage
-			await DataStorageService.LocalRemove(StorageFileNames.SaleReturnDataFileName);
-
-			// Navigate to success page
-			NavigationManager.NavigateTo("/SaleReturn/Confirmed", true);
-		}
-		catch (Exception ex)
-		{
-			_validationErrors.Add(new() { Field = "Save Error", Message = $"An error occurred while saving the sale return: {ex.Message}" });
-			_validationErrorDialogVisible = true;
-			StateHasChanged();
-		}
-		finally
-		{
-			_isSaving = false;
-			StateHasChanged();
-		}
-	}
-
-	private async Task PrintInvoice()
-	{
-		var memoryStream = await SaleReturnA4Print.GenerateA4SaleReturnBill(_saleReturn.Id);
-		var fileName = $"Sale_Return_Bill_{_saleReturn.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
-	}
-
-	private async Task SendLocalNotification()
-	{
-		var saleReturn = await SaleReturnData.LoadSaleReturnOverviewBySaleReturnId(_saleReturn.Id);
-
-		await NotificationService.ShowLocalNotification(
-			saleReturn.SaleReturnId,
-			"Sale Return Placed",
-			$"{saleReturn.TransactionNo}",
-			$"Your sale return #{saleReturn.TransactionNo} has been successfully placed for sale #{saleReturn.SaleId} | Total Items: {saleReturn.TotalProducts} | Total Qty: {saleReturn.TotalQuantity} | Location: {saleReturn.LocationName} | User: {saleReturn.UserName} | Date: {saleReturn.ReturnDateTime:dd/MM/yy hh:mm tt} | Remarks: {saleReturn.Remarks}");
+		VibrationService.VibrateWithTime(500);
+		_cart.Clear();
+		NavigationManager.NavigateTo("/SaleReturn/Cart");
 	}
 	#endregion
 }

@@ -192,28 +192,31 @@ else
 					</SfAutoComplete>
 				</div>
 
-				<div class="form-group">
-					<SfComboBox TValue="int?"
-								TItem="OrderModel"
-								Placeholder="Select an order (optional)"
-								DataSource="@_orders"
-								FloatLabelType='@FloatLabelType.Auto'
-								Value="@_sale.OrderId"
-								CssClass="form-control"
-								AllowFiltering="true"
-								FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-						<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="OnOrderChanged" />
-						<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
-						<ComboBoxTemplates TItem="OrderModel">
-							<ItemTemplate>
-								<div class="order-item-template">
-									<div class="order-number">@((context as OrderModel)?.OrderNo)</div>
-									<div class="order-date">@((context as OrderModel)?.OrderDateTime.ToString("dd/MM/yyyy"))</div>
-								</div>
-							</ItemTemplate>
-						</ComboBoxTemplates>
-					</SfComboBox>
-				</div>
+				@if (_sale.Id == 0 || (_sale.Id > 0 && _sale.OrderId == 0))
+				{
+					<div class="form-group">
+						<SfComboBox TValue="int?"
+									TItem="OrderModel"
+									Placeholder="Select an order (optional)"
+									DataSource="@_orders"
+									FloatLabelType='@FloatLabelType.Auto'
+									Value="@_sale.OrderId"
+									CssClass="form-control"
+									AllowFiltering="true"
+									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+							<ComboBoxEvents TItem="OrderModel" TValue="int?" ValueChange="OnOrderChanged" />
+							<ComboBoxFieldSettings Value="Id" Text="OrderNo" />
+							<ComboBoxTemplates TItem="OrderModel">
+								<ItemTemplate>
+									<div class="order-item-template">
+										<div class="order-number">@((context as OrderModel)?.OrderNo)</div>
+										<div class="order-date">@((context as OrderModel)?.OrderDateTime.ToString("dd/MM/yyyy"))</div>
+									</div>
+								</ItemTemplate>
+							</ComboBoxTemplates>
+						</SfComboBox>
+					</div>
+				}
 			</div>
 		</Content>
 		<FooterTemplate>

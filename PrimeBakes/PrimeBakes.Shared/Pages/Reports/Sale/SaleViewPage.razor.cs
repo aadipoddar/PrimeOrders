@@ -200,8 +200,34 @@ public partial class SaleViewPage
 		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, SaleId);
 		var saleDetails = await SaleData.LoadSaleDetailBySale(SaleId);
 
+		List<SaleProductCartModel> cart = [];
+		foreach (var detail in saleDetails)
+		{
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			cart.Add(new()
+			{
+				ProductId = detail.ProductId,
+				ProductName = product.Name,
+				ProductCategoryId = product.ProductCategoryId,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				BaseTotal = detail.BaseTotal,
+				DiscPercent = detail.DiscPercent,
+				DiscAmount = detail.DiscAmount,
+				AfterDiscount = detail.AfterDiscount,
+				CGSTPercent = detail.CGSTPercent,
+				CGSTAmount = detail.CGSTAmount,
+				SGSTPercent = detail.SGSTPercent,
+				SGSTAmount = detail.SGSTAmount,
+				IGSTPercent = detail.IGSTPercent,
+				IGSTAmount = detail.IGSTAmount,
+				NetRate = detail.NetRate,
+				Total = detail.Total
+			});
+		}
+
 		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleDataFileName, System.Text.Json.JsonSerializer.Serialize(sale));
-		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleCartDataFileName, System.Text.Json.JsonSerializer.Serialize(saleDetails));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
 
 		NavigationManager.NavigateTo("/Sale");
 	}

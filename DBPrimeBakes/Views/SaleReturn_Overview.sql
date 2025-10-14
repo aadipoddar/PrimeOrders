@@ -1,60 +1,85 @@
 ﻿CREATE VIEW [dbo].[SaleReturn_Overview]
 	AS
 	SELECT
-		sr.Id AS SaleReturnId,
-		sr.TransactionNo,
-		sr.SaleId,
-		s.BillNo AS OriginalBillNo,
-		sr.UserId,
-		u.Name AS UserName,
-		sr.LocationId,
-		l.Name AS LocationName,
-		sr.ReturnDateTime,
-		sr.Remarks,
+		[s].[Id] AS SaleReturnId,
+		[s].[BillNo],
+		[s].[UserId],
+		[u].[Name] AS UserName,
+		[s].[LocationId],
+		[l].[Name] AS LocationName,
+		[s].[SaleReturnDateTime],
+		[s].[PartyId],
+		[p].[Name] AS PartyName,
+		[s].[Remarks],
+		[s].[DiscPercent] AS DiscountPercent,
+		[s].[DiscReason] AS DiscountReason,
 
-		COUNT(DISTINCT srd.Id) AS TotalProducts,
-		SUM(srd.Quantity) AS TotalQuantity,
+		COUNT(DISTINCT sd.Id) AS TotalProducts,
+		SUM(sd.Quantity) AS TotalQuantity,
 
-		AVG(srd.SGSTPercent) AS SGSTPercent,
-		AVG(srd.CGSTPercent) AS CGSTPercent,
-		AVG(srd.IGSTPercent) AS IGSTPercent,
+		AVG(sd.SGSTPercent) AS SGSTPercent,
+		AVG(sd.CGSTPercent) AS CGSTPercent,
+		AVG(sd.IGSTPercent) AS IGSTPercent,
 
-		SUM(srd.SGSTAmount) AS SGSTAmount,
-		SUM(srd.CGSTAmount) AS CGSTAmount,
-		SUM(srd.IGSTAmount) AS IGSTAmount,
+		SUM(sd.SGSTAmount) AS SGSTAmount,
+		SUM(sd.CGSTAmount) AS CGSTAmount,
+		SUM(sd.IGSTAmount) AS IGSTAmount,
 
-		SUM(srd.DiscAmount) AS DiscountAmount,
-		SUM(srd.SGSTAmount + srd.CGSTAmount + srd.IGSTAmount) AS TotalTaxAmount,
+		SUM(sd.DiscAmount) AS DiscountAmount,
+		SUM(sd.SGSTAmount + sd.CGSTAmount + sd.IGSTAmount) AS TotalTaxAmount,
 
-		SUM(srd.BaseTotal) AS BaseTotal,
-		SUM(srd.AfterDiscount) AS SubTotal,
-		SUM(srd.Total) AS Total
+		SUM(sd.BaseTotal) AS BaseTotal,
+		SUM(sd.AfterDiscount) AS SubTotal,
+		SUM(sd.Total) AS AfterTax,
+		[s].[RoundOff],
+		SUM(sd.Total) + [s].[RoundOff] AS Total,
+
+		[s].[Cash],
+		[s].[Card],
+		[s].[UPI],
+		[s].[Credit],
+		[s].[CustomerId],
+		[c].[Name] AS CustomerName,
+		[c].[Number] AS CustomerNumber,
+		[s].[CreatedAt]
 
 	FROM
-		dbo.SaleReturn sr
-
+		[dbo].[SaleReturn] s
 	INNER JOIN
-		dbo.Sale s ON sr.SaleId = s.Id
+		[dbo].[SaleReturnDetail] sd ON s.Id = sd.SaleReturnId
 	INNER JOIN
-		dbo.Location l ON sr.LocationId = l.Id
+		[dbo].[Location] l ON s.LocationId = l.Id
 	INNER JOIN
-		dbo.[User] u ON sr.UserId = u.Id
-	INNER JOIN
-		dbo.SaleReturnDetail srd ON sr.Id = srd.SaleReturnId
+		[dbo].[User] u ON s.UserId = u.Id
+	LEFT JOIN
+		[dbo].[Ledger] p ON s.PartyId = p.Id
+	LEFT JOIN
+		[dbo].[Customer] c ON s.CustomerId = c.Id
 
 	WHERE
-		sr.Status = 1
-		AND srd.Status = 1
+		[s].[Status] = 1
+		AND [sd].[Status] = 1
 
 	GROUP BY
-		sr.Id,
-		sr.TransactionNo,
-		sr.SaleId,
-		s.BillNo,
-		sr.UserId,
-		u.Name,
-		sr.LocationId,
-		l.Name,
-		sr.ReturnDateTime,
-		sr.Remarks,
-		sr.Status
+		[s].[Id],
+		[s].[BillNo],
+		[s].[UserId],
+		[u].[Name],
+		[s].[LocationId],
+		[l].[Name],
+		[s].[SaleReturnDateTime],
+		[s].[PartyId],
+		[p].[Name],
+		[s].[Remarks],
+		[s].[DiscPercent],
+		[s].[DiscReason],
+		[s].[RoundOff],
+		[s].[Cash],
+		[s].[Card],
+		[s].[UPI],
+		[s].[Credit],
+		[s].[Status],
+		[s].[CustomerId],
+		[c].[Name],
+		[c].[Number],
+		[s].[CreatedAt];

@@ -8,14 +8,14 @@ BEGIN
     BEGIN
         SELECT *
         FROM dbo.SaleReturn_Overview v
-        WHERE ReturnDateTime BETWEEN @FromDate AND @ToDate;
+        WHERE SaleReturnDateTime BETWEEN @FromDate AND @ToDate;
     END
 
     ELSE
     BEGIN
         SELECT *
         FROM dbo.SaleReturn_Overview v
-        WHERE ReturnDateTime BETWEEN @FromDate AND @ToDate
+        WHERE SaleReturnDateTime BETWEEN @FromDate AND @ToDate
           AND LocationId = @LocationId;
     END
 END

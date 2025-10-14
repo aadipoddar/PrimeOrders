@@ -1,34 +1,50 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_SaleReturn]
 	@Id INT OUTPUT,
-	@SaleId INT,
-	@TransactionNo VARCHAR(20),
+	@BillNo VARCHAR(20),
+	@DiscPercent DECIMAL(5, 2),
+	@DiscReason VARCHAR(250),
+	@RoundOff MONEY,
 	@Remarks VARCHAR(250),
 	@UserId INT,
 	@LocationId INT,
-	@ReturnDateTime DATETIME,
-	@Status BIT
+	@SaleReturnDateTime DATETIME,
+	@PartyId INT = NULL,
+	@Cash MONEY = 0,
+	@Card MONEY = 0,
+	@UPI MONEY = 0,
+	@Credit MONEY = 0,
+	@CustomerId INT = NULL,
+	@CreatedAt DATETIME,
+	@Status BIT = 1
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[SaleReturn] 
-			([SaleId], [TransactionNo], [Remarks], [UserId], [LocationId], [ReturnDateTime], [Status])
+		INSERT INTO [dbo].[SaleReturn]
+			([BillNo], [DiscPercent], DiscReason, RoundOff, Remarks, UserId, LocationId, SaleReturnDateTime, PartyId, Cash, Card, UPI, Credit, CustomerId, Status)
 		VALUES 
-			(@SaleId, @TransactionNo, @Remarks, @UserId, @LocationId, @ReturnDateTime, @Status);
+			(@BillNo, @DiscPercent, @DiscReason, @RoundOff, @Remarks, @UserId, @LocationId, @SaleReturnDateTime, @PartyId, @Cash, @Card, @UPI, @Credit, @CustomerId, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
-
 	ELSE
 	BEGIN
 		UPDATE [dbo].[SaleReturn]
 		SET
-			[SaleId] = @SaleId,
-			[TransactionNo] = @TransactionNo,
-			[Remarks] = @Remarks,
-			[UserId] = @UserId,
-			[LocationId] = @LocationId,
-			[ReturnDateTime] = @ReturnDateTime,
-			[Status] = @Status
+			BillNo = @BillNo,
+			DiscPercent = @DiscPercent,
+			DiscReason = @DiscReason,
+			RoundOff = @RoundOff,
+			Remarks = @Remarks,
+			UserId = @UserId,
+			LocationId = @LocationId,
+			SaleReturnDateTime = @SaleReturnDateTime,
+			PartyId = @PartyId,
+			Cash = @Cash,
+			Card = @Card,
+			UPI = @UPI,
+			Credit = @Credit,
+			CustomerId = @CustomerId,
+			Status = @Status
 		WHERE Id = @Id;
 	END
 	SELECT @Id AS Id;

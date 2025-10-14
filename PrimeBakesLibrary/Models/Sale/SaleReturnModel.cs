@@ -3,12 +3,21 @@
 public class SaleReturnModel
 {
 	public int Id { get; set; }
-	public int SaleId { get; set; }
-	public string TransactionNo { get; set; }
+	public string BillNo { get; set; }
+	public decimal DiscPercent { get; set; }
+	public string DiscReason { get; set; }
+	public decimal RoundOff { get; set; }
 	public string Remarks { get; set; }
 	public int UserId { get; set; }
 	public int LocationId { get; set; }
-	public DateTime ReturnDateTime { get; set; }
+	public DateTime SaleReturnDateTime { get; set; }
+	public int? PartyId { get; set; }
+	public decimal Cash { get; set; }
+	public decimal Card { get; set; }
+	public decimal UPI { get; set; }
+	public decimal Credit { get; set; }
+	public int? CustomerId { get; set; }
+	public DateTime CreatedAt { get; set; }
 	public bool Status { get; set; }
 }
 
@@ -38,9 +47,8 @@ public class SaleReturnProductCartModel
 {
 	public int ProductId { get; set; }
 	public string ProductName { get; set; }
+	public int ProductCategoryId { get; set; }
 	public decimal Quantity { get; set; }
-	public decimal MaxQuantity { get; set; }
-	public decimal SoldQuantity { get; set; }
 	public decimal Rate { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal DiscPercent { get; set; }
@@ -59,15 +67,17 @@ public class SaleReturnProductCartModel
 public class SaleReturnOverviewModel
 {
 	public int SaleReturnId { get; set; }
-	public string TransactionNo { get; set; }
-	public int SaleId { get; set; }
-	public string OriginalBillNo { get; set; }
+	public string BillNo { get; set; }
 	public int UserId { get; set; }
 	public string UserName { get; set; }
 	public int LocationId { get; set; }
 	public string LocationName { get; set; }
-	public DateTime ReturnDateTime { get; set; }
+	public DateTime SaleReturnDateTime { get; set; }
+	public int? PartyId { get; set; }
+	public string? PartyName { get; set; }
 	public string Remarks { get; set; }
+	public decimal DiscountPercent { get; set; }
+	public string DiscountReason { get; set; }
 	public int TotalProducts { get; set; }
 	public decimal TotalQuantity { get; set; }
 	public decimal SGSTPercent { get; set; }
@@ -80,5 +90,15 @@ public class SaleReturnOverviewModel
 	public decimal TotalTaxAmount { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal SubTotal { get; set; }
+	public decimal AfterTax { get; set; }
+	public decimal RoundOff { get; set; }
 	public decimal Total { get; set; }
+	public decimal Cash { get; set; }
+	public decimal Card { get; set; }
+	public decimal UPI { get; set; }
+	public decimal Credit { get; set; }
+	public int? CustomerId { get; set; }
+	public string? CustomerName { get; set; }
+	public string? CustomerNumber { get; set; }
+	public DateTime CreatedAt { get; set; }
 }

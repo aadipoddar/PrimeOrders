@@ -129,8 +129,21 @@ public partial class OrderViewPage
 		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _orderOverview.OrderId);
 		var orderDetails = await OrderData.LoadOrderDetailByOrder(_orderOverview.OrderId);
 
+		List<OrderProductCartModel> cart = [];
+		foreach (var product in orderDetails)
+		{
+			var prod = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
+			cart.Add(new()
+			{
+				ProductId = product.ProductId,
+				ProductName = prod.Name,
+				ProductCategoryId = prod.ProductCategoryId,
+				Quantity = product.Quantity
+			});
+		}
+
 		await DataStorageService.LocalSaveAsync(StorageFileNames.OrderDataFileName, System.Text.Json.JsonSerializer.Serialize(order));
-		await DataStorageService.LocalSaveAsync(StorageFileNames.OrderCartDataFileName, System.Text.Json.JsonSerializer.Serialize(orderDetails));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.OrderCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
 
 		NavigationManager.NavigateTo("/Order");
 	}

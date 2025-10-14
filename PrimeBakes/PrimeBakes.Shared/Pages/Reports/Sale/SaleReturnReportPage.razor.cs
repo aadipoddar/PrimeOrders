@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
-using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Sale;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sale;
@@ -17,50 +15,25 @@ namespace PrimeBakes.Shared.Pages.Reports.Sale;
 
 public partial class SaleReturnReportPage
 {
-	[Parameter] public int? SelectedLocationId { get; set; }
-
 	private UserModel _user;
 	private bool _isLoading = true;
 
 	// Data collections
 	private List<SaleReturnOverviewModel> _saleReturnOverviews = [];
-	private List<LocationModel> _locations = [];
-	private LocationModel _selectedLocation;
+	private List<SaleReturnOverviewModel> _filteredSaleReturnOverviews = [];
 
 	// Filter properties
-	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
+	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
-	private int? _selectedLocationId;
+	private string _selectedPaymentFilter = "All";
 
 	// Grid reference
 	private SfGrid<SaleReturnOverviewModel> _sfGrid;
 
-	// Chart data models
-	public class DailyReturnData
-	{
-		public DateTime Date { get; set; }
-		public decimal Amount { get; set; }
-		public int Count { get; set; }
-	}
-
-	public class LocationReturnData
-	{
-		public string LocationName { get; set; }
-		public decimal Amount { get; set; }
-		public int Count { get; set; }
-	}
-
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales, true);
 		_user = authResult.User;
-
-		// Handle location parameter from URL
-		if (SelectedLocationId.HasValue && _user.LocationId == 1)
-			_selectedLocationId = SelectedLocationId.Value;
-		else if (_user.LocationId != 1)
-			_selectedLocationId = _user.LocationId;
-
 		await LoadData();
 		_isLoading = false;
 	}
@@ -70,159 +43,207 @@ public partial class SaleReturnReportPage
 		_isLoading = true;
 		StateHasChanged();
 
-		await LoadLocations();
-		await LoadSaleReturnData();
+		await LoadSalesReturnData();
+		ApplyFilters();
 
 		_isLoading = false;
 		StateHasChanged();
 	}
-
-	private async Task LoadLocations()
+	private async Task LoadSalesReturnData()
 	{
-		if (_user.LocationId == 1)
-		{
-			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		var fromDate = _startDate.ToDateTime(TimeOnly.MinValue);
+		var toDate = _endDate.ToDateTime(TimeOnly.MaxValue);
 
-			// Add "All Locations" option for primary location users
-			_locations.Insert(0, new LocationModel { Id = 0, Name = "All Locations" });
-
-			if (!_selectedLocationId.HasValue)
-			{
-				_selectedLocationId = 0;
-			}
-			_selectedLocation = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
-		}
-		else
-		{
-			// Non-primary users can only see their own location
-			var userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-			if (userLocation != null)
-			{
-				_locations = [userLocation];
-				_selectedLocationId = _user.LocationId;
-				_selectedLocation = userLocation;
-			}
-		}
+		_saleReturnOverviews = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(fromDate, toDate, _user.LocationId);
+		_saleReturnOverviews = [.. _saleReturnOverviews.OrderByDescending(s => s.SaleReturnDateTime)];
 	}
 
-	private async Task LoadSaleReturnData()
+	private void ApplyFilters()
 	{
-		try
-		{
-			if (_user.LocationId == 1 && (_selectedLocationId == null || _selectedLocationId == 0))
-			{
-				// Load all sale returns for primary location when "All Locations" is selected
-				_saleReturnOverviews = [];
-				foreach (var location in _locations.Where(l => l.Id > 0))
-				{
-					var locationReturns = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
-						_startDate.ToDateTime(new TimeOnly(0, 0)),
-						_endDate.ToDateTime(new TimeOnly(23, 59)),
-						location.Id);
-					_saleReturnOverviews.AddRange(locationReturns);
-				}
-			}
-			else
-			{
-				// Load returns for specific location
-				var locationId = _selectedLocationId ?? _user.LocationId;
-				_saleReturnOverviews = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
-					_startDate.ToDateTime(new TimeOnly(0, 0)),
-					_endDate.ToDateTime(new TimeOnly(23, 59)),
-					locationId);
-			}
+		var filtered = _saleReturnOverviews.AsEnumerable();
 
-			// Sort by return date descending
-			_saleReturnOverviews = _saleReturnOverviews.OrderByDescending(r => r.ReturnDateTime).ToList();
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(999, "Error", "Data Load Failed", $"Failed to load sale return data: {ex.Message}");
-			_saleReturnOverviews = [];
-		}
+		// Apply payment method filter
+		if (!string.IsNullOrEmpty(_selectedPaymentFilter) && _selectedPaymentFilter != "All")
+			filtered = filtered.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter);
+
+		_filteredSaleReturnOverviews = [.. filtered];
 	}
-
-	#region Event Handlers
 
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
-		_startDate = args.StartDate;
-		_endDate = args.EndDate;
-		await LoadSaleReturnData();
+		if (args.StartDate != default && args.EndDate != default)
+		{
+			_startDate = args.StartDate;
+			_endDate = args.EndDate;
+			await LoadData();
+		}
 	}
 
-	private async Task OnLocationFilterChanged(ChangeEventArgs<int?, LocationModel> args)
+	private async Task OnPaymentFilterChanged(ChangeEventArgs<string, string> args)
 	{
-		_selectedLocationId = args.Value;
-		_selectedLocation = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
-		await LoadSaleReturnData();
+		_selectedPaymentFilter = args.Value ?? "All";
+		ApplyFilters();
+		await InvokeAsync(StateHasChanged);
 	}
 
-	#endregion
-
-	#region Chart Data Methods
-
-	private List<DailyReturnData> GetDailyReturnData()
+	private string GetPrimaryPaymentMethod(SaleReturnOverviewModel saleReturn)
 	{
-		return _saleReturnOverviews
-			.GroupBy(r => r.ReturnDateTime.Date)
-			.Select(g => new DailyReturnData
+		var payments = new Dictionary<string, decimal>
+		{
+			{ "Cash", saleReturn.Cash },
+			{ "Card", saleReturn.Card },
+			{ "UPI", saleReturn.UPI },
+			{ "Credit", saleReturn.Credit }
+		};
+
+		var primaryPayment = payments.Where(p => p.Value > 0).OrderByDescending(p => p.Value).FirstOrDefault();
+
+		if (primaryPayment.Key == null)
+			return "Cash"; // Default
+
+		// Check if it's mixed payment (more than one method used)
+		var usedMethods = payments.Count(p => p.Value > 0);
+		return usedMethods > 1 ? "Mixed" : primaryPayment.Key;
+	}
+
+	private string GetPaymentBadgeClass(string paymentMethod)
+	{
+		return paymentMethod.ToLower() switch
+		{
+			"cash" => "payment-cash",
+			"card" => "payment-card",
+			"upi" => "payment-upi",
+			"credit" => "payment-credit",
+			"mixed" => "payment-mixed",
+			_ => "payment-cash"
+		};
+	}
+
+	private string GetPaymentIcon(string paymentMethod)
+	{
+		return paymentMethod.ToLower() switch
+		{
+			"cash" => "fas fa-money-bill",
+			"card" => "fas fa-credit-card",
+			"upi" => "fas fa-mobile-alt",
+			"credit" => "fas fa-handshake",
+			"mixed" => "fas fa-layer-group",
+			_ => "fas fa-money-bill"
+		};
+	}
+
+	private void ViewSaleReturnDetails(SaleReturnOverviewModel sale) =>
+		NavigationManager.NavigateTo($"/Reports/SaleReturn/View/{sale.SaleReturnId}");
+
+	// Chart data methods
+	private List<DailySalesChartData> GetSalesTrendsData()
+	{
+		if (_filteredSaleReturnOverviews == null || _filteredSaleReturnOverviews.Count == 0)
+			return [];
+
+		return [.. _filteredSaleReturnOverviews
+			.GroupBy(s => s.SaleReturnDateTime.Date)
+			.Select(g => new DailySalesChartData
 			{
-				Date = g.Key,
-				Amount = g.Sum(r => r.Total),
-				Count = g.Count()
+				Date = g.Key.ToString("yyyy-MM-dd"),
+				Amount = g.Sum(s => s.Total)
 			})
-			.OrderBy(d => d.Date)
-			.ToList();
+			.OrderBy(d => d.Date)];
 	}
 
-	private List<LocationReturnData> GetLocationReturnData()
+	private List<PaymentMethodChartData> GetPaymentMethodData()
 	{
-		return _saleReturnOverviews
-			.GroupBy(r => r.LocationName)
-			.Select(g => new LocationReturnData
+		if (_filteredSaleReturnOverviews == null || _filteredSaleReturnOverviews.Count == 0)
+			return [];
+
+		var paymentData = new Dictionary<string, decimal>
+		{
+			{ "Cash", _filteredSaleReturnOverviews.Sum(s => s.Cash) },
+			{ "Card", _filteredSaleReturnOverviews.Sum(s => s.Card) },
+			{ "UPI", _filteredSaleReturnOverviews.Sum(s => s.UPI) },
+			{ "Credit", _filteredSaleReturnOverviews.Sum(s => s.Credit) }
+		};
+
+		var result = paymentData
+			.Where(p => p.Value > 0)
+			.Select(p => new PaymentMethodChartData
 			{
-				LocationName = g.Key,
-				Amount = g.Sum(r => r.Total),
-				Count = g.Count()
+				PaymentMethod = p.Key,
+				Amount = p.Value
+			})
+			.ToList();
+
+		// Ensure we always have at least one data point for the chart
+		if (result.Count == 0)
+			result.Add(new PaymentMethodChartData { PaymentMethod = "No Data", Amount = 1 });
+
+		return result;
+	}
+
+	private List<LocationSalesSummaryChartData> GetLocationPerformanceData()
+	{
+		// Only show for admin users
+		if (_user?.LocationId != 1)
+			return [];
+
+		// If no data or admin is viewing a specific location, don't show location comparison
+		if (_filteredSaleReturnOverviews == null || _filteredSaleReturnOverviews.Count == 0)
+			return [];
+
+		var locationData = _filteredSaleReturnOverviews
+			.Where(s => !string.IsNullOrEmpty(s.LocationName)) // Ensure location name exists
+			.GroupBy(s => new { s.LocationId, s.LocationName })
+			.Select(g => new LocationSalesSummaryChartData
+			{
+				LocationName = g.Key.LocationName,
+				Amount = g.Sum(s => s.Total)
 			})
 			.OrderByDescending(l => l.Amount)
 			.ToList();
+
+		return locationData;
 	}
 
-	#endregion
-
-	#region Export Methods
-
-	private async Task ExportExcel()
+	private List<HourlySalesData> GetHourlySalesData()
 	{
-		try
-		{
-			var memoryStream = SaleReturnExcelExport.ExportSaleReturnOverviewExcel(
-				_saleReturnOverviews,
-				_startDate,
-				_endDate,
-				_selectedLocationId ?? 0,
-				_locations);
+		if (_filteredSaleReturnOverviews == null || _filteredSaleReturnOverviews.Count == 0)
+			return [];
 
-			var fileName = $"Sale_Return_Report_{_startDate:yyyyMMdd}_{_endDate:yyyyMMdd}.xlsx";
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
-
-			await NotificationService.ShowLocalNotification(1, "Export Successful", "Excel Export", "Sale return report has been exported to Excel successfully.");
-		}
-		catch (Exception ex)
-		{
-			await NotificationService.ShowLocalNotification(999, "Export Failed", "Excel Export Error", $"Failed to export to Excel: {ex.Message}");
-		}
+		return [.. _filteredSaleReturnOverviews
+			.GroupBy(s => s.SaleReturnDateTime.Hour)
+			.Select(g => new HourlySalesData
+			{
+				Hour = g.Key.ToString("D2"),
+				Count = g.Count()
+			})
+			.OrderBy(h => h.Hour)];
 	}
-	#endregion
 
-	#region Navigation Methods
-
-	private void ViewReturnDetails(int saleReturnId)
+	// Summary methods
+	private string GetDateRangeText()
 	{
-		NavigationManager.NavigateTo($"/Reports/SaleReturnView/{saleReturnId}");
+		var days = (_endDate.ToDateTime(TimeOnly.MinValue) - _startDate.ToDateTime(TimeOnly.MinValue)).Days;
+		return days == 0 ? "Today" : $"Last {days + 1} days";
 	}
 
-	#endregion
+	private string GetAverageRevenueText()
+	{
+		if (_filteredSaleReturnOverviews.Count == 0) return "No data";
+		var avgPerSale = _filteredSaleReturnOverviews.Average(s => s.Total);
+		return $"₹{avgPerSale:N0} avg/sale";
+	}
+
+	private decimal GetAverageOrderValue()
+	{
+		return _filteredSaleReturnOverviews.Count > 0 ? _filteredSaleReturnOverviews.Average(s => s.Total) : 0;
+	}
+
+	// Export methods
+	private async Task ExportToExcel()
+	{
+		var excelData = SaleReturnExcelExport.ExportSaleReturnOverviewExcel(_filteredSaleReturnOverviews, _startDate, _endDate);
+		var fileName = $"Sale_Return_Details_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.xlsx";
+		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelData);
+		VibrationService.VibrateWithTime(100);
+	}
 }

@@ -177,19 +177,6 @@ public partial class LedgerReportsPage
 		if (!_ledgerOverviews.Any()) return 0;
 		return _ledgerOverviews.Average(l => (l.Debit ?? 0) + (l.Credit ?? 0));
 	}
-
-	private string[] GetGroupingColumns()
-	{
-		// When a ledger is selected, group by TransactionNo, otherwise group by ReferenceNo
-		if (_selectedLedger != null && _selectedLedger.Id > 0)
-		{
-			return new string[] { nameof(LedgerOverviewModel.TransactionNo) };
-		}
-		else
-		{
-			return new string[] { nameof(LedgerOverviewModel.ReferenceNo) };
-		}
-	}
 	#endregion
 
 	#region Chart Data Methods

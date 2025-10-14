@@ -66,8 +66,35 @@ public partial class PurchaseViewPage : ComponentBase
 		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, _purchaseOverview.PurchaseId);
 		var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(_purchaseOverview.PurchaseId);
 
+		List<PurchaseRawMaterialCartModel> cart = [];
+		foreach (var detail in purchaseDetails)
+		{
+			var rawMaterial = await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, detail.RawMaterialId);
+			cart.Add(new()
+			{
+				RawMaterialId = detail.RawMaterialId,
+				RawMaterialName = rawMaterial.Name,
+				RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
+				MeasurementUnit = detail.MeasurementUnit,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				BaseTotal = detail.BaseTotal,
+				DiscPercent = detail.DiscPercent,
+				DiscAmount = detail.DiscAmount,
+				AfterDiscount = detail.AfterDiscount,
+				CGSTPercent = detail.CGSTPercent,
+				CGSTAmount = detail.CGSTAmount,
+				SGSTPercent = detail.SGSTPercent,
+				SGSTAmount = detail.SGSTAmount,
+				IGSTPercent = detail.IGSTPercent,
+				IGSTAmount = detail.IGSTAmount,
+				NetRate = detail.NetRate,
+				Total = detail.Total
+			});
+		}
+
 		await DataStorageService.LocalSaveAsync(StorageFileNames.PurchaseDataFileName, System.Text.Json.JsonSerializer.Serialize(purchase));
-		await DataStorageService.LocalSaveAsync(StorageFileNames.PurchaseCartDataFileName, System.Text.Json.JsonSerializer.Serialize(purchaseDetails));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.PurchaseCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
 
 		NavigationManager.NavigateTo("/Inventory/Purchase");
 	}

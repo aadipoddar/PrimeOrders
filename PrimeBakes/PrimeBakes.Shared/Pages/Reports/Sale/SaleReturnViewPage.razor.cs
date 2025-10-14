@@ -18,13 +18,13 @@ public partial class SaleReturnViewPage
 {
 	[Parameter] public int SaleReturnId { get; set; }
 
-	private UserModel _user = default!;
+	private UserModel _user;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 
 	// Data models
-	private SaleReturnOverviewModel? _saleReturnOverview;
-	private readonly List<DetailedSaleReturnProductModel> _detailedReturnProducts = [];
+	private SaleReturnOverviewModel _saleReturnOverview;
+	private readonly List<DetailedSaleProductModel> _detailedSaleProducts = [];
 
 	// Dialog properties
 	private bool _showConfirmation = false;
@@ -38,101 +38,52 @@ public partial class SaleReturnViewPage
 	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales, true);
 		_user = authResult.User;
 
-		await LoadSaleReturnData();
+		await LoadSaleData();
 		_isLoading = false;
 	}
 
-	private async Task LoadSaleReturnData()
+	private async Task LoadSaleData()
 	{
-		try
+		// Load sale overview
+		_saleReturnOverview = await SaleReturnData.LoadSaleReturnOverviewBySaleReturnId(SaleReturnId);
+
+		if (_saleReturnOverview is null)
+			return;
+
+		// Load sale details and build detailed product models
+		var saleReturnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(SaleReturnId);
+		_detailedSaleProducts.Clear();
+
+		foreach (var detail in saleReturnDetails)
 		{
-			// Get the sale return details by ID using date range approach
-			var saleReturns = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
-				DateTime.Now.AddYears(-1), // Start date - 1 year back to ensure we capture the return
-				DateTime.Now.AddDays(1),   // End date - tomorrow to ensure we capture today's returns
-				_user.LocationId
-			);
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+			var category = product != null ? await CommonData.LoadTableDataById<ProductCategoryModel>(TableNames.ProductCategory, product.ProductCategoryId) : null;
 
-			_saleReturnOverview = saleReturns.FirstOrDefault(sr => sr.SaleReturnId == SaleReturnId);
-
-			// If not found in user's location and user is from primary location (LocationId 1), 
-			// try to fetch from all locations
-			if (_saleReturnOverview == null && _user.LocationId == 1)
+			_detailedSaleProducts.Add(new()
 			{
-				var allReturns = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
-					DateTime.Now.AddYears(-1),
-					DateTime.Now.AddDays(1),
-					0 // 0 to fetch all locations
-				);
-
-				_saleReturnOverview = allReturns.FirstOrDefault(sr => sr.SaleReturnId == SaleReturnId);
-			}
-
-			if (_saleReturnOverview == null)
-				return;
-
-			// Check access permissions
-			if (_user.LocationId != 1 && _user.LocationId != _saleReturnOverview.LocationId)
-			{
-				NavigationManager.NavigateTo("/Reports/Sale/Return");
-				return;
-			}
-
-			// Load detailed product information
-			await LoadDetailedReturnProducts();
-		}
-		catch (Exception ex)
-		{
-			// Handle error - could add logging here
-			Console.WriteLine($"Error loading sale return details: {ex.Message}");
-		}
-	}
-
-	private async Task LoadDetailedReturnProducts()
-	{
-		if (_saleReturnOverview == null) return;
-
-		try
-		{
-			// Load return details and build detailed product models
-			var returnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(SaleReturnId);
-			_detailedReturnProducts.Clear();
-
-			foreach (var detail in returnDetails)
-			{
-				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
-				var category = product != null ? await CommonData.LoadTableDataById<ProductCategoryModel>(TableNames.ProductCategory, product.ProductCategoryId) : null;
-
-				_detailedReturnProducts.Add(new DetailedSaleReturnProductModel
-				{
-					ProductId = detail.ProductId,
-					ProductName = product?.Name ?? "Unknown Product",
-					ProductCode = product?.Code ?? "N/A",
-					CategoryName = category?.Name ?? "Unknown Category",
-					Quantity = detail.Quantity,
-					Rate = detail.Rate,
-					BaseTotal = detail.BaseTotal,
-					DiscountPercent = detail.DiscPercent,
-					DiscountAmount = detail.DiscAmount,
-					AfterDiscount = detail.AfterDiscount,
-					CGSTPercent = detail.CGSTPercent,
-					CGSTAmount = detail.CGSTAmount,
-					SGSTPercent = detail.SGSTPercent,
-					SGSTAmount = detail.SGSTAmount,
-					IGSTPercent = detail.IGSTPercent,
-					IGSTAmount = detail.IGSTAmount,
-					TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
-					Total = detail.Total,
-					NetRate = detail.NetRate
-				});
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error loading detailed return products: {ex.Message}");
+				ProductId = detail.ProductId,
+				ProductName = product?.Name ?? "Unknown Product",
+				ProductCode = product?.Code ?? "N/A",
+				CategoryName = category?.Name ?? "Unknown Category",
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				BaseTotal = detail.BaseTotal,
+				DiscountPercent = detail.DiscPercent,
+				DiscountAmount = detail.DiscAmount,
+				AfterDiscount = detail.AfterDiscount,
+				CGSTPercent = detail.CGSTPercent,
+				CGSTAmount = detail.CGSTAmount,
+				SGSTPercent = detail.SGSTPercent,
+				SGSTAmount = detail.SGSTAmount,
+				IGSTPercent = detail.IGSTPercent,
+				IGSTAmount = detail.IGSTAmount,
+				TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
+				Total = detail.Total,
+				NetRate = detail.NetRate
+			});
 		}
 	}
 	#endregion
@@ -143,45 +94,33 @@ public partial class SaleReturnViewPage
 		_isProcessing = true;
 		StateHasChanged();
 
-		try
-		{
-			// Load the actual SaleReturnModel for PDF generation
-			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, SaleReturnId);
-			if (saleReturn != null)
-			{
-				var pdfData = await SaleReturnA4Print.GenerateA4SaleReturnBill(saleReturn.Id);
-				var fileName = $"SaleReturn_{_saleReturnOverview.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-				await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfData);
-				VibrationService.VibrateWithTime(100);
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error generating PDF: {ex.Message}");
-		}
+		var pdfData = await SaleReturnA4Print.GenerateA4SaleReturnBill(SaleReturnId);
+		var fileName = $"SaleReturn_{_saleReturnOverview.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfData);
+		VibrationService.VibrateWithTime(100);
 
 		_isProcessing = false;
 		StateHasChanged();
 	}
 	#endregion
 
-	#region Sale Return Actions
-	private void EditSaleReturn() =>
+	#region Sale Actions
+	private void EditSale() =>
 		ShowConfirmation(
 			"Edit Sale Return",
 			"Are you sure you want to edit this sale return?",
-			"This will redirect you to the sale return editing page where you can modify the return details.",
-			"Edit Return",
+			"This will redirect you to the sale return editing page where you can modify the sale return details. This will Also Delete any Existing Sale Cart.",
+			"Edit Sale Return",
 			"fas fa-edit",
 			"edit"
 		);
 
-	private void DeleteSaleReturn() =>
+	private void DeleteSale() =>
 		ShowConfirmation(
 			"Delete Sale Return",
 			"Are you sure you want to delete this sale return?",
-			"This action cannot be undone. All return data, including products and transactions, will be permanently removed.",
-			"Delete Return",
+			"This action cannot be undone. All sale return data, including products and transactions, will be permanently removed.",
+			"Delete Sale Return",
 			"fas fa-trash-alt",
 			"delete"
 		);
@@ -205,10 +144,10 @@ public partial class SaleReturnViewPage
 		switch (_currentAction)
 		{
 			case "edit":
-				await EditSaleReturnConfirmed();
+				await EditSaleConfirmed();
 				break;
 			case "delete":
-				await DeleteSaleReturnConfirmed();
+				await DeleteSaleConfirmed();
 				break;
 		}
 
@@ -217,51 +156,64 @@ public partial class SaleReturnViewPage
 		StateHasChanged();
 	}
 
-	private async Task EditSaleReturnConfirmed()
+	private async Task EditSaleConfirmed()
 	{
-		try
-		{
-			// Clear any existing sale return cart data
-			await DataStorageService.LocalRemove(StorageFileNames.SaleReturnDataFileName);
+		await DataStorageService.LocalRemove(StorageFileNames.SaleReturnDataFileName);
+		await DataStorageService.LocalRemove(StorageFileNames.SaleReturnCartDataFileName);
 
-			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, SaleReturnId);
-			if (saleReturn != null)
-			{
-				await DataStorageService.LocalSaveAsync(StorageFileNames.SaleReturnDataFileName, System.Text.Json.JsonSerializer.Serialize(saleReturn));
-				NavigationManager.NavigateTo("/SaleReturn");
-			}
-		}
-		catch (Exception ex)
+		var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, SaleReturnId);
+		var saleReturnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(SaleReturnId);
+
+		List<SaleReturnProductCartModel> cart = [];
+		foreach (var detail in saleReturnDetails)
 		{
-			Console.WriteLine($"Error editing sale return: {ex.Message}");
+			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+
+			cart.Add(new()
+			{
+				ProductId = detail.ProductId,
+				ProductName = product.Name,
+				ProductCategoryId = product.ProductCategoryId,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				BaseTotal = detail.BaseTotal,
+				DiscPercent = detail.DiscPercent,
+				DiscAmount = detail.DiscAmount,
+				AfterDiscount = detail.AfterDiscount,
+				CGSTPercent = detail.CGSTPercent,
+				CGSTAmount = detail.CGSTAmount,
+				SGSTPercent = detail.SGSTPercent,
+				SGSTAmount = detail.SGSTAmount,
+				IGSTPercent = detail.IGSTPercent,
+				IGSTAmount = detail.IGSTAmount,
+				Total = detail.Total,
+				NetRate = detail.NetRate
+			});
 		}
+
+		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleReturnDataFileName, System.Text.Json.JsonSerializer.Serialize(saleReturn));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.SaleReturnCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
+
+		NavigationManager.NavigateTo("/SaleReturn");
 	}
 
-	private async Task DeleteSaleReturnConfirmed()
+	private async Task DeleteSaleConfirmed()
 	{
-		try
-		{
-			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, SaleReturnId);
-			if (saleReturn is not null)
-			{
-				saleReturn.Status = false;
-				await SaleReturnData.InsertSaleReturn(saleReturn);
-				await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.TransactionNo);
-				var accounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.TransactionNo);
-				if (accounting is not null)
-				{
-					accounting.Status = false;
-					await AccountingData.InsertAccounting(accounting);
-				}
+		var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, SaleReturnId);
+		if (saleReturn is null)
+			return;
 
-				VibrationService.VibrateWithTime(200);
-				NavigationManager.NavigateTo("/Reports/SaleReturn");
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error deleting sale return: {ex.Message}");
-		}
+		saleReturn.Status = false;
+		await SaleReturnData.InsertSaleReturn(saleReturn);
+		await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
+		var accounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.BillNo);
+		if (accounting is null)
+			return;
+		accounting.Status = false;
+		await AccountingData.InsertAccounting(accounting);
+
+		VibrationService.VibrateWithTime(200);
+		NavigationManager.NavigateTo("/Reports/SaleReturn");
 	}
 
 	private void CancelAction()
@@ -270,28 +222,4 @@ public partial class SaleReturnViewPage
 		_currentAction = "";
 	}
 	#endregion
-}
-
-// Model for detailed sale return product display
-public class DetailedSaleReturnProductModel
-{
-	public int ProductId { get; set; }
-	public string ProductName { get; set; } = "";
-	public string ProductCode { get; set; } = "";
-	public string CategoryName { get; set; } = "";
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal BaseTotal { get; set; }
-	public decimal DiscountPercent { get; set; }
-	public decimal DiscountAmount { get; set; }
-	public decimal AfterDiscount { get; set; }
-	public decimal CGSTPercent { get; set; }
-	public decimal CGSTAmount { get; set; }
-	public decimal SGSTPercent { get; set; }
-	public decimal SGSTAmount { get; set; }
-	public decimal IGSTPercent { get; set; }
-	public decimal IGSTAmount { get; set; }
-	public decimal TotalTaxAmount { get; set; }
-	public decimal Total { get; set; }
-	public decimal NetRate { get; set; }
 }

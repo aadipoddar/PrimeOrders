@@ -165,7 +165,6 @@
     <Build Include="StoredProcedures\LoadData\Sale\Load_LastSaleReturn_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleDetail_By_Sale.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleOverview_By_SaleId.sql" />
-    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_Sale.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturnDetail_By_SaleReturn.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturnOverview_By_SaleReturnId.sql" />
     <Build Include="StoredProcedures\Reports\Accounts\Load_AccountingDetails_By_Date.sql" />
@@ -233,7 +232,7 @@
     <Build Include="StoredProcedures\Reports\Stock\Load_ProductStockDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_OrderNo.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_Sale_By_BillNo.sql" />
-    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_BillNo.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssue_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_State.sql" />
@@ -244,5 +243,8 @@
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />
     <None Include="PublishLocations\LocalDBPrimeBakes.publish.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="DBPrimeBakes.refactorlog" />
   </ItemGroup>
 </Project>

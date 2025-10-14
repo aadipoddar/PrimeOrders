@@ -1,5 +1,4 @@
-﻿using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Sale;
+﻿using PrimeBakesLibrary.Models.Sale;
 
 namespace PrimeBakesLibrary.Exporting.Sale;
 
@@ -8,139 +7,61 @@ public static class SaleReturnExcelExport
 	public static MemoryStream ExportSaleReturnOverviewExcel(
 		List<SaleReturnOverviewModel> saleReturnOverviews,
 		DateOnly startDate,
-		DateOnly endDate,
-		int selectedLocationId = 0,
-		List<LocationModel> locations = null)
+		DateOnly endDate)
 	{
 		// Create summary items dictionary with key metrics
 		Dictionary<string, object> summaryItems = new()
 		{
-			{ "Total Returns", saleReturnOverviews.Count },
-			{ "Total Products", saleReturnOverviews.Sum(_ => _.TotalProducts) },
-			{ "Total Quantity", saleReturnOverviews.Sum(_ => _.TotalQuantity) },
-			{ "Locations Active", saleReturnOverviews.Select(_ => _.LocationId).Distinct().Count() },
-			{ "Average Products per Return", saleReturnOverviews.Count > 0 ? saleReturnOverviews.Average(_ => _.TotalProducts) : 0 },
-			{ "Average Quantity per Return", saleReturnOverviews.Count > 0 ? saleReturnOverviews.Average(_ => _.TotalQuantity) : 0 }
+			{ "Total Returns", saleReturnOverviews.Sum(s => s.Total) },
+			{ "Total Transactions", saleReturnOverviews.Count },
+			{ "Total Products", saleReturnOverviews.Sum(s => s.TotalProducts) },
+			{ "Total Quantity", saleReturnOverviews.Sum(s => s.TotalQuantity) },
+			{ "Discount Amount", saleReturnOverviews.Sum(s => s.DiscountAmount) },
+			{ "Cash", saleReturnOverviews.Sum(s => s.Cash) },
+			{ "Card", saleReturnOverviews.Sum(s => s.Card) },
+			{ "UPI", saleReturnOverviews.Sum(s => s.UPI) },
+			{ "Credit", saleReturnOverviews.Sum(s => s.Credit) }
 		};
-
-		// Add location filter info if specific location is selected
-		if (selectedLocationId > 0 && locations is not null)
-		{
-			var locationName = locations.FirstOrDefault(l => l.Id == selectedLocationId)?.Name ?? "Unknown";
-			summaryItems.Add("Filtered by Location", locationName);
-		}
-
-		// Add top locations summary data
-		var topLocations = saleReturnOverviews
-			.GroupBy(sr => sr.LocationName)
-			.OrderByDescending(g => g.Sum(x => x.TotalQuantity))
-			.Take(3)
-			.ToList();
-
-		foreach (var location in topLocations)
-			summaryItems.Add($"Location: {location.Key}", location.Sum(l => l.TotalQuantity));
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-			nameof(SaleReturnOverviewModel.TransactionNo),
-			nameof(SaleReturnOverviewModel.ReturnDateTime),
-			nameof(SaleReturnOverviewModel.LocationName),
-			nameof(SaleReturnOverviewModel.UserName),
-			nameof(SaleReturnOverviewModel.OriginalBillNo),
-			nameof(SaleReturnOverviewModel.TotalProducts),
-			nameof(SaleReturnOverviewModel.TotalQuantity),
-			nameof(SaleReturnOverviewModel.Remarks)
+			nameof(SaleOverviewModel.SaleId),
+					nameof(SaleReturnOverviewModel.BillNo),
+					nameof(SaleReturnOverviewModel.SaleReturnDateTime),
+					nameof(SaleReturnOverviewModel.LocationName),
+					nameof(SaleReturnOverviewModel.UserName),
+					nameof(SaleReturnOverviewModel.TotalProducts),
+					nameof(SaleReturnOverviewModel.TotalQuantity),
+					nameof(SaleReturnOverviewModel.BaseTotal),
+					nameof(SaleReturnOverviewModel.DiscountPercent),
+					nameof(SaleReturnOverviewModel.DiscountAmount),
+					nameof(SaleReturnOverviewModel.DiscountReason),
+					nameof(SaleReturnOverviewModel.SubTotal),
+					nameof(SaleReturnOverviewModel.CGSTPercent),
+					nameof(SaleReturnOverviewModel.CGSTAmount),
+					nameof(SaleReturnOverviewModel.SGSTPercent),
+					nameof(SaleReturnOverviewModel.SGSTAmount),
+					nameof(SaleReturnOverviewModel.IGSTPercent),
+					nameof(SaleReturnOverviewModel.IGSTAmount),
+					nameof(SaleReturnOverviewModel.TotalTaxAmount),
+					nameof(SaleReturnOverviewModel.RoundOff),
+					nameof(SaleReturnOverviewModel.Total),
+					nameof(SaleReturnOverviewModel.Cash),
+					nameof(SaleReturnOverviewModel.Card),
+					nameof(SaleReturnOverviewModel.UPI),
+					nameof(SaleReturnOverviewModel.Credit),
+					nameof(SaleReturnOverviewModel.Remarks),
+					nameof(SaleReturnOverviewModel.PartyName),
+					nameof(SaleReturnOverviewModel.CustomerName),
+					nameof(SaleReturnOverviewModel.CustomerNumber),
+					nameof(SaleReturnOverviewModel.CreatedAt)
 		];
 
-		// Define custom column settings with professional styling
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
-		{
-			[nameof(SaleReturnOverviewModel.TransactionNo)] = new()
-			{
-				DisplayName = "Transaction #",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(SaleReturnOverviewModel.ReturnDateTime)] = new()
-			{
-				DisplayName = "Return Date",
-				Format = "dd-MMM-yyyy hh:mm",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(SaleReturnOverviewModel.LocationName)] = new()
-			{
-				DisplayName = "Location",
-				Width = 20,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(SaleReturnOverviewModel.UserName)] = new()
-			{
-				DisplayName = "Processed By",
-				Width = 18,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			},
-			[nameof(SaleReturnOverviewModel.OriginalBillNo)] = new()
-			{
-				DisplayName = "Original Bill",
-				Width = 15,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter
-			},
-			[nameof(SaleReturnOverviewModel.TotalProducts)] = new()
-			{
-				DisplayName = "Products",
-				Format = "#,##0",
-				Width = 12,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
-				FormatCallback = (value) =>
-				{
-					if (value == null) return null;
-					var productCount = Convert.ToInt32(value);
-					return new ExcelExportUtil.FormatInfo
-					{
-						Bold = productCount > 3,
-						FontColor = productCount > 5 ? Syncfusion.Drawing.Color.FromArgb(220, 53, 69) : null
-					};
-				}
-			},
-			[nameof(SaleReturnOverviewModel.TotalQuantity)] = new()
-			{
-				DisplayName = "Total Quantity",
-				Format = "#,##0.00",
-				Width = 15,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight,
-				FormatCallback = (value) =>
-				{
-					if (value == null) return null;
-					var qtyValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
-					{
-						Bold = qtyValue > 10,
-						FontColor = qtyValue > 20 ? Syncfusion.Drawing.Color.FromArgb(220, 53, 69) :
-								   qtyValue > 10 ? Syncfusion.Drawing.Color.FromArgb(255, 165, 0) : null
-					};
-				}
-			},
-			[nameof(SaleReturnOverviewModel.Remarks)] = new()
-			{
-				DisplayName = "Remarks",
-				Width = 30,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft
-			}
-		};
+		// Create a customized column settings for the report
+		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = null;
 
 		// Generate title based on location selection if applicable
 		string reportTitle = "Sale Return Report";
-
-		if (selectedLocationId > 0 && locations is not null)
-		{
-			var location = locations.FirstOrDefault(l => l.Id == selectedLocationId);
-			if (location is not null)
-				reportTitle = $"Sale Return Report - {location.Name}";
-		}
-
 		string worksheetName = "Return Details";
 
 		return ExcelExportUtil.ExportToExcel(

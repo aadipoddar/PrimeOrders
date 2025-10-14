@@ -1,6 +1,5 @@
 ﻿using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
-using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
@@ -15,84 +14,102 @@ public static class SaleReturnA4Print
 {
 	public static async Task<MemoryStream> GenerateA4SaleReturnBill(int saleReturnId)
 	{
-		var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturnId);
-		var saleReturnOverview = (await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
-			saleReturn.ReturnDateTime.AddDays(-1),
-			saleReturn.ReturnDateTime.AddDays(1),
-			saleReturn.LocationId))
-			.FirstOrDefault(x => x.SaleReturnId == saleReturnId);
-
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, saleReturn.LocationId);
-		var originalSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleReturn.SaleId);
+		var saleReturn = await SaleReturnData.LoadSaleReturnOverviewBySaleReturnId(saleReturnId);
 		var saleReturnDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(saleReturnId);
 
 		List<SaleReturnProductCartModel> saleReturnProductCartModel = [];
 		foreach (var item in saleReturnDetails)
-		{
-			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
 			saleReturnProductCartModel.Add(new()
 			{
 				ProductId = item.ProductId,
-				ProductName = product.Name,
+				ProductName = (await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId)).Name,
+				ProductCategoryId = (await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId)).ProductCategoryId,
 				Quantity = item.Quantity,
-				MaxQuantity = 0, // Not needed for printing
-				SoldQuantity = 0, // Not needed for printing
+				AfterDiscount = item.AfterDiscount,
+				Rate = item.Rate,
+				BaseTotal = item.BaseTotal,
+				DiscPercent = item.DiscPercent,
+				DiscAmount = item.DiscAmount,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = item.CGSTAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = item.SGSTAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = item.IGSTAmount,
+				Total = item.Total
 			});
-		}
 
 		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
 
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALE RETURN INVOICE");
-		currentY = DrawInvoiceDetails(pdfPage, currentY, saleReturnOverview, originalSale);
+		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES RETURN INVOICE");
+
+		currentY = await DrawInvoiceDetailsAsync(pdfPage, currentY, saleReturn);
 		var result = DrawItemDetails(pdfPage, currentY, saleReturnProductCartModel);
-		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, saleReturnOverview);
+		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, saleReturn, saleReturnDetails);
 
 		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
 	}
 
-	private static float DrawInvoiceDetails(PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn, SaleModel originalSale)
+	private static async Task<float> DrawInvoiceDetailsAsync(PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn)
 	{
 		var leftColumnDetails = new Dictionary<string, string>
 		{
-			["Trans No"] = saleReturn.TransactionNo ?? "N/A",
-			["Return Date"] = saleReturn.ReturnDateTime.ToString("dddd, MMMM dd, yyyy hh:mm tt"),
+			["Invoice No"] = saleReturn.BillNo ?? "N/A",
+			["Date"] = saleReturn.SaleReturnDateTime.ToString("dddd, MMMM dd, yyyy hh:mm tt"),
 			["User"] = saleReturn.UserName ?? "N/A"
 		};
 
-		var rightColumnDetails = new Dictionary<string, string>
+		var rightColumnDetails = new Dictionary<string, string>();
+
+		if (saleReturn.CustomerId is not null)
 		{
-			["Sale No"] = saleReturn.OriginalBillNo ?? "N/A",
-			["Location"] = saleReturn.LocationName ?? "N/A"
-		};
+			rightColumnDetails["Cust. Name"] = saleReturn.CustomerName ?? "N/A";
+			rightColumnDetails["Cust. No."] = saleReturn.CustomerNumber ?? "N/A";
+		}
+
+		if (saleReturn.PartyId is not null)
+			rightColumnDetails["Party"] = saleReturn.PartyName ?? "N/A";
 
 		if (!string.IsNullOrEmpty(saleReturn.Remarks))
-			rightColumnDetails["Remarks"] = saleReturn.Remarks;
+			leftColumnDetails["Remarks"] = saleReturn.Remarks;
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Return Details", leftColumnDetails, rightColumnDetails);
+		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Invoice Details", leftColumnDetails, rightColumnDetails);
 	}
 
-	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<SaleReturnProductCartModel> saleReturnDetails)
+	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<SaleReturnProductCartModel> saleDetails)
 	{
-		var dataSource = saleReturnDetails.Select((item, index) => new
+		var dataSource = saleDetails.Select((item, index) => new
 		{
 			SNo = index + 1,
 			Name = item.ProductName.ToString(),
-			Qty = item.Quantity.ToString("N2")
+			Qty = (int)item.Quantity,
+			Rate = (int)item.Rate,
+			Amount = (int)item.BaseTotal,
+			Discount = $"{item.DiscPercent} ({(int)item.DiscAmount})",
+			Total = (int)item.Total
 		}).ToList();
 
 		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
 		var columnWidths = new float[]
 		{
-			tableWidth * 0.15f, // S.No
-			tableWidth * 0.65f, // Name
-			tableWidth * 0.20f  // Qty
+			tableWidth * 0.08f, // S.No
+			tableWidth * 0.35f, // Name
+			tableWidth * 0.08f, // Qty
+			tableWidth * 0.12f, // Rate
+			tableWidth * 0.12f, // Amount
+			tableWidth * 0.12f, // Discount
+			tableWidth * 0.13f  // Total
 		};
 
 		var columnAlignments = new PdfTextAlignment[]
 		{
 			PdfTextAlignment.Center, // S.No
 			PdfTextAlignment.Left,   // Name
-			PdfTextAlignment.Center  // Qty
+			PdfTextAlignment.Center, // Qty
+			PdfTextAlignment.Right,  // Rate
+			PdfTextAlignment.Right,  // Amount
+			PdfTextAlignment.Right,  // Discount
+			PdfTextAlignment.Right   // Total
 		};
 
 		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
@@ -103,15 +120,76 @@ public static class SaleReturnA4Print
 		return result;
 	}
 
-	private static float DrawSummary(PdfDocument pdfDocument, PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn)
+	private static float DrawSummary(PdfDocument pdfDocument, PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn, List<SaleReturnDetailModel> saleReturnDetails)
 	{
 		var summaryItems = new Dictionary<string, string>
 		{
-			["Total Products Returned: "] = saleReturn.TotalProducts.ToString(),
-			["Total Quantity Returned: "] = saleReturn.TotalQuantity.ToString("N2")
+			["Total Products: "] = saleReturn.TotalProducts.ToString(),
+			["Total Quantity: "] = ((int)saleReturn.TotalQuantity).ToString(),
+			["Sub Total: "] = saleReturn.BaseTotal.FormatIndianCurrency()
 		};
 
-		// For sale returns, we don't typically have monetary values, so we pass 0 as the grand total
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, 0, "Sale Return");
+		bool uniformDiscount = saleReturnDetails.All(x => x.DiscPercent == saleReturn.DiscountPercent);
+
+		// Check if tax rates are consistent across all items
+		bool uniformTaxRates = saleReturnDetails.All(x =>
+			x.CGSTPercent == saleReturn.CGSTPercent &&
+			x.SGSTPercent == saleReturn.SGSTPercent &&
+			x.IGSTPercent == saleReturn.IGSTPercent);
+
+		if (saleReturn.DiscountAmount > 0)
+		{
+			if (uniformDiscount)
+				summaryItems[$"Discount ({saleReturn.DiscountPercent:N1}%):"] = $"-{saleReturn.DiscountAmount.FormatIndianCurrency()}";
+			else
+				summaryItems[$"Discount:"] = $"-{saleReturn.DiscountAmount.FormatIndianCurrency()}";
+		}
+
+		if (saleReturn.CGSTPercent > 0)
+		{
+			if (uniformTaxRates)
+				summaryItems[$"CGST ({saleReturn.CGSTPercent:N1}%):"] = saleReturn.CGSTAmount.FormatIndianCurrency();
+			else
+				summaryItems[$"CGST:"] = saleReturn.CGSTAmount.FormatIndianCurrency();
+		}
+
+		if (saleReturn.SGSTPercent > 0)
+		{
+			if (uniformTaxRates)
+				summaryItems[$"SGST ({saleReturn.SGSTPercent:N1}%):"] = saleReturn.SGSTAmount.FormatIndianCurrency();
+			else
+				summaryItems[$"SGST:"] = saleReturn.SGSTAmount.FormatIndianCurrency();
+		}
+
+		if (saleReturn.IGSTPercent > 0)
+		{
+			if (uniformTaxRates)
+				summaryItems[$"IGST ({saleReturn.IGSTPercent:N1}%):"] = saleReturn.IGSTAmount.FormatIndianCurrency();
+			else
+				summaryItems[$"IGST:"] = saleReturn.IGSTAmount.FormatIndianCurrency();
+		}
+
+		if (saleReturn.RoundOff != 0)
+			summaryItems["Round Off:"] = saleReturn.RoundOff.FormatIndianCurrency();
+
+		var paymentMode = GetPaymentMode(saleReturn);
+
+		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, saleReturn.Total, paymentMode);
+	}
+
+	private static string GetPaymentMode(SaleReturnOverviewModel sale)
+	{
+		if (sale.Cash > 0 && sale.Cash >= sale.Card + sale.UPI + sale.Credit)
+			return "Cash";
+		else if (sale.Card > 0 && sale.Card >= sale.Cash + sale.UPI + sale.Credit)
+			return "Card";
+		else if (sale.UPI > 0 && sale.UPI >= sale.Cash + sale.Card + sale.Credit)
+			return "UPI";
+		else if (sale.Credit > 0 && sale.Credit >= sale.Cash + sale.Card + sale.UPI)
+			return "Credit";
+		else if (sale.Cash > 0 || sale.Card > 0 || sale.UPI > 0 || sale.Credit > 0)
+			return "Multiple";
+		else
+			return "Unknown";
 	}
 }
