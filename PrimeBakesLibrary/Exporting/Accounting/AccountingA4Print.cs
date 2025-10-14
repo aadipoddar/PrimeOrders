@@ -52,7 +52,7 @@ public static class AccountingA4Print
 	{
 		var leftColumnDetails = new Dictionary<string, string>
 		{
-			["Transaction No"] = accounting.TransactionNo ?? "N/A",
+			["Trans No"] = accounting.TransactionNo ?? "N/A",
 			["Date"] = accounting.AccountingDate.ToString("dddd, MMMM dd, yyyy"),
 			["Voucher"] = voucher?.Name ?? "N/A"
 		};

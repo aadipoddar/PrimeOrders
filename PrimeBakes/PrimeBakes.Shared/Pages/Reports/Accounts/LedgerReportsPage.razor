@@ -343,6 +343,7 @@ else
                                 AllowPaging="true" 
                                 AllowSorting="true" 
                                 AllowFiltering="true" 
+                                AllowTextWrap="true"
                                 AllowSelection="true" 
                                 AllowResizing="true" 
                                 AllowGrouping="true"
@@ -353,7 +354,7 @@ else
                             <GridPageSettings PageSize="25" PageSizes="new int[] { 10, 25, 50, 100, 200 }"></GridPageSettings>
                             <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
                             <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
-                            <GridGroupSettings Columns="new string[] { nameof(LedgerOverviewModel.ReferenceNo) }" ShowGroupedColumn="false">
+                            <GridGroupSettings Columns="@GetGroupingColumns()" ShowGroupedColumn="false">
                             </GridGroupSettings>
                             <GridAggregates>
                                 <GridAggregate>
@@ -467,6 +468,51 @@ else
                                 </GridColumn>
                             </GridColumns>
                         </SfGrid>
+                    </div>
+                    
+                    <!-- Grand Total Summary -->
+                    <div class="grand-total-section">
+                        <div class="grand-total-container">
+                            <div class="grand-total-header">
+                                <h4><i class="fas fa-calculator"></i> Grand Total Summary</h4>
+                            </div>
+                            <div class="grand-total-grid">
+                                <div class="total-card debit-total">
+                                    <div class="total-icon">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </div>
+                                    <div class="total-info">
+                                        <div class="total-label">Total Debit</div>
+                                        <div class="total-amount debit-amount">@GetTotalDebitAmount().FormatIndianCurrency()</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="total-card credit-total">
+                                    <div class="total-icon">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </div>
+                                    <div class="total-info">
+                                        <div class="total-label">Total Credit</div>
+                                        <div class="total-amount credit-amount">@GetTotalCreditAmount().FormatIndianCurrency()</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="total-card balance-total">
+                                    <div class="total-icon">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <div class="total-info">
+                                        <div class="total-label">Closing Balance</div>
+                                        <div class="total-amount balance-amount @(GetNetBalance() >= 0 ? "balance-positive" : "balance-negative")">
+                                            @GetNetBalance().FormatIndianCurrency()
+                                        </div>
+                                        <div class="balance-type">
+                                            @(GetNetBalance() >= 0 ? "Dr" : "Cr") Balance
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1199,6 +1245,165 @@ else
 
     .grid-card { animation-delay: 1.1s; }
 
+    /* Grand Total Section */
+    .grand-total-section {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+        border-top: 2px solid rgba(226, 19, 123, 0.15);
+        padding: 25px 30px;
+        margin-top: 0;
+    }
+
+    .grand-total-container {
+        max-width: 100%;
+    }
+
+    .grand-total-header {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .grand-total-header h4 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .grand-total-header i {
+        color: var(--primary-color);
+        font-size: 18px;
+    }
+
+    .grand-total-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .total-card {
+        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+        border-radius: var(--border-radius-lg);
+        padding: 25px;
+        box-shadow: 
+            0 8px 25px rgba(0, 0, 0, 0.08),
+            0 3px 8px rgba(0, 0, 0, 0.03),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .total-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-color);
+    }
+
+    .total-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 15px 35px rgba(0, 0, 0, 0.12),
+            0 6px 15px rgba(0, 0, 0, 0.06);
+    }
+
+    .total-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: var(--white);
+        background: var(--primary-color);
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
+    }
+
+    .debit-total .total-icon {
+        background: linear-gradient(135deg, var(--success-color), #00a043);
+    }
+
+    .credit-total .total-icon {
+        background: linear-gradient(135deg, var(--danger-color), #d32f2f);
+    }
+
+    .balance-total .total-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .total-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .total-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .total-amount {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 2px;
+    }
+
+    .debit-amount {
+        color: var(--success-color);
+    }
+
+    .credit-amount {
+        color: var(--danger-color);
+    }
+
+    .balance-amount {
+        color: var(--primary-color);
+    }
+
+    .balance-amount.balance-positive {
+        color: var(--success-color);
+    }
+
+    .balance-amount.balance-negative {
+        color: var(--danger-color);
+    }
+
+    .balance-type {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-500);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-top: 2px;
+    }
+
+    /* Animation for grand total cards */
+    .total-card {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .debit-total { animation-delay: 0.2s; }
+    .credit-total { animation-delay: 0.4s; }
+    .balance-total { animation-delay: 0.6s; }
+
     /* Responsive Design */
     @@media (max-width: 768px) {
         .page-header {
@@ -1250,6 +1455,29 @@ else
         .grid-header h3 {
             font-size: 20px;
         }
+
+        .grand-total-section {
+            padding: 20px 15px;
+        }
+
+        .grand-total-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .total-card {
+            padding: 20px;
+        }
+
+        .total-amount {
+            font-size: 24px;
+        }
+
+        .total-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
     }
 
     @@media (max-width: 480px) {
@@ -1271,6 +1499,33 @@ else
 
         .grid-header h3 {
             font-size: 18px;
+        }
+
+        .grand-total-section {
+            padding: 15px 10px;
+        }
+
+        .grand-total-header h4 {
+            font-size: 18px;
+        }
+
+        .total-card {
+            padding: 18px 15px;
+            gap: 15px;
+        }
+
+        .total-amount {
+            font-size: 22px;
+        }
+
+        .total-icon {
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+        }
+
+        .total-label {
+            font-size: 13px;
         }
     }
 </style>

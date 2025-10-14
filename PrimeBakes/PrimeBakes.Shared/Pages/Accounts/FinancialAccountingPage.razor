@@ -5,85 +5,831 @@
 @using PrimeBakesLibrary.Models.Common;
 @using PrimeBakesLibrary.Data.Common;
 
+<link href="~/css/financial-accounting.css" rel="stylesheet" />
+
 @if (_isLoading)
 {
-
+    <div class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
 }
 else
 {
-	<SfDatePicker TValue="DateOnly"
-				  Value="_accounting.AccountingDate"
-				  Placeholder="Select Accounting Date">
-		<DatePickerEvents TValue="DateOnly" ValueChange="OnAccountingDateChanged" />
-	</SfDatePicker>
+    <div class="accounting-page">
+        <!-- Header Section -->
+        <div class="accounting-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <SfButton IconCss="e-icons e-chevron-left" 
+                             Content="Back" 
+                             CssClass="btn-back"
+                             OnClick="@(() => NavigationManager.NavigateTo("/"))" />
+                </div>
+                <div class="header-center">
+                    <div class="header-title">Financial Accounting</div>
+                    <div class="header-subtitle">Manage your journal entries and financial transactions</div>
+                </div>
+                <div class="header-right">
+                    <!-- Space for future header actions -->
+                </div>
+            </div>
+        </div>
 
-	<SfComboBox TValue="int"
-				TItem="VoucherModel"
-				Value="_accounting.VoucherId"
-				DataSource="_vouchers"
-				Placeholder="Select Voucher Type">
-		<ComboBoxEvents TItem="VoucherModel" TValue="int" ValueChange="OnVoucherTypeChanged" />
-		<ComboBoxFieldSettings Text="Name" Value="Id" />
-	</SfComboBox>
+        <!-- Transaction Details Section -->
+        <div class="form-section fade-in">
+            <div class="section-title">Transaction Details</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Accounting Date</label>
+                    <SfDatePicker TValue="DateOnly"
+                                  Value="_accounting.AccountingDate"
+                                  Placeholder="Select Accounting Date"
+                                  CssClass="e-custom-input">
+                        <DatePickerEvents TValue="DateOnly" ValueChange="OnAccountingDateChanged" />
+                    </SfDatePicker>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Voucher Type</label>
+                    <SfComboBox TValue="int"
+                                TItem="VoucherModel"
+                                Value="_accounting.VoucherId"
+                                DataSource="_vouchers"
+                                Placeholder="Select Voucher Type"
+                                CssClass="e-custom-input">
+                        <ComboBoxEvents TItem="VoucherModel" TValue="int" ValueChange="OnVoucherTypeChanged" />
+                        <ComboBoxFieldSettings Text="Name" Value="Id" />
+                    </SfComboBox>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Financial Year</label>
+                    <SfTextBox Readonly="true" 
+                              Value="@($"{_financialYear?.StartDate}  -  {_financialYear?.EndDate}")"
+                              CssClass="e-custom-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Transaction Number</label>
+                    <SfTextBox Readonly="true" 
+                              Value="@_accounting.TransactionNo"
+                              CssClass="e-custom-input" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Transaction Remarks</label>
+                    <SfTextBox Placeholder="Enter remarks for this transaction..." 
+                              @bind-Value="_accounting.Remarks"
+                              CssClass="e-custom-input" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger Entry Section -->
+        <div class="form-section fade-in">
+            <div class="section-title">Add Ledger Entry</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Select Ledger</label>
+                    <SfAutoComplete TValue="LedgerModel"
+                                    TItem="LedgerModel"
+                                    Value="@_selectedLedger"
+                                    Placeholder="Search for a ledger..."
+                                    FloatLabelType='@FloatLabelType.Never'
+                                    DataSource="@_ledgers"
+                                    AllowFiltering="true"
+                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                    CssClass="e-custom-input">
+                        <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnLedgerChanged" />
+                        <AutoCompleteFieldSettings Value="Name" />
+                    </SfAutoComplete>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Debit Amount</label>
+                    <SfNumericTextBox TValue="decimal?"
+                                      Placeholder="0.00"
+                                      Value="_selectedCart?.Debit"
+                                      Decimals="2"
+                                      Min="0"
+                                      CssClass="e-custom-input">
+                        <NumericTextBoxEvents TValue="decimal?" ValueChange="OnDebitChanged" />
+                    </SfNumericTextBox>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Credit Amount</label>
+                    <SfNumericTextBox TValue="decimal?"
+                                      Placeholder="0.00"
+                                      Value="_selectedCart?.Credit"
+                                      Decimals="2"
+                                      Min="0"
+                                      CssClass="e-custom-input">
+                        <NumericTextBoxEvents TValue="decimal?" ValueChange="OnCreditChanged" />
+                    </SfNumericTextBox>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ledger Remarks</label>
+                    <SfTextBox Placeholder="Entry remarks..." 
+                              Value="@_selectedCart?.Remarks" 
+                              ValueChanged="OnRemarksChanged"
+                              CssClass="e-custom-input" />
+                </div>
+            </div>
+
+            <!-- Reference Section -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Reference</label>
+                    <div class="reference-section">
+                        <SfComboBox TValue="LedgerOverviewModel"
+                                    TItem="LedgerOverviewModel"
+                                    Value="_selectedLedgerReference"
+                                    DataSource="_ledgerReferences"
+                                    Placeholder="Select reference (optional)"
+                                    CssClass="e-custom-input">
+                            <ComboBoxEvents TItem="LedgerOverviewModel" TValue="LedgerOverviewModel" ValueChange="OnReferenceChanged" />
+                            <ComboBoxFieldSettings Text="ReferenceNo" Value="Id" />
+                        </SfComboBox>
+                        <SfButton Content="@(_isRetrieving ? "Loading..." : "Get References")" 
+                                 OnClick="RetrieveReferences" 
+                                 Disabled="_isRetrieving"
+                                 CssClass="btn-secondary" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <SfButton Content="Add to Cart" 
+                             OnClick="AddToCart" 
+                             CssClass="btn-primary"
+                             Disabled="@(_selectedCart == null || (_selectedCart.Debit == null && _selectedCart.Credit == null) || (_selectedCart.Debit != null && _selectedCart.Credit != null))"
+                             style="margin-top: 24px;" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div class="form-section fade-in">
+            <div class="section-title">Journal Entries</div>
+            <div class="cart-grid @(_accountingCart.Count == 0 ? "empty-grid" : "")">
+                <SfGrid @ref="_sfAccountingCart"
+                        DataSource="@_accountingCart"
+                        AllowPaging="true"
+						AllowTextWrap="true"
+                        Height="auto"
+                        GridLines="GridLine.Both"
+                        AllowSorting="true"
+                        AllowFiltering="true"
+                        AllowResizing="true">
+                    <GridPageSettings PageSize="20" PageSizes="@(new int[] { 20, 50, 100 })" />
+                    <GridEditSettings AllowEditing="false"></GridEditSettings>
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" ShowFilterBarStatus="true"></GridFilterSettings>
+                    <GridColumns>
+                        <GridColumn Field="Name" 
+                                  HeaderText="Ledger Name" 
+                                  Width="220"
+                                  AllowEditing="false"
+                                  AllowFiltering="true"
+                                  HeaderTextAlign="TextAlign.Center">
+                            <Template>
+                                @{
+                                    var cart = context as AccountingCartModel;
+                                    <div class="ledger-name-cell">
+                                        <i class="ledger-icon"></i>
+                                        <span>@cart.Name</span>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="Debit" 
+                                  HeaderText="Debit Amount" 
+                                  Width="160" 
+                                  TextAlign="TextAlign.Right"
+                                  HeaderTextAlign="TextAlign.Center"
+                                  AllowEditing="false"
+                                  AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var cart = context as AccountingCartModel;
+                                    <div class="amount-cell debit-amount">
+                                        <span class="amount-value @(cart.Debit > 0 ? "has-value" : "no-value")">
+                                            @(cart.Debit?.FormatIndianCurrency() ?? "₹0.00")
+                                        </span>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="Credit" 
+                                  HeaderText="Credit Amount" 
+                                  Width="160" 
+                                  TextAlign="TextAlign.Right"
+                                  HeaderTextAlign="TextAlign.Center"
+                                  AllowEditing="false"
+                                  AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var cart = context as AccountingCartModel;
+                                    <div class="amount-cell credit-amount">
+                                        <span class="amount-value @(cart.Credit > 0 ? "has-value" : "no-value")">
+                                            @(cart.Credit?.FormatIndianCurrency() ?? "₹0.00")
+                                        </span>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="Remarks" 
+                                  HeaderText="Entry Remarks" 
+                                  Width="220"
+                                  HeaderTextAlign="TextAlign.Center"
+                                  AllowEditing="false"
+                                  AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var cart = context as AccountingCartModel;
+                                    <div class="remarks-cell">
+                                        <span class="@(string.IsNullOrEmpty(cart.Remarks) ? "no-remarks" : "has-remarks")">
+                                            @(string.IsNullOrEmpty(cart.Remarks) ? "No remarks" : cart.Remarks)
+                                        </span>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="ReferenceNo" 
+                                  HeaderText="Reference" 
+                                  Width="100"
+                                  HeaderTextAlign="TextAlign.Center"
+                                  AllowEditing="false"
+                                  AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var cart = context as AccountingCartModel;
+                                    <div class="reference-cell">
+                                        @if (!string.IsNullOrEmpty(cart.ReferenceNo))
+                                        {
+                                            <span class="reference-badge">@cart.ReferenceNo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="no-reference">-</span>
+                                        }
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn HeaderText="Actions" 
+                                  Width="50" 
+                                  AllowEditing="false"
+                                  HeaderTextAlign="TextAlign.Center"
+                                  AllowSorting="false"
+                                  AllowResizing="false">
+                            <Template>
+                                @{
+                                    var cart = context as AccountingCartModel;
+                                    var index = _accountingCart.IndexOf(cart);
+                                }
+                                <div class="action-buttons-cell">
+                                    <SfButton Content=""
+                                             IconCss="e-icons e-delete"
+                                             CssClass="btn-remove"
+                                             Title="Remove Entry"
+                                             OnClick="@(() => RemoveFromCart(index))" />
+                                </div>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+
+        <!-- Totals Section -->
+        <div class="totals-section slide-up">
+            <div class="totals-grid">
+                <div class="total-item">
+                    <div class="total-label">Total Debit</div>
+                    <div class="total-value">@_totalDebit.FormatIndianCurrency()</div>
+                </div>
+                <div class="total-item">
+                    <div class="total-label">Total Credit</div>
+                    <div class="total-value">@_totalCredit.FormatIndianCurrency()</div>
+                </div>
+                <div class="total-item">
+                    <div class="total-label">Balance</div>
+                    <div class="total-value @(_balance == 0 ? "balance-balanced" : "balance-unbalanced")">
+                        @_balance.FormatIndianCurrency()
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <SfButton Content="@(_isSaving ? "Saving..." : "Save Entry")" 
+                     OnClick="ShowConfirmationDialog" 
+                     CssClass="btn-primary"
+                     Disabled="@(_isSaving || _accountingCart.Count == 0 || _balance != 0)" />
+            <SfButton Content="Clear All" 
+                     OnClick="ClearCart" 
+                     CssClass="btn-secondary" />
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <SfDialog @bind-Visible="_showConfirmDialog" 
+              Header="Confirm Transaction"
+              Width="600px"
+              IsModal="true"
+              ShowCloseIcon="true">
+        <DialogTemplates>
+            <Content>
+                <div style="padding: 20px;">
+                    <h4 style="color: #e2137b; margin-bottom: 20px;">Transaction Summary</h4>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div><strong>Date:</strong> @_accounting.AccountingDate.ToString("dd MMM yyyy")</div>
+                            <div><strong>Transaction No:</strong> @_accounting.TransactionNo</div>
+                            <div><strong>Voucher:</strong> @_vouchers.FirstOrDefault(v => v.Id == _accounting.VoucherId)?.Name</div>
+                            <div><strong>Total Entries:</strong> @_accountingCart.Count</div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(_accounting.Remarks))
+                        {
+                            <div style="margin-top: 10px;"><strong>Remarks:</strong> @_accounting.Remarks</div>
+                        }
+                    </div>
+
+                    <div style="background: white; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; padding: 20px; text-align: center;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 24px; font-weight: bold; color: #e2137b;">@_totalDebit.FormatIndianCurrency()</div>
+                                <div style="font-size: 14px; color: #6c757d; margin-top: 5px;">Total Debit</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 24px; font-weight: bold; color: #e2137b;">@_totalCredit.FormatIndianCurrency()</div>
+                                <div style="font-size: 14px; color: #6c757d; margin-top: 5px;">Total Credit</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                                <div style="font-size: 18px; font-weight: bold; color: @(_balance == 0 ? "#28a745" : "#dc3545");">@_balance.FormatIndianCurrency()</div>
+                                <div style="font-size: 14px; color: #6c757d; margin-top: 5px;">Balance @(_balance == 0 ? "(Balanced)" : "(Unbalanced)")</div>
+                            </div>
+                        </div>
+                    </div>
 
 
-	<SfTextBox Readonly="true" Value="@($"{_financialYear?.StartDate}  {_financialYear?.EndDate}")" />
+                </div>
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content="Cancel" 
+                         OnClick="@(() => _showConfirmDialog = false)" 
+                         CssClass="e-flat e-secondary" />
+            <DialogButton Content="Confirm & Save" 
+                         OnClick="ConfirmAccountingEntry" 
+                         CssClass="e-flat e-primary" 
+                         IsPrimary="true" />
+        </DialogButtons>
+    </SfDialog>
 
-	<SfTextBox Readonly="true" Value="@_accounting.TransactionNo" />
+    <!-- Success Toast -->
+    <SfToast @ref="_sfToast"
+             ID="toast_success"
+             Timeout="3000"
+             ShowCloseButton="true"
+             CssClass="e-toast-success">
+        <ToastPosition X="Right" Y="Top" />
+        <ToastAnimationSettings>
+            <ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+            <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+        </ToastAnimationSettings>
+    </SfToast>
 
-	<SfTextBox Placeholder="Financial Accounting Remarks" @bind-Value="_accounting.Remarks" />
-
-	<SfAutoComplete TValue="LedgerModel?"
-					TItem="LedgerModel"
-					Value="@_selectedLedger"
-					Placeholder="Search for a Ledger..."
-					FloatLabelType='@FloatLabelType.Auto'
-					DataSource="@_ledgers"
-					AllowFiltering="true"
-					FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-		<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel?" ValueChange="OnLedgerChanged" />
-		<AutoCompleteFieldSettings Value="Name" />
-	</SfAutoComplete>
-
-	<SfNumericTextBox TValue="decimal?"
-					  Placeholder="Enter Debit"
-					  Value="_selectedCart?.Debit"
-					  Format="N2"
-					  Min="0">
-		<NumericTextBoxEvents TValue="decimal?" ValueChange="OnDebitChanged" />
-	</SfNumericTextBox>
-
-	<SfNumericTextBox TValue="decimal?"
-					  Placeholder="Enter Credit"
-					  Value="_selectedCart?.Credit"
-					  Format="N2"
-					  Min="0">
-		<NumericTextBoxEvents TValue="decimal?" ValueChange="OnCreditChanged" />
-	</SfNumericTextBox>
-
-	<SfTextBox Placeholder="Ledger Remarks" Value="@_selectedCart?.Remarks" ValueChanged="OnRemarksChanged" />
-
-	<SfButton Content="Retrieve References" OnClick="RetrieveReferences" />
-
-	<SfComboBox TValue="LedgerOverviewModel?"
-				TItem="LedgerOverviewModel"
-				Value="_selectedLedgerReference"
-				DataSource="_ledgerReferences"
-				Placeholder="Select Reference">
-		<ComboBoxEvents TItem="LedgerOverviewModel" TValue="LedgerOverviewModel?" ValueChange="OnReferenceChanged" />
-		<ComboBoxFieldSettings Text="ReferenceNo" Value="Id" />
-	</SfComboBox>
-
-	<SfButton Content="Add Ledger to Cart" OnClick="AddToCart" />
-
-	<SfGrid @ref="_sfAccountingCart"
-			Id="_sfAccountingCart"
-			DataSource="@_accountingCart"
-			AllowPaging="true" />
-
-	<SfTextBox Readonly="true" Value="@($"Total Debit: {_totalDebit.FormatIndianCurrency()}")" />
-	<SfTextBox Readonly="true" Value="@($"Total Credit: {_totalCredit.FormatIndianCurrency()}")" />
-	<SfTextBox Readonly="true" Value="@($"Difference: {_balance.FormatIndianCurrency()}")" />
-	<SfButton Content="Save Accounting Entry" OnClick="SaveAccountingEntry" />
-	<SfButton Content="Save Accounting Entry" OnClick="ConfirmAccountingEntry" />
+    <!-- Error Toast -->
+    <SfToast @ref="_sfErrorToast"
+             ID="toast_error"
+             Timeout="5000"
+             ShowCloseButton="true"
+             CssClass="e-toast-danger">
+        <ToastPosition X="Right" Y="Top" />
+        <ToastAnimationSettings>
+            <ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+            <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+        </ToastAnimationSettings>
+    </SfToast>
 }
+
+<style>
+    .accounting-page {
+        background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+        min-height: 100vh;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .accounting-header {
+        background: linear-gradient(135deg, #e2137b 0%, #b91463 100%);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .header-left {
+        flex: 0 0 auto;
+    }
+
+    .header-center {
+        flex: 1;
+        text-align: center;
+    }
+
+    .header-right {
+        flex: 0 0 auto;
+        width: 100px; /* Balance the left side */
+    }
+
+    .header-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        color: white !important;
+        padding: 10px 20px !important;
+        border-radius: 25px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        backdrop-filter: blur(10px) !important;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        transform: translateX(-3px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .btn-back .e-icons {
+        margin-right: 8px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .form-section {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-top: 4px solid #e2137b;
+    }
+
+    .section-title {
+        color: #e2137b;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        color: #555;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .cart-grid {
+        margin-top: 30px;
+    }
+
+    .e-grid {
+        border: 2px solid #e2137b !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.2) !important;
+    }
+
+    .cart-grid .e-grid {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .totals-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 15px;
+        margin: 30px 0;
+        border-left: 6px solid #e2137b;
+    }
+
+    .totals-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .total-item {
+        text-align: center;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .total-label {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+
+    .total-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #e2137b;
+    }
+
+    .balance-balanced {
+        color: #28a745 !important;
+    }
+
+    .balance-unbalanced {
+        color: #dc3545 !important;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #e2137b 0%, #b91463 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(226, 19, 123, 0.4);
+        }
+
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: 500;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #e2137b;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .e-grid .e-gridheader {
+        background: linear-gradient(135deg, #e2137b 0%, #b91463 100%) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        border-bottom: 3px solid #b91463 !important;
+        height: 55px !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .e-grid .e-headercell {
+        border-color: rgba(255, 255, 255, 0.3) !important;
+        padding: 15px 12px !important;
+        text-align: center !important;
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.8px !important;
+        background: linear-gradient(135deg, #e2137b 0%, #b91463 100%) !important;
+        color: white !important;
+        height: 55px !important;
+        display: table-cell !important;
+        visibility: visible !important;
+    }
+
+    .e-grid .e-headercelldiv {
+        color: white !important;
+        font-weight: 700 !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 100% !important;
+    }
+
+    .e-grid .e-row:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .e-grid .e-row:hover {
+        background-color: rgba(226, 19, 123, 0.1);
+    }
+
+    .reference-section {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 15px;
+        align-items: end;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Additional inline enhancements */
+    .total-item {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .total-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .total-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #e2137b, #b91463, #e2137b);
+        border-radius: 10px 10px 0 0;
+    }
+
+    /* Action buttons enhancement */
+    .action-buttons .btn-primary {
+        background: linear-gradient(135deg, #e2137b 0%, #b91463 50%, #a01356 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-buttons .btn-primary:disabled {
+        background: linear-gradient(135deg, #adb5bd 0%, #6c757d 100%);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Toast Styling */
+    .e-toast-container .e-toast.e-toast-success {
+        background: linear-gradient(135deg, #28a745, #20c997) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        color: white !important;
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3) !important;
+    }
+
+    .e-toast-container .e-toast.e-toast-danger {
+        background: linear-gradient(135deg, #dc3545, #e74c3c) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        color: white !important;
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3) !important;
+    }
+
+    .e-toast-container .e-toast .e-toast-message {
+        color: white !important;
+    }
+
+    .e-toast-container .e-toast .e-toast-title {
+        color: white !important;
+        font-weight: 700 !important;
+        font-size: 16px !important;
+    }
+
+    .e-toast-container .e-toast .e-toast-content {
+        color: rgba(255, 255, 255, 0.95) !important;
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+    }
+
+    .e-toast-container .e-toast .e-toast-close-icon {
+        color: white !important;
+        opacity: 0.8 !important;
+    }
+
+    .e-toast-container .e-toast .e-toast-close-icon:hover {
+        opacity: 1 !important;
+    }
+
+    .e-toast-container .e-toast .e-toast-icon {
+        color: white !important;
+        font-size: 20px !important;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .header-left {
+            order: 1;
+            align-self: center;
+        }
+
+        .header-center {
+            order: 0;
+        }
+
+        .header-right {
+            display: none;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+        }
+
+        .btn-back {
+            padding: 8px 16px !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Toast responsive adjustments */
+        .e-toast-container .e-toast {
+            min-width: 280px !important;
+            max-width: 90vw !important;
+        }
+
+        .e-toast-container .e-toast .e-toast-title {
+            font-size: 14px !important;
+        }
+
+        .e-toast-container .e-toast .e-toast-content {
+            font-size: 13px !important;
+        }
+    }
+</style>

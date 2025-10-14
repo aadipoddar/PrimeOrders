@@ -76,7 +76,7 @@ public partial class LedgerReportsPage
 		foreach (var item in filteredLedgers)
 		{
 			var referenceLedgers = _ledgerOverviews
-				.Where(l => (l.ReferenceId == item.ReferenceId && l.ReferenceNo == item.ReferenceNo && l.ReferenceType == item.ReferenceType) || l.AccountingId == item.AccountingId)
+				.Where(l => l.AccountingId == item.AccountingId)
 				.ToList();
 			foreach (var ledger in referenceLedgers)
 				filteredOverviews.Add(ledger);
@@ -100,6 +100,11 @@ public partial class LedgerReportsPage
 	{
 		_selectedLedger = args.Value;
 		await LoadData();
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+
+		StateHasChanged();
 	}
 
 	private void ToggleCharts()
@@ -171,6 +176,19 @@ public partial class LedgerReportsPage
 	{
 		if (!_ledgerOverviews.Any()) return 0;
 		return _ledgerOverviews.Average(l => (l.Debit ?? 0) + (l.Credit ?? 0));
+	}
+
+	private string[] GetGroupingColumns()
+	{
+		// When a ledger is selected, group by TransactionNo, otherwise group by ReferenceNo
+		if (_selectedLedger != null && _selectedLedger.Id > 0)
+		{
+			return new string[] { nameof(LedgerOverviewModel.TransactionNo) };
+		}
+		else
+		{
+			return new string[] { nameof(LedgerOverviewModel.ReferenceNo) };
+		}
 	}
 	#endregion
 

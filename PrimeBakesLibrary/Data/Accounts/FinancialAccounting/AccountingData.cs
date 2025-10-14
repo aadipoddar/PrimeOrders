@@ -41,6 +41,7 @@ public static class AccountingData
 		accounting.Status = true;
 		accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
 		accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(accounting.AccountingDate)).Id;
+		accounting.CreatedAt = DateTime.Now;
 
 		if (update)
 			accounting.TransactionNo = (await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accounting.Id)).TransactionNo;
