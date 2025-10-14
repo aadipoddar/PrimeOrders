@@ -31,7 +31,6 @@ public class AccountingCartModel
 {
 	public int GroupId { get; set; }
 	public int AccountTypeId { get; set; }
-	public int Serial { get; set; }
 	public int Id { get; set; }
 	public string Name { get; set; }
 	public string? ReferenceType { get; set; }

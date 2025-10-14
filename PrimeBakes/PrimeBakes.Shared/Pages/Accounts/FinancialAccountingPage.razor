@@ -3,6 +3,7 @@
 @using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 @using PrimeBakesLibrary.Models.Accounts.Masters;
 @using PrimeBakesLibrary.Models.Common;
+@using PrimeBakesLibrary.Data.Common;
 
 @if (_isLoading)
 {
@@ -74,4 +75,15 @@ else
 	</SfComboBox>
 
 	<SfButton Content="Add Ledger to Cart" OnClick="AddToCart" />
+
+	<SfGrid @ref="_sfAccountingCart"
+			Id="_sfAccountingCart"
+			DataSource="@_accountingCart"
+			AllowPaging="true" />
+
+	<SfTextBox Readonly="true" Value="@($"Total Debit: {_totalDebit.FormatIndianCurrency()}")" />
+	<SfTextBox Readonly="true" Value="@($"Total Credit: {_totalCredit.FormatIndianCurrency()}")" />
+	<SfTextBox Readonly="true" Value="@($"Difference: {_balance.FormatIndianCurrency()}")" />
+	<SfButton Content="Save Accounting Entry" OnClick="SaveAccountingEntry" />
+	<SfButton Content="Save Accounting Entry" OnClick="ConfirmAccountingEntry" />
 }

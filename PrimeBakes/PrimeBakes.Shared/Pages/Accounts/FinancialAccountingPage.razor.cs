@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -15,6 +16,7 @@ public partial class FinancialAccountingPage
 {
 	private bool _isLoading = true;
 	private bool _isRetrieving = false;
+	private bool _isSaving = false;
 
 	private UserModel _user;
 	private FinancialYearModel _financialYear;
@@ -38,8 +40,13 @@ public partial class FinancialAccountingPage
 	private List<LedgerModel> _ledgers;
 	private List<VoucherModel> _vouchers;
 	private List<LedgerOverviewModel> _ledgerReferences = [];
+	private List<AccountingCartModel> _accountingCart = [];
 
 	private SfGrid<AccountingCartModel> _sfAccountingCart;
+
+	private decimal _totalDebit => _accountingCart.Sum(x => x.Debit ?? 0);
+	private decimal _totalCredit => _accountingCart.Sum(x => x.Credit ?? 0);
+	private decimal _balance => _totalDebit - _totalCredit;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
@@ -102,7 +109,6 @@ public partial class FinancialAccountingPage
 		if (_selectedLedger is not null)
 			_selectedCart = new()
 			{
-				Serial = 0,
 				Id = _selectedLedger.Id,
 				Name = _selectedLedger.Name,
 				GroupId = _selectedLedger.GroupId,
@@ -193,6 +199,11 @@ public partial class FinancialAccountingPage
 			_selectedCart.ReferenceId = _selectedLedgerReference.ReferenceId;
 			_selectedCart.ReferenceType = _selectedLedgerReference.ReferenceType;
 			_selectedCart.ReferenceNo = _selectedLedgerReference.ReferenceNo;
+
+			if ((_selectedLedgerReference.Debit ?? 0) > (_selectedLedgerReference.Credit ?? 0))
+				_selectedCart.Credit = (_selectedLedgerReference.Debit ?? 0) - (_selectedLedgerReference.Credit ?? 0);
+			else
+				_selectedCart.Debit = (_selectedLedgerReference.Credit ?? 0) - (_selectedLedgerReference.Debit ?? 0);
 		}
 		else
 		{
@@ -210,6 +221,10 @@ public partial class FinancialAccountingPage
 	{
 		if (_isRetrieving || _selectedCart is null || (_selectedCart.Debit is null && _selectedCart.Credit is null) || (_selectedCart.Debit is not null && _selectedCart.Credit is not null))
 			return;
+
+		_accountingCart.Add(_selectedCart);
+
+		await SaveAccountingToCart();
 	}
 	#endregion
 
@@ -221,7 +236,75 @@ public partial class FinancialAccountingPage
 		_accounting.TransactionNo = await GenerateCodes.GenerateAccountingTransactionNo(_accounting);
 
 		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingDataFileName, System.Text.Json.JsonSerializer.Serialize(_accounting));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingCartDataFileName, System.Text.Json.JsonSerializer.Serialize(_accountingCart));
+
+		if (_sfAccountingCart is not null)
+			await _sfAccountingCart.Refresh();
+
 		StateHasChanged();
+	}
+
+	private async Task SaveAccountingEntry()
+	{
+
+	}
+
+	private async Task<bool> ValidateForm()
+	{
+		if (_accountingCart.Count == 0)
+			return false;
+
+		if (_balance != 0)
+			return false;
+
+		if (_financialYear is null || _financialYear.Id == 0)
+			return false;
+
+		if (_accounting.VoucherId == 0)
+			return false;
+
+		if (_accounting.AccountingDate < _financialYear.StartDate || _accounting.AccountingDate > _financialYear.EndDate)
+			return false;
+
+		if (string.IsNullOrEmpty(_accounting.TransactionNo))
+			return false;
+
+		return true;
+	}
+
+	private async Task ConfirmAccountingEntry()
+	{
+		if (_isRetrieving || _accountingCart.Count == 0 || _balance != 0 || _isSaving)
+			return;
+
+		_isSaving = true;
+		StateHasChanged();
+
+		try
+		{
+			await SaveAccountingToCart();
+
+			if (!await ValidateForm())
+				return;
+
+			_accounting.Id = await AccountingData.SaveAccountingTransaction(_accounting, _accountingCart);
+			await DeleteCart();
+			NavigationManager.NavigateTo("/Accounting/Confirmed");
+		}
+		catch (Exception ex)
+		{
+		}
+		finally
+		{
+			_isSaving = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task DeleteCart()
+	{
+		await DataStorageService.LocalRemove(StorageFileNames.FinancialAccountingDataFileName);
+		await DataStorageService.LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
 	}
 	#endregion
 }

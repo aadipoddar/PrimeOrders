@@ -1,1 +1,1 @@
-[{"GroupId":1,"AccountTypeId":3,"Serial":0,"Id":2901,"Name":"A A ENTERPRISE ( ANKUSH SIR )","ReferenceType":null,"ReferenceId":null,"Remarks":"Test","Debit":100,"Credit":0},{"GroupId":1,"AccountTypeId":3,"Serial":0,"Id":2141,"Name":"A E ENTERPRISE","ReferenceType":null,"ReferenceId":null,"Remarks":"","Debit":0,"Credit":100}]
+[{"GroupId":1,"AccountTypeId":3,"Serial":0,"Id":2,"Name":"TRAVELLING EXP.","ReferenceType":"Sales","ReferenceId":257,"ReferenceNo":"PBOFF25SL000243","Remarks":"Test","Debit":null,"Credit":2400.0000}]
