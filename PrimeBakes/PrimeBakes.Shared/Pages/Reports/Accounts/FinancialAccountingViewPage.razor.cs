@@ -165,10 +165,28 @@ public partial class FinancialAccountingViewPage
 		await DataStorageService.LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
 
 		var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, AccountingId);
-		var accountingDetails = await AccountingData.LoadAccountingDetailsByAccounting(AccountingId);
+		var accountingDetails = await AccountingData.LoadLedgerOverviewByAccountingId(accounting.Id);
+
+		List<AccountingCartModel> cart = [];
+		foreach (var item in accountingDetails)
+		{
+			cart.Add(new()
+			{
+				Id = item.LedgerId,
+				GroupId = item.GroupId,
+				AccountTypeId = item.AccountTypeId,
+				Name = item.LedgerName,
+				ReferenceId = item.ReferenceId,
+				ReferenceNo = item.ReferenceNo,
+				ReferenceType = item.ReferenceType,
+				Remarks = item.Remarks,
+				Debit = item.Debit,
+				Credit = item.Credit
+			});
+		}
 
 		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingDataFileName, System.Text.Json.JsonSerializer.Serialize(accounting));
-		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingCartDataFileName, System.Text.Json.JsonSerializer.Serialize(accountingDetails));
+		await DataStorageService.LocalSaveAsync(StorageFileNames.FinancialAccountingCartDataFileName, System.Text.Json.JsonSerializer.Serialize(cart));
 
 		NavigationManager.NavigateTo("/Accounting");
 	}

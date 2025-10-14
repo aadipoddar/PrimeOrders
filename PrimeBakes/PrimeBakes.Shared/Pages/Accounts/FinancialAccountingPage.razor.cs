@@ -85,9 +85,7 @@ public partial class FinancialAccountingPage
 			{
 				var accountingData = await DataStorageService.LocalGetAsync(StorageFileNames.FinancialAccountingDataFileName);
 				if (!string.IsNullOrEmpty(accountingData))
-				{
 					_accounting = System.Text.Json.JsonSerializer.Deserialize<AccountingModel>(accountingData);
-				}
 			}
 			else
 			{
@@ -105,9 +103,7 @@ public partial class FinancialAccountingPage
 			{
 				var cartData = await DataStorageService.LocalGetAsync(StorageFileNames.FinancialAccountingCartDataFileName);
 				if (!string.IsNullOrEmpty(cartData))
-				{
 					_accountingCart = System.Text.Json.JsonSerializer.Deserialize<List<AccountingCartModel>>(cartData) ?? [];
-				}
 			}
 		}
 		catch (IOException ex)
