@@ -43,14 +43,14 @@ public static class SaleReturnA4Print
 
 		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES RETURN INVOICE");
 
-		currentY = await DrawInvoiceDetailsAsync(pdfPage, currentY, saleReturn);
+		currentY = DrawInvoiceDetailsAsync(pdfPage, currentY, saleReturn);
 		var result = DrawItemDetails(pdfPage, currentY, saleReturnProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, saleReturn, saleReturnDetails);
 
 		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
 	}
 
-	private static async Task<float> DrawInvoiceDetailsAsync(PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn)
+	private static float DrawInvoiceDetailsAsync(PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn)
 	{
 		var leftColumnDetails = new Dictionary<string, string>
 		{

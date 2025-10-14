@@ -6,7 +6,6 @@ using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
-using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
 namespace PrimeBakesLibrary.Data.Sale;
@@ -106,10 +105,6 @@ public static class SaleReturnData
 
 		foreach (var product in cart)
 		{
-			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
-			if (item.LocationId != 1)
-				continue;
-
 			// Remove stock from the return location (negative quantity)
 			if (saleReturn.PartyId is not null && saleReturn.PartyId > 1 && party is not null && party.LocationId > 1)
 				await ProductStockData.InsertProductStock(new()

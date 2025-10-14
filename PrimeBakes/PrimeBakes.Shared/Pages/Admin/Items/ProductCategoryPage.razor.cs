@@ -18,12 +18,10 @@ public partial class ProductCategoryPage
 	private string _successMessage = "";
 	private string _errorMessage = "";
 
-	private UserModel _currentUser;
 	private ProductCategoryModel _categoryModel = new()
 	{
 		Id = 0,
 		Name = "",
-		LocationId = 1,
 		Status = true
 	};
 
@@ -45,8 +43,7 @@ public partial class ProductCategoryPage
 		try
 		{
 			// Validate user and check admin permissions
-			var userResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin);
-			_currentUser = userResult.User;
+			await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
 			await LoadData();
 		}
 		catch (Exception ex)
@@ -69,24 +66,9 @@ public partial class ProductCategoryPage
 			_categories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.ProductCategory);
 			_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
-			// Set default location for new categories
-			_categoryModel.LocationId = _currentUser.LocationId;
-
-			// Apply location-based filtering
-			if (_currentUser.LocationId != 1)
-			{
-				// Non-location-1 users can only see their own categories
-				_categories = [.. _categories.Where(c => c.LocationId == _currentUser.LocationId)];
-
-				// Non-location-1 users can only create categories for their location
-				_locations = [.. _locations.Where(l => l.Id == _currentUser.LocationId)];
-			}
-
 			// Refresh grid if it exists
-			if (_sfGrid != null)
-			{
+			if (_sfGrid is not null)
 				await _sfGrid.Refresh();
-			}
 
 			StateHasChanged();
 		}
@@ -101,19 +83,10 @@ public partial class ProductCategoryPage
 	{
 		try
 		{
-			// Check if user can edit this category
-			if (_currentUser.LocationId != 1 && args.Data.LocationId != _currentUser.LocationId)
-			{
-				_errorMessage = "You can only edit categories from your location.";
-				await ShowErrorToast();
-				return;
-			}
-
-			_categoryModel = new ProductCategoryModel
+			_categoryModel = new()
 			{
 				Id = args.Data.Id,
 				Name = args.Data.Name,
-				LocationId = args.Data.LocationId,
 				Status = args.Data.Status
 			};
 
@@ -132,19 +105,6 @@ public partial class ProductCategoryPage
 	{
 		try
 		{
-			// Ensure non-location-1 users can only create/edit for their location
-			if (_currentUser.LocationId != 1)
-			{
-				_categoryModel.LocationId = _currentUser.LocationId;
-			}
-
-			if (_categoryModel.LocationId <= 0)
-			{
-				_errorMessage = "Please select a valid location.";
-				await ShowErrorToast();
-				return false;
-			}
-
 			if (string.IsNullOrWhiteSpace(_categoryModel.Name))
 			{
 				_errorMessage = "Category name is required.";
@@ -169,22 +129,6 @@ public partial class ProductCategoryPage
 				_errorMessage = "A category with this name already exists.";
 				await ShowErrorToast();
 				return false;
-			}
-
-			// Additional validation for editing existing categories
-			if (_categoryModel.Id > 0)
-			{
-				var originalCategory = _categories.FirstOrDefault(c => c.Id == _categoryModel.Id);
-				if (originalCategory != null)
-				{
-					// Non-location-1 users can only edit their own location's categories
-					if (_currentUser.LocationId != 1 && originalCategory.LocationId != _currentUser.LocationId)
-					{
-						_errorMessage = "You can only edit categories from your location.";
-						await ShowErrorToast();
-						return false;
-					}
-				}
 			}
 
 			return true;
@@ -240,7 +184,6 @@ public partial class ProductCategoryPage
 		{
 			Id = 0,
 			Name = "",
-			LocationId = _currentUser.LocationId,
 			Status = true
 		};
 		StateHasChanged();
@@ -250,14 +193,6 @@ public partial class ProductCategoryPage
 	{
 		try
 		{
-			// Check if user can delete this category
-			if (_currentUser.LocationId != 1 && category.LocationId != _currentUser.LocationId)
-			{
-				_errorMessage = "You can only delete categories from your location.";
-				await ShowErrorToast();
-				return;
-			}
-
 			// Note: In a real application, you might want to check if the category is being used by products
 			// before allowing deletion. For now, we'll just deactivate it.
 			category.Status = false;
@@ -292,19 +227,10 @@ public partial class ProductCategoryPage
 
 	public void SelectCategoryForEdit(ProductCategoryModel category)
 	{
-		// Check if user can edit this category
-		if (_currentUser.LocationId != 1 && category.LocationId != _currentUser.LocationId)
-		{
-			_errorMessage = "You can only edit categories from your location.";
-			_ = ShowErrorToast();
-			return;
-		}
-
-		_categoryModel = new ProductCategoryModel
+		_categoryModel = new()
 		{
 			Id = category.Id,
 			Name = category.Name,
-			LocationId = category.LocationId,
 			Status = category.Status
 		};
 
@@ -313,7 +239,7 @@ public partial class ProductCategoryPage
 
 	private async Task ShowSuccessToast()
 	{
-		if (_sfToast != null)
+		if (_sfToast is not null)
 		{
 			var toastModel = new ToastModel
 			{
@@ -328,7 +254,7 @@ public partial class ProductCategoryPage
 
 	private async Task ShowErrorToast()
 	{
-		if (_sfErrorToast != null)
+		if (_sfErrorToast is not null)
 		{
 			var toastModel = new ToastModel
 			{

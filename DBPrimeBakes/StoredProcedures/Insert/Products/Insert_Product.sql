@@ -5,14 +5,13 @@
 	@ProductCategoryId INT,
 	@Rate MONEY,
 	@TaxId INT,
-	@LocationId INT,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[Product] ([ProductCategoryId], [Code], [Name], [TaxId], [Rate], [Status], [LocationId])
-		VALUES (@ProductCategoryId, @Code, @Name, @TaxId, @Rate, @Status, @LocationId);
+		INSERT INTO [dbo].[Product] ([ProductCategoryId], [Code], [Name], [TaxId], [Rate], [Status])
+		VALUES (@ProductCategoryId, @Code, @Name, @TaxId, @Rate, @Status);
 	END
 
 	ELSE
@@ -23,7 +22,6 @@ BEGIN
 			[Name] = @Name, 
 			[TaxId] = @TaxId, 
 			[Rate] = @Rate, 
-			[LocationId] = @LocationId,
 			[Status] = @Status
 		WHERE [Id] = @Id;
 	END

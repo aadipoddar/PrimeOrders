@@ -4,11 +4,11 @@ using NumericWordsConversion;
 
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Order;
-using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
 namespace PrimeBakesLibrary.Exporting.Sale;
@@ -179,8 +179,8 @@ public class SaleThermalPrint
 
 		foreach (var item in saleDetails)
 		{
-			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
-			if (product != null)
+			var product = (await ProductData.LoadProductRateByProduct(item.ProductId)).Where(p => p.LocationId == sale.LocationId).FirstOrDefault();
+			if (product is not null)
 			{
 				content.AppendLine("<tr class='table-row'>");
 				content.AppendLine($"<td align='left'>{product.Name}</td>");

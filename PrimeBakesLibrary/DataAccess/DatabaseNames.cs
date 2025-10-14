@@ -9,7 +9,7 @@ public static class TableNames
 	public static string Tax => "Tax";
 	public static string ProductCategory => "ProductCategory";
 	public static string Product => "Product";
-	public static string ProductRate => "ProductRate";
+	public static string ProductLocation => "ProductLocation";
 	public static string RawMaterialCategory => "RawMaterialCategory";
 	public static string RawMaterial => "RawMaterial";
 	public static string Recipe => "Recipe";
@@ -62,7 +62,7 @@ public static class StoredProcedureNames
 
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
 	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
-	public static string LoadProductByLocationRate => "Load_Product_By_LocationRate";
+	public static string LoadProductByLocation => "Load_Product_By_Location";
 
 	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
 	public static string LoadOrderByLocation => "Load_Order_By_Location";
@@ -128,7 +128,7 @@ public static class StoredProcedureNames
 
 	public static string InsertProductCategory => "Insert_ProductCategory";
 	public static string InsertProduct => "Insert_Product";
-	public static string InsertProductRate => "Insert_ProductRate";
+	public static string InsertProductLocation => "Insert_ProductLocation";
 
 	public static string InsertRawMaterialCategory => "Insert_RawMaterialCategory";
 	public static string InsertRawMaterial => "Insert_RawMaterial";
@@ -182,4 +182,5 @@ public static class ViewNames
 	public static string LedgerOverview => "Ledger_Overview";
 	public static string RawMaterialStockDetails => "RawMaterialStockDetails";
 	public static string ProductStockDetails => "ProductStockDetails";
+	public static string ProductLocationOverview => "ProductLocation_Overview";
 }

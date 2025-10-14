@@ -1,21 +1,26 @@
 ﻿using OfficeOpenXml;
 
+using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Product;
+using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Product;
 
-// FileInfo fileInfo = new(@"C:\Others\supplier.xlsx");
+//FileInfo fileInfo = new(@"C:\Others\accountingdetail.xlsx");
 
-// ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+//ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-// using var package = new ExcelPackage(fileInfo);
+//using var package = new ExcelPackage(fileInfo);
 
-// await package.LoadAsync(fileInfo);
+//await package.LoadAsync(fileInfo);
 
-// var worksheet = package.Workbook.Worksheets[0];
+//var worksheet = package.Workbook.Worksheets[0];
 
 // await InsertProducts(worksheet);
 
@@ -25,8 +30,16 @@ using PrimeBakesLibrary.Models.Product;
 
 // await InsertSupplier(worksheet);
 
-// Console.WriteLine("Finished importing Items.");
-// Console.ReadLine();
+// await InsertProductLocations();
+
+// await InsertFixProductLocations(worksheet);
+
+// await InsertAccounting(worksheet);
+
+// await InsertAccountingDetails(worksheet);
+
+Console.WriteLine("Finished importing Items.");
+Console.ReadLine();
 
 static async Task UpdateProducts()
 {
@@ -45,7 +58,6 @@ static async Task UpdateProducts()
 			Code = code,
 			Name = product.Name,
 			ProductCategoryId = product.ProductCategoryId,
-			LocationId = product.LocationId,
 			Rate = product.Rate,
 			TaxId = product.TaxId,
 			Status = product.Status
@@ -123,7 +135,6 @@ static async Task InsertProducts(ExcelWorksheet worksheet)
 			Code = code,
 			Name = name,
 			ProductCategoryId = int.Parse(categoryId),
-			LocationId = 1,
 			Rate = price,
 			TaxId = taxId,
 			Status = true
@@ -168,6 +179,161 @@ static async Task InsertSupplier(ExcelWorksheet worksheet)
 			AccountTypeId = int.Parse(accountType),
 			GroupId = 1,
 			Status = true
+		});
+
+		row++;
+	}
+}
+
+static async Task InsertProductLocations()
+{
+	var products = await CommonData.LoadTableData<ProductModel>(TableNames.Product);
+	var locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
+
+	foreach (var product in products)
+		foreach (var location in locations)
+			await ProductData.InsertProductLocation(new()
+			{
+				Id = 0,
+				ProductId = product.Id,
+				LocationId = location.Id,
+				Rate = product.Rate,
+				Status = true
+			});
+}
+
+static async Task InsertFixProductLocations(ExcelWorksheet worksheet)
+{
+	int row = 2;
+	while (worksheet.Cells[row, 1].Value != null)
+	{
+		var productId = worksheet.Cells[row, 1].Value.ToString();
+		var rate = worksheet.Cells[row, 2].Value.ToString();
+		var locationId = worksheet.Cells[row, 3].Value.ToString();
+
+		if (string.IsNullOrWhiteSpace(productId) ||
+			string.IsNullOrWhiteSpace(locationId) ||
+			string.IsNullOrWhiteSpace(rate))
+		{
+			Console.WriteLine("Not Inserted Row = " + row);
+			continue;
+		}
+
+		Console.WriteLine("Inserting Product Location for ProductId: " + productId + " and LocationId " + locationId);
+
+		var product = (await ProductData.LoadProductRateByProduct(int.Parse(productId))).Where(p => p.LocationId == int.Parse(locationId)).FirstOrDefault();
+		if (product is null)
+		{
+			Console.WriteLine("Product Not Found for ProductId: " + productId + " and LocationId " + locationId);
+			row++;
+			continue;
+		}
+
+		await ProductData.InsertProductLocation(new()
+		{
+			Id = product.Id,
+			ProductId = int.Parse(productId),
+			LocationId = int.Parse(locationId),
+			Rate = decimal.Parse(rate),
+			Status = true
+		});
+		row++;
+	}
+}
+
+static async Task InsertAccounting(ExcelWorksheet worksheet)
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+	int row = 2;
+	while (worksheet.Cells[row, 1].Value != null)
+	{
+		var referenceNo = worksheet.Cells[row, 2].Value.ToString();
+		var voucherId = worksheet.Cells[row, 3].Value.ToString();
+		var remarks = worksheet.Cells[row, 4].Value?.ToString() ?? string.Empty;
+		var date = worksheet.Cells[row, 5].Value.ToString();
+		var financialYearId = worksheet.Cells[row, 6].Value.ToString();
+		var userId = worksheet.Cells[row, 7].Value.ToString();
+		var generatedMode = worksheet.Cells[row, 8].Value.ToString();
+		var createdAt = worksheet.Cells[row, 9].Value.ToString();
+		var status = worksheet.Cells[row, 10].Value.ToString();
+
+		Console.WriteLine("Inserting Accounting Voucher: " + referenceNo + " and voucherId " + voucherId);
+		await AccountingData.InsertAccounting(new()
+		{
+			Id = 0,
+			TransactionNo = referenceNo,
+			UserId = int.Parse(userId),
+			VoucherId = int.Parse(voucherId),
+			Remarks = remarks,
+			FinancialYearId = int.Parse(financialYearId),
+			GeneratedModule = generatedMode,
+			AccountingDate = DateOnly.FromDateTime(DateTime.Parse(date)),
+			CreatedAt = DateTime.Now,
+			Status = status.ToLower() == "true",
+		});
+
+		row++;
+	}
+}
+
+static async Task InsertAccountingDetails(ExcelWorksheet worksheet)
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+	int row = 2;
+	while (worksheet.Cells[row, 1].Value != null)
+	{
+		var accountingId = worksheet.Cells[row, 2].Value?.ToString();
+		var ledgerId = worksheet.Cells[row, 3].Value?.ToString();
+		var debit = worksheet.Cells[row, 4].Value?.ToString();
+		var credit = worksheet.Cells[row, 5].Value?.ToString();
+		var remarks = worksheet.Cells[row, 6].Value?.ToString() ?? string.Empty;
+		var status = worksheet.Cells[row, 7].Value?.ToString();
+
+		// Skip row if essential fields are null or empty
+		if (string.IsNullOrWhiteSpace(accountingId) || string.IsNullOrWhiteSpace(ledgerId) || string.IsNullOrWhiteSpace(status))
+		{
+			Console.WriteLine("Skipping row " + row + " due to missing required fields");
+			row++;
+			continue;
+		}
+
+		var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, int.Parse(accountingId));
+
+		int? id = null;
+		if (accounting.GeneratedModule == "Sales")
+		{
+			var sale = await SaleData.LoadSaleByBillNo(accounting.TransactionNo);
+			id = sale?.Id;
+		}
+		else if (accounting.GeneratedModule == "SaleReturn")
+		{
+			var saleReturn = await SaleReturnData.LoadSaleReturnByBillNo(accounting.TransactionNo);
+			id = saleReturn?.Id;
+		}
+		else if (accounting.GeneratedModule == "Purchase")
+			id = (await CommonData.LoadTableData<PurchaseModel>(TableNames.Purchase)).Where(p => p.BillNo == accounting.TransactionNo).FirstOrDefault()?.Id ?? 0;
+
+		Console.WriteLine("Inserting Accounting Voucher: " + accounting.TransactionNo + " and voucherId " + accounting.VoucherId);
+
+		// Helper method to safely parse decimal values
+		decimal? ParseNullableDecimal(string? value)
+		{
+			if (string.IsNullOrWhiteSpace(value) || value.Equals("NULL", StringComparison.OrdinalIgnoreCase))
+				return null;
+			return decimal.TryParse(value, out var result) ? result : null;
+		}
+
+		await AccountingData.InsertAccountingDetails(new()
+		{
+			Id = 0,
+			AccountingId = int.Parse(accountingId),
+			LedgerId = int.Parse(ledgerId),
+			ReferenceId = id,
+			ReferenceType = id is not null ? accounting.GeneratedModule : null,
+			Credit = ParseNullableDecimal(credit),
+			Debit = ParseNullableDecimal(debit),
+			Remarks = remarks,
+			Status = status.Equals("true", StringComparison.OrdinalIgnoreCase),
 		});
 
 		row++;

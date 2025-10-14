@@ -126,7 +126,7 @@
     <Build Include="StoredProcedures\Insert\Order\Insert_OrderDetail.sql" />
     <Build Include="StoredProcedures\Insert\Products\Insert_Product.sql" />
     <Build Include="StoredProcedures\Insert\Products\Insert_ProductCategory.sql" />
-    <Build Include="StoredProcedures\Insert\Products\Insert_ProductRate.sql" />
+    <Build Include="StoredProcedures\Insert\Products\Insert_ProductLocation.sql" />
     <Build Include="StoredProcedures\Insert\Products\Insert_Tax.sql" />
     <Build Include="StoredProcedures\Insert\Sale\Insert_Sale.sql" />
     <Build Include="StoredProcedures\Insert\Sale\Insert_SaleDetail.sql" />
@@ -158,7 +158,7 @@
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_Sale.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_OrderDetail_By_Order.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_OrderOverview_By_OrderId.sql" />
-    <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_LocationRate.sql" />
+    <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_ProductCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_ProductRate_By_Product.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_LastSale_By_Location.sql" />
@@ -211,7 +211,7 @@
     <Build Include="Tables\Order\OrderDetail.sql" />
     <Build Include="Tables\Products\Product.sql" />
     <Build Include="Tables\Products\ProductCategory.sql" />
-    <Build Include="Tables\Products\ProductRate.sql" />
+    <Build Include="Tables\Products\ProductLocation.sql" />
     <Build Include="Tables\Products\Tax.sql" />
     <Build Include="Tables\Sales\Sale.sql" />
     <Build Include="Tables\Sales\SaleDetail.sql" />
@@ -239,6 +239,7 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionOverview_By_KitchenProductionId.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_Accounting_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_LedgerOverview_By_AccountingId.sql" />
+    <Build Include="Views\ProductLocation_Overview.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

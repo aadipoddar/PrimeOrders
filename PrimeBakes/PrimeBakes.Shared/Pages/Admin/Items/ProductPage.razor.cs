@@ -13,7 +13,6 @@ namespace PrimeBakes.Shared.Pages.Admin.Items;
 
 public partial class ProductPage
 {
-	private UserModel _userModel;
 	private bool _isLoading = true;
 	private bool _isSubmitting = false;
 	private string _successMessage = "";
@@ -26,7 +25,6 @@ public partial class ProductPage
 		Rate = 0,
 		TaxId = 0,
 		ProductCategoryId = 0,
-		LocationId = 1,
 		Status = true
 	};
 
@@ -35,7 +33,7 @@ public partial class ProductPage
 	private List<LocationModel> _locations = [];
 	private List<TaxModel> _taxTypes = [];
 
-	private List<ProductRateModel> _productRates = [];
+	private List<ProductLocationOverviewModel> _productLocations = [];
 	private int _selectedProductId = 0;
 	private string _selectedProductName = "";
 	private int _newLocationRateId = 0;
@@ -43,15 +41,14 @@ public partial class ProductPage
 	private List<LocationModel> _availableLocationsForRates = [];
 
 	private SfGrid<ProductModel> _sfGrid;
-	private SfGrid<ProductRateModel> _sfRatesGrid;
+	private SfGrid<ProductLocationOverviewModel> _sfRatesGrid;
 	private SfToast _sfToast;
 	private SfToast _sfUpdateToast;
 	private SfToast _sfErrorToast;
 
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
-		_userModel = authResult.User;
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
 		await LoadData();
 		_isLoading = false;
 	}
@@ -65,14 +62,6 @@ public partial class ProductPage
 
 		// Auto-generate product code
 		_productModel.Code = GenerateCodes.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code);
-		_productModel.LocationId = _userModel.LocationId;
-
-		// Location-based filtering - non-location-1 users can only see their own location's products
-		if (_userModel.LocationId != 1)
-		{
-			_products = [.. _products.Where(p => p.LocationId == _userModel.LocationId)];
-			_productCategories = [.. _productCategories.Where(c => c.LocationId == _userModel.LocationId || c.LocationId == 1)];
-		}
 
 		// Set default values
 		if (_productCategories.Count > 0)
@@ -86,12 +75,6 @@ public partial class ProductPage
 
 	private async Task OnProductFormSubmit()
 	{
-		// Ensure non-location-1 users can only assign their own location
-		if (_userModel.LocationId != 1)
-		{
-			_productModel.LocationId = _userModel.LocationId;
-		}
-
 		if (!await ValidateProductForm())
 			return;
 
@@ -103,13 +86,26 @@ public partial class ProductPage
 			await ProductData.InsertProduct(_productModel);
 
 			if (_productModel.Id == 0)
+			{
+				var locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+				foreach (var location in locations)
+					await ProductData.InsertProductLocation(new()
+					{
+						Id = 0,
+						ProductId = _productModel.Id,
+						LocationId = location.Id,
+						Rate = _productModel.Rate,
+						Status = true
+					});
+
 				_successMessage = "Product added successfully!";
+			}
 			else
 				_successMessage = "Product updated successfully!";
 
 			await _sfToast.ShowAsync();
 			await LoadData();
-			ResetProductForm();
+			await LoadProductRates(_productModel.Id, _productModel.Name);
 		}
 		catch (Exception ex)
 		{
@@ -156,19 +152,6 @@ public partial class ProductPage
 			return false;
 		}
 
-		if (_productModel.LocationId <= 0)
-		{
-			await ShowErrorToast("Please select a location.");
-			return false;
-		}
-
-		// Non-location-1 users can only manage their own location's products
-		if (_userModel.LocationId != 1 && _productModel.LocationId != _userModel.LocationId)
-		{
-			await ShowErrorToast("You can only manage products for your own location.");
-			return false;
-		}
-
 		// Check for duplicate code
 		if (_products.Any(p => p.Code.Equals(_productModel.Code, StringComparison.OrdinalIgnoreCase) && p.Id != _productModel.Id))
 		{
@@ -183,19 +166,19 @@ public partial class ProductPage
 	{
 		_productModel = new()
 		{
+			Id = 0,
 			Name = "",
 			Code = GenerateCodes.GenerateProductCode(_products.OrderBy(r => r.Code).LastOrDefault()?.Code),
 			Rate = 0,
 			TaxId = _taxTypes.Count > 0 ? _taxTypes[0].Id : 0,
 			ProductCategoryId = _productCategories.Count > 0 ? _productCategories[0].Id : 0,
-			LocationId = _userModel.LocationId,
 			Status = true
 		};
 
 		// Clear location rates data
 		_selectedProductId = 0;
 		_selectedProductName = "";
-		_productRates.Clear();
+		_productLocations.Clear();
 		_availableLocationsForRates.Clear();
 		_newLocationRateId = 0;
 		_newLocationRate = 0;
@@ -208,13 +191,7 @@ public partial class ProductPage
 		{
 			_selectedProductId = productId;
 			_selectedProductName = productName;
-			_productRates = await ProductData.LoadProductRateByProduct(productId);
-
-			// Filter rates for non-location-1 users
-			if (_userModel.LocationId != 1)
-			{
-				_productRates = [.. _productRates.Where(r => r.LocationId == _userModel.LocationId)];
-			}
+			_productLocations = await ProductData.LoadProductRateByProduct(productId);
 
 			// Update available locations for rates dropdown
 			UpdateAvailableLocationsForRates();
@@ -230,16 +207,14 @@ public partial class ProductPage
 
 	private void UpdateAvailableLocationsForRates()
 	{
-		// Get locations that don't already have active rates for the selected product
-		var existingLocationIds = _productRates.Where(r => r.Status).Select(r => r.LocationId).ToHashSet();
+		// Get locations that don't already have rates for the selected product
+		var existingLocationIds = _productLocations.Select(r => r.LocationId).ToHashSet();
 
 		_availableLocationsForRates = [.. _locations.Where(location => !existingLocationIds.Contains(location.Id))];
 
 		// Reset the selected location if it's no longer available
 		if (_newLocationRateId > 0 && !_availableLocationsForRates.Any(l => l.Id == _newLocationRateId))
-		{
 			_newLocationRateId = 0;
-		}
 	}
 
 	private async Task AddLocationRate()
@@ -257,7 +232,7 @@ public partial class ProductPage
 		}
 
 		// Check if rate already exists for this location (safety check)
-		if (_productRates.Any(r => r.LocationId == _newLocationRateId && r.Status))
+		if (_productLocations.Any(r => r.LocationId == _newLocationRateId))
 		{
 			await ShowErrorToast("Rate already exists for this location.");
 			return;
@@ -265,15 +240,14 @@ public partial class ProductPage
 
 		try
 		{
-			var productRate = new ProductRateModel
+			await ProductData.InsertProductLocation(new()
 			{
+				Id = 0,
 				ProductId = _selectedProductId,
 				LocationId = _newLocationRateId,
 				Rate = _newLocationRate,
 				Status = true
-			};
-
-			await ProductData.InsertProductRate(productRate);
+			});
 			_successMessage = "Location rate added successfully!";
 			await _sfToast.ShowAsync();
 
@@ -296,7 +270,7 @@ public partial class ProductPage
 	private async Task OnProductRowSelected(RowSelectEventArgs<ProductModel> args)
 	{
 		var selectedProduct = args.Data;
-		_productModel = new ProductModel
+		_productModel = new()
 		{
 			Id = selectedProduct.Id,
 			Code = selectedProduct.Code,
@@ -304,25 +278,12 @@ public partial class ProductPage
 			Rate = selectedProduct.Rate,
 			ProductCategoryId = selectedProduct.ProductCategoryId,
 			TaxId = selectedProduct.TaxId,
-			LocationId = selectedProduct.LocationId,
 			Status = selectedProduct.Status
 		};
 
 		// Load product rates only for primary location products
-		if (selectedProduct.LocationId == 1)
-		{
-			await LoadProductRates(selectedProduct.Id, selectedProduct.Name);
-		}
-		else
-		{
-			// Clear rates data for non-primary location products
-			_selectedProductId = selectedProduct.Id;
-			_selectedProductName = selectedProduct.Name;
-			_productRates.Clear();
-			_availableLocationsForRates.Clear();
-			_newLocationRateId = 0;
-			_newLocationRate = 0;
-		}
+		await LoadProductRates(selectedProduct.Id, selectedProduct.Name);
+
 		StateHasChanged();
 	}
 
@@ -359,25 +320,6 @@ public partial class ProductPage
 				_ = ShowErrorToast("Product code already exists.");
 				return;
 			}
-
-			// Location-based permission check for editing
-			if (args.Action == "Edit" && _userModel.LocationId != 1 && args.Data.LocationId != _userModel.LocationId)
-			{
-				args.Cancel = true;
-				_ = ShowErrorToast("You can only edit products from your location.");
-				return;
-			}
-		}
-
-		if (args.RequestType == Syncfusion.Blazor.Grids.Action.Delete)
-		{
-			// Location-based permission check for deleting
-			if (_userModel.LocationId != 1 && args.Data.LocationId != _userModel.LocationId)
-			{
-				args.Cancel = true;
-				_ = ShowErrorToast("You can only delete products from your location.");
-				return;
-			}
 		}
 	}
 
@@ -395,9 +337,9 @@ public partial class ProductPage
 	{
 		try
 		{
-			var productRate = _productRates.FirstOrDefault(r => r.Id == rateId);
+			var productRate = await CommonData.LoadTableDataById<ProductLocationModel>(TableNames.ProductLocation, rateId);
 			productRate.Status = false;
-			await ProductData.InsertProductRate(productRate);
+			await ProductData.InsertProductLocation(productRate);
 			_successMessage = "Location rate removed successfully!";
 			await _sfToast.ShowAsync();
 
@@ -435,28 +377,5 @@ public partial class ProductPage
 	{
 		var tax = _taxTypes.FirstOrDefault(t => t.Id == taxId);
 		return tax?.Code ?? "Unknown";
-	}
-
-	// Permission Checks
-	private bool CanManageRates()
-	{
-		return _userModel.LocationId == 1; // Only location 1 users can manage rates for all locations
-	}
-
-	private bool ShouldShowLocationRates()
-	{
-		// Only show location rates for products from primary location (LocationId == 1)
-		var selectedProduct = _products.FirstOrDefault(p => p.Id == _selectedProductId);
-		return selectedProduct != null && selectedProduct.LocationId == 1;
-	}
-
-	private bool CanEditProduct(ProductModel product)
-	{
-		return _userModel.LocationId == 1 || product.LocationId == _userModel.LocationId;
-	}
-
-	private bool CanDeleteProduct(ProductModel product)
-	{
-		return _userModel.LocationId == 1 || product.LocationId == _userModel.LocationId;
 	}
 }

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Insert_ProductRate]
+﻿CREATE PROCEDURE [dbo].[Insert_ProductLocation]
 	@Id INT,
 	@ProductId INT,
 	@Rate MONEY,
@@ -8,13 +8,13 @@ AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-	INSERT INTO [dbo].[ProductRate] ([ProductId], [Rate], [LocationId], [Status])
+	INSERT INTO [dbo].[ProductLocation] ([ProductId], [Rate], [LocationId], [Status])
 		VALUES (@ProductId, @Rate, @LocationId, @Status);
 	END
 
 	ELSE
 	BEGIN
-		UPDATE [dbo].[ProductRate]
+		UPDATE [dbo].[ProductLocation]
 		SET [ProductId] = @ProductId, 
 			[Rate] = @Rate, 
 			[LocationId] = @LocationId,

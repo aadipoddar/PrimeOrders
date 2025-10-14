@@ -252,7 +252,7 @@ else
 				</div>
 			}
 
-			@if (_user.Accounts)
+			@if (_user.Accounts && _user.LocationId == 1)
 			{
 				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Accounting")'>
 					<div class="card-icon accounts-icon">💰</div>
@@ -267,7 +267,7 @@ else
 				<p>View and generate comprehensive business reports</p>
 			</div>
 
-			@if (_user.Admin)
+			@if (_user.Admin && _user.LocationId == 1)
 			{
 				<div class="dashboard-card admin-card" @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")'>
 					<div class="card-icon admin-icon">👑</div>

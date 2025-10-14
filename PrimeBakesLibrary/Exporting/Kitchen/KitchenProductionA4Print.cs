@@ -1,8 +1,8 @@
 ﻿using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
-using PrimeBakesLibrary.Models.Product;
 
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
@@ -23,7 +23,7 @@ public static class KitchenProductionA4Print
 		List<KitchenProductionProductCartModel> kitchenProductionDetailCartModel = [];
 		foreach (var item in kitchenProductionDetails)
 		{
-			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+			var product = (await ProductData.LoadProductRateByProduct(item.ProductId)).Where(p => p.LocationId == kitchenProduction.LocationId).FirstOrDefault();
 			kitchenProductionDetailCartModel.Add(new()
 			{
 				ProductId = item.ProductId,

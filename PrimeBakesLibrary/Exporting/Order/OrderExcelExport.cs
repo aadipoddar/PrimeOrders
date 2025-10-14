@@ -1,4 +1,5 @@
 ﻿using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Models.Order;
 using PrimeBakesLibrary.Models.Product;
 
@@ -150,7 +151,7 @@ public static class OrderExcelExport
 				if (!productQuantities.TryGetValue(detail.ProductId, out var summary))
 				{
 					// Load product info if we haven't seen this product yet
-					var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, detail.ProductId);
+					var product = (await ProductData.LoadProductRateByProduct(detail.ProductId)).Where(p => p.LocationId == 1).FirstOrDefault();
 					if (product == null) continue;
 
 					// Find category name

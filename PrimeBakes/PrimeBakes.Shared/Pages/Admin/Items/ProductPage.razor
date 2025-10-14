@@ -129,35 +129,21 @@ else
 							</SfDropDownList>
 						</div>
 
-						@* Location selection - only for primary location admin *@
-						@if (_userModel.LocationId == 1)
-						{
-							<div class="form-group">
-								<label class="form-label">Location *</label>
-								<SfDropDownList @bind-Value="_productModel.LocationId"
-												DataSource="@_locations"
-												Placeholder="Select location"
-												CssClass="custom-dropdown">
-									<DropDownListFieldSettings Value="Id" Text="Name" />
-								</SfDropDownList>
-							</div>
-						}
-
 						<!-- Status -->
 						<div class="form-group status-section">
 							<label class="form-label">Product Status</label>
 							<div class="status-toggle">
-								<SfCheckBox @bind-Checked="_productModel.Status" 
-										   Label="@(_productModel.Status ? "Active Product" : "Inactive Product")"
-										   CssClass="status-checkbox" />
+								<SfCheckBox @bind-Checked="_productModel.Status"
+											Label="@(_productModel.Status ? "Active Product" : "Inactive Product")"
+											CssClass="status-checkbox" />
 								<small class="status-help">@(_productModel.Status ? "Product is available for sale" : "Product is disabled")</small>
 							</div>
 						</div>
 
 						<!-- Action Buttons -->
 						<div class="form-actions span-2">
-							<button @onclick="OnProductFormSubmit" 
-									class="save-button @(_isSubmitting ? "submitting" : "")" 
+							<button @onclick="OnProductFormSubmit"
+									class="save-button @(_isSubmitting ? "submitting" : "")"
 									disabled="@_isSubmitting">
 								@if (_isSubmitting)
 								{
@@ -181,7 +167,7 @@ else
 			</div>
 
 			<!-- Location Rates Management Card (Second) -->
-			@if (_selectedProductId > 0 && ShouldShowLocationRates())
+			@if (_selectedProductId > 0)
 			{
 				<div class="rates-card">
 					<div class="card-header">
@@ -189,72 +175,66 @@ else
 						<p class="card-subtitle">Manage pricing for different locations</p>
 					</div>
 					<div class="card-body">
-						@if (CanManageRates())
-						{
-							<!-- Add New Rate Form -->
-							<div class="add-rate-form">
-								<div class="rate-form-grid">
-									<div class="form-group">
-										<label class="form-label">Location</label>
-										<SfDropDownList @bind-Value="_newLocationRateId"
-														DataSource="@_availableLocationsForRates"
-														Placeholder="Select location"
-														CssClass="custom-dropdown">
-											<DropDownListFieldSettings Value="Id" Text="Name" />
-										</SfDropDownList>
-									</div>
-									<div class="form-group">
-										<label class="form-label">Rate (₹)</label>
-										<SfNumericTextBox @bind-Value="_newLocationRate"
-														  Placeholder="Enter rate"
-														  Format="N2"
-														  CssClass="custom-numeric" />
-									</div>
-									<div class="form-group">
-										<button @onclick="AddLocationRate" class="add-rate-button">
-											<span class="add-icon">➕</span>
-											<span>Add Rate</span>
-										</button>
-									</div>
+						<!-- Add New Rate Form -->
+						<div class="add-rate-form">
+							<div class="rate-form-grid">
+								<div class="form-group">
+									<label class="form-label">Location</label>
+									<SfDropDownList @bind-Value="_newLocationRateId"
+													DataSource="@_availableLocationsForRates"
+													Placeholder="Select location"
+													CssClass="custom-dropdown">
+										<DropDownListFieldSettings Value="Id" Text="Name" />
+									</SfDropDownList>
+								</div>
+								<div class="form-group">
+									<label class="form-label">Rate (₹)</label>
+									<SfNumericTextBox @bind-Value="_newLocationRate"
+													  Placeholder="Enter rate"
+													  Format="N2"
+													  CssClass="custom-numeric" />
+								</div>
+								<div class="form-group">
+									<button @onclick="AddLocationRate" class="add-rate-button">
+										<span class="add-icon">➕</span>
+										<span>Add Rate</span>
+									</button>
 								</div>
 							</div>
-						}
+						</div>
 
 						<!-- Existing Rates Grid -->
 						<div class="rates-grid">
-							<SfGrid DataSource="@_productRates"
+							<SfGrid DataSource="@_productLocations"
 									@ref="_sfRatesGrid"
 									AllowSorting="true"
 									CssClass="custom-grid rates-grid-table">
 								<GridColumns>
-									<GridColumn Field="@nameof(ProductRateModel.LocationId)" 
-											   HeaderText="Location" 
-											   Width="200">
+									<GridColumn Field="@nameof(ProductLocationOverviewModel.LocationId)"
+												HeaderText="Location"
+												Width="200">
 										<Template>
 											@{
-												var rate = (context as ProductRateModel);
+												var rate = (context as ProductLocationOverviewModel);
 											}
 											<span class="location-name">@GetLocationName(rate.LocationId)</span>
 										</Template>
 									</GridColumn>
-									<GridColumn Field="@nameof(ProductRateModel.Rate)" 
-											   HeaderText="Rate (₹)" 
-											   Width="120" 
-											   Format="C2" 
-											   TextAlign="TextAlign.Right" />
+									<GridColumn Field="@nameof(ProductLocationOverviewModel.Rate)"
+												HeaderText="Rate (₹)"
+												Width="120"
+												Format="C2"
+												TextAlign="TextAlign.Right" />
 									<GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center">
 										<Template>
 											@{
-												var rate = (context as ProductRateModel);
+												var rate = (context as ProductLocationOverviewModel);
 											}
-											@if (CanManageRates() || rate.LocationId == _userModel.LocationId)
-											{
-												<button @onclick="() => RemoveLocationRate(rate.Id)" 
-														class="delete-rate-button" 
-														title="Remove rate">
-													<span>🗑️</span>
-												</button>
-											}
+											<button @onclick="() => RemoveLocationRate(rate.Id)"
+													class="delete-rate-button"
+													title="Remove rate">
+												<span>🗑️</span>
+											</button>
 										</Template>
 									</GridColumn>
 								</GridColumns>
@@ -281,19 +261,19 @@ else
 						<GridPageSettings PageSize="10"></GridPageSettings>
 						<GridEvents RowSelected="OnProductRowSelected" TValue="ProductModel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(ProductModel.Id)" 
-									   HeaderText="ID" 
-									   Width="70" 
-									   TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(ProductModel.Code)" 
-									   HeaderText="Code" 
-									   Width="120" />
-							<GridColumn Field="@nameof(ProductModel.Name)" 
-									   HeaderText="Product Name" 
-									   Width="200" />
-							<GridColumn Field="@nameof(ProductModel.ProductCategoryId)" 
-									   HeaderText="Category" 
-									   Width="150">
+							<GridColumn Field="@nameof(ProductModel.Id)"
+										HeaderText="ID"
+										Width="70"
+										TextAlign="TextAlign.Center" />
+							<GridColumn Field="@nameof(ProductModel.Code)"
+										HeaderText="Code"
+										Width="120" />
+							<GridColumn Field="@nameof(ProductModel.Name)"
+										HeaderText="Product Name"
+										Width="200" />
+							<GridColumn Field="@nameof(ProductModel.ProductCategoryId)"
+										HeaderText="Category"
+										Width="150">
 								<Template>
 									@{
 										var product = (context as ProductModel);
@@ -301,14 +281,14 @@ else
 									<span class="category-name">@GetCategoryName(product.ProductCategoryId)</span>
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(ProductModel.Rate)" 
-									   HeaderText="Base Rate (₹)" 
-									   Width="120" 
-									   Format="C2" 
-									   TextAlign="TextAlign.Right" />
-							<GridColumn Field="@nameof(ProductModel.TaxId)" 
-									   HeaderText="Tax" 
-									   Width="100">
+							<GridColumn Field="@nameof(ProductModel.Rate)"
+										HeaderText="Base Rate (₹)"
+										Width="120"
+										Format="C2"
+										TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(ProductModel.TaxId)"
+										HeaderText="Tax"
+										Width="100">
 								<Template>
 									@{
 										var product = (context as ProductModel);
@@ -316,20 +296,10 @@ else
 									<span class="tax-code">@GetTaxCode(product.TaxId)</span>
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(ProductModel.LocationId)" 
-									   HeaderText="Location" 
-									   Width="120">
-								<Template>
-									@{
-										var product = (context as ProductModel);
-									}
-									<span class="location-name">@GetLocationName(product.LocationId)</span>
-								</Template>
-							</GridColumn>
-							<GridColumn Field="@nameof(ProductModel.Status)" 
-									   HeaderText="Status" 
-									   Width="100" 
-									   TextAlign="TextAlign.Center">
+							<GridColumn Field="@nameof(ProductModel.Status)"
+										HeaderText="Status"
+										Width="100"
+										TextAlign="TextAlign.Center">
 								<Template>
 									@{
 										var product = (context as ProductModel);
@@ -385,13 +355,28 @@ else
 		animation: bounce 1.4s ease-in-out infinite both;
 	}
 
-	.dot-1 { animation-delay: -0.32s; }
-	.dot-2 { animation-delay: -0.16s; }
-	.dot-3 { animation-delay: 0s; }
+	.dot-1 {
+		animation-delay: -0.32s;
+	}
+
+	.dot-2 {
+		animation-delay: -0.16s;
+	}
+
+	.dot-3 {
+		animation-delay: 0s;
+	}
 
 	@@keyframes bounce {
-		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-		40% { transform: scale(1.2); opacity: 1; }
+		0%, 80%, 100% {
+			transform: scale(0.8);
+			opacity: 0.5;
+		}
+
+		40% {
+			transform: scale(1.2);
+			opacity: 1;
+		}
 	}
 
 	.loading-text {
@@ -451,11 +436,11 @@ else
 		backdrop-filter: blur(10px);
 	}
 
-	.back-button:hover {
-		background: rgba(255, 255, 255, 0.25);
-		border-color: rgba(255, 255, 255, 0.5);
-		transform: translateY(-2px);
-	}
+		.back-button:hover {
+			background: rgba(255, 255, 255, 0.25);
+			border-color: rgba(255, 255, 255, 0.5);
+			transform: translateY(-2px);
+		}
 
 	/* Content Layout */
 	.content-layout {
@@ -494,10 +479,10 @@ else
 		gap: 10px;
 	}
 
-	.card-title::before {
-		content: "📋";
-		font-size: 18px;
-	}
+		.card-title::before {
+			content: "📋";
+			font-size: 18px;
+		}
 
 	.grid-card .card-title::before {
 		content: "📊";
@@ -530,9 +515,9 @@ else
 		flex-direction: column;
 	}
 
-	.form-group.span-2 {
-		grid-column: 1 / -1;
-	}
+		.form-group.span-2 {
+			grid-column: 1 / -1;
+		}
 
 	.form-label {
 		font-weight: 600;
@@ -544,11 +529,11 @@ else
 		gap: 6px;
 	}
 
-	.form-label::before {
-		content: "•";
-		color: var(--primary-color);
-		font-weight: bold;
-	}
+		.form-label::before {
+			content: "•";
+			color: var(--primary-color);
+			font-weight: bold;
+		}
 
 	.field-help {
 		font-size: 12px;
@@ -568,19 +553,19 @@ else
 		padding: 12px 15px;
 	}
 
-	::deep .custom-textbox:hover,
-	::deep .custom-numeric:hover,
-	::deep .custom-dropdown:hover {
-		border-color: rgba(226, 19, 123, 0.3);
-	}
+		::deep .custom-textbox:hover,
+		::deep .custom-numeric:hover,
+		::deep .custom-dropdown:hover {
+			border-color: rgba(226, 19, 123, 0.3);
+		}
 
-	::deep .custom-textbox:focus,
-	::deep .custom-numeric:focus,
-	::deep .custom-dropdown:focus {
-		border-color: var(--primary-color);
-		box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
-		outline: none;
-	}
+		::deep .custom-textbox:focus,
+		::deep .custom-numeric:focus,
+		::deep .custom-dropdown:focus {
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+			outline: none;
+		}
 
 	/* Role Selection */
 	.role-section {
@@ -608,15 +593,15 @@ else
 		gap: 8px;
 	}
 
-	.role-button.active {
-		border-color: var(--primary-color);
-		background: rgba(226, 19, 123, 0.05);
-	}
+		.role-button.active {
+			border-color: var(--primary-color);
+			background: rgba(226, 19, 123, 0.05);
+		}
 
-	.role-button:hover {
-		border-color: var(--primary-color);
-		transform: translateY(-2px);
-	}
+		.role-button:hover {
+			border-color: var(--primary-color);
+			transform: translateY(-2px);
+		}
 
 	.role-icon {
 		font-size: 2rem;
@@ -757,18 +742,18 @@ else
 		box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
 	}
 
-	.save-button:hover:not(:disabled) {
-		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(226, 19, 123, 0.4);
-	}
+		.save-button:hover:not(:disabled) {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(226, 19, 123, 0.4);
+		}
 
-	.save-button:disabled,
-	.save-button.submitting {
-		background: #95a5a6;
-		cursor: not-allowed;
-		transform: none;
-		box-shadow: none;
-	}
+		.save-button:disabled,
+		.save-button.submitting {
+			background: #95a5a6;
+			cursor: not-allowed;
+			transform: none;
+			box-shadow: none;
+		}
 
 	.clear-button {
 		background: #6c757d;
@@ -776,11 +761,11 @@ else
 		box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
 	}
 
-	.clear-button:hover {
-		background: #5a6268;
-		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-	}
+		.clear-button:hover {
+			background: #5a6268;
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+		}
 
 	.btn-icon {
 		font-size: 16px;
@@ -797,8 +782,13 @@ else
 	}
 
 	@@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* Grid Styles */
@@ -807,24 +797,24 @@ else
 		overflow: hidden !important;
 	}
 
-	.custom-grid .e-gridheader {
-		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
-		color: white !important;
-	}
+		.custom-grid .e-gridheader {
+			background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+			color: white !important;
+		}
 
-	.custom-grid .e-gridheader .e-headercell {
-		border-color: rgba(255, 255, 255, 0.2) !important;
-		font-weight: 600 !important;
-	}
+			.custom-grid .e-gridheader .e-headercell {
+				border-color: rgba(255, 255, 255, 0.2) !important;
+				font-weight: 600 !important;
+			}
 
-	.custom-grid .e-row:hover {
-		background: rgba(226, 19, 123, 0.05) !important;
-		cursor: pointer !important;
-	}
+		.custom-grid .e-row:hover {
+			background: rgba(226, 19, 123, 0.05) !important;
+			cursor: pointer !important;
+		}
 
-	.custom-grid .e-row.e-selectionbackground {
-		background: rgba(226, 19, 123, 0.1) !important;
-	}
+		.custom-grid .e-row.e-selectionbackground {
+			background: rgba(226, 19, 123, 0.1) !important;
+		}
 
 	/* Status Badge */
 	.status-badge {
@@ -869,17 +859,17 @@ else
 		font-weight: 600;
 	}
 
-	.permission-badge.active {
-		background: rgba(76, 175, 80, 0.1);
-		color: var(--success-color);
-		border: 1px solid rgba(76, 175, 80, 0.3);
-	}
+		.permission-badge.active {
+			background: rgba(76, 175, 80, 0.1);
+			color: var(--success-color);
+			border: 1px solid rgba(76, 175, 80, 0.3);
+		}
 
-	.permission-badge.inactive {
-		background: rgba(244, 67, 54, 0.1);
-		color: var(--danger-color);
-		border: 1px solid rgba(244, 67, 54, 0.3);
-	}
+		.permission-badge.inactive {
+			background: rgba(244, 67, 54, 0.1);
+			color: var(--danger-color);
+			border: 1px solid rgba(244, 67, 54, 0.3);
+		}
 
 	.admin-badge {
 		display: inline-flex;
@@ -891,17 +881,17 @@ else
 		font-size: 14px;
 	}
 
-	.admin-badge.active {
-		background: rgba(255, 193, 7, 0.1);
-		color: #ff9800;
-		border: 1px solid rgba(255, 193, 7, 0.3);
-	}
+		.admin-badge.active {
+			background: rgba(255, 193, 7, 0.1);
+			color: #ff9800;
+			border: 1px solid rgba(255, 193, 7, 0.3);
+		}
 
-	.admin-badge.inactive {
-		background: rgba(158, 158, 158, 0.1);
-		color: var(--text-muted);
-		border: 1px solid rgba(158, 158, 158, 0.3);
-	}
+		.admin-badge.inactive {
+			background: rgba(158, 158, 158, 0.1);
+			color: var(--text-muted);
+			border: 1px solid rgba(158, 158, 158, 0.3);
+		}
 
 	/* Action Buttons */
 	.action-buttons {
@@ -931,30 +921,30 @@ else
 		box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 	}
 
-	.edit-btn:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
-	}
+		.edit-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+		}
 
 	.toggle-btn.activate {
 		background: linear-gradient(135deg, var(--success-color), #27ae60);
 		box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 	}
 
-	.toggle-btn.activate:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-	}
+		.toggle-btn.activate:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+		}
 
 	.toggle-btn.deactivate {
 		background: linear-gradient(135deg, var(--danger-color), #e74c3c);
 		box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
 	}
 
-	.toggle-btn.deactivate:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-	}
+		.toggle-btn.deactivate:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+		}
 
 	/* Loading Animation */
 	.loader-container {
@@ -972,22 +962,35 @@ else
 		margin-bottom: 20px;
 	}
 
-	.circular-dots-loader .dot {
-		position: absolute;
-		width: 12px;
-		height: 12px;
-		background-color: var(--primary-color);
-		border-radius: 50%;
-		animation: rotate 2s infinite linear;
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			background-color: var(--primary-color);
+			border-radius: 50%;
+			animation: rotate 2s infinite linear;
+		}
+
+	.dot-1 {
+		animation-delay: 0s;
 	}
 
-	.dot-1 { animation-delay: 0s; }
-	.dot-2 { animation-delay: 0.4s; }
-	.dot-3 { animation-delay: 0.8s; }
+	.dot-2 {
+		animation-delay: 0.4s;
+	}
+
+	.dot-3 {
+		animation-delay: 0.8s;
+	}
 
 	@@keyframes rotate {
-		0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
-		100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+		0% {
+			transform: rotate(0deg) translateX(30px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translateX(30px) rotate(-360deg);
+		}
 	}
 
 	.loading-text {
@@ -998,8 +1001,13 @@ else
 
 	/* Spinner Animation for Save Button */
 	@@keyframes spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* Toast Styles */
@@ -1015,15 +1023,15 @@ else
 		color: var(--danger-color);
 	}
 
-	::deep .e-toast-success .e-toast-title,
-	::deep .e-toast-danger .e-toast-title {
-		font-weight: 600;
-	}
+		::deep .e-toast-success .e-toast-title,
+		::deep .e-toast-danger .e-toast-title {
+			font-weight: 600;
+		}
 
-	::deep .e-toast-success .e-toast-content,
-	::deep .e-toast-danger .e-toast-content {
-		font-size: 14px;
-	}
+		::deep .e-toast-success .e-toast-content,
+		::deep .e-toast-danger .e-toast-content {
+			font-size: 14px;
+		}
 
 	/* Rates Card Specific Styles */
 	.add-rate-form {
@@ -1057,10 +1065,10 @@ else
 		justify-content: center;
 	}
 
-	.add-rate-button:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-	}
+		.add-rate-button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+		}
 
 	.delete-rate-button {
 		background: #dc3545;
@@ -1073,10 +1081,10 @@ else
 		font-size: 14px;
 	}
 
-	.delete-rate-button:hover {
-		background: #c82333;
-		transform: scale(1.1);
-	}
+		.delete-rate-button:hover {
+			background: #c82333;
+			transform: scale(1.1);
+		}
 
 	.rates-grid-table {
 		margin-top: 15px;

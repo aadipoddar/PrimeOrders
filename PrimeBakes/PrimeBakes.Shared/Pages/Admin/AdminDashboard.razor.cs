@@ -16,7 +16,7 @@ public partial class AdminDashboard
 
 	protected override async Task OnInitializedAsync()
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
 		_user = authResult.User;
 
 		var locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);

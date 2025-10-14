@@ -3,7 +3,6 @@
 AS
 BEGIN
 	SELECT	* 
-	FROM ProductRate
+	FROM [ProductLocation_Overview]
 	WHERE ProductId = @ProductId
-	AND Status = 1
 END

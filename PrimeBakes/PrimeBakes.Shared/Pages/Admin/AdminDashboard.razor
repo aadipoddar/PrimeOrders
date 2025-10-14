@@ -44,24 +44,21 @@
 		</div>
 
 		<div class="admin-cards-grid">
-			@if (_user is not null && _user.LocationId == 1)
-			{
-				<!-- Raw Material Management -->
-				<AdminCard Title="Raw Materials"
-						   Description="Control inventory, suppliers, procurement processes, and stock levels"
-						   Icon="📦"
-						   IconClass="material-icon"
-						   ActionText="Manage Materials"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterial"))" />
+			<!-- Raw Material Management -->
+			<AdminCard Title="Raw Materials"
+					   Description="Control inventory, suppliers, procurement processes, and stock levels"
+					   Icon="📦"
+					   IconClass="material-icon"
+					   ActionText="Manage Materials"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterial"))" />
 
-				<!-- Raw Material Category Management -->
-				<AdminCard Title="Raw Material Categories"
-						   Description="Organize and categorize raw materials for better inventory management"
-						   Icon="�"
-						   IconClass="category-icon"
-						   ActionText="Manage Categories"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialCategory"))" />
-			}
+			<!-- Raw Material Category Management -->
+			<AdminCard Title="Raw Material Categories"
+					   Description="Organize and categorize raw materials for better inventory management"
+					   Icon="�"
+					   IconClass="category-icon"
+					   ActionText="Manage Categories"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/RawMaterialCategory"))" />
 
 			<!-- Finished Product Management -->
 			<AdminCard Title="Finished Products"
@@ -82,116 +79,113 @@
 	</div>
 
 	<!-- Common Management Section -->
-	@if (_user is not null && _user.LocationId == 1)
-	{
-		<div class="management-section">
-			<div class="section-header">
-				<div class="section-icon">⚙️</div>
-				<h2 class="section-title">Common Management</h2>
-				<p class="section-description">Manage common settings, locations, and operational parameters</p>
-			</div>
-
-			<div class="admin-cards-grid">
-				<!-- Outlet / Franchise Management -->
-				<AdminCard Title="Outlet Management"
-						   Description="Manage franchise locations, outlet operations, and regional performance tracking"
-						   Icon="�"
-						   IconClass="outlet-icon"
-						   ActionText="Manage Outlets"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
-
-				<AdminCard Title="User Management"
-						   Description="Manage user accounts, roles, permissions, and access control"
-						   Icon="👥"
-						   IconClass="user-icon"
-						   ActionText="Manage Users"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
-
-				<!-- States Management -->
-				<AdminCard Title="States Management"
-						   Description="Manage states, regions, and geographical locations for business operations"
-						   Icon="🗺️"
-						   IconClass="states-icon"
-						   ActionText="Manage States"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/State"))" />
-
-				<!-- Tax Management -->
-				<AdminCard Title="Tax Management"
-						   Description="Configure tax rates, GST settings, CGST, SGST, IGST percentages and tax policies"
-						   Icon="🧾"
-						   IconClass="tax-icon"
-						   ActionText="Manage Taxes"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Tax"))" />
-
-				<!-- Kitchen Management -->
-				<AdminCard Title="Kitchen Operations"
-						   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
-						   Icon="�‍🍳"
-						   IconClass="kitchen-icon"
-						   ActionText="Manage Kitchen"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
-
-				<!-- Settings Management -->
-				<AdminCard Title="Settings"
-						   Description="Configure system settings, preferences, and application parameters"
-						   Icon="⚙️"
-						   IconClass="settings-icon"
-						   ActionText="Manage Settings"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Settings"))" />
-			</div>
+	<div class="management-section">
+		<div class="section-header">
+			<div class="section-icon">⚙️</div>
+			<h2 class="section-title">Common Management</h2>
+			<p class="section-description">Manage common settings, locations, and operational parameters</p>
 		</div>
 
-		<!-- Accounts Management Section -->
-		<div class="management-section">
-			<div class="section-header">
-				<div class="section-icon">💰</div>
-				<h2 class="section-title">Accounts Management</h2>
-				<p class="section-description">Manage financial accounts, ledgers, and accounting operations</p>
-			</div>
+		<div class="admin-cards-grid">
+			<!-- Outlet / Franchise Management -->
+			<AdminCard Title="Outlet Management"
+					   Description="Manage franchise locations, outlet operations, and regional performance tracking"
+					   Icon="�"
+					   IconClass="outlet-icon"
+					   ActionText="Manage Outlets"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Location"))" />
 
-			<div class="admin-cards-grid">
-				<!-- Account Groups Management -->
-				<AdminCard Title="Account Groups"
-						   Description="Manage chart of accounts, group hierarchies, and account classifications"
-						   Icon="🏦"
-						   IconClass="account-group-icon"
-						   ActionText="Manage Groups"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountGroup"))" />
+			<AdminCard Title="User Management"
+					   Description="Manage user accounts, roles, permissions, and access control"
+					   Icon="👥"
+					   IconClass="user-icon"
+					   ActionText="Manage Users"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/User"))" />
 
-				<!-- Account Types Management -->
-				<AdminCard Title="Account Types"
-						   Description="Configure account types, ledger categories, and accounting structures"
-						   Icon="📊"
-						   IconClass="account-type-icon"
-						   ActionText="Manage Types"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountType"))" />
+			<!-- States Management -->
+			<AdminCard Title="States Management"
+					   Description="Manage states, regions, and geographical locations for business operations"
+					   Icon="🗺️"
+					   IconClass="states-icon"
+					   ActionText="Manage States"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/State"))" />
 
-				<!-- Ledger / Party Management -->
-				<AdminCard Title="Ledger & Party Management"
-						   Description="Manage customer ledgers, supplier accounts, party details and financial records"
-						   Icon="📚"
-						   IconClass="ledger-icon"
-						   ActionText="Manage Ledgers"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Ledger"))" />
+			<!-- Tax Management -->
+			<AdminCard Title="Tax Management"
+					   Description="Configure tax rates, GST settings, CGST, SGST, IGST percentages and tax policies"
+					   Icon="🧾"
+					   IconClass="tax-icon"
+					   ActionText="Manage Taxes"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Tax"))" />
 
-				<!-- Voucher Management -->
-				<AdminCard Title="Voucher Management"
-						   Description="Manage voucher types, numbering series, and transaction templates"
-						   Icon="🧾"
-						   IconClass="voucher-icon"
-						   ActionText="Manage Vouchers"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountVoucher"))" />
+			<!-- Kitchen Management -->
+			<AdminCard Title="Kitchen Operations"
+					   Description="Monitor production schedules, equipment, and kitchen workflow efficiency"
+					   Icon="�‍🍳"
+					   IconClass="kitchen-icon"
+					   ActionText="Manage Kitchen"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Kitchen"))" />
 
-				<!-- Financial Years Management -->
-				<AdminCard Title="Financial Years"
-						   Description="Configure financial years, accounting periods, and fiscal calendar"
-						   Icon="📅"
-						   IconClass="financial-year-icon"
-						   ActionText="Manage Years"
-						   OnClick="@(() => NavigationManager.NavigateTo("/Admin/FinancialYear"))" />
-			</div>
+			<!-- Settings Management -->
+			<AdminCard Title="Settings"
+					   Description="Configure system settings, preferences, and application parameters"
+					   Icon="⚙️"
+					   IconClass="settings-icon"
+					   ActionText="Manage Settings"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Settings"))" />
 		</div>
-	}
+	</div>
+
+	<!-- Accounts Management Section -->
+	<div class="management-section">
+		<div class="section-header">
+			<div class="section-icon">💰</div>
+			<h2 class="section-title">Accounts Management</h2>
+			<p class="section-description">Manage financial accounts, ledgers, and accounting operations</p>
+		</div>
+
+		<div class="admin-cards-grid">
+			<!-- Account Groups Management -->
+			<AdminCard Title="Account Groups"
+					   Description="Manage chart of accounts, group hierarchies, and account classifications"
+					   Icon="🏦"
+					   IconClass="account-group-icon"
+					   ActionText="Manage Groups"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountGroup"))" />
+
+			<!-- Account Types Management -->
+			<AdminCard Title="Account Types"
+					   Description="Configure account types, ledger categories, and accounting structures"
+					   Icon="📊"
+					   IconClass="account-type-icon"
+					   ActionText="Manage Types"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountType"))" />
+
+			<!-- Ledger / Party Management -->
+			<AdminCard Title="Ledger & Party Management"
+					   Description="Manage customer ledgers, supplier accounts, party details and financial records"
+					   Icon="📚"
+					   IconClass="ledger-icon"
+					   ActionText="Manage Ledgers"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/Ledger"))" />
+
+			<!-- Voucher Management -->
+			<AdminCard Title="Voucher Management"
+					   Description="Manage voucher types, numbering series, and transaction templates"
+					   Icon="🧾"
+					   IconClass="voucher-icon"
+					   ActionText="Manage Vouchers"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/AccountVoucher"))" />
+
+			<!-- Financial Years Management -->
+			<AdminCard Title="Financial Years"
+					   Description="Configure financial years, accounting periods, and fiscal calendar"
+					   Icon="📅"
+					   IconClass="financial-year-icon"
+					   ActionText="Manage Years"
+					   OnClick="@(() => NavigationManager.NavigateTo("/Admin/FinancialYear"))" />
+		</div>
+	</div>
 
 	<!-- Footer -->
 	<div class="dashboard-footer">

@@ -9,7 +9,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Order;
-using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
 namespace PrimeBakesLibrary.Data.Sale;
@@ -113,11 +112,6 @@ public static class SaleData
 			await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
 
 		foreach (var product in cart)
-		{
-			var item = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
-			if (item.LocationId != 1)
-				continue;
-
 			await ProductStockData.InsertProductStock(new()
 			{
 				Id = 0,
@@ -129,7 +123,6 @@ public static class SaleData
 				TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
 				LocationId = sale.LocationId
 			});
-		}
 
 		if (sale.PartyId is null || sale.PartyId <= 0)
 			return;

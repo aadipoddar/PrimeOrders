@@ -137,7 +137,6 @@ public partial class SalePage
 	private async Task LoadProductCategories()
 	{
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
 		_productCategories.Add(new() { Id = 0, Name = "All Categories" });
 		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
 		_selectedCategoryId = 0;
@@ -147,18 +146,16 @@ public partial class SalePage
 	{
 		_allCart.Clear();
 
-		var allProducts = await ProductData.LoadProductByLocationRate(_user.LocationId);
-		allProducts.RemoveAll(r => r.LocationId != 1 && r.LocationId != _user.LocationId);
-
+		var allProducts = await ProductData.LoadProductByLocation(_user.LocationId);
 		var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
 		foreach (var product in allProducts)
 		{
-			var productTax = taxes.FirstOrDefault(t => t.Id == product.TaxId) ?? new TaxModel();
+			var productTax = taxes.FirstOrDefault(t => t.Id == product.TaxId) ?? new();
 
 			_allCart.Add(new()
 			{
-				ProductId = product.Id,
+				ProductId = product.ProductId,
 				ProductName = product.Name,
 				ProductCategoryId = product.ProductCategoryId,
 				Rate = product.Rate,

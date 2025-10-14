@@ -2,6 +2,7 @@ using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
@@ -73,7 +74,6 @@ public partial class ProductStockAdjustment
 	private async Task LoadCategories()
 	{
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.RemoveAll(c => c.LocationId != _selectedLocationId && c.LocationId != 1);
 		_productCategories.Add(new()
 		{
 			Id = 0,
@@ -85,14 +85,12 @@ public partial class ProductStockAdjustment
 
 	private async Task LoadProducts()
 	{
-		var allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
-		allProducts.RemoveAll(c => c.LocationId != _selectedLocationId && c.LocationId != 1);
-
+		var allProducts = await ProductData.LoadProductByLocation(_selectedLocationId);
 		foreach (var product in allProducts)
 			_cart.Add(new()
 			{
 				ProductCategoryId = product.ProductCategoryId,
-				ProductId = product.Id,
+				ProductId = product.ProductId,
 				ProductName = product.Name,
 				Quantity = 0,
 				Rate = product.Rate,

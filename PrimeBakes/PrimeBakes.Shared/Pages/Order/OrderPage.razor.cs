@@ -1,6 +1,7 @@
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Order;
@@ -34,7 +35,6 @@ public partial class OrderPage
 	private async Task LoadData()
 	{
 		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.RemoveAll(r => r.LocationId != 1);
 		_productCategories.Add(new()
 		{
 			Id = 0,
@@ -43,14 +43,14 @@ public partial class OrderPage
 		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
 		_selectedCategoryId = 0;
 
-		var allProducts = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
-		allProducts.RemoveAll(r => r.LocationId != 1);
-
+		var mainLocationProducts = await ProductData.LoadProductByLocation(1);
+		var userLocationProducts = await ProductData.LoadProductByLocation(_user.LocationId);
+		var allProducts = mainLocationProducts.Where(x => userLocationProducts.Any(y => y.ProductId == x.ProductId)).ToList();
 		foreach (var product in allProducts)
 			_cart.Add(new()
 			{
 				ProductCategoryId = product.ProductCategoryId,
-				ProductId = product.Id,
+				ProductId = product.ProductId,
 				ProductName = product.Name,
 				Quantity = 0
 			});

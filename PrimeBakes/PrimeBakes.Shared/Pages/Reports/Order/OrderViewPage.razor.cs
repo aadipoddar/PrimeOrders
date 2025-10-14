@@ -55,7 +55,7 @@ public partial class OrderViewPage
 		{
 			// Load detailed order products
 			var orderDetails = await OrderData.LoadOrderDetailByOrder(OrderId);
-			var products = await ProductData.LoadProductByLocationRate(_orderOverview.LocationId);
+			var products = await ProductData.LoadProductByLocation(_orderOverview.LocationId);
 
 			// Load product information for each order detail
 			foreach (var detail in orderDetails)
@@ -66,7 +66,7 @@ public partial class OrderViewPage
 					// Load category information
 					var category = await CommonData.LoadTableDataById<ProductCategoryModel>(TableNames.ProductCategory, product.ProductCategoryId);
 
-					_detailedOrderProducts.Add(new DetailedOrderProductModel
+					_detailedOrderProducts.Add(new()
 					{
 						ProductCode = product.Code,
 						ProductName = product.Name,

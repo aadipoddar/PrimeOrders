@@ -1,6 +1,7 @@
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
@@ -16,12 +17,10 @@ public partial class KitchenProductionPage
 {
 	private bool _isLoading = true;
 
-	private List<ProductModel> _products = [];
 	private List<ProductCategoryModel> _productCategories = [];
 	private readonly List<KitchenProductionProductCartModel> _cart = [];
 
 	private int _selectedCategoryId = 0;
-	private KitchenProductionModel _kitchenProduction = new();
 	private KitchenProductionProductCartModel _selectedProductForEdit;
 
 	// Grid Reference
@@ -49,12 +48,12 @@ public partial class KitchenProductionPage
 
 		_cart.Clear();
 
-		_products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
-		foreach (var item in _products)
+		var allProducts = await ProductData.LoadProductByLocation(1);
+		foreach (var item in allProducts)
 			_cart.Add(new()
 			{
 				ProductCategoryId = item.ProductCategoryId,
-				ProductId = item.Id,
+				ProductId = item.ProductId,
 				ProductName = item.Name,
 				Quantity = 0,
 				Rate = item.Rate,

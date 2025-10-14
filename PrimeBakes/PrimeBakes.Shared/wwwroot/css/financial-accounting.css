@@ -374,7 +374,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  font-family: "Courier New", monospace;
   font-weight: 600;
 }
 
@@ -663,7 +662,6 @@
 .summary-table {
   border-collapse: collapse;
   width: 100%;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .summary-table th {
