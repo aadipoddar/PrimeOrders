@@ -12,989 +12,991 @@
 @using PrimeBakes.Shared.Services
 
 <HeadContent>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		  integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+		  crossorigin="anonymous" referrerpolicy="no-referrer" />
 </HeadContent>
 
 <PageTitle>Financial Accounting Report - PrimeBakes</PageTitle>
 
 @if (_isLoading)
 {
-    <div class="loading-overlay">
-        <div class="loading-content">
-            <div class="circular-dots-loader">
-                <span class="dot dot-1"></span>
-                <span class="dot dot-2"></span>
-                <span class="dot dot-3"></span>
-            </div>
-            <p class="loading-text">Loading Financial Reports...</p>
-        </div>
-    </div>
+	<div class="loading-overlay">
+		<div class="loading-content">
+			<div class="circular-dots-loader">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>
+				<span class="dot dot-3"></span>
+			</div>
+			<p class="loading-text">Loading Financial Reports...</p>
+		</div>
+	</div>
 }
 else
 {
-    <div class="financial-report-container">
-        <!-- Header Section -->
-        <div class="page-header">
-            <div class="header-content">
-                <div class="header-title">
-                    <div class="title-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="title-info">
-                        <h1>Financial Accounting Report</h1>
-                        <p>Comprehensive financial analytics and accounting insights</p>
-                    </div>
-                </div>
-                
-                <div class="header-actions">
-                    <button @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")' class="dashboard-btn">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Back to Dashboard</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+	<div class="financial-report-container">
+		<!-- Header Section -->
+		<div class="page-header">
+			<div class="header-content">
+				<div class="header-title">
+					<div class="title-icon">
+						<i class="fas fa-chart-line"></i>
+					</div>
+					<div class="title-info">
+						<h1>Financial Accounting Report</h1>
+						<p>Comprehensive financial analytics and accounting insights</p>
+					</div>
+				</div>
 
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <div class="filter-card">
-                <div class="filter-header">
-                    <h3><i class="fas fa-filter"></i> Filters</h3>
-                </div>
-                <div class="filter-content">
-                    <div class="filter-group">
-                        <label>Date Range</label>
-                        <SfDateRangePicker @bind-StartDate="_startDate" 
-                                         @bind-EndDate="_endDate" 
-                                         Placeholder="Select date range"
-                                         Format="dd/MM/yyyy"
-                                         CssClass="date-picker">
-                            <DateRangePickerEvents TValue="DateOnly" ValueChange="OnDateRangeChanged" />
-                        </SfDateRangePicker>
-                    </div>
+				<div class="header-actions">
+					<button @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")' class="dashboard-btn">
+						<i class="fas fa-tachometer-alt"></i>
+						<span>Back to Dashboard</span>
+					</button>
+				</div>
+			</div>
+		</div>
 
-                    <div class="filter-group">
-                        <label>Voucher Type</label>
-                        <SfDropDownList @bind-Value="_selectedVoucherId" 
-                                      DataSource="_vouchers" 
-                                      TValue="int" 
-                                      TItem="VoucherModel"
-                                      Placeholder="All Vouchers"
-                                      CssClass="voucher-dropdown">
-                            <DropDownListFieldSettings Value="Id" Text="Name" />
-                            <DropDownListEvents TValue="int" TItem="VoucherModel" ValueChange="OnVoucherChanged" />
-                        </SfDropDownList>
-                    </div>
+		<!-- Filter Section -->
+		<div class="filter-section">
+			<div class="filter-card">
+				<div class="filter-header">
+					<h3><i class="fas fa-filter"></i> Filters</h3>
+				</div>
+				<div class="filter-content">
+					<div class="filter-group">
+						<label>Date Range</label>
+						<SfDateRangePicker @bind-StartDate="_startDate"
+										   @bind-EndDate="_endDate"
+										   Placeholder="Select date range"
+										   Format="dd/MM/yyyy"
+										   CssClass="date-picker">
+							<DateRangePickerEvents TValue="DateOnly" ValueChange="OnDateRangeChanged" />
+						</SfDateRangePicker>
+					</div>
 
-                    <div class="filter-actions">
-                        <button @onclick="ToggleCharts" class="chart-toggle-btn">
-                            <i class="fas @(_showCharts ? "fa-chart-bar" : "fa-chart-line")"></i>
-                            @(_showCharts ? "Hide Charts" : "Show Charts")
-                        </button>
-                        <button @onclick="ExportToExcel" class="export-btn">
-                            <i class="fas fa-file-excel"></i>
-                            Export Excel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+					<div class="filter-group">
+						<label>Voucher Type</label>
+						<SfDropDownList @bind-Value="_selectedVoucherId"
+										DataSource="_vouchers"
+										TValue="int"
+										TItem="VoucherModel"
+										Placeholder="All Vouchers"
+										CssClass="voucher-dropdown">
+							<DropDownListFieldSettings Value="Id" Text="Name" />
+							<DropDownListEvents TValue="int" TItem="VoucherModel" ValueChange="OnVoucherChanged" />
+						</SfDropDownList>
+					</div>
 
-        <!-- Summary Cards Section -->
-        @if (_accountingOverviews.Any())
-        {
-            <div class="summary-section">
-                <div class="summary-cards">
-                    <div class="summary-card debit-card">
-                        <div class="card-icon">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">₹@GetTotalDebitAmount().ToString("N0")</div>
-                            <div class="card-label">Total Debits</div>
-                        </div>
-                    </div>
+					<div class="filter-actions">
+						<button @onclick="ToggleCharts" class="chart-toggle-btn">
+							<i class="fas @(_showCharts ? "fa-chart-bar" : "fa-chart-line")"></i>
+							@(_showCharts ? "Hide Charts" : "Show Charts")
+						</button>
+						<button @onclick="ExportToExcel" class="export-btn">
+							<i class="fas fa-file-excel"></i>
+							Export Excel
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
-                    <div class="summary-card credit-card">
-                        <div class="card-icon">
-                            <i class="fas fa-minus-circle"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">₹@GetTotalCreditAmount().ToString("N0")</div>
-                            <div class="card-label">Total Credits</div>
-                        </div>
-                    </div>
+		<!-- Summary Cards Section -->
+		@if (_accountingOverviews.Any())
+		{
+			<div class="summary-section">
+				<div class="summary-cards">
+					<div class="summary-card debit-card">
+						<div class="card-icon">
+							<i class="fas fa-plus-circle"></i>
+						</div>
+						<div class="card-content">
+							<div class="card-value">₹@GetTotalDebitAmount().ToString("N0")</div>
+							<div class="card-label">Total Debits</div>
+						</div>
+					</div>
 
-                    <div class="summary-card amount-card">
-                        <div class="card-icon">
-                            <i class="fas fa-calculator"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">₹@GetTotalAmount().ToString("N0")</div>
-                            <div class="card-label">Total Amount</div>
-                        </div>
-                    </div>
+					<div class="summary-card credit-card">
+						<div class="card-icon">
+							<i class="fas fa-minus-circle"></i>
+						</div>
+						<div class="card-content">
+							<div class="card-value">₹@GetTotalCreditAmount().ToString("N0")</div>
+							<div class="card-label">Total Credits</div>
+						</div>
+					</div>
 
-                    <div class="summary-card entries-card">
-                        <div class="card-icon">
-                            <i class="fas fa-list"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetTotalEntries().ToString("N0")</div>
-                            <div class="card-label">Total Entries</div>
-                        </div>
-                    </div>
+					<div class="summary-card amount-card">
+						<div class="card-icon">
+							<i class="fas fa-calculator"></i>
+						</div>
+						<div class="card-content">
+							<div class="card-value">₹@GetTotalAmount().ToString("N0")</div>
+							<div class="card-label">Total Amount</div>
+						</div>
+					</div>
 
-                    <div class="summary-card balance-card">
-                        <div class="card-icon">
-                            <i class="fas fa-balance-scale"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">₹@GetNetBalance().ToString("N0")</div>
-                            <div class="card-label">Net Balance</div>
-                        </div>
-                    </div>
+					<div class="summary-card entries-card">
+						<div class="card-icon">
+							<i class="fas fa-list"></i>
+						</div>
+						<div class="card-content">
+							<div class="card-value">@GetTotalEntries().ToString("N0")</div>
+							<div class="card-label">Total Entries</div>
+						</div>
+					</div>
 
-                    <div class="summary-card ledgers-card">
-                        <div class="card-icon">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetTotalLedgers().ToString("N0")</div>
-                            <div class="card-label">Total Ledgers</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+					<div class="summary-card balance-card">
+						<div class="card-icon">
+							<i class="fas fa-balance-scale"></i>
+						</div>
+						<div class="card-content">
+							<div class="card-value">₹@GetNetBalance().ToString("N0")</div>
+							<div class="card-label">Net Balance</div>
+						</div>
+					</div>
 
-            <!-- Charts Section -->
-            @if (_showCharts)
-            {
-                <div class="charts-section">
-                    <div class="charts-grid">
-                        <!-- Voucher Type Distribution Pie Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h4>Voucher Type Distribution</h4>
-                                <p>Entry count distribution by voucher type</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfAccumulationChart EnableSmartLabels="true">
-                                    <AccumulationChartSeriesCollection>
-                                        <AccumulationChartSeries DataSource="GetVoucherTypeChartData()" 
-                                                               XName="VoucherName" 
-                                                               YName="EntryCount" 
-                                                               Name="Entry Count"
-                                                               InnerRadius="30%">
-                                            <AccumulationDataLabelSettings Visible="true" 
-                                                                         Name="VoucherName" 
-                                                                         Position="AccumulationLabelPosition.Outside" />
-                                            <AccumulationChartAnimation Enable="true" />
-                                        </AccumulationChartSeries>
-                                    </AccumulationChartSeriesCollection>
-                                    <AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
-                                    <AccumulationChartTooltipSettings Enable="true" Format="${point.x}: ${point.y} entries (${point.percentage}%)" />
-                                </SfAccumulationChart>
-                            </div>
-                        </div>
-                        
-                        <!-- Debit Credit Comparison Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h4>Debit vs Credit Analysis</h4>
-                                <p>Total debit and credit amounts comparison</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfChart>
-                                    <ChartArea>
-                                        <ChartAreaBorder Width="0" />
-                                    </ChartArea>
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryXAxis>
-                                    <ChartPrimaryYAxis LabelFormat="₹{value}">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryYAxis>
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="GetDebitCreditChartData()" 
-                                                   XName="Type" 
-                                                   YName="Amount" 
-                                                   Type="ChartSeriesType.Column"
-                                                   Name="Amount"
-                                                   Fill="#e2137b">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Middle" />
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                    <ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
-                                </SfChart>
-                            </div>
-                        </div>
-                        
-                        <!-- Amount Comparison Analysis -->
-                        <div class="chart-card wide-chart">
-                            <div class="chart-header">
-                                <h4>Amount Comparison Analysis</h4>
-                                <p>Total debit, credit and net balance comparison</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfChart>
-                                    <ChartArea>
-                                        <ChartAreaBorder Width="0" />
-                                    </ChartArea>
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryXAxis>
-                                    <ChartPrimaryYAxis LabelFormat="₹{value}">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryYAxis>
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="GetAmountComparisonChartData()" 
-                                                   XName="Category" 
-                                                   YName="Amount" 
-                                                   Type="ChartSeriesType.Column"
-                                                   Name="Amount Analysis"
-                                                   Fill="#e2137b">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Top" />
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                    <ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
-                                </SfChart>
-                            </div>
-                        </div>
-                        
-                        <!-- Daily Trend Line Chart -->
-                        <div class="chart-card wide-chart">
-                            <div class="chart-header">
-                                <h4>Daily Financial Trend</h4>
-                                <p>Daily debit and credit trends over time</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfChart>
-                                    <ChartArea>
-                                        <ChartAreaBorder Width="0" />
-                                    </ChartArea>
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryXAxis>
-                                    <ChartPrimaryYAxis LabelFormat="₹{value}">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryYAxis>
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="GetDailyTrendChartData()" 
-                                                   XName="Date" 
-                                                   YName="DebitAmount" 
-                                                   Type="ChartSeriesType.SplineArea"
-                                                   Name="Debit Amount"
-                                                   Fill="#e2137b"
-                                                   Opacity="0.7">
-                                            <ChartMarker Visible="true" Fill="#e2137b" />
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="GetDailyTrendChartData()" 
-                                                   XName="Date" 
-                                                   YName="CreditAmount" 
-                                                   Type="ChartSeriesType.SplineArea"
-                                                   Name="Credit Amount"
-                                                   Fill="#ff6b9d"
-                                                   Opacity="0.7">
-                                            <ChartMarker Visible="true" Fill="#ff6b9d" />
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                    <ChartTooltipSettings Enable="true" Format="Date: ${point.x}<br/>${series.name}: ₹${point.y}" />
-                                    <ChartLegendSettings Visible="true" Position="LegendPosition.Top" />
-                                </SfChart>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (_showCharts && !_accountingOverviews.Any())
-            {
-                <div class="no-charts-message">
-                    <div class="no-charts-content">
-                        <i class="fas fa-chart-pie"></i>
-                        <h3>No Data for Charts</h3>
-                        <p>Charts will appear when financial data is available for the selected period.</p>
-                    </div>
-                </div>
-            }
+					<div class="summary-card ledgers-card">
+						<div class="card-icon">
+							<i class="fas fa-book"></i>
+						</div>
+						<div class="card-content">
+							<div class="card-value">@GetTotalLedgers().ToString("N0")</div>
+							<div class="card-label">Total Ledgers</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <!-- Accounting Overview Data Grid -->
-            <div class="data-section">
-                <div class="section-header">
-                    <div class="header-info">
-                        <h2>
-                            <i class="fas fa-table"></i>
-                            Accounting Overview
-                        </h2>
-                        <div class="record-count">
-                            @_accountingOverviews.Count Entries
-                        </div>
-                    </div>
-                </div>
+			<!-- Charts Section -->
+			@if (_showCharts)
+			{
+				<div class="charts-section">
+					<div class="charts-grid">
+						<!-- Voucher Type Distribution Pie Chart -->
+						<div class="chart-card">
+							<div class="chart-header">
+								<h4>Voucher Type Distribution</h4>
+								<p>Entry count distribution by voucher type</p>
+							</div>
+							<div class="chart-container">
+								<SfAccumulationChart EnableSmartLabels="true">
+									<AccumulationChartSeriesCollection>
+										<AccumulationChartSeries DataSource="GetVoucherTypeChartData()"
+																 XName="VoucherName"
+																 YName="EntryCount"
+																 Name="Entry Count"
+																 InnerRadius="30%">
+											<AccumulationDataLabelSettings Visible="true"
+																		   Name="VoucherName"
+																		   Position="AccumulationLabelPosition.Outside" />
+											<AccumulationChartAnimation Enable="true" />
+										</AccumulationChartSeries>
+									</AccumulationChartSeriesCollection>
+									<AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
+									<AccumulationChartTooltipSettings Enable="true" Format="${point.x}: ${point.y} entries (${point.percentage}%)" />
+								</SfAccumulationChart>
+							</div>
+						</div>
 
-                <div class="grid-container">
-                    <SfGrid @ref="_sfGrid" DataSource="_accountingOverviews" 
-                            AllowPaging="true" AllowSorting="true" AllowFiltering="true" 
-                            AllowSelection="true" AllowResizing="true" GridLines="GridLine.Both"
-                            Height="400">
-                        <GridPageSettings PageSize="10" PageSizes="new int[] { 5, 10, 20, 50 }"></GridPageSettings>
-                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
-                        <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
-                        
-                        <GridColumns>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.TransactionNo)" HeaderText="Reference No" 
-                                        Width="120"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.AccountingDate)" HeaderText="Date" 
-                                        Format="dd/MM/yyyy" Width="100" Type="ColumnType.Date"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.VoucherName)" HeaderText="Voucher Type" 
-                                        Width="120"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.GeneratedModule)" HeaderText="Module" 
-                                        Width="120"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.TotalDebitAmount)" HeaderText="Debit Amount" 
-                                        Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.TotalCreditAmount)" HeaderText="Credit Amount" 
-                                        Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.TotalAmount)" HeaderText="Total Amount" 
-                                        Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
-                            <GridColumn Field="@nameof(AccountingOverviewModel.Remarks)" HeaderText="Remarks" 
-                                        Width="150"></GridColumn>
-                            <GridColumn HeaderText="Actions" 
-                                       Width="120" 
-                                       TextAlign="TextAlign.Center" 
-                                       AllowFiltering="false"
-                                       AllowSorting="false">
-                                <Template>
-                                    @{
-                                        var accounting = (context as AccountingOverviewModel);
-                                        <button class="action-btn-grid view-details-btn" 
-                                                @onclick="() => ViewAccountingDetails(accounting)"
-                                                title="View Accounting Details">
-                                            <i class="fas fa-eye"></i>
-                                            <span>View</span>
-                                        </button>
-                                    }
-                                </Template>
-                            </GridColumn>
-                        </GridColumns>
-                    </SfGrid>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="no-data-message">
-                <div class="no-data-content">
-                    <i class="fas fa-chart-bar"></i>
-                    <h3>No Financial Data Available</h3>
-                    <p>No financial data found for the selected criteria. Please adjust your filters and try again.</p>
-                </div>
-            </div>
-        }
-    </div>
+						<!-- Debit Credit Comparison Chart -->
+						<div class="chart-card">
+							<div class="chart-header">
+								<h4>Debit vs Credit Analysis</h4>
+								<p>Total debit and credit amounts comparison</p>
+							</div>
+							<div class="chart-container">
+								<SfChart>
+									<ChartArea>
+										<ChartAreaBorder Width="0" />
+									</ChartArea>
+									<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryXAxis>
+									<ChartPrimaryYAxis LabelFormat="₹{value}">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryYAxis>
+									<ChartSeriesCollection>
+										<ChartSeries DataSource="GetDebitCreditChartData()"
+													 XName="Type"
+													 YName="Amount"
+													 Type="ChartSeriesType.Column"
+													 Name="Amount"
+													 Fill="#e2137b">
+											<ChartMarker>
+												<ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Middle" />
+											</ChartMarker>
+										</ChartSeries>
+									</ChartSeriesCollection>
+									<ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
+								</SfChart>
+							</div>
+						</div>
+
+						<!-- Amount Comparison Analysis -->
+						<div class="chart-card wide-chart">
+							<div class="chart-header">
+								<h4>Amount Comparison Analysis</h4>
+								<p>Total debit, credit and net balance comparison</p>
+							</div>
+							<div class="chart-container">
+								<SfChart>
+									<ChartArea>
+										<ChartAreaBorder Width="0" />
+									</ChartArea>
+									<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryXAxis>
+									<ChartPrimaryYAxis LabelFormat="₹{value}">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryYAxis>
+									<ChartSeriesCollection>
+										<ChartSeries DataSource="GetAmountComparisonChartData()"
+													 XName="Category"
+													 YName="Amount"
+													 Type="ChartSeriesType.Column"
+													 Name="Amount Analysis"
+													 Fill="#e2137b">
+											<ChartMarker>
+												<ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Top" />
+											</ChartMarker>
+										</ChartSeries>
+									</ChartSeriesCollection>
+									<ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
+								</SfChart>
+							</div>
+						</div>
+
+						<!-- Daily Trend Line Chart -->
+						<div class="chart-card wide-chart">
+							<div class="chart-header">
+								<h4>Daily Financial Trend</h4>
+								<p>Daily debit and credit trends over time</p>
+							</div>
+							<div class="chart-container">
+								<SfChart>
+									<ChartArea>
+										<ChartAreaBorder Width="0" />
+									</ChartArea>
+									<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryXAxis>
+									<ChartPrimaryYAxis LabelFormat="₹{value}">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryYAxis>
+									<ChartSeriesCollection>
+										<ChartSeries DataSource="GetDailyTrendChartData()"
+													 XName="Date"
+													 YName="DebitAmount"
+													 Type="ChartSeriesType.SplineArea"
+													 Name="Debit Amount"
+													 Fill="#e2137b"
+													 Opacity="0.7">
+											<ChartMarker Visible="true" Fill="#e2137b" />
+										</ChartSeries>
+										<ChartSeries DataSource="GetDailyTrendChartData()"
+													 XName="Date"
+													 YName="CreditAmount"
+													 Type="ChartSeriesType.SplineArea"
+													 Name="Credit Amount"
+													 Fill="#ff6b9d"
+													 Opacity="0.7">
+											<ChartMarker Visible="true" Fill="#ff6b9d" />
+										</ChartSeries>
+									</ChartSeriesCollection>
+									<ChartTooltipSettings Enable="true" Format="Date: ${point.x}<br/>${series.name}: ₹${point.y}" />
+									<ChartLegendSettings Visible="true" Position="LegendPosition.Top" />
+								</SfChart>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+			else if (_showCharts && !_accountingOverviews.Any())
+			{
+				<div class="no-charts-message">
+					<div class="no-charts-content">
+						<i class="fas fa-chart-pie"></i>
+						<h3>No Data for Charts</h3>
+						<p>Charts will appear when financial data is available for the selected period.</p>
+					</div>
+				</div>
+			}
+
+			<!-- Accounting Overview Data Grid -->
+			<div class="data-section">
+				<div class="section-header">
+					<div class="header-info">
+						<h2>
+							<i class="fas fa-table"></i>
+							Accounting Overview
+						</h2>
+						<div class="record-count">
+							@_accountingOverviews.Count Entries
+						</div>
+					</div>
+				</div>
+
+				<div class="grid-container">
+					<SfGrid @ref="_sfGrid" DataSource="_accountingOverviews"
+							AllowPaging="true" AllowSorting="true" AllowFiltering="true"
+							AllowSelection="true" AllowResizing="true" GridLines="GridLine.Both"
+							Height="auto"
+							Toolbar="@(new List<string>() { "Search" })">
+						<GridPageSettings PageSize="10" PageSizes="new int[] { 5, 10, 20, 50 }"></GridPageSettings>
+						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+						<GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+
+						<GridColumns>
+							<GridColumn Field="@nameof(AccountingOverviewModel.TransactionNo)" HeaderText="Reference No"
+										Width="120"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.AccountingDate)" HeaderText="Date"
+										Format="dd/MM/yyyy" Width="100" Type="ColumnType.Date"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.VoucherName)" HeaderText="Voucher Type"
+										Width="120"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.GeneratedModule)" HeaderText="Module"
+										Width="120"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.TotalDebitAmount)" HeaderText="Debit Amount"
+										Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.TotalCreditAmount)" HeaderText="Credit Amount"
+										Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.TotalAmount)" HeaderText="Total Amount"
+										Format="C0" Width="120" TextAlign="TextAlign.Right"></GridColumn>
+							<GridColumn Field="@nameof(AccountingOverviewModel.Remarks)" HeaderText="Remarks"
+										Width="150"></GridColumn>
+							<GridColumn HeaderText="Actions"
+										Width="120"
+										TextAlign="TextAlign.Center"
+										AllowFiltering="false"
+										AllowSorting="false">
+								<Template>
+									@{
+										var accounting = (context as AccountingOverviewModel);
+										<button class="action-btn-grid view-details-btn"
+												@onclick="() => ViewAccountingDetails(accounting)"
+												title="View Accounting Details">
+											<i class="fas fa-eye"></i>
+											<span>View</span>
+										</button>
+									}
+								</Template>
+							</GridColumn>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="no-data-message">
+				<div class="no-data-content">
+					<i class="fas fa-chart-bar"></i>
+					<h3>No Financial Data Available</h3>
+					<p>No financial data found for the selected criteria. Please adjust your filters and try again.</p>
+				</div>
+			</div>
+		}
+	</div>
 }
 
 <style>
-    :root {
-        --primary-color: #e2137b;
-        --primary-light: rgba(226, 19, 123, 0.1);
-        --primary-dark: #c71068;
-        --secondary-color: #f5c2d3;
-        --accent-color: #ff6b9d;
-        --success-color: #00c853;
-        --warning-color: #ff9100;
-        --danger-color: #ff1744;
-        --dark-color: #2c2c54;
-        --light-color: #fef7f9;
-        --white: #ffffff;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-800: #1f2937;
-        --gray-900: #111827;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        --border-radius: 8px;
-        --border-radius-lg: 12px;
-        --border-radius-xl: 16px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Loading Styles */
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    .loading-content {
-        text-align: center;
-        padding: 40px;
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-xl);
-    }
-
-    .circular-dots-loader {
-        position: relative;
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 20px;
-    }
-
-    .circular-dots-loader .dot {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        animation: rotate 1.8s infinite linear;
-    }
-
-    .circular-dots-loader .dot-1 {
-        background-color: var(--primary-color);
-        animation-delay: 0s;
-    }
-
-    .circular-dots-loader .dot-2 {
-        background-color: var(--primary-dark);
-        animation-delay: -0.6s;
-    }
-
-    .circular-dots-loader .dot-3 {
-        background-color: var(--accent-color);
-        animation-delay: -1.2s;
-    }
-
-    @@keyframes rotate {
-        0% {
-            transform: rotate(0deg) translate(-24px) rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg) translate(-24px) rotate(-360deg);
-        }
-    }
-
-    .loading-text {
-        font-size: 16px;
-        color: var(--gray-600);
-        margin: 0;
-    }
-
-    /* Main Container */
-    .financial-report-container {
-        min-height: 100vh;
-        background: var(--light-color);
-        padding: 0;
-        margin: 0;
-    }
-
-    /* Header Styles */
-    .page-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: var(--white);
-        padding: 20px 15px;
-        margin-bottom: 0;
-    }
-
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        margin: 0;
-    }
-
-    .header-title {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .title-icon {
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-    }
-
-    .title-info h1 {
-        font-size: 32px;
-        font-weight: 700;
-        margin: 0;
-        letter-spacing: -0.5px;
-    }
-
-    .title-info p {
-        font-size: 16px;
-        opacity: 0.9;
-        margin: 5px 0 0 0;
-        font-weight: 300;
-    }
-
-    .dashboard-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        color: var(--white);
-        padding: 12px 24px;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        transition: var(--transition);
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .dashboard-btn:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.4);
-        transform: translateY(-2px);
-    }
-
-    /* Filter Section */
-    .filter-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .filter-card {
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-    }
-
-    .filter-header {
-        background: var(--primary-light);
-        padding: 10px 15px;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .filter-header h3 {
-        margin: 0;
-        color: var(--primary-color);
-        font-size: 18px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .filter-content {
-        padding: 15px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        align-items: end;
-    }
-
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .filter-group label {
-        font-weight: 500;
-        color: var(--gray-700);
-        font-size: 14px;
-    }
-
-    .filter-actions {
-        display: flex;
-        gap: 15px;
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-        margin-top: 10px;
-    }
-
-    .chart-toggle-btn, .export-btn {
-        padding: 12px 20px;
-        border: none;
-        border-radius: var(--border-radius);
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-    }
-
-    .chart-toggle-btn {
-        background: var(--primary-light);
-        color: var(--primary-color);
-        border: 1px solid var(--primary-color);
-    }
-
-    .chart-toggle-btn:hover {
-        background: var(--primary-color);
-        color: var(--white);
-    }
-
-    .export-btn {
-        background: var(--success-color);
-        color: var(--white);
-    }
-
-    .export-btn:hover {
-        background: #00a843;
-        transform: translateY(-1px);
-    }
-
-    /* Summary Cards */
-    .summary-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .summary-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 10px;
-    }
-
-    .summary-card {
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        padding: 25px;
-        box-shadow: var(--shadow);
-        border-left: 4px solid var(--primary-color);
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        transition: var(--transition);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .summary-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100px;
-        height: 100px;
-        background: linear-gradient(45deg, transparent, var(--primary-light));
-        border-radius: 50%;
-        transform: translate(30px, -30px);
-    }
-
-    .summary-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .summary-card .card-icon {
-        width: 60px;
-        height: 60px;
-        background: var(--primary-light);
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-color);
-        font-size: 24px;
-        flex-shrink: 0;
-    }
-
-    .card-content {
-        flex: 1;
-        z-index: 1;
-    }
-
-    .card-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 5px;
-        line-height: 1.2;
-    }
-
-    .card-label {
-        font-size: 14px;
-        color: var(--gray-600);
-        font-weight: 500;
-    }
-
-    /* Charts Section */
-    .charts-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .charts-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .chart-card {
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-        transition: var(--transition);
-    }
-
-    .chart-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-    }
-
-    .chart-card.wide-chart {
-        grid-column: span 2;
-    }
-
-    .chart-header {
-        padding: 25px 30px 15px;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .chart-header h4 {
-        margin: 0 0 5px 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: var(--dark-color);
-    }
-
-    .chart-header p {
-        margin: 0;
-        font-size: 14px;
-        color: var(--gray-600);
-    }
-
-    .chart-container {
-        padding: 20px;
-        height: 400px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Data Section */
-    .data-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .section-header {
-        background: var(--white);
-        padding: 15px 20px;
-        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-        box-shadow: var(--shadow);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 4px solid var(--primary-color);
-    }
-
-    .header-info h2 {
-        margin: 0;
-        font-size: 24px;
-        font-weight: 600;
-        color: var(--dark-color);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .header-info h2 i {
-        color: var(--primary-color);
-    }
-
-    .record-count {
-        background: var(--primary-light);
-        color: var(--primary-color);
-        padding: 8px 16px;
-        border-radius: var(--border-radius);
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .grid-container {
-        background: var(--white);
-        border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-    }
-
-    /* No Data Messages */
-    .no-data-message, .no-charts-message {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 30px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 300px;
-    }
-
-    .no-data-content, .no-charts-content {
-        text-align: center;
-        padding: 40px;
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        max-width: 400px;
-    }
-
-    .no-data-content i, .no-charts-content i {
-        font-size: 48px;
-        color: var(--gray-400);
-        margin-bottom: 20px;
-    }
-
-    .no-data-content h3, .no-charts-content h3 {
-        margin: 0 0 10px 0;
-        font-size: 20px;
-        color: var(--gray-700);
-    }
-
-    .no-data-content p, .no-charts-content p {
-        margin: 0;
-        color: var(--gray-500);
-        line-height: 1.5;
-    }
-
-    /* Action Button Styles */
-    .action-btn-grid {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 16px;
-        background: var(--primary-color);
-        color: var(--white);
-        border: none;
-        border-radius: var(--border-radius);
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        text-decoration: none;
-        min-width: 80px;
-        justify-content: center;
-    }
-
-    .action-btn-grid:hover {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow);
-    }
-
-    .action-btn-grid:active {
-        transform: translateY(0);
-    }
-
-    .view-details-btn {
-        background: var(--primary-color);
-    }
-
-    .view-details-btn:hover {
-        background: var(--primary-dark);
-    }
-
-    .action-btn-grid i {
-        font-size: 12px;
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .header-content {
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
-        }
-
-        .filter-content {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        .filter-actions {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .summary-cards {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .charts-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        .chart-card.wide-chart {
-            grid-column: 1;
-        }
-
-        .page-header {
-            padding: 30px 20px;
-        }
-
-        .summary-section,
-        .charts-section,
-        .data-section,
-        .filter-section {
-            padding: 0 20px;
-        }
-
-        .action-btn-grid {
-            padding: 6px 12px;
-            font-size: 12px;
-            min-width: 70px;
-        }
-
-        .action-btn-grid span {
-            display: none;
-        }
-
-        .action-btn-grid i {
-            font-size: 14px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .title-info h1 {
-            font-size: 24px;
-        }
-
-        .title-info p {
-            font-size: 14px;
-        }
-
-        .summary-card {
-            padding: 20px;
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .chart-container {
-            height: 300px;
-        }
-    }
+	:root {
+		--primary-color: #e2137b;
+		--primary-light: rgba(226, 19, 123, 0.1);
+		--primary-dark: #c71068;
+		--secondary-color: #f5c2d3;
+		--accent-color: #ff6b9d;
+		--success-color: #00c853;
+		--warning-color: #ff9100;
+		--danger-color: #ff1744;
+		--dark-color: #2c2c54;
+		--light-color: #fef7f9;
+		--white: #ffffff;
+		--gray-50: #f9fafb;
+		--gray-100: #f3f4f6;
+		--gray-200: #e5e7eb;
+		--gray-300: #d1d5db;
+		--gray-400: #9ca3af;
+		--gray-500: #6b7280;
+		--gray-600: #4b5563;
+		--gray-700: #374151;
+		--gray-800: #1f2937;
+		--gray-900: #111827;
+		--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		--border-radius: 8px;
+		--border-radius-lg: 12px;
+		--border-radius-xl: 16px;
+		--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* Loading Styles */
+	.loading-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(255, 255, 255, 0.95);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+	}
+
+	.loading-content {
+		text-align: center;
+		padding: 40px;
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow-xl);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin: 0 auto 20px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.8s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--primary-dark);
+			animation-delay: -0.6s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--accent-color);
+			animation-delay: -1.2s;
+		}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	.loading-text {
+		font-size: 16px;
+		color: var(--gray-600);
+		margin: 0;
+	}
+
+	/* Main Container */
+	.financial-report-container {
+		min-height: 100vh;
+		background: var(--light-color);
+		padding: 0;
+		margin: 0;
+	}
+
+	/* Header Styles */
+	.page-header {
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: var(--white);
+		padding: 20px 15px;
+		margin-bottom: 0;
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
+		margin: 0;
+	}
+
+	.header-title {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.title-icon {
+		width: 60px;
+		height: 60px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: var(--border-radius-lg);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28px;
+	}
+
+	.title-info h1 {
+		font-size: 32px;
+		font-weight: 700;
+		margin: 0;
+		letter-spacing: -0.5px;
+	}
+
+	.title-info p {
+		font-size: 16px;
+		opacity: 0.9;
+		margin: 5px 0 0 0;
+		font-weight: 300;
+	}
+
+	.dashboard-btn {
+		background: rgba(255, 255, 255, 0.1);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		color: var(--white);
+		padding: 12px 24px;
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		transition: var(--transition);
+		font-weight: 500;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+		.dashboard-btn:hover {
+			background: rgba(255, 255, 255, 0.2);
+			border-color: rgba(255, 255, 255, 0.4);
+			transform: translateY(-2px);
+		}
+
+	/* Filter Section */
+	.filter-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.filter-card {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		overflow: hidden;
+	}
+
+	.filter-header {
+		background: var(--primary-light);
+		padding: 10px 15px;
+		border-bottom: 1px solid var(--gray-200);
+	}
+
+		.filter-header h3 {
+			margin: 0;
+			color: var(--primary-color);
+			font-size: 18px;
+			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+	.filter-content {
+		padding: 15px;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 15px;
+		align-items: end;
+	}
+
+	.filter-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+		.filter-group label {
+			font-weight: 500;
+			color: var(--gray-700);
+			font-size: 14px;
+		}
+
+	.filter-actions {
+		display: flex;
+		gap: 15px;
+		grid-column: 1 / -1;
+		justify-content: flex-start;
+		margin-top: 10px;
+	}
+
+	.chart-toggle-btn, .export-btn {
+		padding: 12px 20px;
+		border: none;
+		border-radius: var(--border-radius);
+		font-weight: 500;
+		cursor: pointer;
+		transition: var(--transition);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 14px;
+	}
+
+	.chart-toggle-btn {
+		background: var(--primary-light);
+		color: var(--primary-color);
+		border: 1px solid var(--primary-color);
+	}
+
+		.chart-toggle-btn:hover {
+			background: var(--primary-color);
+			color: var(--white);
+		}
+
+	.export-btn {
+		background: var(--success-color);
+		color: var(--white);
+	}
+
+		.export-btn:hover {
+			background: #00a843;
+			transform: translateY(-1px);
+		}
+
+	/* Summary Cards */
+	.summary-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.summary-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 10px;
+	}
+
+	.summary-card {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		padding: 25px;
+		box-shadow: var(--shadow);
+		border-left: 4px solid var(--primary-color);
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		transition: var(--transition);
+		position: relative;
+		overflow: hidden;
+	}
+
+		.summary-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 100px;
+			height: 100px;
+			background: linear-gradient(45deg, transparent, var(--primary-light));
+			border-radius: 50%;
+			transform: translate(30px, -30px);
+		}
+
+		.summary-card:hover {
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-lg);
+		}
+
+		.summary-card .card-icon {
+			width: 60px;
+			height: 60px;
+			background: var(--primary-light);
+			border-radius: var(--border-radius-lg);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--primary-color);
+			font-size: 24px;
+			flex-shrink: 0;
+		}
+
+	.card-content {
+		flex: 1;
+		z-index: 1;
+	}
+
+	.card-value {
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--dark-color);
+		margin-bottom: 5px;
+		line-height: 1.2;
+	}
+
+	.card-label {
+		font-size: 14px;
+		color: var(--gray-600);
+		font-weight: 500;
+	}
+
+	/* Charts Section */
+	.charts-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.charts-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 10px;
+	}
+
+	.chart-card {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		overflow: hidden;
+		transition: var(--transition);
+	}
+
+		.chart-card:hover {
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-lg);
+		}
+
+		.chart-card.wide-chart {
+			grid-column: span 2;
+		}
+
+	.chart-header {
+		padding: 25px 30px 15px;
+		border-bottom: 1px solid var(--gray-200);
+	}
+
+		.chart-header h4 {
+			margin: 0 0 5px 0;
+			font-size: 20px;
+			font-weight: 600;
+			color: var(--dark-color);
+		}
+
+		.chart-header p {
+			margin: 0;
+			font-size: 14px;
+			color: var(--gray-600);
+		}
+
+	.chart-container {
+		padding: 20px;
+		height: 400px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* Data Section */
+	.data-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.section-header {
+		background: var(--white);
+		padding: 15px 20px;
+		border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+		box-shadow: var(--shadow);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-left: 4px solid var(--primary-color);
+	}
+
+	.header-info h2 {
+		margin: 0;
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--dark-color);
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+		.header-info h2 i {
+			color: var(--primary-color);
+		}
+
+	.record-count {
+		background: var(--primary-light);
+		color: var(--primary-color);
+		padding: 8px 16px;
+		border-radius: var(--border-radius);
+		font-size: 14px;
+		font-weight: 500;
+	}
+
+	.grid-container {
+		background: var(--white);
+		border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		overflow: hidden;
+	}
+
+	/* No Data Messages */
+	.no-data-message, .no-charts-message {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 30px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 300px;
+	}
+
+	.no-data-content, .no-charts-content {
+		text-align: center;
+		padding: 40px;
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		max-width: 400px;
+	}
+
+		.no-data-content i, .no-charts-content i {
+			font-size: 48px;
+			color: var(--gray-400);
+			margin-bottom: 20px;
+		}
+
+		.no-data-content h3, .no-charts-content h3 {
+			margin: 0 0 10px 0;
+			font-size: 20px;
+			color: var(--gray-700);
+		}
+
+		.no-data-content p, .no-charts-content p {
+			margin: 0;
+			color: var(--gray-500);
+			line-height: 1.5;
+		}
+
+	/* Action Button Styles */
+	.action-btn-grid {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 16px;
+		background: var(--primary-color);
+		color: var(--white);
+		border: none;
+		border-radius: var(--border-radius);
+		font-size: 14px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: var(--transition);
+		text-decoration: none;
+		min-width: 80px;
+		justify-content: center;
+	}
+
+		.action-btn-grid:hover {
+			background: var(--primary-dark);
+			transform: translateY(-1px);
+			box-shadow: var(--shadow);
+		}
+
+		.action-btn-grid:active {
+			transform: translateY(0);
+		}
+
+	.view-details-btn {
+		background: var(--primary-color);
+	}
+
+		.view-details-btn:hover {
+			background: var(--primary-dark);
+		}
+
+	.action-btn-grid i {
+		font-size: 12px;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 768px) {
+		.header-content {
+			flex-direction: column;
+			gap: 20px;
+			text-align: center;
+		}
+
+		.filter-content {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+
+		.filter-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.summary-cards {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.charts-grid {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+
+		.chart-card.wide-chart {
+			grid-column: 1;
+		}
+
+		.page-header {
+			padding: 30px 20px;
+		}
+
+		.summary-section,
+		.charts-section,
+		.data-section,
+		.filter-section {
+			padding: 0 20px;
+		}
+
+		.action-btn-grid {
+			padding: 6px 12px;
+			font-size: 12px;
+			min-width: 70px;
+		}
+
+			.action-btn-grid span {
+				display: none;
+			}
+
+			.action-btn-grid i {
+				font-size: 14px;
+			}
+	}
+
+	@@media (max-width: 480px) {
+		.title-info h1 {
+			font-size: 24px;
+		}
+
+		.title-info p {
+			font-size: 14px;
+		}
+
+		.summary-card {
+			padding: 20px;
+			flex-direction: column;
+			text-align: center;
+		}
+
+		.chart-container {
+			height: 300px;
+		}
+	}
 </style>
