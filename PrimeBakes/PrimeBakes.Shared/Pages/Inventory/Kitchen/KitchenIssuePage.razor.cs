@@ -52,7 +52,7 @@ public partial class KitchenIssuePage
 
 		_cart.Clear();
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0, DateTime.Now);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0, DateOnly.FromDateTime(DateTime.Now).ToDateTime(TimeOnly.MaxValue));
 		foreach (var item in _rawMaterials)
 			_cart.Add(new()
 			{

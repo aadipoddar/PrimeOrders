@@ -114,6 +114,125 @@
         </div>
     </div>
 
+    <!-- Data Grid -->
+    <div class="grid-section">
+        <div class="grid-card">
+            <div class="grid-header">
+                <h3>Sale Details</h3>
+                <p>Complete list of sales with detailed information</p>
+            </div>
+            <div class="grid-content">
+                <SfGrid ID="_sfGrid"
+                        @ref="_sfGrid"
+                        DataSource="_filteredSaleOverviews"
+                        AllowSorting="true"
+                        AllowFiltering="true"
+                        AllowResizing="true"
+                        AllowPaging="true"
+                        AllowExcelExport="true"
+                        AllowPdfExport="true"
+                        CssClass="modern-grid"
+                        Toolbar="@(new List<string>() { "Search" })">
+                    <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+                    <GridColumns>
+                        <GridColumn Field="@nameof(SaleOverviewModel.BillNo)"
+                                    HeaderText="Bill #"
+                                    Width="120"
+                                    TextAlign="TextAlign.Center"
+                                    AllowFiltering="true" />
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.SaleDateTime)"
+                                    HeaderText="Sale Date"
+                                    Width="140"
+                                    Format="dd/MM/yyyy hh:mm tt"
+                                    AllowFiltering="true" />
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.LocationName)"
+                                    HeaderText="Location"
+                                    Width="150"
+                                    AllowFiltering="true" />
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.UserName)"
+                                    HeaderText="Sales Person"
+                                    Width="130"
+                                    AllowFiltering="true" />
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.PartyName)"
+                                    HeaderText="Party"
+                                    Width="150"
+                                    AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var sale = (context as SaleOverviewModel);
+                                    <span class="@(sale.PartyName != null ? "party-name" : "no-party")">
+                                        @(sale.PartyName ?? "Walk-in Customer")
+                                    </span>
+                                }
+                            </Template>
+                        </GridColumn>
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalProducts)"
+                                    HeaderText="Products"
+                                    Width="100"
+                                    TextAlign="TextAlign.Right"
+                                    AllowFiltering="false" />
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)"
+                                    HeaderText="Quantity"
+                                    Width="100"
+                                    Format="N2"
+                                    TextAlign="TextAlign.Right"
+                                    AllowFiltering="false" />
+
+                        <GridColumn HeaderText="Payment"
+                                    Width="120"
+                                    TextAlign="TextAlign.Center"
+                                    AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var sale = (context as SaleOverviewModel);
+                                    var primaryPayment = GetPrimaryPaymentMethod(sale);
+                                    <div class="payment-badge-container">
+                                        <span class="payment-badge @GetPaymentBadgeClass(primaryPayment)">
+                                            <i class="@GetPaymentIcon(primaryPayment)"></i>
+                                            @primaryPayment
+                                        </span>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+
+                        <GridColumn Field="@nameof(SaleOverviewModel.Total)"
+                                    HeaderText="Total Amount"
+                                    Width="130"
+                                    Format="N2"
+                                    TextAlign="TextAlign.Right"
+                                    AllowFiltering="false" />
+
+                        <GridColumn HeaderText="Actions"
+                                    Width="120"
+                                    TextAlign="TextAlign.Center"
+                                    AllowFiltering="false"
+                                    AllowSorting="false">
+                            <Template>
+                                @{
+                                    var sale = (context as SaleOverviewModel);
+                                    <button class="action-btn-grid view-details-btn"
+                                            @onclick="() => ViewSaleDetails(sale)"
+                                            title="View Sale Details">
+                                        <i class="fas fa-eye"></i>
+                                        <span>View</span>
+                                    </button>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="summary-cards">
         <div class="summary-card total-sales">
@@ -294,124 +413,6 @@
                         <ChartLegendSettings Visible="false" />
                     </SfChart>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Grid -->
-    <div class="grid-section">
-        <div class="grid-card">
-            <div class="grid-header">
-                <h3>Sale Details</h3>
-                <p>Complete list of sales with detailed information</p>
-            </div>
-            <div class="grid-content">
-                <SfGrid ID="_sfGrid"
-                        @ref="_sfGrid"
-                        DataSource="_filteredSaleOverviews"
-                        AllowSorting="true"
-                        AllowFiltering="true"
-                        AllowResizing="true"
-                        AllowPaging="true"
-                        AllowExcelExport="true"
-                        AllowPdfExport="true"
-                        CssClass="modern-grid">
-                    <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
-                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
-                    <GridColumns>
-                        <GridColumn Field="@nameof(SaleOverviewModel.BillNo)" 
-                                   HeaderText="Bill #" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.SaleDateTime)" 
-                                   HeaderText="Sale Date" 
-                                   Width="140" 
-                                   Format="dd/MM/yyyy hh:mm tt" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.LocationName)" 
-                                   HeaderText="Location" 
-                                   Width="150" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.UserName)" 
-                                   HeaderText="Sales Person" 
-                                   Width="130" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.PartyName)" 
-                                   HeaderText="Party" 
-                                   Width="150" 
-                                   AllowFiltering="true">
-                            <Template>
-                                @{
-                                    var sale = (context as SaleOverviewModel);
-                                    <span class="@(sale.PartyName != null ? "party-name" : "no-party")">
-                                        @(sale.PartyName ?? "Walk-in Customer")
-                                    </span>
-                                }
-                            </Template>
-                        </GridColumn>
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalProducts)" 
-                                   HeaderText="Products" 
-                                   Width="100" 
-                                   TextAlign="TextAlign.Right" 
-                                   AllowFiltering="false" />
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" 
-                                   HeaderText="Quantity" 
-                                   Width="100" 
-                                   Format="N2" 
-                                   TextAlign="TextAlign.Right" 
-                                   AllowFiltering="false" />
-                        
-                        <GridColumn HeaderText="Payment" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="true">
-                            <Template>
-                                @{
-                                    var sale = (context as SaleOverviewModel);
-                                    var primaryPayment = GetPrimaryPaymentMethod(sale);
-                                    <div class="payment-badge-container">
-                                        <span class="payment-badge @GetPaymentBadgeClass(primaryPayment)">
-                                            <i class="@GetPaymentIcon(primaryPayment)"></i>
-                                            @primaryPayment
-                                        </span>
-                                    </div>
-                                }
-                            </Template>
-                        </GridColumn>
-                        
-                        <GridColumn Field="@nameof(SaleOverviewModel.Total)" 
-                                   HeaderText="Total Amount" 
-                                   Width="130" 
-                                   Format="N2" 
-                                   TextAlign="TextAlign.Right" 
-                                   AllowFiltering="false" />
-                        
-                        <GridColumn HeaderText="Actions" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="false"
-                                   AllowSorting="false">
-                            <Template>
-                                @{
-                                    var sale = (context as SaleOverviewModel);
-                                    <button class="action-btn-grid view-details-btn" 
-                                            @onclick="() => ViewSaleDetails(sale)"
-                                            title="View Sale Details">
-                                        <i class="fas fa-eye"></i>
-                                        <span>View</span>
-                                    </button>
-                                }
-                            </Template>
-                        </GridColumn>
-                    </GridColumns>
-                </SfGrid>
             </div>
         </div>
     </div>

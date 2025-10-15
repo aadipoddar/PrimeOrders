@@ -40,8 +40,8 @@ public partial class PurchaseReport
 	private async Task LoadPurchaseData()
 	{
 		_purchaseOverviews = await PurchaseData.LoadPurchaseDetailsByDate(
-			_startDate.ToDateTime(new TimeOnly(0, 0)),
-			_endDate.ToDateTime(new TimeOnly(23, 59)));
+			_startDate.ToDateTime(TimeOnly.MinValue),
+			_endDate.ToDateTime(TimeOnly.MaxValue));
 
 		StateHasChanged();
 	}

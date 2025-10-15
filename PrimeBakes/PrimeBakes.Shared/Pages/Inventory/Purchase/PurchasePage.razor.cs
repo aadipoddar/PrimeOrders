@@ -126,10 +126,7 @@ public partial class PurchasePage
 	{
 		_allCart.Clear();
 
-		if (_selectedSupplier?.Id > 0)
-			_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_selectedSupplier.Id, _purchase.BillDateTime);
-		else
-			_rawMaterials = await CommonData.LoadTableDataByStatus<RawMaterialModel>(TableNames.RawMaterial);
+		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(_selectedSupplier?.Id ?? 0, DateOnly.FromDateTime(_purchase.BillDateTime).ToDateTime(TimeOnly.MaxValue));
 
 		var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 

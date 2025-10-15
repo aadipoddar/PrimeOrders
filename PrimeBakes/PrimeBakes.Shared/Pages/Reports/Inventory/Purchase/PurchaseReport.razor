@@ -91,6 +91,130 @@ else
             </div>
         </div>
 
+        <!-- Data Grid Section -->
+        <div class="grid-section">
+            <div class="section-header">
+                <h2><i class="fas fa-table"></i> Purchase Details</h2>
+                <div class="grid-actions">
+                    <button @onclick="ExportToExcel" class="export-btn" disabled="@_isProcessing">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Export to Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid-card">
+                <div class="grid-content">
+                    <SfGrid DataSource="_purchaseOverviews"
+                            AllowSorting="true"
+                            AllowFiltering="true"
+                            AllowResizing="true"
+                            AllowPaging="true"
+                            AllowExcelExport="true"
+                            AllowPdfExport="true"
+                            CssClass="modern-grid"
+                            Toolbar="@(new List<string>() { "Search" })">
+                        <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+                        <GridColumns>
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.BillNo)"
+                                        HeaderText="Bill No"
+                                        Width="120"
+                                        TextAlign="TextAlign.Center"
+                                        AllowFiltering="true" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.BillDateTime)"
+                                        HeaderText="Purchase Date"
+                                        Width="140"
+                                        Format="dd/MM/yyyy hh:mm tt"
+                                        AllowFiltering="true" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.SupplierName)"
+                                        HeaderText="Supplier"
+                                        Width="180"
+                                        AllowFiltering="true" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.UserName)"
+                                        HeaderText="Created By"
+                                        Width="130"
+                                        AllowFiltering="true" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.TotalItems)"
+                                        HeaderText="Items"
+                                        Width="80"
+                                        TextAlign="TextAlign.Right"
+                                        AllowFiltering="false" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.TotalQuantity)"
+                                        HeaderText="Quantity"
+                                        Width="100"
+                                        Format="N2"
+                                        TextAlign="TextAlign.Right"
+                                        AllowFiltering="false" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.BaseTotal)"
+                                        HeaderText="Base Total"
+                                        Width="120"
+                                        Format="C2"
+                                        TextAlign="TextAlign.Right"
+                                        AllowFiltering="false" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.DiscountAmount)"
+                                        HeaderText="Discount"
+                                        Width="100"
+                                        Format="C2"
+                                        TextAlign="TextAlign.Right"
+                                        AllowFiltering="false" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.TotalTaxAmount)"
+                                        HeaderText="Tax"
+                                        Width="100"
+                                        Format="C2"
+                                        TextAlign="TextAlign.Right"
+                                        AllowFiltering="false" />
+
+                            <GridColumn Field="@nameof(PurchaseOverviewModel.Total)"
+                                        HeaderText="Total Amount"
+                                        Width="130"
+                                        Format="C2"
+                                        TextAlign="TextAlign.Right"
+                                        AllowFiltering="false">
+                                <Template>
+                                    @{
+                                        var purchase = (context as PurchaseOverviewModel);
+                                        <div class="amount-cell">
+                                            <span class="amount-value @(purchase.Total > 50000 ? "high-amount" : purchase.Total > 10000 ? "medium-amount" : "normal-amount")">
+                                                ₹@purchase.Total.ToString("N2")
+                                            </span>
+                                        </div>
+                                    }
+                                </Template>
+                            </GridColumn>
+
+                            <GridColumn HeaderText="Actions"
+                                        Width="100"
+                                        TextAlign="TextAlign.Center"
+                                        AllowFiltering="false"
+                                        AllowSorting="false">
+                                <Template>
+                                    @{
+                                        var purchase = (context as PurchaseOverviewModel);
+                                    }
+                                    <button class="view-btn"
+                                            @onclick="() => ViewPurchaseDetails(purchase.PurchaseId)"
+                                            title="View Purchase Details">
+                                        <i class="fas fa-eye"></i>
+                                        <span>View</span>
+                                    </button>
+                                </Template>
+                            </GridColumn>
+
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+
         <!-- Summary Cards Section -->
         <div class="summary-section">
             <div class="section-header">
@@ -485,128 +609,6 @@ else
             </div>
         }
 
-        <!-- Data Grid Section -->
-        <div class="grid-section">
-            <div class="section-header">
-                <h2><i class="fas fa-table"></i> Purchase Details</h2>
-                <div class="grid-actions">
-                    <button @onclick="ExportToExcel" class="export-btn" disabled="@_isProcessing">
-                        <i class="fas fa-file-excel"></i>
-                        <span>Export to Excel</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="grid-card">
-                <div class="grid-content">
-                    <SfGrid DataSource="_purchaseOverviews"
-                            AllowSorting="true"
-                            AllowFiltering="true"
-                            AllowResizing="true"
-                            AllowPaging="true"
-                            AllowExcelExport="true"
-                            AllowPdfExport="true"
-                            CssClass="modern-grid">
-                        <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
-                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
-                        <GridColumns>
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.BillNo)" 
-                                       HeaderText="Bill No" 
-                                       Width="120" 
-                                       TextAlign="TextAlign.Center" 
-                                       AllowFiltering="true" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.BillDateTime)" 
-                                       HeaderText="Purchase Date" 
-                                       Width="140" 
-                                       Format="dd/MM/yyyy hh:mm tt" 
-                                       AllowFiltering="true" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.SupplierName)" 
-                                       HeaderText="Supplier" 
-                                       Width="180" 
-                                       AllowFiltering="true" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.UserName)" 
-                                       HeaderText="Created By" 
-                                       Width="130" 
-                                       AllowFiltering="true" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.TotalItems)" 
-                                       HeaderText="Items" 
-                                       Width="80" 
-                                       TextAlign="TextAlign.Right" 
-                                       AllowFiltering="false" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.TotalQuantity)" 
-                                       HeaderText="Quantity" 
-                                       Width="100" 
-                                       Format="N2" 
-                                       TextAlign="TextAlign.Right" 
-                                       AllowFiltering="false" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.BaseTotal)" 
-                                       HeaderText="Base Total" 
-                                       Width="120" 
-                                       Format="C2" 
-                                       TextAlign="TextAlign.Right" 
-                                       AllowFiltering="false" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.DiscountAmount)" 
-                                       HeaderText="Discount" 
-                                       Width="100" 
-                                       Format="C2" 
-                                       TextAlign="TextAlign.Right" 
-                                       AllowFiltering="false" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.TotalTaxAmount)" 
-                                       HeaderText="Tax" 
-                                       Width="100" 
-                                       Format="C2" 
-                                       TextAlign="TextAlign.Right" 
-                                       AllowFiltering="false" />
-                            
-                            <GridColumn Field="@nameof(PurchaseOverviewModel.Total)" 
-                                       HeaderText="Total Amount" 
-                                       Width="130" 
-                                       Format="C2" 
-                                       TextAlign="TextAlign.Right" 
-                                       AllowFiltering="false">
-                                <Template>
-                                    @{
-                                        var purchase = (context as PurchaseOverviewModel);
-                                        <div class="amount-cell">
-                                            <span class="amount-value @(purchase.Total > 50000 ? "high-amount" : purchase.Total > 10000 ? "medium-amount" : "normal-amount")">
-                                                ₹@purchase.Total.ToString("N2")
-                                            </span>
-                                        </div>
-                                    }
-                                </Template>
-                            </GridColumn>
-                            
-                            <GridColumn HeaderText="Actions" 
-                                       Width="100" 
-                                       TextAlign="TextAlign.Center" 
-                                       AllowFiltering="false"
-                                       AllowSorting="false">
-                                <Template>
-                                    @{
-                                        var purchase = (context as PurchaseOverviewModel);
-                                    }
-                                    <button class="view-btn" 
-                                            @onclick="() => ViewPurchaseDetails(purchase.PurchaseId)"
-                                            title="View Purchase Details">
-                                        <i class="fas fa-eye"></i>
-                                        <span>View</span>
-                                    </button>
-                                </Template>
-                            </GridColumn>
-                            
-                        </GridColumns>
-                    </SfGrid>
-                </div>
-            </div>
-        </div>
     </div>
 }
 

@@ -107,6 +107,118 @@
         </div>
     </div>
 
+     <!-- Data Grid -->
+    <div class="grid-section">
+        <div class="grid-card">
+            <div class="grid-header">
+                <h3>Order Details</h3>
+                <p>Complete list of orders with detailed information</p>
+            </div>
+            <div class="grid-content">
+                <SfGrid ID="_sfGrid"
+                        @ref="_sfGrid"
+                        DataSource="_orderOverviews"
+                        AllowSorting="true"
+                        AllowFiltering="true"
+                        AllowResizing="true"
+                        AllowPaging="true"
+                        AllowExcelExport="true"
+                        AllowPdfExport="true"
+                        CssClass="modern-grid"
+                        Toolbar="@(new List<string>() { "Search" })">
+                    <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+                    <GridColumns>
+                        <GridColumn Field="@nameof(OrderOverviewModel.OrderNo)" 
+                                   HeaderText="Order #" 
+                                   Width="100" 
+                                   TextAlign="TextAlign.Center" 
+                                   AllowFiltering="true" />
+                        
+                        <GridColumn Field="@nameof(OrderOverviewModel.OrderDateTime)" 
+                                   HeaderText="Order Date" 
+                                   Width="140" 
+                                   Format="dd/MM/yyyy hh:mm tt" 
+                                   AllowFiltering="true" />
+                        
+                        <GridColumn Field="@nameof(OrderOverviewModel.LocationName)" 
+                                   HeaderText="Location" 
+                                   Width="150" 
+                                   AllowFiltering="true" />
+                        
+                        <GridColumn Field="@nameof(OrderOverviewModel.UserName)" 
+                                   HeaderText="Created By" 
+                                   Width="130" 
+                                   AllowFiltering="true" />
+                        
+                        <GridColumn Field="@nameof(OrderOverviewModel.TotalProducts)" 
+                                   HeaderText="Products" 
+                                   Width="100" 
+                                   TextAlign="TextAlign.Right" 
+                                   AllowFiltering="false" />
+                        
+                        <GridColumn Field="@nameof(OrderOverviewModel.TotalQuantity)" 
+                                   HeaderText="Quantity" 
+                                   Width="100" 
+                                   Format="N2" 
+                                   TextAlign="TextAlign.Right" 
+                                   AllowFiltering="false" />
+                        
+                        <GridColumn HeaderText="Status" 
+                                   Width="120" 
+                                   TextAlign="TextAlign.Center" 
+                                   AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var order = (context as OrderOverviewModel);
+                                    <div class="status-badge-container">
+                                        <span class="status-badge @(order.SaleId.HasValue ? "status-completed" : "status-pending")">
+                                            <i class="@(order.SaleId.HasValue ? "fas fa-check-circle" : "fas fa-clock")"></i>
+                                            @(order.SaleId.HasValue ? "Completed" : "Pending")
+                                        </span>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                        
+                        <GridColumn Field="@nameof(OrderOverviewModel.SaleBillNo)" 
+                                   HeaderText="Sale Bill #" 
+                                   Width="130" 
+                                   TextAlign="TextAlign.Center" 
+                                   AllowFiltering="true">
+                            <Template>
+                                @{
+                                    var order = (context as OrderOverviewModel);
+                                    <span class="@(order.SaleBillNo != null ? "bill-number" : "no-bill")">
+                                        @(order.SaleBillNo ?? "-")
+                                    </span>
+                                }
+                            </Template>
+                        </GridColumn>
+                        
+                        <GridColumn HeaderText="Actions" 
+                                   Width="120" 
+                                   TextAlign="TextAlign.Center" 
+                                   AllowFiltering="false"
+                                   AllowSorting="false">
+                            <Template>
+                                @{
+                                    var order = (context as OrderOverviewModel);
+                                    <button class="action-btn-grid view-details-btn" 
+                                            @onclick="() => ViewOrderDetails(order)"
+                                            title="View Order Details">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Details</span>
+                                    </button>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="summary-cards">
         <div class="summary-card total-orders">
@@ -252,117 +364,6 @@
                         <ChartLegendSettings Visible="false" />
                     </SfChart>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Grid -->
-    <div class="grid-section">
-        <div class="grid-card">
-            <div class="grid-header">
-                <h3>Order Details</h3>
-                <p>Complete list of orders with detailed information</p>
-            </div>
-            <div class="grid-content">
-                <SfGrid ID="_sfGrid"
-                        @ref="_sfGrid"
-                        DataSource="_orderOverviews"
-                        AllowSorting="true"
-                        AllowFiltering="true"
-                        AllowResizing="true"
-                        AllowPaging="true"
-                        AllowExcelExport="true"
-                        AllowPdfExport="true"
-                        CssClass="modern-grid">
-                    <GridPageSettings PageSize="15" PageSizes="@(new int[] { 10, 15, 25, 50 })" />
-                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
-                    <GridColumns>
-                        <GridColumn Field="@nameof(OrderOverviewModel.OrderNo)" 
-                                   HeaderText="Order #" 
-                                   Width="100" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(OrderOverviewModel.OrderDateTime)" 
-                                   HeaderText="Order Date" 
-                                   Width="140" 
-                                   Format="dd/MM/yyyy hh:mm tt" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(OrderOverviewModel.LocationName)" 
-                                   HeaderText="Location" 
-                                   Width="150" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(OrderOverviewModel.UserName)" 
-                                   HeaderText="Created By" 
-                                   Width="130" 
-                                   AllowFiltering="true" />
-                        
-                        <GridColumn Field="@nameof(OrderOverviewModel.TotalProducts)" 
-                                   HeaderText="Products" 
-                                   Width="100" 
-                                   TextAlign="TextAlign.Right" 
-                                   AllowFiltering="false" />
-                        
-                        <GridColumn Field="@nameof(OrderOverviewModel.TotalQuantity)" 
-                                   HeaderText="Quantity" 
-                                   Width="100" 
-                                   Format="N2" 
-                                   TextAlign="TextAlign.Right" 
-                                   AllowFiltering="false" />
-                        
-                        <GridColumn HeaderText="Status" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="true">
-                            <Template>
-                                @{
-                                    var order = (context as OrderOverviewModel);
-                                    <div class="status-badge-container">
-                                        <span class="status-badge @(order.SaleId.HasValue ? "status-completed" : "status-pending")">
-                                            <i class="@(order.SaleId.HasValue ? "fas fa-check-circle" : "fas fa-clock")"></i>
-                                            @(order.SaleId.HasValue ? "Completed" : "Pending")
-                                        </span>
-                                    </div>
-                                }
-                            </Template>
-                        </GridColumn>
-                        
-                        <GridColumn Field="@nameof(OrderOverviewModel.SaleBillNo)" 
-                                   HeaderText="Sale Bill #" 
-                                   Width="130" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="true">
-                            <Template>
-                                @{
-                                    var order = (context as OrderOverviewModel);
-                                    <span class="@(order.SaleBillNo != null ? "bill-number" : "no-bill")">
-                                        @(order.SaleBillNo ?? "-")
-                                    </span>
-                                }
-                            </Template>
-                        </GridColumn>
-                        
-                        <GridColumn HeaderText="Actions" 
-                                   Width="120" 
-                                   TextAlign="TextAlign.Center" 
-                                   AllowFiltering="false"
-                                   AllowSorting="false">
-                            <Template>
-                                @{
-                                    var order = (context as OrderOverviewModel);
-                                    <button class="action-btn-grid view-details-btn" 
-                                            @onclick="() => ViewOrderDetails(order)"
-                                            title="View Order Details">
-                                        <i class="fas fa-eye"></i>
-                                        <span>Details</span>
-                                    </button>
-                                }
-                            </Template>
-                        </GridColumn>
-                    </GridColumns>
-                </SfGrid>
             </div>
         </div>
     </div>
