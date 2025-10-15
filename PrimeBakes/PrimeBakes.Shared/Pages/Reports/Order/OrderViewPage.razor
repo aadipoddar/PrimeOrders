@@ -241,7 +241,8 @@ else
                         AllowFiltering="true"
                         AllowResizing="true"
                         AllowExcelExport="true"
-                        CssClass="products-grid">
+                        CssClass="products-grid"
+                        Toolbar="@(new List<string>() { "Search" })">
                     <GridPageSettings PageSize="10" PageSizes="@(new int[] { 5, 10, 15, 25, 50 })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
                     <GridColumns>

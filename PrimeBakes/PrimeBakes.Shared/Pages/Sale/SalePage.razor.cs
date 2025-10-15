@@ -129,8 +129,8 @@ public partial class SalePage
 			}
 		}
 
-		_sale.LocationId = _user.LocationId;
 		_sale.UserId = _user.Id;
+		_sale.LocationId = _sale.Id > 0 ? _sale.LocationId : _user.LocationId;
 		_sale.BillNo = _sale.Id > 0 ? _sale.BillNo : await GenerateCodes.GenerateSaleBillNo(_sale);
 	}
 
@@ -146,7 +146,7 @@ public partial class SalePage
 	{
 		_allCart.Clear();
 
-		var allProducts = await ProductData.LoadProductByLocation(_user.LocationId);
+		var allProducts = await ProductData.LoadProductByLocation(_sale.LocationId);
 		var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
 		foreach (var product in allProducts)
