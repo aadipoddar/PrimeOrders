@@ -208,7 +208,8 @@ else
 							<SfGrid DataSource="@_productLocations"
 									@ref="_sfRatesGrid"
 									AllowSorting="true"
-									CssClass="custom-grid rates-grid-table">
+									CssClass="custom-grid rates-grid-table"
+									Toolbar="@(new List<string>() { "Search" })">
 								<GridColumns>
 									<GridColumn Field="@nameof(ProductLocationOverviewModel.LocationId)"
 												HeaderText="Location"
@@ -257,7 +258,8 @@ else
 							AllowFiltering="true"
 							AllowResizing="true"
 							AllowPaging="true"
-							CssClass="custom-grid">
+							CssClass="custom-grid"
+							Toolbar="@(new List<string>() { "Search" })">
 						<GridPageSettings PageSize="10"></GridPageSettings>
 						<GridEvents RowSelected="OnProductRowSelected" TValue="ProductModel" />
 						<GridColumns>

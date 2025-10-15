@@ -43,9 +43,14 @@ public partial class OrderPage
 		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
 		_selectedCategoryId = 0;
 
+		OrderModel? order = null;
+
+		if (await DataStorageService.LocalExists(StorageFileNames.OrderDataFileName))
+			order = System.Text.Json.JsonSerializer.Deserialize<OrderModel>(await DataStorageService.LocalGetAsync(StorageFileNames.OrderDataFileName));
+
 		var mainLocationProducts = await ProductData.LoadProductByLocation(1);
-		var userLocationProducts = await ProductData.LoadProductByLocation(_user.LocationId);
-		var allProducts = mainLocationProducts.Where(x => userLocationProducts.Any(y => y.ProductId == x.ProductId)).ToList();
+		var orderLocationProducts = await ProductData.LoadProductByLocation(order is not null && order.LocationId > 0 ? order.LocationId : _user.LocationId);
+		var allProducts = mainLocationProducts.Where(x => orderLocationProducts.Any(y => y.ProductId == x.ProductId)).ToList();
 		foreach (var product in allProducts)
 			_cart.Add(new()
 			{

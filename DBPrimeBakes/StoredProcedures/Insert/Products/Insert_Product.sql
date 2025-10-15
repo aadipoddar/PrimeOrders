@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Product]
-	@Id INT,
+	@Id INT OUTPUT,
 	@Code VARCHAR(50),
 	@Name VARCHAR(250),
 	@ProductCategoryId INT,
@@ -12,6 +12,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[Product] ([ProductCategoryId], [Code], [Name], [TaxId], [Rate], [Status])
 		VALUES (@ProductCategoryId, @Code, @Name, @TaxId, @Rate, @Status);
+		SET @Id = SCOPE_IDENTITY();
 	END
 
 	ELSE
@@ -25,4 +26,5 @@ BEGIN
 			[Status] = @Status
 		WHERE [Id] = @Id;
 	END
+	SELECT @Id AS Id;
 END

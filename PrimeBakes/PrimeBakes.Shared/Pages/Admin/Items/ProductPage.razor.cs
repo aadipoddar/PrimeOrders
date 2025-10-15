@@ -83,29 +83,50 @@ public partial class ProductPage
 
 		try
 		{
-			await ProductData.InsertProduct(_productModel);
+			bool update = _productModel.Id != 0;
 
-			if (_productModel.Id == 0)
+			_productModel.Id = await ProductData.InsertProduct(_productModel);
+
+			if (!update)
 			{
-				var locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-				foreach (var location in locations)
-					await ProductData.InsertProductLocation(new()
-					{
-						Id = 0,
-						ProductId = _productModel.Id,
-						LocationId = location.Id,
-						Rate = _productModel.Rate,
-						Status = true
-					});
+				if (_productModel.Status)
+				{
+					var locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+					foreach (var location in locations)
+						await ProductData.InsertProductLocation(new()
+						{
+							Id = 0,
+							ProductId = _productModel.Id,
+							LocationId = location.Id,
+							Rate = _productModel.Rate,
+							Status = true
+						});
+				}
 
 				_successMessage = "Product added successfully!";
 			}
 			else
+			{
+				if (!_productModel.Status)
+				{
+					var productLocations = await ProductData.LoadProductRateByProduct(_productModel.Id);
+					foreach (var productLocation in productLocations)
+						await ProductData.InsertProductLocation(new()
+						{
+							Id = productLocation.Id,
+							ProductId = productLocation.ProductId,
+							LocationId = productLocation.LocationId,
+							Rate = productLocation.Rate,
+							Status = false
+						});
+				}
+
 				_successMessage = "Product updated successfully!";
+			}
 
 			await _sfToast.ShowAsync();
 			await LoadData();
-			await LoadProductRates(_productModel.Id, _productModel.Name);
+			ResetProductForm();
 		}
 		catch (Exception ex)
 		{

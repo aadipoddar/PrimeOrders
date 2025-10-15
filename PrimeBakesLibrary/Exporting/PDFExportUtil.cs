@@ -184,73 +184,185 @@ internal static class PDFExportUtil
 	}
 
 	/// <summary>
-	/// Draws a summary section with financial totals
+	/// Draws a summary section with financial totals - compact design with optimal space utilization
 	/// </summary>
 	internal static float DrawSummarySection(PdfDocument pdfDocument, PdfPage pdfPage, float currentY,
 		Dictionary<string, string> summaryItems, decimal grandTotal, string additionalInfo = null)
 	{
+		// Calculate optimal layout based on number of items
+		var items = summaryItems.Where(x => !string.IsNullOrEmpty(x.Value)).ToList();
+		var itemCount = items.Count;
+		
+		if (itemCount == 0)
+		{
+			// If no items, just draw grand total and amount in words compactly
+			return DrawCompactGrandTotalOnly(pdfPage, currentY, grandTotal, additionalInfo);
+		}
+
+		var pageWidth = pdfPage.GetClientSize().Width;
+		var availableWidth = pageWidth - 30; // Total available width with margins
+
+		// Smart column calculation for optimal space usage
+		var columnsCount = itemCount <= 2 ? 1 : itemCount <= 6 ? 2 : 3;
+		var rowsPerColumn = (int)Math.Ceiling((double)itemCount / columnsCount);
+		
+		// Calculate actual required width based on content
+		var maxLabelWidth = 0f;
+		var maxValueWidth = 0f;
+		
+		foreach (var item in items)
+		{
+			var labelWidth = _normalFont.MeasureString(item.Key).Width;
+			var valueWidth = _boldFont.MeasureString(item.Value).Width;
+			maxLabelWidth = Math.Max(maxLabelWidth, labelWidth);
+			maxValueWidth = Math.Max(maxValueWidth, valueWidth);
+		}
+		
+		// Minimum column width based on content + small padding
+		var minColumnWidth = maxLabelWidth + maxValueWidth + 15f; // 15f padding between label and value
+		var totalMinWidth = (minColumnWidth * columnsCount) + (columnsCount - 1) * 10f; // 10f gap between columns
+		
+		// Use minimum required width, but not less than 60% of available width for readability
+		var summaryWidth = Math.Max(totalMinWidth + 20f, availableWidth * 0.6f); // 20f for margins
+		var summaryX = (pageWidth - summaryWidth) / 2; // Center the summary section
+		
+		// Recalculate column width with actual summary width
+		var columnGap = 10f;
+		var columnWidth = (summaryWidth - 20f - (columnGap * (columnsCount - 1))) / columnsCount;
+
+		// Calculate compact height
+		var headerHeight = 18f; // Summary header
+		var itemsHeight = rowsPerColumn * 12f; // Reduced from 14f to 12f for more compact rows
+		var grandTotalHeight = 18f; // Grand total bar
+		var amountWordsHeight = !string.IsNullOrEmpty(additionalInfo) ? 25f : 20f; // Amount in words
+		var summaryHeight = headerHeight + itemsHeight + grandTotalHeight + amountWordsHeight + 12f; // Total with padding
+
 		// Check if page has space for summary
-		if (currentY + 200 > pdfPage.GetClientSize().Height - _pageMargin) // Reduced from 250
+		if (currentY + summaryHeight > pdfPage.GetClientSize().Height - _pageMargin)
 		{
 			pdfDocument.Pages.Add();
 			pdfPage = pdfDocument.Pages[pdfDocument.Pages.Count - 1];
 			currentY = _pageMargin;
 		}
 
-		var summaryWidth = 220f; // Reduced from 250f
-		var summaryX = pdfPage.GetClientSize().Width - summaryWidth - 15; // Reduced margin
-		var summaryHeight = 200f; // Reduced from 250f
-
 		var summaryRect = new RectangleF(summaryX, currentY, summaryWidth, summaryHeight);
 		pdfPage.Graphics.DrawRectangle(new PdfPen(Color.Black, 1), new PdfSolidBrush(_lightGray), summaryRect);
 
-		var summaryY = currentY + 8; // Reduced from 10
-		pdfPage.Graphics.DrawString("Summary", _subHeaderFont, new PdfSolidBrush(_primaryColor), new PointF(summaryX + 8, summaryY)); // Reduced margin
+		var summaryY = currentY + 6;
+		pdfPage.Graphics.DrawString("Summary", _subHeaderFont, new PdfSolidBrush(_primaryColor), new PointF(summaryX + 8, summaryY));
 
-		summaryY += 20; // Reduced from 25
+		summaryY += 16; // Reduced spacing
 
-		// Draw summary items with smaller spacing
-		foreach (var item in summaryItems)
-			if (!string.IsNullOrEmpty(item.Value))
+		// Draw summary items in compact columns
+		var currentColumn = 0;
+		var currentRow = 0;
+		var startY = summaryY;
+
+		foreach (var item in items)
+		{
+			var columnX = summaryX + 8 + (currentColumn * (columnWidth + columnGap));
+			var itemY = startY + (currentRow * 12f); // Compact row height
+
+			DrawSummaryLine(pdfPage, item.Key, item.Value, columnWidth, columnX, itemY);
+
+			currentRow++;
+			if (currentRow >= rowsPerColumn)
 			{
-				summaryY += 12; // Reduced from 15
-				DrawSummaryLine(pdfPage, item.Key, item.Value, summaryWidth, summaryX, summaryY);
+				currentRow = 0;
+				currentColumn++;
 			}
+		}
 
-		// Draw grand total
-		summaryY += 20; // Reduced from 25
-		var grandTotalRect = new RectangleF(summaryX + 4, summaryY - 4, summaryWidth - 8, 20); // Reduced height from 25
+		// Move Y position past the items with minimal spacing
+		summaryY = startY + (rowsPerColumn * 12f) + 6f;
+
+		// Draw grand total across full width
+		var grandTotalRect = new RectangleF(summaryX + 4, summaryY, summaryWidth - 8, 18);
 		pdfPage.Graphics.DrawRectangle(new PdfPen(_primaryColor, 2), new PdfSolidBrush(_primaryColor), grandTotalRect);
-		pdfPage.Graphics.DrawString("Grand Total: ", new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold), // Reduced from 10
-			PdfBrushes.White, new PointF(summaryX + 8, summaryY)); // Reduced margin
+		pdfPage.Graphics.DrawString("Grand Total: ", new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold),
+			PdfBrushes.White, new PointF(summaryX + 8, summaryY + 1));
 
 		var grandTotalText = grandTotal.FormatIndianCurrency();
-		var grandTotalFont = new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold); // Reduced from 10
+		var grandTotalFont = new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
 		var grandTotalSize = grandTotalFont.MeasureString(grandTotalText);
 
 		pdfPage.Graphics.DrawString(grandTotalText, grandTotalFont,
-			PdfBrushes.White, new PointF(summaryX + summaryWidth - grandTotalSize.Width - 12, summaryY)); // Reduced margin
+			PdfBrushes.White, new PointF(summaryX + summaryWidth - grandTotalSize.Width - 12, summaryY + 1));
 
-		// Draw amount in words with smaller spacing
-		summaryY += 25; // Reduced from 30
+		summaryY += 20;
+
+		// Compact amount in words and payment mode layout
 		var amountInWords = grandTotal.ToNumericWords();
 		if (string.IsNullOrEmpty(amountInWords))
 			amountInWords = "Zero";
 		amountInWords += " Rupees Only";
 
-		var availableWidth = summaryWidth - 16; // Reduced from 20
-		DrawWrappedText(pdfPage, amountInWords, _boldFont, new PdfSolidBrush(_primaryColor),
-						new RectangleF(summaryX + 8, summaryY, availableWidth, 40), // Reduced height from 50
-						PdfTextAlignment.Left, ref summaryY);
-
-		// Draw additional info if provided
 		if (!string.IsNullOrEmpty(additionalInfo))
 		{
-			summaryY += 15; // Reduced from 20
-			DrawSummaryLine(pdfPage, "Payment Mode: ", additionalInfo, summaryWidth, summaryX, summaryY);
+			// Compact two-row layout instead of two columns for better space usage
+			pdfPage.Graphics.DrawString($"Amount: {amountInWords}", _boldFont, new PdfSolidBrush(_primaryColor),
+				new PointF(summaryX + 8, summaryY));
+			
+			summaryY += 12f;
+			pdfPage.Graphics.DrawString($"Payment Mode: {additionalInfo}", _boldFont, new PdfSolidBrush(_secondaryColor),
+				new PointF(summaryX + 8, summaryY));
+		}
+		else
+		{
+			pdfPage.Graphics.DrawString($"Amount: {amountInWords}", _boldFont, new PdfSolidBrush(_primaryColor),
+				new PointF(summaryX + 8, summaryY));
 		}
 
-		return summaryRect.Height + summaryRect.Y + 15; // Reduced from 20
+		return summaryRect.Y + summaryRect.Height + 8; // Reduced bottom margin
+	}
+
+	/// <summary>
+	/// Draws a compact grand total section when there are no summary items
+	/// </summary>
+	private static float DrawCompactGrandTotalOnly(PdfPage pdfPage, float currentY, decimal grandTotal, string additionalInfo)
+	{
+		var pageWidth = pdfPage.GetClientSize().Width;
+		var summaryWidth = pageWidth * 0.4f; // Even more compact when no items
+		var summaryX = (pageWidth - summaryWidth) / 2;
+		var summaryHeight = !string.IsNullOrEmpty(additionalInfo) ? 50f : 35f;
+
+		var summaryRect = new RectangleF(summaryX, currentY, summaryWidth, summaryHeight);
+		pdfPage.Graphics.DrawRectangle(new PdfPen(Color.Black, 1), new PdfSolidBrush(_lightGray), summaryRect);
+
+		var summaryY = currentY + 6;
+		
+		// Grand total
+		var grandTotalRect = new RectangleF(summaryX + 4, summaryY, summaryWidth - 8, 18);
+		pdfPage.Graphics.DrawRectangle(new PdfPen(_primaryColor, 2), new PdfSolidBrush(_primaryColor), grandTotalRect);
+		pdfPage.Graphics.DrawString("Grand Total: ", new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold),
+			PdfBrushes.White, new PointF(summaryX + 8, summaryY + 1));
+
+		var grandTotalText = grandTotal.FormatIndianCurrency();
+		var grandTotalFont = new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
+		var grandTotalSize = grandTotalFont.MeasureString(grandTotalText);
+
+		pdfPage.Graphics.DrawString(grandTotalText, grandTotalFont,
+			PdfBrushes.White, new PointF(summaryX + summaryWidth - grandTotalSize.Width - 12, summaryY + 1));
+
+		summaryY += 22;
+
+		// Amount in words
+		var amountInWords = grandTotal.ToNumericWords();
+		if (string.IsNullOrEmpty(amountInWords))
+			amountInWords = "Zero";
+		amountInWords += " Rupees Only";
+
+		pdfPage.Graphics.DrawString($"Amount: {amountInWords}", _boldFont, new PdfSolidBrush(_primaryColor),
+			new PointF(summaryX + 8, summaryY));
+
+		if (!string.IsNullOrEmpty(additionalInfo))
+		{
+			summaryY += 12f;
+			pdfPage.Graphics.DrawString($"Payment: {additionalInfo}", _boldFont, new PdfSolidBrush(_secondaryColor),
+				new PointF(summaryX + 8, summaryY));
+		}
+
+		return summaryRect.Y + summaryRect.Height + 8;
 	}
 
 	/// <summary>
@@ -288,13 +400,61 @@ internal static class PDFExportUtil
 	}
 
 	/// <summary>
-	/// Draws a summary line with label and value
+	/// Draws a summary line with label and value - optimized for column layout
 	/// </summary>
-	internal static void DrawSummaryLine(PdfPage pdfPage, string label, string value, float summaryWidth, float summaryX, float summaryY)
+	internal static void DrawSummaryLine(PdfPage pdfPage, string label, string value, float columnWidth, float columnX, float summaryY)
 	{
-		pdfPage.Graphics.DrawString(label, _normalFont, PdfBrushes.Black, new PointF(summaryX + 8, summaryY)); // Reduced margin
-		pdfPage.Graphics.DrawString(value, _boldFont, new PdfSolidBrush(_secondaryColor),
-			new PointF(summaryX + summaryWidth - _boldFont.MeasureString(value).Width - 12, summaryY)); // Reduced margin
+		// Use smaller font for more compact display
+		var labelFont = new PdfStandardFont(PdfFontFamily.Helvetica, 7); // Reduced from default for compact layout
+		var valueFont = new PdfStandardFont(PdfFontFamily.Helvetica, 7, PdfFontStyle.Bold); // Reduced from default
+		
+		// Measure text to ensure proper alignment
+		var labelSize = labelFont.MeasureString(label);
+		var valueSize = valueFont.MeasureString(value);
+		
+		// Add colon for cleaner appearance if not present
+		var displayLabel = label.EndsWith(":") ? label : label + ":";
+		var availableWidth = columnWidth - 4f; // Small margin within column
+		
+		// Smart layout: if both fit comfortably, align value to right; otherwise use inline format
+		if (labelSize.Width + valueSize.Width + 12f <= availableWidth) // 12f for comfortable spacing
+		{
+			// Draw label on the left
+			pdfPage.Graphics.DrawString(displayLabel, labelFont, PdfBrushes.Black, new PointF(columnX, summaryY));
+			
+			// Draw value aligned to the right of the column
+			var valueX = columnX + columnWidth - valueSize.Width - 2f;
+			pdfPage.Graphics.DrawString(value, valueFont, new PdfSolidBrush(_secondaryColor), 
+				new PointF(valueX, summaryY));
+		}
+		else
+		{
+			// Inline format for space efficiency: "Label: Value"
+			pdfPage.Graphics.DrawString(displayLabel, labelFont, PdfBrushes.Black, new PointF(columnX, summaryY));
+			
+			var labelWidth = labelFont.MeasureString(displayLabel).Width;
+			var remainingWidth = availableWidth - labelWidth - 2f; // 2f spacing
+			
+			// Check if value fits in remaining space
+			if (valueSize.Width <= remainingWidth)
+			{
+				pdfPage.Graphics.DrawString(" " + value, valueFont, new PdfSolidBrush(_secondaryColor), 
+					new PointF(columnX + labelWidth, summaryY));
+			}
+			else
+			{
+				// Truncate value if necessary
+				var truncatedValue = value;
+				while (valueFont.MeasureString(" " + truncatedValue + "...").Width > remainingWidth && truncatedValue.Length > 3)
+				{
+					truncatedValue = truncatedValue.Substring(0, truncatedValue.Length - 1);
+				}
+				
+				var finalValue = truncatedValue == value ? " " + value : " " + truncatedValue + "...";
+				pdfPage.Graphics.DrawString(finalValue, valueFont, new PdfSolidBrush(_secondaryColor), 
+					new PointF(columnX + labelWidth, summaryY));
+			}
+		}
 	}
 
 	/// <summary>

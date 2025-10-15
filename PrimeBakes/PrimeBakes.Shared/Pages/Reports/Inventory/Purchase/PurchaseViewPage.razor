@@ -11,6 +11,8 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
+<PageTitle>Purchase Details - @(_purchaseOverview?.BillNo?? "Loading...") - PrimeBakes</PageTitle>
+
 @if (_isLoading)
 {
     <div class="loading-overlay">

@@ -55,12 +55,11 @@ public partial class OrderViewPage
 		{
 			// Load detailed order products
 			var orderDetails = await OrderData.LoadOrderDetailByOrder(OrderId);
-			var products = await ProductData.LoadProductByLocation(_orderOverview.LocationId);
 
 			// Load product information for each order detail
 			foreach (var detail in orderDetails)
 			{
-				var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
+				var product = (await ProductData.LoadProductRateByProduct(detail.ProductId)).Where(p => p.LocationId == _orderOverview.LocationId).FirstOrDefault();
 				if (product is not null)
 				{
 					// Load category information
@@ -132,7 +131,7 @@ public partial class OrderViewPage
 		List<OrderProductCartModel> cart = [];
 		foreach (var product in orderDetails)
 		{
-			var prod = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, product.ProductId);
+			var prod = (await ProductData.LoadProductRateByProduct(product.ProductId)).Where(p => p.LocationId == _orderOverview.LocationId).FirstOrDefault();
 			cart.Add(new()
 			{
 				ProductId = product.ProductId,
