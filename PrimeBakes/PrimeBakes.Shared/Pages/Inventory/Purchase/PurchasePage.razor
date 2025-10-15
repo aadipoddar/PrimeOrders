@@ -60,8 +60,33 @@ else
 				<GridPageSettings PageSize="10" />
 
 				<GridColumns>
-					<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.RawMaterialName)" HeaderText="Raw Material" Width="35%" />
-					<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.Quantity)" HeaderText="Quantity" Width="25%" TextAlign="TextAlign.Center">
+					<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.RawMaterialName)" HeaderText="Raw Material" Width="30%" />
+					<GridColumn HeaderText="Rate" Width="15%" TextAlign="TextAlign.Center">
+						<Template>
+							@{
+								var item = (context as PurchaseRawMaterialCartModel);
+							}
+							@if (item is not null && item.Quantity > 0)
+							{
+								<div class="rate-section">
+									<SfNumericTextBox TValue="decimal"
+													  Value="@item.Rate"
+													  ValueChanged="@((decimal value) => UpdateRate(item, value))"
+													  Min="0"
+													  Step="0.01m"
+													  type="tel"
+													  Format="N2"
+													  Width="70px"
+													  CssClass="rate-input" />
+								</div>
+							}
+							else if (item is not null)
+							{
+								<span class="total-value">@item.Rate.FormatIndianCurrency()</span>
+							}
+						</Template>
+					</GridColumn>
+					<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.Quantity)" HeaderText="Qty" Width="15%" TextAlign="TextAlign.Center">
 						<Template>
 							@{
 								var item = (context as PurchaseRawMaterialCartModel);
@@ -77,55 +102,65 @@ else
 									}
 									else
 									{
-										<div class="quantity-controls">
-											<div class="quantity-input-wrapper">
-												<SfNumericTextBox TValue="decimal"
-																  Value="@item.Quantity"
-																  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
-																  Min="0"
-																  Step="1"
-																  type="tel"
-																  ShowSpinButton=false
-																  Format="N2"
-																  Width="60px"
-																  CssClass="quantity-input" />
-											</div>
+										<div class="rate-section">
+											<SfNumericTextBox TValue="decimal"
+															  Value="@item.Quantity"
+															  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
+															  Min="0"
+															  Step="1"
+															  type="tel"
+															  Format="N2"
+															  Width="30px"
+															  CssClass="rate-input" />
 										</div>
 									}
 								</div>
 							}
 						</Template>
 					</GridColumn>
-					<GridColumn HeaderText="Amount" Width="20%" TextAlign="TextAlign.Right">
+					<GridColumn HeaderText="Total" Width="15%" TextAlign="TextAlign.Right">
 						<Template>
 							@{
 								var item = (context as PurchaseRawMaterialCartModel);
 							}
 							@if (item is not null)
 							{
-								<div class="price-total-column">
-									<div class="price-section">
-										<span class="price-label">Rate:</span>
-										<span class="price-value">@item.Rate.FormatIndianCurrency()</span>
-									</div>
-									<div class="total-section">
-										<span class="total-label">Total:</span>
-										<span class="total-value">@item.Total.FormatIndianCurrency()</span>
-									</div>
+								<span class="total-value">@item.Total.FormatIndianCurrency()</span>
+							}
+						</Template>
+					</GridColumn>
+					<GridColumn HeaderText="Unit" Width="10%" TextAlign="TextAlign.Center">
+						<Template>
+							@{
+								var item = (context as PurchaseRawMaterialCartModel);
+							}
+							@if (item is not null)
+							{
+								<div class="unit-section">
+									<SfTextBox Value="@item.MeasurementUnit"
+											   ValueChanged="@((string value) => UpdateUnit(item, value))"
+											   Width="60px"
+											   CssClass="unit-input"
+											   Placeholder="Unit" />
 								</div>
 							}
 						</Template>
 					</GridColumn>
-					<GridColumn HeaderText="🖊️" Width="10%" TextAlign="TextAlign.Right">
+					<GridColumn HeaderText="Actions" Width="20%" TextAlign="TextAlign.Center">
 						<Template>
 							@{
 								var item = (context as PurchaseRawMaterialCartModel);
 							}
 							@if (item is not null && item.Quantity > 0)
 							{
-								<button class="edit-button" @onclick="() => OpenRawMaterialDetailsDialog(item)" @onclick:stopPropagation="true" title="Edit Raw Material Details">
-									<span class="edit-icon">⚙️</span>
-								</button>
+								<div class="action-buttons-group">
+									<button class="edit-button" @onclick="() => OpenRawMaterialDetailsDialog(item)" @onclick:stopPropagation="true" title="Edit Details" disabled="@_isSaving">
+										<span class="edit-icon">⚙️ Edit</span>
+									</button>
+									<button class="remove-button" @onclick="() => RemoveFromCart(item)" @onclick:stopPropagation="true" title="Remove from Cart" disabled="@_isSaving">
+										<span class="remove-icon">🗑️ Remove</span>
+									</button>
+								</div>
 							}
 						</Template>
 					</GridColumn>
@@ -226,13 +261,13 @@ else
 	</DialogTemplates>
 </SfDialog>
 
-<!-- Raw Material Details Dialog -->
+<!-- Raw Material Details Dialog - Consolidated -->
 <SfDialog ID="_sfRawMaterialDetailsDialog"
 		  @ref="_sfRawMaterialDetailsDialog"
-		  Width="500px"
+		  Width="900px"
 		  Height="auto"
 		  AllowDragging="true"
-		  EnableResize="false"
+		  EnableResize="true"
 		  @bind-Visible="_rawMaterialDetailsDialogVisible"
 		  IsModal="true">
 	<DialogPositionData X="Center" Y="Center" />
@@ -240,68 +275,7 @@ else
 		<Header>
 			<div class="dialog-header">
 				<span class="material-icon">📦</span>
-				<span>Edit Raw Material Details</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				@if (_selectedRawMaterialForEdit != null)
-				{
-					<div class="material-info-section">
-						<h4 class="material-title">@_selectedRawMaterialForEdit.RawMaterialName</h4>
-						<div class="material-summary">
-							<span class="summary-item">Qty: <strong>@_selectedRawMaterialForEdit.Quantity.ToString("N2")</strong></span>
-							<span class="summary-item">Rate: <strong>₹@_selectedRawMaterialForEdit.Rate.ToString("N2")</strong></span>
-							<span class="summary-item">Total: <strong>₹@_selectedRawMaterialForEdit.Total.ToString("N2")</strong></span>
-							<span class="summary-item">Unit: <strong>@_selectedRawMaterialForEdit.MeasurementUnit</strong></span>
-						</div>
-					</div>
-
-					<div class="action-buttons-section">
-						<button class="detail-action-button basic-button" @onclick="() => OpenBasicDetails()">
-							<span class="button-icon">📋</span>
-							<span class="button-text">Basic</span>
-							<span class="button-description">Edit basic material info</span>
-						</button>
-
-						<button class="detail-action-button discount-button" @onclick="() => OpenDiscountDetails()">
-							<span class="button-icon">💰</span>
-							<span class="button-text">Discount</span>
-							<span class="button-description">Apply discounts</span>
-						</button>
-
-						<button class="detail-action-button tax-button" @onclick="() => OpenTaxDetails()">
-							<span class="button-icon">🧾</span>
-							<span class="button-text">Tax</span>
-							<span class="button-description">Configure tax settings</span>
-						</button>
-					</div>
-				}
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _rawMaterialDetailsDialogVisible = false" CssClass="dialog-button" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Basic Info Dialog -->
-<SfDialog ID="_sfBasicInfoDialog"
-		  @ref="_sfBasicInfoDialog"
-		  Width="600px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_basicInfoDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="material-icon">📋</span>
-				<span>Basic Info: </span>
+				<span>Edit Raw Material Details: </span>
 				<span class="material-name">@_selectedRawMaterialForEdit?.RawMaterialName</span>
 			</div>
 		</Header>
@@ -309,53 +283,164 @@ else
 			<div class="dialog-content">
 				@if (_selectedRawMaterialForEdit != null)
 				{
-					<div class="form-row">
-						<div class="form-group">
-							<label>Rate (₹)</label>
-							<SfNumericTextBox TValue="decimal"
-											  Value="_selectedRawMaterialForEdit.Rate"
-											  ValueChanged="OnBasicRateChanged"
-											  Min="0"
-											  type="tel"
-											  Format="N2"
-											  CssClass="form-control" />
-						</div>
-
-						<div class="form-group">
-							<label>Quantity</label>
-							<SfNumericTextBox TValue="decimal"
-											  Value="_selectedRawMaterialForEdit.Quantity"
-											  ValueChanged="OnBasicQuantityChanged"
-											  Min="0"
-											  type="tel"
-											  Format="N2"
-											  CssClass="form-control" />
-						</div>
-					</div>
-
-					<div class="form-row">
-						<div class="form-group">
-							<label>Measurement Unit</label>
-							<SfTextBox Value="@_selectedRawMaterialForEdit.MeasurementUnit"
-									   ValueChanged="OnMeasurementUnitChanged"
-									   CssClass="form-control" />
-						</div>
-					</div>
-
-					<div class="basic-summary">
-						<div class="summary-card">
-							<div class="summary-row">
-								<span class="summary-label">Rate:</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.Rate.FormatIndianCurrency()</span>
+					<div class="consolidated-form">
+						<!-- Basic Details Section -->
+						<div class="form-section">
+							<h4 class="section-title">
+								<span class="section-icon">📋</span>
+								Basic Details
+							</h4>
+							<div class="form-row-compact">
+								<div class="form-group-compact">
+									<label>Rate (₹)</label>
+									<SfNumericTextBox TValue="decimal"
+													  Value="_selectedRawMaterialForEdit.Rate"
+													  ValueChanged="OnRateChanged"
+													  Min="0"
+													  type="tel"
+													  Format="N2"
+													  CssClass="form-control-compact" />
+								</div>
+								<div class="form-group-compact">
+									<label>Quantity</label>
+									<SfNumericTextBox TValue="decimal"
+													  Value="_selectedRawMaterialForEdit.Quantity"
+													  ValueChanged="OnQuantityChanged"
+													  Min="0"
+													  type="tel"
+													  Format="N2"
+													  CssClass="form-control-compact" />
+								</div>
+								<div class="form-group-compact">
+									<label>Unit</label>
+									<SfTextBox Value="@_selectedRawMaterialForEdit.MeasurementUnit"
+											   ValueChanged="OnMeasurementUnitChanged"
+											   CssClass="form-control-compact" />
+								</div>
 							</div>
-							<div class="summary-row">
-								<span class="summary-label">Quantity:</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.Quantity.ToString("N2") @_selectedRawMaterialForEdit.MeasurementUnit</span>
+							<div class="amount-display">
+								<span class="amount-label">Base Amount:</span>
+								<span class="amount-value">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity).FormatIndianCurrency())</span>
 							</div>
-							<div class="summary-divider"></div>
-							<div class="summary-row total-row">
-								<span class="summary-label">Base Total:</span>
-								<span class="summary-value total-value">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity).FormatIndianCurrency())</span>
+						</div>
+
+						<!-- Discount Section -->
+						<div class="form-section">
+							<h4 class="section-title">
+								<span class="section-icon">💰</span>
+								Discount Details
+							</h4>
+							<div class="form-row-compact">
+								<div class="form-group-compact">
+									<label>Discount (%)</label>
+									<SfNumericTextBox TValue="decimal"
+													  Value="_selectedRawMaterialForEdit.DiscPercent"
+													  ValueChanged="OnDiscountPercentChanged"
+													  Min="0"
+													  Max="100"
+													  type="tel"
+													  Format="N2"
+													  CssClass="form-control-compact" />
+								</div>
+								<div class="form-group-compact">
+									<label>Discount Amount</label>
+									<div class="readonly-amount">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity * _selectedRawMaterialForEdit.DiscPercent / 100).FormatIndianCurrency())</div>
+								</div>
+								<div class="form-group-compact">
+									<label>After Discount</label>
+									<div class="readonly-amount">@_selectedRawMaterialForEdit.AfterDiscount.FormatIndianCurrency()</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Tax Section -->
+						<div class="form-section">
+							<h4 class="section-title">
+								<span class="section-icon">🧾</span>
+								Tax Details
+							</h4>
+							<div class="form-row-compact">
+								<div class="form-group-compact">
+									<label>CGST (%)</label>
+									<SfNumericTextBox TValue="decimal"
+													  Value="_selectedRawMaterialForEdit.CGSTPercent"
+													  ValueChanged="OnCGSTPercentChanged"
+													  Min="0"
+													  Max="50"
+													  type="tel"
+													  Format="N2"
+													  CssClass="form-control-compact" />
+									<div class="tax-amount">₹@_selectedRawMaterialForEdit.CGSTAmount.ToString("N2")</div>
+								</div>
+								<div class="form-group-compact">
+									<label>SGST (%)</label>
+									<SfNumericTextBox TValue="decimal"
+													  Value="_selectedRawMaterialForEdit.SGSTPercent"
+													  ValueChanged="OnSGSTPercentChanged"
+													  Min="0"
+													  Max="50"
+													  type="tel"
+													  Format="N2"
+													  CssClass="form-control-compact" />
+									<div class="tax-amount">₹@_selectedRawMaterialForEdit.SGSTAmount.ToString("N2")</div>
+								</div>
+								<div class="form-group-compact">
+									<label>IGST (%)</label>
+									<SfNumericTextBox TValue="decimal"
+													  Value="_selectedRawMaterialForEdit.IGSTPercent"
+													  ValueChanged="OnIGSTPercentChanged"
+													  Min="0"
+													  Max="50"
+													  type="tel"
+													  Format="N2"
+													  CssClass="form-control-compact" />
+									<div class="tax-amount">₹@_selectedRawMaterialForEdit.IGSTAmount.ToString("N2")</div>
+								</div>
+							</div>
+							<div class="tax-info">
+								<div class="info-card">
+									<span class="info-icon">ℹ️</span>
+									<span class="info-text">Use CGST + SGST for intra-state transactions, or IGST for inter-state transactions.</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Summary Section -->
+						<div class="form-section">
+							<h4 class="section-title">
+								<span class="section-icon">📊</span>
+								Summary
+							</h4>
+							<div class="summary-card">
+								<div class="summary-row">
+									<span class="summary-label">Base Amount:</span>
+									<span class="summary-value">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity).FormatIndianCurrency())</span>
+								</div>
+								<div class="summary-row">
+									<span class="summary-label">Discount (@_selectedRawMaterialForEdit.DiscPercent.ToString("N2")%):</span>
+									<span class="summary-value discount-value">-@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity * _selectedRawMaterialForEdit.DiscPercent / 100).FormatIndianCurrency())</span>
+								</div>
+								<div class="summary-row">
+									<span class="summary-label">After Discount:</span>
+									<span class="summary-value">@_selectedRawMaterialForEdit.AfterDiscount.FormatIndianCurrency()</span>
+								</div>
+								<div class="summary-row">
+									<span class="summary-label">CGST Amount:</span>
+									<span class="summary-value">@_selectedRawMaterialForEdit.CGSTAmount.FormatIndianCurrency()</span>
+								</div>
+								<div class="summary-row">
+									<span class="summary-label">SGST Amount:</span>
+									<span class="summary-value">@_selectedRawMaterialForEdit.SGSTAmount.FormatIndianCurrency()</span>
+								</div>
+								<div class="summary-row">
+									<span class="summary-label">IGST Amount:</span>
+									<span class="summary-value">@_selectedRawMaterialForEdit.IGSTAmount.FormatIndianCurrency()</span>
+								</div>
+								<div class="summary-divider"></div>
+								<div class="summary-row total-row">
+									<span class="summary-label">Final Total:</span>
+									<span class="summary-value total-value">@_selectedRawMaterialForEdit.Total.FormatIndianCurrency()</span>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -365,192 +450,7 @@ else
 		<FooterTemplate>
 			<div class="dialog-footer">
 				<div class="footer-buttons">
-					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveBasicInfoClick" CssClass="dialog-button" />
-				</div>
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Discount Details Dialog -->
-<SfDialog ID="_sfDiscountDetailsDialog"
-		  @ref="_sfDiscountDetailsDialog"
-		  Width="600px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_discountDetailsDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="material-icon">💰</span>
-				<span>Discount Details: </span>
-				<span class="material-name">@_selectedRawMaterialForEdit?.RawMaterialName</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				@if (_selectedRawMaterialForEdit != null)
-				{
-					<div class="form-row">
-						<div class="form-group">
-							<label>Discount Percentage (%)</label>
-							<SfNumericTextBox TValue="decimal"
-											  Value="_selectedRawMaterialForEdit.DiscPercent"
-											  ValueChanged="OnDiscountPercentChanged"
-											  Min="0"
-											  type="tel"
-											  Max="100"
-											  Format="N2"
-											  CssClass="form-control" />
-						</div>
-					</div>
-
-					<div class="discount-summary">
-						<div class="summary-card">
-							<div class="summary-row">
-								<span class="summary-label">Base Amount:</span>
-								<span class="summary-value">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity).FormatIndianCurrency())</span>
-							</div>
-							<div class="summary-row">
-								<span class="summary-label">Discount (%):</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.DiscPercent.ToString("N2")%</span>
-							</div>
-							<div class="summary-row">
-								<span class="summary-label">Discount Amount:</span>
-								<span class="summary-value discount-value">-@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity * _selectedRawMaterialForEdit.DiscPercent / 100).FormatIndianCurrency())</span>
-							</div>
-							<div class="summary-divider"></div>
-							<div class="summary-row total-row">
-								<span class="summary-label">After Discount:</span>
-								<span class="summary-value total-value">@(((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity) - (_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity * _selectedRawMaterialForEdit.DiscPercent / 100)).FormatIndianCurrency())</span>
-							</div>
-						</div>
-					</div>
-				}
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveDiscountClick" CssClass="dialog-button" />
-				</div>
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Tax Details Dialog -->
-<SfDialog ID="_sfTaxDetailsDialog"
-		  @ref="_sfTaxDetailsDialog"
-		  Width="700px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_taxDetailsDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="material-icon">🧾</span>
-				<span>Tax Details: </span>
-				<span class="material-name">@_selectedRawMaterialForEdit?.RawMaterialName</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				@if (_selectedRawMaterialForEdit != null)
-				{
-					<div class="tax-grid">
-						<div class="tax-row">
-							<div class="tax-column">
-								<label>CGST Percentage (%)</label>
-								<SfNumericTextBox TValue="decimal"
-												  Value="_selectedRawMaterialForEdit.CGSTPercent"
-												  ValueChanged="OnCGSTPercentChanged"
-												  Min="0"
-												  Max="50"
-												  type="tel"
-												  Format="N2"
-												  CssClass="form-control" />
-							</div>
-						</div>
-
-						<div class="tax-row">
-							<div class="tax-column">
-								<label>SGST Percentage (%)</label>
-								<SfNumericTextBox TValue="decimal"
-												  Value="_selectedRawMaterialForEdit.SGSTPercent"
-												  ValueChanged="OnSGSTPercentChanged"
-												  Min="0"
-												  Max="50"
-												  type="tel"
-												  Format="N2"
-												  CssClass="form-control" />
-							</div>
-						</div>
-
-						<div class="tax-row">
-							<div class="tax-column">
-								<label>IGST Percentage (%)</label>
-								<SfNumericTextBox TValue="decimal"
-												  Value="_selectedRawMaterialForEdit.IGSTPercent"
-												  ValueChanged="OnIGSTPercentChanged"
-												  Min="0"
-												  Max="50"
-												  type="tel"
-												  Format="N2"
-												  CssClass="form-control" />
-							</div>
-						</div>
-					</div>
-
-					<div class="tax-summary">
-						<div class="summary-card">
-							<div class="summary-row">
-								<span class="summary-label">Taxable Amount:</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.AfterDiscount.FormatIndianCurrency()</span>
-							</div>
-							<div class="summary-row">
-								<span class="summary-label">CGST Amount:</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.CGSTAmount.FormatIndianCurrency()</span>
-							</div>
-							<div class="summary-row">
-								<span class="summary-label">SGST Amount:</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.SGSTAmount.FormatIndianCurrency()</span>
-							</div>
-							<div class="summary-row">
-								<span class="summary-label">IGST Amount:</span>
-								<span class="summary-value">@_selectedRawMaterialForEdit.IGSTAmount.FormatIndianCurrency()</span>
-							</div>
-							<div class="summary-row">
-								<span class="summary-label">Total Tax:</span>
-								<span class="summary-value tax-value">@((_selectedRawMaterialForEdit.CGSTAmount + _selectedRawMaterialForEdit.SGSTAmount + _selectedRawMaterialForEdit.IGSTAmount).FormatIndianCurrency())</span>
-							</div>
-							<div class="summary-divider"></div>
-							<div class="summary-row total-row">
-								<span class="summary-label">Final Amount:</span>
-								<span class="summary-value total-value">@_selectedRawMaterialForEdit.Total.FormatIndianCurrency()</span>
-							</div>
-						</div>
-					</div>
-
-					<div class="tax-info">
-						<div class="info-card">
-							<span class="info-icon">ℹ️</span>
-							<span class="info-text">Use CGST + SGST for intra-state transactions, or IGST for inter-state transactions.</span>
-						</div>
-					</div>
-				}
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Save" IsPrimary="true" OnClick="OnSaveTaxClick" CssClass="dialog-button" />
+					<SfButton Content="Save & Close" IsPrimary="true" OnClick="OnSaveRawMaterialDetailsClick" CssClass="dialog-button primary-button" />
 				</div>
 			</div>
 		</FooterTemplate>
@@ -571,6 +471,7 @@ else
 		--success-color: #28a745;
 		--info-color: #17a2b8;
 		--warning-color: #ffc107;
+		--danger-color: #dc3545;
 		--discount-color: #ff6b35;
 		--tax-color: #6f42c1;
 	}
@@ -641,12 +542,12 @@ else
 		flex-direction: column;
 	}
 
-	/* Page Header */
+	/* Page Header - Desktop Optimized */
 	.page-header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 15px 20px;
+		padding: 8px 16px;
 		background: white;
 		box-shadow: var(--shadow-light);
 		position: sticky;
@@ -658,18 +559,18 @@ else
 		background: var(--primary-color);
 		color: white;
 		border: none;
-		border-radius: 8px;
-		padding: 10px 15px;
+		border-radius: 4px;
+		padding: 6px 10px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		box-shadow: var(--shadow-light);
-		font-size: 18px;
+		font-size: 14px;
 		font-weight: bold;
-		min-width: 44px;
-		min-height: 44px;
+		min-width: 32px;
+		min-height: 32px;
 	}
 
 		.back-button:hover {
@@ -685,24 +586,24 @@ else
 	.page-title {
 		margin: 0;
 		color: var(--text-dark);
-		font-size: 24px;
+		font-size: 18px;
 		font-weight: 600;
 		flex: 1;
 		text-align: center;
 	}
 
-	/* Header Action Button */
+	/* Header Action Button - Desktop Optimized */
 	.header-action-btn {
 		background: transparent;
-		border: 2px solid var(--primary-color);
+		border: 1px solid var(--primary-color);
 		color: var(--primary-color);
-		border-radius: 8px;
-		padding: 10px 12px;
+		border-radius: 4px;
+		padding: 6px 8px;
 		cursor: pointer;
 		transition: all 0.2s ease;
-		font-size: 14px;
+		font-size: 12px;
 		font-weight: 500;
-		min-height: 44px;
+		min-height: 32px;
 	}
 
 		.header-action-btn:hover {
@@ -710,12 +611,12 @@ else
 			color: white;
 		}
 
-	/* Enhanced Filter Section */
+	/* Enhanced Filter Section - Desktop Optimized */
 	.filter-section {
 		background: white;
-		margin: 15px;
-		padding: 20px;
-		border-radius: 16px;
+		margin: 8px;
+		padding: 12px;
+		border-radius: 8px;
 		box-shadow: var(--shadow-light);
 		border: 1px solid var(--border-color);
 		transition: all 0.3s ease;
@@ -727,16 +628,18 @@ else
 
 	.filter-content {
 		display: flex;
-		flex-direction: column;
-		gap: 12px;
+		flex-direction: row;
+		gap: 8px;
+		align-items: center;
 	}
 
 	.supplier-filter-wrapper,
 	.category-filter-wrapper {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 6px;
 		position: relative;
+		flex: 1;
 	}
 
 	.supplier-filter,
@@ -744,11 +647,11 @@ else
 		flex: 1;
 	}
 
-	/* Syncfusion Filter Controls Styling */
+	/* Syncfusion Filter Controls Styling - Desktop Optimized */
 	::deep .supplier-filter .e-input-group,
 	::deep .category-filter .e-input-group {
-		border: 2px solid var(--border-color);
-		border-radius: 12px;
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
 		transition: all 0.2s ease;
 		background: white;
 		height: auto;
@@ -762,18 +665,18 @@ else
 		::deep .supplier-filter .e-input-group.e-input-focus,
 		::deep .category-filter .e-input-group.e-input-focus {
 			border-color: var(--primary-color);
-			box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+			box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
 		}
 
 		::deep .supplier-filter .e-input-group input,
 		::deep .category-filter .e-input-group input {
-			padding: 10px 12px;
-			font-size: 14px;
+			padding: 8px 10px;
+			font-size: 16px;
 			color: var(--text-dark);
 			font-weight: 500;
 			border: none;
 			background: transparent;
-			height: 36px;
+			height: 40px;
 		}
 
 			::deep .supplier-filter .e-input-group input::placeholder,
@@ -785,8 +688,8 @@ else
 		::deep .supplier-filter .e-input-group .e-ddl-icon,
 		::deep .category-filter .e-input-group .e-ddl-icon {
 			color: var(--primary-color);
-			font-size: 16px;
-			margin-right: 8px;
+			font-size: 12px;
+			margin-right: 6px;
 		}
 
 	/* Popup Styling */
@@ -822,10 +725,10 @@ else
 				border-bottom: none;
 			}
 
-	/* Grid Container */
+	/* Grid Container - Desktop Optimized */
 	.grid-container {
 		flex: 1;
-		padding: 15px;
+		padding: 8px;
 		overflow: hidden;
 	}
 
@@ -857,24 +760,24 @@ else
 		padding: 8px 0;
 	}
 
-	/* Add Button */
+	/* Add Button - Desktop Optimized */
 	.add-button {
 		background: var(--primary-color);
 		color: white;
 		border: none;
-		border-radius: 25px;
-		padding: 10px 20px;
+		border-radius: 4px;
+		padding: 8px 14px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
+		gap: 4px;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		font-weight: 500;
 		font-size: 14px;
 		box-shadow: var(--shadow-light);
-		min-height: 40px;
-		min-width: 80px;
+		min-height: 36px;
+		min-width: 60px;
 	}
 
 		.add-button:hover {
@@ -889,23 +792,22 @@ else
 
 	.add-text {
 		display: inline;
-		margin-left: 4px;
 		font-weight: 600;
 	}
 
-	/* Quantity Controls */
+	/* Quantity Controls - Desktop Optimized */
 	.quantity-controls {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 4px;
 		width: 100%;
 		justify-content: center;
-		max-width: 250px;
+		max-width: 200px;
 	}
 
 	.quantity-input-wrapper {
 		flex: 1;
-		min-width: 160px;
+		min-width: 60px;
 		max-width: 200px;
 	}
 
@@ -915,68 +817,83 @@ else
 
 		.quantity-input input {
 			text-align: center !important;
-			border: 2px solid var(--border-color);
-			border-radius: 8px;
-			padding: 8px 12px !important;
+			border: 1px solid var(--border-color);
+			border-radius: 4px;
+			padding: 6px 8px !important;
 			font-weight: 600;
-			font-size: 14px !important;
+			font-size: 16px !important;
 			color: var(--text-dark);
 			transition: all 0.2s ease;
 			height: 36px !important;
 			box-sizing: border-box;
-			letter-spacing: 0.5px;
 		}
 
 			.quantity-input input:focus {
 				border-color: var(--primary-color);
-				box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+				box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
 				outline: none;
 			}
 
-	/* Price/Total Combined Column Styling */
-	.price-total-column {
+	/* Rate Section */
+	.rate-section {
 		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		align-items: flex-end;
-		font-size: 11px;
-	}
-
-	.price-section,
-	.total-section {
-		display: flex;
+		justify-content: center;
 		align-items: center;
-		gap: 4px;
+		width: 100%;
+		padding: 2px 0;
 	}
 
-	.price-label,
-	.total-label {
-		font-size: 9px;
-		color: var(--text-light);
-		font-weight: 500;
-		min-width: 30px;
+	.rate-input {
+		width: 100% !important;
 	}
 
-	.price-value {
-		font-weight: 600;
-		color: var(--text-dark);
+		.rate-input input {
+			text-align: center !important;
+			border: 1px solid var(--border-color);
+			border-radius: 4px;
+			padding: 6px 8px !important;
+			font-weight: 600;
+			font-size: 16px !important;
+			color: var(--text-dark);
+			transition: all 0.2s ease;
+			height: 36px !important;
+			box-sizing: border-box;
+		}
+
+			.rate-input input:focus {
+				border-color: var(--primary-color);
+				box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
+				outline: none;
+			}
+
+	.rate-display {
 		font-size: 10px;
+		font-weight: 700;
+		color: var(--text-dark);
 	}
 
+	/* Total Value Styling */
 	.total-value {
 		font-weight: 700;
 		color: var(--primary-color);
-		font-size: 11px;
+		font-size: 10px;
 	}
 
-	/* Edit Button Styling */
+	/* Unit Display */
+	.unit-display {
+		font-size: 9px;
+		color: var(--text-light);
+		font-weight: 500;
+		text-transform: uppercase;
+	}
+
+	/* Edit Button Styling - Desktop Optimized */
 	.edit-button {
 		background: var(--info-color);
 		color: white;
 		border: none;
-		border-radius: 50%;
-		width: 32px;
-		height: 32px;
+		border-radius: 4px;
+		padding: 6px 10px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -984,11 +901,12 @@ else
 		transition: all 0.2s ease;
 		box-shadow: var(--shadow-light);
 		font-size: 14px;
+		min-height: 32px;
 	}
 
 		.edit-button:hover {
 			background: #138496;
-			transform: scale(1.1);
+			transform: scale(1.05);
 			box-shadow: var(--shadow-medium);
 		}
 
@@ -997,16 +915,61 @@ else
 		}
 
 	.edit-icon {
-		font-size: 12px;
+		font-size: 14px;
 	}
 
-	/* Cart Footer */
+	/* Action Buttons Group Styling */
+	.action-buttons-group {
+		display: flex;
+		gap: 4px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	/* Remove Button Styling */
+	.remove-button {
+		background: var(--danger-color);
+		color: white;
+		border: none;
+		border-radius: 4px;
+		padding: 6px 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-light);
+		font-size: 14px;
+		min-height: 32px;
+	}
+
+		.remove-button:hover:not(:disabled) {
+			background: #c82333;
+			transform: scale(1.05);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.remove-button:active {
+			transform: scale(0.95);
+		}
+
+		.remove-button:disabled {
+			background: var(--text-light);
+			cursor: not-allowed;
+			transform: none;
+		}
+
+	.remove-icon {
+		font-size: 14px;
+	}
+
+	/* Cart Footer - Desktop Optimized */
 	.cart-footer {
 		position: sticky;
 		bottom: 0;
 		background: white;
-		padding: 15px 20px;
-		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+		padding: 8px 16px;
+		box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.1);
 		z-index: 100;
 		animation: slideUp 0.3s ease-out;
 	}
@@ -1016,25 +979,25 @@ else
 		background: var(--primary-color);
 		color: white;
 		border: none;
-		border-radius: 12px;
-		padding: 15px 20px;
+		border-radius: 4px;
+		padding: 8px 12px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 12px;
+		gap: 6px;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		font-weight: 600;
-		font-size: 16px;
+		font-size: 12px;
 		box-shadow: var(--shadow-medium);
 		position: relative;
-		min-height: 56px;
+		min-height: 36px;
 	}
 
 		.cart-button:hover {
 			background: var(--primary-dark);
-			transform: translateY(-2px);
-			box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 		}
 
 		.cart-button:active {
@@ -1045,28 +1008,28 @@ else
 		background: white;
 		color: var(--primary-color);
 		border-radius: 50%;
-		width: 28px;
-		height: 28px;
+		width: 20px;
+		height: 20px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-weight: 700;
-		font-size: 14px;
+		font-size: 10px;
 		position: absolute;
-		right: 15px;
+		right: 8px;
 		top: 50%;
 		transform: translateY(-50%);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 	}
 
-	/* Grid Styling */
+	/* Grid Styling - Desktop Optimized */
 	::deep .e-grid {
-		border-radius: 12px;
+		border-radius: 8px;
 		overflow: hidden;
 		background: white;
 		box-shadow: var(--shadow-light);
 		border: none;
-		font-size: 12px;
+		font-size: 11px;
 	}
 
 		::deep .e-grid .e-gridheader {
@@ -1078,17 +1041,17 @@ else
 			color: white;
 			font-weight: 600;
 			border: none;
-			padding: 10px 8px;
-			font-size: 11px;
+			padding: 6px 4px;
+			font-size: 10px;
 		}
 
 		::deep .e-grid .e-rowcell {
 			border: none;
 			border-bottom: 1px solid var(--border-color);
-			padding: 8px 6px;
+			padding: 4px 3px;
 			vertical-align: middle;
-			font-size: 11px;
-			line-height: 1.3;
+			font-size: 10px;
+			line-height: 1.2;
 		}
 
 		::deep .e-grid .e-row:nth-child(even) {
@@ -1285,6 +1248,123 @@ else
 		font-size: 13px;
 		opacity: 0.9;
 		font-weight: 400;
+	}
+
+	/* Consolidated Dialog Styling */
+	.consolidated-form {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.form-section {
+		background: var(--bg-light);
+		border-radius: 8px;
+		padding: 16px;
+		border: 1px solid var(--border-color);
+	}
+
+	.section-title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0 0 16px 0;
+		font-size: 16px;
+		font-weight: 600;
+		color: var(--text-dark);
+		border-bottom: 2px solid var(--primary-color);
+		padding-bottom: 8px;
+	}
+
+	.section-icon {
+		font-size: 18px;
+	}
+
+	/* Compact Form Layout */
+	.form-row-compact {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		gap: 12px;
+		margin-bottom: 12px;
+	}
+
+	.form-group-compact {
+		display: flex;
+		flex-direction: column;
+	}
+
+		.form-group-compact label {
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--text-dark);
+			margin-bottom: 4px;
+		}
+
+	.form-control-compact {
+		width: 100%;
+		border-radius: 4px;
+	}
+
+		.form-control-compact input {
+			padding: 8px 10px !important;
+			font-size: 16px !important;
+			height: 40px !important;
+			border: 1px solid var(--border-color) !important;
+			border-radius: 4px !important;
+		}
+
+			.form-control-compact input:focus {
+				border-color: var(--primary-color) !important;
+				box-shadow: 0 0 0 1px rgba(40, 167, 69, 0.2) !important;
+			}
+
+	/* Amount Display Styling */
+	.amount-display {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 12px;
+		background: var(--primary-light);
+		border-radius: 4px;
+		margin-top: 8px;
+		border: 1px solid var(--primary-color);
+	}
+
+	.amount-label {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--text-dark);
+	}
+
+	.amount-value {
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--primary-color);
+	}
+
+	/* Readonly Amount Styling */
+	.readonly-amount {
+		padding: 6px 8px;
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--primary-color);
+		background: var(--bg-light);
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		text-align: center;
+		margin-top: 4px;
+	}
+
+	/* Tax Amount Display */
+	.tax-amount {
+		font-size: 10px;
+		font-weight: 600;
+		color: var(--success-color);
+		text-align: center;
+		margin-top: 2px;
+		padding: 2px 4px;
+		background: rgba(40, 167, 69, 0.1);
+		border-radius: 3px;
 	}
 
 	/* Form Controls */
@@ -1489,217 +1569,68 @@ else
 		}
 	}
 
-	/* Mobile Responsiveness */
-	@@media (max-width: 768px) {
-		.page-header {
-			padding: 12px 15px;
-		}
-
-		.page-title {
-			font-size: 18px;
-		}
-
-		.header-action-btn {
-			padding: 8px 10px;
-			font-size: 14px;
-		}
-
-		.filter-section {
-			margin: 10px;
-			padding: 15px;
-		}
-
-		.grid-container {
-			padding: 10px;
-		}
-
-		.quantity-controls {
-			max-width: 120px;
-			gap: 4px;
-		}
-
-		.quantity-input-wrapper {
-			min-width: 100px;
-			max-width: 120px;
-		}
-
-		.quantity-input input {
-			font-size: 13px !important;
-			height: 34px !important;
-			padding: 6px 10px !important;
-		}
-
-		.add-button {
-			padding: 8px 16px;
-			font-size: 13px;
-			min-height: 36px;
-			min-width: 70px;
-			border-radius: 20px;
-		}
-
-		.cart-footer {
-			padding: 12px 15px;
-		}
-
-		.cart-button {
-			padding: 12px 15px;
-			font-size: 14px;
-			min-height: 48px;
-		}
-
-		.cart-count {
-			width: 24px;
-			height: 24px;
-			font-size: 12px;
-			right: 12px;
-		}
-
-		/* Mobile filter styling */
-		::deep .supplier-filter .e-input-group input,
-		::deep .category-filter .e-input-group input {
-			padding: 8px 10px;
-			font-size: 14px;
-			height: 32px;
-		}
-
-		/* Dialog adjustments for mobile */
-		.dialog-footer {
-			flex-direction: column;
-			gap: 10px;
-		}
-
-			.dialog-footer button {
-				width: 100%;
-			}
-
-		.form-row {
-			grid-template-columns: 1fr;
-			gap: 15px;
-		}
-
-		.tax-row {
-			grid-template-columns: 1fr;
-			gap: 15px;
-		}
-
-		.action-buttons-section {
-			gap: 12px;
-		}
-
-		.detail-action-button {
-			padding: 15px;
-			gap: 12px;
-		}
-
-		.button-icon {
-			font-size: 20px;
-		}
-
-		.button-text {
-			font-size: 16px;
-		}
-
-		.button-description {
-			font-size: 12px;
-		}
-
-		.edit-button {
-			width: 28px;
-			height: 28px;
-		}
-
-		.edit-icon {
-			font-size: 10px;
-		}
+	/* Enhanced column font sizes for better visibility */
+	::deep .e-grid .e-rowcell:nth-child(2), /* Rate column */
+	::deep .e-grid .e-rowcell:nth-child(3), /* Quantity column */
+	::deep .e-grid .e-rowcell:nth-child(4), /* Total column */
+	::deep .e-grid .e-rowcell:nth-child(5) { /* Unit column */
+		font-size: 14px !important;
+		font-weight: 600 !important;
 	}
 
-	@@media (max-width: 576px) {
-		.back-button, .header-action-btn {
-			padding: 8px 10px;
-			font-size: 14px;
-		}
-
-		.page-title {
-			font-size: 16px;
-		}
-
-		.quantity-input-wrapper {
-			min-width: 90px;
-			max-width: 110px;
-		}
-
-		.quantity-input input {
-			font-size: 12px !important;
-			height: 32px !important;
-			padding: 5px 8px !important;
-		}
+	::deep .e-grid .e-headercell:nth-child(2), /* Rate header */
+	::deep .e-grid .e-headercell:nth-child(3), /* Quantity header */
+	::deep .e-grid .e-headercell:nth-child(4), /* Total header */
+	::deep .e-grid .e-headercell:nth-child(5) { /* Unit header */
+		font-size: 14px !important;
+		font-weight: 700 !important;
 	}
 
-	@@media (max-width: 400px) {
-		.back-button, .header-action-btn {
-			min-width: 40px;
-			min-height: 40px;
-			padding: 8px;
-			font-size: 14px;
-		}
-
-		.page-title {
-			font-size: 16px;
-		}
-
-		.add-button {
-			padding: 6px 12px;
-			font-size: 12px;
-			min-height: 32px;
-			min-width: 60px;
-			gap: 4px;
-		}
-
-		.quantity-input-wrapper {
-			min-width: 80px;
-			max-width: 100px;
-		}
-
-		.quantity-input input {
-			font-size: 11px !important;
-			height: 30px !important;
-			padding: 4px 6px !important;
-		}
-
-		.edit-button {
-			width: 24px;
-			height: 24px;
-		}
-
-		.edit-icon {
-			font-size: 8px;
-		}
+	/* Rate input styling for better visibility */
+	.rate-section .rate-input input {
+		font-size: 16px !important;
+		font-weight: 700 !important;
 	}
 
-	/* Touch-friendly targets for mobile devices */
-	@@media (hover: none) and (pointer: coarse) {
-		.add-button {
-			min-height: 44px;
-			padding: 10px 20px;
-			min-width: 80px;
-		}
-
-		.back-button, .header-action-btn {
-			min-width: 48px;
-			min-height: 48px;
-		}
-
-		.quantity-input input {
-			min-height: 36px !important;
-		}
-
-		.edit-button {
-			width: 40px;
-			height: 40px;
-		}
-
-		.detail-action-button {
-			min-height: 60px;
-		}
+	/* Total value styling */
+	.total-value {
+		font-size: 16px !important;
+		font-weight: 800 !important;
+		color: var(--primary-color) !important;
 	}
+
+	/* Quantity display styling */
+	.quantity-display {
+		font-size: 14px !important;
+		font-weight: 700 !important;
+	}
+
+	/* Unit input styling */
+	.unit-input input {
+		font-size: 16px !important;
+		font-weight: 700 !important;
+		text-align: center !important;
+		border: 1px solid var(--border-color) !important;
+		border-radius: 4px !important;
+		padding: 6px 8px !important;
+		transition: all 0.2s ease;
+		height: 36px !important;
+	}
+
+		.unit-input input:focus {
+			border-color: var(--primary-color) !important;
+			box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1) !important;
+			outline: none !important;
+		}
+
+	/* Unit section styling */
+	.unit-section {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+		padding: 2px 0;
+	}
+
+	/* Desktop-Only Layout - No Mobile Responsiveness */
 </style>

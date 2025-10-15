@@ -18,15 +18,13 @@ public partial class PurchasePage
 {
 	private UserModel _user;
 	private bool _isLoading = true;
+	private bool _isSaving = false;
 
 	private int _selectedSupplierId = 0;
 	private int _selectedCategoryId = 0;
 
 	private bool _supplierDetailsDialogVisible = false;
 	private bool _rawMaterialDetailsDialogVisible = false;
-	private bool _basicInfoDialogVisible = false;
-	private bool _discountDetailsDialogVisible = false;
-	private bool _taxDetailsDialogVisible = false;
 
 	private LedgerModel? _selectedSupplier;
 	private PurchaseRawMaterialCartModel? _selectedRawMaterialForEdit;
@@ -53,9 +51,6 @@ public partial class PurchasePage
 
 	private SfDialog _sfSupplierDetailsDialog;
 	private SfDialog _sfRawMaterialDetailsDialog;
-	private SfDialog _sfBasicInfoDialog;
-	private SfDialog _sfDiscountDetailsDialog;
-	private SfDialog _sfTaxDetailsDialog;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
@@ -143,7 +138,7 @@ public partial class PurchasePage
 				MeasurementUnit = rawMaterial.MeasurementUnit,
 				Quantity = 0,
 				BaseTotal = 0,
-				DiscPercent = _purchase.CDPercent,
+				DiscPercent = 0,
 				DiscAmount = 0,
 				AfterDiscount = 0,
 				CGSTPercent = rawMaterialTax.Extra ? rawMaterialTax.CGST : 0,
@@ -262,10 +257,37 @@ public partial class PurchasePage
 
 	private async Task UpdateQuantity(PurchaseRawMaterialCartModel item, decimal newQuantity)
 	{
-		if (item is null)
+		if (item is null || _isSaving)
 			return;
 
 		item.Quantity = Math.Max(0, newQuantity);
+		await SavePurchaseFile();
+	}
+
+	private async Task UpdateRate(PurchaseRawMaterialCartModel item, decimal newRate)
+	{
+		if (item is null || _isSaving)
+			return;
+
+		item.Rate = Math.Max(0, newRate);
+		await SavePurchaseFile();
+	}
+
+	private async Task UpdateUnit(PurchaseRawMaterialCartModel item, string newUnit)
+	{
+		if (item is null || _isSaving || string.IsNullOrWhiteSpace(newUnit))
+			return;
+
+		item.MeasurementUnit = newUnit.Trim();
+		await SavePurchaseFile();
+	}
+
+	private async Task RemoveFromCart(PurchaseRawMaterialCartModel item)
+	{
+		if (item is null || _isSaving)
+			return;
+
+		item.Quantity = 0;
 		await SavePurchaseFile();
 	}
 	#endregion
@@ -281,33 +303,7 @@ public partial class PurchasePage
 		StateHasChanged();
 	}
 
-	private void OpenBasicDetails()
-	{
-		_rawMaterialDetailsDialogVisible = false;
-		_basicInfoDialogVisible = true;
-		VibrationService.VibrateHapticClick();
-		StateHasChanged();
-	}
-
-	private void OpenDiscountDetails()
-	{
-		_rawMaterialDetailsDialogVisible = false;
-		_discountDetailsDialogVisible = true;
-		VibrationService.VibrateHapticClick();
-		StateHasChanged();
-	}
-
-	private void OpenTaxDetails()
-	{
-		_rawMaterialDetailsDialogVisible = false;
-		_taxDetailsDialogVisible = true;
-		VibrationService.VibrateHapticClick();
-		StateHasChanged();
-	}
-	#endregion
-
-	#region Basic Info Dialog
-	private async Task OnBasicRateChanged(decimal newRate)
+	private async Task OnRateChanged(decimal newRate)
 	{
 		if (_selectedRawMaterialForEdit is null)
 			return;
@@ -316,7 +312,7 @@ public partial class PurchasePage
 		await SavePurchaseFile();
 	}
 
-	private async Task OnBasicQuantityChanged(decimal newQuantity)
+	private async Task OnQuantityChanged(decimal newQuantity)
 	{
 		if (_selectedRawMaterialForEdit is null)
 			return;
@@ -334,14 +330,6 @@ public partial class PurchasePage
 		await SavePurchaseFile();
 	}
 
-	private async Task OnSaveBasicInfoClick()
-	{
-		_basicInfoDialogVisible = false;
-		await SavePurchaseFile();
-	}
-	#endregion
-
-	#region Discount Details Dialog
 	private async Task OnDiscountPercentChanged(decimal newDiscountPercent)
 	{
 		if (_selectedRawMaterialForEdit is null)
@@ -351,14 +339,6 @@ public partial class PurchasePage
 		await SavePurchaseFile();
 	}
 
-	private async Task OnSaveDiscountClick()
-	{
-		_discountDetailsDialogVisible = false;
-		await SavePurchaseFile();
-	}
-	#endregion
-
-	#region Tax Details Dialog
 	private async Task OnCGSTPercentChanged(decimal newCGSTPercent)
 	{
 		if (_selectedRawMaterialForEdit is null)
@@ -386,9 +366,9 @@ public partial class PurchasePage
 		await SavePurchaseFile();
 	}
 
-	private async Task OnSaveTaxClick()
+	private async Task OnSaveRawMaterialDetailsClick()
 	{
-		_taxDetailsDialogVisible = false;
+		_rawMaterialDetailsDialogVisible = false;
 		await SavePurchaseFile();
 	}
 	#endregion

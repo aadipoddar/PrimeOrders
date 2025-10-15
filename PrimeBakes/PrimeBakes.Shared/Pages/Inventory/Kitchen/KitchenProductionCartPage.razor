@@ -48,9 +48,10 @@ else
 								AllowPaging="true"
 								AllowTextWrap=true
 								AllowSorting="false"
-								Height="auto">
+								Height="auto"
+								Toolbar="@(new List<string>() { "Search" })">
 
-							<GridPageSettings PageSize="4" />
+							<GridPageSettings PageSize="10" />
 
 							<GridColumns>
 								<GridColumn Field="@nameof(KitchenProductionProductCartModel.ProductName)" HeaderText="Product" Width="35%" />

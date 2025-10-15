@@ -40,6 +40,7 @@ public class PurchaseData
 		await SavePurchaseDetail(purchase, cart, update);
 		await SaveRawMaterialStock(purchase, cart, update);
 		await InsertAccounting(purchase, update);
+		await UpdateRawMaterialPrice(cart);
 
 		return purchase.Id;
 	}
@@ -181,5 +182,21 @@ public class PurchaseData
 				Remarks = $"GST Account Posting For Purchase Bill {purchaseOverview.BillNo}",
 				Status = true
 			});
+	}
+
+	private static async Task UpdateRawMaterialPrice(List<PurchaseRawMaterialCartModel> cart)
+	{
+		var rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
+
+		foreach (var item in cart)
+		{
+			var rawMaterial = rawMaterials.FirstOrDefault(r => r.Id == item.RawMaterialId);
+			if (rawMaterial is not null)
+			{
+				rawMaterial.MRP = item.NetRate;
+				rawMaterial.MeasurementUnit = item.MeasurementUnit;
+				await RawMaterialData.InsertRawMaterial(rawMaterial);
+			}
+		}
 	}
 }

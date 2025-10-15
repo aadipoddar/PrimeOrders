@@ -31,13 +31,10 @@ public partial class PurchaseCartPage
 	private bool _validationErrorDialogVisible = false;
 	private bool _discountDialogVisible = false;
 	private bool _rawMaterialDetailsDialogVisible = false;
-	private bool _basicInfoDialogVisible = false;
-	private bool _discountDetailsDialogVisible = false;
-	private bool _taxDetailsDialogVisible = false;
 
 	private readonly List<PurchaseRawMaterialCartModel> _cart = [];
 	private readonly List<ValidationError> _validationErrors = [];
-	private PurchaseRawMaterialCartModel? _selectedRawMaterialForEdit;
+	private PurchaseRawMaterialCartModel _selectedRawMaterialForEdit;
 
 	private PurchaseModel _purchase = new()
 	{
@@ -63,9 +60,6 @@ public partial class PurchaseCartPage
 	private SfDialog _sfValidationErrorDialog;
 	private SfDialog _sfDiscountDialog;
 	private SfDialog _sfRawMaterialDetailsDialog;
-	private SfDialog _sfBasicInfoDialog;
-	private SfDialog _sfDiscountDetailsDialog;
-	private SfDialog _sfTaxDetailsDialog;
 
 	#region Load Data
 	protected override async Task OnInitializedAsync()
@@ -126,6 +120,33 @@ public partial class PurchaseCartPage
 		await SavePurchaseFile();
 	}
 
+	private async Task UpdateRate(PurchaseRawMaterialCartModel item, decimal newRate)
+	{
+		if (item is null || _isSaving)
+			return;
+
+		item.Rate = Math.Max(0, newRate);
+		await SavePurchaseFile();
+	}
+
+	private async Task UpdateUnit(PurchaseRawMaterialCartModel item, string newUnit)
+	{
+		if (item is null || _isSaving || string.IsNullOrWhiteSpace(newUnit))
+			return;
+
+		item.MeasurementUnit = newUnit.Trim();
+		await SavePurchaseFile();
+	}
+
+	private async Task RemoveFromCart(PurchaseRawMaterialCartModel item)
+	{
+		if (item is null || _isSaving)
+			return;
+
+		_cart.Remove(item);
+		await SavePurchaseFile();
+	}
+
 	private async Task ClearCart()
 	{
 		if (_isSaving)
@@ -162,6 +183,7 @@ public partial class PurchaseCartPage
 			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
+			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
 			item.NetRate = item.Quantity == 0 ? 0 : (item.AfterDiscount - (item.AfterDiscount * (_purchase.CDPercent / 100))
 				+ item.CGSTAmount + item.SGSTAmount + item.IGSTAmount) / item.Quantity;
 		}
@@ -193,28 +215,64 @@ public partial class PurchaseCartPage
 		StateHasChanged();
 	}
 
-	private void OpenBasicDetails()
+	private async Task OnRateChanged(decimal newRate)
 	{
-		_rawMaterialDetailsDialogVisible = false;
-		_basicInfoDialogVisible = true;
-		VibrationService.VibrateHapticClick();
-		StateHasChanged();
+		if (_selectedRawMaterialForEdit is null)
+			return;
+
+		_selectedRawMaterialForEdit.Rate = Math.Max(0, newRate);
+		await SavePurchaseFile();
 	}
 
-	private void OpenDiscountDetails()
+	private async Task OnQuantityChanged(decimal newQuantity)
 	{
-		_rawMaterialDetailsDialogVisible = false;
-		_discountDetailsDialogVisible = true;
-		VibrationService.VibrateHapticClick();
-		StateHasChanged();
+		if (_selectedRawMaterialForEdit is null)
+			return;
+
+		_selectedRawMaterialForEdit.Quantity = Math.Max(0, newQuantity);
+		await SavePurchaseFile();
 	}
 
-	private void OpenTaxDetails()
+	private async Task OnDiscountPercentChanged(decimal newDiscountPercent)
+	{
+		if (_selectedRawMaterialForEdit is null)
+			return;
+
+		_selectedRawMaterialForEdit.DiscPercent = Math.Max(0, Math.Min(100, newDiscountPercent));
+		await SavePurchaseFile();
+	}
+
+	private async Task OnCGSTPercentChanged(decimal newCGSTPercent)
+	{
+		if (_selectedRawMaterialForEdit is null)
+			return;
+
+		_selectedRawMaterialForEdit.CGSTPercent = Math.Max(0, Math.Min(50, newCGSTPercent));
+		await SavePurchaseFile();
+	}
+
+	private async Task OnSGSTPercentChanged(decimal newSGSTPercent)
+	{
+		if (_selectedRawMaterialForEdit is null)
+			return;
+
+		_selectedRawMaterialForEdit.SGSTPercent = Math.Max(0, Math.Min(50, newSGSTPercent));
+		await SavePurchaseFile();
+	}
+
+	private async Task OnIGSTPercentChanged(decimal newIGSTPercent)
+	{
+		if (_selectedRawMaterialForEdit is null)
+			return;
+
+		_selectedRawMaterialForEdit.IGSTPercent = Math.Max(0, Math.Min(50, newIGSTPercent));
+		await SavePurchaseFile();
+	}
+
+	private async Task OnSaveRawMaterialDetailsClick()
 	{
 		_rawMaterialDetailsDialogVisible = false;
-		_taxDetailsDialogVisible = true;
-		VibrationService.VibrateHapticClick();
-		StateHasChanged();
+		await SavePurchaseFile();
 	}
 	#endregion
 
@@ -246,63 +304,6 @@ public partial class PurchaseCartPage
 		await SavePurchaseFile();
 	}
 
-	private async Task OnSaveBasicInfoClick()
-	{
-		_basicInfoDialogVisible = false;
-		await SavePurchaseFile();
-	}
-	#endregion
-
-	#region Discount Details Dialog
-	private async Task OnDiscountPercentChanged(decimal newDiscountPercent)
-	{
-		if (_selectedRawMaterialForEdit is null)
-			return;
-
-		_selectedRawMaterialForEdit.DiscPercent = Math.Max(0, Math.Min(100, newDiscountPercent));
-		await SavePurchaseFile();
-	}
-
-	private async Task OnSaveDiscountClick()
-	{
-		_discountDetailsDialogVisible = false;
-		await SavePurchaseFile();
-	}
-	#endregion
-
-	#region Tax Details Dialog
-	private async Task OnCGSTPercentChanged(decimal newCGSTPercent)
-	{
-		if (_selectedRawMaterialForEdit is null)
-			return;
-
-		_selectedRawMaterialForEdit.CGSTPercent = Math.Max(0, Math.Min(50, newCGSTPercent));
-		await SavePurchaseFile();
-	}
-
-	private async Task OnSGSTPercentChanged(decimal newSGSTPercent)
-	{
-		if (_selectedRawMaterialForEdit is null)
-			return;
-
-		_selectedRawMaterialForEdit.SGSTPercent = Math.Max(0, Math.Min(50, newSGSTPercent));
-		await SavePurchaseFile();
-	}
-
-	private async Task OnIGSTPercentChanged(decimal newIGSTPercent)
-	{
-		if (_selectedRawMaterialForEdit is null)
-			return;
-
-		_selectedRawMaterialForEdit.IGSTPercent = Math.Max(0, Math.Min(50, newIGSTPercent));
-		await SavePurchaseFile();
-	}
-
-	private async Task OnSaveTaxClick()
-	{
-		_taxDetailsDialogVisible = false;
-		await SavePurchaseFile();
-	}
 	#endregion
 
 	#region Saving
