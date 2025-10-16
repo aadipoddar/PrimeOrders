@@ -48,6 +48,7 @@ public partial class SaleDetailedPage
 		else if (_user.LocationId != 1)
 			_selectedLocationId = _user.LocationId;
 
+		await LoadLocations();
 		await LoadData();
 		_isLoading = false;
 	}
@@ -57,7 +58,6 @@ public partial class SaleDetailedPage
 		_isLoading = true;
 		StateHasChanged();
 
-		await LoadLocations();
 		await LoadSalesData();
 		ApplyFilters();
 
@@ -72,7 +72,7 @@ public partial class SaleDetailedPage
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 
 			// Add "All Locations" option for location 1 users
-			_locations.Insert(0, new LocationModel { Id = 0, Name = "All Locations" });
+			_locations.Insert(0, new() { Id = 0, Name = "All Locations" });
 
 			_selectedLocationId = 0;
 			_selectedLocation = _locations.FirstOrDefault(l => l.Id == 0);
@@ -81,7 +81,7 @@ public partial class SaleDetailedPage
 		{
 			// Non-admin users can only see their own location
 			var userLocation = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
-			if (userLocation != null)
+			if (userLocation is not null)
 			{
 				_locations = [userLocation];
 				_selectedLocationId = _user.LocationId;
@@ -95,7 +95,7 @@ public partial class SaleDetailedPage
 		var fromDate = _startDate.ToDateTime(TimeOnly.MinValue);
 		var toDate = _endDate.ToDateTime(TimeOnly.MaxValue);
 
-		if (_user.LocationId == 1 && (_selectedLocationId == null || _selectedLocationId == 0))
+		if (_user.LocationId == 1 && (_selectedLocationId is null || _selectedLocationId == 0))
 		{
 			// Load all sales for admin when "All Locations" is selected
 			_saleOverviews = [];
