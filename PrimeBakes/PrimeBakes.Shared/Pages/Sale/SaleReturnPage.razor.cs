@@ -145,7 +145,7 @@ public partial class SaleReturnPage
 
 		foreach (var product in allProducts)
 		{
-			var productTax = taxes.FirstOrDefault(t => t.Id == product.TaxId) ?? new TaxModel();
+			var productTax = taxes.FirstOrDefault(t => t.Id == product.TaxId) ?? new();
 
 			_allCart.Add(new()
 			{

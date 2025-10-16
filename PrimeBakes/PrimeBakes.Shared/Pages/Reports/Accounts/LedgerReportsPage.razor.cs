@@ -15,9 +15,8 @@ namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
 public partial class LedgerReportsPage
 {
-	private UserModel _user;
 	private bool _isLoading = true;
-	private bool _showCharts = true;
+	private bool _showCharts = false;
 
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now.AddDays(-30));
 	private DateOnly _endDate = DateOnly.FromDateTime(DateTime.Now);
@@ -30,16 +29,7 @@ public partial class LedgerReportsPage
 	protected override async Task OnInitializedAsync()
 	{
 		_isLoading = true;
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Accounts, true);
-		_user = authResult.User;
-
-		// Only admin users can access ledger reports
-		if (_user.LocationId != 1)
-		{
-			NavigationManager.NavigateTo("/Reports-Dashboard");
-			return;
-		}
-
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Accounts, true);
 		await LoadData();
 		_isLoading = false;
 	}
@@ -82,6 +72,7 @@ public partial class LedgerReportsPage
 				filteredOverviews.Add(ledger);
 		}
 
+		filteredOverviews.RemoveAll(l => l.LedgerId == _selectedLedger.Id);
 		_ledgerOverviews = [.. filteredOverviews];
 	}
 
