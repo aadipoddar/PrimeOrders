@@ -54,7 +54,6 @@ public partial class OrderCartPage
 		_locations.RemoveAll(c => c.Id == 1);
 
 		_order.LocationId = _user.LocationId == 1 ? _locations.FirstOrDefault().Id : _user.LocationId;
-		_order.UserId = _user.Id;
 		_order.OrderNo = await GenerateCodes.GenerateOrderBillNo(_order);
 
 		_cart.Clear();
@@ -70,6 +69,8 @@ public partial class OrderCartPage
 		if (await DataStorageService.LocalExists(StorageFileNames.OrderDataFileName))
 			_order = System.Text.Json.JsonSerializer.Deserialize<OrderModel>(await DataStorageService.LocalGetAsync(StorageFileNames.OrderDataFileName)) ??
 				new() { OrderDateTime = DateTime.Now, Id = 0, SaleId = null, Status = true, Remarks = "", CreatedAt = DateTime.Now };
+
+		_order.UserId = _user.Id;
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
