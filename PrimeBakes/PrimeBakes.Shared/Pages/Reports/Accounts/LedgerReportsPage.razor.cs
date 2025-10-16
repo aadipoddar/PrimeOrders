@@ -1,9 +1,11 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Accounting;
+using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
@@ -24,8 +26,12 @@ public partial class LedgerReportsPage
 
 	private List<LedgerModel> _ledgers = [];
 	private List<LedgerOverviewModel> _ledgerOverviews = [];
+	private List<LedgerOverviewModel> _allLedgerOverviews = []; // Store original data for group headers
+	private List<TrialBalanceModel> _trialBalances = [];
+
 	private SfGrid<LedgerOverviewModel> _sfGrid;
 
+	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
 		_isLoading = true;
@@ -41,6 +47,7 @@ public partial class LedgerReportsPage
 			_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger, true);
 			await LoadLedgerData();
 			ApplyFilters();
+			await LoadTrialBalance();
 			StateHasChanged();
 		}
 		catch (Exception ex)
@@ -49,32 +56,46 @@ public partial class LedgerReportsPage
 		}
 	}
 
-	private async Task LoadLedgerData() =>
-		_ledgerOverviews = await LedgerData.LoadLedgerDetailsByDateLedger(
+	private async Task LoadLedgerData()
+	{
+		_allLedgerOverviews = await LedgerData.LoadLedgerDetailsByDateLedger(
 			_startDate.ToDateTime(TimeOnly.MinValue),
 			_endDate.ToDateTime(TimeOnly.MaxValue),
 			0);
 
+		_ledgerOverviews = [.. _allLedgerOverviews]; // Copy for filtering
+	}
+
 	private void ApplyFilters()
 	{
 		if (_selectedLedger is null || _selectedLedger.Id <= 0)
+		{
+			_ledgerOverviews = [.. _allLedgerOverviews];
 			return;
+		}
 
 		List<LedgerOverviewModel> filteredOverviews = [];
-		var filteredLedgers = _ledgerOverviews.Where(l => l.LedgerId == _selectedLedger.Id).ToList();
+		var filteredLedgers = _allLedgerOverviews.Where(l => l.LedgerId == _selectedLedger.Id).ToList();
 
 		foreach (var item in filteredLedgers)
 		{
-			var referenceLedgers = _ledgerOverviews
-				.Where(l => l.AccountingId == item.AccountingId)
+			var referenceLedgers = _allLedgerOverviews
+				.Where(l => l.AccountingId == item.AccountingId && l.LedgerId != _selectedLedger.Id) // Exclude the selected ledger rows
 				.ToList();
 			foreach (var ledger in referenceLedgers)
 				filteredOverviews.Add(ledger);
 		}
 
-		filteredOverviews.RemoveAll(l => l.LedgerId == _selectedLedger.Id);
 		_ledgerOverviews = [.. filteredOverviews];
 	}
+
+	private async Task LoadTrialBalance()
+	{
+		_trialBalances = await AccountingData.LoadTrialBalanceByDate(
+			_startDate.ToDateTime(TimeOnly.MinValue),
+			_endDate.ToDateTime(TimeOnly.MaxValue));
+	}
+	#endregion
 
 	#region Event Handlers
 	private async Task OnDateRangeChanged(RangePickerEventArgs<DateOnly> args)

@@ -13,1527 +13,1640 @@
 @using PrimeBakes.Shared.Services
 
 <HeadContent>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		  integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+		  crossorigin="anonymous" referrerpolicy="no-referrer" />
 </HeadContent>
 
 <PageTitle>Ledger Reports & Analysis - PrimeBakes</PageTitle>
 
 @if (_isLoading)
 {
-    <div class="loading-overlay">
-        <div class="loading-content">
-            <div class="circular-dots-loader">
-                <span class="dot dot-1"></span>
-                <span class="dot dot-2"></span>
-                <span class="dot dot-3"></span>
-            </div>
-            <p class="loading-text">Loading Ledger Reports...</p>
-        </div>
-    </div>
+	<div class="loading-overlay">
+		<div class="loading-content">
+			<div class="circular-dots-loader">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>
+				<span class="dot dot-3"></span>
+			</div>
+			<p class="loading-text">Loading Ledger Reports...</p>
+		</div>
+	</div>
 }
 else
 {
-    <div class="ledger-report-container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="header-content">
-                <div class="title-section">
-                    <div class="icon-wrapper">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="title-text">
-                        <h1>Ledger Reports & Analysis</h1>
-                        <p>Comprehensive ledger analytics and transaction insights</p>
-                    </div>
-                </div>
-                
-                <button @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")' class="back-to-dashboard-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Back to Dashboard</span>
-                </button>
-            </div>
-        </div>
+	<div class="ledger-report-container">
+		<!-- Page Header -->
+		<div class="page-header">
+			<div class="header-content">
+				<div class="title-section">
+					<div class="icon-wrapper">
+						<i class="fas fa-book"></i>
+					</div>
+					<div class="title-text">
+						<h1>Ledger Reports & Analysis</h1>
+						<p>Comprehensive ledger analytics and transaction insights</p>
+					</div>
+				</div>
 
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <div class="filter-card">
-                <div class="filter-header">
-                    <h3><i class="fas fa-filter"></i> Filters</h3>
-                </div>
-                <div class="filter-content">
-                    <div class="filter-group">
-                        <label>Date Range</label>
-                        <SfDateRangePicker @bind-StartDate="_startDate" 
-                                         @bind-EndDate="_endDate" 
-                                         Placeholder="Select date range"
-                                         Format="dd/MM/yyyy"
-                                         CssClass="date-picker">
-                            <DateRangePickerEvents TValue="DateOnly" ValueChange="OnDateRangeChanged" />
-                        </SfDateRangePicker>
-                    </div>
+				<button @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")' class="back-to-dashboard-btn">
+					<i class="fas fa-arrow-left"></i>
+					<span>Back to Dashboard</span>
+				</button>
+			</div>
+		</div>
 
-                    <div class="filter-group">
-                        <label>Ledger</label>
-                        <SfAutoComplete TValue="LedgerModel"
-                                        TItem="LedgerModel"
-                                        @bind-Value="_selectedLedger"
-                                        Placeholder="All Ledgers"
-                                        DataSource="_ledgers"
-                                        CssClass="form-control"
-                                        AllowFiltering="true"
-                                        FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
-                                        FloatLabelType='@FloatLabelType.Never'>
-                            <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnLedgerChanged" />
-                            <AutoCompleteFieldSettings Value="Name" />
-                        </SfAutoComplete>
-                    </div>
+		<!-- Filter Section -->
+		<div class="filter-section">
+			<div class="filter-card">
+				<div class="filter-header">
+					<h3><i class="fas fa-filter"></i> Filters</h3>
+				</div>
+				<div class="filter-content">
+					<div class="filter-group">
+						<label>Date Range</label>
+						<SfDateRangePicker @bind-StartDate="_startDate"
+										   @bind-EndDate="_endDate"
+										   Placeholder="Select date range"
+										   Format="dd/MM/yyyy"
+										   CssClass="date-picker">
+							<DateRangePickerEvents TValue="DateOnly" ValueChange="OnDateRangeChanged" />
+						</SfDateRangePicker>
+					</div>
 
-                    <div class="filter-actions">
-                        <button @onclick="ToggleCharts" class="chart-toggle-btn">
-                            <i class="fas @(_showCharts ? "fa-chart-bar" : "fa-chart-line")"></i>
-                            @(_showCharts ? "Hide Charts" : "Show Charts")
-                        </button>
-                        <button @onclick="ExportToExcel" class="export-btn">
-                            <i class="fas fa-file-excel"></i>
-                            Export Excel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+					<div class="filter-group">
+						<label>Ledger</label>
+						<SfAutoComplete TValue="LedgerModel"
+										TItem="LedgerModel"
+										@bind-Value="_selectedLedger"
+										Placeholder="All Ledgers"
+										DataSource="_ledgers"
+										CssClass="form-control"
+										AllowFiltering="true"
+										FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+										FloatLabelType='@FloatLabelType.Never'>
+							<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnLedgerChanged" />
+							<AutoCompleteFieldSettings Value="Name" />
+						</SfAutoComplete>
+					</div>
 
-        <!-- Summary Cards Section -->
-        @if (_ledgerOverviews.Any())
-        {
-            <div class="summary-section">
-                <div class="summary-cards">
-                    <div class="summary-card debit-card">
-                        <div class="card-icon">
-                            <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetTotalDebitAmount().FormatIndianCurrency()</div>
-                            <div class="card-label">Total Debits</div>
-                        </div>
-                    </div>
+					<div class="filter-actions">
+						<button @onclick="ToggleCharts" class="chart-toggle-btn">
+							<i class="fas @(_showCharts ? "fa-chart-bar" : "fa-chart-line")"></i>
+							@(_showCharts ? "Hide Charts" : "Show Charts")
+						</button>
+						<button @onclick="ExportToExcel" class="export-btn">
+							<i class="fas fa-file-excel"></i>
+							Export Excel
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 
-                    <div class="summary-card credit-card">
-                        <div class="card-icon">
-                            <i class="fas fa-minus-circle"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetTotalCreditAmount().FormatIndianCurrency()</div>
-                            <div class="card-label">Total Credits</div>
-                        </div>
-                    </div>
+		<!-- Summary Cards Section -->
+		@if (_ledgerOverviews.Any())
+		{
+			<!-- Charts Section -->
+			@if (_showCharts)
+			{
+				<div class="summary-section">
+					<div class="summary-cards">
+						<div class="summary-card debit-card">
+							<div class="card-icon">
+								<i class="fas fa-plus-circle"></i>
+							</div>
+							<div class="card-content">
+								<div class="card-value">@GetTotalDebitAmount().FormatIndianCurrency()</div>
+								<div class="card-label">Total Debits</div>
+							</div>
+						</div>
 
-                    <div class="summary-card balance-card">
-                        <div class="card-icon">
-                            <i class="fas fa-balance-scale"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetNetBalance().FormatIndianCurrency()</div>
-                            <div class="card-label">Net Balance</div>
-                        </div>
-                    </div>
+						<div class="summary-card credit-card">
+							<div class="card-icon">
+								<i class="fas fa-minus-circle"></i>
+							</div>
+							<div class="card-content">
+								<div class="card-value">@GetTotalCreditAmount().FormatIndianCurrency()</div>
+								<div class="card-label">Total Credits</div>
+							</div>
+						</div>
 
-                    <div class="summary-card transactions-card">
-                        <div class="card-icon">
-                            <i class="fas fa-exchange-alt"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetTotalTransactions().ToString("N0")</div>
-                            <div class="card-label">Total Transactions</div>
-                        </div>
-                    </div>
+						<div class="summary-card balance-card">
+							<div class="card-icon">
+								<i class="fas fa-balance-scale"></i>
+							</div>
+							<div class="card-content">
+								<div class="card-value">@GetNetBalance().FormatIndianCurrency()</div>
+								<div class="card-label">Net Balance</div>
+							</div>
+						</div>
 
-                    <div class="summary-card ledgers-card">
-                        <div class="card-icon">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetActiveLedgers().ToString("N0")</div>
-                            <div class="card-label">Active Ledgers</div>
-                        </div>
-                    </div>
+						<div class="summary-card transactions-card">
+							<div class="card-icon">
+								<i class="fas fa-exchange-alt"></i>
+							</div>
+							<div class="card-content">
+								<div class="card-value">@GetTotalTransactions().ToString("N0")</div>
+								<div class="card-label">Total Transactions</div>
+							</div>
+						</div>
 
-                    <div class="summary-card average-card">
-                        <div class="card-icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-value">@GetAverageTransactionAmount().FormatIndianCurrency()</div>
-                            <div class="card-label">Avg Transaction</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+						<div class="summary-card ledgers-card">
+							<div class="card-icon">
+								<i class="fas fa-book-open"></i>
+							</div>
+							<div class="card-content">
+								<div class="card-value">@GetActiveLedgers().ToString("N0")</div>
+								<div class="card-label">Active Ledgers</div>
+							</div>
+						</div>
 
-            <!-- Charts Section -->
-            @if (_showCharts)
-            {
-                <div class="charts-section">
-                    <div class="charts-grid">
-                        <!-- Debit vs Credit Pie Chart -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h4>Debit vs Credit Distribution</h4>
-                                <p>Total debit and credit amount comparison</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfAccumulationChart EnableSmartLabels="true">
-                                    <AccumulationChartSeriesCollection>
-                                        <AccumulationChartSeries DataSource="GetDebitCreditChartData()" 
-                                                               XName="Type" 
-                                                               YName="Amount" 
-                                                               Name="Amount"
-                                                               InnerRadius="30%">
-                                            <AccumulationDataLabelSettings Visible="true" 
-                                                                         Name="Type" 
-                                                                         Position="AccumulationLabelPosition.Outside" />
-                                            <AccumulationChartAnimation Enable="true" />
-                                        </AccumulationChartSeries>
-                                    </AccumulationChartSeriesCollection>
-                                    <AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
-                                    <AccumulationChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y} (${point.percentage}%)" />
-                                </SfAccumulationChart>
-                            </div>
-                        </div>
-                        
-                        <!-- Top Ledgers by Transaction Count -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h4>Top Ledgers by Activity</h4>
-                                <p>Ledgers with highest transaction counts</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfChart>
-                                    <ChartArea>
-                                        <ChartAreaBorder Width="0" />
-                                    </ChartArea>
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryXAxis>
-                                    <ChartPrimaryYAxis LabelFormat="{value}">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryYAxis>
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="GetTopLedgersChartData()" 
-                                                   XName="LedgerName" 
-                                                   YName="TransactionCount" 
-                                                   Type="ChartSeriesType.Column"
-                                                   Name="Transaction Count"
-                                                   Fill="#e2137b">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Middle" />
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                    <ChartTooltipSettings Enable="true" Format="${point.x}: ${point.y} transactions" />
-                                </SfChart>
-                            </div>
-                        </div>
-                        
-                        <!-- Daily Transaction Trend -->
-                        <div class="chart-card wide-chart">
-                            <div class="chart-header">
-                                <h4>Daily Transaction Trend</h4>
-                                <p>Daily debit and credit transaction trends</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfChart>
-                                    <ChartArea>
-                                        <ChartAreaBorder Width="0" />
-                                    </ChartArea>
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryXAxis>
-                                    <ChartPrimaryYAxis LabelFormat="₹{value}">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryYAxis>
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="GetDailyTrendChartData()" 
-                                                   XName="Date" 
-                                                   YName="DebitAmount" 
-                                                   Type="ChartSeriesType.SplineArea"
-                                                   Name="Daily Debits"
-                                                   Fill="#e2137b"
-                                                   Opacity="0.7">
-                                            <ChartMarker Visible="true" Fill="#e2137b" />
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="GetDailyTrendChartData()" 
-                                                   XName="Date" 
-                                                   YName="CreditAmount" 
-                                                   Type="ChartSeriesType.SplineArea"
-                                                   Name="Daily Credits"
-                                                   Fill="#ff6b9d"
-                                                   Opacity="0.7">
-                                            <ChartMarker Visible="true" Fill="#ff6b9d" />
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                    <ChartTooltipSettings Enable="true" Format="Date: ${point.x}<br/>${series.name}: ₹${point.y}" />
-                                    <ChartLegendSettings Visible="true" Position="LegendPosition.Top" />
-                                </SfChart>
-                            </div>
-                        </div>
+						<div class="summary-card average-card">
+							<div class="card-icon">
+								<i class="fas fa-chart-bar"></i>
+							</div>
+							<div class="card-content">
+								<div class="card-value">@GetAverageTransactionAmount().FormatIndianCurrency()</div>
+								<div class="card-label">Avg Transaction</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
-                        <!-- Account Type Distribution -->
-                        <div class="chart-card wide-chart">
-                            <div class="chart-header">
-                                <h4>Account Type Distribution</h4>
-                                <p>Transaction amounts by account type</p>
-                            </div>
-                            <div class="chart-container">
-                                <SfChart>
-                                    <ChartArea>
-                                        <ChartAreaBorder Width="0" />
-                                    </ChartArea>
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryXAxis>
-                                    <ChartPrimaryYAxis LabelFormat="₹{value}">
-                                        <ChartAxisLabelStyle Color="#666" />
-                                    </ChartPrimaryYAxis>
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="GetAccountTypeChartData()" 
-                                                   XName="AccountTypeName" 
-                                                   YName="TotalAmount" 
-                                                   Type="ChartSeriesType.Column"
-                                                   Name="Total Amount"
-                                                   Fill="#e2137b">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Top" />
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                    <ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
-                                </SfChart>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-            else if (_showCharts && !_ledgerOverviews.Any())
-            {
-                <div class="no-charts-message">
-                    <div class="no-charts-content">
-                        <i class="fas fa-chart-pie"></i>
-                        <h3>No Data for Charts</h3>
-                        <p>Charts will appear when ledger data is available for the selected period.</p>
-                    </div>
-                </div>
-            }
 
-            <!-- Data Grid -->
-            <div class="grid-section">
-                <div class="grid-card">
-                    <div class="grid-header">
-                        <h3>
-                            <i class="fas fa-table"></i>
-                            Ledger Transactions
-                        </h3>
-                        <p>Detailed view of ledger transactions for the selected period</p>
-                    </div>
-                    
-                    <div class="grid-content">
-                        <SfGrid @ref="_sfGrid" 
-                                DataSource="_ledgerOverviews" 
-                                AllowPaging="true" 
-                                AllowSorting="true" 
-                                AllowFiltering="true" 
-                                AllowTextWrap="true"
-                                AllowSelection="true" 
-                                AllowResizing="true" 
-                                AllowGrouping="true"
-                                GridLines="GridLine.Horizontal"
-                                CssClass="modern-grid"
-                                Toolbar="@(new List<string>() { "Search" })"
-                                Height="auto">
-                            
-                            <GridPageSettings PageSize="25" PageSizes="new int[] { 10, 25, 50, 100, 200 }"></GridPageSettings>
-                            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
-                            <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+				<div class="charts-section">
+					<div class="charts-grid">
+						<!-- Debit vs Credit Pie Chart -->
+						<div class="chart-card">
+							<div class="chart-header">
+								<h4>Debit vs Credit Distribution</h4>
+								<p>Total debit and credit amount comparison</p>
+							</div>
+							<div class="chart-container">
+								<SfAccumulationChart EnableSmartLabels="true">
+									<AccumulationChartSeriesCollection>
+										<AccumulationChartSeries DataSource="GetDebitCreditChartData()"
+																 XName="Type"
+																 YName="Amount"
+																 Name="Amount"
+																 InnerRadius="30%">
+											<AccumulationDataLabelSettings Visible="true"
+																		   Name="Type"
+																		   Position="AccumulationLabelPosition.Outside" />
+											<AccumulationChartAnimation Enable="true" />
+										</AccumulationChartSeries>
+									</AccumulationChartSeriesCollection>
+									<AccumulationChartLegendSettings Visible="true" Position="LegendPosition.Right" />
+									<AccumulationChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y} (${point.percentage}%)" />
+								</SfAccumulationChart>
+							</div>
+						</div>
 
-                            @if (_selectedLedger is not null && _selectedLedger.Id > 0)
-                            {
-                                <GridGroupSettings Columns="[nameof(LedgerOverviewModel.TransactionNo)]" ShowGroupedColumn="true" />
-                            }
-                            else
-                            {
-                                <GridGroupSettings Columns="[nameof(LedgerOverviewModel.ReferenceNo)]" ShowGroupedColumn="true" />
-                            }
-                            <GridAggregates>
-                                <GridAggregate>
-                                    <GridAggregateColumns>
-                                        <GridAggregateColumn Field="@nameof(LedgerOverviewModel.Debit)" Type="AggregateType.Sum" Format="N2">
-                                            <GroupFooterTemplate>
-                                                @{
-                                                    var aggregateContext = context as AggregateTemplateContext;
-                                                    var debitSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
-                                                }
-                                                <div class="transaction-summary-debit">
-                                                    <strong>Total Debit: @(debitSum.FormatIndianCurrency())</strong>
-                                                </div>
-                                            </GroupFooterTemplate>
-                                        </GridAggregateColumn>
-                                        <GridAggregateColumn Field="@nameof(LedgerOverviewModel.Credit)" Type="AggregateType.Sum" Format="N2">
-                                            <GroupFooterTemplate>
-                                                @{
-                                                    var aggregateContext = context as AggregateTemplateContext;
-                                                    var creditSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
-                                                }
-                                                <div class="transaction-summary-credit">
-                                                    <strong>Total Credit: @(creditSum.FormatIndianCurrency())</strong>
-                                                </div>
-                                            </GroupFooterTemplate>
-                                        </GridAggregateColumn>
-                                    </GridAggregateColumns>
-                                </GridAggregate>
-                            </GridAggregates>
-                            
-                            <GridColumns>
-                                <GridColumn Field="@nameof(LedgerOverviewModel.AccountingDate)" 
-                                            HeaderText="Date" 
-                                            Format="dd/MM/yyyy" 
-                                            Width="100" 
-                                            Type="ColumnType.Date">
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.TransactionNo)" 
-                                            HeaderText="Transaction No" 
-                                            Width="130">
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceNo)" 
-                                            HeaderText="Reference No" 
-                                            Width="120">
-                                </GridColumn>
+						<!-- Top Ledgers by Transaction Count -->
+						<div class="chart-card">
+							<div class="chart-header">
+								<h4>Top Ledgers by Activity</h4>
+								<p>Ledgers with highest transaction counts</p>
+							</div>
+							<div class="chart-container">
+								<SfChart>
+									<ChartArea>
+										<ChartAreaBorder Width="0" />
+									</ChartArea>
+									<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryXAxis>
+									<ChartPrimaryYAxis LabelFormat="{value}">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryYAxis>
+									<ChartSeriesCollection>
+										<ChartSeries DataSource="GetTopLedgersChartData()"
+													 XName="LedgerName"
+													 YName="TransactionCount"
+													 Type="ChartSeriesType.Column"
+													 Name="Transaction Count"
+													 Fill="#e2137b">
+											<ChartMarker>
+												<ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Middle" />
+											</ChartMarker>
+										</ChartSeries>
+									</ChartSeriesCollection>
+									<ChartTooltipSettings Enable="true" Format="${point.x}: ${point.y} transactions" />
+								</SfChart>
+							</div>
+						</div>
 
-                                <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceType)"
-                                            HeaderText="Reference Type"
-                                            Width="120">
-                                </GridColumn>
+						<!-- Daily Transaction Trend -->
+						<div class="chart-card wide-chart">
+							<div class="chart-header">
+								<h4>Daily Transaction Trend</h4>
+								<p>Daily debit and credit transaction trends</p>
+							</div>
+							<div class="chart-container">
+								<SfChart>
+									<ChartArea>
+										<ChartAreaBorder Width="0" />
+									</ChartArea>
+									<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryXAxis>
+									<ChartPrimaryYAxis LabelFormat="₹{value}">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryYAxis>
+									<ChartSeriesCollection>
+										<ChartSeries DataSource="GetDailyTrendChartData()"
+													 XName="Date"
+													 YName="DebitAmount"
+													 Type="ChartSeriesType.SplineArea"
+													 Name="Daily Debits"
+													 Fill="#e2137b"
+													 Opacity="0.7">
+											<ChartMarker Visible="true" Fill="#e2137b" />
+										</ChartSeries>
+										<ChartSeries DataSource="GetDailyTrendChartData()"
+													 XName="Date"
+													 YName="CreditAmount"
+													 Type="ChartSeriesType.SplineArea"
+													 Name="Daily Credits"
+													 Fill="#ff6b9d"
+													 Opacity="0.7">
+											<ChartMarker Visible="true" Fill="#ff6b9d" />
+										</ChartSeries>
+									</ChartSeriesCollection>
+									<ChartTooltipSettings Enable="true" Format="Date: ${point.x}<br/>${series.name}: ₹${point.y}" />
+									<ChartLegendSettings Visible="true" Position="LegendPosition.Top" />
+								</SfChart>
+							</div>
+						</div>
 
-                                <GridColumn Field="@nameof(LedgerOverviewModel.ReferenceDate)"
-                                            HeaderText="Ref Date"
-                                            Format="dd/MM/yyyy"
-                                            Width="100"
-                                            Type="ColumnType.Date">
-                                </GridColumn>
+						<!-- Account Type Distribution -->
+						<div class="chart-card wide-chart">
+							<div class="chart-header">
+								<h4>Account Type Distribution</h4>
+								<p>Transaction amounts by account type</p>
+							</div>
+							<div class="chart-container">
+								<SfChart>
+									<ChartArea>
+										<ChartAreaBorder Width="0" />
+									</ChartArea>
+									<ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryXAxis>
+									<ChartPrimaryYAxis LabelFormat="₹{value}">
+										<ChartAxisLabelStyle Color="#666" />
+									</ChartPrimaryYAxis>
+									<ChartSeriesCollection>
+										<ChartSeries DataSource="GetAccountTypeChartData()"
+													 XName="AccountTypeName"
+													 YName="TotalAmount"
+													 Type="ChartSeriesType.Column"
+													 Name="Total Amount"
+													 Fill="#e2137b">
+											<ChartMarker>
+												<ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Top" />
+											</ChartMarker>
+										</ChartSeries>
+									</ChartSeriesCollection>
+									<ChartTooltipSettings Enable="true" Format="${point.x}: ₹${point.y}" />
+								</SfChart>
+							</div>
+						</div>
+					</div>
+				</div>
+			}
+			else if (_showCharts && !_ledgerOverviews.Any())
+			{
+				<div class="no-charts-message">
+					<div class="no-charts-content">
+						<i class="fas fa-chart-pie"></i>
+						<h3>No Data for Charts</h3>
+						<p>Charts will appear when ledger data is available for the selected period.</p>
+					</div>
+				</div>
+			}
 
-                                <GridColumn Field="@nameof(LedgerOverviewModel.LedgerName)" 
-                                            HeaderText="Ledger Name" 
-                                            Width="180">
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.AccountTypeName)" 
-                                            HeaderText="Account Type" 
-                                            Width="120">
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.GroupName)" 
-                                            HeaderText="Group" 
-                                            Width="120">
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.Debit)" 
-                                            HeaderText="Debit"
-                                            Width="120" 
-                                            TextAlign="TextAlign.Right">
-                                    <Template>
-                                        @{
-                                            var ledger = (context as LedgerOverviewModel);
-                                            var debitValue = ledger?.Debit;
-                                        }
-                                        @if (debitValue.HasValue && debitValue.Value > 0)
-                                        {
-                                            @debitValue.Value.FormatIndianCurrency()
-                                        }
-                                    </Template>
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.Credit)" 
-                                            HeaderText="Credit"
-                                            Width="120" 
-                                            TextAlign="TextAlign.Right">
-                                    <Template>
-                                        @{
-                                            var ledger = (context as LedgerOverviewModel);
-                                            var creditValue = ledger?.Credit;
-                                        }
-                                        @if (creditValue.HasValue && creditValue.Value > 0)
-                                        {
-                                            @creditValue.Value.FormatIndianCurrency()
-                                        }
-                                    </Template>
-                                </GridColumn>
-                                
-                                <GridColumn Field="@nameof(LedgerOverviewModel.Remarks)" 
-                                            HeaderText="Remarks" 
-                                            Width="150">
-                                </GridColumn>
-                            </GridColumns>
-                        </SfGrid>
-                    </div>
-                    
-                    <!-- Grand Total Summary -->
-                    <div class="grand-total-section">
-                        <div class="grand-total-container">
-                            <div class="grand-total-header">
-                                <h4><i class="fas fa-calculator"></i> Grand Total Summary</h4>
-                            </div>
-                            <div class="grand-total-grid">
-                                <div class="total-card debit-total">
-                                    <div class="total-icon">
-                                        <i class="fas fa-plus-circle"></i>
-                                    </div>
-                                    <div class="total-info">
-                                        <div class="total-label">Total Debit</div>
-                                        <div class="total-amount debit-amount">@GetTotalDebitAmount().FormatIndianCurrency()</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="total-card credit-total">
-                                    <div class="total-icon">
-                                        <i class="fas fa-minus-circle"></i>
-                                    </div>
-                                    <div class="total-info">
-                                        <div class="total-label">Total Credit</div>
-                                        <div class="total-amount credit-amount">@GetTotalCreditAmount().FormatIndianCurrency()</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="total-card balance-total">
-                                    <div class="total-icon">
-                                        <i class="fas fa-balance-scale"></i>
-                                    </div>
-                                    <div class="total-info">
-                                        <div class="total-label">Closing Balance</div>
-                                        <div class="total-amount balance-amount @(GetNetBalance() >= 0 ? "balance-positive" : "balance-negative")">
-                                            @GetNetBalance().FormatIndianCurrency()
-                                        </div>
-                                        <div class="balance-type">
-                                            @(GetNetBalance() >= 0 ? "Dr" : "Cr") Balance
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="no-data-message">
-                <div class="no-data-content">
-                    <i class="fas fa-book"></i>
-                    <h3>No Ledger Data Available</h3>
-                    <p>No ledger data found for the selected criteria. Please adjust your filters and try again.</p>
-                </div>
-            </div>
-        }
-    </div>
+			<!-- Data Grid -->
+			<div class="grid-section">
+				<div class="grid-card">
+					<div class="grid-header">
+						<h3>
+							<i class="fas fa-table"></i>
+							Ledger Transactions - @(_selectedLedger is null || _selectedLedger.Id == 0 ? "All Ledgers" : _selectedLedger.Name)
+						</h3>
+						<p>Detailed view of ledger transactions for the selected period</p>
+					</div>
+
+					<div class="grid-content">
+						<SfGrid @ref="_sfGrid"
+								DataSource="_ledgerOverviews"
+								AllowPaging="true"
+								AllowSorting="true"
+								AllowFiltering="true"
+								AllowTextWrap="true"
+								AllowSelection="true"
+								AllowResizing="true"
+								AllowGrouping="true"
+								GridLines="GridLine.Horizontal"
+								CssClass="modern-grid"
+								Toolbar="@(new List<string>() { "Search" })"
+								Height="auto">
+
+							<GridPageSettings PageSize="25" PageSizes="new int[] { 10, 25, 50, 100, 200 }"></GridPageSettings>
+							<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+							<GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+							<GridGroupSettings Columns="[nameof(LedgerOverviewModel.TransactionNo)]" ShowGroupedColumn="false">
+								<CaptionTemplate>
+									@{
+										var group = (context as CaptionTemplateContext);
+										var transactionNo = group.Key.ToString();
+									}
+
+									<div class="party-group-header">
+										<span class="party-name">@transactionNo</span>
+
+										@if (_selectedLedger is not null && _selectedLedger.Id > 0)
+										{
+											var party = _allLedgerOverviews.Where(x => x.TransactionNo == transactionNo && x.LedgerId == _selectedLedger.Id).FirstOrDefault();
+
+											<span class="party-name">@party?.LedgerName</span>
+											<span class="party-amount">Debit : @((party?.Debit).GetValueOrDefault(0).FormatIndianCurrency())</span>
+											<span class="party-amount">Credit : @((party?.Credit).GetValueOrDefault(0).FormatIndianCurrency())</span>
+										}
+									</div>
+								</CaptionTemplate>
+							</GridGroupSettings>
+
+							<GridAggregates>
+								<GridAggregate>
+									<GridAggregateColumns>
+										<GridAggregateColumn Field="@nameof(LedgerOverviewModel.Debit)" Type="AggregateType.Sum" Format="N2">
+											<GroupFooterTemplate>
+												@{
+													var aggregateContext = context as AggregateTemplateContext;
+													var debitSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
+												}
+												<div class="group-footer-simple">
+													<span class="footer-debit">Debit: @(debitSum.FormatIndianCurrency())</span>
+												</div>
+											</GroupFooterTemplate>
+										</GridAggregateColumn>
+										<GridAggregateColumn Field="@nameof(LedgerOverviewModel.Credit)" Type="AggregateType.Sum" Format="N2">
+											<GroupFooterTemplate>
+												@{
+													var aggregateContext = context as AggregateTemplateContext;
+													var creditSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
+												}
+												<div class="group-footer-simple">
+													<span class="footer-credit">Credit: @(creditSum.FormatIndianCurrency())</span>
+												</div>
+											</GroupFooterTemplate>
+										</GridAggregateColumn>
+									</GridAggregateColumns>
+								</GridAggregate>
+							</GridAggregates>
+
+							<GridColumns>
+								<GridColumn Field="@nameof(LedgerOverviewModel.AccountingDate)"
+											HeaderText="Date"
+											Format="dd/MM/yyyy"
+											Width="100"
+											Type="ColumnType.Date">
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.TransactionNo)"
+											HeaderText="Transaction No"
+											Width="130">
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.ReferenceNo)"
+											HeaderText="Reference No"
+											Width="120">
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.ReferenceType)"
+											HeaderText="Reference Type"
+											Width="120">
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.LedgerName)"
+											HeaderText="Ledger Name"
+											Width="180">
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.Debit)"
+											HeaderText="Debit"
+											Width="120"
+											TextAlign="TextAlign.Right">
+									<Template>
+										@{
+											var ledger = (context as LedgerOverviewModel);
+											var debitValue = ledger?.Debit;
+										}
+										@if (debitValue.HasValue && debitValue.Value > 0)
+										{
+											@debitValue.Value.FormatIndianCurrency()
+										}
+									</Template>
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.Credit)"
+											HeaderText="Credit"
+											Width="120"
+											TextAlign="TextAlign.Right">
+									<Template>
+										@{
+											var ledger = (context as LedgerOverviewModel);
+											var creditValue = ledger?.Credit;
+										}
+										@if (creditValue.HasValue && creditValue.Value > 0)
+										{
+											@creditValue.Value.FormatIndianCurrency()
+										}
+									</Template>
+								</GridColumn>
+
+								<GridColumn Field="@nameof(LedgerOverviewModel.Remarks)"
+											HeaderText="Remarks"
+											Width="200">
+								</GridColumn>
+							</GridColumns>
+						</SfGrid>
+					</div>
+
+					@if (_selectedLedger is not null && _selectedLedger.Id > 0 && _trialBalances.Where(x => x.LedgerId == _selectedLedger.Id).Any())
+					{
+						<!-- Trial Balance -->
+						<div class="grand-total-section">
+							<div class="grand-total-container">
+								<div class="grand-total-header">
+									<h4><i class="fas fa-calculator"></i> Trial Balance </h4>
+								</div>
+								<div class="grand-total-grid">
+									<div class="total-card opening-balance-total">
+										<div class="total-icon">
+											<i class="fas fa-play-circle"></i>
+										</div>
+										<div class="total-info">
+											<div class="total-label">Opening Balance</div>
+											<div class="total-amount opening-balance-amount">@_trialBalances.Sum(x => x.LedgerId == _selectedLedger.Id ? x.OpeningBalance : 0).FormatIndianCurrency()</div>
+											<div class="balance-type">
+												@(_trialBalances.Sum(x => x.LedgerId == _selectedLedger.Id ? x.OpeningBalance : 0) >= 0 ? "Dr" : "Cr") Balance
+											</div>
+										</div>
+									</div>
+
+									<div class="total-card debit-total">
+										<div class="total-icon">
+											<i class="fas fa-plus-circle"></i>
+										</div>
+										<div class="total-info">
+											<div class="total-label">Total Debit</div>
+											<div class="total-amount debit-amount">@_trialBalances.Sum(x => x.LedgerId == _selectedLedger.Id ? x.TotalDebit : 0).FormatIndianCurrency()</div>
+										</div>
+									</div>
+
+									<div class="total-card credit-total">
+										<div class="total-icon">
+											<i class="fas fa-minus-circle"></i>
+										</div>
+										<div class="total-info">
+											<div class="total-label">Total Credit</div>
+											<div class="total-amount credit-amount">@_trialBalances.Sum(x => x.LedgerId == _selectedLedger.Id ? x.TotalCredit : 0).FormatIndianCurrency()</div>
+										</div>
+									</div>
+
+									<div class="total-card balance-total">
+										<div class="total-icon">
+											<i class="fas fa-balance-scale"></i>
+										</div>
+										<div class="total-info">
+											<div class="total-label">Closing Balance</div>
+											<div class="total-amount balance-amount @(GetNetBalance() >= 0 ? "balance-positive" : "balance-negative")">
+												@_trialBalances.Sum(x => x.LedgerId == _selectedLedger.Id ? x.ClosingBalance : 0).FormatIndianCurrency()
+											</div>
+											<div class="balance-type">
+												@(_trialBalances.Sum(x => x.LedgerId == _selectedLedger.Id ? x.ClosingBalance : 0) >= 0 ? "Dr" : "Cr") Balance
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="no-data-message">
+				<div class="no-data-content">
+					<i class="fas fa-book"></i>
+					<h3>No Ledger Data Available</h3>
+					<p>No ledger data found for the selected criteria. Please adjust your filters and try again.</p>
+				</div>
+			</div>
+		}
+	</div>
 }
 
 <style>
-    :root {
-        --primary-color: #e2137b;
-        --primary-light: rgba(226, 19, 123, 0.1);
-        --primary-dark: #c71068;
-        --secondary-color: #f5c2d3;
-        --accent-color: #ff6b9d;
-        --success-color: #00c853;
-        --warning-color: #ff9100;
-        --danger-color: #ff1744;
-        --dark-color: #2c2c54;
-        --light-color: #fef7f9;
-        --white: #ffffff;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-800: #1f2937;
-        --gray-900: #111827;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        --border-radius: 8px;
-        --border-radius-lg: 12px;
-        --border-radius-xl: 16px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Loading Styles */
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    .loading-content {
-        text-align: center;
-        padding: 40px;
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow-xl);
-    }
-
-    .circular-dots-loader {
-        position: relative;
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 20px;
-    }
-
-    .circular-dots-loader .dot {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        animation: rotate 1.8s infinite linear;
-    }
-
-    .circular-dots-loader .dot-1 {
-        background-color: var(--primary-color);
-        animation-delay: 0s;
-    }
-
-    .circular-dots-loader .dot-2 {
-        background-color: var(--primary-dark);
-        animation-delay: -0.6s;
-    }
-
-    .circular-dots-loader .dot-3 {
-        background-color: var(--accent-color);
-        animation-delay: -1.2s;
-    }
-
-    @@keyframes rotate {
-        0% {
-            transform: rotate(0deg) translate(-24px) rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg) translate(-24px) rotate(-360deg);
-        }
-    }
-
-    .loading-text {
-        font-size: 16px;
-        color: var(--gray-600);
-        margin: 0;
-    }
-
-    /* Main Container */
-    .ledger-report-container {
-        padding: 20px;
-        background: 
-            radial-gradient(circle at 20% 80%, rgba(226, 19, 123, 0.03) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(226, 19, 123, 0.03) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(255, 107, 157, 0.02) 0%, transparent 50%),
-            linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #fef7f9 100%);
-        min-height: 100vh;
-        position: relative;
-    }
-
-    .ledger-report-container::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: 
-            radial-gradient(circle at 10% 20%, rgba(226, 19, 123, 0.02) 0%, transparent 20%),
-            radial-gradient(circle at 80% 80%, rgba(255, 107, 157, 0.02) 0%, transparent 20%);
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .ledger-report-container > * {
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Page Header */
-    .page-header {
-        margin-bottom: 30px;
-    }
-
-    .header-content {
-        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
-        padding: 30px;
-        border-radius: var(--border-radius-lg);
-        box-shadow: 
-            0 10px 25px rgba(226, 19, 123, 0.08),
-            0 4px 10px rgba(0, 0, 0, 0.05),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        border-left: 5px solid var(--primary-color);
-        border-top: 1px solid rgba(226, 19, 123, 0.1);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .header-content::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100px;
-        height: 100px;
-        background: radial-gradient(circle, rgba(226, 19, 123, 0.05) 0%, transparent 70%);
-        border-radius: 50%;
-        transform: translate(30px, -30px);
-    }
-
-    .title-section {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .icon-wrapper {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--white);
-        font-size: 24px;
-        box-shadow: 0 3px 10px rgba(226, 19, 123, 0.2);
-    }
-
-    .title-text h1 {
-        margin: 0;
-        color: var(--dark-color);
-        font-size: 28px;
-        font-weight: 700;
-    }
-
-    .title-text p {
-        margin: 5px 0 0;
-        color: var(--gray-600);
-        font-size: 14px;
-    }
-
-    /* Back to Dashboard Button */
-    .back-to-dashboard-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, var(--gray-600), #5a6268);
-        color: var(--white);
-        border: none;
-        padding: 10px 16px;
-        border-radius: var(--border-radius);
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        transition: var(--transition);
-        box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        z-index: 10;
-    }
-
-    .back-to-dashboard-btn:hover {
-        background: linear-gradient(135deg, #5a6268, #495057);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
-    }
-
-    .back-to-dashboard-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
-    }
-
-    .back-to-dashboard-btn i {
-        font-size: 12px;
-        transition: transform 0.3s ease;
-    }
-
-    .back-to-dashboard-btn:hover i {
-        transform: translateX(-2px);
-    }
-
-    /* Filter Section */
-    .filter-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .filter-card {
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-    }
-
-    .filter-header {
-        background: var(--primary-light);
-        padding: 10px 15px;
-        border-bottom: 1px solid var(--gray-200);
-    }
-
-    .filter-header h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--dark-color);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .filter-content {
-        padding: 15px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        align-items: end;
-    }
-
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .filter-group label {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--gray-700);
-    }
-
-    .filter-actions {
-        display: flex;
-        gap: 10px;
-        grid-column: 1 / -1;
-        justify-content: flex-end;
-        margin-top: 10px;
-    }
-
-    .chart-toggle-btn, .export-btn {
-        padding: 10px 20px;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        border: none;
-    }
-
-    .chart-toggle-btn {
-        background: var(--primary-color);
-        color: var(--white);
-    }
-
-    .chart-toggle-btn:hover {
-        background: var(--primary-dark);
-    }
-
-    .export-btn {
-        background: var(--success-color);
-        color: var(--white);
-    }
-
-    .export-btn:hover {
-        background: #00a043;
-    }
-
-    /* Summary Cards */
-    .summary-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .summary-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 10px;
-    }
-
-    .summary-card {
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        padding: 25px;
-        box-shadow: var(--shadow);
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        transition: var(--transition);
-        border-left: 4px solid var(--primary-color);
-    }
-
-    .summary-card:hover {
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-2px);
-    }
-
-    .card-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: var(--border-radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: var(--white);
-        background: var(--primary-color);
-    }
-
-    .card-content {
-        flex: 1;
-    }
-
-    .card-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 5px;
-    }
-
-    .card-label {
-        font-size: 14px;
-        color: var(--gray-600);
-        font-weight: 500;
-    }
-
-    .debit-card .card-icon { background: var(--success-color); }
-    .credit-card .card-icon { background: var(--danger-color); }
-    .balance-card .card-icon { background: var(--primary-color); }
-    .transactions-card .card-icon { background: var(--accent-color); }
-    .ledgers-card .card-icon { background: var(--warning-color); }
-    .average-card .card-icon { background: var(--dark-color); }
-
-    /* Charts Section */
-    .charts-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .charts-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-
-    .chart-card {
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-    }
-
-    .chart-card.wide-chart {
-        grid-column: span 2;
-    }
-
-    .chart-header {
-        padding: 10px 15px;
-        border-bottom: 1px solid var(--gray-200);
-        background: var(--gray-50);
-    }
-
-    .chart-header h4 {
-        margin: 0 0 5px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--dark-color);
-    }
-
-    .chart-header p {
-        margin: 0;
-        font-size: 13px;
-        color: var(--gray-600);
-    }
-
-    .chart-container {
-        padding: 15px;
-        height: 400px;
-        background: var(--white);
-    }
-
-    .no-charts-message {
-        padding: 60px 20px;
-        text-align: center;
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        margin: 20px;
-    }
-
-    .no-charts-content i {
-        font-size: 48px;
-        color: var(--gray-400);
-        margin-bottom: 20px;
-    }
-
-    .no-charts-content h3 {
-        font-size: 24px;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 10px;
-    }
-
-    .no-charts-content p {
-        font-size: 16px;
-        color: var(--gray-600);
-        margin: 0;
-    }
-
-    /* Grid Section */
-    .grid-section {
-        margin: 0;
-        padding: 10px;
-    }
-
-    .grid-card {
-        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
-        border-radius: var(--border-radius-lg);
-        box-shadow: 
-            0 10px 25px rgba(226, 19, 123, 0.08),
-            0 4px 10px rgba(0, 0, 0, 0.05),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(226, 19, 123, 0.05);
-        position: relative;
-        overflow: hidden;
-        transition: var(--transition);
-    }
-
-    .grid-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-color), transparent, var(--primary-color));
-        opacity: 0.1;
-    }
-
-    .grid-card:hover {
-        box-shadow: 
-            0 20px 40px rgba(226, 19, 123, 0.12),
-            0 8px 16px rgba(0, 0, 0, 0.08);
-    }
-
-    .grid-header {
-        padding: 25px 30px 20px;
-        border-bottom: 1px solid rgba(226, 19, 123, 0.1);
-        background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(255, 255, 255, 0.8) 100%);
-    }
-
-    .grid-header h3 {
-        margin: 0 0 8px;
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--dark-color);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .grid-header p {
-        margin: 0;
-        font-size: 14px;
-        color: var(--gray-600);
-        font-weight: 400;
-    }
-
-    .grid-content {
-        padding: 0;
-        background: var(--white);
-    }
-
-    .no-data-message {
-        padding: 80px 20px;
-        text-align: center;
-        background: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        margin: 20px;
-    }
-
-    .no-data-content i {
-        font-size: 64px;
-        color: var(--gray-400);
-        margin-bottom: 20px;
-    }
-
-    .no-data-content h3 {
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 10px;
-    }
-
-    .no-data-content p {
-        font-size: 18px;
-        color: var(--gray-600);
-        margin: 0;
-    }
-
-    /* Modern Grid Styling */
-    .modern-grid .e-grid .e-gridheader {
-        background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
-        border-bottom: 2px solid rgba(226, 19, 123, 0.1);
-    }
-
-    .modern-grid .e-grid .e-headercell {
-        border-right: 1px solid rgba(226, 19, 123, 0.08);
-        font-weight: 600;
-        color: var(--dark-color);
-    }
-
-    .modern-grid .e-grid .e-row:hover {
-        background-color: rgba(226, 19, 123, 0.03);
-        transition: var(--transition);
-    }
-
-    .modern-grid .e-grid .e-altrow {
-        background-color: rgba(226, 19, 123, 0.01);
-    }
-
-    .modern-grid .e-grid .e-gridcontent {
-        border: none;
-    }
-
-    .modern-grid .e-grid .e-content table {
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .modern-grid .e-grid .e-rowcell {
-        border-right: 1px solid rgba(226, 19, 123, 0.05);
-        border-bottom: 1px solid rgba(226, 19, 123, 0.05);
-        padding: 12px 8px;
-        vertical-align: middle;
-    }
-
-    .modern-grid .e-pager {
-        background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(255, 255, 255, 0.95) 100%);
-        border-top: 1px solid rgba(226, 19, 123, 0.1);
-        padding: 15px;
-    }
-
-    .modern-grid .e-pager .e-pagercontainer {
-        border: none;
-    }
-
-    .modern-grid .e-pager .e-numericitem,
-    .modern-grid .e-pager .e-currentitem {
-        border: 1px solid rgba(226, 19, 123, 0.2);
-        margin: 0 2px;
-        border-radius: 4px;
-        min-width: 35px;
-        height: 35px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modern-grid .e-pager .e-currentitem {
-        background: var(--primary-color);
-        color: var(--white);
-        border-color: var(--primary-color);
-    }
-
-    .modern-grid .e-pager .e-numericitem:hover {
-        background: rgba(226, 19, 123, 0.1);
-        border-color: var(--primary-color);
-    }
-
-    /* Transaction Summary Styling */
-    .transaction-summary-debit,
-    .transaction-summary-credit {
-        padding: 8px 12px;
-        border-radius: 4px;
-        margin: 2px;
-        font-size: 13px;
-        text-align: center;
-    }
-
-    .transaction-summary-debit {
-        background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.05));
-        border-left: 3px solid var(--success-color);
-        color: var(--success-color);
-    }
-
-    .transaction-summary-credit {
-        background: linear-gradient(135deg, rgba(255, 23, 68, 0.1), rgba(255, 23, 68, 0.05));
-        border-left: 3px solid var(--danger-color);
-        color: var(--danger-color);
-    }
-
-    /* Group Header Styling */
-    .modern-grid .e-grid .e-groupheadercell {
-        background: linear-gradient(135deg, rgba(226, 19, 123, 0.08) 0%, rgba(226, 19, 123, 0.03) 100%);
-        border-bottom: 2px solid rgba(226, 19, 123, 0.15);
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-
-    .modern-grid .e-grid .e-recordplusexpand,
-    .modern-grid .e-grid .e-recordpluscollapse {
-        color: var(--primary-color);
-    }
-
-    /* Group Footer Styling */
-    .modern-grid .e-grid .e-groupfooter {
-        background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
-        border-top: 1px solid rgba(226, 19, 123, 0.1);
-        border-bottom: 2px solid rgba(226, 19, 123, 0.15);
-    }
-
-    .modern-grid .e-grid .e-groupfooter .e-rowcell {
-        border-right: none;
-        border-bottom: none;
-    }
-
-    /* Animation Keyframes */
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes float {
-        0%, 100% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-5px);
-        }
-    }
-
-    .summary-card,
-    .chart-card,
-    .grid-card {
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .summary-card:nth-child(1) { animation-delay: 0.1s; }
-    .summary-card:nth-child(2) { animation-delay: 0.2s; }
-    .summary-card:nth-child(3) { animation-delay: 0.3s; }
-    .summary-card:nth-child(4) { animation-delay: 0.4s; }
-    .summary-card:nth-child(5) { animation-delay: 0.5s; }
-    .summary-card:nth-child(6) { animation-delay: 0.6s; }
-
-    .chart-card:nth-child(1) { animation-delay: 0.7s; }
-    .chart-card:nth-child(2) { animation-delay: 0.8s; }
-    .chart-card:nth-child(3) { animation-delay: 0.9s; }
-    .chart-card:nth-child(4) { animation-delay: 1.0s; }
-
-    .grid-card { animation-delay: 1.1s; }
-
-    /* Grand Total Section */
-    .grand-total-section {
-        background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
-        border-top: 2px solid rgba(226, 19, 123, 0.15);
-        padding: 25px 30px;
-        margin-top: 0;
-    }
-
-    .grand-total-container {
-        max-width: 100%;
-    }
-
-    .grand-total-header {
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .grand-total-header h4 {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--dark-color);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .grand-total-header i {
-        color: var(--primary-color);
-        font-size: 18px;
-    }
-
-    .grand-total-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .total-card {
-        background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
-        border-radius: var(--border-radius-lg);
-        padding: 25px;
-        box-shadow: 
-            0 8px 25px rgba(0, 0, 0, 0.08),
-            0 3px 8px rgba(0, 0, 0, 0.03),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        transition: var(--transition);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .total-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--primary-color);
-    }
-
-    .total-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.12),
-            0 6px 15px rgba(0, 0, 0, 0.06);
-    }
-
-    .total-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: var(--white);
-        background: var(--primary-color);
-        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
-    }
-
-    .debit-total .total-icon {
-        background: linear-gradient(135deg, var(--success-color), #00a043);
-    }
-
-    .credit-total .total-icon {
-        background: linear-gradient(135deg, var(--danger-color), #d32f2f);
-    }
-
-    .balance-total .total-icon {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    }
-
-    .total-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .total-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--gray-600);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .total-amount {
-        font-size: 28px;
-        font-weight: 700;
-        line-height: 1.2;
-        margin-bottom: 2px;
-    }
-
-    .debit-amount {
-        color: var(--success-color);
-    }
-
-    .credit-amount {
-        color: var(--danger-color);
-    }
-
-    .balance-amount {
-        color: var(--primary-color);
-    }
-
-    .balance-amount.balance-positive {
-        color: var(--success-color);
-    }
-
-    .balance-amount.balance-negative {
-        color: var(--danger-color);
-    }
-
-    .balance-type {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--gray-500);
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-top: 2px;
-    }
-
-    /* Animation for grand total cards */
-    .total-card {
-        animation: fadeInUp 0.6s ease-out forwards;
-    }
-
-    .debit-total { animation-delay: 0.2s; }
-    .credit-total { animation-delay: 0.4s; }
-    .balance-total { animation-delay: 0.6s; }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .page-header {
-            padding: 20px 15px;
-        }
-
-        .header-content {
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
-        }
-
-        .title-info h1 {
-            font-size: 24px;
-        }
-
-        .summary-section,
-        .charts-section,
-        .grid-section,
-        .filter-section {
-            padding: 10px;
-        }
-
-        .filter-content {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .filter-actions {
-            flex-direction: column;
-        }
-
-        .charts-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .chart-card.wide-chart {
-            grid-column: span 1;
-        }
-
-        .summary-cards {
-            grid-template-columns: 1fr;
-        }
-
-        .grid-header {
-            padding: 20px 15px;
-        }
-
-        .grid-header h3 {
-            font-size: 20px;
-        }
-
-        .grand-total-section {
-            padding: 20px 15px;
-        }
-
-        .grand-total-grid {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-
-        .total-card {
-            padding: 20px;
-        }
-
-        .total-amount {
-            font-size: 24px;
-        }
-
-        .total-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .title-info h1 {
-            font-size: 20px;
-        }
-
-        .summary-card {
-            padding: 20px 15px;
-        }
-
-        .card-value {
-            font-size: 24px;
-        }
-
-        .grid-header {
-            padding: 15px;
-        }
-
-        .grid-header h3 {
-            font-size: 18px;
-        }
-
-        .grand-total-section {
-            padding: 15px 10px;
-        }
-
-        .grand-total-header h4 {
-            font-size: 18px;
-        }
-
-        .total-card {
-            padding: 18px 15px;
-            gap: 15px;
-        }
-
-        .total-amount {
-            font-size: 22px;
-        }
-
-        .total-icon {
-            width: 45px;
-            height: 45px;
-            font-size: 18px;
-        }
-
-        .total-label {
-            font-size: 13px;
-        }
-    }
+	:root {
+		--primary-color: #e2137b;
+		--primary-light: rgba(226, 19, 123, 0.1);
+		--primary-dark: #c71068;
+		--secondary-color: #f5c2d3;
+		--accent-color: #ff6b9d;
+		--success-color: #00c853;
+		--warning-color: #ff9100;
+		--danger-color: #ff1744;
+		--dark-color: #2c2c54;
+		--light-color: #fef7f9;
+		--white: #ffffff;
+		--gray-50: #f9fafb;
+		--gray-100: #f3f4f6;
+		--gray-200: #e5e7eb;
+		--gray-300: #d1d5db;
+		--gray-400: #9ca3af;
+		--gray-500: #6b7280;
+		--gray-600: #4b5563;
+		--gray-700: #374151;
+		--gray-800: #1f2937;
+		--gray-900: #111827;
+		--shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+		--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		--border-radius: 8px;
+		--border-radius-lg: 12px;
+		--border-radius-xl: 16px;
+		--transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* Loading Styles */
+	.loading-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(255, 255, 255, 0.95);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+	}
+
+	.loading-content {
+		text-align: center;
+		padding: 40px;
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow-xl);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin: 0 auto 20px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.8s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--primary-dark);
+			animation-delay: -0.6s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--accent-color);
+			animation-delay: -1.2s;
+		}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	.loading-text {
+		font-size: 16px;
+		color: var(--gray-600);
+		margin: 0;
+	}
+
+	/* Main Container */
+	.ledger-report-container {
+		padding: 20px;
+		background: radial-gradient(circle at 20% 80%, rgba(226, 19, 123, 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(226, 19, 123, 0.03) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(255, 107, 157, 0.02) 0%, transparent 50%), linear-gradient(135deg, #f8f9fa 0%, #e9ecef 30%, #f1f3f4 70%, #fef7f9 100%);
+		min-height: 100vh;
+		position: relative;
+	}
+
+		.ledger-report-container::before {
+			content: '';
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: radial-gradient(circle at 10% 20%, rgba(226, 19, 123, 0.02) 0%, transparent 20%), radial-gradient(circle at 80% 80%, rgba(255, 107, 157, 0.02) 0%, transparent 20%);
+			pointer-events: none;
+			z-index: 0;
+		}
+
+		.ledger-report-container > * {
+			position: relative;
+			z-index: 1;
+		}
+
+	/* Page Header */
+	.page-header {
+		margin-bottom: 30px;
+	}
+
+	.header-content {
+		background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+		padding: 30px;
+		border-radius: var(--border-radius-lg);
+		box-shadow: 0 10px 25px rgba(226, 19, 123, 0.08), 0 4px 10px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		border-left: 5px solid var(--primary-color);
+		border-top: 1px solid rgba(226, 19, 123, 0.1);
+		position: relative;
+		overflow: hidden;
+	}
+
+		.header-content::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 100px;
+			height: 100px;
+			background: radial-gradient(circle, rgba(226, 19, 123, 0.05) 0%, transparent 70%);
+			border-radius: 50%;
+			transform: translate(30px, -30px);
+		}
+
+	.title-section {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.icon-wrapper {
+		width: 60px;
+		height: 60px;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+		border-radius: var(--border-radius-lg);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--white);
+		font-size: 24px;
+		box-shadow: 0 3px 10px rgba(226, 19, 123, 0.2);
+	}
+
+	.title-text h1 {
+		margin: 0;
+		color: var(--dark-color);
+		font-size: 28px;
+		font-weight: 700;
+	}
+
+	.title-text p {
+		margin: 5px 0 0;
+		color: var(--gray-600);
+		font-size: 14px;
+	}
+
+	/* Back to Dashboard Button */
+	.back-to-dashboard-btn {
+		position: absolute;
+		top: 20px;
+		right: 20px;
+		background: linear-gradient(135deg, var(--gray-600), #5a6268);
+		color: var(--white);
+		border: none;
+		padding: 10px 16px;
+		border-radius: var(--border-radius);
+		font-size: 14px;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		transition: var(--transition);
+		box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		z-index: 10;
+	}
+
+		.back-to-dashboard-btn:hover {
+			background: linear-gradient(135deg, #5a6268, #495057);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+		}
+
+		.back-to-dashboard-btn:active {
+			transform: translateY(0);
+			box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
+		}
+
+		.back-to-dashboard-btn i {
+			font-size: 12px;
+			transition: transform 0.3s ease;
+		}
+
+		.back-to-dashboard-btn:hover i {
+			transform: translateX(-2px);
+		}
+
+	/* Filter Section */
+	.filter-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.filter-card {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		overflow: hidden;
+	}
+
+	.filter-header {
+		background: var(--primary-light);
+		padding: 10px 15px;
+		border-bottom: 1px solid var(--gray-200);
+	}
+
+		.filter-header h3 {
+			margin: 0;
+			font-size: 18px;
+			font-weight: 600;
+			color: var(--dark-color);
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+	.filter-content {
+		padding: 15px;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 15px;
+		align-items: end;
+	}
+
+	.filter-group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+		.filter-group label {
+			font-size: 14px;
+			font-weight: 500;
+			color: var(--gray-700);
+		}
+
+	.filter-actions {
+		display: flex;
+		gap: 10px;
+		grid-column: 1 / -1;
+		justify-content: flex-end;
+		margin-top: 10px;
+	}
+
+	.chart-toggle-btn, .export-btn {
+		padding: 10px 20px;
+		border-radius: var(--border-radius);
+		cursor: pointer;
+		font-size: 14px;
+		font-weight: 500;
+		transition: var(--transition);
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border: none;
+	}
+
+	.chart-toggle-btn {
+		background: var(--primary-color);
+		color: var(--white);
+	}
+
+		.chart-toggle-btn:hover {
+			background: var(--primary-dark);
+		}
+
+	.export-btn {
+		background: var(--success-color);
+		color: var(--white);
+	}
+
+		.export-btn:hover {
+			background: #00a043;
+		}
+
+	/* Summary Cards */
+	.summary-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.summary-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 10px;
+	}
+
+	.summary-card {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		padding: 25px;
+		box-shadow: var(--shadow);
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		transition: var(--transition);
+		border-left: 4px solid var(--primary-color);
+	}
+
+		.summary-card:hover {
+			box-shadow: var(--shadow-lg);
+			transform: translateY(-2px);
+		}
+
+	.card-icon {
+		width: 50px;
+		height: 50px;
+		border-radius: var(--border-radius-lg);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		color: var(--white);
+		background: var(--primary-color);
+	}
+
+	.card-content {
+		flex: 1;
+	}
+
+	.card-value {
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--dark-color);
+		margin-bottom: 5px;
+	}
+
+	.card-label {
+		font-size: 14px;
+		color: var(--gray-600);
+		font-weight: 500;
+	}
+
+	.debit-card .card-icon {
+		background: var(--success-color);
+	}
+
+	.credit-card .card-icon {
+		background: var(--danger-color);
+	}
+
+	.balance-card .card-icon {
+		background: var(--primary-color);
+	}
+
+	.transactions-card .card-icon {
+		background: var(--accent-color);
+	}
+
+	.ledgers-card .card-icon {
+		background: var(--warning-color);
+	}
+
+	.average-card .card-icon {
+		background: var(--dark-color);
+	}
+
+	/* Charts Section */
+	.charts-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.charts-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 10px;
+	}
+
+	.chart-card {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		overflow: hidden;
+	}
+
+		.chart-card.wide-chart {
+			grid-column: span 2;
+		}
+
+	.chart-header {
+		padding: 10px 15px;
+		border-bottom: 1px solid var(--gray-200);
+		background: var(--gray-50);
+	}
+
+		.chart-header h4 {
+			margin: 0 0 5px 0;
+			font-size: 16px;
+			font-weight: 600;
+			color: var(--dark-color);
+		}
+
+		.chart-header p {
+			margin: 0;
+			font-size: 13px;
+			color: var(--gray-600);
+		}
+
+	.chart-container {
+		padding: 15px;
+		height: 400px;
+		background: var(--white);
+	}
+
+	.no-charts-message {
+		padding: 60px 20px;
+		text-align: center;
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		margin: 20px;
+	}
+
+	.no-charts-content i {
+		font-size: 48px;
+		color: var(--gray-400);
+		margin-bottom: 20px;
+	}
+
+	.no-charts-content h3 {
+		font-size: 24px;
+		font-weight: 600;
+		color: var(--gray-700);
+		margin-bottom: 10px;
+	}
+
+	.no-charts-content p {
+		font-size: 16px;
+		color: var(--gray-600);
+		margin: 0;
+	}
+
+	/* Grid Section */
+	.grid-section {
+		margin: 0;
+		padding: 10px;
+	}
+
+	.grid-card {
+		background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+		border-radius: var(--border-radius-lg);
+		box-shadow: 0 10px 25px rgba(226, 19, 123, 0.08), 0 4px 10px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		border: 1px solid rgba(226, 19, 123, 0.05);
+		position: relative;
+		overflow: hidden;
+		transition: var(--transition);
+	}
+
+		.grid-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: linear-gradient(90deg, var(--primary-color), transparent, var(--primary-color));
+			opacity: 0.1;
+		}
+
+		.grid-card:hover {
+			box-shadow: 0 20px 40px rgba(226, 19, 123, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08);
+		}
+
+	.grid-header {
+		padding: 25px 30px 20px;
+		border-bottom: 1px solid rgba(226, 19, 123, 0.1);
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(255, 255, 255, 0.8) 100%);
+	}
+
+		.grid-header h3 {
+			margin: 0 0 8px;
+			font-size: 24px;
+			font-weight: 700;
+			color: var(--dark-color);
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+
+		.grid-header p {
+			margin: 0;
+			font-size: 14px;
+			color: var(--gray-600);
+			font-weight: 400;
+		}
+
+	.grid-content {
+		padding: 0;
+		background: var(--white);
+	}
+
+	.no-data-message {
+		padding: 80px 20px;
+		text-align: center;
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow);
+		margin: 20px;
+	}
+
+	.no-data-content i {
+		font-size: 64px;
+		color: var(--gray-400);
+		margin-bottom: 20px;
+	}
+
+	.no-data-content h3 {
+		font-size: 28px;
+		font-weight: 600;
+		color: var(--gray-700);
+		margin-bottom: 10px;
+	}
+
+	.no-data-content p {
+		font-size: 18px;
+		color: var(--gray-600);
+		margin: 0;
+	}
+
+	/* Modern Grid Styling */
+	.modern-grid .e-grid .e-gridheader {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+		border-bottom: 2px solid rgba(226, 19, 123, 0.1);
+	}
+
+	.modern-grid .e-grid .e-headercell {
+		border-right: 1px solid rgba(226, 19, 123, 0.08);
+		font-weight: 600;
+		color: var(--dark-color);
+	}
+
+	.modern-grid .e-grid .e-row:hover {
+		background-color: rgba(226, 19, 123, 0.03);
+		transition: var(--transition);
+	}
+
+	.modern-grid .e-grid .e-altrow {
+		background-color: rgba(226, 19, 123, 0.01);
+	}
+
+	.modern-grid .e-grid .e-gridcontent {
+		border: none;
+	}
+
+	.modern-grid .e-grid .e-content table {
+		border-collapse: separate;
+		border-spacing: 0;
+	}
+
+	.modern-grid .e-grid .e-rowcell {
+		border-right: 1px solid rgba(226, 19, 123, 0.05);
+		border-bottom: 1px solid rgba(226, 19, 123, 0.05);
+		padding: 12px 8px;
+		vertical-align: middle;
+	}
+
+	.modern-grid .e-pager {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.02) 0%, rgba(255, 255, 255, 0.95) 100%);
+		border-top: 1px solid rgba(226, 19, 123, 0.1);
+		padding: 15px;
+	}
+
+		.modern-grid .e-pager .e-pagercontainer {
+			border: none;
+		}
+
+		.modern-grid .e-pager .e-numericitem,
+		.modern-grid .e-pager .e-currentitem {
+			border: 1px solid rgba(226, 19, 123, 0.2);
+			margin: 0 2px;
+			border-radius: 4px;
+			min-width: 35px;
+			height: 35px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.modern-grid .e-pager .e-currentitem {
+			background: var(--primary-color);
+			color: var(--white);
+			border-color: var(--primary-color);
+		}
+
+		.modern-grid .e-pager .e-numericitem:hover {
+			background: rgba(226, 19, 123, 0.1);
+			border-color: var(--primary-color);
+		}
+
+	/* Transaction Summary Styling */
+	.transaction-summary-debit,
+	.transaction-summary-credit {
+		padding: 8px 12px;
+		border-radius: 4px;
+		margin: 2px;
+		font-size: 13px;
+		text-align: center;
+	}
+
+	.transaction-summary-debit {
+		background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.05));
+		border-left: 3px solid var(--success-color);
+		color: var(--success-color);
+	}
+
+	.transaction-summary-credit {
+		background: linear-gradient(135deg, rgba(255, 23, 68, 0.1), rgba(255, 23, 68, 0.05));
+		border-left: 3px solid var(--danger-color);
+		color: var(--danger-color);
+	}
+
+	/* Group Header Styling */
+	.modern-grid .e-grid .e-groupheadercell {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.08) 0%, rgba(226, 19, 123, 0.03) 100%);
+		border-bottom: 2px solid rgba(226, 19, 123, 0.15);
+		font-weight: 600;
+		color: var(--primary-color);
+	}
+
+	.modern-grid .e-grid .e-recordplusexpand,
+	.modern-grid .e-grid .e-recordpluscollapse {
+		color: var(--primary-color);
+	}
+
+	/* Party Group Header Styling */
+	.party-group-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 12px;
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.06) 0%, rgba(226, 19, 123, 0.02) 100%);
+		border-radius: 6px;
+		margin: 2px 0;
+		border-left: 3px solid var(--primary-color);
+	}
+
+	.party-name {
+		font-weight: 600;
+		color: var(--dark-color);
+		font-size: 14px;
+	}
+
+	.party-amount {
+		font-weight: 700;
+		color: var(--primary-color);
+		font-size: 14px;
+		background: rgba(226, 19, 123, 0.1);
+		padding: 4px 8px;
+		border-radius: 4px;
+	}
+
+	/* Group Footer Styling */
+	.modern-grid .e-grid .e-groupfooter {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+		border-top: 1px solid rgba(226, 19, 123, 0.1);
+		border-bottom: 2px solid rgba(226, 19, 123, 0.15);
+	}
+
+		.modern-grid .e-grid .e-groupfooter .e-rowcell {
+			border-right: none;
+			border-bottom: none;
+		}
+
+	/* Simple Group Footer */
+	.group-footer-simple {
+		padding: 4px 8px;
+		text-align: right;
+		font-size: 12px;
+		color: var(--gray-600);
+	}
+
+	.footer-debit {
+		color: var(--success-color);
+		font-weight: 500;
+		margin-right: 15px;
+	}
+
+	.footer-credit {
+		color: var(--danger-color);
+		font-weight: 500;
+	}
+
+	/* Animation Keyframes */
+	@@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@@keyframes float {
+		0%, 100% {
+			transform: translateY(0px);
+		}
+
+		50% {
+			transform: translateY(-5px);
+		}
+	}
+
+	.summary-card,
+	.chart-card,
+	.grid-card {
+		animation: fadeInUp 0.6s ease-out forwards;
+	}
+
+		.summary-card:nth-child(1) {
+			animation-delay: 0.1s;
+		}
+
+		.summary-card:nth-child(2) {
+			animation-delay: 0.2s;
+		}
+
+		.summary-card:nth-child(3) {
+			animation-delay: 0.3s;
+		}
+
+		.summary-card:nth-child(4) {
+			animation-delay: 0.4s;
+		}
+
+		.summary-card:nth-child(5) {
+			animation-delay: 0.5s;
+		}
+
+		.summary-card:nth-child(6) {
+			animation-delay: 0.6s;
+		}
+
+		.chart-card:nth-child(1) {
+			animation-delay: 0.7s;
+		}
+
+		.chart-card:nth-child(2) {
+			animation-delay: 0.8s;
+		}
+
+		.chart-card:nth-child(3) {
+			animation-delay: 0.9s;
+		}
+
+		.chart-card:nth-child(4) {
+			animation-delay: 1.0s;
+		}
+
+	.grid-card {
+		animation-delay: 1.1s;
+	}
+
+	/* Grand Total Section */
+	.grand-total-section {
+		background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(255, 255, 255, 0.95) 100%);
+		border-top: 2px solid rgba(226, 19, 123, 0.15);
+		padding: 25px 30px;
+		margin-top: 0;
+	}
+
+	.grand-total-container {
+		max-width: 100%;
+	}
+
+	.grand-total-header {
+		margin-bottom: 20px;
+		text-align: center;
+	}
+
+		.grand-total-header h4 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 700;
+			color: var(--dark-color);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+		}
+
+		.grand-total-header i {
+			color: var(--primary-color);
+			font-size: 18px;
+		}
+
+	.grand-total-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 20px;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.total-card {
+		background: linear-gradient(135deg, var(--white) 0%, #fefefe 100%);
+		border-radius: var(--border-radius-lg);
+		padding: 25px;
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08), 0 3px 8px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		transition: var(--transition);
+		position: relative;
+		overflow: hidden;
+	}
+
+		.total-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: var(--primary-color);
+		}
+
+		.total-card:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 6px 15px rgba(0, 0, 0, 0.06);
+		}
+
+	.total-icon {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 24px;
+		color: var(--white);
+		background: var(--primary-color);
+		box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
+	}
+
+	.debit-total .total-icon {
+		background: linear-gradient(135deg, var(--success-color), #00a043);
+	}
+
+	.credit-total .total-icon {
+		background: linear-gradient(135deg, var(--danger-color), #d32f2f);
+	}
+
+	.balance-total .total-icon {
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+	}
+
+	.opening-balance-total .total-icon {
+		background: linear-gradient(135deg, #2196f3, #1976d2);
+	}
+
+	.total-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+	}
+
+	.total-label {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--gray-600);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.total-amount {
+		font-size: 28px;
+		font-weight: 700;
+		line-height: 1.2;
+		margin-bottom: 2px;
+	}
+
+	.debit-amount {
+		color: var(--success-color);
+	}
+
+	.credit-amount {
+		color: var(--danger-color);
+	}
+
+	.balance-amount {
+		color: var(--primary-color);
+	}
+
+	.balance-amount.balance-positive {
+		color: var(--success-color);
+	}
+
+	.balance-amount.balance-negative {
+		color: var(--danger-color);
+	}
+
+	.opening-balance-amount {
+		color: #2196f3;
+	}	.balance-type {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--gray-500);
+		text-transform: uppercase;
+		letter-spacing: 0.8px;
+		margin-top: 2px;
+	}
+
+	/* Animation for grand total cards */
+	.total-card {
+		animation: fadeInUp 0.6s ease-out forwards;
+	}
+
+	.debit-total {
+		animation-delay: 0.2s;
+	}
+
+	.credit-total {
+		animation-delay: 0.4s;
+	}
+
+	.balance-total {
+		animation-delay: 0.6s;
+	}
+
+	.opening-balance-total {
+		animation-delay: 0.1s;
+	}
+
+	/* Responsive Design */
+	@@media (max-width: 768px) {
+		.page-header {
+			padding: 20px 15px;
+		}
+
+		.header-content {
+			flex-direction: column;
+			gap: 20px;
+			text-align: center;
+		}
+
+		.title-info h1 {
+			font-size: 24px;
+		}
+
+		.summary-section,
+		.charts-section,
+		.grid-section,
+		.filter-section {
+			padding: 10px;
+		}
+
+		.filter-content {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.filter-actions {
+			flex-direction: column;
+		}
+
+		.charts-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.chart-card.wide-chart {
+			grid-column: span 1;
+		}
+
+		.summary-cards {
+			grid-template-columns: 1fr;
+		}
+
+		.grid-header {
+			padding: 20px 15px;
+		}
+
+			.grid-header h3 {
+				font-size: 20px;
+			}
+
+		.grand-total-section {
+			padding: 20px 15px;
+		}
+
+		.grand-total-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: 15px;
+		}
+
+		.total-card {
+			padding: 20px;
+		}
+
+		.total-amount {
+			font-size: 24px;
+		}
+
+		.total-icon {
+			width: 50px;
+			height: 50px;
+			font-size: 20px;
+		}
+	}
+
+	@@media (max-width: 480px) {
+		.title-info h1 {
+			font-size: 20px;
+		}
+
+		.summary-card {
+			padding: 20px 15px;
+		}
+
+		.card-value {
+			font-size: 24px;
+		}
+
+		.grid-header {
+			padding: 15px;
+		}
+
+			.grid-header h3 {
+				font-size: 18px;
+			}
+
+		.grand-total-section {
+			padding: 15px 10px;
+		}
+
+		.grand-total-header h4 {
+			font-size: 18px;
+		}
+
+		.grand-total-grid {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.total-card {
+			padding: 18px 15px;
+			gap: 15px;
+		}
+
+		.total-amount {
+			font-size: 22px;
+		}
+
+		.total-icon {
+			width: 45px;
+			height: 45px;
+			font-size: 18px;
+		}
+
+		.total-label {
+			font-size: 13px;
+		}
+	}
 </style>
