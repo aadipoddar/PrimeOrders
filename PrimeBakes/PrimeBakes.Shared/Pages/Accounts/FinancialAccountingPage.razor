@@ -10,8 +10,8 @@
 <PageTitle>Financial Accounting</PageTitle>
 
 <HeadContent>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-		  integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		  integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
 		  crossorigin="anonymous" referrerpolicy="no-referrer" />
 </HeadContent>
 
@@ -51,20 +51,19 @@
 				<h3>Transaction Details</h3>
 			</div>
 
-			<div class="form-group">
-				<label>Voucher Type</label>
-				<SfComboBox TValue="int"
-							TItem="VoucherModel"
-							Value="_accounting.VoucherId"
-							DataSource="_vouchers"
-							Placeholder="Select Voucher Type"
-							FloatLabelType="FloatLabelType.Auto">
-					<ComboBoxEvents TItem="VoucherModel" TValue="int" ValueChange="OnVoucherTypeChanged" />
-					<ComboBoxFieldSettings Text="Name" Value="Id" />
-				</SfComboBox>
-			</div>
-
 			<div class="form-row">
+				<div class="form-group">
+					<label>Voucher Type</label>
+					<SfComboBox TValue="int"
+								TItem="VoucherModel"
+								Value="_accounting.VoucherId"
+								DataSource="_vouchers"
+								Placeholder="Select Voucher Type">
+						<ComboBoxEvents TItem="VoucherModel" TValue="int" ValueChange="OnVoucherTypeChanged" />
+						<ComboBoxFieldSettings Text="Name" Value="Id" />
+					</SfComboBox>
+				</div>
+
 				<div class="form-group">
 					<label>Accounting Date</label>
 					<SfDatePicker TValue="DateOnly"
@@ -73,18 +72,20 @@
 						<DatePickerEvents TValue="DateOnly" ValueChange="OnAccountingDateChanged" />
 					</SfDatePicker>
 				</div>
+			</div>
 
+			<div class="form-row">
 				<div class="form-group">
 					<label>Transaction No.</label>
 					<SfTextBox Readonly="true"
-							   Value="@_accounting.TransactionNo"/>
+							   Value="@_accounting.TransactionNo" />
 				</div>
-			</div>
 
-			<div class="form-group">
-				<label>Financial Year</label>
-				<SfTextBox Readonly="true"
-						   Value="@($"{_financialYear?.StartDate:dd-MM-yyyy} to {_financialYear?.EndDate:dd-MM-yyyy} | {_financialYear?.Remarks}")" />
+				<div class="form-group">
+					<label>Financial Year</label>
+					<SfTextBox Readonly="true"
+							   Value="@($"{_financialYear?.StartDate:dd-MM-yyyy} to {_financialYear?.EndDate:dd-MM-yyyy} | {_financialYear?.Remarks}")" />
+				</div>
 			</div>
 
 			<div class="form-group">
@@ -225,31 +226,6 @@
 	<!-- Accounting Entries Grid -->
 	<div class="grid-section">
 		<div class="grid-card">
-			<div class="grid-header">
-				<div class="header-content">
-					<div class="header-title">
-						<span class="grid-icon">📊</span>
-						<div>
-							<h3>Accounting Entries</h3>
-							<p class="grid-subtitle">Manage your transaction entries (@_accountingCart.Count entries)</p>
-						</div>
-					</div>
-					@if (_accountingCart.Count > 0)
-					{
-						<div class="summary-badges">
-							<span class="summary-badge debit">
-								<span class="badge-label">Total Debit</span>
-								<span class="badge-value">₹@_totalDebit.ToString("N2")</span>
-							</span>
-							<span class="summary-badge credit">
-								<span class="badge-label">Total Credit</span>
-								<span class="badge-value">₹@_totalCredit.ToString("N2")</span>
-							</span>
-						</div>
-					}
-				</div>
-			</div>
-
 			<div class="grid-content">
 				@if (_accountingCart.Count == 0)
 				{
@@ -907,49 +883,49 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 	}
 
-	.modern-accounting-grid .e-grid .e-gridheader {
-		background: linear-gradient(135deg, var(--primary-color) 0%, #c10e69 100%);
-		border-bottom: none;
-	}
+		.modern-accounting-grid .e-grid .e-gridheader {
+			background: linear-gradient(135deg, var(--primary-color) 0%, #c10e69 100%);
+			border-bottom: none;
+		}
 
-	.modern-accounting-grid .e-grid .e-headercell {
-		background: transparent;
-		color: white;
-		font-weight: 600;
-		font-size: 13px;
-		text-align: center;
-		border-right: 1px solid rgba(255, 255, 255, 0.2);
-		padding: 15px 8px;
-	}
+		.modern-accounting-grid .e-grid .e-headercell {
+			background: transparent;
+			color: white;
+			font-weight: 600;
+			font-size: 13px;
+			text-align: center;
+			border-right: 1px solid rgba(255, 255, 255, 0.2);
+			padding: 15px 8px;
+		}
 
-	.modern-accounting-grid .e-grid .e-headercell:last-child {
-		border-right: none;
-	}
+			.modern-accounting-grid .e-grid .e-headercell:last-child {
+				border-right: none;
+			}
 
-	.modern-accounting-grid .e-grid .e-row {
-		border-bottom: 1px solid rgba(226, 19, 123, 0.08);
-		transition: all 0.2s ease;
-	}
+		.modern-accounting-grid .e-grid .e-row {
+			border-bottom: 1px solid rgba(226, 19, 123, 0.08);
+			transition: all 0.2s ease;
+		}
 
-	.modern-accounting-grid .e-grid .e-row:hover {
-		background: rgba(226, 19, 123, 0.03);
-		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(226, 19, 123, 0.1);
-	}
+			.modern-accounting-grid .e-grid .e-row:hover {
+				background: rgba(226, 19, 123, 0.03);
+				transform: translateY(-1px);
+				box-shadow: 0 2px 8px rgba(226, 19, 123, 0.1);
+			}
 
-	.modern-accounting-grid .e-grid .e-altrow {
-		background: rgba(248, 249, 250, 0.5);
-	}
+		.modern-accounting-grid .e-grid .e-altrow {
+			background: rgba(248, 249, 250, 0.5);
+		}
 
-	.modern-accounting-grid .e-grid .e-rowcell {
-		border-right: 1px solid rgba(226, 19, 123, 0.08);
-		padding: 12px 8px;
-		vertical-align: middle;
-	}
+		.modern-accounting-grid .e-grid .e-rowcell {
+			border-right: 1px solid rgba(226, 19, 123, 0.08);
+			padding: 12px 8px;
+			vertical-align: middle;
+		}
 
-	.modern-accounting-grid .e-grid .e-rowcell:last-child {
-		border-right: none;
-	}
+			.modern-accounting-grid .e-grid .e-rowcell:last-child {
+				border-right: none;
+			}
 
 	/* Grid Cell Styles */
 	.ledger-cell {
@@ -987,13 +963,13 @@
 		font-family: 'Courier New', monospace;
 	}
 
-	.amount-cell.debit-cell .amount-value {
-		color: #dc3545;
-	}
+		.amount-cell.debit-cell .amount-value {
+			color: #dc3545;
+		}
 
-	.amount-cell.credit-cell .amount-value {
-		color: #28a745;
-	}
+		.amount-cell.credit-cell .amount-value {
+			color: #28a745;
+		}
 
 	.currency-symbol {
 		color: var(--text-secondary);
@@ -1069,22 +1045,22 @@
 		color: white;
 	}
 
-	.edit-btn:hover {
-		background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
-	}
+		.edit-btn:hover {
+			background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+		}
 
 	.remove-btn {
 		background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
 		color: white;
 	}
 
-	.remove-btn:hover {
-		background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-	}
+		.remove-btn:hover {
+			background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+		}
 
 	/* Toolbar Styling */
 	.modern-accounting-grid .e-toolbar {
@@ -1093,17 +1069,17 @@
 		padding: 10px 15px;
 	}
 
-	.modern-accounting-grid .e-toolbar .e-input-group input {
-		border: 2px solid var(--border-color);
-		border-radius: 20px;
-		padding: 8px 15px;
-		font-size: 13px;
-	}
+		.modern-accounting-grid .e-toolbar .e-input-group input {
+			border: 2px solid var(--border-color);
+			border-radius: 20px;
+			padding: 8px 15px;
+			font-size: 13px;
+		}
 
-	.modern-accounting-grid .e-toolbar .e-input-group input:focus {
-		border-color: var(--primary-color);
-		box-shadow: 0 0 0 2px rgba(226, 19, 123, 0.2);
-	}
+			.modern-accounting-grid .e-toolbar .e-input-group input:focus {
+				border-color: var(--primary-color);
+				box-shadow: 0 0 0 2px rgba(226, 19, 123, 0.2);
+			}
 
 	/* Pager Styling */
 	.modern-accounting-grid .e-pager {
@@ -1112,19 +1088,19 @@
 		padding: 15px;
 	}
 
-	.modern-accounting-grid .e-pager .e-numericitem,
-	.modern-accounting-grid .e-pager .e-currentitem {
-		border-radius: 6px;
-		margin: 0 2px;
-		min-width: 32px;
-		height: 32px;
-	}
+		.modern-accounting-grid .e-pager .e-numericitem,
+		.modern-accounting-grid .e-pager .e-currentitem {
+			border-radius: 6px;
+			margin: 0 2px;
+			min-width: 32px;
+			height: 32px;
+		}
 
-	.modern-accounting-grid .e-pager .e-currentitem {
-		background: var(--primary-color);
-		color: white;
-		font-weight: 600;
-	}
+		.modern-accounting-grid .e-pager .e-currentitem {
+			background: var(--primary-color);
+			color: white;
+			font-weight: 600;
+		}
 
 	.btn-primary {
 		background: linear-gradient(135deg, #e2137b 0%, #c41e3a 100%);
@@ -1176,28 +1152,28 @@
 		margin: 0 auto 20px;
 	}
 
-	.circular-dots-loader .dot {
-		position: absolute;
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		animation: rotate 1.8s infinite linear;
-	}
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.8s infinite linear;
+		}
 
-	.circular-dots-loader .dot-1 {
-		background-color: #e2137b;
-		animation-delay: 0s;
-	}
+		.circular-dots-loader .dot-1 {
+			background-color: #e2137b;
+			animation-delay: 0s;
+		}
 
-	.circular-dots-loader .dot-2 {
-		background-color: #c10e69;
-		animation-delay: -0.6s;
-	}
+		.circular-dots-loader .dot-2 {
+			background-color: #c10e69;
+			animation-delay: -0.6s;
+		}
 
-	.circular-dots-loader .dot-3 {
-		background-color: #a10d5b;
-		animation-delay: -1.2s;
-	}
+		.circular-dots-loader .dot-3 {
+			background-color: #a10d5b;
+			animation-delay: -1.2s;
+		}
 
 	.loading-text {
 		color: #2c3e50;
@@ -1210,6 +1186,7 @@
 		0% {
 			transform: rotate(0deg) translateX(30px) rotate(0deg);
 		}
+
 		100% {
 			transform: rotate(360deg) translateX(30px) rotate(-360deg);
 		}
@@ -1294,17 +1271,17 @@
 		border-bottom: 1px solid rgba(226, 19, 123, 0.1);
 	}
 
-	.dialog-header.save-dialog {
-		background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
-	}
+		.dialog-header.save-dialog {
+			background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
+		}
 
-	.dialog-header.clear-dialog {
-		background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
-	}
+		.dialog-header.clear-dialog {
+			background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
+		}
 
-	.dialog-header.remove-dialog {
-		background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
-	}
+		.dialog-header.remove-dialog {
+			background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
+		}
 
 	.dialog-icon {
 		width: 48px;
@@ -1318,17 +1295,17 @@
 		flex-shrink: 0;
 	}
 
-	.dialog-icon.save-icon {
-		background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-	}
+		.dialog-icon.save-icon {
+			background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+		}
 
-	.dialog-icon.clear-icon {
-		background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-	}
+		.dialog-icon.clear-icon {
+			background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+		}
 
-	.dialog-icon.remove-icon {
-		background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-	}
+		.dialog-icon.remove-icon {
+			background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+		}
 
 	.dialog-title-section h4 {
 		margin: 0 0 4px 0;
@@ -1366,9 +1343,9 @@
 		border-bottom: 1px solid rgba(226, 19, 123, 0.1);
 	}
 
-	.summary-item:last-child {
-		border-bottom: none;
-	}
+		.summary-item:last-child {
+			border-bottom: none;
+		}
 
 	.summary-label {
 		font-weight: 600;
@@ -1416,13 +1393,13 @@
 		font-family: 'Courier New', monospace;
 	}
 
-	.amount-value.debit {
-		color: #dc3545;
-	}
+		.amount-value.debit {
+			color: #dc3545;
+		}
 
-	.amount-value.credit {
-		color: #28a745;
-	}
+		.amount-value.credit {
+			color: #28a745;
+		}
 
 	.balance-row {
 		display: flex;
@@ -1445,13 +1422,13 @@
 		font-family: 'Courier New', monospace;
 	}
 
-	.balance-value.balanced {
-		color: #28a745;
-	}
+		.balance-value.balanced {
+			color: #28a745;
+		}
 
-	.balance-value.unbalanced {
-		color: #dc3545;
-	}
+		.balance-value.unbalanced {
+			color: #dc3545;
+		}
 
 	.balance-icon {
 		font-size: 18px;
@@ -1511,9 +1488,9 @@
 		border-bottom: 1px solid rgba(226, 19, 123, 0.1);
 	}
 
-	.entry-item:last-child {
-		border-bottom: none;
-	}
+		.entry-item:last-child {
+			border-bottom: none;
+		}
 
 	.entry-label {
 		font-weight: 600;
@@ -1566,55 +1543,55 @@
 		justify-content: center;
 	}
 
-	.dialog-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-		transform: none !important;
-	}
+		.dialog-btn:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+			transform: none !important;
+		}
 
 	.btn-cancel {
 		background: #6c757d;
 		color: white;
 	}
 
-	.btn-cancel:hover:not(:disabled) {
-		background: #5a6268;
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-	}
+		.btn-cancel:hover:not(:disabled) {
+			background: #5a6268;
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+		}
 
 	.btn-save {
 		background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 		color: white;
 	}
 
-	.btn-save:hover:not(:disabled) {
-		background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-	}
+		.btn-save:hover:not(:disabled) {
+			background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+		}
 
 	.btn-clear {
 		background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
 		color: #212529;
 	}
 
-	.btn-clear:hover:not(:disabled) {
-		background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-	}
+		.btn-clear:hover:not(:disabled) {
+			background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+		}
 
 	.btn-remove {
 		background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
 		color: white;
 	}
 
-	.btn-remove:hover:not(:disabled) {
-		background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-	}
+		.btn-remove:hover:not(:disabled) {
+			background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+		}
 
 	.e-grid .e-gridheader {
 		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
