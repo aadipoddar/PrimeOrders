@@ -56,28 +56,7 @@ else
 
 							<GridColumns>
 								<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.RawMaterialName)" HeaderText="Raw Material" Width="30%" />
-								<GridColumn HeaderText="Rate" Width="15%" TextAlign="TextAlign.Center">
-									<Template>
-										@{
-											var item = (context as PurchaseRawMaterialCartModel);
-										}
-										@if (item is not null)
-										{
-											<div class="rate-section">
-												<SfNumericTextBox TValue="decimal"
-																  Value="@item.Rate"
-																  ValueChanged="@((decimal value) => UpdateRate(item, value))"
-																  Min="0"
-																  Step="0.01m"
-																  type="tel"
-																  Format="N2"
-																  Width="70px"
-																  CssClass="rate-input"
-																  Enabled="@(!_isSaving)" />
-											</div>
-										}
-									</Template>
-								</GridColumn>
+								
 								<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.Quantity)" HeaderText="Qty" Width="15%" TextAlign="TextAlign.Center">
 									<Template>
 										@{
@@ -100,6 +79,30 @@ else
 										}
 									</Template>
 								</GridColumn>
+
+								<GridColumn HeaderText="Rate" Width="15%" TextAlign="TextAlign.Center">
+									<Template>
+										@{
+											var item = (context as PurchaseRawMaterialCartModel);
+										}
+										@if (item is not null)
+										{
+											<div class="rate-section">
+												<SfNumericTextBox TValue="decimal"
+																  Value="@item.Rate"
+																  ValueChanged="@((decimal value) => UpdateRate(item, value))"
+																  Min="0"
+																  Step="0.01m"
+																  type="tel"
+																  Format="N2"
+																  Width="70px"
+																  CssClass="rate-input"
+																  Enabled="@(!_isSaving)" />
+											</div>
+										}
+									</Template>
+								</GridColumn>
+
 								<GridColumn HeaderText="Total" Width="15%" TextAlign="TextAlign.Right">
 									<Template>
 										@{
