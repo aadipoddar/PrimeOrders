@@ -26,7 +26,6 @@ public partial class LedgerReportsPage
 
 	private List<LedgerModel> _ledgers = [];
 	private List<LedgerOverviewModel> _ledgerOverviews = [];
-	private List<LedgerOverviewModel> _allLedgerOverviews = []; // Store original data for group headers
 	private List<TrialBalanceModel> _trialBalances = [];
 
 	private SfGrid<LedgerOverviewModel> _sfGrid;
@@ -56,45 +55,41 @@ public partial class LedgerReportsPage
 		}
 	}
 
-	private async Task LoadLedgerData()
-	{
-		_allLedgerOverviews = await LedgerData.LoadLedgerDetailsByDateLedger(
+	private async Task LoadLedgerData() =>
+		_ledgerOverviews = await LedgerData.LoadLedgerDetailsByDateLedger(
 			_startDate.ToDateTime(TimeOnly.MinValue),
 			_endDate.ToDateTime(TimeOnly.MaxValue),
 			0);
 
-		_ledgerOverviews = [.. _allLedgerOverviews]; // Copy for filtering
-	}
-
 	private void ApplyFilters()
 	{
 		if (_selectedLedger is null || _selectedLedger.Id <= 0)
-		{
-			_ledgerOverviews = [.. _allLedgerOverviews];
 			return;
-		}
 
 		List<LedgerOverviewModel> filteredOverviews = [];
-		var filteredLedgers = _allLedgerOverviews.Where(l => l.LedgerId == _selectedLedger.Id).ToList();
+		var partyLedgers = _ledgerOverviews.Where(l => l.LedgerId == _selectedLedger.Id).ToList();
 
-		foreach (var item in filteredLedgers)
+		foreach (var item in partyLedgers)
 		{
-			var referenceLedgers = _allLedgerOverviews
+			var referenceLedgers = _ledgerOverviews
 				.Where(l => l.AccountingId == item.AccountingId && l.LedgerId != _selectedLedger.Id) // Exclude the selected ledger rows
 				.ToList();
-			foreach (var ledger in referenceLedgers)
-				filteredOverviews.Add(ledger);
+
+			var referenceLedgerNamesWithAmount = string.Join("\n",
+				referenceLedgers.Select(l =>
+				$"{l.LedgerName}\t({(l.Debit > 0 ? "Dr " + l.Debit.FormatIndianCurrency() : l.Credit > 0 ? "Cr " + l.Credit.FormatIndianCurrency() : "0.00")})"));
+
+			item.LedgerName = referenceLedgerNamesWithAmount;
+			filteredOverviews.Add(item);
 		}
 
 		_ledgerOverviews = [.. filteredOverviews];
 	}
 
-	private async Task LoadTrialBalance()
-	{
+	private async Task LoadTrialBalance() =>
 		_trialBalances = await AccountingData.LoadTrialBalanceByDate(
 			_startDate.ToDateTime(TimeOnly.MinValue),
 			_endDate.ToDateTime(TimeOnly.MaxValue));
-	}
 	#endregion
 
 	#region Event Handlers
@@ -192,18 +187,12 @@ public partial class LedgerReportsPage
 	#endregion
 
 	#region Chart Data Methods
-	private List<object> GetDebitCreditChartData()
-	{
-		return new List<object>
-		{
+	private List<object> GetDebitCreditChartData() => [
 			new { Type = "Debit", Amount = GetTotalDebitAmount() },
 			new { Type = "Credit", Amount = GetTotalCreditAmount() }
-		};
-	}
+		];
 
-	private List<object> GetTopLedgersChartData()
-	{
-		return _ledgerOverviews
+	private List<object> GetTopLedgersChartData() => _ledgerOverviews
 			.GroupBy(l => new { l.LedgerId, l.LedgerName })
 			.Select(g => new
 			{
@@ -214,7 +203,6 @@ public partial class LedgerReportsPage
 			.Take(10)
 			.Cast<object>()
 			.ToList();
-	}
 
 	private List<object> GetDailyTrendChartData()
 	{

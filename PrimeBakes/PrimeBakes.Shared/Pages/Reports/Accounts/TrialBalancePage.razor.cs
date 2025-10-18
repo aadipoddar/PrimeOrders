@@ -178,13 +178,13 @@ public partial class TrialBalancePage
 	#region Chart Data Methods
 	private List<object> GetBalanceOverviewChartData()
 	{
-		return new List<object>
-		{
+		return
+		[
 			new { Type = "Opening Balance", Amount = GetTotalOpeningBalance() },
 			new { Type = "Total Debit", Amount = GetTotalDebit() },
 			new { Type = "Total Credit", Amount = GetTotalCredit() },
 			new { Type = "Closing Balance", Amount = GetTotalClosingBalance() }
-		};
+		];
 	}
 
 	private List<object> GetTopGroupsChartData()

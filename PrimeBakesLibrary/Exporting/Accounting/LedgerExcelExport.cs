@@ -53,16 +53,10 @@ public static class LedgerExcelExport
 
 		// Column order
 		List<string> columnOrder = [
-			nameof(LedgerOverviewModel.LedgerName),
-			nameof(LedgerOverviewModel.LedgerCode),
-			nameof(LedgerOverviewModel.AccountTypeName),
-			nameof(LedgerOverviewModel.GroupName),
 			nameof(LedgerOverviewModel.AccountingDate),
 			nameof(LedgerOverviewModel.TransactionNo),
-			nameof(LedgerOverviewModel.ReferenceNo),
+			nameof(LedgerOverviewModel.LedgerName),
 			nameof(LedgerOverviewModel.ReferenceType),
-			nameof(LedgerOverviewModel.ReferenceDate),
-			nameof(LedgerOverviewModel.ReferenceAmount),
 			nameof(LedgerOverviewModel.Debit),
 			nameof(LedgerOverviewModel.Credit),
 			nameof(LedgerOverviewModel.Remarks),
@@ -73,35 +67,11 @@ public static class LedgerExcelExport
 		// Column settings
 		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
 		{
-			[nameof(LedgerOverviewModel.LedgerName)] = new()
-			{
-				DisplayName = "Ledger Name",
-				Width = 28,
-				Alignment = ExcelHAlign.HAlignLeft
-			},
-			[nameof(LedgerOverviewModel.LedgerCode)] = new()
-			{
-				DisplayName = "Ledger Code",
-				Width = 14,
-				Alignment = ExcelHAlign.HAlignCenter
-			},
-			[nameof(LedgerOverviewModel.AccountTypeName)] = new()
-			{
-				DisplayName = "Account Type",
-				Width = 18,
-				Alignment = ExcelHAlign.HAlignLeft
-			},
-			[nameof(LedgerOverviewModel.GroupName)] = new()
-			{
-				DisplayName = "Group",
-				Width = 18,
-				Alignment = ExcelHAlign.HAlignLeft
-			},
 			[nameof(LedgerOverviewModel.AccountingDate)] = new()
 			{
 				DisplayName = "Date",
 				Format = "dd-MMM-yyyy",
-				Width = 15,
+				Width = 20,
 				Alignment = ExcelHAlign.HAlignCenter
 			},
 			[nameof(LedgerOverviewModel.TransactionNo)] = new()
@@ -110,32 +80,16 @@ public static class LedgerExcelExport
 				Width = 18,
 				Alignment = ExcelHAlign.HAlignCenter
 			},
-			[nameof(LedgerOverviewModel.ReferenceNo)] = new()
+			[nameof(LedgerOverviewModel.LedgerName)] = new()
 			{
-				DisplayName = "Reference No",
-				Width = 18,
-				Alignment = ExcelHAlign.HAlignCenter
+				DisplayName = "Ledger Name",
+				Width = 30
 			},
 			[nameof(LedgerOverviewModel.ReferenceType)] = new()
 			{
 				DisplayName = "Reference Type",
 				Width = 20,
 				Alignment = ExcelHAlign.HAlignLeft
-			},
-			[nameof(LedgerOverviewModel.ReferenceDate)] = new()
-			{
-				DisplayName = "Reference Date",
-				Format = "dd-MMM-yyyy",
-				Width = 15,
-				Alignment = ExcelHAlign.HAlignCenter
-			},
-			[nameof(LedgerOverviewModel.ReferenceAmount)] = new()
-			{
-				DisplayName = "Reference Amount",
-				Format = "₹#,##0.00",
-				Width = 18,
-				IsCurrency = true,
-				Alignment = ExcelHAlign.HAlignRight
 			},
 			[nameof(LedgerOverviewModel.Debit)] = new()
 			{
@@ -178,19 +132,19 @@ public static class LedgerExcelExport
 			[nameof(LedgerOverviewModel.Remarks)] = new()
 			{
 				DisplayName = "Entry Remarks",
-				Width = 30,
+				Width = 40,
 				Alignment = ExcelHAlign.HAlignLeft
 			},
 			[nameof(LedgerOverviewModel.AccountingRemarks)] = new()
 			{
 				DisplayName = "Accounting Remarks",
-				Width = 30,
+				Width = 40,
 				Alignment = ExcelHAlign.HAlignLeft
 			},
 			[nameof(LedgerOverviewModel.LedgerRemarks)] = new()
 			{
 				DisplayName = "Ledger Remarks",
-				Width = 30,
+				Width = 40,
 				Alignment = ExcelHAlign.HAlignLeft
 			}
 		};

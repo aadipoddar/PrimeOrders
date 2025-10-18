@@ -172,21 +172,21 @@ public partial class FinancialAccountingReportPage
 
 	private List<object> GetDebitCreditChartData()
 	{
-		return new List<object>
-		{
+		return
+		[
 			new { Type = "Debit", Amount = GetTotalDebitAmount() },
 			new { Type = "Credit", Amount = GetTotalCreditAmount() }
-		};
+		];
 	}
 
 	private List<object> GetAmountComparisonChartData()
 	{
-		return new List<object>
-		{
+		return
+		[
 			new { Category = "Total Debit", Amount = GetTotalDebitAmount() },
 			new { Category = "Total Credit", Amount = GetTotalCreditAmount() },
 			new { Category = "Net Balance", Amount = Math.Abs(GetNetBalance()) }
-		};
+		];
 	}
 
 	private List<object> GetDailyTrendChartData()

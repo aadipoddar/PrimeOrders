@@ -353,30 +353,14 @@ else
 								Toolbar="@(new List<string>() { "Search" })"
 								Height="auto">
 
-							<GridPageSettings PageSize="25" PageSizes="new int[] { 10, 25, 50, 100, 200 }"></GridPageSettings>
-							<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
-							<GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
-							<GridGroupSettings Columns="[nameof(LedgerOverviewModel.TransactionNo)]" ShowGroupedColumn="false">
-								<CaptionTemplate>
-									@{
-										var group = (context as CaptionTemplateContext);
-										var transactionNo = group.Key.ToString();
-									}
+							<GridPageSettings PageSize="25" PageSizes="new int[] { 10, 25, 50, 100, 200 }" />
+							<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+							<GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" />
 
-									<div class="party-group-header">
-										<span class="party-name">@transactionNo</span>
-
-										@if (_selectedLedger is not null && _selectedLedger.Id > 0)
-										{
-											var party = _allLedgerOverviews.Where(x => x.TransactionNo == transactionNo && x.LedgerId == _selectedLedger.Id).FirstOrDefault();
-
-											<span class="party-name">@party?.LedgerName</span>
-											<span class="party-amount">Debit : @((party?.Debit).GetValueOrDefault(0).FormatIndianCurrency())</span>
-											<span class="party-amount">Credit : @((party?.Credit).GetValueOrDefault(0).FormatIndianCurrency())</span>
-										}
-									</div>
-								</CaptionTemplate>
-							</GridGroupSettings>
+							@if (_selectedLedger is null || _selectedLedger.Id == 0)
+							{
+								<GridGroupSettings Columns="[nameof(LedgerOverviewModel.TransactionNo)]" />
+							}
 
 							<GridAggregates>
 								<GridAggregate>
@@ -387,8 +371,8 @@ else
 													var aggregateContext = context as AggregateTemplateContext;
 													var debitSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
 												}
-												<div class="group-footer-simple">
-													<span class="footer-debit">Debit: @(debitSum.FormatIndianCurrency())</span>
+												<div class="transaction-summary-debit">
+													<strong>Total Debit: @(debitSum.FormatIndianCurrency())</strong>
 												</div>
 											</GroupFooterTemplate>
 										</GridAggregateColumn>
@@ -398,8 +382,8 @@ else
 													var aggregateContext = context as AggregateTemplateContext;
 													var creditSum = aggregateContext?.Sum != null ? Convert.ToDecimal(aggregateContext.Sum) : 0m;
 												}
-												<div class="group-footer-simple">
-													<span class="footer-credit">Credit: @(creditSum.FormatIndianCurrency())</span>
+												<div class="transaction-summary-credit">
+													<strong>Total Credit: @(creditSum.FormatIndianCurrency())</strong>
 												</div>
 											</GroupFooterTemplate>
 										</GridAggregateColumn>
@@ -1480,17 +1464,19 @@ else
 		color: var(--primary-color);
 	}
 
-	.balance-amount.balance-positive {
-		color: var(--success-color);
-	}
+		.balance-amount.balance-positive {
+			color: var(--success-color);
+		}
 
-	.balance-amount.balance-negative {
-		color: var(--danger-color);
-	}
+		.balance-amount.balance-negative {
+			color: var(--danger-color);
+		}
 
 	.opening-balance-amount {
 		color: #2196f3;
-	}	.balance-type {
+	}
+
+	.balance-type {
 		font-size: 12px;
 		font-weight: 600;
 		color: var(--gray-500);
