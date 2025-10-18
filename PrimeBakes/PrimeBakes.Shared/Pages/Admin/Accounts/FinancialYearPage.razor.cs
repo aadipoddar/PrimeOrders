@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -107,9 +105,8 @@ public partial class FinancialYearPage
 	private string GetFinancialYearDisplay()
 	{
 		if (_financialYearModel.StartDate != default && _financialYearModel.EndDate != default)
-		{
 			return $"{_financialYearModel.StartDate:yyyy}-{_financialYearModel.EndDate:yy}";
-		}
+
 		return string.Empty;
 	}
 

@@ -97,8 +97,8 @@ public partial class SaleDetailedPage
 
 		if (_user.LocationId == 1 && (_selectedLocationId is null || _selectedLocationId == 0))
 		{
-			// Load all sales for admin when "All Locations" is selected
 			_saleOverviews = [];
+			// Load all sales for admin when "All Locations" is selected
 			foreach (var location in _locations.Where(l => l.Id > 0))
 			{
 				var locationSales = await SaleData.LoadSaleDetailsByDateLocationId(fromDate, toDate, location.Id);
@@ -140,17 +140,14 @@ public partial class SaleDetailedPage
 	private async Task OnLocationFilterChanged(ChangeEventArgs<int?, LocationModel> args)
 	{
 		if (args.Value is null)
+		{
 			_selectedLocationId = 0;
+			return;
+		}
 		else
 			_selectedLocationId = args.Value;
 
 		_selectedLocation = _locations.FirstOrDefault(l => l.Id == _selectedLocationId);
-
-		// Update URL if admin user
-		if (_user.LocationId == 1 && _selectedLocationId.HasValue && _selectedLocationId.Value > 0)
-			NavigationManager.NavigateTo($"/Reports/Sale/Detailed/{_selectedLocationId.Value}");
-		else if (_user.LocationId == 1 && (_selectedLocationId == null || _selectedLocationId == 0))
-			NavigationManager.NavigateTo("/Reports/Sale/Detailed");
 
 		await LoadData();
 	}

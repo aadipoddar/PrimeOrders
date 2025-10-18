@@ -84,7 +84,7 @@
 				<div class="form-group">
 					<label>Financial Year</label>
 					<SfTextBox Readonly="true"
-							   Value="@($"{_financialYear?.StartDate:dd-MM-yyyy} to {_financialYear?.EndDate:dd-MM-yyyy} | {_financialYear?.Remarks}")" />
+							   Value="@($"{_financialYear?.StartDate:yyyy} to {_financialYear?.EndDate:yyyy}")" />
 				</div>
 			</div>
 
@@ -161,6 +161,7 @@
 									  Placeholder="Enter debit amount"
 									  Value="_selectedCart?.Debit"
 									  Decimals="2"
+									  EnableRtl="true"
 									  Min="0"
 									  Step="0.01m"
 									  Format="N2"
@@ -176,6 +177,7 @@
 									  Placeholder="Enter credit amount"
 									  Value="_selectedCart?.Credit"
 									  Decimals="2"
+									  EnableRtl="true"
 									  Min="0"
 									  Step="0.01m"
 									  Format="N2"
