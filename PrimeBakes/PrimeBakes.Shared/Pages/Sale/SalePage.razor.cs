@@ -161,7 +161,7 @@ public partial class SalePage
 				Rate = product.Rate,
 				Quantity = 0,
 				BaseTotal = 0,
-				DiscPercent = _sale.DiscPercent,
+				DiscPercent = 0,
 				DiscAmount = 0,
 				AfterDiscount = 0,
 				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
@@ -228,9 +228,6 @@ public partial class SalePage
 
 		_sale.OrderId = null;
 
-		foreach (var item in _cart)
-			item.DiscPercent = _sale.DiscPercent;
-
 		await SaveSaleFile();
 		StateHasChanged();
 	}
@@ -246,10 +243,7 @@ public partial class SalePage
 			var orderDetails = await OrderData.LoadOrderDetailByOrder(_sale.OrderId.Value);
 
 			foreach (var item in orderDetails)
-			{
 				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().Quantity += item.Quantity;
-				_cart.Where(p => p.ProductId == item.ProductId).FirstOrDefault().DiscPercent = _sale.DiscPercent;
-			}
 		}
 
 		else _sale.OrderId = null;
@@ -446,10 +440,13 @@ public partial class SalePage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
-			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
+			item.NetRate = item.Quantity == 0 ? 0 : (item.AfterDiscount - (item.AfterDiscount * (_sale.DiscPercent / 100))
+				+ item.CGSTAmount + item.SGSTAmount + item.IGSTAmount) / item.Quantity;
 		}
 
-		_sale.RoundOff = Math.Round(_cart.Sum(x => x.Total)) - _cart.Sum(x => x.Total);
+		var totalBeforeDiscount = _cart.Sum(c => c.Total);
+		var discountAmount = totalBeforeDiscount * (_sale.DiscPercent / 100);
+		_sale.RoundOff = Math.Round(totalBeforeDiscount - discountAmount) - (totalBeforeDiscount - discountAmount);
 
 		_sfGrid?.Refresh();
 		StateHasChanged();

@@ -269,17 +269,17 @@ else
                             <span class="financial-label">Base Total:</span>
                             <span class="financial-value">₹@_saleOverview.BaseTotal.ToString("N2")</span>
                         </div>
-                        @if (_saleOverview.DiscountAmount > 0)
+                        @if (_saleOverview.BillDiscountAmount > 0)
                         {
                             <div class="financial-row discount">
                                 <span class="financial-label">
-                                    Discount (@_saleOverview.DiscountPercent.ToString("N2")%):
-                                    @if (!string.IsNullOrEmpty(_saleOverview.DiscountReason))
+                                    Bill Discount (@_saleOverview.BillDiscountPercent.ToString("N2")%):
+                                    @if (!string.IsNullOrEmpty(_saleOverview.BillDiscountReason))
                                     {
-                                        <small class="discount-reason">(@_saleOverview.DiscountReason)</small>
+                                        <small class="discount-reason">(@_saleOverview.BillDiscountReason)</small>
                                     }
                                 </span>
-                                <span class="financial-value">-₹@_saleOverview.DiscountAmount.ToString("N2")</span>
+                                <span class="financial-value">-₹@_saleOverview.BillDiscountAmount.ToString("N2")</span>
                             </div>
                         }
                         <div class="financial-row">

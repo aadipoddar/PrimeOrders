@@ -129,21 +129,14 @@ public static class SaleReturnA4Print
 			["Sub Total: "] = saleReturn.BaseTotal.FormatIndianCurrency()
 		};
 
-		bool uniformDiscount = saleReturnDetails.All(x => x.DiscPercent == saleReturn.DiscountPercent);
-
 		// Check if tax rates are consistent across all items
 		bool uniformTaxRates = saleReturnDetails.All(x =>
 			x.CGSTPercent == saleReturn.CGSTPercent &&
 			x.SGSTPercent == saleReturn.SGSTPercent &&
 			x.IGSTPercent == saleReturn.IGSTPercent);
 
-		if (saleReturn.DiscountAmount > 0)
-		{
-			if (uniformDiscount)
-				summaryItems[$"Discount ({saleReturn.DiscountPercent:N1}%):"] = $"-{saleReturn.DiscountAmount.FormatIndianCurrency()}";
-			else
-				summaryItems[$"Discount:"] = $"-{saleReturn.DiscountAmount.FormatIndianCurrency()}";
-		}
+		if (saleReturn.ProductDiscountAmount > 0)
+			summaryItems["Product Discount: "] = $"-{saleReturn.ProductDiscountAmount.FormatIndianCurrency()}";
 
 		if (saleReturn.CGSTPercent > 0)
 		{
@@ -168,6 +161,9 @@ public static class SaleReturnA4Print
 			else
 				summaryItems[$"IGST:"] = saleReturn.IGSTAmount.FormatIndianCurrency();
 		}
+
+		if (saleReturn.BillDiscountAmount > 0)
+			summaryItems[$"Bill Discount ({saleReturn.BillDiscountPercent}%): "] = $"-{saleReturn.BillDiscountAmount.FormatIndianCurrency()}";
 
 		if (saleReturn.RoundOff != 0)
 			summaryItems["Round Off:"] = saleReturn.RoundOff.FormatIndianCurrency();

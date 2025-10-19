@@ -76,8 +76,9 @@ public class SaleReturnOverviewModel
 	public int? PartyId { get; set; }
 	public string? PartyName { get; set; }
 	public string Remarks { get; set; }
-	public decimal DiscountPercent { get; set; }
-	public string DiscountReason { get; set; }
+	public decimal BillDiscountPercent { get; set; }
+	public decimal BillDiscountAmount { get; set; }
+	public string BillDiscountReason { get; set; }
 	public int TotalProducts { get; set; }
 	public decimal TotalQuantity { get; set; }
 	public decimal SGSTPercent { get; set; }
@@ -86,11 +87,12 @@ public class SaleReturnOverviewModel
 	public decimal SGSTAmount { get; set; }
 	public decimal CGSTAmount { get; set; }
 	public decimal IGSTAmount { get; set; }
-	public decimal DiscountAmount { get; set; }
+	public decimal ProductDiscountAmount { get; set; }
 	public decimal TotalTaxAmount { get; set; }
 	public decimal BaseTotal { get; set; }
 	public decimal SubTotal { get; set; }
 	public decimal AfterTax { get; set; }
+	public decimal AfterBillDiscount { get; set; }
 	public decimal RoundOff { get; set; }
 	public decimal Total { get; set; }
 	public decimal Cash { get; set; }

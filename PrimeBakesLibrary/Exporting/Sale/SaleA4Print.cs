@@ -257,21 +257,14 @@ public static class SaleA4Print
 			["Sub Total: "] = sale.BaseTotal.FormatIndianCurrency()
 		};
 
-		bool uniformDiscount = saleDetails.All(x => x.DiscPercent == sale.DiscountPercent);
-
 		// Check if tax rates are consistent across all items
 		bool uniformTaxRates = saleDetails.All(x =>
 			x.CGSTPercent == sale.CGSTPercent &&
 			x.SGSTPercent == sale.SGSTPercent &&
 			x.IGSTPercent == sale.IGSTPercent);
 
-		if (sale.DiscountAmount > 0)
-		{
-			if (uniformDiscount)
-				summaryItems[$"Discount ({sale.DiscountPercent:N1}%):"] = $"-{sale.DiscountAmount.FormatIndianCurrency()}";
-			else
-				summaryItems[$"Discount:"] = $"-{sale.DiscountAmount.FormatIndianCurrency()}";
-		}
+		if (sale.ProductDiscountAmount > 0)
+			summaryItems["Product Discount: "] = $"-{sale.ProductDiscountAmount.FormatIndianCurrency()}";
 
 		if (sale.CGSTPercent > 0)
 		{
@@ -296,6 +289,9 @@ public static class SaleA4Print
 			else
 				summaryItems[$"IGST:"] = sale.IGSTAmount.FormatIndianCurrency();
 		}
+
+		if (sale.BillDiscountAmount > 0)
+			summaryItems[$"Bill Discount ({sale.BillDiscountPercent}%): "] = $"-{sale.BillDiscountAmount.FormatIndianCurrency()}";
 
 		if (sale.RoundOff != 0)
 			summaryItems["Round Off:"] = sale.RoundOff.FormatIndianCurrency();

@@ -24,7 +24,8 @@ public partial class SaleCartPage
 	private bool _customRoundOff = false;
 
 	private decimal _baseTotal = 0;
-	private decimal _discountAmount = 0;
+	private decimal _productsDiscountAmount = 0;
+	private decimal _billDiscountAmount = 0;
 	private decimal _subTotal = 0;
 	private decimal _afterTax = 0;
 	private decimal _total = 0;
@@ -263,9 +264,6 @@ public partial class SaleCartPage
 
 	private async Task ApplyDiscount()
 	{
-		foreach (var item in _cart)
-			item.DiscPercent = _sale.DiscPercent;
-
 		_discountDialogVisible = false;
 		await SaveSaleFile();
 	}
@@ -291,17 +289,20 @@ public partial class SaleCartPage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
-			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
+			item.NetRate = item.Quantity == 0 ? 0 : (item.AfterDiscount - (item.AfterDiscount * (_sale.DiscPercent / 100))
+				+ item.CGSTAmount + item.SGSTAmount + item.IGSTAmount) / item.Quantity;
 		}
-
-		if (!_customRoundOff)
-			_sale.RoundOff = Math.Round(_cart.Sum(x => x.Total)) - _cart.Sum(x => x.Total);
 
 		_baseTotal = _cart.Sum(c => c.BaseTotal);
 		_subTotal = _cart.Sum(c => c.AfterDiscount);
-		_discountAmount = _baseTotal - _subTotal;
+		_productsDiscountAmount = _baseTotal - _subTotal;
 		_afterTax = _cart.Sum(c => c.Total);
-		_total = _afterTax + _sale.RoundOff;
+		_billDiscountAmount = _afterTax * (_sale.DiscPercent / 100);
+
+		if (!_customRoundOff)
+			_sale.RoundOff = Math.Round(_afterTax - _billDiscountAmount) - (_afterTax - _billDiscountAmount);
+
+		_total = _afterTax - _billDiscountAmount + _sale.RoundOff;
 
 		switch (_selectedPaymentModeId)
 		{

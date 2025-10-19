@@ -155,7 +155,7 @@ public partial class SaleReturnPage
 				Rate = product.Rate,
 				Quantity = 0,
 				BaseTotal = 0,
-				DiscPercent = _saleReturn.DiscPercent,
+				DiscPercent = 0,
 				DiscAmount = 0,
 				AfterDiscount = 0,
 				CGSTPercent = productTax.Extra ? productTax.CGST : 0,
@@ -218,9 +218,6 @@ public partial class SaleReturnPage
 			_saleReturn.DiscPercent = 0;
 		}
 
-
-		foreach (var item in _cart)
-			item.DiscPercent = _saleReturn.DiscPercent;
 
 		await SaveSaleFile();
 		StateHasChanged();

@@ -13,8 +13,9 @@
 		[s].[OrderId],
 		[o].[OrderNo],
 		[s].[Remarks],
-		[s].[DiscPercent] AS DiscountPercent,
-		[s].[DiscReason] AS DiscountReason,
+		[s].[DiscPercent] AS BillDiscountPercent,
+		SUM(sd.Total) * [s].[DiscPercent] / 100 AS BillDiscountAmount,
+		[s].[DiscReason] AS BillDiscountReason,
 
 		COUNT(DISTINCT sd.Id) AS TotalProducts,
 		SUM(sd.Quantity) AS TotalQuantity,
@@ -27,14 +28,16 @@
 		SUM(sd.CGSTAmount) AS CGSTAmount,
 		SUM(sd.IGSTAmount) AS IGSTAmount,
 
-		SUM(sd.DiscAmount) AS DiscountAmount,
+		SUM(sd.DiscAmount) AS ProductDiscountAmount,
 		SUM(sd.SGSTAmount + sd.CGSTAmount + sd.IGSTAmount) AS TotalTaxAmount,
 
 		SUM(sd.BaseTotal) AS BaseTotal,
 		SUM(sd.AfterDiscount) AS SubTotal,
 		SUM(sd.Total) AS AfterTax,
+
+		SUM(sd.Total) - (SUM(sd.Total) * [s].[DiscPercent] / 100) AS AfterBillDiscount,
 		[s].[RoundOff],
-		SUM(sd.Total) + [s].[RoundOff] AS Total,
+		SUM(sd.Total) - (SUM(sd.Total) * [s].[DiscPercent] / 100) + [s].[RoundOff] AS Total,
 
 		[s].[Cash],
 		[s].[Card],

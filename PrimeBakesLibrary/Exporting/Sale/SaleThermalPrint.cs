@@ -197,73 +197,56 @@ public class SaleThermalPrint
 
 	private static async Task AddTotalDetails(SaleModel sale, StringBuilder content)
 	{
+		var saleOverview = await SaleData.LoadSaleOverviewBySaleId(sale.Id);
 		var saleDetails = await SaleData.LoadSaleDetailBySale(sale.Id);
-
-		// Calculate totals
-		decimal baseTotal = saleDetails.Sum(x => x.BaseTotal);
-		decimal discountTotal = saleDetails.Sum(x => x.DiscAmount);
-		decimal subTotal = saleDetails.Sum(x => x.AfterDiscount);
-		decimal cgstTotal = saleDetails.Sum(x => x.CGSTAmount);
-		decimal sgstTotal = saleDetails.Sum(x => x.SGSTAmount);
-		decimal igstTotal = saleDetails.Sum(x => x.IGSTAmount);
-		decimal grandTotal = saleDetails.Sum(x => x.Total) + sale.RoundOff;
-
-		// Get tax percentages (check if all items have same tax rate)
-		var cgstPercent = saleDetails.FirstOrDefault()?.CGSTPercent ?? 0;
-		var sgstPercent = saleDetails.FirstOrDefault()?.SGSTPercent ?? 0;
-		var igstPercent = saleDetails.FirstOrDefault()?.IGSTPercent ?? 0;
-
-		bool uniformDiscount = saleDetails.All(x => x.DiscPercent == sale.DiscPercent);
 
 		// Check if tax rates are consistent across all items
 		bool uniformTaxRates = saleDetails.All(x =>
-			x.CGSTPercent == cgstPercent &&
-			x.SGSTPercent == sgstPercent &&
-			x.IGSTPercent == igstPercent);
+			x.CGSTPercent == saleOverview.CGSTPercent &&
+			x.SGSTPercent == saleOverview.SGSTPercent &&
+			x.IGSTPercent == saleOverview.IGSTPercent);
 
 		content.AppendLine("<table class='summary-table'>");
-		content.AppendLine($"<tr><td class='summary-label'>Sub Total:</td><td align='right' class='summary-value'>{baseTotal.FormatIndianCurrency()}</td></tr>");
+		content.AppendLine($"<tr><td class='summary-label'>Sub Total:</td><td align='right' class='summary-value'>{saleOverview.BaseTotal.FormatIndianCurrency()}</td></tr>");
 
-		if (discountTotal > 0)
-		{
-			if (uniformDiscount)
-				content.AppendLine($"<tr><td class='summary-label'>Discount ({sale.DiscPercent}%):</td><td align='right' class='summary-value'>{discountTotal.FormatIndianCurrency()}</td></tr>");
-			else
-				content.AppendLine($"<tr><td class='summary-label'>Discount:</td><td align='right' class='summary-value'>{discountTotal.FormatIndianCurrency()}</td></tr>");
-		}
+		if (saleOverview.ProductDiscountAmount > 0)
+			content.AppendLine($"<tr><td class='summary-label'>Item Discount:</td><td align='right' class='summary-value'>{saleOverview.ProductDiscountAmount.FormatIndianCurrency()}</td></tr>");
 
-		if (cgstTotal > 0)
+		if (saleOverview.CGSTPercent > 0)
 		{
 			if (uniformTaxRates)
-				content.AppendLine($"<tr><td class='summary-label'>CGST ({cgstPercent}%):</td><td align='right' class='summary-value'>{cgstTotal.FormatIndianCurrency()}</td></tr>");
+				content.AppendLine($"<tr><td class='summary-label'>CGST ({saleOverview.CGSTPercent}%):</td><td align='right' class='summary-value'>{saleOverview.CGSTAmount.FormatIndianCurrency()}</td></tr>");
 			else
-				content.AppendLine($"<tr><td class='summary-label'>CGST:</td><td align='right' class='summary-value'>{cgstTotal.FormatIndianCurrency()}</td></tr>");
+				content.AppendLine($"<tr><td class='summary-label'>CGST:</td><td align='right' class='summary-value'>{saleOverview.CGSTAmount.FormatIndianCurrency()}</td></tr>");
 		}
 
-		if (sgstTotal > 0)
+		if (saleOverview.SGSTPercent > 0)
 		{
 			if (uniformTaxRates)
-				content.AppendLine($"<tr><td class='summary-label'>SGST ({sgstPercent}%):</td><td align='right' class='summary-value'>{sgstTotal.FormatIndianCurrency()}</td></tr>");
+				content.AppendLine($"<tr><td class='summary-label'>SGST ({saleOverview.SGSTPercent}%):</td><td align='right' class='summary-value'>{saleOverview.SGSTAmount.FormatIndianCurrency()}</td></tr>");
 			else
-				content.AppendLine($"<tr><td class='summary-label'>SGST:</td><td align='right' class='summary-value'>{sgstTotal.FormatIndianCurrency()}</td></tr>");
+				content.AppendLine($"<tr><td class='summary-label'>SGST:</td><td align='right' class='summary-value'>{saleOverview.SGSTAmount.FormatIndianCurrency()}</td></tr>");
 		}
 
-		if (igstTotal > 0)
+		if (saleOverview.IGSTPercent > 0)
 		{
 			if (uniformTaxRates)
-				content.AppendLine($"<tr><td class='summary-label'>IGST ({igstPercent}%):</td><td align='right' class='summary-value'>{igstTotal.FormatIndianCurrency()}</td></tr>");
+				content.AppendLine($"<tr><td class='summary-label'>IGST ({saleOverview.IGSTPercent}%):</td><td align='right' class='summary-value'>{saleOverview.IGSTAmount.FormatIndianCurrency()}</td></tr>");
 			else
-				content.AppendLine($"<tr><td class='summary-label'>IGST:</td><td align='right' class='summary-value'>{igstTotal.FormatIndianCurrency()}</td></tr>");
+				content.AppendLine($"<tr><td class='summary-label'>IGST:</td><td align='right' class='summary-value'>{saleOverview.IGSTAmount.FormatIndianCurrency()}</td></tr>");
 		}
 
-		if (sale.RoundOff != 0)
-			content.AppendLine($"<tr><td class='summary-label'>Round Off:</td><td align='right' class='summary-value'>{sale.RoundOff.FormatIndianCurrency()}</td></tr>");
+		if (saleOverview.BillDiscountPercent > 0)
+			content.AppendLine($"<tr><td class='summary-label'>Discount ({saleOverview.BillDiscountPercent}%):</td><td align='right' class='summary-value'>{saleOverview.BillDiscountAmount.FormatIndianCurrency()}</td></tr>");
+
+		if (saleOverview.RoundOff != 0)
+			content.AppendLine($"<tr><td class='summary-label'>Round Off:</td><td align='right' class='summary-value'>{saleOverview.RoundOff.FormatIndianCurrency()}</td></tr>");
 
 		content.AppendLine("</table>");
 		content.AppendLine("<div class='bold-separator'></div>");
 
 		content.AppendLine("<table class='grand-total'>");
-		content.AppendLine($"<tr><td class='grand-total-label'>Grand Total:</td><td align='right' class='grand-total-value'>{grandTotal.FormatIndianCurrency()}</td></tr>");
+		content.AppendLine($"<tr><td class='grand-total-label'>Grand Total:</td><td align='right' class='grand-total-value'>{saleOverview.Total.FormatIndianCurrency()}</td></tr>");
 		content.AppendLine("</table>");
 
 		CurrencyWordsConverter numericWords = new(new()
@@ -272,7 +255,7 @@ public class SaleThermalPrint
 			OutputFormat = OutputFormat.English
 		});
 
-		string amountInWords = numericWords.ToWords(Math.Round(grandTotal));
+		string amountInWords = numericWords.ToWords(Math.Round(saleOverview.Total));
 		if (string.IsNullOrEmpty(amountInWords))
 			amountInWords = "Zero";
 

@@ -301,7 +301,7 @@ else
 					<div class="form-group">
 						<label>Discount Amount</label>
 						<div class="readonly-display">
-							@_discountAmount.FormatIndianCurrency()
+							@_billDiscountAmount.FormatIndianCurrency()
 						</div>
 					</div>
 
@@ -321,7 +321,7 @@ else
 						</div>
 						<div class="summary-item">
 							<span class="summary-label">Discount:</span>
-							<span class="summary-value discount-amount">-@_discountAmount.FormatIndianCurrency()</span>
+							<span class="summary-value discount-amount">-@_billDiscountAmount.FormatIndianCurrency()</span>
 						</div>
 						<div class="summary-item total-after-discount">
 							<span class="summary-label">Total after Discount:</span>
@@ -472,7 +472,7 @@ else
 						{
 							<div class="summary-item">
 								<span class="summary-label">Discount:</span>
-								<span class="summary-value discount-amount">@_saleReturn.DiscPercent% (-@_discountAmount.FormatIndianCurrency())</span>
+								<span class="summary-value discount-amount">@_saleReturn.DiscPercent% (-@_billDiscountAmount.FormatIndianCurrency())</span>
 							</div>
 						}
 						@if (!string.IsNullOrEmpty(_customer.Name))
