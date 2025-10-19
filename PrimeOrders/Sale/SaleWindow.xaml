@@ -1,0 +1,193 @@
+﻿<Window x:Class="PrimeOrders.Sale.SaleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PrimeOrders.Sale"
+        xmlns:common="clr-namespace:PrimeOrders.Common"
+		xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        mc:Ignorable="d" WindowState="Maximized"
+        Title="Sale" Height="1000" Width="1500"
+        Loaded="Window_Loaded">
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+
+			<Expander Grid.Row="0" Margin="10" Padding="5" IsExpanded="True" Background="#e2137b">
+				<Expander.Header>
+					<TextBlock Text="Sale Details" FontWeight="Bold" Foreground="Black" HorizontalAlignment="Center" />
+				</Expander.Header>
+
+				<Grid HorizontalAlignment="Center">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+
+					<!--region Party order Info-->
+					<Border Grid.Column="0" BorderBrush="Gold" BorderThickness="2" CornerRadius="5" Padding="5" Margin="5" x:Name="partyOrderSection" Visibility="Collapsed">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Party - Order" Margin="10" Padding="5" HorizontalAlignment="Center" />
+
+							<TextBlock Grid.Row="1" Grid.Column="0" Text="Party" Margin="5" Padding="5" />
+							<syncfusion:SfTextBoxExt Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" MinWidth="200" x:Name="partyAutoCompleteTextBox" SuggestionMode="Contains" AutoCompleteMode="SuggestAppend" Watermark="Select a Party" SelectedItemChanged="partyAutoCompleteTextBox_SelectedItemChanged" />
+
+							<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" x:Name="orderPanel" Visibility="Collapsed">
+								<TextBlock Text="Order" Margin="5" Padding="5" />
+								<syncfusion:SfTextBoxExt Margin="5" Padding="5" MinWidth="200" x:Name="orderAutoCompleteTextBox" SuggestionMode="EndsWithOrdinal" AutoCompleteMode="SuggestAppend" Watermark="Select an Order" ShowSuggestionsOnFocus="True" SelectedItemChanged="orderAutoCompleteTextBox_SelectedItemChanged" />
+							</StackPanel>
+						</Grid>
+					</Border>
+					<!--#endregion-->
+
+					<!--region Sale Details-->
+					<Border Grid.Column="1" BorderBrush="Gold" BorderThickness="2" CornerRadius="5" Padding="5" Margin="5" x:Name="saleDetailsSection">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Sale Details" Margin="10" Padding="5" HorizontalAlignment="Center" />
+
+							<TextBlock Grid.Row="1" Grid.Column="0" Text="Bill No" Margin="5" Padding="5" />
+							<TextBox x:Name="billNoTextBox" Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" IsReadOnly="True" Text="Bill No" TabIndex="-1" />
+
+							<TextBlock Grid.Row="2" Grid.Column="0" Text="Sale Date" Margin="5" Padding="5" />
+							<syncfusion:DateTimeEdit Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" x:Name="saleDateTimePicker" Pattern="CustomPattern" CustomPattern="dd/MM/yy hh:mm:ss tt" IsEmptyDateEnabled="False" DateTimeChanged="saleDateTimePicker_DateTimeChanged" />
+
+							<TextBlock Grid.Row="3" Grid.Column="0" Text="Remarks" Margin="5" Padding="5" />
+							<TextBox x:Name="remarksTextBox" Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" MinWidth="200" TextWrapping="Wrap" AcceptsReturn="True" MaxLength="250" />
+						</Grid>
+					</Border>
+					<!--#endregion-->
+
+					<!--region Discount Details-->
+					<Border Grid.Column="2" BorderBrush="Gold" BorderThickness="2" CornerRadius="5" Padding="5" Margin="5" x:Name="discountDetailsSection">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Discount Details" Margin="10" Padding="5" HorizontalAlignment="Center" />
+
+							<TextBlock Grid.Row="1" Grid.Column="0" Text="Disc %" Margin="5" Padding="5" />
+							<syncfusion:PercentTextBox x:Name="discountPercentTextBox" Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" PercentValue="0" MinValue="0" MaxValue="100" UseNullOption="False" EnableExtendedScrolling="True" EnableRangeAdorner="True" CornerRadius="5" TextAlignment="Right" RangeAdornerBackground="#e2137b" MaxPercentDecimalDigits="2" PercentValueChanged="discountPercentTextBox_PercentValueChanged" />
+
+							<TextBlock Grid.Row="2" Grid.Column="0" Text="Disc Amt" Margin="5" Padding="5" />
+							<TextBox x:Name="discountAmountTextBox" Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="3" Grid.Column="0" Text="Disc Reason" Margin="5" Padding="5" />
+							<TextBox x:Name="discountReasonTextBox" Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" TextWrapping="Wrap" AcceptsReturn="True" MaxLength="250" />
+
+							<TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="Customer Details" Margin="10" Padding="5" HorizontalAlignment="Center" />
+
+							<TextBlock Grid.Row="5" Grid.Column="0" Text="Cust No." Margin="5" Padding="5" />
+							<TextBox x:Name="customerNumberTextBox" Grid.Row="5" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" PreviewTextInput="numberTextBox_PreviewTextInput" TextChanged="customerNumberTextBox_TextChanged" />
+
+							<TextBlock Grid.Row="6" Grid.Column="0" Text="Cust Name" Margin="5" Padding="5" />
+							<TextBox x:Name="customerNameTextBox" Grid.Row="6" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" />
+						</Grid>
+					</Border>
+					<!--#endregion-->
+
+					<!--region Payment Details-->
+					<Border Grid.Column="3" BorderBrush="Gold" BorderThickness="2" CornerRadius="5" Padding="5" Margin="5" x:Name="paymentDetailsSection">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto" />
+							</Grid.ColumnDefinitions>
+
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+
+							<TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Text="Payment Details" Margin="10" Padding="5" HorizontalAlignment="Center" />
+
+							<TextBlock Grid.Row="1" Grid.Column="0" Text="Base Total" Margin="5" Padding="5" />
+							<TextBox x:Name="baseTotalTextBox" Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="2" Grid.Column="0" Text="Product Disc" Margin="5" Padding="5" />
+							<TextBox x:Name="productDiscountTextBox" Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="3" Grid.Column="0" Text="Sub Total" Margin="5" Padding="5" />
+							<TextBox x:Name="subTotalTextBox" Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="4" Grid.Column="0" Text="Tax Amt" Margin="5" Padding="5" />
+							<TextBox x:Name="taxAmountTextBox" Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="5" Grid.Column="0" Text="After Tax" Margin="5" Padding="5" />
+							<TextBox x:Name="afterTaxTextBox" Grid.Row="5" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="6" Grid.Column="0" Text="Round Off" Margin="5" Padding="5" />
+							<TextBox x:Name="roundOffTextBox" Grid.Row="6" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+
+							<TextBlock Grid.Row="7" Grid.Column="0" Text="Total" Margin="5" Padding="5" />
+							<TextBox x:Name="totalTextBox" Grid.Row="7" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" FontWeight="UltraBold" />
+
+							<ComboBox x:Name="paymentModeComboBox" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Padding="5" MinWidth="100" />
+
+							<Button x:Name="saveButton" Grid.Row="9" Grid.Column="0" Content="Save" Margin="5" MinWidth="100" Style="{DynamicResource AccentButtonStyle}"/>
+							<Button x:Name="thermalButton" Grid.Row="9" Grid.Column="1" Content="Thermal" Margin="5" MinWidth="100" Background="#e2137b" Foreground="Black"/>
+						</Grid>
+					</Border>
+					<!--#endregion-->
+				</Grid>
+			</Expander>
+
+		</Grid>
+
+		<common:FooterControl Grid.Row="1"/>
+	</Grid>
+
+</Window>

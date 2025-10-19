@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="PrimeOrders.Common.FooterControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PrimeOrders.Common"
+			 xmlns:main="clr-namespace:PrimeOrders">
+	<Grid VerticalAlignment="Bottom" Height="30" Margin="0,10,0,0">
+		<Grid.Style>
+			<Style TargetType="Grid">
+				<Style.Triggers>
+					<DataTrigger Binding="{Binding Source={x:Static main:App.IsLightTheme}}" Value="True">
+						<Setter Property="Background" Value="#ffdddddd"/>
+					</DataTrigger>
+					<DataTrigger Binding="{Binding Source={x:Static main:App.IsLightTheme}}" Value="False">
+						<Setter Property="Background" Value="#ff313131"/>
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+		</Grid.Style>
+
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="Auto"/>
+		</Grid.ColumnDefinitions>
+
+		<TextBlock x:Name="richTextBoxFooter" Grid.Column="0" 
+       Margin="10,0" VerticalAlignment="Center"
+       TextWrapping="WrapWithOverflow" Text="{Binding Source={x:Static main:App.FooterVersionText}}"/>
+
+		<TextBlock x:Name="rightFooter" Grid.Column="1" 
+       Margin="10,0" VerticalAlignment="Center">
+		<Hyperlink NavigateUri="https://aadi.vercel.app" RequestNavigate="Hyperlink_RequestNavigate">
+			<TextBlock Text="© AADISOFT" />
+		</Hyperlink>
+	</TextBlock>
+	</Grid>
+</UserControl>
