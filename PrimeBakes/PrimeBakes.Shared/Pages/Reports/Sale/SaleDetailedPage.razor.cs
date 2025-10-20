@@ -6,6 +6,7 @@ using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Sale;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sale;
 
@@ -26,7 +27,9 @@ public partial class SaleDetailedPage
 	private List<SaleOverviewModel> _saleOverviews = [];
 	private List<SaleOverviewModel> _filteredSaleOverviews = [];
 	private List<LocationModel> _locations = [];
+	private List<LedgerModel> _suppliers = [];
 	private LocationModel _selectedLocation;
+	private LedgerModel _selectedSupplier = null;
 
 	// Filter properties
 	private DateOnly _startDate = DateOnly.FromDateTime(DateTime.Now);
@@ -53,18 +56,6 @@ public partial class SaleDetailedPage
 		_isLoading = false;
 	}
 
-	private async Task LoadData()
-	{
-		_isLoading = true;
-		StateHasChanged();
-
-		await LoadSalesData();
-		ApplyFilters();
-
-		_isLoading = false;
-		StateHasChanged();
-	}
-
 	private async Task LoadLocations()
 	{
 		if (_user.LocationId == 1)
@@ -76,6 +67,8 @@ public partial class SaleDetailedPage
 
 			_selectedLocationId = 0;
 			_selectedLocation = _locations.FirstOrDefault(l => l.Id == 0);
+
+			_suppliers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
 		}
 		else
 		{
@@ -88,6 +81,18 @@ public partial class SaleDetailedPage
 				_selectedLocation = userLocation;
 			}
 		}
+	}
+
+	private async Task LoadData()
+	{
+		_isLoading = true;
+		StateHasChanged();
+
+		await LoadSalesData();
+		await ApplyFilters();
+
+		_isLoading = false;
+		StateHasChanged();
 	}
 
 	private async Task LoadSalesData()
@@ -116,13 +121,74 @@ public partial class SaleDetailedPage
 		_saleOverviews = [.. _saleOverviews.OrderByDescending(s => s.SaleDateTime)];
 	}
 
-	private void ApplyFilters()
+	private async Task ApplyFilters()
 	{
-		var filtered = _saleOverviews.AsEnumerable();
+		var filtered = _saleOverviews.ToList();
 
 		// Apply payment method filter
 		if (!string.IsNullOrEmpty(_selectedPaymentFilter) && _selectedPaymentFilter != "All")
-			filtered = filtered.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter);
+			filtered = [.. filtered.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter)];
+
+		if (_selectedSupplier is not null && _user.LocationId == 1)
+		{
+			filtered = [.. filtered.Where(s => s.PartyId == _selectedSupplier.Id)];
+
+			var allSaleReturns = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
+				_startDate.ToDateTime(TimeOnly.MinValue),
+				_endDate.ToDateTime(TimeOnly.MaxValue),
+				1);
+
+			var saleReturns = allSaleReturns
+				.Where(sr => sr.PartyId == _selectedSupplier.Id).ToList();
+
+			// Apply payment method filter
+			if (!string.IsNullOrEmpty(_selectedPaymentFilter) && _selectedPaymentFilter != "All")
+				saleReturns = [.. saleReturns.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter)];
+
+			foreach (var saleReturn in saleReturns)
+				filtered.Add(new()
+				{
+					SaleId = -saleReturn.SaleReturnId, // Negative ID to differentiate
+					BillNo = saleReturn.BillNo,
+					UserId = saleReturn.UserId,
+					UserName = saleReturn.UserName,
+					SaleDateTime = saleReturn.SaleReturnDateTime,
+					LocationId = saleReturn.LocationId,
+					LocationName = saleReturn.LocationName,
+					PartyId = saleReturn.PartyId,
+					PartyName = saleReturn.PartyName,
+					OrderId = null,
+					OrderNo = null,
+					CustomerId = saleReturn.CustomerId,
+					CustomerName = saleReturn.CustomerName,
+					CustomerNumber = saleReturn.CustomerNumber,
+					TotalProducts = -saleReturn.TotalProducts,
+					TotalQuantity = -saleReturn.TotalQuantity,
+					BaseTotal = -saleReturn.BaseTotal,
+					ProductDiscountAmount = -saleReturn.ProductDiscountAmount,
+					SubTotal = -saleReturn.SubTotal,
+					CGSTPercent = saleReturn.CGSTPercent,
+					CGSTAmount = -saleReturn.CGSTAmount,
+					SGSTPercent = saleReturn.SGSTPercent,
+					SGSTAmount = -saleReturn.SGSTAmount,
+					IGSTPercent = saleReturn.IGSTPercent,
+					IGSTAmount = -saleReturn.IGSTAmount,
+					TotalTaxAmount = -saleReturn.TotalTaxAmount,
+					AfterTax = -saleReturn.AfterTax,
+					BillDiscountPercent = saleReturn.BillDiscountPercent,
+					BillDiscountAmount = -saleReturn.BillDiscountAmount,
+					BillDiscountReason = saleReturn.BillDiscountReason,
+					AfterBillDiscount = -saleReturn.AfterBillDiscount,
+					RoundOff = -saleReturn.RoundOff,
+					Total = -saleReturn.Total,
+					Cash = -saleReturn.Cash,
+					Card = -saleReturn.Card,
+					UPI = -saleReturn.UPI,
+					Credit = -saleReturn.Credit,
+					CreatedAt = saleReturn.CreatedAt,
+					Remarks = saleReturn.Remarks
+				});
+		}
 
 		_filteredSaleOverviews = [.. filtered];
 	}
@@ -152,21 +218,60 @@ public partial class SaleDetailedPage
 		await LoadData();
 	}
 
+	private async Task OnSupplierChanged(ChangeEventArgs<LedgerModel?, LedgerModel> args)
+	{
+		_selectedSupplier = args.Value;
+
+		if (args.ItemData is not null && args.ItemData.Id > 0)
+			_selectedSupplier = args.ItemData;
+		else
+			_selectedSupplier = null;
+
+		await LoadData();
+	}
+
 	private async Task OnPaymentFilterChanged(ChangeEventArgs<string, string> args)
 	{
 		_selectedPaymentFilter = args.Value ?? "All";
-		ApplyFilters();
-		await InvokeAsync(StateHasChanged);
+		await ApplyFilters();
 	}
 
 	private string GetPrimaryPaymentMethod(SaleOverviewModel sale)
 	{
 		var payments = new Dictionary<string, decimal>
+	{
+		{ "Cash", sale.Cash },
+		{ "Card", sale.Card },
+		{ "UPI", sale.UPI },
+		{ "Credit", sale.Credit }
+	};
+
+		KeyValuePair<string, decimal>? primaryPayment = null;
+
+		if (sale.SaleId < 0)
+			primaryPayment = payments.Where(p => p.Value < 0).OrderByDescending(p => p.Value).FirstOrDefault();
+		else
+			primaryPayment = payments.Where(p => p.Value > 0).OrderByDescending(p => p.Value).FirstOrDefault();
+
+		if (primaryPayment == null || string.IsNullOrEmpty(primaryPayment.Value.Key))
+			return "Cash"; // Default
+
+		// Check if it's mixed payment (more than one method used)
+		int usedMethods = sale.SaleId < 0
+			? payments.Count(p => p.Value < 0)
+			: payments.Count(p => p.Value > 0);
+
+		return usedMethods > 1 ? "Mixed" : primaryPayment.Value.Key;
+	}
+
+	private string GetPrimaryPaymentMethod(SaleReturnOverviewModel saleReturn)
+	{
+		var payments = new Dictionary<string, decimal>
 		{
-			{ "Cash", sale.Cash },
-			{ "Card", sale.Card },
-			{ "UPI", sale.UPI },
-			{ "Credit", sale.Credit }
+			{ "Cash", -saleReturn.Cash },
+			{ "Card", -saleReturn.Card },
+			{ "UPI", -saleReturn.UPI },
+			{ "Credit", -saleReturn.Credit }
 		};
 
 		var primaryPayment = payments.Where(p => p.Value > 0).OrderByDescending(p => p.Value).FirstOrDefault();
@@ -207,6 +312,14 @@ public partial class SaleDetailedPage
 
 	private void ViewSaleDetails(SaleOverviewModel sale)
 	{
+		if (sale.SaleId < 0)
+		{
+			// Navigate to Sale Return details
+			NavigationManager.NavigateTo($"/Reports/SaleReturn/View/{-sale.SaleId}");
+			return;
+		}
+
+		// Navigate to Sale details
 		NavigationManager.NavigateTo($"/Reports/Sale/View/{sale.SaleId}");
 	}
 

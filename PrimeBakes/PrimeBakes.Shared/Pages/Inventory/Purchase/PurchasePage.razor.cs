@@ -385,8 +385,7 @@ public partial class PurchasePage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
-			item.NetRate = item.Quantity == 0 ? 0 : (item.AfterDiscount - (item.AfterDiscount * (_purchase.CDPercent / 100))
-				+ item.CGSTAmount + item.SGSTAmount + item.IGSTAmount) / item.Quantity;
+			item.NetRate = item.Quantity == 0 ? 0 : item.Total / item.Quantity * (1 - (_purchase.CDPercent / 100));
 		}
 
 		var totalBeforeCashDiscount = _cart.Sum(x => x.Total);

@@ -10,6 +10,7 @@
 @using Syncfusion.Blazor.Charts
 @using Syncfusion.Blazor.Inputs
 @using PrimeBakes.Shared.Services
+@using PrimeBakesLibrary.Models.Accounts.Masters
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
@@ -44,7 +45,7 @@
                 <div class="title-text">
                     <h1>Sale Detailed Analysis</h1>
                     <p>Comprehensive sales performance and analytics dashboard</p>
-                    @if (_selectedLocation != null)
+                    @if (_selectedLocation is not null)
                     {
                         <div class="location-badge">
                             <i class="fas fa-map-marker-alt"></i>
@@ -63,6 +64,7 @@
                 <label class="filter-label">Date Range</label>
                 <SfDateRangePicker @bind-StartDate="_startDate"
                                    @bind-EndDate="_endDate"
+                                   Format="dd/MM/yy"
                                    Placeholder="Select date range"
                                    FloatLabelType='@FloatLabelType.Auto'
                                    CssClass="filter-control date-range"
@@ -85,6 +87,25 @@
                         <ComboBoxFieldSettings Text="Name" Value="Id" />
                         <ComboBoxEvents TItem="LocationModel" TValue="int?" ValueChange="OnLocationFilterChanged" />
                     </SfComboBox>
+                </div>
+            }
+
+            @if (_user is not null && _user.LocationId == 1)
+            {
+                <div class="filter-group">
+                    <label class="filter-label">Party</label>
+                    <SfAutoComplete TValue="LedgerModel?"
+                                    TItem="LedgerModel"
+                                    Value="@_selectedSupplier"
+                                    Placeholder="Search for a Party..."
+                                    FloatLabelType='@FloatLabelType.Auto'
+                                    DataSource="@_suppliers"
+                                    CssClass="filter-control"
+                                    AllowFiltering="true"
+                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                        <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel?" ValueChange="OnSupplierChanged" />
+                        <AutoCompleteFieldSettings Value="Name" />
+                    </SfAutoComplete>
                 </div>
             }
 
@@ -192,6 +213,8 @@
                             <Template>
                                 @{
                                     var sale = (context as SaleOverviewModel);
+
+
                                     var primaryPayment = GetPrimaryPaymentMethod(sale);
                                     <div class="payment-badge-container">
                                         <span class="payment-badge @GetPaymentBadgeClass(primaryPayment)">

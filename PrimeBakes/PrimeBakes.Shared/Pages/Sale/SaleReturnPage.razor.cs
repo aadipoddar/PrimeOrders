@@ -411,7 +411,7 @@ public partial class SaleReturnPage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
-			item.NetRate = item.Quantity > 0 ? item.Total / item.Quantity : 0;
+			item.NetRate = item.Quantity == 0 ? 0 : item.Total / item.Quantity * (1 + (_saleReturn.DiscPercent / 100));
 		}
 
 		_saleReturn.RoundOff = Math.Round(_cart.Sum(x => x.Total)) - _cart.Sum(x => x.Total);

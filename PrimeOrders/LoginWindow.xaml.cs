@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System.Reflection;
+using System.Windows;
 
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.DataAccess;
 
 using PrimeOrders.Common;
 
@@ -11,8 +13,27 @@ namespace PrimeOrders;
 /// </summary>
 public partial class LoginWindow : Window
 {
-	public LoginWindow() =>
+	public LoginWindow()
+	{
 		InitializeComponent();
+		UpdateCheck();
+	}
+
+	private static async void UpdateCheck()
+	{
+		try
+		{
+			var isUpdateAvailable = await AadiSoftUpdater.AadiSoftUpdater.CheckForUpdates("aadipoddar", $"{Secrets.DatabaseName}", Assembly.GetExecutingAssembly().GetName().Version.ToString());
+
+			if (!isUpdateAvailable) return;
+			MessageBox.Show("New Version Available. Application will now update to the latest version.", "Update Available", MessageBoxButton.OK, MessageBoxImage.Information);
+			await AadiSoftUpdater.AadiSoftUpdater.UpdateApp("aadipoddar", $"{Secrets.DatabaseName}", "PrimeBakes", "BF7E02F7-1471-4821-B98D-A914DF5998ED");
+		}
+		catch (Exception)
+		{
+			MessageBox.Show("No Internet Connection", "Network Error", MessageBoxButton.OK, MessageBoxImage.Error);
+		}
+	}
 
 	private void Window_Loaded(object sender, RoutedEventArgs e) =>
 		userPasswordBox.Focus();

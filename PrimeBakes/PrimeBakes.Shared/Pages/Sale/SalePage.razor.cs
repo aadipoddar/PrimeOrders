@@ -146,10 +146,17 @@ public partial class SalePage
 	{
 		_allCart.Clear();
 
-		var allProducts = await ProductData.LoadProductByLocation(_sale.LocationId);
+		var locationProducts = await ProductData.LoadProductByLocation(_sale.LocationId);
+
+		if (_selectedParty is not null && _selectedParty.Id > 0 && _selectedParty.LocationId is not null)
+		{
+			var partyLocationProducts = await ProductData.LoadProductByLocation(_selectedParty.LocationId.Value);
+			locationProducts = [.. locationProducts.Where(p => partyLocationProducts.Any(plp => plp.ProductId == p.ProductId))];
+		}
+
 		var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
-		foreach (var product in allProducts)
+		foreach (var product in locationProducts)
 		{
 			var productTax = taxes.FirstOrDefault(t => t.Id == product.TaxId) ?? new();
 
@@ -214,6 +221,7 @@ public partial class SalePage
 
 			if (args.ItemData.LocationId is not null)
 			{
+				await LoadProducts();
 				var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, args.ItemData.LocationId.Value);
 				_sale.DiscPercent = location.Discount;
 				_orders = await OrderData.LoadOrderByLocation(args.ItemData.LocationId.Value);
@@ -440,8 +448,7 @@ public partial class SalePage
 			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
 			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
 			item.Total = item.AfterDiscount + item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
-			item.NetRate = item.Quantity == 0 ? 0 : (item.AfterDiscount - (item.AfterDiscount * (_sale.DiscPercent / 100))
-				+ item.CGSTAmount + item.SGSTAmount + item.IGSTAmount) / item.Quantity;
+			item.NetRate = item.Quantity == 0 ? 0 : item.Total / item.Quantity * (1 + (_sale.DiscPercent / 100));
 		}
 
 		var totalBeforeDiscount = _cart.Sum(c => c.Total);

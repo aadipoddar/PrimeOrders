@@ -11,6 +11,7 @@ using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Product;
+using PrimeBakesLibrary.Models.Sale;
 
 //FileInfo fileInfo = new(@"C:\Others\accountingdetail.xlsx");
 
@@ -37,6 +38,10 @@ using PrimeBakesLibrary.Models.Product;
 // await InsertAccounting(worksheet);
 
 // await InsertAccountingDetails(worksheet);
+
+// await RecalculateBills();
+
+await RecalculateReturnBills();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -337,5 +342,127 @@ static async Task InsertAccountingDetails(ExcelWorksheet worksheet)
 		});
 
 		row++;
+	}
+}
+
+static async Task RecalculateBills()
+{
+	var allSales = await CommonData.LoadTableDataByStatus<SaleModel>(TableNames.Sale);
+	foreach (var sale in allSales)
+	{
+		var saleDetails = await SaleData.LoadSaleDetailBySale(sale.Id);
+
+		Console.WriteLine("Recalculating Bill No: " + sale.BillNo);
+
+		foreach (var item in saleDetails)
+		{
+			var baseTotal = item.Quantity * item.Rate;
+			var cgstAmount = baseTotal * item.CGSTPercent / 100;
+			var sgstAmount = baseTotal * item.SGSTPercent / 100;
+			var igstAmount = baseTotal * item.IGSTPercent / 100;
+			var total = baseTotal + cgstAmount + sgstAmount + igstAmount;
+			// Add 0 Check
+			decimal netRate = 0;
+			if (item.Quantity > 0)
+				netRate = total / item.Quantity * (1 - (sale.DiscPercent / 100));
+
+			await SaleData.InsertSaleDetail(new()
+			{
+				Id = item.Id,
+				SaleId = item.SaleId,
+				ProductId = item.ProductId,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				BaseTotal = baseTotal,
+				DiscPercent = 0,
+				DiscAmount = 0,
+				AfterDiscount = baseTotal,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = cgstAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = sgstAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = igstAmount,
+				Total = total,
+				NetRate = netRate,
+				Status = true
+			});
+		}
+
+		var newSaleDetails = await SaleData.LoadSaleDetailBySale(sale.Id);
+		var newTotal = newSaleDetails.Sum(d => d.Total) * (1 - (sale.DiscPercent / 100));
+		sale.RoundOff = Math.Round(newTotal) - newTotal;
+
+		if (sale.Cash > 0)
+			sale.Cash = Math.Round(newTotal);
+		if (sale.Card > 0)
+			sale.Card = Math.Round(newTotal);
+		if (sale.UPI > 0)
+			sale.UPI = Math.Round(newTotal);
+		if (sale.Credit > 0)
+			sale.Credit = Math.Round(newTotal);
+
+		await SaleData.InsertSale(sale);
+	}
+}
+
+static async Task RecalculateReturnBills()
+{
+	var allSales = await CommonData.LoadTableDataByStatus<SaleReturnModel>(TableNames.SaleReturn);
+	foreach (var sale in allSales)
+	{
+		var saleDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(sale.Id);
+
+		Console.WriteLine("Recalculating Bill No: " + sale.BillNo);
+
+		foreach (var item in saleDetails)
+		{
+			var baseTotal = item.Quantity * item.Rate;
+			var cgstAmount = baseTotal * item.CGSTPercent / 100;
+			var sgstAmount = baseTotal * item.SGSTPercent / 100;
+			var igstAmount = baseTotal * item.IGSTPercent / 100;
+			var total = baseTotal + cgstAmount + sgstAmount + igstAmount;
+			// Add 0 Check
+			decimal netRate = 0;
+			if (item.Quantity > 0)
+				netRate = total / item.Quantity * (1 - (sale.DiscPercent / 100));
+
+			await SaleReturnData.InsertSaleReturnDetail(new()
+			{
+				Id = item.Id,
+				SaleReturnId = item.SaleReturnId,
+				ProductId = item.ProductId,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				BaseTotal = baseTotal,
+				DiscPercent = 0,
+				DiscAmount = 0,
+				AfterDiscount = baseTotal,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = cgstAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = sgstAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = igstAmount,
+				Total = total,
+				NetRate = netRate,
+				Status = true
+			});
+		}
+
+		var newSaleDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(sale.Id);
+		var newTotal = newSaleDetails.Sum(d => d.Total) * (1 - (sale.DiscPercent / 100));
+		sale.RoundOff = Math.Round(newTotal) - newTotal;
+
+		if (sale.Cash > 0)
+			sale.Cash = Math.Round(newTotal);
+		if (sale.Card > 0)
+			sale.Card = Math.Round(newTotal);
+		if (sale.UPI > 0)
+			sale.UPI = Math.Round(newTotal);
+		if (sale.Credit > 0)
+			sale.Credit = Math.Round(newTotal);
+
+		await SaleReturnData.InsertSaleReturn(sale);
 	}
 }

@@ -325,7 +325,7 @@ else
 						</div>
 						<div class="summary-item total-after-discount">
 							<span class="summary-label">Total after Discount:</span>
-							<span class="summary-value">@_subTotal.FormatIndianCurrency()</span>
+							<span class="summary-value">@_total.FormatIndianCurrency()</span>
 						</div>
 					</div>
 				</div>
@@ -468,13 +468,6 @@ else
 							<span class="summary-label">Sale Date:</span>
 							<span class="summary-value">@_sale.SaleDateTime.ToShortDateString()</span>
 						</div>
-						@if (_sale.DiscPercent > 0)
-						{
-							<div class="summary-item">
-								<span class="summary-label">Discount:</span>
-								<span class="summary-value discount-amount">@_sale.DiscPercent% (-@_billDiscountAmount.FormatIndianCurrency())</span>
-							</div>
-						}
 						@if (!string.IsNullOrEmpty(_customer.Name))
 						{
 							<div class="summary-item">
@@ -487,6 +480,14 @@ else
 							<span class="summary-label">Subtotal:</span>
 							<span class="summary-value">@_afterTax.FormatIndianCurrency()</span>
 						</div>
+
+						@if (_sale.DiscPercent > 0)
+						{
+							<div class="summary-item">
+								<span class="summary-label">Discount:</span>
+								<span class="summary-value discount-amount">@_sale.DiscPercent% (-@_billDiscountAmount.FormatIndianCurrency())</span>
+							</div>
+						}
 
 						<!-- Round Off Section with Interactive Input -->
 						<div class="round-off-section">

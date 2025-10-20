@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PushNotificationsAPI", "Pus
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrimeOrders", "PrimeOrders\PrimeOrders.csproj", "{9DAE432F-928A-40A0-BFF1-A9DCF34B05EB}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupPrimeOrders", "SetupPrimeOrders\SetupPrimeOrders.vdproj", "{2028BAEC-7B69-73E8-609E-B1E2C94234BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{9DAE432F-928A-40A0-BFF1-A9DCF34B05EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DAE432F-928A-40A0-BFF1-A9DCF34B05EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DAE432F-928A-40A0-BFF1-A9DCF34B05EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2028BAEC-7B69-73E8-609E-B1E2C94234BE}.Debug|Any CPU.ActiveCfg = Debug
+		{2028BAEC-7B69-73E8-609E-B1E2C94234BE}.Debug|Any CPU.Build.0 = Debug
+		{2028BAEC-7B69-73E8-609E-B1E2C94234BE}.Release|Any CPU.ActiveCfg = Release
+		{2028BAEC-7B69-73E8-609E-B1E2C94234BE}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
