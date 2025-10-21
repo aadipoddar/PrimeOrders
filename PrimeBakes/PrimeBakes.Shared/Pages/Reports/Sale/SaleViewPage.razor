@@ -269,6 +269,13 @@ else
 							<span class="financial-label">Base Total:</span>
 							<span class="financial-value">₹@_saleOverview.BaseTotal.ToString("N2")</span>
 						</div>
+						@if (_saleOverview.ProductDiscountAmount > 0)
+						{
+							<div class="financial-row discount">
+								<span class="financial-label">Product Discount:</span>
+								<span class="financial-value">-₹@_saleOverview.ProductDiscountAmount.ToString("N2")</span>
+							</div>
+						}
 						<div class="financial-row">
 							<span class="financial-label">Sub Total:</span>
 							<span class="financial-value">₹@_saleOverview.SubTotal.ToString("N2")</span>

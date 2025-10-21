@@ -72,14 +72,6 @@ public partial class SaleWindow : Window
 			List<SaleProductCartModel> allCart = [];
 
 			var locationProducts = await ProductData.LoadProductByLocation(_user.LocationId);
-			var selectedParty = partyAutoCompleteTextBox.SelectedItem as LedgerModel;
-
-			if (selectedParty is not null && selectedParty.Id > 0 && selectedParty.LocationId is not null)
-			{
-				var partyLocationProducts = await ProductData.LoadProductByLocation(selectedParty.LocationId.Value);
-				locationProducts = [.. locationProducts.Where(p => partyLocationProducts.Any(plp => plp.ProductId == p.ProductId))];
-			}
-
 			var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
 			foreach (var product in locationProducts)
@@ -261,14 +253,6 @@ public partial class SaleWindow : Window
 			var orderItems = await OrderData.LoadOrderDetailByOrder(selectedOrder.Id);
 
 			var locationProducts = await ProductData.LoadProductByLocation(_user.LocationId);
-			var selectedParty = partyAutoCompleteTextBox.SelectedItem as LedgerModel;
-
-			if (selectedParty is not null && selectedParty.Id > 0 && selectedParty.LocationId is not null)
-			{
-				var partyLocationProducts = await ProductData.LoadProductByLocation(selectedParty.LocationId.Value);
-				locationProducts = [.. locationProducts.Where(p => partyLocationProducts.Any(plp => plp.ProductId == p.ProductId))];
-			}
-
 			var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
 			foreach (var item in orderItems)
@@ -277,7 +261,7 @@ public partial class SaleWindow : Window
 
 				if (product is null)
 				{
-					MessageBox.Show($"Product with ID {item.ProductId} not found for the current location and party.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+					MessageBox.Show($"Product with ID {item.ProductId} not found for the current location or is Inactive.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
 					continue;
 				}
 
@@ -501,39 +485,36 @@ public partial class SaleWindow : Window
 
 		var existingCartItem = _cart.FirstOrDefault(x => x.ProductId == ((SaleProductCartModel)selectedProductAutoCompleteTextBox.SelectedItem).ProductId);
 		if (existingCartItem is not null)
-		{
 			_cart.FirstOrDefault(x => x.ProductId == existingCartItem.ProductId).Quantity += decimal.Parse(selectedProductQuantityTextBox.Value.ToString());
-			selectedProductAutoCompleteTextBox.SelectedItem = null;
-			selectedProductQuantityTextBox.Value = 0;
-			selectedProductDiscountPercentTextBox.PercentValue = 0;
-			await SaveSaleFile();
-		}
 
-		var product = (SaleProductCartModel)selectedProductAutoCompleteTextBox.SelectedItem;
-		var rate = decimal.Parse(selectedProductRateTextBox.Value.ToString());
-		var quantity = decimal.Parse(selectedProductQuantityTextBox.Value.ToString());
-		var discPercent = decimal.Parse(selectedProductDiscountPercentTextBox.PercentValue.ToString());
-
-		_cart.Add(new()
+		else
 		{
-			ProductId = product.ProductId,
-			ProductName = product.ProductName,
-			ProductCategoryId = product.ProductCategoryId,
-			Rate = rate,
-			Quantity = quantity,
-			BaseTotal = 0,
-			DiscPercent = discPercent,
-			DiscAmount = 0,
-			AfterDiscount = 0,
-			CGSTPercent = 0,
-			CGSTAmount = 0,
-			SGSTPercent = 0,
-			SGSTAmount = 0,
-			IGSTPercent = 0,
-			IGSTAmount = 0,
-			Total = 0,
-			NetRate = 0
-		});
+			var product = (SaleProductCartModel)selectedProductAutoCompleteTextBox.SelectedItem;
+			var rate = decimal.Parse(selectedProductRateTextBox.Value.ToString());
+			var quantity = decimal.Parse(selectedProductQuantityTextBox.Value.ToString());
+			var discPercent = decimal.Parse(selectedProductDiscountPercentTextBox.PercentValue.ToString());
+
+			_cart.Add(new()
+			{
+				ProductId = product.ProductId,
+				ProductName = product.ProductName,
+				ProductCategoryId = product.ProductCategoryId,
+				Rate = rate,
+				Quantity = quantity,
+				BaseTotal = 0,
+				DiscPercent = discPercent,
+				DiscAmount = 0,
+				AfterDiscount = 0,
+				CGSTPercent = 0,
+				CGSTAmount = 0,
+				SGSTPercent = 0,
+				SGSTAmount = 0,
+				IGSTPercent = 0,
+				IGSTAmount = 0,
+				Total = 0,
+				NetRate = 0
+			});
+		}
 
 		selectedProductAutoCompleteTextBox.SelectedItem = null;
 		selectedProductQuantityTextBox.Value = 0;
@@ -701,14 +682,8 @@ public partial class SaleWindow : Window
 				return;
 			}
 
-			var ms = await SaleA4Print.GenerateA4SaleBill(saleId);
-			using FileStream stream = new(Path.Combine(Path.GetTempPath(), $"SaleBill{saleId}.pdf"), FileMode.Create, FileAccess.Write);
-			ms.Position = 0;
-			await ms.CopyToAsync(stream);
-			Process.Start(new ProcessStartInfo($"{Path.GetTempPath()}\\SaleBill{saleId}.pdf") { UseShellExecute = true });
-
-			File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName));
-			File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleCartDataFileName));
+			await PrintInvoice(saleId);
+			DeleteCart();
 
 			MessageBox.Show("Sale saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 			Close();
@@ -721,6 +696,23 @@ public partial class SaleWindow : Window
 		{
 			_isSaving = false;
 		}
+	}
+
+	private static async Task PrintInvoice(int saleId)
+	{
+		var sale = await SaleData.LoadSaleOverviewBySaleId(saleId);
+		var ms = await SaleA4Print.GenerateA4SaleBill(saleId);
+		var fileName = $"SaleBill_{sale.BillNo}_{DateTime.Now:dd/MM/yy}.pdf";
+		using FileStream stream = new(Path.Combine(Path.GetTempPath(), fileName), FileMode.Create, FileAccess.Write);
+		ms.Position = 0;
+		await ms.CopyToAsync(stream);
+		Process.Start(new ProcessStartInfo($"{Path.GetTempPath()}\\{fileName}") { UseShellExecute = true });
+	}
+
+	private static void DeleteCart()
+	{
+		File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName));
+		File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleCartDataFileName));
 	}
 	#endregion
 }

@@ -22,15 +22,24 @@ public static class SaleExcelExport
 
 		// Define the column order for better readability
 		List<string> columnOrder = [
-					nameof(SaleOverviewModel.PartyName),
+					nameof(SaleOverviewModel.SaleId),
 					nameof(SaleOverviewModel.BillNo),
 					nameof(SaleOverviewModel.SaleDateTime),
 					nameof(SaleOverviewModel.LocationName),
+					nameof(SaleOverviewModel.UserName),
+					nameof(SaleOverviewModel.TotalProducts),
 					nameof(SaleOverviewModel.TotalQuantity),
 					nameof(SaleOverviewModel.BaseTotal),
 					nameof(SaleOverviewModel.BillDiscountPercent),
 					nameof(SaleOverviewModel.BillDiscountAmount),
+					nameof(SaleOverviewModel.BillDiscountReason),
 					nameof(SaleOverviewModel.SubTotal),
+					nameof(SaleOverviewModel.CGSTPercent),
+					nameof(SaleOverviewModel.CGSTAmount),
+					nameof(SaleOverviewModel.SGSTPercent),
+					nameof(SaleOverviewModel.SGSTAmount),
+					nameof(SaleOverviewModel.IGSTPercent),
+					nameof(SaleOverviewModel.IGSTAmount),
 					nameof(SaleOverviewModel.ProductDiscountAmount),
 					nameof(SaleOverviewModel.TotalTaxAmount),
 					nameof(SaleOverviewModel.BaseTotal),
@@ -39,7 +48,16 @@ public static class SaleExcelExport
 					nameof(SaleOverviewModel.AfterBillDiscount),
 					nameof(SaleOverviewModel.RoundOff),
 					nameof(SaleOverviewModel.Total),
+					nameof(SaleOverviewModel.Cash),
+					nameof(SaleOverviewModel.Card),
+					nameof(SaleOverviewModel.UPI),
+					nameof(SaleOverviewModel.Credit),
+					nameof(SaleOverviewModel.Remarks),
+					nameof(SaleOverviewModel.PartyName),
 					nameof(SaleOverviewModel.OrderNo),
+					nameof(SaleOverviewModel.CustomerName),
+					nameof(SaleOverviewModel.CustomerNumber),
+					nameof(SaleOverviewModel.CreatedAt)
 			];
 
 		// Create a customized column settings for the report

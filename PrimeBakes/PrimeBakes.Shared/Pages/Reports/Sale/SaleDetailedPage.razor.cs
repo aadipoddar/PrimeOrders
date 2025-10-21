@@ -40,6 +40,7 @@ public partial class SaleDetailedPage
 	// Grid reference
 	private SfGrid<SaleOverviewModel> _sfGrid;
 
+	#region Load Data
 	protected override async Task OnInitializedAsync()
 	{
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
@@ -192,7 +193,9 @@ public partial class SaleDetailedPage
 
 		_filteredSaleOverviews = [.. filtered];
 	}
+	#endregion
 
+	#region Change Events
 	private async Task DateRangeChanged(RangePickerEventArgs<DateOnly> args)
 	{
 		if (args.StartDate != default && args.EndDate != default)
@@ -235,7 +238,31 @@ public partial class SaleDetailedPage
 		_selectedPaymentFilter = args.Value ?? "All";
 		await ApplyFilters();
 	}
+	#endregion
 
+	#region Export
+	private async Task ExportToExcel()
+	{
+		var locationName = _selectedLocation?.Name ?? "All Locations";
+		var excelData = SaleExcelExport.ExportSaleOverviewExcel(_filteredSaleOverviews, _startDate, _endDate);
+		var fileName = $"Sales_Details_{locationName}_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.xlsx";
+		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelData);
+		VibrationService.VibrateWithTime(100);
+	}
+
+	private async Task ExportToPdf()
+	{
+		if (_filteredSaleOverviews == null || !_filteredSaleOverviews.Any())
+			return;
+
+		var pdfData = await SaleReportPDFExport.GenerateA4SaleReport(_filteredSaleOverviews, _startDate, _endDate, _selectedSupplier);
+		var fileName = $"Sales_Register_{_selectedSupplier?.Name ?? "All"}_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.pdf";
+		await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfData);
+		VibrationService.VibrateWithTime(100);
+	}
+	#endregion
+
+	#region Charts
 	private string GetPrimaryPaymentMethod(SaleOverviewModel sale)
 	{
 		var payments = new Dictionary<string, decimal>
@@ -429,16 +456,7 @@ public partial class SaleDetailedPage
 	{
 		return _filteredSaleOverviews.Count > 0 ? _filteredSaleOverviews.Average(s => s.Total) : 0;
 	}
-
-	// Export methods
-	private async Task ExportToExcel()
-	{
-		var locationName = _selectedLocation?.Name ?? "All Locations";
-		var excelData = SaleExcelExport.ExportSaleOverviewExcel(_filteredSaleOverviews, _startDate, _endDate);
-		var fileName = $"Sales_Details_{locationName}_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelData);
-		VibrationService.VibrateWithTime(100);
-	}
+	#endregion
 }
 
 // Helper data models for charts

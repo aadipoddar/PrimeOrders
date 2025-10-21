@@ -129,7 +129,11 @@
                 </SfButton>
                 <SfButton CssClass="excel-btn" OnClick="@(() => ExportToExcel())">
                     <i class="fas fa-file-excel"></i>
-                    Export Sales
+                    Export Excel
+                </SfButton>
+                <SfButton CssClass="pdf-btn" OnClick="@(() => ExportToPdf())">
+                    <i class="fas fa-file-pdf"></i>
+                    Export PDF
                 </SfButton>
             </div>
         </div>
@@ -691,6 +695,7 @@
     }
 
     .refresh-btn,
+    .pdf-btn,
     .excel-btn {
         padding: 12px 24px;
         border-radius: var(--border-radius);
@@ -761,6 +766,33 @@
     .excel-btn:hover::before {
         left: 100%;
     }
+
+    .pdf-btn {
+        background: linear-gradient(135deg, #F54927, #F09584);
+        color: var(--white);
+        box-shadow: 0 4px 15px rgba(33, 115, 70, 0.2);
+    }
+
+        .pdf-btn:hover {
+            background: linear-gradient(135deg, #C74026, #C77A6B);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(226, 19, 123, 0.3);
+        }
+
+        .pdf-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .pdf-btn:hover::before {
+            left: 100%;
+        }
 
     .products-btn {
         background: linear-gradient(135deg, #0066cc, #0052a3);

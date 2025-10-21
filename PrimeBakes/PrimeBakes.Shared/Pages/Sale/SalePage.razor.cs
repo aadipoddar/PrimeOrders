@@ -147,13 +147,6 @@ public partial class SalePage
 		_allCart.Clear();
 
 		var locationProducts = await ProductData.LoadProductByLocation(_sale.LocationId);
-
-		if (_selectedParty is not null && _selectedParty.Id > 0 && _selectedParty.LocationId is not null)
-		{
-			var partyLocationProducts = await ProductData.LoadProductByLocation(_selectedParty.LocationId.Value);
-			locationProducts = [.. locationProducts.Where(p => partyLocationProducts.Any(plp => plp.ProductId == p.ProductId))];
-		}
-
 		var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
 		foreach (var product in locationProducts)
