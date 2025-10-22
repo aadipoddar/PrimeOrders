@@ -118,8 +118,8 @@ public partial class SaleDetailedPage
 			_saleOverviews = await SaleData.LoadSaleDetailsByDateLocationId(fromDate, toDate, locationId);
 		}
 
-		// Sort by date descending
-		_saleOverviews = [.. _saleOverviews.OrderByDescending(s => s.SaleDateTime)];
+		// Sort by date ascending
+		_saleOverviews = [.. _saleOverviews.OrderBy(s => s.SaleDateTime).ThenBy(s => s.BillNo)];
 	}
 
 	private async Task ApplyFilters()
@@ -145,6 +145,9 @@ public partial class SaleDetailedPage
 			// Apply payment method filter
 			if (!string.IsNullOrEmpty(_selectedPaymentFilter) && _selectedPaymentFilter != "All")
 				saleReturns = [.. saleReturns.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter)];
+
+			// Sort Sale Returns by Date and Bill No
+			saleReturns = [.. saleReturns.OrderBy(sr => sr.SaleReturnDateTime).ThenBy(sr => sr.BillNo)];
 
 			foreach (var saleReturn in saleReturns)
 				filtered.Add(new()

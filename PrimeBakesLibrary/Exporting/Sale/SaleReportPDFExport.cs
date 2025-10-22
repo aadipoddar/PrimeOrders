@@ -38,7 +38,7 @@ public static class SaleReportPDFExport
 		var dataSource = saleOverview.Select((item, index) => new
 		{
 			TransType = item.SaleId < 0 ? "Return" : "Sale",
-			BillNo = item.BillNo,
+			item.BillNo,
 			BillDate = item.SaleDateTime.ToString("dd-MM-yyyy"),
 			Quantity = item.TotalQuantity.ToString("N2"),
 			Discount = $"{item.BillDiscountPercent}% ({item.BillDiscountAmount.FormatIndianCurrency()})",
@@ -67,7 +67,7 @@ public static class SaleReportPDFExport
 		};
 
 		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
-		
+
 		pdfGrid.Headers[0].Cells[0].Value = "Trans Type";
 		pdfGrid.Headers[0].Cells[1].Value = "Bill No";
 		pdfGrid.Headers[0].Cells[2].Value = "Bill Date";
@@ -87,9 +87,9 @@ public static class SaleReportPDFExport
 		{
 			["Total Sales: "] = saleOverview.Count(x => x.SaleId > 0).ToString(),
 			["Total Returns: "] = saleOverview.Count(x => x.SaleId < 0).ToString(),
-			["Total Products: "] = saleOverview.Sum(x => x.TotalProducts).ToString(),
-			["Total Quantity: "] = saleOverview.Sum(x => x.TotalQuantity).ToString(),
+			[""] = "",
 			["Total Sale Amt: "] = saleOverview.Sum(x => x.SaleId > 0 ? x.Total : 0).FormatIndianCurrency(),
+			["Total Sale Discount: "] = $"-{saleOverview.Where(x => x.SaleId > 0).Sum(x => x.BillDiscountAmount).FormatIndianCurrency()}",
 			["Total Return Amt: "] = saleOverview.Sum(x => x.SaleId < 0 ? x.Total : 0).FormatIndianCurrency()
 		};
 

@@ -190,9 +190,9 @@ internal static class PDFExportUtil
 		Dictionary<string, string> summaryItems, decimal grandTotal, string additionalInfo = null)
 	{
 		// Calculate optimal layout based on number of items
-		var items = summaryItems.Where(x => !string.IsNullOrEmpty(x.Value)).ToList();
+		var items = summaryItems.Where(x => !string.IsNullOrEmpty(x.Value) || string.IsNullOrEmpty(x.Key)).ToList();
 		var itemCount = items.Count;
-		
+
 		if (itemCount == 0)
 		{
 			// If no items, just draw grand total and amount in words compactly
@@ -205,11 +205,11 @@ internal static class PDFExportUtil
 		// Smart column calculation for optimal space usage
 		var columnsCount = itemCount <= 2 ? 1 : itemCount <= 6 ? 2 : 3;
 		var rowsPerColumn = (int)Math.Ceiling((double)itemCount / columnsCount);
-		
+
 		// Calculate actual required width based on content
 		var maxLabelWidth = 0f;
 		var maxValueWidth = 0f;
-		
+
 		foreach (var item in items)
 		{
 			var labelWidth = _normalFont.MeasureString(item.Key).Width;
@@ -217,15 +217,15 @@ internal static class PDFExportUtil
 			maxLabelWidth = Math.Max(maxLabelWidth, labelWidth);
 			maxValueWidth = Math.Max(maxValueWidth, valueWidth);
 		}
-		
+
 		// Minimum column width based on content + small padding
 		var minColumnWidth = maxLabelWidth + maxValueWidth + 15f; // 15f padding between label and value
 		var totalMinWidth = (minColumnWidth * columnsCount) + (columnsCount - 1) * 10f; // 10f gap between columns
-		
+
 		// Use minimum required width, but not less than 60% of available width for readability
 		var summaryWidth = Math.Max(totalMinWidth + 20f, availableWidth * 0.6f); // 20f for margins
 		var summaryX = (pageWidth - summaryWidth) / 2; // Center the summary section
-		
+
 		// Recalculate column width with actual summary width
 		var columnGap = 10f;
 		var columnWidth = (summaryWidth - 20f - (columnGap * (columnsCount - 1))) / columnsCount;
@@ -302,7 +302,7 @@ internal static class PDFExportUtil
 			// Compact two-row layout instead of two columns for better space usage
 			pdfPage.Graphics.DrawString($"Amount: {amountInWords}", _boldFont, new PdfSolidBrush(_primaryColor),
 				new PointF(summaryX + 8, summaryY));
-			
+
 			summaryY += 12f;
 			pdfPage.Graphics.DrawString($"Payment Mode: {additionalInfo}", _boldFont, new PdfSolidBrush(_secondaryColor),
 				new PointF(summaryX + 8, summaryY));
@@ -330,7 +330,7 @@ internal static class PDFExportUtil
 		pdfPage.Graphics.DrawRectangle(new PdfPen(Color.Black, 1), new PdfSolidBrush(_lightGray), summaryRect);
 
 		var summaryY = currentY + 6;
-		
+
 		// Grand total
 		var grandTotalRect = new RectangleF(summaryX + 4, summaryY, summaryWidth - 8, 18);
 		pdfPage.Graphics.DrawRectangle(new PdfPen(_primaryColor, 2), new PdfSolidBrush(_primaryColor), grandTotalRect);
@@ -407,38 +407,43 @@ internal static class PDFExportUtil
 		// Use smaller font for more compact display
 		var labelFont = new PdfStandardFont(PdfFontFamily.Helvetica, 7); // Reduced from default for compact layout
 		var valueFont = new PdfStandardFont(PdfFontFamily.Helvetica, 7, PdfFontStyle.Bold); // Reduced from default
-		
+
 		// Measure text to ensure proper alignment
 		var labelSize = labelFont.MeasureString(label);
 		var valueSize = valueFont.MeasureString(value);
-		
+
 		// Add colon for cleaner appearance if not present
-		var displayLabel = label.EndsWith(":") ? label : label + ":";
-		var availableWidth = columnWidth - 4f; // Small margin within column
-		
+		var displayLabel = string.Empty;
+		var availableWidth = 0f;
+		if (!string.IsNullOrEmpty(label) && !string.IsNullOrEmpty(value))
+		{
+			displayLabel = label.EndsWith(":") ? label : label + ":";
+			availableWidth = columnWidth - 4f; // Small margin within column
+		}
+
 		// Smart layout: if both fit comfortably, align value to right; otherwise use inline format
 		if (labelSize.Width + valueSize.Width + 12f <= availableWidth) // 12f for comfortable spacing
 		{
 			// Draw label on the left
 			pdfPage.Graphics.DrawString(displayLabel, labelFont, PdfBrushes.Black, new PointF(columnX, summaryY));
-			
+
 			// Draw value aligned to the right of the column
 			var valueX = columnX + columnWidth - valueSize.Width - 2f;
-			pdfPage.Graphics.DrawString(value, valueFont, new PdfSolidBrush(_secondaryColor), 
+			pdfPage.Graphics.DrawString(value, valueFont, new PdfSolidBrush(_secondaryColor),
 				new PointF(valueX, summaryY));
 		}
 		else
 		{
 			// Inline format for space efficiency: "Label: Value"
 			pdfPage.Graphics.DrawString(displayLabel, labelFont, PdfBrushes.Black, new PointF(columnX, summaryY));
-			
+
 			var labelWidth = labelFont.MeasureString(displayLabel).Width;
 			var remainingWidth = availableWidth - labelWidth - 2f; // 2f spacing
-			
+
 			// Check if value fits in remaining space
 			if (valueSize.Width <= remainingWidth)
 			{
-				pdfPage.Graphics.DrawString(" " + value, valueFont, new PdfSolidBrush(_secondaryColor), 
+				pdfPage.Graphics.DrawString(" " + value, valueFont, new PdfSolidBrush(_secondaryColor),
 					new PointF(columnX + labelWidth, summaryY));
 			}
 			else
@@ -449,9 +454,9 @@ internal static class PDFExportUtil
 				{
 					truncatedValue = truncatedValue.Substring(0, truncatedValue.Length - 1);
 				}
-				
+
 				var finalValue = truncatedValue == value ? " " + value : " " + truncatedValue + "...";
-				pdfPage.Graphics.DrawString(finalValue, valueFont, new PdfSolidBrush(_secondaryColor), 
+				pdfPage.Graphics.DrawString(finalValue, valueFont, new PdfSolidBrush(_secondaryColor),
 					new PointF(columnX + labelWidth, summaryY));
 			}
 		}
