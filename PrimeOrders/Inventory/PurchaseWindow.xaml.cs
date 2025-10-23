@@ -170,8 +170,11 @@ public partial class PurchaseWindow : Window
 		await SavePurchaseFile();
 	}
 
-	private async void purchaseDateTimePicker_DateTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
+	private async void purchaseDateTimePicker_DateTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+	{
+		await LoadRawMaterial();
 		await SavePurchaseFile();
+	}
 
 	private async void cashDiscountPercentTextBox_PercentValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
 		await SavePurchaseFile();

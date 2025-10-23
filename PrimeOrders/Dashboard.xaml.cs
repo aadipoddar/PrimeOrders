@@ -31,6 +31,7 @@ public partial class Dashboard : Window
 		else
 		{
 			bool isSale = _user.Sales;
+			bool isInventory = _user.Inventory;
 			bool isAdmin = _user.Admin;
 
 			if (isAdmin)
@@ -38,6 +39,12 @@ public partial class Dashboard : Window
 
 			if (!isSale)
 				saleButton.Visibility = Visibility.Collapsed;
+
+			if (!isInventory)
+			{
+				purchaseButton.Visibility = Visibility.Collapsed;
+				kitchenIssueButton.Visibility = Visibility.Collapsed;
+			}
 
 			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
 
@@ -55,6 +62,12 @@ public partial class Dashboard : Window
 	{
 		PurchaseWindow purchaseWindow = new(_user);
 		purchaseWindow.Show();
+	}
+
+	private void kitchenIssueButton_Click(object sender, RoutedEventArgs e)
+	{
+		KitchenIssueWindow kitchenIssueWindow = new(_user);
+		kitchenIssueWindow.Show();
 	}
 
 	private void Window_Closed(object sender, EventArgs e) =>
