@@ -171,7 +171,7 @@
 							<TextBox x:Name="discountAmountTextBox" Grid.Row="6" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
 
 							<TextBlock Grid.Row="7" Grid.Column="0" Text="Round Off" Margin="5" Padding="5" />
-							<TextBox x:Name="roundOffTextBox" Grid.Row="7" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
+							<syncfusion:DoubleTextBox x:Name="roundOffTextBox" Grid.Row="7" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" Text="00.00" MaximumNumberDecimalDigits="2" UseNullOption="False" TextAlignment="Right" ValueChanged="roundOffTextBox_ValueChanged" />
 
 							<TextBlock Grid.Row="8" Grid.Column="0" Text="Total" Margin="5" Padding="5" />
 							<TextBox x:Name="totalTextBox" Grid.Row="8" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" FontWeight="UltraBold" />

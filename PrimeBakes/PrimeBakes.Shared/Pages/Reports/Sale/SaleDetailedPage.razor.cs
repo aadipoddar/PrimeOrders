@@ -146,9 +146,6 @@ public partial class SaleDetailedPage
 			if (!string.IsNullOrEmpty(_selectedPaymentFilter) && _selectedPaymentFilter != "All")
 				saleReturns = [.. saleReturns.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter)];
 
-			// Sort Sale Returns by Date and Bill No
-			saleReturns = [.. saleReturns.OrderBy(sr => sr.SaleReturnDateTime).ThenBy(sr => sr.BillNo)];
-
 			foreach (var saleReturn in saleReturns)
 				filtered.Add(new()
 				{
@@ -194,6 +191,7 @@ public partial class SaleDetailedPage
 				});
 		}
 
+		filtered = [.. filtered.OrderBy(s => s.SaleDateTime.Date).ThenByDescending(s => s.SaleId)];
 		_filteredSaleOverviews = [.. filtered];
 	}
 	#endregion

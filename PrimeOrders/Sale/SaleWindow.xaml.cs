@@ -278,11 +278,11 @@ public partial class SaleWindow : Window
 					DiscPercent = 0,
 					DiscAmount = 0,
 					AfterDiscount = 0,
-					CGSTPercent = productTax.CGST,
+					CGSTPercent = productTax.Extra ? productTax.CGST : 0,
 					CGSTAmount = 0,
-					SGSTPercent = productTax.SGST,
+					SGSTPercent = productTax.Extra ? productTax.SGST : 0,
 					SGSTAmount = 0,
-					IGSTPercent = productTax.IGST,
+					IGSTPercent = productTax.Extra ? productTax.IGST : 0,
 					IGSTAmount = 0,
 					Total = 0,
 					NetRate = 0
@@ -543,7 +543,10 @@ public partial class SaleWindow : Window
 	#endregion
 
 	#region Saving
-	private async Task UpdateFinancials()
+	private async void roundOffTextBox_ValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
+		await SaveSaleFile(true);
+
+	private async Task UpdateFinancials(bool customRoundOff = false)
 	{
 		billNoTextBox.Text = await GenerateCodes.GenerateSaleBillNo(new()
 		{
@@ -562,12 +565,12 @@ public partial class SaleWindow : Window
 			cart.BaseTotal = cart.Rate * cart.Quantity;
 			cart.DiscAmount = cart.BaseTotal * cart.DiscPercent / 100;
 			cart.AfterDiscount = cart.BaseTotal - cart.DiscAmount;
-			cart.CGSTPercent = productTax.CGST;
-			cart.CGSTAmount = cart.AfterDiscount * productTax.CGST / 100;
-			cart.SGSTPercent = productTax.SGST;
-			cart.SGSTAmount = cart.AfterDiscount * productTax.SGST / 100;
-			cart.IGSTPercent = productTax.IGST;
-			cart.IGSTAmount = cart.AfterDiscount * productTax.IGST / 100;
+			cart.CGSTPercent = productTax.Extra ? productTax.CGST : 0;
+			cart.CGSTAmount = cart.AfterDiscount * cart.CGSTPercent / 100;
+			cart.SGSTPercent = productTax.Extra ? productTax.SGST : 0;
+			cart.SGSTAmount = cart.AfterDiscount * cart.SGSTPercent / 100;
+			cart.IGSTPercent = productTax.Extra ? productTax.IGST : 0;
+			cart.IGSTAmount = cart.AfterDiscount * cart.IGSTPercent / 100;
 			cart.Total = cart.AfterDiscount + cart.CGSTAmount + cart.SGSTAmount + cart.IGSTAmount;
 			cart.NetRate = cart.Total / cart.Quantity * (1 - discountPercent / 100);
 		}
@@ -578,7 +581,13 @@ public partial class SaleWindow : Window
 		var afterTax = _cart.Sum(x => x.Total);
 		var totalTax = afterTax - subTotal;
 		var discountAmount = afterTax * discountPercent / 100;
-		var roundOff = Math.Round(afterTax - discountAmount) - (afterTax - discountAmount);
+
+		decimal roundOff = 0;
+		if (customRoundOff)
+			roundOff = decimal.Parse(roundOffTextBox.Value.ToString());
+		else
+			roundOff = Math.Round(afterTax - discountAmount) - (afterTax - discountAmount);
+
 		var total = Math.Round(afterTax - discountAmount + roundOff);
 
 		discountAmountTextBox.Text = discountAmount.FormatIndianCurrency();
@@ -587,14 +596,14 @@ public partial class SaleWindow : Window
 		subTotalTextBox.Text = subTotal.FormatIndianCurrency();
 		taxAmountTextBox.Text = totalTax.FormatIndianCurrency();
 		afterTaxTextBox.Text = afterTax.FormatIndianCurrency();
-		roundOffTextBox.Text = roundOff.FormatIndianCurrency();
+		roundOffTextBox.Value = double.Parse(roundOff.ToString());
 		totalTextBox.Text = total.FormatIndianCurrency();
 
 		_cart.OrderBy(p => p.ProductName).ToList();
 		cartDataGrid.Items.Refresh();
 	}
 
-	private async Task SaveSaleFile()
+	private async Task SaveSaleFile(bool customRoundOff = false)
 	{
 		if (_user is null || _isSaving)
 			return;
@@ -603,7 +612,7 @@ public partial class SaleWindow : Window
 
 		try
 		{
-			await UpdateFinancials();
+			await UpdateFinancials(customRoundOff);
 			await SaveCustomer();
 
 			await File.WriteAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName),
@@ -619,7 +628,7 @@ public partial class SaleWindow : Window
 					DiscPercent = decimal.Parse(discountPercentTextBox.PercentValue.Value.ToString()),
 					DiscReason = discountReasonTextBox.Text,
 					CustomerId = _customer.Id > 0 ? _customer.Id : null,
-					RoundOff = 0,
+					RoundOff = decimal.Parse(roundOffTextBox.Value.ToString()),
 					Cash = 0,
 					Card = 0,
 					UPI = 0,
@@ -649,7 +658,7 @@ public partial class SaleWindow : Window
 
 		try
 		{
-			await SaveSaleFile();
+			await SaveSaleFile(true);
 
 			_isSaving = true;
 
@@ -665,7 +674,7 @@ public partial class SaleWindow : Window
 				DiscPercent = decimal.Parse(discountPercentTextBox.PercentValue.Value.ToString()),
 				DiscReason = discountReasonTextBox.Text,
 				CustomerId = _customer.Id > 0 ? _customer.Id : null,
-				RoundOff = decimal.Parse(roundOffTextBox.Text.Replace("₹", "").Replace(",", "").Trim()),
+				RoundOff = decimal.Parse(roundOffTextBox.Value.ToString()),
 				Cash = 0,
 				Card = 0,
 				UPI = 0,
