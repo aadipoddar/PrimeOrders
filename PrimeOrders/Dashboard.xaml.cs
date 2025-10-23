@@ -4,6 +4,7 @@ using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 
+using PrimeOrders.Inventory;
 using PrimeOrders.Sale;
 
 namespace PrimeOrders;
@@ -48,6 +49,12 @@ public partial class Dashboard : Window
 	{
 		SaleWindow saleWindow = new(_user);
 		saleWindow.Show();
+	}
+
+	private void purchaseButton_Click(object sender, RoutedEventArgs e)
+	{
+		PurchaseWindow purchaseWindow = new(_user);
+		purchaseWindow.Show();
 	}
 
 	private void Window_Closed(object sender, EventArgs e) =>

@@ -615,6 +615,8 @@ public partial class SaleWindow : Window
 			await UpdateFinancials(customRoundOff);
 			await SaveCustomer();
 
+			var total = decimal.Parse(totalTextBox.Text.Replace(",", "").Replace("₹", "").Trim());
+
 			await File.WriteAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName),
 				System.Text.Json.JsonSerializer.Serialize(new SaleModel()
 				{
@@ -629,10 +631,10 @@ public partial class SaleWindow : Window
 					DiscReason = discountReasonTextBox.Text,
 					CustomerId = _customer.Id > 0 ? _customer.Id : null,
 					RoundOff = decimal.Parse(roundOffTextBox.Value.ToString()),
-					Cash = 0,
-					Card = 0,
-					UPI = 0,
-					Credit = 0,
+					Cash = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 1 ? total : 0,
+					Card = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 2 ? total : 0,
+					UPI = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 3 ? total : 0,
+					Credit = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 4 ? total : 0,
 					Remarks = remarksTextBox.Text,
 					CreatedAt = DateTime.Now,
 					Status = true,
@@ -660,7 +662,21 @@ public partial class SaleWindow : Window
 		{
 			await SaveSaleFile(true);
 
+			if (_cart.Count == 0)
+			{
+				MessageBox.Show("No products in the cart to save the sale.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return;
+			}
+
+			if (((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 4 && partyAutoCompleteTextBox.SelectedItem is null)
+			{
+				MessageBox.Show("Please select a Party for Credit sales.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return;
+			}
+
 			_isSaving = true;
+
+			var total = decimal.Parse(totalTextBox.Text.Replace(",", "").Replace("₹", "").Trim());
 
 			var saleModel = new SaleModel()
 			{
@@ -675,10 +691,10 @@ public partial class SaleWindow : Window
 				DiscReason = discountReasonTextBox.Text,
 				CustomerId = _customer.Id > 0 ? _customer.Id : null,
 				RoundOff = decimal.Parse(roundOffTextBox.Value.ToString()),
-				Cash = 0,
-				Card = 0,
-				UPI = 0,
-				Credit = 0,
+				Cash = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 1 ? total : 0,
+				Card = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 2 ? total : 0,
+				UPI = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 3 ? total : 0,
+				Credit = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 4 ? total : 0,
 				Remarks = remarksTextBox.Text,
 				CreatedAt = DateTime.Now,
 				Status = true,

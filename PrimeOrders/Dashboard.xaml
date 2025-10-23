@@ -18,12 +18,14 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto"/>
 			</Grid.RowDefinitions>
 
 			<TextBlock Grid.Row="0" Margin="10" Padding="5" Text="Welcome to Prime Bakes" TextAlignment="Center" FontSize="16" FontWeight="Bold" />
 			<TextBlock Grid.Row="1" Margin="10" Padding="5" Text="Hello User" TextAlignment="Center" FontSize="14" x:Name="userLabel" />
 
 			<Button x:Name="saleButton" Content="Sale" Grid.Row="2" Margin="10" Padding="5" HorizontalAlignment="Center" MinWidth="140" MinHeight="40" Click="saleButton_Click" />
+			<Button x:Name="purchaseButton" Content="Purchase" Grid.Row="3" Margin="10" Padding="5" HorizontalAlignment="Center" MinWidth="140" MinHeight="40" Click="purchaseButton_Click" />
 
 		</Grid>
 
