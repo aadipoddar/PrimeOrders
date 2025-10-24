@@ -88,7 +88,7 @@ public static class SaleReportPDFExport
 			["Total Sales: "] = saleOverview.Count(x => x.SaleId > 0).ToString(),
 			["Total Returns: "] = saleOverview.Count(x => x.SaleId < 0).ToString(),
 			[""] = "",
-			["Total Sale Amt: "] = saleOverview.Sum(x => x.SaleId > 0 ? x.Total : 0).FormatIndianCurrency(),
+			["Total Sale Amt: "] = saleOverview.Sum(x => x.SaleId > 0 ? x.AfterTax : 0).FormatIndianCurrency(),
 			["Total Sale Discount: "] = $"-{saleOverview.Where(x => x.SaleId > 0).Sum(x => x.BillDiscountAmount).FormatIndianCurrency()}",
 			["Total Return Amt: "] = saleOverview.Sum(x => x.SaleId < 0 ? x.Total : 0).FormatIndianCurrency()
 		};
