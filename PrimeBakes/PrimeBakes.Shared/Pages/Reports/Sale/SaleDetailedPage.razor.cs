@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
@@ -338,17 +339,24 @@ public partial class SaleDetailedPage
 		};
 	}
 
-	private void ViewSaleDetails(SaleOverviewModel sale)
+	private async Task ViewSaleDetails(SaleOverviewModel sale)
 	{
 		if (sale.SaleId < 0)
 		{
 			// Navigate to Sale Return details
-			NavigationManager.NavigateTo($"/Reports/SaleReturn/View/{-sale.SaleId}");
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", $"/Reports/SaleReturn/View/{-sale.SaleId}", "_blank");
+			else
+				NavigationManager.NavigateTo($"/Reports/SaleReturn/View/{-sale.SaleId}");
+
 			return;
 		}
 
 		// Navigate to Sale details
-		NavigationManager.NavigateTo($"/Reports/Sale/View/{sale.SaleId}");
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"/Reports/Sale/View/{sale.SaleId}", "_blank");
+		else
+			NavigationManager.NavigateTo($"/Reports/Sale/View/{sale.SaleId}");
 	}
 
 	// Chart data methods
