@@ -1,3 +1,5 @@
+using Microsoft.JSInterop;
+
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
@@ -117,9 +119,12 @@ public partial class FinancialAccountingReportPage
 		}
 	}
 
-	private void ViewAccountingDetails(AccountingOverviewModel accounting)
+	private async Task ViewAccountingDetails(AccountingOverviewModel accounting)
 	{
-		if (accounting?.AccountingId > 0)
+		// Navigate to Sale Return details
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"/Reports/Financial/Accounting/View/{accounting.AccountingId}", "_blank");
+		else
 			NavigationManager.NavigateTo($"/Reports/Financial/Accounting/View/{accounting.AccountingId}");
 	}
 	#endregion

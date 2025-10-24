@@ -50,8 +50,7 @@ public partial class KitchenIssueWindow : Window
 		kitchenIssueDateTimePicker.DateTime = DateTime.Now;
 
 		await LoadRawMaterial();
-		await LoadExistingKitchenIssue();
-		await SaveKitchenIssueFile();
+		await UpdateFinancials();
 
 		kitchenAutoCompleteTextBox.Focus();
 	}
@@ -95,70 +94,19 @@ public partial class KitchenIssueWindow : Window
 			Close();
 		}
 	}
-
-	private async Task LoadExistingKitchenIssue()
-	{
-		try
-		{
-			var kitchenIssueFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueDataFileName);
-			if (File.Exists(kitchenIssueFilePath))
-			{
-				var kitchenIssueData = System.Text.Json.JsonSerializer.Deserialize<KitchenIssueModel>(await File.ReadAllTextAsync(kitchenIssueFilePath));
-				if (kitchenIssueData is not null)
-				{
-					transactionNoTextBox.Text = kitchenIssueData.TransactionNo;
-					kitchenIssueDateTimePicker.DateTime = kitchenIssueData.IssueDate;
-					remarksTextBox.Text = kitchenIssueData.Remarks;
-
-					kitchenAutoCompleteTextBox.SelectedItem = kitchenAutoCompleteTextBox.AutoCompleteSource.Cast<KitchenModel>().FirstOrDefault(x => x.Id == kitchenIssueData.KitchenId);
-					await LoadRawMaterial();
-				}
-
-				await LoadExistingCart();
-			}
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show($"Error loading existing kitchen issue data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueDataFileName));
-		}
-	}
-
-	private async Task LoadExistingCart()
-	{
-		try
-		{
-			var kitchenIssueCartFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueCartDataFileName);
-			if (File.Exists(kitchenIssueCartFilePath))
-			{
-				var cartData = System.Text.Json.JsonSerializer.Deserialize<List<KitchenIssueRawMaterialCartModel>>(await File.ReadAllTextAsync(kitchenIssueCartFilePath));
-				if (cartData is not null)
-				{
-					_cart.Clear();
-					foreach (var item in cartData)
-						_cart.Add(item);
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show($"Error loading existing kitchen issue cart data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueCartDataFileName));
-		}
-	}
 	#endregion
 
 	#region Kitchen and Date
 	private async void kitchenAutoCompleteTextBox_SelectedItemChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 	{
 		await LoadRawMaterial();
-		await SaveKitchenIssueFile();
+		await UpdateFinancials();
 	}
 
 	private async void kitchenIssueDateTimePicker_DateTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 	{
 		await LoadRawMaterial();
-		await SaveKitchenIssueFile();
+		await UpdateFinancials();
 	}
 	#endregion
 
@@ -251,7 +199,7 @@ public partial class KitchenIssueWindow : Window
 
 		selectedRawMaterialAutoCompleteTextBox.Focus();
 
-		await SaveKitchenIssueFile();
+		await UpdateFinancials();
 	}
 
 	private async void cartDataGrid_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -266,63 +214,38 @@ public partial class KitchenIssueWindow : Window
 			selectedRawMaterialAutoCompleteTextBox.Focus();
 		}
 
-		await SaveKitchenIssueFile();
+		await UpdateFinancials();
 	}
 	#endregion
 
 	#region Saving
-	private async void roundOffTextBox_ValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-		await SaveKitchenIssueFile();
-
 	private async Task UpdateFinancials()
-	{
-		transactionNoTextBox.Text = await GenerateCodes.GenerateKitchenIssueTransactionNo(new()
-		{
-			Id = 0,
-			IssueDate = kitchenIssueDateTimePicker.DateTime.Value,
-			LocationId = _user.LocationId
-		});
-
-		foreach (var cart in _cart)
-			cart.Total = cart.Rate * cart.Quantity;
-
-		var total = _cart.Sum(p => p.Total);
-
-		totalItemsTextBox.Text = _cart.Count.ToString();
-		totalQuantityTextBox.Text = _cart.Sum(p => p.Quantity).ToString();
-		totalTextBox.Text = total.FormatIndianCurrency();
-
-		_cart.OrderBy(p => p.RawMaterialName).ToList();
-		cartDataGrid.Items.Refresh();
-	}
-
-	private async Task SaveKitchenIssueFile()
 	{
 		if (_user is null || _isSaving)
 			return;
 
-		_isSaving = true;
-
 		try
 		{
-			await UpdateFinancials();
+			_isSaving = true;
 
-			await File.WriteAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueDataFileName),
-				System.Text.Json.JsonSerializer.Serialize(new KitchenIssueModel()
-				{
-					Id = 0,
-					UserId = _user.Id,
-					IssueDate = kitchenIssueDateTimePicker.DateTime.Value,
-					KitchenId = kitchenAutoCompleteTextBox.SelectedItem is not null ? ((KitchenModel)kitchenAutoCompleteTextBox.SelectedItem).Id : 0,
-					TransactionNo = transactionNoTextBox.Text,
-					LocationId = 1,
-					Remarks = remarksTextBox.Text,
-					CreatedAt = DateTime.Now,
-					Status = true,
-				}));
+			transactionNoTextBox.Text = await GenerateCodes.GenerateKitchenIssueTransactionNo(new()
+			{
+				Id = 0,
+				IssueDate = kitchenIssueDateTimePicker.DateTime.Value,
+				LocationId = _user.LocationId
+			});
 
-			await File.WriteAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueCartDataFileName),
-				System.Text.Json.JsonSerializer.Serialize(_cart.ToList()));
+			foreach (var cart in _cart)
+				cart.Total = cart.Rate * cart.Quantity;
+
+			var total = _cart.Sum(p => p.Total);
+
+			totalItemsTextBox.Text = _cart.Count.ToString();
+			totalQuantityTextBox.Text = _cart.Sum(p => p.Quantity).ToString();
+			totalTextBox.Text = total.FormatIndianCurrency();
+
+			_cart.OrderBy(p => p.RawMaterialName).ToList();
+			cartDataGrid.Items.Refresh();
 		}
 		catch (Exception ex)
 		{
@@ -341,7 +264,7 @@ public partial class KitchenIssueWindow : Window
 
 		try
 		{
-			await SaveKitchenIssueFile();
+			await UpdateFinancials();
 
 			if (_cart.Count == 0)
 			{
@@ -378,7 +301,6 @@ public partial class KitchenIssueWindow : Window
 			}
 
 			await PrintInvoice(kitchenIssueId);
-			DeleteCart();
 
 			MessageBox.Show("Kitchen Issue saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 			Close();
@@ -402,12 +324,6 @@ public partial class KitchenIssueWindow : Window
 		ms.Position = 0;
 		await ms.CopyToAsync(stream);
 		Process.Start(new ProcessStartInfo($"{Path.GetTempPath()}\\{fileName}") { UseShellExecute = true });
-	}
-
-	private static void DeleteCart()
-	{
-		File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueDataFileName));
-		File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.KitchenIssueCartDataFileName));
 	}
 	#endregion
 }

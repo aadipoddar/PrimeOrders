@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
@@ -94,8 +95,13 @@ public partial class OrderHistoryPage
 		await LoadOrderHistory();
 	}
 
-	private void ViewOrderDetails(OrderOverviewModel order) =>
-		NavigationManager.NavigateTo($"/Reports/Order/View/{order.OrderId}");
+	private async Task ViewOrderDetails(OrderOverviewModel order)
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"/Reports/Order/View/{order.OrderId}", "_blank");
+		else
+			NavigationManager.NavigateTo($"/Reports/Order/View/{order.OrderId}");
+	}
 	#endregion
 
 	#region Excel

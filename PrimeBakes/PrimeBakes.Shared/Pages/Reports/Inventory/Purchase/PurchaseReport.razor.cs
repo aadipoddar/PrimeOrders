@@ -1,3 +1,5 @@
+using Microsoft.JSInterop;
+
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Inventory;
@@ -324,10 +326,14 @@ public partial class PurchaseReport
 	#endregion
 
 	#region Grid Actions
-	private void ViewPurchaseDetails(int purchaseId)
+	private async Task ViewPurchaseDetails(int purchaseId)
 	{
 		// Navigate to purchase view page
-		NavigationManager.NavigateTo($"/Inventory/Purchase/View/{purchaseId}");
+
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"/Inventory/Purchase/View/{purchaseId}", "_blank");
+		else
+			NavigationManager.NavigateTo($"/Inventory/Purchase/View/{purchaseId}");
 	}
 	#endregion
 }

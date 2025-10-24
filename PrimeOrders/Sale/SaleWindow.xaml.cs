@@ -59,8 +59,7 @@ public partial class SaleWindow : Window
 		paymentModeComboBox.SelectedIndex = 0;
 
 		await LoadProducts();
-		await LoadExistingSale();
-		await SaveSaleFile();
+		//await UpdateFinancials();
 
 		partyAutoCompleteTextBox.Focus();
 	}
@@ -113,86 +112,6 @@ public partial class SaleWindow : Window
 			Close();
 		}
 	}
-
-	private async Task LoadExistingSale()
-	{
-		try
-		{
-			var saleFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName);
-			if (File.Exists(saleFilePath))
-			{
-				var saleData = System.Text.Json.JsonSerializer.Deserialize<SaleModel>(await File.ReadAllTextAsync(saleFilePath));
-				if (saleData is not null)
-				{
-					billNoTextBox.Text = saleData.BillNo;
-					saleDateTimePicker.DateTime = saleData.SaleDateTime;
-
-					remarksTextBox.Text = saleData.Remarks;
-					discountReasonTextBox.Text = saleData.DiscReason;
-
-					_customer = new CustomerModel();
-					if (saleData.CustomerId is not null && saleData.CustomerId > 0)
-					{
-						var customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, saleData.CustomerId.Value);
-						if (customer is not null)
-						{
-							_customer = customer;
-							customerNumberTextBox.Text = _customer.Number;
-							customerNameTextBox.Text = _customer.Name;
-						}
-					}
-
-					if (saleData.PartyId is not null)
-					{
-						partyAutoCompleteTextBox.SelectedItem = partyAutoCompleteTextBox.AutoCompleteSource.Cast<LedgerModel>().FirstOrDefault(x => x.Id == saleData.PartyId.Value);
-
-						if (saleData.OrderId is not null)
-						{
-							await LoadProducts();
-							orderPanel.Visibility = Visibility.Visible;
-							var orders = await OrderData.LoadOrderByLocation(((LedgerModel)partyAutoCompleteTextBox.SelectedItem).LocationId.Value);
-							orderAutoCompleteTextBox.AutoCompleteSource = orders;
-							orderAutoCompleteTextBox.ValueMemberPath = nameof(OrderModel.Id);
-							orderAutoCompleteTextBox.SearchItemPath = nameof(OrderModel.OrderNo);
-							orderAutoCompleteTextBox.SelectedItem = orderAutoCompleteTextBox.AutoCompleteSource.Cast<OrderModel>().FirstOrDefault(x => x.Id == saleData.OrderId.Value);
-						}
-					}
-
-					discountPercentTextBox.PercentValue = double.Parse(saleData.DiscPercent.ToString());
-				}
-
-				await LoadExistingCart();
-			}
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show($"Error loading existing sale data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName));
-		}
-	}
-
-	private async Task LoadExistingCart()
-	{
-		try
-		{
-			var saleCartFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleCartDataFileName);
-			if (File.Exists(saleCartFilePath))
-			{
-				var cartData = System.Text.Json.JsonSerializer.Deserialize<List<SaleProductCartModel>>(await File.ReadAllTextAsync(saleCartFilePath));
-				if (cartData is not null)
-				{
-					_cart.Clear();
-					foreach (var item in cartData)
-						_cart.Add(item);
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			MessageBox.Show($"Error loading existing sale cart data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-			File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleCartDataFileName));
-		}
-	}
 	#endregion
 
 	#region Party and Order
@@ -228,7 +147,7 @@ public partial class SaleWindow : Window
 			{
 			}
 
-			await SaveSaleFile();
+			await UpdateFinancials();
 		}
 		catch (Exception ex)
 		{
@@ -245,7 +164,7 @@ public partial class SaleWindow : Window
 
 			if (orderAutoCompleteTextBox.SelectedItem is null || partyAutoCompleteTextBox.SelectedItem is null)
 			{
-				await SaveSaleFile();
+				await UpdateFinancials();
 				return;
 			}
 
@@ -297,17 +216,17 @@ public partial class SaleWindow : Window
 		}
 		finally
 		{
-			await SaveSaleFile();
+			await UpdateFinancials();
 		}
 	}
 
 	private async void saleDateTimePicker_DateTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-		await SaveSaleFile();
+		await UpdateFinancials();
 
 	private async void discountPercentTextBox_PercentValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 	{
 		discountPercentTextBox.Text = Math.Clamp(discountPercentTextBox.PercentValue.Value, 0, 100).ToString();
-		await SaveSaleFile();
+		await UpdateFinancials();
 	}
 	#endregion
 
@@ -355,7 +274,7 @@ public partial class SaleWindow : Window
 		}
 		finally
 		{
-			await SaveSaleFile();
+			await UpdateFinancials();
 		}
 	}
 
@@ -394,7 +313,7 @@ public partial class SaleWindow : Window
 		}
 		finally
 		{
-			await SaveSaleFile();
+			await UpdateFinancials();
 		}
 	}
 	#endregion
@@ -522,7 +441,7 @@ public partial class SaleWindow : Window
 
 		selectedProductAutoCompleteTextBox.Focus();
 
-		await SaveSaleFile();
+		await UpdateFinancials();
 	}
 
 	private async void cartDataGrid_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -538,114 +457,82 @@ public partial class SaleWindow : Window
 			selectedProductAutoCompleteTextBox.Focus();
 		}
 
-		await SaveSaleFile();
+		await UpdateFinancials();
 	}
 	#endregion
 
 	#region Saving
 	private async void roundOffTextBox_ValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
-		await SaveSaleFile(true);
+		await UpdateFinancials(true);
 
 	private async Task UpdateFinancials(bool customRoundOff = false)
-	{
-		billNoTextBox.Text = await GenerateCodes.GenerateSaleBillNo(new()
-		{
-			Id = 0,
-			SaleDateTime = saleDateTimePicker.DateTime.Value,
-			LocationId = _user.LocationId
-		});
-
-		var discountPercent = decimal.Parse(discountPercentTextBox.PercentValue.Value.ToString());
-
-		foreach (var cart in _cart)
-		{
-			var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, cart.ProductId);
-			var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
-
-			cart.BaseTotal = cart.Rate * cart.Quantity;
-			cart.DiscAmount = cart.BaseTotal * cart.DiscPercent / 100;
-			cart.AfterDiscount = cart.BaseTotal - cart.DiscAmount;
-			cart.CGSTPercent = productTax.Extra ? productTax.CGST : 0;
-			cart.CGSTAmount = cart.AfterDiscount * cart.CGSTPercent / 100;
-			cart.SGSTPercent = productTax.Extra ? productTax.SGST : 0;
-			cart.SGSTAmount = cart.AfterDiscount * cart.SGSTPercent / 100;
-			cart.IGSTPercent = productTax.Extra ? productTax.IGST : 0;
-			cart.IGSTAmount = cart.AfterDiscount * cart.IGSTPercent / 100;
-			cart.Total = cart.AfterDiscount + cart.CGSTAmount + cart.SGSTAmount + cart.IGSTAmount;
-			cart.NetRate = cart.Total / cart.Quantity * (1 - discountPercent / 100);
-		}
-
-		var baseTotal = _cart.Sum(x => x.BaseTotal);
-		var subTotal = _cart.Sum(x => x.AfterDiscount);
-		var productDiscount = baseTotal - subTotal;
-		var afterTax = _cart.Sum(x => x.Total);
-		var totalTax = afterTax - subTotal;
-		var discountAmount = afterTax * discountPercent / 100;
-
-		decimal roundOff = 0;
-		if (customRoundOff)
-			roundOff = decimal.Parse(roundOffTextBox.Value.ToString());
-		else
-			roundOff = Math.Round(afterTax - discountAmount) - (afterTax - discountAmount);
-
-		var total = Math.Round(afterTax - discountAmount + roundOff);
-
-		discountAmountTextBox.Text = discountAmount.FormatIndianCurrency();
-		baseTotalTextBox.Text = baseTotal.FormatIndianCurrency();
-		productDiscountTextBox.Text = productDiscount.FormatIndianCurrency();
-		subTotalTextBox.Text = subTotal.FormatIndianCurrency();
-		taxAmountTextBox.Text = totalTax.FormatIndianCurrency();
-		afterTaxTextBox.Text = afterTax.FormatIndianCurrency();
-		roundOffTextBox.Value = double.Parse(roundOff.ToString());
-		totalTextBox.Text = total.FormatIndianCurrency();
-
-		_cart.OrderBy(p => p.ProductName).ToList();
-		cartDataGrid.Items.Refresh();
-	}
-
-	private async Task SaveSaleFile(bool customRoundOff = false)
 	{
 		if (_user is null || _isSaving)
 			return;
 
-		_isSaving = true;
-
 		try
 		{
-			await UpdateFinancials(customRoundOff);
+			_isSaving = true;
+
 			await SaveCustomer();
 
-			var total = decimal.Parse(totalTextBox.Text.Replace(",", "").Replace("₹", "").Trim());
+			billNoTextBox.Text = await GenerateCodes.GenerateSaleBillNo(new()
+			{
+				Id = 0,
+				SaleDateTime = saleDateTimePicker.DateTime.Value,
+				LocationId = _user.LocationId
+			});
 
-			await File.WriteAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName),
-				System.Text.Json.JsonSerializer.Serialize(new SaleModel()
-				{
-					Id = 0,
-					UserId = _user.Id,
-					LocationId = _user.LocationId,
-					BillNo = billNoTextBox.Text,
-					SaleDateTime = saleDateTimePicker.DateTime.Value,
-					PartyId = partyAutoCompleteTextBox.SelectedItem is not null ? ((LedgerModel)partyAutoCompleteTextBox.SelectedItem).Id : null,
-					OrderId = orderAutoCompleteTextBox.SelectedItem is not null ? ((OrderModel)orderAutoCompleteTextBox.SelectedItem).Id : null,
-					DiscPercent = decimal.Parse(discountPercentTextBox.PercentValue.Value.ToString()),
-					DiscReason = discountReasonTextBox.Text,
-					CustomerId = _customer.Id > 0 ? _customer.Id : null,
-					RoundOff = decimal.Parse(roundOffTextBox.Value.ToString()),
-					Cash = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 1 ? total : 0,
-					Card = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 2 ? total : 0,
-					UPI = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 3 ? total : 0,
-					Credit = paymentModeComboBox.SelectedItem is not null && ((PaymentModeModel)paymentModeComboBox.SelectedItem).Id == 4 ? total : 0,
-					Remarks = remarksTextBox.Text,
-					CreatedAt = DateTime.Now,
-					Status = true,
-				}));
+			var discountPercent = decimal.Parse(discountPercentTextBox.PercentValue.Value.ToString());
 
-			await File.WriteAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleCartDataFileName),
-				System.Text.Json.JsonSerializer.Serialize(_cart.ToList()));
+			foreach (var cart in _cart)
+			{
+				var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, cart.ProductId);
+				var productTax = await CommonData.LoadTableDataById<TaxModel>(TableNames.Tax, product.TaxId);
+
+				cart.BaseTotal = cart.Rate * cart.Quantity;
+				cart.DiscAmount = cart.BaseTotal * cart.DiscPercent / 100;
+				cart.AfterDiscount = cart.BaseTotal - cart.DiscAmount;
+				cart.CGSTPercent = productTax.Extra ? productTax.CGST : 0;
+				cart.CGSTAmount = cart.AfterDiscount * cart.CGSTPercent / 100;
+				cart.SGSTPercent = productTax.Extra ? productTax.SGST : 0;
+				cart.SGSTAmount = cart.AfterDiscount * cart.SGSTPercent / 100;
+				cart.IGSTPercent = productTax.Extra ? productTax.IGST : 0;
+				cart.IGSTAmount = cart.AfterDiscount * cart.IGSTPercent / 100;
+				cart.Total = cart.AfterDiscount + cart.CGSTAmount + cart.SGSTAmount + cart.IGSTAmount;
+				cart.NetRate = cart.Total / cart.Quantity * (1 - discountPercent / 100);
+			}
+
+			var baseTotal = _cart.Sum(x => x.BaseTotal);
+			var subTotal = _cart.Sum(x => x.AfterDiscount);
+			var productDiscount = baseTotal - subTotal;
+			var afterTax = _cart.Sum(x => x.Total);
+			var totalTax = afterTax - subTotal;
+			var discountAmount = afterTax * discountPercent / 100;
+
+			decimal roundOff = 0;
+			if (customRoundOff)
+				roundOff = decimal.Parse(roundOffTextBox.Value.ToString());
+			else
+				roundOff = Math.Round(afterTax - discountAmount) - (afterTax - discountAmount);
+
+			var total = Math.Round(afterTax - discountAmount + roundOff);
+
+			discountAmountTextBox.Text = discountAmount.FormatIndianCurrency();
+			baseTotalTextBox.Text = baseTotal.FormatIndianCurrency();
+			productDiscountTextBox.Text = productDiscount.FormatIndianCurrency();
+			subTotalTextBox.Text = subTotal.FormatIndianCurrency();
+			taxAmountTextBox.Text = totalTax.FormatIndianCurrency();
+			afterTaxTextBox.Text = afterTax.FormatIndianCurrency();
+			roundOffTextBox.Value = double.Parse(roundOff.ToString());
+			totalTextBox.Text = total.FormatIndianCurrency();
+
+			_cart.OrderBy(p => p.ProductName).ToList();
+			cartDataGrid.Items.Refresh();
 		}
 		catch (Exception ex)
 		{
-			MessageBox.Show($"Error saving sale data to File: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			MessageBox.Show($"Error in Updating the Financial Details: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 		}
 		finally
 		{
@@ -660,7 +547,7 @@ public partial class SaleWindow : Window
 
 		try
 		{
-			await SaveSaleFile(true);
+			await UpdateFinancials(true);
 
 			if (_cart.Count == 0)
 			{
@@ -708,7 +595,6 @@ public partial class SaleWindow : Window
 			}
 
 			await PrintInvoice(saleId);
-			DeleteCart();
 
 			MessageBox.Show("Sale saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 			Close();
@@ -732,12 +618,6 @@ public partial class SaleWindow : Window
 		ms.Position = 0;
 		await ms.CopyToAsync(stream);
 		Process.Start(new ProcessStartInfo($"{Path.GetTempPath()}\\{fileName}") { UseShellExecute = true });
-	}
-
-	private static void DeleteCart()
-	{
-		File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleDataFileName));
-		File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), StorageFileNames.SaleCartDataFileName));
 	}
 	#endregion
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
@@ -92,11 +93,13 @@ public partial class KitchenIssueReportPage
 		StateHasChanged();
 	}
 
-	private void ViewIssueDetails(KitchenIssueOverviewModel issue) =>
-		NavigationManager.NavigateTo($"/Reports/Kitchen-Issue/View/{issue.KitchenIssueId}");
-
-	private void ViewIssueDetails(RowSelectEventArgs<KitchenIssueOverviewModel> args) =>
-		ViewIssueDetails(args.Data);
+	private async Task ViewIssueDetails(KitchenIssueOverviewModel issue)
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"/Reports/Kitchen-Issue/View/{issue.KitchenIssueId}", "_blank");
+		else
+			NavigationManager.NavigateTo($"/Reports/Kitchen-Issue/View/{issue.KitchenIssueId}");
+	}
 	#endregion
 
 	#region Excel Export

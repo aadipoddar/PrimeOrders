@@ -242,7 +242,7 @@ public partial class SaleDetailedPage
 	}
 	#endregion
 
-	#region Export
+	#region Exporting
 	private async Task ExportToExcel()
 	{
 		var locationName = _selectedLocation?.Name ?? "All Locations";

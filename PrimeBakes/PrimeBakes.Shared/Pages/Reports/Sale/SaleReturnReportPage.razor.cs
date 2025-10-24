@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
@@ -132,8 +133,13 @@ public partial class SaleReturnReportPage
 		};
 	}
 
-	private void ViewSaleReturnDetails(SaleReturnOverviewModel sale) =>
-		NavigationManager.NavigateTo($"/Reports/SaleReturn/View/{sale.SaleReturnId}");
+	private async Task ViewSaleReturnDetails(SaleReturnOverviewModel sale)
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"/Reports/SaleReturn/View/{sale.SaleReturnId}", "_blank");
+		else
+			NavigationManager.NavigateTo($"/Reports/SaleReturn/View/{sale.SaleReturnId}");
+	}
 
 	// Chart data methods
 	private List<DailySalesChartData> GetSalesTrendsData()
