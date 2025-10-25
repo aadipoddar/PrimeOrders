@@ -3,9 +3,7 @@ using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
@@ -238,17 +236,7 @@ public partial class SaleViewPage
 		if (sale is null)
 			return;
 
-		sale.Status = false;
-		await SaleData.InsertSale(sale);
-		await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
-		if (sale.LocationId == 1)
-		{
-			var accounting = await AccountingData.LoadAccountingByTransactionNo(sale.BillNo);
-			if (accounting is null)
-				return;
-			accounting.Status = false;
-			await AccountingData.InsertAccounting(accounting);
-		}
+		await SaleData.DeleteSale(sale);
 
 		VibrationService.VibrateWithTime(200);
 		NavigationManager.NavigateTo("/Reports/Sale/Detailed");

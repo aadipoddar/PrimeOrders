@@ -19,7 +19,6 @@ public class RecipeDetailModel
 public class ItemRecipeModel
 {
 	public int ItemId { get; set; }
-	public int ItemCategoryId { get; set; }
 	public string ItemName { get; set; }
 	public decimal Quantity { get; set; }
 }

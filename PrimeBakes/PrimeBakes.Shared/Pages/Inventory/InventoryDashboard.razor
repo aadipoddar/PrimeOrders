@@ -60,6 +60,12 @@ else
 					<h3>Kitchen Production</h3>
 					<p>Manage kitchen production and baking activities</p>
 				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Recipe")'>
+					<div class="card-icon production-icon">🧾</div>
+					<h3>Recipes</h3>
+					<p>Manage and view recipes</p>
+				</div>
 			}
 
 			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/ProductStockAdjustment")'>

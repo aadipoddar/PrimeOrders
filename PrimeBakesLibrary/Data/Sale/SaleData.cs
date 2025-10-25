@@ -1,6 +1,7 @@
 ﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Notification;
 using PrimeBakesLibrary.Data.Order;
@@ -62,9 +63,10 @@ public static class SaleData
 
 		sale.Id = await InsertSale(sale);
 		await SaveSaleDetail(sale, cart, update);
-		await SaveProductStock(sale, cart, update);
+		await SaveStock(sale, cart, update);
+		await SaveRawMaterialStockByRecipe(sale, cart);
 		await UpdateOrder(sale, update);
-		await InsertAccounting(sale, update);
+		await SaveAccounting(sale, update);
 		await SendNotification.SendSaleNotificationPartyAdmin(sale.Id);
 
 		return sale.Id;
@@ -106,10 +108,13 @@ public static class SaleData
 			});
 	}
 
-	private static async Task SaveProductStock(SaleModel sale, List<SaleProductCartModel> cart, bool update)
+	private static async Task SaveStock(SaleModel sale, List<SaleProductCartModel> cart, bool update)
 	{
 		if (update)
+		{
 			await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(sale.BillNo);
+		}
 
 		foreach (var product in cart)
 			await ProductStockData.InsertProductStock(new()
@@ -143,6 +148,31 @@ public static class SaleData
 				});
 	}
 
+	private static async Task SaveRawMaterialStockByRecipe(SaleModel sale, List<SaleProductCartModel> cart)
+	{
+		if (sale.LocationId != 1)
+			return;
+
+		foreach (var product in cart)
+		{
+			var recipe = await RecipeData.LoadRecipeByProduct(product.ProductId);
+			var recipeItems = recipe is null ? [] : await RecipeData.LoadRecipeDetailByRecipe(recipe.Id);
+
+			foreach (var recipeItem in recipeItems)
+				await RawMaterialStockData.InsertRawMaterialStock(new()
+				{
+					Id = 0,
+					RawMaterialId = recipeItem.RawMaterialId,
+					Quantity = -recipeItem.Quantity * product.Quantity,
+					NetRate = product.NetRate / recipeItem.Quantity,
+					TransactionNo = sale.BillNo,
+					Type = StockType.Sale.ToString(),
+					TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
+					LocationId = 1
+				});
+		}
+	}
+
 	private static async Task UpdateOrder(SaleModel sale, bool update)
 	{
 		if (update)
@@ -166,7 +196,7 @@ public static class SaleData
 		}
 	}
 
-	private static async Task InsertAccounting(SaleModel sale, bool update)
+	private static async Task SaveAccounting(SaleModel sale, bool update)
 	{
 		if (sale.LocationId != 1)
 			return;
@@ -200,10 +230,10 @@ public static class SaleData
 			Status = true
 		});
 
-		await InsertAccountingDetails(saleOverview, accountingId);
+		await SaveAccountingDetails(saleOverview, accountingId);
 	}
 
-	private static async Task InsertAccountingDetails(SaleOverviewModel saleOverview, int accountingId)
+	private static async Task SaveAccountingDetails(SaleOverviewModel saleOverview, int accountingId)
 	{
 		if (saleOverview.Cash + saleOverview.Card + saleOverview.UPI + saleOverview.Credit > 0)
 			await AccountingData.InsertAccountingDetails(new()
@@ -246,5 +276,23 @@ public static class SaleData
 				Remarks = $"GST Account Posting For Sale Bill {saleOverview.BillNo}",
 				Status = true
 			});
+	}
+
+	public static async Task DeleteSale(SaleModel sale)
+	{
+		sale.Status = false;
+		await InsertSale(sale);
+		await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(sale.BillNo);
+
+		if (sale.LocationId != 1)
+			return;
+
+		var accounting = await AccountingData.LoadAccountingByTransactionNo(sale.BillNo);
+		if (accounting is null)
+			return;
+
+		accounting.Status = false;
+		await AccountingData.InsertAccounting(accounting);
 	}
 }

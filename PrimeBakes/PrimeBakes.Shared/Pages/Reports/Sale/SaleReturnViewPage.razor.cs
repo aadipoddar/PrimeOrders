@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Sale;
@@ -203,14 +201,7 @@ public partial class SaleReturnViewPage
 		if (saleReturn is null)
 			return;
 
-		saleReturn.Status = false;
-		await SaleReturnData.InsertSaleReturn(saleReturn);
-		await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
-		var accounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.BillNo);
-		if (accounting is null)
-			return;
-		accounting.Status = false;
-		await AccountingData.InsertAccounting(accounting);
+		await SaleReturnData.DeleteSaleReturn(saleReturn);
 
 		VibrationService.VibrateWithTime(200);
 		NavigationManager.NavigateTo("/Reports/SaleReturn");

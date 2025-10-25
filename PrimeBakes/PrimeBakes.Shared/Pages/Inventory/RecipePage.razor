@@ -1,0 +1,810 @@
+﻿@page "/Inventory/Recipe"
+
+@using PrimeBakesLibrary.Models.Common;
+@using PrimeBakesLibrary.Models.Inventory;
+@using PrimeBakesLibrary.Models.Product;
+
+<PageTitle>Recipe Management - Prime Bakes</PageTitle>
+
+<!-- Success Toast -->
+<SfToast @ref="_sfToast"
+		 ID="toast_success"
+		 Title="Success"
+		 Content="@_successMessage"
+		 Timeout="3000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-success">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<!-- Error Toast -->
+<SfToast @ref="_sfErrorToast"
+		 ID="toast_error"
+		 Title="Error"
+		 Content="@_errorMessage"
+		 Timeout="5000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-danger">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+<!-- Info Toast -->
+<SfToast @ref="_sfUpdateToast"
+		 ID="toast_info"
+		 Title="Recipe Loaded"
+		 Content="@_infoMessage"
+		 Timeout="2000"
+		 ShowCloseButton="true"
+		 CssClass="e-toast-info">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastAnimationSettings>
+		<ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" Easing="ToastEasing.Linear" />
+		<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" Easing="ToastEasing.Linear" />
+	</ToastAnimationSettings>
+</SfToast>
+
+@if (_isLoading)
+{
+	<div class="loader-container">
+		<div class="circular-dots-loader">
+			<span class="dot dot-1"></span>
+			<span class="dot dot-2"></span>
+			<span class="dot dot-3"></span>
+		</div>
+		<p class="loading-text">Loading recipes...</p>
+	</div>
+}
+else
+{
+	<div class="recipe-container">
+		<!-- Header -->
+		<div class="page-header">
+			<button @onclick='() => NavigationManager.NavigateTo("/")' class="back-button">
+				🏠
+			</button>
+			<h1 class="page-title">🧾 Recipe Management</h1>
+			<div class="header-spacer"></div>
+		</div>
+
+		<div class="content-layout">
+			<!-- Product Selection Card -->
+			<div class="selection-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						<span class="card-icon">📦</span>
+						Select Product
+					</h2>
+					<p class="card-subtitle">Choose a product to manage its recipe</p>
+				</div>
+				<div class="card-body">
+					<div class="form-group">
+						<label class="form-label">Product *</label>
+						<SfAutoComplete TValue="ProductLocationOverviewModel"
+										TItem="ProductLocationOverviewModel"
+										Value="@_selectedProduct"
+										Placeholder="Search for a product..."
+										FloatLabelType='@FloatLabelType.Auto'
+										DataSource="@_products"
+										CssClass="custom-autocomplete"
+										AllowFiltering="true"
+										FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+							<AutoCompleteEvents TItem="ProductLocationOverviewModel" TValue="ProductLocationOverviewModel" ValueChange="OnProductChanged" />
+							<AutoCompleteFieldSettings Value="Name" />
+						</SfAutoComplete>
+						@if (_selectedProduct != null && _selectedProduct.Id > 0)
+						{
+							<div class="selected-product-info">
+								<span class="info-icon">✓</span>
+								<span class="info-text">Selected: <strong>@_selectedProduct.Name</strong></span>
+								@if (_recipe != null)
+								{
+									<span class="recipe-badge">Recipe exists</span>
+								}
+								else
+								{
+									<span class="recipe-badge new-recipe">New recipe</span>
+								}
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+
+			<!-- Add Raw Material Card -->
+			<div class="add-material-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						<span class="card-icon">➕</span>
+						Add Raw Material
+					</h2>
+					<p class="card-subtitle">Select raw materials and specify quantities</p>
+				</div>
+				<div class="card-body">
+					<div class="form-row">
+						<div class="form-group flex-2">
+							<label class="form-label">Raw Material *</label>
+							<SfAutoComplete TValue="RawMaterialModel"
+											TItem="RawMaterialModel"
+											@bind-Value="@_selectedRawMaterial"
+											Placeholder="Search for a raw material..."
+											FloatLabelType='@FloatLabelType.Auto'
+											DataSource="@_rawMaterials"
+											CssClass="custom-autocomplete"
+											AllowFiltering="true"
+											FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+								<AutoCompleteFieldSettings Value="Name" />
+							</SfAutoComplete>
+						</div>
+
+						<div class="form-group flex-1">
+							<label class="form-label">Quantity *</label>
+							<SfNumericTextBox TValue="decimal"
+											  Decimals="3"
+											  Min="0"
+											  Placeholder="Enter quantity"
+											  @bind-Value="@_selectedRawMaterialQuantity"
+											  FloatLabelType="FloatLabelType.Auto"
+											  CssClass="custom-numeric" />
+						</div>
+					</div>
+
+					<div class="button-group">
+						<button @onclick="AddRawMaterialToRecipe" class="add-material-button" disabled="@(_selectedRawMaterial == null || _selectedRawMaterial.Id == 0 || _selectedRawMaterialQuantity <= 0)">
+							<span class="button-icon">➕</span>
+							<span class="button-text">Add to Recipe</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Recipe Items Grid Card -->
+			<div class="recipe-grid-card">
+				<div class="card-header">
+					<h2 class="card-title">
+						<span class="card-icon">📋</span>
+						Recipe Items (@_recipeItems.Count)
+					</h2>
+					<p class="card-subtitle">Click on any row to remove it from the recipe</p>
+				</div>
+				<div class="card-body">
+					@if (_recipeItems.Count == 0)
+					{
+						<div class="empty-state">
+							<div class="empty-icon">📭</div>
+							<h3 class="empty-title">No items in recipe</h3>
+							<p class="empty-text">Add raw materials to create or update the recipe for @(_selectedProduct?.Name ?? "the selected product")</p>
+						</div>
+					}
+					else
+					{
+						<SfGrid DataSource="@_recipeItems"
+								ID="_sfGrid"
+								@ref="_sfGrid"
+								AllowPaging="true"
+								AllowSorting="true"
+								AllowTextWrap="true">
+							<GridEvents RowSelected="RowSelectHandler" TValue="ItemRecipeModel" />
+							<GridPageSettings PageSize="10" />
+							<GridColumns>
+								<GridColumn Field="@nameof(ItemRecipeModel.ItemId)" Visible="false" />
+								<GridColumn Field="@nameof(ItemRecipeModel.ItemName)" HeaderText="Raw Material" Width="60%" />
+								<GridColumn Field="@nameof(ItemRecipeModel.Quantity)" HeaderText="Quantity" Width="30%" Format="N3" TextAlign="TextAlign.Right" />
+								<GridColumn HeaderText="Action" Width="10%" TextAlign="TextAlign.Center">
+									<Template>
+										<button class="remove-button" @onclick="() => RemoveItem((ItemRecipeModel)context)" @onclick:stopPropagation="true" title="Remove item">
+											<span class="remove-icon">🗑️</span>
+										</button>
+									</Template>
+								</GridColumn>
+							</GridColumns>
+						</SfGrid>
+					}
+				</div>
+			</div>
+
+			<!-- Save Button Card -->
+			@if (_recipeItems.Count > 0 && _selectedProduct != null && _selectedProduct.Id > 0)
+			{
+				<div class="save-card">
+					<button @onclick="OnSaveButtonClick" class="save-button">
+						<span class="button-icon">💾</span>
+						<span class="button-text">Save Recipe</span>
+					</button>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+<style>
+	:root {
+		--primary-color: #e2137b;
+		--primary-dark: #c71068;
+		--primary-light: #f5c2d3;
+		--text-dark: #2c3e50;
+		--text-light: #7f8c8d;
+		--bg-light: #f8f9fa;
+		--border-color: #e9ecef;
+		--shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+		--shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+		--success-color: #28a745;
+		--danger-color: #dc3545;
+		--info-color: #17a2b8;
+		--warning-color: #ffc107;
+	}
+
+	/* Loading Animation */
+	.loader-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+	}
+
+	.circular-dots-loader {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		margin-bottom: 15px;
+	}
+
+		.circular-dots-loader .dot {
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			animation: rotate 1.5s infinite linear;
+		}
+
+		.circular-dots-loader .dot-1 {
+			background-color: var(--primary-color);
+			animation-delay: 0s;
+		}
+
+		.circular-dots-loader .dot-2 {
+			background-color: var(--info-color);
+			animation-delay: -0.5s;
+		}
+
+		.circular-dots-loader .dot-3 {
+			background-color: var(--primary-dark);
+			animation-delay: -1s;
+		}
+
+	.loading-text {
+		color: var(--text-dark);
+		font-size: 16px;
+		margin-top: 10px;
+		font-weight: 500;
+	}
+
+	@@keyframes rotate {
+		0% {
+			transform: rotate(0deg) translate(-24px) rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg) translate(-24px) rotate(-360deg);
+		}
+	}
+
+	/* Main Container */
+	.recipe-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Page Header */
+	.page-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 15px 20px;
+		background: white;
+		box-shadow: var(--shadow-light);
+		position: sticky;
+		top: 0;
+		z-index: 100;
+	}
+
+	.back-button {
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: 8px;
+		padding: 10px 15px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-light);
+		font-size: 18px;
+		font-weight: bold;
+		min-width: 44px;
+		min-height: 44px;
+	}
+
+		.back-button:hover {
+			background: var(--primary-dark);
+			transform: translateY(-1px);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.back-button:active {
+			transform: translateY(0);
+		}
+
+	.page-title {
+		margin: 0;
+		color: var(--text-dark);
+		font-size: 24px;
+		font-weight: 600;
+		flex: 1;
+		text-align: center;
+	}
+
+	.header-spacer {
+		min-width: 44px;
+		min-height: 44px;
+	}
+
+	/* Content Layout */
+	.content-layout {
+		padding: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		max-width: 1200px;
+		margin: 0 auto;
+		width: 100%;
+	}
+
+	/* Card Styles */
+	.selection-card,
+	.add-material-card,
+	.recipe-grid-card,
+	.save-card {
+		background: white;
+		border-radius: 16px;
+		box-shadow: var(--shadow-light);
+		overflow: hidden;
+		transition: all 0.3s ease;
+	}
+
+		.selection-card:hover,
+		.add-material-card:hover,
+		.recipe-grid-card:hover {
+			box-shadow: var(--shadow-medium);
+		}
+
+	.card-header {
+		padding: 20px;
+		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+		color: white;
+	}
+
+	.card-title {
+		margin: 0 0 5px 0;
+		font-size: 20px;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.card-icon {
+		font-size: 24px;
+	}
+
+	.card-subtitle {
+		margin: 0;
+		font-size: 14px;
+		opacity: 0.9;
+	}
+
+	.card-body {
+		padding: 25px;
+	}
+
+	/* Form Styles */
+	.form-group {
+		margin-bottom: 20px;
+	}
+
+	.form-label {
+		display: block;
+		margin-bottom: 8px;
+		font-weight: 600;
+		color: var(--text-dark);
+		font-size: 14px;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: 2fr 1fr;
+		gap: 15px;
+		align-items: end;
+	}
+
+	.flex-1 {
+		flex: 1;
+	}
+
+	.flex-2 {
+		flex: 2;
+	}
+
+	/* Selected Product Info */
+	.selected-product-info {
+		margin-top: 12px;
+		padding: 12px 15px;
+		background: var(--bg-light);
+		border-radius: 8px;
+		border: 1px solid var(--border-color);
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	.info-icon {
+		color: var(--success-color);
+		font-size: 18px;
+		font-weight: bold;
+	}
+
+	.info-text {
+		color: var(--text-dark);
+		font-size: 14px;
+		flex: 1;
+	}
+
+	.recipe-badge {
+		padding: 4px 12px;
+		background: var(--success-color);
+		color: white;
+		border-radius: 12px;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	.recipe-badge.new-recipe {
+		background: var(--info-color);
+	}
+
+	/* Button Styles */
+	.button-group {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 20px;
+	}
+
+	.add-material-button {
+		background: var(--success-color);
+		color: white;
+		border: none;
+		border-radius: 10px;
+		padding: 12px 24px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 600;
+		font-size: 15px;
+		box-shadow: var(--shadow-light);
+	}
+
+		.add-material-button:hover:not(:disabled) {
+			background: #218838;
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.add-material-button:active:not(:disabled) {
+			transform: translateY(0);
+		}
+
+		.add-material-button:disabled {
+			background: var(--text-light);
+			cursor: not-allowed;
+			opacity: 0.6;
+		}
+
+	.button-icon {
+		font-size: 16px;
+	}
+
+	.button-text {
+		font-size: 15px;
+	}
+
+	/* Remove Button */
+	.remove-button {
+		background: var(--danger-color);
+		color: white;
+		border: none;
+		border-radius: 50%;
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: var(--shadow-light);
+	}
+
+		.remove-button:hover {
+			background: #c82333;
+			transform: scale(1.1);
+			box-shadow: var(--shadow-medium);
+		}
+
+		.remove-button:active {
+			transform: scale(0.95);
+		}
+
+	.remove-icon {
+		font-size: 14px;
+	}
+
+	/* Empty State */
+	.empty-state {
+		text-align: center;
+		padding: 60px 20px;
+	}
+
+	.empty-icon {
+		font-size: 64px;
+		margin-bottom: 20px;
+		opacity: 0.6;
+	}
+
+	.empty-title {
+		margin: 0 0 10px 0;
+		color: var(--text-dark);
+		font-size: 20px;
+		font-weight: 600;
+	}
+
+	.empty-text {
+		margin: 0;
+		color: var(--text-light);
+		font-size: 14px;
+	}
+
+	/* Save Card */
+	.save-card {
+		padding: 20px;
+		background: white;
+	}
+
+	.save-button {
+		width: 100%;
+		background: var(--primary-color);
+		color: white;
+		border: none;
+		border-radius: 12px;
+		padding: 16px 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-weight: 600;
+		font-size: 18px;
+		box-shadow: var(--shadow-medium);
+	}
+
+		.save-button:hover {
+			background: var(--primary-dark);
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(226, 19, 123, 0.3);
+		}
+
+		.save-button:active {
+			transform: translateY(0);
+		}
+
+	/* Grid Styling */
+	::deep .e-grid {
+		border-radius: 8px;
+		overflow: hidden;
+		border: 1px solid var(--border-color);
+	}
+
+		::deep .e-grid .e-gridheader {
+			background: var(--bg-light);
+		}
+
+		::deep .e-grid .e-headercell {
+			background: transparent;
+			color: var(--text-dark);
+			font-weight: 600;
+			border: none;
+			border-bottom: 2px solid var(--border-color);
+			padding: 12px;
+		}
+
+		::deep .e-grid .e-rowcell {
+			border: none;
+			border-bottom: 1px solid var(--border-color);
+			padding: 12px;
+			vertical-align: middle;
+		}
+
+		::deep .e-grid .e-row:hover {
+			background-color: var(--primary-light);
+			cursor: pointer;
+		}
+
+		::deep .e-grid .e-row:nth-child(even) {
+			background-color: #fafafa;
+		}
+
+	/* Pager Styling */
+	::deep .e-pager {
+		background: white;
+		border-top: 1px solid var(--border-color);
+		padding: 10px;
+	}
+
+		::deep .e-pager .e-currentitem {
+			background: var(--primary-color);
+			color: white;
+			border-radius: 6px;
+		}
+
+	/* Syncfusion AutoComplete Styling */
+	::deep .custom-autocomplete .e-input-group,
+	::deep .custom-numeric .e-input-group {
+		border: 2px solid var(--border-color);
+		border-radius: 8px;
+		transition: all 0.2s ease;
+		background: white;
+	}
+
+		::deep .custom-autocomplete .e-input-group:hover,
+		::deep .custom-numeric .e-input-group:hover {
+			border-color: var(--primary-light);
+		}
+
+		::deep .custom-autocomplete .e-input-group.e-input-focus,
+		::deep .custom-numeric .e-input-group.e-input-focus {
+			border-color: var(--primary-color);
+			box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+		}
+
+		::deep .custom-autocomplete .e-input-group input,
+		::deep .custom-numeric .e-input-group input {
+			padding: 10px 12px;
+			font-size: 14px;
+			color: var(--text-dark);
+			border: none;
+			background: transparent;
+		}
+
+			::deep .custom-autocomplete .e-input-group input::placeholder,
+			::deep .custom-numeric .e-input-group input::placeholder {
+				color: var(--text-light);
+			}
+
+	/* Mobile Responsiveness */
+	@@media (max-width: 768px) {
+		.page-title {
+			font-size: 18px;
+		}
+
+		.content-layout {
+			padding: 15px;
+		}
+
+		.card-header {
+			padding: 15px;
+		}
+
+		.card-title {
+			font-size: 18px;
+		}
+
+		.card-body {
+			padding: 20px;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+		}
+
+		.button-group {
+			justify-content: stretch;
+		}
+
+		.add-material-button {
+			width: 100%;
+			justify-content: center;
+		}
+
+		::deep .e-grid .e-headercell {
+			padding: 10px 8px;
+			font-size: 13px;
+		}
+
+		::deep .e-grid .e-rowcell {
+			padding: 10px 8px;
+			font-size: 13px;
+		}
+	}
+
+	@@media (max-width: 576px) {
+		.page-header {
+			padding: 12px 15px;
+		}
+
+		.page-title {
+			font-size: 16px;
+		}
+
+		.back-button {
+			min-width: 40px;
+			min-height: 40px;
+			font-size: 16px;
+			padding: 8px;
+		}
+
+		.header-spacer {
+			min-width: 40px;
+			min-height: 40px;
+		}
+
+		.content-layout {
+			padding: 10px;
+			gap: 15px;
+		}
+
+		.card-title {
+			font-size: 16px;
+		}
+
+		.card-icon {
+			font-size: 20px;
+		}
+
+		.card-subtitle {
+			font-size: 13px;
+		}
+
+		.save-button {
+			font-size: 16px;
+			padding: 14px 20px;
+		}
+	}
+
+	/* Toast Styling */
+	::deep .e-toast-success {
+		background: var(--success-color);
+	}
+
+	::deep .e-toast-danger {
+		background: var(--danger-color);
+	}
+
+	::deep .e-toast-info {
+		background: var(--info-color);
+	}
+</style>

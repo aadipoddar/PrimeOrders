@@ -1,6 +1,7 @@
 ﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
@@ -52,8 +53,8 @@ public static class SaleReturnData
 		saleReturn.Id = await InsertSaleReturn(saleReturn);
 		await SaveSaleReturnDetail(saleReturn, cart, update);
 		await SaveStock(saleReturn, cart, update);
-		if (saleReturn.LocationId == 1)
-			await SaveAccounting(saleReturn, cart, update);
+		await SaveRawMaterialStockByRecipe(saleReturn, cart);
+		await SaveAccounting(saleReturn, update);
 
 		return saleReturn.Id;
 	}
@@ -97,7 +98,10 @@ public static class SaleReturnData
 	private static async Task SaveStock(SaleReturnModel saleReturn, List<SaleReturnProductCartModel> cart, bool update)
 	{
 		if (update)
+		{
 			await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(saleReturn.BillNo);
+		}
 
 		LedgerModel party = null;
 		if (saleReturn.PartyId is not null && saleReturn.PartyId > 1)
@@ -112,6 +116,7 @@ public static class SaleReturnData
 					Id = 0,
 					ProductId = product.ProductId,
 					Quantity = -product.Quantity,
+					NetRate = product.NetRate,
 					TransactionNo = saleReturn.BillNo,
 					Type = StockType.SaleReturn.ToString(),
 					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
@@ -124,6 +129,7 @@ public static class SaleReturnData
 				Id = 0,
 				ProductId = product.ProductId,
 				Quantity = product.Quantity,
+				NetRate = product.NetRate,
 				TransactionNo = saleReturn.BillNo,
 				Type = StockType.SaleReturn.ToString(),
 				TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
@@ -132,8 +138,36 @@ public static class SaleReturnData
 		}
 	}
 
-	private static async Task SaveAccounting(SaleReturnModel saleReturn, List<SaleReturnProductCartModel> cart, bool update)
+	private static async Task SaveRawMaterialStockByRecipe(SaleReturnModel saleReturn, List<SaleReturnProductCartModel> cart)
 	{
+		if (saleReturn.LocationId != 1)
+			return;
+
+		foreach (var product in cart)
+		{
+			var recipe = await RecipeData.LoadRecipeByProduct(product.ProductId);
+			var recipeItems = recipe is null ? [] : await RecipeData.LoadRecipeDetailByRecipe(recipe.Id);
+
+			foreach (var recipeItem in recipeItems)
+				await RawMaterialStockData.InsertRawMaterialStock(new()
+				{
+					Id = 0,
+					RawMaterialId = recipeItem.RawMaterialId,
+					Quantity = recipeItem.Quantity * product.Quantity,
+					NetRate = product.NetRate / recipeItem.Quantity,
+					TransactionNo = saleReturn.BillNo,
+					Type = StockType.SaleReturn.ToString(),
+					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
+					LocationId = 1
+				});
+		}
+	}
+
+	private static async Task SaveAccounting(SaleReturnModel saleReturn, bool update)
+	{
+		if (saleReturn.LocationId == 1)
+			return;
+
 		if (update)
 		{
 			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.BillNo);
@@ -209,5 +243,23 @@ public static class SaleReturnData
 				Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.BillNo}",
 				Status = true
 			});
+	}
+
+	public static async Task DeleteSaleReturn(SaleReturnModel saleReturn)
+	{
+		saleReturn.Status = false;
+		await InsertSaleReturn(saleReturn);
+		await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(saleReturn.BillNo);
+
+		if (saleReturn.LocationId != 1)
+			return;
+
+		var accounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.BillNo);
+		if (accounting is null)
+			return;
+
+		accounting.Status = false;
+		await AccountingData.InsertAccounting(accounting);
 	}
 }
