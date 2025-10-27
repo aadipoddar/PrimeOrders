@@ -83,11 +83,13 @@ public partial class RecipePage
 	{
 		try
 		{
-			if (_sfGrid is null || _selectedProduct is null || _selectedProduct.ProductId == 0)
+			if (_selectedProduct is null || _selectedProduct.ProductId == 0)
 				return;
 
 			_recipeItems.Clear();
-			await _sfGrid?.Refresh();
+
+			if (_sfGrid is not null)
+				await _sfGrid?.Refresh();
 
 			_recipe = await RecipeData.LoadRecipeByProduct(_selectedProduct.ProductId);
 			if (_recipe is null)
