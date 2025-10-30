@@ -44,13 +44,18 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 	public async Task<bool> LocalExists(string key)
 	{
 		await Task.CompletedTask;
-		return File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Secrets.DatabaseName, key));
+
+		var directoryPath = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			Secrets.DatabaseName);
+
+		return File.Exists(Path.Combine(directoryPath, key));
 	}
 
 	public async Task LocalSaveAsync(string key, string value)
 	{
 		var directoryPath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 			Secrets.DatabaseName);
 
 		Directory.CreateDirectory(directoryPath);
@@ -61,8 +66,12 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 
 	public async Task<string?> LocalGetAsync(string key)
 	{
+		var directoryPath = Path.Combine(
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+			Secrets.DatabaseName);
+
 		if (await LocalExists(key))
-			return await File.ReadAllTextAsync(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Secrets.DatabaseName, key));
+			return await File.ReadAllTextAsync(Path.Combine(directoryPath, key));
 
 		return null;
 	}
@@ -71,7 +80,7 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 	{
 		await Task.CompletedTask;
 		var filePath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 			Secrets.DatabaseName,
 			key);
 

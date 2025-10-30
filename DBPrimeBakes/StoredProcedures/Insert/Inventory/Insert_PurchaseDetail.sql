@@ -2,7 +2,7 @@
 	@Id INT,
 	@PurchaseId INT,
 	@RawMaterialId INT,
-	@Quantity DECIMAL(7, 3),
+	@Quantity MONEY,
 	@MeasurementUnit VARCHAR(10),
 	@Rate MONEY,
 	@BaseTotal MONEY,

@@ -3,7 +3,7 @@
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [SaleId] INT NOT NULL, 
     [ProductId] INT NOT NULL, 
-    [Quantity] DECIMAL(5, 2) NOT NULL DEFAULT 1, 
+    [Quantity] DECIMAL(7, 3) NOT NULL DEFAULT 1, 
     [Rate] MONEY NOT NULL,
     [BaseTotal] MONEY NOT NULL DEFAULT 0, 
     [DiscPercent] DECIMAL(5, 2) NOT NULL DEFAULT 0, 

@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_RawMaterialStock]
 	@Id INT,
 	@RawMaterialId INT, 
-	@Quantity DECIMAL(7, 3), 
+	@Quantity MONEY, 
 	@NetRate MONEY,
 	@Type VARCHAR(20), 
 	@TransactionNo VARCHAR(20),

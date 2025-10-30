@@ -45,6 +45,8 @@ public partial class PurchaseReport
 			_startDate.ToDateTime(TimeOnly.MinValue),
 			_endDate.ToDateTime(TimeOnly.MaxValue));
 
+		_purchaseOverviews = [.. _purchaseOverviews.OrderBy(_ => _.BillDateTime)];
+
 		StateHasChanged();
 	}
 	#endregion
