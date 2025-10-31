@@ -392,7 +392,7 @@ public partial class PurchaseWindow : Window
 				return;
 			}
 
-			await PrintInvoice(purchaseId);
+			// qlawait PrintInvoice(purchaseId);
 
 			MessageBox.Show("Purchase saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 			Close();

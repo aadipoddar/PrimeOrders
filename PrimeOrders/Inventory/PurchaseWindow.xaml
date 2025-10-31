@@ -134,7 +134,7 @@
 							<TextBox x:Name="cashDiscountAmountTextBox" Grid.Row="2" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" IsReadOnly="True" Text="00.00" TextAlignment="Right" />
 
 							<TextBlock Grid.Row="3" Grid.Column="0" Text="Round Off" Margin="5" Padding="5" />
-							<syncfusion:DoubleTextBox x:Name="roundOffTextBox" Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" Text="00.00" MaximumNumberDecimalDigits="2" UseNullOption="False" TextAlignment="Right" ValueChanged="roundOffTextBox_ValueChanged" />
+							<syncfusion:DoubleTextBox x:Name="roundOffTextBox" Grid.Row="3" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" Text="00.00" MaximumNumberDecimalDigits="5" UseNullOption="False" TextAlignment="Right" ValueChanged="roundOffTextBox_ValueChanged" />
 
 							<TextBlock Grid.Row="4" Grid.Column="0" Text="Total" Margin="5" Padding="5" />
 							<TextBox x:Name="totalTextBox" Grid.Row="4" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MaxLength="10" IsReadOnly="True" Text="00.00" TextAlignment="Right" FontWeight="UltraBold" />
@@ -168,10 +168,10 @@
 				<syncfusion:SfTextBoxExt Grid.Row="1" Grid.Column="0" Margin="5" Padding="5" x:Name="selectedRawMaterialAutoCompleteTextBox" SuggestionMode="Contains" AutoCompleteMode="SuggestAppend" Watermark="Search Raw Material by Name" SelectedItemChanged="selectedRawMaterialAutoCompleteTextBox_SelectedItemChanged" />
 
 				<TextBlock Grid.Row="0" Grid.Column="1" Text="Qty" Margin="5" Padding="5" HorizontalAlignment="Right" />
-				<syncfusion:DoubleTextBox x:Name="selectedRawMaterialQuantityTextBox" Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MinValue="0.01" Value="1" TextAlignment="Right" UseNullOption="False" ValueChanged="selectedRawMaterialQuantityTextBox_ValueChanged" />
+				<syncfusion:DoubleTextBox x:Name="selectedRawMaterialQuantityTextBox" Grid.Row="1" Grid.Column="1" Margin="5" Padding="5" MinWidth="100" MinValue="0.01" Value="1" TextAlignment="Right" UseNullOption="False" MaximumNumberDecimalDigits="5" ValueChanged="selectedRawMaterialQuantityTextBox_ValueChanged" />
 
 				<TextBlock Grid.Row="0" Grid.Column="2" Text="Rate" Margin="5" Padding="5" HorizontalAlignment="Right" />
-				<syncfusion:DoubleTextBox x:Name="selectedRawMaterialRateTextBox" Grid.Row="1" Grid.Column="2" Margin="5" Padding="5" MinWidth="100" MinValue="0" Value="0" TextAlignment="Right" UseNullOption="False" ValueChanged="selectedRawMaterialRateTextBox_ValueChanged" />
+				<syncfusion:DoubleTextBox x:Name="selectedRawMaterialRateTextBox" Grid.Row="1" Grid.Column="2" Margin="5" Padding="5" MinWidth="100" MinValue="0" Value="0" TextAlignment="Right" UseNullOption="False" MaximumNumberDecimalDigits="5" ValueChanged="selectedRawMaterialRateTextBox_ValueChanged" />
 
 				<TextBlock Grid.Row="0" Grid.Column="3" Text="Disc %" Margin="5" Padding="5" HorizontalAlignment="Right" />
 				<syncfusion:PercentTextBox x:Name="selectedRawMaterialDiscountPercentTextBox" Grid.Row="1" Grid.Column="3" Margin="5" Padding="5" MinWidth="100" PercentValue="0" MinValue="0" MaxValue="100" UseNullOption="False" EnableExtendedScrolling="True" EnableRangeAdorner="True" CornerRadius="5" TextAlignment="Right" RangeAdornerBackground="#e2137b" MaxPercentDecimalDigits="2" PercentValueChanged="selectedRawMaterialDiscountPercentTextBox_PercentValueChanged" />

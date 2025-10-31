@@ -300,7 +300,7 @@ public partial class KitchenIssueWindow : Window
 				return;
 			}
 
-			await PrintInvoice(kitchenIssueId);
+			// await PrintInvoice(kitchenIssueId);
 
 			MessageBox.Show("Kitchen Issue saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 			Close();
