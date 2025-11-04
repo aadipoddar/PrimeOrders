@@ -43,6 +43,7 @@ public class ProductStockSummaryModel
 	public decimal LastSalePrice { get; set; }
 	public decimal WeightedAverageValue { get; set; }
 	public decimal LastSaleValue { get; set; }
+	public decimal StockValueAtProductRate { get; set; }
 }
 
 public class ProductStockAdjustmentCartModel

@@ -56,12 +56,8 @@ public static class ProductStockExcelExport
 			nameof(ProductStockSummaryModel.OpeningStock),
 			nameof(ProductStockSummaryModel.PurchaseStock),
 			nameof(ProductStockSummaryModel.SaleStock),
-			nameof(ProductStockSummaryModel.MonthlyStock),
 			nameof(ProductStockSummaryModel.ClosingStock),
-			nameof(ProductStockSummaryModel.AveragePrice),
-			nameof(ProductStockSummaryModel.WeightedAverageValue),
-			nameof(ProductStockSummaryModel.LastSalePrice),
-			nameof(ProductStockSummaryModel.LastSaleValue)
+			nameof(ProductStockSummaryModel.StockValueAtProductRate)
 		];
 
 		// Define custom column settings
@@ -139,14 +135,6 @@ public static class ProductStockExcelExport
 					};
 				}
 			},
-			[nameof(ProductStockSummaryModel.MonthlyStock)] = new()
-			{
-				DisplayName = "Monthly Stock",
-				Format = "#,##0.00",
-				Width = 15,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
 			[nameof(ProductStockSummaryModel.ClosingStock)] = new()
 			{
 				DisplayName = "Closing Stock",
@@ -180,36 +168,9 @@ public static class ProductStockExcelExport
 					return null;
 				}
 			},
-			[nameof(ProductStockSummaryModel.AveragePrice)] = new()
+			[nameof(ProductStockSummaryModel.StockValueAtProductRate)] = new()
 			{
-				DisplayName = "Average Price",
-				Format = "₹#,##0.00",
-				Width = 18,
-				IsCurrency = true,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
-			[nameof(ProductStockSummaryModel.WeightedAverageValue)] = new()
-			{
-				DisplayName = "Weighted Avg Value",
-				Format = "₹#,##0.00",
-				Width = 18,
-				IsCurrency = true,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
-			[nameof(ProductStockSummaryModel.LastSalePrice)] = new()
-			{
-				DisplayName = "Last Sale Price",
-				Format = "₹#,##0.00",
-				Width = 18,
-				IsCurrency = true,
-				IncludeInTotal = true,
-				Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight
-			},
-			[nameof(ProductStockSummaryModel.LastSaleValue)] = new()
-			{
-				DisplayName = "Last Sale Value",
+				DisplayName = "Stock Value at Product Rate",
 				Format = "₹#,##0.00",
 				Width = 18,
 				IsCurrency = true,

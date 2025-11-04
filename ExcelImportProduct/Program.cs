@@ -41,7 +41,9 @@ using PrimeBakesLibrary.Models.Sale;
 
 // await RecalculateBills();
 
-await RecalculateReturnBills();
+// await RecalculateReturnBills();
+
+await UpdateProductLocation();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -465,4 +467,18 @@ static async Task RecalculateReturnBills()
 
 		await SaleReturnData.InsertSaleReturn(sale);
 	}
+}
+
+static async Task UpdateProductLocation()
+{
+	var products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
+	foreach (var product in products)
+		await ProductData.InsertProductLocation(new()
+		{
+			Id = 0,
+			ProductId = product.Id,
+			LocationId = 48,
+			Rate = product.Rate,
+			Status = true
+		});
 }

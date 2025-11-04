@@ -78,6 +78,8 @@ public partial class ProductStockReport
 		_stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(startDate, endDate, _selectedLocationId);
 		_stockDetails = await ProductStockData.LoadProductStockDetailsByDateLocationId(startDate, endDate, _selectedLocationId);
 
+		_stockSummary.RemoveAll(s => s.OpeningStock == 0 && s.PurchaseStock == 0 && s.SaleStock == 0 && s.ClosingStock == 0);
+
 		_isProcessing = false;
 		StateHasChanged();
 	}

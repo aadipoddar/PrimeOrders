@@ -26,8 +26,8 @@ BEGIN
             FROM [ProductStock]
             WHERE     ProductId = s.ProductId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
-                  AND Type = 'Purchase'
+                  AND TransactionDate <= @ToDate
+                  AND Quantity > 0
                   AND LocationId = @LocationId),
            0) AS PurchaseStock,
 
@@ -37,8 +37,8 @@ BEGIN
             FROM [ProductStock]
             WHERE     ProductId = s.ProductId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
-                  AND Type = 'Sale'
+                  AND TransactionDate <= @ToDate
+                  AND Quantity < 0
                   AND LocationId = @LocationId),
            0) AS SaleStock,
 
@@ -129,7 +129,20 @@ BEGIN
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId
              ORDER BY TransactionDate DESC),
-        0) AS LastSaleValue
+        0) AS LastSaleValue,
+
+        ISNULL
+        (
+            p.Rate *
+                ISNULL
+                  (
+                     (SELECT SUM (Quantity)
+                      FROM [ProductStock]
+                      WHERE     ProductId = s.ProductId
+                            AND TransactionDate <= @ToDate
+                            AND LocationId = @LocationId),
+                     0)
+        , 0) AS StockValueAtProductRate
 
     FROM
         [ProductStock] s
@@ -140,8 +153,9 @@ BEGIN
         dbo.ProductCategory pc ON pc.Id = p.ProductCategoryId
 
     GROUP BY s.ProductId,
-            p.[Name],
-            p.Code,
-            p.ProductCategoryId,
-            pc.Name;
+        p.[Name],
+        p.Code,
+        p.ProductCategoryId,
+        pc.Name,
+        p.Rate;
 END

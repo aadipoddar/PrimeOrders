@@ -2,9 +2,11 @@ using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Product;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -191,6 +193,9 @@ public partial class LocationPage
 
 			_locationModel.Id = await LocationData.InsertLocation(_locationModel);
 			await InsertLedger();
+			if (isNewLocation)
+				await InsertProducts();
+
 			await LoadLocations();
 
 			// Reset form
@@ -210,6 +215,60 @@ public partial class LocationPage
 		{
 			_isSubmitting = false;
 			StateHasChanged();
+		}
+	}
+
+	private async Task InsertProducts()
+	{
+		try
+		{
+			var products = await CommonData.LoadTableDataByStatus<ProductModel>(TableNames.Product);
+			foreach (var product in products)
+				await ProductData.InsertProductLocation(new()
+				{
+					Id = 0,
+					ProductId = product.Id,
+					LocationId = _locationModel.Id,
+					Rate = product.Rate,
+					Status = true
+				});
+		}
+		catch (Exception ex)
+		{
+			throw new Exception($"Location saved but product stock initialization failed: {ex.Message}", ex);
+		}
+	}
+
+	private async Task InsertLedger()
+	{
+		try
+		{
+			var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+			var ledger = await LedgerData.LoadLedgerByLocation(_locationModel.Id);
+
+			await LedgerData.InsertLedger(new()
+			{
+				Id = ledger?.Id ?? 0,
+				Name = _locationModel.Name,
+				LocationId = _locationModel.Id,
+				Code = ledger?.Code ?? GenerateCodes.GenerateLedgerCode(ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
+				AccountTypeId = 3,
+				GroupId = 1,
+				Alias = "",
+				Email = "",
+				Remarks = "",
+				Address = "",
+				GSTNo = "",
+				Phone = "",
+				StateId = 2,
+				Status = true
+			});
+		}
+		catch (Exception ex)
+		{
+			// Log the error but don't fail the location creation
+			// The ledger creation is supplementary
+			throw new Exception($"Location saved but ledger creation failed: {ex.Message}", ex);
 		}
 	}
 
@@ -244,39 +303,6 @@ public partial class LocationPage
 				Icon = "e-error toast-icons"
 			};
 			await _sfErrorToast.ShowAsync(toastModel);
-		}
-	}
-
-	private async Task InsertLedger()
-	{
-		try
-		{
-			var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
-			var ledger = await LedgerData.LoadLedgerByLocation(_locationModel.Id);
-
-			await LedgerData.InsertLedger(new()
-			{
-				Id = ledger?.Id ?? 0,
-				Name = _locationModel.Name,
-				LocationId = _locationModel.Id,
-				Code = ledger?.Code ?? GenerateCodes.GenerateLedgerCode(ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code),
-				AccountTypeId = 3,
-				GroupId = 1,
-				Alias = "",
-				Email = "",
-				Remarks = "",
-				Address = "",
-				GSTNo = "",
-				Phone = "",
-				StateId = 2,
-				Status = true
-			});
-		}
-		catch (Exception ex)
-		{
-			// Log the error but don't fail the location creation
-			// The ledger creation is supplementary
-			throw new Exception($"Location saved but ledger creation failed: {ex.Message}", ex);
 		}
 	}
 }
