@@ -37,9 +37,15 @@ else
 		<div class="dashboard-cards">
 			@if (_user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Purchase")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/purchase")'>
 					<div class="card-icon purchase-icon">🛒</div>
 					<h3>New Raw Material Purchase</h3>
+					<p>Create a new purchase order for raw materials</p>
+				</div>
+
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/purchasereturn")'>
+					<div class="card-icon purchase-icon">🛒</div>
+					<h3>New Raw Material Purchase Return</h3>
 					<p>Create a new purchase order for raw materials</p>
 				</div>
 

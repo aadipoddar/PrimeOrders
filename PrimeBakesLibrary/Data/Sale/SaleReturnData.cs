@@ -188,7 +188,7 @@ public static class SaleReturnData
 			Id = 0,
 			TransactionNo = saleReturn.BillNo,
 			AccountingDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(saleReturn.SaleReturnDateTime))).Id,
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(saleReturn.SaleReturnDateTime)).Id,
 			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
 			Remarks = saleReturn.Remarks,
 			UserId = saleReturn.UserId,

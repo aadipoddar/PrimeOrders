@@ -79,7 +79,7 @@ public partial class KitchenIssueViewPage
 						MaterialName = rawMaterial.Name,
 						CategoryName = category?.Name ?? "N/A",
 						Quantity = detail.Quantity,
-						Unit = detail.MeasurementUnit ?? rawMaterial.MeasurementUnit ?? "Unit",
+						Unit = detail.MeasurementUnit ?? rawMaterial.UnitOfMeasurement ?? "Unit",
 						Rate = detail.Rate,
 						Total = detail.Total
 					});
@@ -110,7 +110,7 @@ public partial class KitchenIssueViewPage
 			{
 				RawMaterialId = detail.RawMaterialId,
 				RawMaterialName = rawMaterial.Name,
-				MeasurementUnit = detail.MeasurementUnit ?? rawMaterial.MeasurementUnit ?? "Unit",
+				MeasurementUnit = detail.MeasurementUnit ?? rawMaterial.UnitOfMeasurement ?? "Unit",
 				RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
 				Quantity = detail.Quantity,
 				Rate = detail.Rate,

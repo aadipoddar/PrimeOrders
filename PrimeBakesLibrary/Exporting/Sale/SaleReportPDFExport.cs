@@ -1,4 +1,4 @@
-﻿using PrimeBakesLibrary.Data.Common;
+﻿using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Sale;
 
@@ -13,14 +13,14 @@ public static class SaleReportPDFExport
 {
 	public static async Task<MemoryStream> GenerateA4SaleReport(List<SaleOverviewModel> saleOverview, DateOnly _startDate, DateOnly _endDate, LedgerModel? selectedSupplier)
 	{
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
+		var (pdfDocument, pdfPage) = PDFExportUtilOld.CreateA4Document();
 
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES REGISTER");
+		float currentY = await PDFExportUtilOld.DrawCompanyInformation(pdfPage, "SALES REGISTER");
 		currentY = DrawInvoiceDetailsAsync(pdfPage, currentY, _startDate, _endDate, selectedSupplier);
 		var result = DrawItemDetails(pdfPage, currentY, saleOverview);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, saleOverview);
 
-		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
+		return PDFExportUtilOld.FinalizePdfDocument(pdfDocument);
 	}
 	private static float DrawInvoiceDetailsAsync(PdfPage pdfPage, float currentY, DateOnly startDate, DateOnly endDate, LedgerModel selectedSupplier)
 	{
@@ -30,7 +30,7 @@ public static class SaleReportPDFExport
 			["Party"] = selectedSupplier?.Name ?? "All",
 		};
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Register Details", leftColumnDetails, []);
+		return PDFExportUtilOld.DrawInvoiceDetailsSection(pdfPage, currentY, "Register Details", leftColumnDetails, []);
 	}
 
 	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<SaleOverviewModel> saleOverview)
@@ -45,7 +45,7 @@ public static class SaleReportPDFExport
 			Total = item.Total.FormatIndianCurrency()
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtilOld._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.15f, // Type
@@ -66,7 +66,7 @@ public static class SaleReportPDFExport
 			PdfTextAlignment.Right   // Total
 		};
 
-		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
+		var pdfGrid = PDFExportUtilOld.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 		
 		pdfGrid.Headers[0].Cells[0].Value = "Trans Treype";
 		pdfGrid.Headers[0].Cells[1].Value = "Bill No";
@@ -75,8 +75,8 @@ public static class SaleReportPDFExport
 		pdfGrid.Headers[0].Cells[4].Value = "Discount";
 		pdfGrid.Headers[0].Cells[5].Value = "Total Amt";
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtilOld._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtilOld._pageMargin));
 
 		return result;
 	}
@@ -93,6 +93,6 @@ public static class SaleReportPDFExport
 			["Total Return Amt: "] = saleOverview.Sum(x => x.SaleId < 0 ? x.Total : 0).FormatIndianCurrency()
 		};
 
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, saleOverview.Sum(x => x.Total));
+		return PDFExportUtilOld.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, saleOverview.Sum(x => x.Total));
 	}
 }

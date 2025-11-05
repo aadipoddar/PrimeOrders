@@ -4,7 +4,8 @@ public static class TableNames
 {
 	public static string User => "User";
 	public static string Location => "Location";
-	public static string State => "State";
+	public static string Company => "Company";
+	public static string StateUT => "StateUT";
 	public static string Settings => "Settings";
 	public static string Tax => "Tax";
 	public static string ProductCategory => "ProductCategory";
@@ -16,6 +17,8 @@ public static class TableNames
 	public static string RecipeDetail => "RecipeDetail";
 	public static string Purchase => "Purchase";
 	public static string PurchaseDetail => "PurchaseDetail";
+	public static string PurchaseReturn => "PurchaseReturn";
+	public static string PurchaseReturnDetail => "PurchaseReturnDetail";
 	public static string ProductStock => "ProductStock";
 	public static string RawMaterialStock => "RawMaterialStock";
 	public static string Order => "Order";
@@ -44,21 +47,29 @@ public static class StoredProcedureNames
 	public static string LoadTableData => "Load_TableData";
 	public static string LoadTableDataById => "Load_TableData_By_Id";
 	public static string LoadTableDataByStatus => "Load_TableData_By_Status";
+	public static string LoadTableDataByCode => "Load_TableData_By_Code";
+	public static string LoadTableDataByTransactionNo => "Load_TableData_By_TransactionNo";
+	public static string LoadLastTableDataByCompanyFinancialYear => "Load_LastTableData_By_Company_FinancialYear";
+	public static string LoadCurrentDateTime => "Load_CurrentDateTime";
 	public static string LoadSettingsByKey => "Load_Settings_By_Key";
-	public static string ResetSettings => "Reset_Settings";
-	public static string UpdateSettings => "Update_Settings";
 
 	public static string LoadUserByPasscode => "Load_User_By_Passcode";
 	public static string LoadCustomerByNumber => "Load_Customer_By_Number";
 
+	public static string LoadFinancialYearByDateTime => "Load_FinancialYear_By_DateTime";
+
 	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
-	public static string LoadRawMaterialRateBySupplierPurchaseDateTime => "Load_RawMaterial_Rate_By_Supplier_PurchaseDateTime";
 
 	public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
 	public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
 
+	public static string LoadRawMaterialByPartyPurchaseDateTime => "Load_RawMaterial_By_Party_PurchaseDateTime";
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
-	public static string LoadPurchaseOverviewByPurchaseId => "Load_PurchaseOverview_By_PurchaseId";
+	public static string LoadPurchaseOverviewByDate => "Load_PurchaseOverview_By_Date";
+	public static string LoadPurchaseReturnDetailByPurchaseReturn => "Load_PurchaseReturnDetail_By_PurchaseReturn";
+	public static string LoadPurchaseReturnOverviewByDate => "Load_PurchaseReturn_Overview_By_Date";
+	public static string LoadPurchaseItemOverviewByDate => "Load_Purchase_Item_Overview_By_Date";
+	public static string LoadPurchaseReturnItemOverviewByDate => "Load_PurchaseReturn_Item_Overview_By_Date";
 
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
 	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
@@ -98,13 +109,11 @@ public static class StoredProcedureNames
 	public static string LoadRawMaterialStockSummaryByDateLocationId => "Load_RawMaterialStockSummary_By_Date_LocationId";
 	public static string LoadProductStockSummaryByDateLocationId => "Load_ProductStockSummary_By_Date_LocationId";
 	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
-	public static string LoadPurchaseDetailsByDate => "Load_PurchaseDetails_By_Date";
 	public static string LoadKitchenIssueDetailsByDate => "Load_KitchenIssueDetails_By_Date";
 	public static string LoadKitchenProductionDetailsByDate => "Load_KitchenProductionDetails_By_Date";
 	public static string LoadSaleReturnDetailsByDateLocationId => "Load_SaleReturnDetails_By_Date_LocationId";
 
 	public static string LoadLedgerByLocation => "Load_Ledger_By_Location";
-	public static string LoadFinancialYearByDate => "Load_FinancialYear_By_Date";
 
 	public static string LoadLastAccountingByFinancialYearVoucher => "Load_LastAccounting_By_FinancialYear_Voucher";
 	public static string LoadAccountingDetailsByAccounting => "Load_AccountingDetails_By_Accounting";
@@ -118,10 +127,12 @@ public static class StoredProcedureNames
 	public static string LoadTrialBalanceByDate => "Load_TrialBalance_By_Date";
 
 	public static string InsertUser => "Insert_User";
+	public static string ResetSettings => "Reset_Settings";
+	public static string UpdateSettings => "Update_Settings";
 	public static string InsertLocation => "Insert_Location";
 	public static string InsertCustomer => "Insert_Customer";
-	public static string InsertState => "Insert_State";
-
+	public static string InsertStateUT => "Insert_StateUT";
+	public static string InsertCompany => "Insert_Company";
 	public static string InsertTax => "Insert_Tax";
 
 	public static string InsertKitchen => "Insert_Kitchen";
@@ -138,6 +149,8 @@ public static class StoredProcedureNames
 
 	public static string InsertPurchase => "Insert_Purchase";
 	public static string InsertPurchaseDetail => "Insert_PurchaseDetail";
+	public static string InsertPurchaseReturn => "Insert_PurchaseReturn";
+	public static string InsertPurchaseReturnDetail => "Insert_PurchaseReturnDetail";
 
 	public static string InsertProductStock => "Insert_ProductStock";
 	public static string InsertRawMaterialStock => "Insert_RawMaterialStock";
@@ -171,11 +184,15 @@ public static class StoredProcedureNames
 
 public static class ViewNames
 {
+	public static string PurchaseOverview => "Purchase_Overview";
+	public static string PurchaseReturnOverview => "PurchaseReturn_Overview";
+	public static string PurchaseItemOverview => "Purchase_Item_Overview";
+	public static string PurchaseReturnItemOverview => "PurchaseReturn_Item_Overview";
+
 	public static string SaleOverview => "Sale_Overview";
 	public static string SaleReturnOverview => "SaleReturn_Overview";
 	public static string OrderOverview => "Order_Overview";
 	public static string ProductOverview => "Product_Overview";
-	public static string PurchaseOverview => "Purchase_Overview";
 	public static string KitchenIssueOverview => "KitchenIssue_Overview";
 	public static string KitchenProductionOverview => "KitchenProduction_Overview";
 	public static string AccountingOverview => "Accounting_Overview";

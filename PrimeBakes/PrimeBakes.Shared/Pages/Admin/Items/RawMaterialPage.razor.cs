@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.DataAccess;
@@ -23,8 +24,8 @@ public partial class RawMaterialPage
 		Name = "",
 		Code = "",
 		RawMaterialCategoryId = 0,
-		MeasurementUnit = "KG",
-		MRP = 0,
+		UnitOfMeasurement = "KG",
+		Rate = 0,
 		TaxId = 0,
 		Status = true
 	};
@@ -79,8 +80,8 @@ public partial class RawMaterialPage
 			Name = "",
 			Code = GenerateCodes.GenerateRawMaterialCode(_rawMaterials.OrderBy(_ => _.Code).LastOrDefault()?.Code),
 			RawMaterialCategoryId = 0,
-			MeasurementUnit = "KG",
-			MRP = 0,
+			UnitOfMeasurement = "KG",
+			Rate = 0,
 			TaxId = 0,
 			Status = true
 		};
@@ -95,8 +96,8 @@ public partial class RawMaterialPage
 			Name = rawMaterial.Name,
 			Code = rawMaterial.Code,
 			RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
-			MeasurementUnit = rawMaterial.MeasurementUnit,
-			MRP = rawMaterial.MRP,
+			UnitOfMeasurement = rawMaterial.UnitOfMeasurement,
+			Rate = rawMaterial.Rate,
 			TaxId = rawMaterial.TaxId,
 			Status = rawMaterial.Status
 		};
@@ -126,7 +127,7 @@ public partial class RawMaterialPage
 	private async Task<bool> ValidateForm()
 	{
 		// Ensure measurement unit is always uppercase
-		_rawMaterialModel.MeasurementUnit = _rawMaterialModel.MeasurementUnit?.ToUpper() ?? "";
+		_rawMaterialModel.UnitOfMeasurement = _rawMaterialModel.UnitOfMeasurement?.ToUpper() ?? "";
 
 		if (string.IsNullOrWhiteSpace(_rawMaterialModel.Name))
 		{
@@ -156,16 +157,16 @@ public partial class RawMaterialPage
 			return false;
 		}
 
-		if (string.IsNullOrWhiteSpace(_rawMaterialModel.MeasurementUnit))
+		if (string.IsNullOrWhiteSpace(_rawMaterialModel.UnitOfMeasurement))
 		{
 			_errorMessage = "Measurement unit is required. Please enter a valid unit.";
 			await ShowErrorToast();
 			return false;
 		}
 
-		if (_rawMaterialModel.MRP < 0)
+		if (_rawMaterialModel.Rate < 0)
 		{
-			_errorMessage = $"MRP must be greater than 0. Current value: {_rawMaterialModel.MRP:C}";
+			_errorMessage = $"MRP must be greater than 0. Current value: {_rawMaterialModel.Rate:C}";
 			await ShowErrorToast();
 			return false;
 		}

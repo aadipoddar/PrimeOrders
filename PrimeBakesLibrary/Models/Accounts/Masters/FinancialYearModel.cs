@@ -6,6 +6,18 @@ public class FinancialYearModel
 	public DateOnly StartDate { get; set; }
 	public DateOnly EndDate { get; set; }
 	public int YearNo { get; set; }
-	public string Remarks { get; set; }
+	public string? Remarks { get; set; }
+	public bool Locked { get; set; }
 	public bool Status { get; set; }
+}
+
+public enum DateRangeType
+{
+	Today,
+	Yesterday,
+	CurrentMonth,
+	PreviousMonth,
+	CurrentFinancialYear,
+	PreviousFinancialYear,
+	AllTime
 }

@@ -36,7 +36,7 @@ public static class OrderExcelExport
 		];
 
 		// Define custom column settings
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(OrderOverviewModel.OrderNo)] = new()
 			{
@@ -87,7 +87,7 @@ public static class OrderExcelExport
 				{
 					if (value == null) return null;
 					var isCompleted = value != null;
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = true,
 						FontColor = isCompleted ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : Syncfusion.Drawing.Color.FromArgb(255, 165, 0),
@@ -119,7 +119,7 @@ public static class OrderExcelExport
 		string reportTitle = "Order History Report";
 		string worksheetName = "Order Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			orderOverviews,
 			reportTitle,
 			worksheetName,
@@ -223,7 +223,7 @@ public static class OrderExcelExport
 		];
 
 		// Define custom column settings
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(ProductOrderSummary.ProductCode)] = new()
 			{
@@ -284,7 +284,7 @@ public static class OrderExcelExport
 				{
 					if (value == null) return null;
 					var qty = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = qty > 10,
 						FontColor = qty > 50 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -306,7 +306,7 @@ public static class OrderExcelExport
 		string reportTitle = "Pending Orders - Product Quantities Report";
 		string worksheetName = "Pending Products";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			productSummaries,
 			reportTitle,
 			worksheetName,
@@ -354,7 +354,7 @@ public static class OrderExcelExport
 		];
 
 		// Define custom column settings
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(ChallanItemModel.ProductCode)] = new()
 			{
@@ -382,7 +382,7 @@ public static class OrderExcelExport
 		string reportTitle = $"Delivery Challan - Order #{selectedOrder.OrderNo}";
 		string worksheetName = "Challan Items";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			challanItems,
 			reportTitle,
 			worksheetName,

@@ -96,15 +96,15 @@ else
 
 						<div class="form-group">
 							<label class="form-label">Measurement Unit *</label>
-							<SfTextBox @bind-Value="_rawMaterialModel.MeasurementUnit"
-									   @onblur="@(() => _rawMaterialModel.MeasurementUnit = _rawMaterialModel.MeasurementUnit?.ToUpper() ?? "")"
+							<SfTextBox @bind-Value="_rawMaterialModel.UnitOfMeasurement"
+									   @onblur="@(() => _rawMaterialModel.UnitOfMeasurement = _rawMaterialModel.UnitOfMeasurement?.ToUpper() ?? "")"
 									   Placeholder="Enter unit (e.g., KG, GRAM, LITRE)"
 									   CssClass="custom-textbox" />
 						</div>
 
 						<div class="form-group">
 							<label class="form-label">MRP (₹) *</label>
-							<SfNumericTextBox @bind-Value="_rawMaterialModel.MRP"
+							<SfNumericTextBox @bind-Value="_rawMaterialModel.Rate"
 											  Format="C2"
 											  Currency="INR"
 											  Placeholder="Enter MRP"
@@ -195,11 +195,11 @@ else
 									<span class="tax-name">@GetTaxName(material.TaxId)</span>
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(RawMaterialModel.MeasurementUnit)" 
+							<GridColumn Field="@nameof(RawMaterialModel.UnitOfMeasurement)" 
 									   HeaderText="Unit" 
 									   Width="80" 
 									   TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(RawMaterialModel.MRP)" 
+							<GridColumn Field="@nameof(RawMaterialModel.Rate)" 
 									   HeaderText="MRP (₹)" 
 									   Width="100" 
 									   Format="C2" 

@@ -2,8 +2,8 @@
 
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakes.Web.Services;
 
@@ -30,6 +30,8 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 		await LocalRemove(StorageFileNames.SaleCartDataFileName);
 		await LocalRemove(StorageFileNames.PurchaseDataFileName);
 		await LocalRemove(StorageFileNames.PurchaseCartDataFileName);
+		await LocalRemove(StorageFileNames.PurchaseReturnDataFileName);
+		await LocalRemove(StorageFileNames.PurchaseReturnCartDataFileName);
 		await LocalRemove(StorageFileNames.KitchenIssueDataFileName);
 		await LocalRemove(StorageFileNames.KitchenIssueCartDataFileName);
 		await LocalRemove(StorageFileNames.KitchenProductionDataFileName);

@@ -63,13 +63,13 @@ public static class SaleReturnExcelExport
 		];
 
 		// Create a customized column settings for the report
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = null;
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = null;
 
 		// Generate title based on location selection if applicable
 		string reportTitle = "Sale Return Report";
 		string worksheetName = "Return Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			saleReturnOverviews,
 			reportTitle,
 			worksheetName,

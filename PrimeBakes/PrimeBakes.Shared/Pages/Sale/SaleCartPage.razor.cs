@@ -2,6 +2,7 @@ using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;

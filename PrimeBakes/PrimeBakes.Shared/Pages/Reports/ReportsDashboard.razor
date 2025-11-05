@@ -161,11 +161,19 @@ else
 					<p>Manage supply chain and raw material analytics</p>
 				</div>
 				<div class="dashboard-cards">
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Purchase")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/purchase")'>
 						<div class="card-icon purchase-report-icon">
 							<i class="fas fa-receipt"></i>
 						</div>
 						<h3>Purchase Report</h3>
+						<p>Track procurement activities and expenditures</p>
+					</div>
+
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/purchasereturn")'>
+						<div class="card-icon purchase-report-icon">
+							<i class="fas fa-receipt"></i>
+						</div>
+						<h3>Purchase Return Report</h3>
 						<p>Track procurement activities and expenditures</p>
 					</div>
 

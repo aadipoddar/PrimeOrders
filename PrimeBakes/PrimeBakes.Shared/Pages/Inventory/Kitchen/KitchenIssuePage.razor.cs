@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
@@ -52,16 +52,16 @@ public partial class KitchenIssuePage
 
 		_cart.Clear();
 
-		_rawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0, DateOnly.FromDateTime(DateTime.Now).ToDateTime(TimeOnly.MaxValue));
+		_rawMaterials = await PurchaseData.LoadRawMaterialByPartyPurchaseDateTime(0, DateOnly.FromDateTime(DateTime.Now).ToDateTime(TimeOnly.MaxValue));
 		foreach (var item in _rawMaterials)
 			_cart.Add(new()
 			{
 				RawMaterialId = item.Id,
 				RawMaterialName = item.Name,
 				RawMaterialCategoryId = item.RawMaterialCategoryId,
-				MeasurementUnit = item.MeasurementUnit,
+				MeasurementUnit = item.UnitOfMeasurement,
 				Quantity = 0,
-				Rate = item.MRP,
+				Rate = item.Rate,
 				Total = 0
 			});
 

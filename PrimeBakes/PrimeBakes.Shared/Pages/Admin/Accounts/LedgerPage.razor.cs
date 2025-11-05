@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -29,7 +30,7 @@ public partial class LedgerPage
 		Address = "",
 		GSTNo = "",
 		Remarks = "",
-		StateId = 0,
+		StateUTId = 0,
 		LocationId = null,
 		Status = true
 	};
@@ -37,7 +38,7 @@ public partial class LedgerPage
 	private List<LedgerModel> _ledgers = [];
 	private List<GroupModel> _groups = [];
 	private List<AccountTypeModel> _accountTypes = [];
-	private List<StateModel> _states = [];
+	private List<StateUTModel> _states = [];
 	private List<LocationModel> _locations = [];
 
 	private SfGrid<LedgerModel> _sfGrid;
@@ -64,7 +65,7 @@ public partial class LedgerPage
 			_ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
 			_groups = await CommonData.LoadTableData<GroupModel>(TableNames.Group);
 			_accountTypes = await CommonData.LoadTableData<AccountTypeModel>(TableNames.AccountType);
-			_states = await CommonData.LoadTableData<StateModel>(TableNames.State);
+			_states = await CommonData.LoadTableData<StateUTModel>(TableNames.StateUT);
 			_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
 			_ledgerModel.Code = GenerateCodes.GenerateLedgerCode(_ledgers.OrderBy(_ => _.Code).LastOrDefault()?.Code);
@@ -95,7 +96,7 @@ public partial class LedgerPage
 			Address = "",
 			GSTNo = "",
 			Remarks = "",
-			StateId = 0,
+			StateUTId = 0,
 			LocationId = null,
 			Status = true
 		};
@@ -117,7 +118,7 @@ public partial class LedgerPage
 			Address = ledger.Address,
 			GSTNo = ledger.GSTNo,
 			Remarks = ledger.Remarks,
-			StateId = ledger.StateId,
+			StateUTId = ledger.StateUTId,
 			LocationId = ledger.LocationId,
 			Status = ledger.Status
 		};
@@ -174,7 +175,7 @@ public partial class LedgerPage
 			return false;
 		}
 
-		if (_ledgerModel.StateId <= 0)
+		if (_ledgerModel.StateUTId <= 0)
 		{
 			_errorMessage = "State selection is required. Please select a valid state.";
 			await ShowErrorToast();

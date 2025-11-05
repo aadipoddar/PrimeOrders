@@ -36,15 +36,15 @@ public static class OrderA4Print
 		}
 
 		// Create PDF document
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
+		var (pdfDocument, pdfPage) = PDFExportUtilOld.CreateA4Document();
 
 		// Draw sections
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "ORDER");
+		float currentY = await PDFExportUtilOld.DrawCompanyInformation(pdfPage, "ORDER");
 		currentY = DrawOrderDetails(pdfPage, currentY, order, location, user);
 		var result = DrawItemDetails(pdfPage, currentY, orderProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, orderProductCartModel, order);
 
-		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
+		return PDFExportUtilOld.FinalizePdfDocument(pdfDocument);
 	}
 
 	private static float DrawOrderDetails(PdfPage pdfPage, float currentY, OrderModel order, LocationModel location, UserModel user)
@@ -65,7 +65,7 @@ public static class OrderA4Print
 		if (!string.IsNullOrEmpty(order.Remarks))
 			rightColumnDetails["Remarks"] = order.Remarks;
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Order Details", leftColumnDetails, rightColumnDetails);
+		return PDFExportUtilOld.DrawInvoiceDetailsSection(pdfPage, currentY, "Order Details", leftColumnDetails, rightColumnDetails);
 	}
 
 	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<OrderProductCartModel> orderProducts)
@@ -77,7 +77,7 @@ public static class OrderA4Print
 			Qty = item.Quantity.ToString("N2")
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtilOld._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.15f, // S.No
@@ -92,10 +92,10 @@ public static class OrderA4Print
 			PdfTextAlignment.Center  // Qty
 		};
 
-		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
+		var pdfGrid = PDFExportUtilOld.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtilOld._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtilOld._pageMargin));
 
 		return result;
 	}
@@ -113,6 +113,6 @@ public static class OrderA4Print
 		if (order.SaleId.HasValue)
 			summaryItems["Sale ID:"] = order.SaleId.Value.ToString();
 
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, 0);
+		return PDFExportUtilOld.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, 0);
 	}
 }

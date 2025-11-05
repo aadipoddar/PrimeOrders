@@ -4,9 +4,9 @@ namespace PrimeBakesLibrary.Data.Accounts.Masters;
 
 public static class FinancialYearData
 {
-	public static async Task InsertFinancialYear(FinancialYearModel financialYear) =>
-		await SqlDataAccess.SaveData(StoredProcedureNames.InsertFinancialYear, financialYear);
+	public static async Task<int> InsertFinancialYear(FinancialYearModel financialYear) =>
+		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertFinancialYear, financialYear)).FirstOrDefault();
 
-	public static async Task<FinancialYearModel> LoadFinancialYearByDate(DateOnly Date) =>
-		(await SqlDataAccess.LoadData<FinancialYearModel, dynamic>(StoredProcedureNames.LoadFinancialYearByDate, new { Date })).FirstOrDefault();
+	public static async Task<FinancialYearModel> LoadFinancialYearByDateTime(DateTime TransactionDateTime) =>
+		(await SqlDataAccess.LoadData<FinancialYearModel, dynamic>(StoredProcedureNames.LoadFinancialYearByDateTime, new { TransactionDateTime })).FirstOrDefault();
 }

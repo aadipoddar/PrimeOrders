@@ -28,21 +28,21 @@ public static class KitchenIssueA4Print
 			{
 				RawMaterialId = item.RawMaterialId,
 				RawMaterialName = rawMaterial.Name,
-				MeasurementUnit = rawMaterial.MeasurementUnit,
+				MeasurementUnit = rawMaterial.UnitOfMeasurement,
 				Quantity = item.Quantity,
 				Rate = item.Rate,
 				Total = item.Total
 			});
 		}
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
+		var (pdfDocument, pdfPage) = PDFExportUtilOld.CreateA4Document();
 
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "KITCHEN ISSUE");
+		float currentY = await PDFExportUtilOld.DrawCompanyInformation(pdfPage, "KITCHEN ISSUE");
 		currentY = DrawIssueDetails(pdfPage, currentY, kitchenIssue, kitchen, user);
 		var result = DrawItemDetails(pdfPage, currentY, kitchenIssueDetailCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, kitchenIssueDetailCartModel);
 
-		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
+		return PDFExportUtilOld.FinalizePdfDocument(pdfDocument);
 	}
 
 	private static float DrawIssueDetails(PdfPage pdfPage, float currentY, KitchenIssueModel kitchenIssue, KitchenModel kitchen, UserModel user)
@@ -60,7 +60,7 @@ public static class KitchenIssueA4Print
 			["Remarks"] = string.IsNullOrWhiteSpace(kitchenIssue.Remarks) ? "N/A" : kitchenIssue.Remarks
 		};
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Issue Details", leftColumnDetails, rightColumnDetails);
+		return PDFExportUtilOld.DrawInvoiceDetailsSection(pdfPage, currentY, "Issue Details", leftColumnDetails, rightColumnDetails);
 	}
 
 	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<KitchenIssueRawMaterialCartModel> kitchenIssueDetails)
@@ -75,7 +75,7 @@ public static class KitchenIssueA4Print
 			Total = item.Total.ToString("N2")
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtilOld._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.08f, // S.No
@@ -96,10 +96,10 @@ public static class KitchenIssueA4Print
 			PdfTextAlignment.Right   // Total
 		};
 
-		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
+		var pdfGrid = PDFExportUtilOld.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtilOld._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtilOld._pageMargin));
 
 		return result;
 	}
@@ -113,6 +113,6 @@ public static class KitchenIssueA4Print
 			["Total Value: "] = $"₹{kitchenIssueDetails.Sum(x => x.Total):N2}"
 		};
 
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, kitchenIssueDetails.Sum(x => x.Total));
+		return PDFExportUtilOld.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, kitchenIssueDetails.Sum(x => x.Total));
 	}
 }

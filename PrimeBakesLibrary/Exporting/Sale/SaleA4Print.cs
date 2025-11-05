@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Data.Accounts.Masters;
+﻿using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Common;
@@ -43,9 +44,9 @@ public static class SaleA4Print
 				Total = item.Total
 			});
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
+		var (pdfDocument, pdfPage) = PDFExportUtilOld.CreateA4Document();
 
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES INVOICE");
+		float currentY = await PDFExportUtilOld.DrawCompanyInformation(pdfPage, "SALES INVOICE");
 
 		// Add outlet details if it's not the primary location (LocationId != 1)
 		if (sale.LocationId != 1)
@@ -55,7 +56,7 @@ public static class SaleA4Print
 		var result = DrawItemDetails(pdfPage, currentY, saleProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, sale, saleDetails);
 
-		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
+		return PDFExportUtilOld.FinalizePdfDocument(pdfDocument);
 	}
 
 	/// <summary>
@@ -82,36 +83,36 @@ public static class SaleA4Print
 		var detailsRect = new RectangleF(15, currentY, pdfPage.GetClientSize().Width - 30, totalHeight);
 
 		// Draw the outlet box with a different background color to distinguish from main company
-		pdfPage.Graphics.DrawRectangle(new PdfPen(PDFExportUtil._accentColor, 1),
+		pdfPage.Graphics.DrawRectangle(new PdfPen(PDFExportUtilOld._accentColor, 1),
 			new PdfSolidBrush(Color.FromArgb(240, 248, 255)), detailsRect); // Light blue background
 
 		var leftX = 20f;
 		var detailY = currentY + 8f;
 
 		// Section title
-		pdfPage.Graphics.DrawString("Outlet Details", PDFExportUtil._subHeaderFont,
-			new PdfSolidBrush(PDFExportUtil._accentColor), new PointF(leftX, detailY));
+		pdfPage.Graphics.DrawString("Outlet Details", PDFExportUtilOld._subHeaderFont,
+			new PdfSolidBrush(PDFExportUtilOld._accentColor), new PointF(leftX, detailY));
 
 		detailY += 20f;
 
 		// Outlet name
-		pdfPage.Graphics.DrawString($"Outlet: {location.Name}", PDFExportUtil._normalFont,
-			new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+		pdfPage.Graphics.DrawString($"Outlet: {location.Name}", PDFExportUtilOld._normalFont,
+			new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 
 		// Alias (if available)
 		if (!string.IsNullOrEmpty(outlet.Alias))
 		{
 			detailY += 12f;
-			pdfPage.Graphics.DrawString(outlet.Alias, PDFExportUtil._normalFont,
-				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			pdfPage.Graphics.DrawString(outlet.Alias, PDFExportUtilOld._normalFont,
+				new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 		}
 
 		// GST Number (if available)
 		if (!string.IsNullOrEmpty(outlet.GSTNo))
 		{
 			detailY += 12f;
-			pdfPage.Graphics.DrawString($"GST NO: {outlet.GSTNo}", PDFExportUtil._normalFont,
-				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			pdfPage.Graphics.DrawString($"GST NO: {outlet.GSTNo}", PDFExportUtilOld._normalFont,
+				new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 		}
 
 		// Address (if available)
@@ -133,22 +134,22 @@ public static class SaleA4Print
 					var firstLine = outlet.Address.Substring(0, breakPoint);
 					var secondLine = outlet.Address.Substring(breakPoint + 1);
 
-					pdfPage.Graphics.DrawString($"Address: {firstLine}", PDFExportUtil._normalFont,
-						new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+					pdfPage.Graphics.DrawString($"Address: {firstLine}", PDFExportUtilOld._normalFont,
+						new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 					detailY += 12f;
-					pdfPage.Graphics.DrawString(secondLine, PDFExportUtil._normalFont,
-						new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX + 60, detailY));
+					pdfPage.Graphics.DrawString(secondLine, PDFExportUtilOld._normalFont,
+						new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX + 60, detailY));
 				}
 				else
 				{
-					pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtil._normalFont,
-						new PdfSolidBrush(PDFExportUtil._darkGray), addressRect);
+					pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtilOld._normalFont,
+						new PdfSolidBrush(PDFExportUtilOld._darkGray), addressRect);
 				}
 			}
 			else
 			{
-				pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtil._normalFont,
-					new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+				pdfPage.Graphics.DrawString($"Address: {outlet.Address}", PDFExportUtilOld._normalFont,
+					new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 			}
 		}
 
@@ -156,16 +157,16 @@ public static class SaleA4Print
 		if (!string.IsNullOrEmpty(outlet.Phone))
 		{
 			detailY += 12f;
-			pdfPage.Graphics.DrawString($"Contact: {outlet.Phone}", PDFExportUtil._normalFont,
-				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			pdfPage.Graphics.DrawString($"Contact: {outlet.Phone}", PDFExportUtilOld._normalFont,
+				new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 		}
 
 		// Email information (if available)
 		if (!string.IsNullOrEmpty(outlet.Email))
 		{
 			detailY += 12f;
-			pdfPage.Graphics.DrawString($"Email: {outlet.Email}", PDFExportUtil._normalFont,
-				new PdfSolidBrush(PDFExportUtil._darkGray), new PointF(leftX, detailY));
+			pdfPage.Graphics.DrawString($"Email: {outlet.Email}", PDFExportUtilOld._normalFont,
+				new PdfSolidBrush(PDFExportUtilOld._darkGray), new PointF(leftX, detailY));
 		}
 
 		return detailsRect.Y + detailsRect.Height + 15f; // Add some spacing after the outlet box
@@ -201,7 +202,7 @@ public static class SaleA4Print
 		if (!string.IsNullOrEmpty(sale.Remarks))
 			leftColumnDetails["Remarks"] = sale.Remarks;
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Invoice Details", leftColumnDetails, rightColumnDetails);
+		return PDFExportUtilOld.DrawInvoiceDetailsSection(pdfPage, currentY, "Invoice Details", leftColumnDetails, rightColumnDetails);
 	}
 
 	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<SaleProductCartModel> saleDetails)
@@ -217,7 +218,7 @@ public static class SaleA4Print
 			Total = (int)item.Total
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtilOld._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.08f, // S.No
@@ -240,10 +241,10 @@ public static class SaleA4Print
 			PdfTextAlignment.Right   // Total
 		};
 
-		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
+		var pdfGrid = PDFExportUtilOld.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtilOld._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtilOld._pageMargin));
 
 		return result;
 	}
@@ -298,7 +299,7 @@ public static class SaleA4Print
 
 		var paymentMode = GetPaymentMode(sale);
 
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, sale.Total, paymentMode);
+		return PDFExportUtilOld.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, sale.Total, paymentMode);
 	}
 
 	private static string GetPaymentMode(SaleOverviewModel sale)

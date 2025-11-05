@@ -105,22 +105,22 @@ else
 							CssClass="custom-grid">
 						<GridPageSettings PageSize="15" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar" />
-						<GridEvents RowSelected="RowSelectHandler" TValue="StateModel" />
+						<GridEvents RowSelected="RowSelectHandler" TValue="StateUTModel" />
 						<GridColumns>
-							<GridColumn Field="@nameof(StateModel.Id)" 
+							<GridColumn Field="@nameof(StateUTModel.Id)" 
 									   HeaderText="ID" 
 									   Width="80" 
 									   TextAlign="TextAlign.Center" />
-							<GridColumn Field="@nameof(StateModel.Name)" 
+							<GridColumn Field="@nameof(StateUTModel.Name)" 
 									   HeaderText="State/UT Name" 
 									   Width="300" />
-							<GridColumn Field="@nameof(StateModel.Status)" 
+							<GridColumn Field="@nameof(StateUTModel.Status)" 
 									   HeaderText="Status" 
 									   Width="120" 
 									   TextAlign="TextAlign.Center">
 								<Template>
 									@{
-										var state = (context as StateModel);
+										var state = (context as StateUTModel);
 									}
 									<div class="status-badge @(state.Status ? "status-active" : "status-inactive")">
 										@(state.Status ? "Active" : "Inactive")
@@ -130,7 +130,7 @@ else
 							<GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center">
 								<Template>
 									@{
-										var state = (context as StateModel);
+										var state = (context as StateUTModel);
 									}
 									<div class="action-buttons">
 										<button @onclick="() => OnEditState(state)" 

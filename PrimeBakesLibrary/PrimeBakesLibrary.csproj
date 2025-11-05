@@ -7,15 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
     <PackageReference Include="NumericWordsConversion" Version="2.1.1" />
-    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="31.2.3" />
-    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="31.2.3" />
+    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="31.2.5" />
+    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="31.2.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="PrimeBakesLibrary.DataAccess" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Exporting\Inventory\Purchase\" />
   </ItemGroup>
 
 </Project>

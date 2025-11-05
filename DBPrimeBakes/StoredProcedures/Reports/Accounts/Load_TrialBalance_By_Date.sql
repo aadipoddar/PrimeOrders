@@ -14,7 +14,7 @@ BEGIN
 		l.Phone AS Phone,
 		l.Address,
 		l.GSTNo,
-		l.StateId,
+		l.[StateUTId],
 		s.Name AS StateName,
 		l.LocationId,
 		loc.Name AS LocationName,
@@ -81,7 +81,7 @@ BEGIN
 	INNER JOIN
 		[dbo].[AccountType] at ON at.Id = l.AccountTypeId
 	INNER JOIN
-		[dbo].[State] s ON s.Id = l.StateId
+		[dbo].[StateUT] s ON s.Id = l.[StateUTId]
 	LEFT JOIN
 		[dbo].[Location] loc ON loc.Id = l.LocationId
 	
@@ -100,7 +100,7 @@ BEGIN
 		l.Phone,
 		l.Address,
 		l.GSTNo,
-		l.StateId,
+		l.[StateUTId],
 		s.Name,
 		l.LocationId,
 		loc.Name

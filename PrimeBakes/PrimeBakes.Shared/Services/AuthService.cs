@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakes.Shared.Services;

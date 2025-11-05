@@ -72,7 +72,7 @@ public static class ProductExcelExport
 		];
 
 		// Define custom column settings with professional styling
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(ProductOverviewModel.ProductCode)] = new()
 			{
@@ -116,7 +116,7 @@ public static class ProductExcelExport
 				{
 					if (value == null) return null;
 					var qty = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = qty > 10,
 						FontColor = qty > 50 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -152,7 +152,7 @@ public static class ProductExcelExport
 				{
 					if (value == null) return null;
 					var discount = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = discount > 0,
 						FontColor = discount > 0 ? Syncfusion.Drawing.Color.FromArgb(220, 53, 69) : null
@@ -205,7 +205,7 @@ public static class ProductExcelExport
 				{
 					if (value == null) return null;
 					var amount = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = amount > 10000,
 						FontColor = amount > 50000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -228,7 +228,7 @@ public static class ProductExcelExport
 
 		string worksheetName = "Product Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			productOverviews,
 			reportTitle,
 			worksheetName,

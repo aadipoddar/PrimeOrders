@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[StateUT]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [Name] VARCHAR(250) NOT NULL UNIQUE, 
+    [UnionTerritory] BIT NOT NULL DEFAULT 0,
+    [Status] BIT NOT NULL DEFAULT 1
+)

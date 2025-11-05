@@ -67,7 +67,7 @@ public partial class RawMaterialStockAdjustmentPage
 				RawMaterialId = product.Id,
 				RawMaterialName = product.Name,
 				Quantity = 0,
-				Rate = product.MRP,
+				Rate = product.Rate,
 				Total = 0
 			});
 

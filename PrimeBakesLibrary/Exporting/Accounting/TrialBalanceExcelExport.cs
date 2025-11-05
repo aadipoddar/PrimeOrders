@@ -52,7 +52,7 @@ public static class TrialBalanceExcelExport
 		];
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelExportUtilOld.ColumnSetting>
 		{
 			[nameof(TrialBalanceModel.AccountTypeName)] = new()
 			{
@@ -113,7 +113,7 @@ public static class TrialBalanceExcelExport
 				{
 					if (value == null) return null;
 					var val = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = val < 0,
 						FontColor = val < 0 ? Syncfusion.Drawing.Color.FromArgb(198, 40, 40) : null
@@ -131,7 +131,7 @@ public static class TrialBalanceExcelExport
 				{
 					if (value == null) return null;
 					var val = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = val > 0,
 						FontColor = val > 0 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -149,7 +149,7 @@ public static class TrialBalanceExcelExport
 				{
 					if (value == null) return null;
 					var val = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = val > 0,
 						FontColor = val > 0 ? Syncfusion.Drawing.Color.FromArgb(239, 108, 0) : null
@@ -170,7 +170,7 @@ public static class TrialBalanceExcelExport
 					var val = Convert.ToDecimal(value);
 					if (val < 0)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							Bold = true,
 							FontColor = Syncfusion.Drawing.Color.FromArgb(198, 40, 40)
@@ -178,7 +178,7 @@ public static class TrialBalanceExcelExport
 					}
 					else if (val < 100)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							Bold = true,
 							FontColor = Syncfusion.Drawing.Color.FromArgb(239, 108, 0)
@@ -192,7 +192,7 @@ public static class TrialBalanceExcelExport
 		string reportTitle = "Trial Balance Report";
 		string worksheetName = "Trial Balance";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			trialBalances,
 			reportTitle,
 			worksheetName,

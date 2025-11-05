@@ -13,7 +13,7 @@ SELECT
 	[l].[GSTNo],
 	[l].[Phone],
 	[l].[Email],
-	[l].[StateId],
+	[l].[StateUTId],
 	[s].[Name] AS StateName,
 	[l].[Remarks] AS LedgerRemarks,
 	[l].[LocationId] AS LedgerLocationId,
@@ -29,7 +29,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Sales' THEN
 			(SELECT BillNo FROM [dbo].[Sale_Overview] WHERE SaleId = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
-			(SELECT BillNo FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
+			(SELECT TransactionNo FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
 			(SELECT BillNo FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
 	END) AS ReferenceNo,
@@ -38,7 +38,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Sales' THEN
 			(SELECT SaleDateTime FROM [dbo].[Sale_Overview] WHERE SaleId = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
-			(SELECT BillDateTime FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
+			(SELECT TransactionDateTime FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
 			(SELECT SaleReturnDateTime FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
 	END) AS ReferenceDate,
@@ -47,7 +47,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Sales' THEN
 			(SELECT Total FROM [dbo].[Sale_Overview] WHERE SaleId = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
-			(SELECT Total FROM [dbo].[Purchase_Overview] WHERE PurchaseId = [ad].[ReferenceId])
+			(SELECT TotalAmount FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
 			(SELECT Total FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
 	END) AS ReferenceAmount,
@@ -69,7 +69,7 @@ INNER JOIN
 INNER JOIN
 	[dbo].[Group] g ON l.GroupId = g.Id
 INNER JOIN
-	[dbo].[State] s ON l.StateId = s.Id
+	[dbo].[StateUT] s ON l.[StateUTId] = s.Id
 LEFT JOIN
 	[dbo].[Location] lo ON l.LocationId = lo.Id
 
@@ -91,7 +91,7 @@ GROUP BY
 	[l].[GSTNo],
 	[l].[Phone],
 	[l].[Email],
-	[l].[StateId],
+	[l].[StateUTId],
 	[s].[Name],
 	[l].[Remarks],
 	[l].[LocationId],

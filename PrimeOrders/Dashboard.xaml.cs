@@ -42,7 +42,6 @@ public partial class Dashboard : Window
 
 			if (!isInventory)
 			{
-				purchaseButton.Visibility = Visibility.Collapsed;
 				kitchenIssueButton.Visibility = Visibility.Collapsed;
 			}
 
@@ -56,12 +55,6 @@ public partial class Dashboard : Window
 	{
 		SaleWindow saleWindow = new(_user);
 		saleWindow.Show();
-	}
-
-	private void purchaseButton_Click(object sender, RoutedEventArgs e)
-	{
-		PurchaseWindow purchaseWindow = new(_user);
-		purchaseWindow.Show();
 	}
 
 	private void kitchenIssueButton_Click(object sender, RoutedEventArgs e)

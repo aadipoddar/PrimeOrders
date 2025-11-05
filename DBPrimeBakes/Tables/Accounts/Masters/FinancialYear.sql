@@ -4,6 +4,7 @@
 	[StartDate] DATE NOT NULL,
 	[EndDate] DATE NOT NULL, 
     [YearNo] INT NOT NULL,
-    [Remarks] VARCHAR(250) NOT NULL,
+    [Remarks] VARCHAR(MAX) NULL,
+	[Locked] BIT NOT NULL DEFAULT 0,
     [Status] BIT NOT NULL DEFAULT 1, 
 )

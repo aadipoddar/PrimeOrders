@@ -92,7 +92,7 @@ else
 
 						<div class="form-group">
 							<label class="form-label">State *</label>
-							<SfDropDownList @bind-Value="_ledgerModel.StateId"
+							<SfDropDownList @bind-Value="_ledgerModel.StateUTId"
 											DataSource="@_states"
 											Placeholder="Select state"
 											CssClass="custom-dropdown">
@@ -240,14 +240,14 @@ else
 									<span class="account-type-name">@GetAccountTypeName(ledger.AccountTypeId)</span>
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(LedgerModel.StateId)" 
+							<GridColumn Field="@nameof(LedgerModel.StateUTId)" 
 									   HeaderText="State" 
 									   Width="100">
 								<Template>
 									@{
 										var ledger = (context as LedgerModel);
 									}
-									<span class="state-name">@GetStateName(ledger.StateId)</span>
+									<span class="state-name">@GetStateName(ledger.StateUTId.Value)</span>
 								</Template>
 							</GridColumn>
 							<GridColumn Field="@nameof(LedgerModel.LocationId)" 

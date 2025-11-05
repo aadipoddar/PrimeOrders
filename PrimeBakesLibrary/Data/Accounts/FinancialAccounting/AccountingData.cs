@@ -40,7 +40,7 @@ public static class AccountingData
 
 		accounting.Status = true;
 		accounting.GeneratedModule = GeneratedModules.FinancialAccounting.ToString();
-		accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(accounting.AccountingDate)).Id;
+		accounting.FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(accounting.AccountingDate.ToDateTime(TimeOnly.MinValue))).Id;
 		accounting.CreatedAt = DateTime.Now;
 
 		if (update)

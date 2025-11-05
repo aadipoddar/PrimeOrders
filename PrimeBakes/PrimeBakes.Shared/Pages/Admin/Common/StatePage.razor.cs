@@ -16,16 +16,16 @@ public partial class StatePage
 	private bool _isLoading = true;
 	private bool _isSubmitting = false;
 
-	private StateModel _stateModel = new()
+	private StateUTModel _stateModel = new()
 	{
 		Id = 0,
 		Name = "",
 		Status = true
 	};
 
-	private List<StateModel> _states = [];
+	private List<StateUTModel> _states = [];
 
-	private SfGrid<StateModel> _sfGrid;
+	private SfGrid<StateUTModel> _sfGrid;
 	private SfToast _sfToast;
 	private SfToast _sfErrorToast;
 
@@ -54,7 +54,7 @@ public partial class StatePage
 
 	private async Task LoadStates()
 	{
-		_states = await CommonData.LoadTableData<StateModel>(TableNames.State);
+		_states = await CommonData.LoadTableData<StateUTModel>(TableNames.StateUT);
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
 		StateHasChanged();
@@ -71,7 +71,7 @@ public partial class StatePage
 		StateHasChanged();
 	}
 
-	private void OnEditState(StateModel state)
+	private void OnEditState(StateUTModel state)
 	{
 		_stateModel = new()
 		{
@@ -118,7 +118,7 @@ public partial class StatePage
 			var isNewState = _stateModel.Id == 0;
 			var stateName = _stateModel.Name;
 
-			await StateData.InsertState(_stateModel);
+			await StateUTData.InsertStateUT(_stateModel);
 			_successMessage = isNewState
 				? $"State '{stateName}' has been added successfully!"
 				: $"State '{stateName}' has been updated successfully!";
@@ -144,14 +144,14 @@ public partial class StatePage
 		}
 	}
 
-	private async Task ToggleStateStatus(StateModel state)
+	private async Task ToggleStateStatus(StateUTModel state)
 	{
 		try
 		{
 			var previousStatus = state.Status;
 			state.Status = !state.Status;
 
-			await StateData.InsertState(state);
+			await StateUTData.InsertStateUT(state);
 			_successMessage = $"State '{state.Name}' has been {(state.Status ? "activated" : "deactivated")} successfully!";
 			await ShowSuccessToast();
 			await LoadStates();
@@ -166,7 +166,7 @@ public partial class StatePage
 		}
 	}
 
-	private void RowSelectHandler(RowSelectEventArgs<StateModel> args)
+	private void RowSelectHandler(RowSelectEventArgs<StateUTModel> args)
 	{
 		OnEditState(args.Data);
 	}

@@ -46,6 +46,7 @@ public enum GeneratedModules
 	FinancialAccounting,
 	Sales,
 	Purchase,
+	PurchaseReturn,
 	SaleReturn,
 }
 
@@ -53,6 +54,7 @@ public enum ReferenceTypes
 {
 	Sales,
 	Purchase,
+	PurchaseReturn,
 	SaleReturn,
 }
 

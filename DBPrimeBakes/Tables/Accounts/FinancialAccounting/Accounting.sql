@@ -3,7 +3,7 @@
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [TransactionNo] VARCHAR(20) NOT NULL, 
     [VoucherId] INT NOT NULL, 
-    [Remarks] VARCHAR(500) NOT NULL, 
+    [Remarks] VARCHAR(500) NULL, 
     [AccountingDate] DATE NOT NULL, 
     [FinancialYearId] INT NOT NULL, 
     [UserId] INT NOT NULL, 

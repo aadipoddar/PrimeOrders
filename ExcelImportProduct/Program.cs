@@ -4,24 +4,26 @@ using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
-//FileInfo fileInfo = new(@"C:\Others\accountingdetail.xlsx");
+FileInfo fileInfo = new(@"C:\Others\purchase.xlsx");
 
-//ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-//using var package = new ExcelPackage(fileInfo);
+using var package = new ExcelPackage(fileInfo);
 
-//await package.LoadAsync(fileInfo);
+await package.LoadAsync(fileInfo);
 
-//var worksheet = package.Workbook.Worksheets[0];
+var worksheet1 = package.Workbook.Worksheets[0];
+var worksheet2 = package.Workbook.Worksheets[1];
 
 // await InsertProducts(worksheet);
 
@@ -43,7 +45,9 @@ using PrimeBakesLibrary.Models.Sale;
 
 // await RecalculateReturnBills();
 
-await UpdateProductLocation();
+// await UpdateProductLocation();
+
+// await InsertPurchase(worksheet1, worksheet2);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -102,9 +106,9 @@ static async Task InsertRawMaterial(ExcelWorksheet worksheet)
 			Id = row,
 			Code = code,
 			Name = name,
-			MRP = 0,
+			Rate = 0,
 			RawMaterialCategoryId = 1,
-			MeasurementUnit = unit,
+			UnitOfMeasurement = unit,
 			TaxId = 7,
 			Status = true
 		});
@@ -180,7 +184,7 @@ static async Task InsertSupplier(ExcelWorksheet worksheet)
 			Address = address ?? string.Empty,
 			GSTNo = gstNo ?? string.Empty,
 			Phone = phone ?? string.Empty,
-			StateId = 1,
+			StateUTId = 1,
 			LocationId = null,
 			Remarks = remarks ?? string.Empty,
 			AccountTypeId = int.Parse(accountType),
@@ -318,7 +322,7 @@ static async Task InsertAccountingDetails(ExcelWorksheet worksheet)
 			id = saleReturn?.Id;
 		}
 		else if (accounting.GeneratedModule == "Purchase")
-			id = (await CommonData.LoadTableData<PurchaseModel>(TableNames.Purchase)).Where(p => p.BillNo == accounting.TransactionNo).FirstOrDefault()?.Id ?? 0;
+			id = (await CommonData.LoadTableData<PurchaseModelOld>(TableNames.Purchase)).Where(p => p.BillNo == accounting.TransactionNo).FirstOrDefault()?.Id ?? 0;
 
 		Console.WriteLine("Inserting Accounting Voucher: " + accounting.TransactionNo + " and voucherId " + accounting.VoucherId);
 
@@ -481,4 +485,209 @@ static async Task UpdateProductLocation()
 			Rate = product.Rate,
 			Status = true
 		});
+}
+
+static async Task InsertPurchase(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+	var row = 2;
+
+	List<PurchaseModelOld> purchase = [];
+	List<PurchaseDetailModelOld> purchaseDetails = [];
+
+	while (worksheet1.Cells[row, 1].Value != null)
+	{
+		var id = worksheet1.Cells[row, 1].Value.ToString();
+		var billNo = worksheet1.Cells[row, 2].Value.ToString();
+		var supplierId = worksheet1.Cells[row, 3].Value.ToString();
+		var billDateTime = worksheet1.Cells[row, 4].Value.ToString();
+		var cdPercent = worksheet1.Cells[row, 5].Value.ToString();
+		var roundOff = worksheet1.Cells[row, 6].Value.ToString();
+		var remarks = worksheet1.Cells[row, 7].Value?.ToString() ?? string.Empty;
+		var userId = worksheet1.Cells[row, 8].Value.ToString();
+		var createdAt = worksheet1.Cells[row, 9].Value.ToString();
+		var status = worksheet1.Cells[row, 10].Value.ToString();
+
+		purchase.Add(new()
+		{
+			Id = int.Parse(id),
+			BillNo = billNo,
+			SupplierId = int.Parse(supplierId),
+			BillDateTime = DateTime.Parse(billDateTime),
+			CDPercent = decimal.Parse(cdPercent),
+			RoundOff = decimal.Parse(roundOff),
+			Remarks = remarks == "NULL" ? string.Empty : remarks,
+			UserId = int.Parse(userId),
+			CreatedAt = DateTime.Parse(createdAt),
+			Status = status.ToLower() == "true",
+		});
+
+		row++;
+	}
+
+	purchase.RemoveAll(_ => _.Status == false);
+
+	row = 2;
+	while (worksheet2.Cells[row, 1].Value != null)
+	{
+		var id = worksheet2.Cells[row, 1].Value.ToString();
+		var purchaseId = worksheet2.Cells[row, 2].Value.ToString();
+		var rawMaterialId = worksheet2.Cells[row, 3].Value.ToString();
+		var quantity = worksheet2.Cells[row, 4].Value.ToString();
+		var measurementUnit = worksheet2.Cells[row, 5].Value.ToString();
+		var rate = worksheet2.Cells[row, 6].Value.ToString();
+		var baseTotal = worksheet2.Cells[row, 7].Value.ToString();
+		var discPercent = worksheet2.Cells[row, 8].Value.ToString();
+		var discAmount = worksheet2.Cells[row, 9].Value.ToString();
+		var afterDiscount = worksheet2.Cells[row, 10].Value.ToString();
+		var cgstPercent = worksheet2.Cells[row, 11].Value.ToString();
+		var cgstAmount = worksheet2.Cells[row, 12].Value.ToString();
+		var sgstPercent = worksheet2.Cells[row, 13].Value.ToString();
+		var sgstAmount = worksheet2.Cells[row, 14].Value.ToString();
+		var igstPercent = worksheet2.Cells[row, 15].Value.ToString();
+		var igstAmount = worksheet2.Cells[row, 16].Value.ToString();
+		var total = worksheet2.Cells[row, 17].Value.ToString();
+		var netRate = worksheet2.Cells[row, 18].Value.ToString();
+		var status = worksheet2.Cells[row, 19].Value.ToString();
+
+		purchaseDetails.Add(new()
+		{
+			Id = int.Parse(id),
+			PurchaseId = int.Parse(purchaseId),
+			RawMaterialId = int.Parse(rawMaterialId),
+			Quantity = decimal.Parse(quantity),
+			MeasurementUnit = measurementUnit,
+			Rate = decimal.Parse(rate),
+			BaseTotal = decimal.Parse(baseTotal),
+			DiscPercent = decimal.Parse(discPercent),
+			DiscAmount = decimal.Parse(discAmount),
+			AfterDiscount = decimal.Parse(afterDiscount),
+			CGSTPercent = decimal.Parse(cgstPercent),
+			CGSTAmount = decimal.Parse(cgstAmount),
+			SGSTPercent = decimal.Parse(sgstPercent),
+			SGSTAmount = decimal.Parse(sgstAmount),
+			IGSTPercent = decimal.Parse(igstPercent),
+			IGSTAmount = decimal.Parse(igstAmount),
+			Total = decimal.Parse(total),
+			NetRate = decimal.Parse(netRate),
+			Status = status.ToLower() == "1",
+		});
+
+		row++;
+	}
+
+	purchaseDetails.RemoveAll(_ => _.Status == false);
+
+	Console.WriteLine("Loaded " + purchase.Count + " purchases.");
+	Console.WriteLine("Loaded " + purchaseDetails.Count + " purchase details.");
+
+	foreach (var pur in purchase)
+	{
+		Console.WriteLine("Inserting Purchase Bill Id: " + pur.Id);
+
+		var purchaseDetail = purchaseDetails.Where(pd => pd.PurchaseId == pur.Id).ToList();
+		if (purchaseDetail.Count == 0)
+		{
+			Console.WriteLine("No Purchase Details Found for Purchase Id: " + pur.Id);
+			continue;
+		}
+		List<PurchaseItemCartModel> purchaseCart = [];
+
+		foreach (var detail in purchaseDetail)
+			purchaseCart.Add(new()
+			{
+				ItemId = detail.RawMaterialId,
+				ItemName = "",
+				UnitOfMeasurement = detail.MeasurementUnit,
+				Remarks = null,
+				InclusiveTax = false,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				DiscountPercent = detail.DiscPercent,
+				CGSTPercent = detail.CGSTPercent,
+				SGSTPercent = detail.SGSTPercent,
+				IGSTPercent = detail.IGSTPercent,
+			});
+
+		foreach (var item in purchaseCart)
+		{
+			item.BaseTotal = item.Rate * item.Quantity;
+			item.DiscountAmount = item.BaseTotal * (item.DiscountPercent / 100);
+			item.AfterDiscount = item.BaseTotal - item.DiscountAmount;
+			item.CGSTAmount = item.AfterDiscount * (item.CGSTPercent / 100);
+			item.SGSTAmount = item.AfterDiscount * (item.SGSTPercent / 100);
+			item.IGSTAmount = item.AfterDiscount * (item.IGSTPercent / 100);
+			item.TotalTaxAmount = item.CGSTAmount + item.SGSTAmount + item.IGSTAmount;
+			item.Total = item.AfterDiscount + item.TotalTaxAmount;
+			var perUnitCost = item.Total / item.Quantity;
+			var withOtherCharges = perUnitCost * (1 + 0 / 100);
+			item.NetRate = withOtherCharges * (1 - pur.CDPercent / 100);
+		}
+
+		PurchaseModel finalPurchase = new()
+		{
+			Id = 0,
+			TransactionNo = pur.BillNo,
+			PartyId = pur.SupplierId,
+			TransactionDateTime = pur.BillDateTime,
+			RoundOffAmount = pur.RoundOff,
+			Remarks = string.IsNullOrWhiteSpace(pur.Remarks) ? null : pur.Remarks,
+			CreatedBy = pur.UserId,
+			OtherChargesPercent = 0,
+			OtherChargesAmount = 0,
+			DocumentUrl = null,
+			CompanyId = 1,
+			FinancialYearId = 1,
+			CreatedFromPlatform = "ImportScript",
+			CreatedAt = pur.CreatedAt,
+			Status = true,
+
+			ItemsTotalAmount = purchaseCart.Sum(x => x.Total),
+			CashDiscountPercent = pur.CDPercent
+		};
+		finalPurchase.CashDiscountAmount = finalPurchase.ItemsTotalAmount * (pur.CDPercent / 100);
+		finalPurchase.TotalAmount = finalPurchase.ItemsTotalAmount - finalPurchase.CashDiscountAmount + finalPurchase.RoundOffAmount;
+
+		await PurchaseData.SavePurchaseTransaction(finalPurchase, purchaseCart);
+		Console.WriteLine("Inserted Purchase Bill Id: " + pur.Id);
+	}
+}
+
+
+class PurchaseModelOld
+{
+	public int Id { get; set; }
+	public string BillNo { get; set; }
+	public int SupplierId { get; set; }
+	public DateTime BillDateTime { get; set; }
+	public decimal CDPercent { get; set; }
+	public decimal RoundOff { get; set; }
+	public string Remarks { get; set; }
+	public int UserId { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public bool Status { get; set; }
+}
+
+class PurchaseDetailModelOld
+{
+	public int Id { get; set; }
+	public int PurchaseId { get; set; }
+	public int RawMaterialId { get; set; }
+	public decimal Quantity { get; set; }
+	public string MeasurementUnit { get; set; }
+	public decimal Rate { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal DiscPercent { get; set; }
+	public decimal DiscAmount { get; set; }
+	public decimal AfterDiscount { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
+	public bool Status { get; set; }
 }

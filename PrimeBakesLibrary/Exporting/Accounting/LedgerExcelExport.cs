@@ -65,7 +65,7 @@ public static class LedgerExcelExport
 		];
 
 		// Column settings
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(LedgerOverviewModel.AccountingDate)] = new()
 			{
@@ -103,7 +103,7 @@ public static class LedgerExcelExport
 				{
 					if (value == null) return null;
 					var debit = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = debit > 0,
 						FontColor = debit > 10000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -122,7 +122,7 @@ public static class LedgerExcelExport
 				{
 					if (value == null) return null;
 					var credit = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = credit > 0,
 						FontColor = credit > 10000 ? Syncfusion.Drawing.Color.FromArgb(220, 53, 69) : null
@@ -156,7 +156,7 @@ public static class LedgerExcelExport
 
 		string worksheetName = "Ledger Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			ledgerOverviews,
 			reportTitle,
 			worksheetName,

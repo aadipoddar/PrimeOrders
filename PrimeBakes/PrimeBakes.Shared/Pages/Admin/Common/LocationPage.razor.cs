@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Product;
@@ -260,7 +261,7 @@ public partial class LocationPage
 				Address = "",
 				GSTNo = "",
 				Phone = "",
-				StateId = 2,
+				StateUTId = 2,
 				Status = true
 			});
 		}

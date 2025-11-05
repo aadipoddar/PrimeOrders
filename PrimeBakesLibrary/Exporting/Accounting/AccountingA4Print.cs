@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
+﻿using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
@@ -30,10 +31,10 @@ public static class AccountingA4Print
 		var ledgerRows = await AccountingData.LoadLedgerOverviewByAccountingId(accountingId);
 
 		// Create PDF document and page
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
+		var (pdfDocument, pdfPage) = PDFExportUtilOld.CreateA4Document();
 
 		// Draw company info and voucher header
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "ACCOUNTING VOUCHER");
+		float currentY = await PDFExportUtilOld.DrawCompanyInformation(pdfPage, "ACCOUNTING VOUCHER");
 
 		// Draw voucher details section
 		currentY = DrawVoucherDetails(pdfPage, currentY, accounting, voucher, user);
@@ -45,7 +46,7 @@ public static class AccountingA4Print
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, accounting, ledgerRows);
 
 		// Return PDF as MemoryStream
-		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
+		return PDFExportUtilOld.FinalizePdfDocument(pdfDocument);
 	}
 
 	private static float DrawVoucherDetails(PdfPage pdfPage, float currentY, AccountingOverviewModel accounting, VoucherModel voucher, UserModel user)
@@ -66,7 +67,7 @@ public static class AccountingA4Print
 		if (!string.IsNullOrEmpty(accounting.Remarks))
 			rightColumnDetails["Remarks"] = accounting.Remarks;
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Voucher Details", leftColumnDetails, rightColumnDetails);
+		return PDFExportUtilOld.DrawInvoiceDetailsSection(pdfPage, currentY, "Voucher Details", leftColumnDetails, rightColumnDetails);
 	}
 
 	private static PdfGridLayoutResult DrawLedgerTable(PdfPage pdfPage, float currentY, List<LedgerOverviewModel> ledgerRows)
@@ -81,7 +82,7 @@ public static class AccountingA4Print
 			Remarks = item.Remarks ?? ""
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtilOld._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.07f,  // S.No
@@ -102,10 +103,10 @@ public static class AccountingA4Print
             PdfTextAlignment.Left    // Remarks
         };
 
-		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
+		var pdfGrid = PDFExportUtilOld.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtilOld._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtilOld._pageMargin));
 
 		return result;
 	}
@@ -125,6 +126,6 @@ public static class AccountingA4Print
 		if (!string.IsNullOrEmpty(accounting.Remarks))
 			summaryItems["Remarks: "] = accounting.Remarks;
 
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, (decimal)(totalDebit - totalCredit));
+		return PDFExportUtilOld.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, (decimal)(totalDebit - totalCredit));
 	}
 }

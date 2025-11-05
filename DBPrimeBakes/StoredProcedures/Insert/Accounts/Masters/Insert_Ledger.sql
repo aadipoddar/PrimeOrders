@@ -1,18 +1,20 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Ledger]
-	@Id INT,
-	@Name VARCHAR(250),
-	@Alias VARCHAR(250),
+	@Id INT OUTPUT,
+	@Name VARCHAR(500),
 	@GroupId INT,
 	@AccountTypeId INT,
-	@Code VARCHAR(10),
-	@Phone VARCHAR(20),
-	@Email VARCHAR(100),
-	@Address VARCHAR(250),
-	@GSTNo VARCHAR(20),
-	@Remarks VARCHAR(250),
-	@StateId INT,
+	@Code VARCHAR(50),
+	@StateUTId INT = NULL,
+	@GSTNo VARCHAR(MAX) = NULL,
+	@PANNo VARCHAR(MAX) = NULL,
+	@CINNo VARCHAR(MAX) = NULL,
+	@Alias VARCHAR(MAX) = NULL,
+	@Phone VARCHAR(20) = NULL,
+	@Email VARCHAR(MAX) = NULL,
+	@Address VARCHAR(MAX) = NULL,
+	@Remarks VARCHAR(MAX) = NULL,
 	@LocationId INT = NULL,
-	@Status BIT
+	@Status BIT = 1
 AS
 BEGIN
 	IF @Id = 0
@@ -20,35 +22,40 @@ BEGIN
 		INSERT INTO [dbo].[Ledger]
 		(
 			[Name],
-			[Alias],
 			[GroupId],
 			[AccountTypeId],
 			[Code],
+			[StateUTId],
+			[GSTNo],
+			[PANNo],
+			[CINNo],
+			[Alias],
 			[Phone],
 			[Email],
 			[Address],
-			[GSTNo],
 			[Remarks],
-			[StateId],
 			[LocationId],
 			[Status]
 		)
 		VALUES
 		(
 			@Name,
-			@Alias,
 			@GroupId,
 			@AccountTypeId,
 			@Code,
+			@StateUTId,
+			@GSTNo,
+			@PANNo,
+			@CINNo,
+			@Alias,
 			@Phone,
 			@Email,
 			@Address,
-			@GSTNo,
 			@Remarks,
-			@StateId,
 			@LocationId,
 			@Status
 		);
+		SET @Id = SCOPE_IDENTITY();
 	END
 
 	ELSE
@@ -56,18 +63,22 @@ BEGIN
 		UPDATE [dbo].[Ledger]
 		SET
 			[Name] = @Name,
-			[Alias] = @Alias,
 			[GroupId] = @GroupId,
 			[AccountTypeId] = @AccountTypeId,
 			[Code] = @Code,
+			[StateUTId] = @StateUTId,
+			[GSTNo] = @GSTNo,
+			[PANNo] = @PANNo,
+			[CINNo] = @CINNo,
+			[Alias] = @Alias,
 			[Phone] = @Phone,
 			[Email] = @Email,
 			[Address] = @Address,
-			[GSTNo] = @GSTNo,
 			[Remarks] = @Remarks,
-			[StateId] = @StateId,
 			[LocationId] = @LocationId,
 			[Status] = @Status
-		WHERE [Id] = @Id;
+		WHERE
+			[Id] = @Id;
 	END
+	SELECT @Id AS Id;
 END

@@ -61,13 +61,13 @@ public static class SaleExcelExport
 			];
 
 		// Create a customized column settings for the report
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = null;
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = null;
 
 		// Generate the Excel file
 		string reportTitle = "Detailed Sales Report";
 		string worksheetName = "Sales Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			saleOverview,
 			reportTitle,
 			worksheetName,

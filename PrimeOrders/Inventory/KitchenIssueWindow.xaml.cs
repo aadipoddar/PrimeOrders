@@ -3,9 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Kitchen;
 using PrimeBakesLibrary.Models.Common;
@@ -61,7 +62,7 @@ public partial class KitchenIssueWindow : Window
 		{
 			List<KitchenIssueRawMaterialCartModel> allCart = [];
 
-			var allRawMaterials = await RawMaterialData.LoadRawMaterialRateBySupplierPurchaseDateTime(0,
+			var allRawMaterials = await PurchaseData.LoadRawMaterialByPartyPurchaseDateTime(0,
 				DateOnly.FromDateTime(kitchenIssueDateTimePicker.DateTime.Value).ToDateTime(TimeOnly.MaxValue));
 
 			var taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
@@ -75,8 +76,8 @@ public partial class KitchenIssueWindow : Window
 					RawMaterialId = rawMaterial.Id,
 					RawMaterialName = rawMaterial.Name,
 					RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
-					MeasurementUnit = rawMaterial.MeasurementUnit,
-					Rate = rawMaterial.MRP,
+					MeasurementUnit = rawMaterial.UnitOfMeasurement,
+					Rate = rawMaterial.Rate,
 					Quantity = 0,
 					Total = 0
 				});

@@ -221,7 +221,7 @@ public static class SaleData
 			Id = 0,
 			TransactionNo = sale.BillNo,
 			AccountingDate = DateOnly.FromDateTime(sale.SaleDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDate(DateOnly.FromDateTime(sale.SaleDateTime))).Id,
+			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(sale.SaleDateTime)).Id,
 			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId)).Value),
 			Remarks = sale.Remarks,
 			UserId = sale.UserId,

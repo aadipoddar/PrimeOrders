@@ -61,7 +61,7 @@ public static class ProductStockExcelExport
 		];
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelExportUtilOld.ColumnSetting>
 		{
 			[nameof(ProductStockSummaryModel.ProductCategoryName)] = new()
 			{
@@ -92,7 +92,7 @@ public static class ProductStockExcelExport
 				{
 					if (value == null) return null;
 					var stockValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = stockValue <= 0,
 						FontColor = stockValue <= 0 ? Syncfusion.Drawing.Color.FromArgb(198, 40, 40) : null
@@ -110,7 +110,7 @@ public static class ProductStockExcelExport
 				{
 					if (value == null) return null;
 					var stockValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = stockValue > 0,
 						FontColor = stockValue > 0 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -128,7 +128,7 @@ public static class ProductStockExcelExport
 				{
 					if (value == null) return null;
 					var stockValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = stockValue > 0,
 						FontColor = stockValue > 0 ? Syncfusion.Drawing.Color.FromArgb(239, 108, 0) : null
@@ -150,7 +150,7 @@ public static class ProductStockExcelExport
 					var stockValue = Convert.ToDecimal(value);
 					if (stockValue <= 0)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							Bold = true,
 							FontColor = Syncfusion.Drawing.Color.FromArgb(198, 40, 40)
@@ -158,7 +158,7 @@ public static class ProductStockExcelExport
 					}
 					else if (stockValue <= 5)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							Bold = true,
 							FontColor = Syncfusion.Drawing.Color.FromArgb(239, 108, 0)
@@ -191,7 +191,7 @@ public static class ProductStockExcelExport
 
 		string worksheetName = "Product Stock Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			stockDetails,
 			reportTitle,
 			worksheetName,
@@ -257,7 +257,7 @@ public static class ProductStockExcelExport
 		];
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelExportUtilOld.ColumnSetting>
 		{
 			[nameof(ProductStockDetailsModel.Id)] = new()
 			{
@@ -290,27 +290,27 @@ public static class ProductStockExcelExport
 					var type = value.ToString();
 					return type switch
 					{
-						"Purchase" or "KitchenProduction" => new ExcelExportUtil.FormatInfo
+						"Purchase" or "KitchenProduction" => new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(56, 142, 60),
 							Bold = true
 						},
-						"Sale" => new ExcelExportUtil.FormatInfo
+						"Sale" => new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(239, 108, 0),
 							Bold = true
 						},
-						"SaleReturn" => new ExcelExportUtil.FormatInfo
+						"SaleReturn" => new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(255, 152, 0),
 							Bold = true
 						},
-						"PurchaseReturn" => new ExcelExportUtil.FormatInfo
+						"PurchaseReturn" => new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(244, 67, 54),
 							Bold = true
 						},
-						"Adjustment" => new ExcelExportUtil.FormatInfo
+						"Adjustment" => new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(33, 150, 243),
 							Bold = true
@@ -345,7 +345,7 @@ public static class ProductStockExcelExport
 					var quantity = Convert.ToDecimal(value);
 					if (quantity > 0)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(56, 142, 60),
 							Bold = true
@@ -353,7 +353,7 @@ public static class ProductStockExcelExport
 					}
 					else if (quantity < 0)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(198, 40, 40),
 							Bold = true
@@ -374,7 +374,7 @@ public static class ProductStockExcelExport
 				{
 					if (value is null)
 					{
-						return new ExcelExportUtil.FormatInfo
+						return new ExcelExportUtilOld.FormatInfo
 						{
 							FontColor = Syncfusion.Drawing.Color.FromArgb(117, 117, 117),
 							Bold = false
@@ -398,7 +398,7 @@ public static class ProductStockExcelExport
 
 		string worksheetName = "Product Transaction Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			stockDetails,
 			reportTitle,
 			worksheetName,

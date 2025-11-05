@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -135,7 +136,7 @@ public partial class FinancialAccountingPage
 	private async Task OnAccountingDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateOnly> args)
 	{
 		_accounting.AccountingDate = args.Value;
-		_financialYear = await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate);
+		_financialYear = await FinancialYearData.LoadFinancialYearByDateTime(_accounting.AccountingDate.ToDateTime(TimeOnly.MinValue));
 		_accounting.FinancialYearId = _financialYear.Id;
 		await SaveAccountingToCart();
 	}
@@ -462,7 +463,7 @@ public partial class FinancialAccountingPage
 		await _fileSemaphore.WaitAsync();
 		try
 		{
-			_financialYear = await FinancialYearData.LoadFinancialYearByDate(_accounting.AccountingDate);
+			_financialYear = await FinancialYearData.LoadFinancialYearByDateTime(_accounting.AccountingDate.ToDateTime(TimeOnly.MinValue));
 			_accounting.FinancialYearId = _financialYear.Id;
 			_accounting.TransactionNo = await GenerateCodes.GenerateAccountingTransactionNo(_accounting);
 

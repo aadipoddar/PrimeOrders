@@ -3,11 +3,23 @@
 public static class CommonData
 {
 	public static async Task<List<T>> LoadTableData<T>(string TableName) where T : new() =>
-		await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableData, new { TableName });
+			await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableData, new { TableName });
 
 	public static async Task<T> LoadTableDataById<T>(string TableName, int Id) where T : new() =>
-			(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataById, new { TableName, Id })).FirstOrDefault();
+		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataById, new { TableName, Id })).FirstOrDefault();
 
 	public static async Task<List<T>> LoadTableDataByStatus<T>(string TableName, bool Status = true) where T : new() =>
-			await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataByStatus, new { TableName, Status });
+		await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataByStatus, new { TableName, Status });
+
+	public static async Task<T> LoadTableDataByCode<T>(string TableName, string Code) where T : new() =>
+		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataByCode, new { TableName, Code })).FirstOrDefault();
+
+	public static async Task<T> LoadTableDataByTransactionNo<T>(string TableName, string TransactionNo) where T : new() =>
+		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataByTransactionNo, new { TableName, TransactionNo })).FirstOrDefault();
+
+	public static async Task<T> LoadLastTableDataByCompanyFinancialYear<T>(string TableName, int CompanyId, int FinancialYearId) where T : new() =>
+		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadLastTableDataByCompanyFinancialYear, new { TableName, CompanyId, FinancialYearId })).FirstOrDefault();
+
+	public static async Task<DateTime> LoadCurrentDateTime() =>
+		(await SqlDataAccess.LoadData<DateTime, dynamic>(StoredProcedureNames.LoadCurrentDateTime, new { })).FirstOrDefault();
 }

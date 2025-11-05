@@ -54,7 +54,7 @@ public static class KitchenProductionExcelExport
 		];
 
 		// Define custom column settings with professional styling
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(KitchenProductionOverviewModel.TransactionNo)] = new()
 			{
@@ -92,7 +92,7 @@ public static class KitchenProductionExcelExport
 				{
 					if (value == null) return null;
 					var productCount = Convert.ToInt32(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = productCount > 5,
 						FontColor = productCount > 10 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -110,7 +110,7 @@ public static class KitchenProductionExcelExport
 				{
 					if (value == null) return null;
 					var qtyValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = qtyValue > 50,
 						FontColor = qtyValue > 100 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) :
@@ -129,7 +129,7 @@ public static class KitchenProductionExcelExport
 				{
 					if (value == null) return null;
 					var amountValue = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = amountValue > 1000,
 						FontColor = amountValue > 5000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) :
@@ -165,7 +165,7 @@ public static class KitchenProductionExcelExport
 
 		string worksheetName = "Kitchen Productions";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			kitchenProductionOverviews,
 			reportTitle,
 			worksheetName,

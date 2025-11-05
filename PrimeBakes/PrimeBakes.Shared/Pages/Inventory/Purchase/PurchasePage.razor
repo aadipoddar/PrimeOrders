@@ -1,1639 +1,1931 @@
-﻿@page "/Inventory/Purchase"
-@using PrimeBakesLibrary.Data.Common
-@using PrimeBakesLibrary.Models.Inventory
-@using PrimeBakesLibrary.Models.Product
+@page "/inventory/purchase"
+@page "/inventory/purchase/{Id:int}"
+
+@using PrimeBakesLibrary.Models.Common
 @using PrimeBakesLibrary.Models.Accounts.Masters
+@using PrimeBakesLibrary.Models.Inventory
 
 <PageTitle>Purchase - Prime Bakes</PageTitle>
 
 @if (_isLoading)
 {
-	<div class="loader-container">
-		<div class="circular-dots-loader">
-			<span class="dot dot-1"></span>
-			<span class="dot dot-2"></span>
-			<span class="dot dot-3"></span>
-		</div>
-		<p class="loading-text">Loading Purchase Page...</p>
-	</div>
+	<SfSpinner @bind-Visible="_isLoading" Label="Page is Loading, Please Wait" />
 }
 else
 {
-	<div class="order-container">
-		<div class="page-header">
-			<button @onclick='() => NavigationManager.NavigateTo("/Inventory-Dashboard")' class="back-button">
-				🏭
+	<!-- Professional Header Section -->
+	<div class="page-header">
+		<div class="header-left">
+			<img src="images/logo.png" alt="Prime Bakes" class="header-logo" />
+			<div class="header-divider"></div>
+			<div class="header-text">
+				<span class="app-name">Prime Bakes</span>
+			</div>
+		</div>
+		<div class="header-center">
+			<h1 class="page-title">Create Purchase</h1>
+			<p class="page-subtitle">Create and manage purchase transactions</p>
+		</div>
+		<div class="header-right">
+			<button class="btn-icon btn-icon-save" @onclick="SaveTransaction" title="Save Transaction">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+					<polyline points="17 21 17 13 7 13 7 21" />
+					<polyline points="7 3 7 8 15 8" />
+				</svg>
 			</button>
-			<h1 class="page-title">Purchase</h1>
-			<button @onclick="() => _supplierDetailsDialogVisible = true" class="header-action-btn">
-				🏢 Supplier
+			<button class="btn-icon" @onclick="UploadDocument" title="Upload Document">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+					<polyline points="17 8 12 3 7 8" />
+					<line x1="12" y1="3" x2="12" y2="15" />
+				</svg>
+			</button>
+			<button class="btn-icon" title="Transaction History" @onclick="NavigateToTransactionHistoryPage">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="12" cy="12" r="10" />
+					<polyline points="12 6 12 12 16 14" />
+				</svg>
+			</button>
+			<button class="btn-icon" @onclick="ResetPage" title="New Purchase">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="12" y1="5" x2="12" y2="19" />
+					<line x1="5" y1="12" x2="19" y2="12" />
+				</svg>
+			</button>
+			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/")' title="Home">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+					<polyline points="9 22 9 12 15 12 15 22" />
+				</svg>
+			</button>
+			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/")' title="Back">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M19 12H5M12 19l-7-7 7-7" />
+				</svg>
 			</button>
 		</div>
+	</div>
 
-		<!-- Enhanced Filter Section -->
-		<div class="filter-section">
-			<div class="filter-content">
-				<div class="category-filter-wrapper">
-					<SfComboBox TValue="int"
-								TItem="RawMaterialCategoryModel"
-								Placeholder="📦 Select Category"
-								DataSource="@_rawMaterialCategories"
-								@bind-Value="_selectedCategoryId"
-								CssClass="category-filter">
-						<ComboBoxEvents TItem="RawMaterialCategoryModel" TValue="int" ValueChange="OnRawMaterialCategoryChanged" />
-						<ComboBoxFieldSettings Value="Id" Text="Name" />
-					</SfComboBox>
+	<!-- Main Content Container -->
+	<div class="purchase-container">
+
+		<!-- Top Section: Transaction Summary and Financial Summary Side by Side -->
+		<div class="two-column-layout">
+			<!-- Transaction Summary Section -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+							<polyline points="14 2 14 8 20 8" />
+							<line x1="16" y1="13" x2="8" y2="13" />
+							<line x1="16" y1="17" x2="8" y2="17" />
+							<polyline points="10 9 9 9 8 9" />
+						</svg>
+						<h2 class="section-title">Transaction Summary</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="form-grid-single">
+						<!-- Company -->
+						<div class="form-field">
+							<label class="field-label">
+								Company <span class="required">*</span>
+							</label>
+							<SfAutoComplete Value="@_selectedCompany"
+											TValue="CompanyModel"
+											TItem="CompanyModel"
+											DataSource="@_companies"
+											Autofill="true"
+											Placeholder="Select a Company"
+											FloatLabelType="FloatLabelType.Never"
+											AllowFiltering="true"
+											FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+											CssClass="custom-autocomplete">
+								<AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel" ValueChange="OnCompanyChanged" />
+								<AutoCompleteFieldSettings Value="Name" />
+							</SfAutoComplete>
+						</div>
+
+						<!-- Party -->
+						<div class="form-field">
+							<label class="field-label">
+								Party <span class="required">*</span>
+							</label>
+							<SfAutoComplete Value="@_selectedParty"
+											TValue="LedgerModel"
+											TItem="LedgerModel"
+											DataSource="@_parties"
+											Autofill="true"
+											Placeholder="Select a Party"
+											FloatLabelType="FloatLabelType.Never"
+											AllowFiltering="true"
+											FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+											CssClass="custom-autocomplete">
+								<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnPartyChanged" />
+								<AutoCompleteFieldSettings Value="Name" />
+							</SfAutoComplete>
+						</div>
+
+						<!-- Transaction Date and Financial Year -->
+						<div class="form-field">
+							<label class="field-label">
+								Transaction Date <span class="required">*</span> / Financial Year
+							</label>
+							<div class="date-year-wrapper">
+								<SfDatePicker Value="@_purchase.TransactionDateTime"
+											  TValue="DateTime"
+											  Format="dd/MM/yy"
+											  Placeholder="Select Date"
+											  FloatLabelType="FloatLabelType.Never"
+											  CssClass="custom-datepicker">
+									<DatePickerEvents TValue="DateTime" ValueChange="OnTransactionDateChanged" />
+								</SfDatePicker>
+								<SfTextBox Value="@($"{_selectedFinancialYear?.StartDate:yyyy} to {_selectedFinancialYear?.EndDate:yyyy}")"
+										   Readonly="true"
+										   Placeholder="Financial Year"
+										   FloatLabelType="FloatLabelType.Never"
+										   CssClass="custom-textbox readonly-field" />
+							</div>
+						</div>
+
+						<!-- Transaction No with Auto-generate -->
+						<div class="form-field">
+							<label class="field-label">
+								Transaction No
+							</label>
+							<div class="transaction-no-wrapper">
+								<SfTextBox @bind-Value="_purchase.TransactionNo"
+										   Placeholder="Enter Transaction No"
+										   FloatLabelType="FloatLabelType.Never"
+										   Readonly="@_autoGenerateTransactionNo"
+										   CssClass="@(_autoGenerateTransactionNo ? "custom-textbox readonly-field" : "custom-textbox")" />
+								<div class="auto-generate-checkbox">
+									<SfCheckBox @bind-Checked="_autoGenerateTransactionNo"
+												Label="Auto Generate"
+												TChecked="bool"
+												ValueChange="OnAutoGenerateTransactionNoChecked"
+												CssClass="custom-checkbox" />
+								</div>
+							</div>
+						</div>
+
+						<!-- Remarks -->
+						<div class="form-field form-field-full">
+							<label class="field-label">
+								Remarks / Narration
+							</label>
+							<SfTextBox @bind-Value="_purchase.Remarks"
+									   Multiline="true"
+									   Placeholder="Enter remarks..."
+									   FloatLabelType="FloatLabelType.Never"
+									   CssClass="custom-textbox textarea-field-small" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Financial Summary Section -->
+			<div class="section-card">
+				<div class="section-header">
+					<div class="section-title-wrapper">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="12" y1="1" x2="12" y2="23" />
+							<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+						</svg>
+						<h2 class="section-title">Financial Summary</h2>
+					</div>
+				</div>
+				<div class="section-body">
+					<div class="financial-grid">
+						<!-- Sub Total -->
+						<div class="financial-row">
+							<label class="financial-label">Sub Total</label>
+							<SfNumericTextBox Value="@_itemAfterTaxTotal"
+											  Readonly="true"
+											  TValue="decimal"
+											  ShowSpinButton="false"
+											  Placeholder="0.00"
+											  FloatLabelType="FloatLabelType.Never"
+											  CssClass="custom-numeric readonly-field" />
+						</div>
+
+						<!-- Other Charges -->
+						<div class="financial-row-dual">
+							<label class="financial-label">Other Charges</label>
+							<div class="dual-inputs">
+								<SfNumericTextBox Value="@_purchase.OtherChargesPercent"
+												  TValue="decimal"
+												  Max="100"
+												  Min="0"
+												  Decimals="2"
+												  ShowSpinButton="false"
+												  Placeholder="%"
+												  FloatLabelType="FloatLabelType.Never"
+												  CssClass="custom-numeric editable-field small-input">
+									<NumericTextBoxEvents TValue="decimal" ValueChange="OnOtherDiscountPercentChanged" />
+								</SfNumericTextBox>
+								<SfNumericTextBox Value="@_purchase.OtherChargesAmount"
+												  Readonly="true"
+												  TValue="decimal"
+												  ShowSpinButton="false"
+												  Placeholder="0.00"
+												  FloatLabelType="FloatLabelType.Never"
+												  CssClass="custom-numeric readonly-field" />
+							</div>
+						</div>
+
+						<!-- Cash Discount -->
+						<div class="financial-row-dual">
+							<label class="financial-label">Cash Discount</label>
+							<div class="dual-inputs">
+								<SfNumericTextBox Value="@_purchase.CashDiscountPercent"
+												  TValue="decimal"
+												  Max="100"
+												  Min="0"
+												  Decimals="2"
+												  ShowSpinButton="false"
+												  Placeholder="%"
+												  FloatLabelType="FloatLabelType.Never"
+												  CssClass="custom-numeric editable-field small-input">
+									<NumericTextBoxEvents TValue="decimal" ValueChange="OnCashDiscountPercentChanged" />
+								</SfNumericTextBox>
+								<SfNumericTextBox Value="@_purchase.CashDiscountAmount"
+												  Readonly="true"
+												  TValue="decimal"
+												  ShowSpinButton="false"
+												  Placeholder="0.00"
+												  FloatLabelType="FloatLabelType.Never"
+												  CssClass="custom-numeric readonly-field discount-field" />
+							</div>
+						</div>
+
+						<!-- Round Off -->
+						<div class="financial-row">
+							<label class="financial-label">Round Off</label>
+							<SfNumericTextBox Value="@_purchase.RoundOffAmount"
+											  TValue="decimal"
+											  Placeholder="0.00"
+											  FloatLabelType="FloatLabelType.Never"
+											  CssClass="custom-numeric editable-field">
+								<NumericTextBoxEvents TValue="decimal" ValueChange="OnRoundOffAmountChanged" />
+							</SfNumericTextBox>
+						</div>
+
+						<!-- Total Amount -->
+						<div class="financial-row total-row">
+							<label class="financial-label-total">Total Amount</label>
+							<SfNumericTextBox Value="@_purchase.TotalAmount"
+											  Readonly="true"
+											  TValue="decimal"
+											  ShowSpinButton="false"
+											  Placeholder="0.00"
+											  FloatLabelType="FloatLabelType.Never"
+											  CssClass="custom-numeric total-field" />
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 
-		<div class="grid-container">
-			<SfGrid ID="_sfGrid"
-					@ref="_sfGrid"
-					EnableAdaptiveUI="true"
-					DataSource="@(_selectedCategoryId == 0 ? _cart : _cart.Where(p => p.RawMaterialCategoryId == _selectedCategoryId))"
-					AllowPaging="true"
-					AllowSorting="false"
-					AllowTextWrap=true
-					Toolbar="@(new List<string>() { "Search" })">
+		<!-- Add to Cart Section -->
+		<div class="section-card">
+			<div class="section-header">
+				<div class="section-title-wrapper">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="9" cy="21" r="1" />
+						<circle cx="20" cy="21" r="1" />
+						<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+					</svg>
+					<h2 class="section-title">Add Item to Cart</h2>
+				</div>
+			</div>
+			<div class="section-body">
+				<!-- First Row: Item Selection and Basic Info -->
+				<div class="cart-row">
+					<div class="cart-field cart-field-item">
+						<label class="cart-label">Item <span class="required">*</span></label>
+						<SfAutoComplete @ref="_sfItemAutoComplete"
+										Value="@_selectedRawMaterial"
+										TValue="RawMaterialModel?"
+										TItem="RawMaterialModel"
+										DataSource="@_rawMaterials"
+										Autofill="true"
+										Placeholder="Select Item"
+										FloatLabelType="FloatLabelType.Never"
+										AllowFiltering="true"
+										FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+										CssClass="custom-autocomplete">
+							<AutoCompleteEvents TItem="RawMaterialModel" TValue="RawMaterialModel?" ValueChange="OnItemChanged" />
+							<AutoCompleteFieldSettings Value="Name" />
+						</SfAutoComplete>
+					</div>
 
-				<GridPageSettings PageSize="10" />
+					<div class="cart-field cart-field-small">
+						<label class="cart-label">Qty</label>
+						<SfNumericTextBox Value="@_selectedCart.Quantity"
+										  TValue="decimal"
+										  Min="0"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric editable-field">
+							<NumericTextBoxEvents TValue="decimal" ValueChange="OnItemQuantityChanged" />
+						</SfNumericTextBox>
+					</div>
 
-				<GridColumns>
-					<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.RawMaterialName)" HeaderText="Raw Material" Width="30%" />
-					
-					<GridColumn Field="@nameof(PurchaseRawMaterialCartModel.Quantity)" HeaderText="Qty" Width="15%" TextAlign="TextAlign.Center">
-						<Template>
-							@{
-								var item = (context as PurchaseRawMaterialCartModel);
-							}
-							@if (item is not null)
-							{
-								<div class="quantity-section">
-									@if (item.Quantity == 0)
-									{
-										<button class="add-button" @onclick="() => AddToCart(item)" @onclick:stopPropagation="true">
-											<span class="add-text">Add</span>
-										</button>
-									}
-									else
-									{
-										<div class="rate-section">
-											<SfNumericTextBox TValue="decimal"
-															  Value="@item.Quantity"
-															  ValueChanged="@((decimal value) => UpdateQuantity(item, value))"
-															  Min="0"
-															  Step="1"
-															  type="tel"
-															  Format="N2"
-															  Width="30px"
-															  CssClass="rate-input" />
-										</div>
-									}
-								</div>
-							}
-						</Template>
-					</GridColumn>
+					<div class="cart-field cart-field-small">
+						<label class="cart-label">Rate</label>
+						<SfNumericTextBox Value="@_selectedCart.Rate"
+										  TValue="decimal"
+										  Min="0"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric editable-field">
+							<NumericTextBoxEvents TValue="decimal" ValueChange="OnItemRateChanged" />
+						</SfNumericTextBox>
+					</div>
 
-					<GridColumn HeaderText="Rate" Width="15%" TextAlign="TextAlign.Center">
-						<Template>
-							@{
-								var item = (context as PurchaseRawMaterialCartModel);
-							}
-							@if (item is not null && item.Quantity > 0)
-							{
-								<div class="rate-section">
-									<SfNumericTextBox TValue="decimal"
-													  Value="@item.Rate"
-													  ValueChanged="@((decimal value) => UpdateRate(item, value))"
-													  Min="0"
-													  Step="0.01m"
-													  type="tel"
-													  Format="N2"
-													  Width="70px"
-													  CssClass="rate-input" />
-								</div>
-							}
-							else if (item is not null)
-							{
-								<span class="total-value">@item.Rate.FormatIndianCurrency()</span>
-							}
-						</Template>
-					</GridColumn>
+					<div class="cart-field cart-field-small">
+						<label class="cart-label">Disc %</label>
+						<SfNumericTextBox Value="@_selectedCart.DiscountPercent"
+										  TValue="decimal"
+										  Decimals="2"
+										  Min="0"
+										  Max="100"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric editable-field">
+							<NumericTextBoxEvents TValue="decimal" ValueChange="OnItemDiscountPercentChanged" />
+						</SfNumericTextBox>
+					</div>
 
-					<GridColumn HeaderText="Total" Width="15%" TextAlign="TextAlign.Right">
-						<Template>
-							@{
-								var item = (context as PurchaseRawMaterialCartModel);
-							}
-							@if (item is not null)
-							{
-								<span class="total-value">@item.Total.FormatIndianCurrency()</span>
-							}
-						</Template>
-					</GridColumn>
-					<GridColumn HeaderText="Unit" Width="10%" TextAlign="TextAlign.Center">
-						<Template>
-							@{
-								var item = (context as PurchaseRawMaterialCartModel);
-							}
-							@if (item is not null)
-							{
-								<div class="unit-section">
-									<SfTextBox Value="@item.MeasurementUnit"
-											   ValueChanged="@((string value) => UpdateUnit(item, value))"
-											   Width="60px"
-											   CssClass="unit-input"
-											   Placeholder="Unit" />
-								</div>
-							}
-						</Template>
-					</GridColumn>
-					<GridColumn HeaderText="Actions" Width="20%" TextAlign="TextAlign.Center">
-						<Template>
-							@{
-								var item = (context as PurchaseRawMaterialCartModel);
-							}
-							@if (item is not null && item.Quantity > 0)
-							{
-								<div class="action-buttons-group">
-									<button class="edit-button" @onclick="() => OpenRawMaterialDetailsDialog(item)" @onclick:stopPropagation="true" title="Edit Details" disabled="@_isSaving">
-										<span class="edit-icon">⚙️ Edit</span>
-									</button>
-									<button class="remove-button" @onclick="() => RemoveFromCart(item)" @onclick:stopPropagation="true" title="Remove from Cart" disabled="@_isSaving">
-										<span class="remove-icon">🗑️ Remove</span>
-									</button>
-								</div>
-							}
-						</Template>
-					</GridColumn>
-				</GridColumns>
-			</SfGrid>
+					<div class="cart-field cart-field-small">
+						<label class="cart-label">CGST %</label>
+						<SfNumericTextBox Value="@_selectedCart.CGSTPercent"
+										  TValue="decimal"
+										  Decimals="2"
+										  Min="0"
+										  Max="100"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric editable-field">
+							<NumericTextBoxEvents TValue="decimal" ValueChange="OnItemCGSTPercentChanged" />
+						</SfNumericTextBox>
+					</div>
+
+					<div class="cart-field cart-field-small">
+						<label class="cart-label">SGST %</label>
+						<SfNumericTextBox Value="@_selectedCart.SGSTPercent"
+										  TValue="decimal"
+										  Decimals="2"
+										  Min="0"
+										  Max="100"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric editable-field">
+							<NumericTextBoxEvents TValue="decimal" ValueChange="OnItemSGSTPercentChanged" />
+						</SfNumericTextBox>
+					</div>
+
+					<div class="cart-field cart-field-small">
+						<label class="cart-label">IGST %</label>
+						<SfNumericTextBox Value="@_selectedCart.IGSTPercent"
+										  TValue="decimal"
+										  Decimals="2"
+										  Min="0"
+										  Max="100"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric editable-field">
+							<NumericTextBoxEvents TValue="decimal" ValueChange="OnItemIGSTPercentChanged" />
+						</SfNumericTextBox>
+					</div>
+
+					<div class="cart-field cart-field-button">
+						<div class="checkbox-wrapper">
+							<SfCheckBox @bind-Checked="_selectedCart.InclusiveTax"
+										Label="Tax Incl."
+										TChecked="bool"
+										ValueChange="OnItemInclusiveTaxChanged"
+										CssClass="custom-checkbox" />
+						</div>
+					</div>
+				</div>
+
+				<!-- Second Row: Readonly Amounts Aligned with Percentages -->
+				<div class="cart-amounts-row">
+					<!-- Item Name (below item field) -->
+					<div class="amount-field amount-field-item">
+						<div class="amount-display identification-field">
+							<label class="cart-label">Remarks</label>
+							<SfTextBox @bind-Value="_selectedCart.Remarks"
+									   Placeholder="Item Narration..."
+									   FloatLabelType="FloatLabelType.Never"
+									   CssClass="custom-textbox identification-input" />
+						</div>
+					</div>
+
+					<!-- UOM (below Quantity) -->
+					<div class="amount-field amount-field-small">
+						<div class="amount-display identification-field">
+							<label class="cart-label">UOM</label>
+							<SfTextBox @bind-Value="_selectedCart.UnitOfMeasurement"
+									   Placeholder="UOM..."
+									   FloatLabelType="FloatLabelType.Never"
+									   CssClass="custom-textbox identification-input" />
+						</div>
+					</div>
+
+					<!-- Base Total (below Rate) -->
+					<div class="amount-field amount-field-small">
+						<div class="amount-display empty-display">
+							<span class="amount-label">Base</span>
+							<span class="amount-value">@_selectedCart.BaseTotal.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- Discount Amount (below Disc %) -->
+					<div class="amount-field amount-field-small">
+						<div class="amount-display empty-display">
+							<span class="amount-label">Disc Amt</span>
+							<span class="amount-value discount-amt">@_selectedCart.DiscountAmount.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- CGST Amount (below CGST %) -->
+					<div class="amount-field amount-field-small">
+						<div class="amount-display empty-display">
+							<span class="amount-label">CGST Amt</span>
+							<span class="amount-value">@_selectedCart.CGSTAmount.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- SGST Amount (below SGST %) -->
+					<div class="amount-field amount-field-small">
+						<div class="amount-display empty-display">
+							<span class="amount-label">SGST Amt</span>
+							<span class="amount-value">@_selectedCart.SGSTAmount.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- IGST Amount (below IGST %) -->
+					<div class="amount-field amount-field-small">
+						<div class="amount-display empty-display">
+							<span class="amount-label">IGST Amt</span>
+							<span class="amount-value">@_selectedCart.IGSTAmount.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- Total and Checkbox (below Remarks) -->
+					<div class="amount-field amount-field-medium">
+						<div class="amount-display total-display">
+							<span class="amount-label">Total</span>
+							<span class="amount-value">@_selectedCart.Total.ToString("N2")</span>
+						</div>
+					</div>
+
+					<!-- Add Button (below Tax Incl. checkbox) -->
+					<div class="amount-field amount-field-button">
+						<button class="btn-add" @onclick="AddItemToCart">
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="12" y1="5" x2="12" y2="19" />
+								<line x1="5" y1="12" x2="19" y2="12" />
+							</svg>
+							<span>Add</span>
+						</button>
+					</div>
+				</div>
+			</div>
 		</div>
 
-		@if (_cart.Any(c => c.Quantity > 0))
-		{
-			<div class="cart-footer">
-				<button @onclick="() => GoToCart()" class="cart-button">
-					<i class="fas fa-shopping-cart"></i>
-					<span>Go to Cart</span>
-					<span class="cart-count">@_cart.Count(c => c.Quantity > 0)</span>
-				</button>
+		<!-- Cart Items Grid Section -->
+		<div class="section-card">
+			<div class="section-header">
+				<div class="section-title-wrapper">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M3 3h7a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H3V3z" />
+						<path d="M14 3h7v17h-7V3z" />
+					</svg>
+					<h2 class="section-title">Purchase Items</h2>
+				</div>
 			</div>
-		}
+			<div class="section-body grid-body">
+				<SfGrid ID="_sfCartGrid"
+						@ref="_sfCartGrid"
+						DataSource="_cart"
+						AllowTextWrap="true"
+						AllowPaging="false"
+						AllowSorting="true"
+						AllowResizing="true"
+						AllowFiltering="true"
+						GridLines="GridLine.Horizontal"
+						CssClass="professional-grid"
+						Toolbar="@(new List<string>() { "Search" })">
+
+					<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+
+					<GridAggregates>
+						<GridAggregate>
+							<GridAggregateColumns>
+								<GridAggregateColumn Field="ItemName" Type="AggregateType.Count">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+										}
+										<div class="aggregate-label">
+											<strong>Total Items: @aggregate.Count</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="Quantity" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="BaseTotal" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="DiscountAmount" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value aggregate-discount">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="AfterDiscount" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="CGSTAmount" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="SGSTAmount" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="IGSTAmount" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="TotalTaxAmount" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+								<GridAggregateColumn Field="Total" Type="AggregateType.Sum">
+									<FooterTemplate>
+										@{
+											var aggregate = (context as AggregateTemplateContext);
+											var sum = aggregate.Sum != null ? Convert.ToDecimal(aggregate.Sum) : 0m;
+										}
+										<div class="aggregate-value aggregate-total">
+											<strong>@sum.ToString("N2")</strong>
+										</div>
+									</FooterTemplate>
+								</GridAggregateColumn>
+							</GridAggregateColumns>
+						</GridAggregate>
+					</GridAggregates>
+
+					<GridColumns>
+						<GridColumn HeaderText="Actions" Width="100" TextAlign="TextAlign.Center">
+							<Template>
+								@{
+									var item = (context as dynamic);
+									<div class="grid-actions">
+										<button class="btn-grid-action btn-edit" title="Edit Item" @onclick="@(() => EditCartItem(item))">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+												<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+											</svg>
+										</button>
+										<button class="btn-grid-action btn-delete" title="Remove Item" @onclick="@(() => RemoveItemFromCart(item))">
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<polyline points="3 6 5 6 21 6" />
+												<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+												<line x1="10" y1="11" x2="10" y2="17" />
+												<line x1="14" y1="11" x2="14" y2="17" />
+											</svg>
+										</button>
+									</div>
+								}
+							</Template>
+						</GridColumn>
+						<GridColumn Field="ItemName" HeaderText="Item Name" Width="200" />
+						<GridColumn Field="UnitOfMeasurement" HeaderText="UOM" Width="80" TextAlign="TextAlign.Center" />
+						<GridColumn Field="Quantity" HeaderText="Qty" Width="100" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="Rate" HeaderText="Rate" Width="110" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="BaseTotal" HeaderText="Base Total" Width="150" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="DiscountPercent" HeaderText="Disc %" Width="120" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="DiscountAmount" HeaderText="Disc Amt" Width="140" TextAlign="TextAlign.Right" Format="N2">
+							<Template>
+								@{
+									var item = (context as dynamic);
+									<span class="grid-discount">@item.DiscountAmount.ToString("N2")</span>
+								}
+							</Template>
+						</GridColumn>
+						<GridColumn Field="AfterDiscount" HeaderText="After Disc" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="CGSTPercent" HeaderText="CGST %" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="CGSTAmount" HeaderText="CGST Amt" Width="150" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="SGSTPercent" HeaderText="SGST %" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="SGSTAmount" HeaderText="SGST Amt" Width="150" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="IGSTPercent" HeaderText="IGST %" Width="140" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="IGSTAmount" HeaderText="IGST Amt" Width="150" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="TotalTaxAmount" HeaderText="Tax Total" Width="150" TextAlign="TextAlign.Right" Format="N2" />
+						<GridColumn Field="InclusiveTax" HeaderText="Tax Incl." Width="100" TextAlign="TextAlign.Center">
+							<Template>
+								@{
+									var item = (context as dynamic);
+									<span class="grid-checkbox">@(item.InclusiveTax ? "✓" : "–")</span>
+								}
+							</Template>
+						</GridColumn>
+						<GridColumn Field="Total" HeaderText="Total" Width="130" TextAlign="TextAlign.Right" Format="N2">
+							<Template>
+								@{
+									var item = (context as dynamic);
+									<span class="grid-total">@item.Total.ToString("N2")</span>
+								}
+							</Template>
+						</GridColumn>
+						<GridColumn Field="Remarks" HeaderText="Remarks" Width="150" />
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
 	</div>
 }
 
-<!-- Supplier Details Dialog -->
-<SfDialog ID="_sfSupplierDetailsDialog"
-		  @ref="_sfSupplierDetailsDialog"
-		  Width="600px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="false"
-		  @bind-Visible="_supplierDetailsDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
+<SfToast @ref="_sfErrorToast"
+		 ID="_sfErrorToast"
+		 Title="@_errorTitle"
+		 Content="@_errorMessage"
+		 Timeout="5000">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
+	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
+</SfToast>
+
+<SfToast @ref="_sfSuccessToast"
+		 ID="_sfSuccessToast"
+		 Title="@_successTitle"
+		 Content="@_successMessage"
+		 Timeout="5000">
+	<ToastPosition X="Right" Y="Top" />
+	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
+	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
+</SfToast>
+
+<SfDialog @ref="_uploadDocumentDialog"
+		  Width="700px"
+		  IsModal="true"
+		  ShowCloseIcon="true"
+		  @bind-Visible="_isUploadDialogVisible">
 	<DialogTemplates>
 		<Header>
-			<div class="dialog-header">
-				<span class="supplier-icon">🏢</span>
-				<span>Supplier Details</span>
+			<div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+					<polyline points="17 8 12 3 7 8" />
+					<line x1="12" y1="3" x2="12" y2="15" />
+				</svg>
+				<span style="font-size: 18px; font-weight: 600; color: #0f172a;">Upload Original Document</span>
 			</div>
 		</Header>
 		<Content>
-			<div class="dialog-content">
-				<div class="form-group">
-					<SfAutoComplete TValue="LedgerModel?"
-									TItem="LedgerModel"
-									Value="@_selectedSupplier"
-									Placeholder="Search for a supplier..."
-									FloatLabelType='@FloatLabelType.Auto'
-									DataSource="@_suppliers"
-									CssClass="form-control"
-									AllowFiltering="true"
-									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-						<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel?" ValueChange="OnSupplierChanged" />
-						<AutoCompleteFieldSettings Value="Name" />
-					</SfAutoComplete>
-				</div>
-
-				@if (_selectedSupplier != null && _selectedSupplier.Id > 0)
+			<div style="padding: 24px;">
+				@if (_purchase is not null && !string.IsNullOrEmpty(_purchase.DocumentUrl))
 				{
-					<div class="supplier-info-card">
-						<div class="supplier-info-header">
-							<span class="info-icon">ℹ️</span>
-							<span>Supplier Information</span>
-						</div>
-						<div class="supplier-info-content">
-							<div class="info-item">
-								<span class="info-label">Name:</span>
-								<span class="info-value">@_selectedSupplier.Name</span>
+					<!-- Existing Document Section -->
+					<div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 24px;">
+						<div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+							<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #10b981;">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+								<polyline points="14 2 14 8 20 8"/>
+								<line x1="9" y1="15" x2="15" y2="15"/>
+								<line x1="9" y1="11" x2="15" y2="11"/>
+							</svg>
+							<div>
+								<h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #0f172a;">Document Uploaded Successfully</h3>
+								<p style="margin: 0; font-size: 14px; color: #64748b;">@(_purchase.DocumentUrl.Split('/').Last())</p>
 							</div>
-							@if (!string.IsNullOrEmpty(_selectedSupplier.GSTNo))
-							{
-								<div class="info-item">
-									<span class="info-label">GST No:</span>
-									<span class="info-value">@_selectedSupplier.GSTNo</span>
-								</div>
-							}
-							@if (!string.IsNullOrEmpty(_selectedSupplier.Phone))
-							{
-								<div class="info-item">
-									<span class="info-label">Phone:</span>
-									<span class="info-value">@_selectedSupplier.Phone</span>
-								</div>
-							}
-							@if (!string.IsNullOrEmpty(_selectedSupplier.Address))
-							{
-								<div class="info-item">
-									<span class="info-label">Address:</span>
-									<span class="info-value">@_selectedSupplier.Address</span>
-								</div>
-							}
 						</div>
+					</div>
+
+					<!-- Action Buttons -->
+					<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+						<button class="dialog-btn dialog-btn-primary" @onclick="DownloadExistingDocument">
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+								<polyline points="7 10 12 15 17 10"/>
+								<line x1="12" y1="15" x2="12" y2="3"/>
+							</svg>
+							<span>Download</span>
+						</button>
+						<button class="dialog-btn dialog-btn-info" @onclick="InterpretFiles">
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="10"/>
+								<line x1="12" y1="16" x2="12" y2="12"/>
+								<line x1="12" y1="8" x2="12.01" y2="8"/>
+							</svg>
+							<span>Interpret</span>
+						</button>
+						<button class="dialog-btn dialog-btn-danger" @onclick="RemoveExistingDocument">
+							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="3 6 5 6 21 6"/>
+								<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+								<line x1="10" y1="11" x2="10" y2="17"/>
+								<line x1="14" y1="11" x2="14" y2="17"/>
+							</svg>
+							<span>Remove</span>
+						</button>
+					</div>
+				}
+				else
+				{
+					<!-- Upload Area -->
+					<div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 48px 32px; text-align: center; transition: all 0.3s ease;">
+						<div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 24px;">
+							<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8;">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+								<polyline points="17 8 12 3 7 8"/>
+								<line x1="12" y1="3" x2="12" y2="15"/>
+							</svg>
+							<div>
+								<h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #0f172a;">Upload Document</h3>
+								<p style="margin: 0 0 4px 0; font-size: 14px; color: #64748b;">Drag and drop your file here or click to browse</p>
+								<p style="margin: 0; font-size: 12px; color: #94a3b8;">Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG (Max 50MB)</p>
+							</div>
+						</div>
+
+						<SfUploader @ref="_sfDocumentUploader"
+									AutoUpload="true"
+									ShowFileList="true"
+									ShowProgressBar="true"
+									AllowMultiple="false"
+									MaxFileSize="52428800"
+									AllowedExtensions=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+									CssClass="custom-uploader">
+							<UploaderEvents ValueChange="OnUploaderFileChange" OnRemove="OnRemoveFile" />
+						</SfUploader>
+					</div>
+
+					<!-- Info Section -->
+					<div style="margin-top: 20px; padding: 16px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 6px;">
+						<p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
+							<strong>Note:</strong> Upload the original purchase invoice or bill document for record keeping and future reference.
+						</p>
 					</div>
 				}
 			</div>
 		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<SfButton Content="Close" OnClick="() => _supplierDetailsDialogVisible = false" CssClass="dialog-button" />
-			</div>
-		</FooterTemplate>
-	</DialogTemplates>
-</SfDialog>
-
-<!-- Raw Material Details Dialog - Consolidated -->
-<SfDialog ID="_sfRawMaterialDetailsDialog"
-		  @ref="_sfRawMaterialDetailsDialog"
-		  Width="900px"
-		  Height="auto"
-		  AllowDragging="true"
-		  EnableResize="true"
-		  @bind-Visible="_rawMaterialDetailsDialogVisible"
-		  IsModal="true">
-	<DialogPositionData X="Center" Y="Center" />
-	<DialogTemplates>
-		<Header>
-			<div class="dialog-header">
-				<span class="material-icon">📦</span>
-				<span>Edit Raw Material Details: </span>
-				<span class="material-name">@_selectedRawMaterialForEdit?.RawMaterialName</span>
-			</div>
-		</Header>
-		<Content>
-			<div class="dialog-content">
-				@if (_selectedRawMaterialForEdit != null)
-				{
-					<div class="consolidated-form">
-						<!-- Basic Details Section -->
-						<div class="form-section">
-							<h4 class="section-title">
-								<span class="section-icon">📋</span>
-								Basic Details
-							</h4>
-							<div class="form-row-compact">
-								<div class="form-group-compact">
-									<label>Rate (₹)</label>
-									<SfNumericTextBox TValue="decimal"
-													  Value="_selectedRawMaterialForEdit.Rate"
-													  ValueChanged="OnRateChanged"
-													  Min="0"
-													  type="tel"
-													  Format="N2"
-													  CssClass="form-control-compact" />
-								</div>
-								<div class="form-group-compact">
-									<label>Quantity</label>
-									<SfNumericTextBox TValue="decimal"
-													  Value="_selectedRawMaterialForEdit.Quantity"
-													  ValueChanged="OnQuantityChanged"
-													  Min="0"
-													  type="tel"
-													  Format="N2"
-													  CssClass="form-control-compact" />
-								</div>
-								<div class="form-group-compact">
-									<label>Unit</label>
-									<SfTextBox Value="@_selectedRawMaterialForEdit.MeasurementUnit"
-											   ValueChanged="OnMeasurementUnitChanged"
-											   CssClass="form-control-compact" />
-								</div>
-							</div>
-							<div class="amount-display">
-								<span class="amount-label">Base Amount:</span>
-								<span class="amount-value">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity).FormatIndianCurrency())</span>
-							</div>
-						</div>
-
-						<!-- Discount Section -->
-						<div class="form-section">
-							<h4 class="section-title">
-								<span class="section-icon">💰</span>
-								Discount Details
-							</h4>
-							<div class="form-row-compact">
-								<div class="form-group-compact">
-									<label>Discount (%)</label>
-									<SfNumericTextBox TValue="decimal"
-													  Value="_selectedRawMaterialForEdit.DiscPercent"
-													  ValueChanged="OnDiscountPercentChanged"
-													  Min="0"
-													  Max="100"
-													  type="tel"
-													  Format="N2"
-													  CssClass="form-control-compact" />
-								</div>
-								<div class="form-group-compact">
-									<label>Discount Amount</label>
-									<div class="readonly-amount">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity * _selectedRawMaterialForEdit.DiscPercent / 100).FormatIndianCurrency())</div>
-								</div>
-								<div class="form-group-compact">
-									<label>After Discount</label>
-									<div class="readonly-amount">@_selectedRawMaterialForEdit.AfterDiscount.FormatIndianCurrency()</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Tax Section -->
-						<div class="form-section">
-							<h4 class="section-title">
-								<span class="section-icon">🧾</span>
-								Tax Details
-							</h4>
-							<div class="form-row-compact">
-								<div class="form-group-compact">
-									<label>CGST (%)</label>
-									<SfNumericTextBox TValue="decimal"
-													  Value="_selectedRawMaterialForEdit.CGSTPercent"
-													  ValueChanged="OnCGSTPercentChanged"
-													  Min="0"
-													  Max="50"
-													  type="tel"
-													  Format="N2"
-													  CssClass="form-control-compact" />
-									<div class="tax-amount">₹@_selectedRawMaterialForEdit.CGSTAmount.ToString("N2")</div>
-								</div>
-								<div class="form-group-compact">
-									<label>SGST (%)</label>
-									<SfNumericTextBox TValue="decimal"
-													  Value="_selectedRawMaterialForEdit.SGSTPercent"
-													  ValueChanged="OnSGSTPercentChanged"
-													  Min="0"
-													  Max="50"
-													  type="tel"
-													  Format="N2"
-													  CssClass="form-control-compact" />
-									<div class="tax-amount">₹@_selectedRawMaterialForEdit.SGSTAmount.ToString("N2")</div>
-								</div>
-								<div class="form-group-compact">
-									<label>IGST (%)</label>
-									<SfNumericTextBox TValue="decimal"
-													  Value="_selectedRawMaterialForEdit.IGSTPercent"
-													  ValueChanged="OnIGSTPercentChanged"
-													  Min="0"
-													  Max="50"
-													  type="tel"
-													  Format="N2"
-													  CssClass="form-control-compact" />
-									<div class="tax-amount">₹@_selectedRawMaterialForEdit.IGSTAmount.ToString("N2")</div>
-								</div>
-							</div>
-							<div class="tax-info">
-								<div class="info-card">
-									<span class="info-icon">ℹ️</span>
-									<span class="info-text">Use CGST + SGST for intra-state transactions, or IGST for inter-state transactions.</span>
-								</div>
-							</div>
-						</div>
-
-						<!-- Summary Section -->
-						<div class="form-section">
-							<h4 class="section-title">
-								<span class="section-icon">📊</span>
-								Summary
-							</h4>
-							<div class="summary-card">
-								<div class="summary-row">
-									<span class="summary-label">Base Amount:</span>
-									<span class="summary-value">@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity).FormatIndianCurrency())</span>
-								</div>
-								<div class="summary-row">
-									<span class="summary-label">Discount (@_selectedRawMaterialForEdit.DiscPercent.ToString("N2")%):</span>
-									<span class="summary-value discount-value">-@((_selectedRawMaterialForEdit.Rate * _selectedRawMaterialForEdit.Quantity * _selectedRawMaterialForEdit.DiscPercent / 100).FormatIndianCurrency())</span>
-								</div>
-								<div class="summary-row">
-									<span class="summary-label">After Discount:</span>
-									<span class="summary-value">@_selectedRawMaterialForEdit.AfterDiscount.FormatIndianCurrency()</span>
-								</div>
-								<div class="summary-row">
-									<span class="summary-label">CGST Amount:</span>
-									<span class="summary-value">@_selectedRawMaterialForEdit.CGSTAmount.FormatIndianCurrency()</span>
-								</div>
-								<div class="summary-row">
-									<span class="summary-label">SGST Amount:</span>
-									<span class="summary-value">@_selectedRawMaterialForEdit.SGSTAmount.FormatIndianCurrency()</span>
-								</div>
-								<div class="summary-row">
-									<span class="summary-label">IGST Amount:</span>
-									<span class="summary-value">@_selectedRawMaterialForEdit.IGSTAmount.FormatIndianCurrency()</span>
-								</div>
-								<div class="summary-divider"></div>
-								<div class="summary-row total-row">
-									<span class="summary-label">Final Total:</span>
-									<span class="summary-value total-value">@_selectedRawMaterialForEdit.Total.FormatIndianCurrency()</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				}
-			</div>
-		</Content>
-		<FooterTemplate>
-			<div class="dialog-footer">
-				<div class="footer-buttons">
-					<SfButton Content="Save & Close" IsPrimary="true" OnClick="OnSaveRawMaterialDetailsClick" CssClass="dialog-button primary-button" />
-				</div>
-			</div>
-		</FooterTemplate>
 	</DialogTemplates>
 </SfDialog>
 
 <style>
-	:root {
-		--primary-color: #28a745;
-		--primary-dark: #1e7e34;
-		--primary-light: #c3e6cb;
-		--text-dark: #2c3e50;
-		--text-light: #7f8c8d;
-		--bg-light: #f8f9fa;
-		--border-color: #e9ecef;
-		--shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
-		--shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
-		--success-color: #28a745;
-		--info-color: #17a2b8;
-		--warning-color: #ffc107;
-		--danger-color: #dc3545;
-		--discount-color: #ff6b35;
-		--tax-color: #6f42c1;
+	* {
+		box-sizing: border-box;
 	}
 
-	/* Loading Animation */
-	.loader-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 100vh;
-		background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
-	}
-
-	.circular-dots-loader {
-		position: relative;
-		width: 60px;
-		height: 60px;
-		margin-bottom: 15px;
-	}
-
-		.circular-dots-loader .dot {
-			position: absolute;
-			width: 12px;
-			height: 12px;
-			border-radius: 50%;
-			animation: rotate 1.5s infinite linear;
-		}
-
-		.circular-dots-loader .dot-1 {
-			background-color: var(--primary-color);
-			animation-delay: 0s;
-		}
-
-		.circular-dots-loader .dot-2 {
-			background-color: var(--info-color);
-			animation-delay: -0.5s;
-		}
-
-		.circular-dots-loader .dot-3 {
-			background-color: var(--primary-dark);
-			animation-delay: -1s;
-		}
-
-	.loading-text {
-		color: var(--text-dark);
-		font-size: 16px;
-		margin-top: 10px;
-		font-weight: 500;
-	}
-
-	/* Animation keyframes */
-	@@keyframes rotate {
-		0% {
-			transform: rotate(0deg) translate(-24px) rotate(0deg);
-		}
-
-		100% {
-			transform: rotate(360deg) translate(-24px) rotate(-360deg);
-		}
-	}
-
-	.order-container {
-		min-height: 100vh;
-		background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-	}
-
-	/* Page Header - Desktop Optimized */
+	/* Professional Header Section */
 	.page-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 8px 16px;
-		background: white;
-		box-shadow: var(--shadow-light);
 		position: sticky;
 		top: 0;
-		z-index: 100;
+		z-index: 1000;
+		background: #ffffff;
+		border-bottom: 2px solid #e2e8f0;
+		padding: 16px 32px;
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		align-items: center;
+		gap: 24px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+		min-height: 72px;
 	}
 
-	.back-button {
-		background: var(--primary-color);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		padding: 6px 10px;
+	.header-left {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: var(--shadow-light);
-		font-size: 14px;
-		font-weight: bold;
-		min-width: 32px;
-		min-height: 32px;
+		gap: 16px;
 	}
 
-		.back-button:hover {
-			background: var(--primary-dark);
-			transform: translateY(-1px);
-			box-shadow: var(--shadow-medium);
-		}
+	.header-logo {
+		width: 40px;
+		height: 40px;
+		flex-shrink: 0;
+	}
 
-		.back-button:active {
-			transform: translateY(0);
-		}
+	.header-divider {
+		width: 1px;
+		height: 32px;
+		background: #e2e8f0;
+		flex-shrink: 0;
+	}
+
+	.header-text {
+		display: flex;
+		align-items: center;
+		font-size: 16px;
+		color: #0f172a;
+		font-weight: 600;
+	}
+
+	.app-name {
+		color: #0f172a;
+		font-weight: 600;
+		letter-spacing: 0.5px;
+	}
+
+	.header-center {
+		text-align: center;
+	}
 
 	.page-title {
-		margin: 0;
-		color: var(--text-dark);
-		font-size: 18px;
-		font-weight: 600;
-		flex: 1;
-		text-align: center;
-	}
-
-	/* Header Action Button - Desktop Optimized */
-	.header-action-btn {
-		background: transparent;
-		border: 1px solid var(--primary-color);
-		color: var(--primary-color);
-		border-radius: 4px;
-		padding: 6px 8px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-size: 12px;
-		font-weight: 500;
-		min-height: 32px;
-	}
-
-		.header-action-btn:hover {
-			background: var(--primary-color);
-			color: white;
-		}
-
-	/* Enhanced Filter Section - Desktop Optimized */
-	.filter-section {
-		background: white;
-		margin: 8px;
-		padding: 12px;
-		border-radius: 8px;
-		box-shadow: var(--shadow-light);
-		border: 1px solid var(--border-color);
-		transition: all 0.3s ease;
-	}
-
-		.filter-section:hover {
-			box-shadow: var(--shadow-medium);
-		}
-
-	.filter-content {
-		display: flex;
-		flex-direction: row;
-		gap: 8px;
-		align-items: center;
-	}
-
-	.supplier-filter-wrapper,
-	.category-filter-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		position: relative;
-		flex: 1;
-	}
-
-	.supplier-filter,
-	.category-filter {
-		flex: 1;
-	}
-
-	/* Syncfusion Filter Controls Styling - Desktop Optimized */
-	::deep .supplier-filter .e-input-group,
-	::deep .category-filter .e-input-group {
-		border: 1px solid var(--border-color);
-		border-radius: 4px;
-		transition: all 0.2s ease;
-		background: white;
-		height: auto;
-	}
-
-		::deep .supplier-filter .e-input-group:hover,
-		::deep .category-filter .e-input-group:hover {
-			border-color: var(--primary-light);
-		}
-
-		::deep .supplier-filter .e-input-group.e-input-focus,
-		::deep .category-filter .e-input-group.e-input-focus {
-			border-color: var(--primary-color);
-			box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
-		}
-
-		::deep .supplier-filter .e-input-group input,
-		::deep .category-filter .e-input-group input {
-			padding: 8px 10px;
-			font-size: 16px;
-			color: var(--text-dark);
-			font-weight: 500;
-			border: none;
-			background: transparent;
-			height: 40px;
-		}
-
-			::deep .supplier-filter .e-input-group input::placeholder,
-			::deep .category-filter .e-input-group input::placeholder {
-				color: var(--text-light);
-				font-weight: 400;
-			}
-
-		::deep .supplier-filter .e-input-group .e-ddl-icon,
-		::deep .category-filter .e-input-group .e-ddl-icon {
-			color: var(--primary-color);
-			font-size: 12px;
-			margin-right: 6px;
-		}
-
-	/* Popup Styling */
-	::deep .e-popup.e-autocomplete,
-	::deep .e-popup.e-combobox {
-		border: 2px solid var(--primary-color);
-		border-radius: 12px;
-		box-shadow: var(--shadow-medium);
-		overflow: hidden;
-	}
-
-		::deep .e-popup.e-autocomplete .e-list-item,
-		::deep .e-popup.e-combobox .e-list-item {
-			padding: 12px 16px;
-			transition: all 0.2s ease;
-			border-bottom: 1px solid var(--border-color);
-		}
-
-			::deep .e-popup.e-autocomplete .e-list-item:hover,
-			::deep .e-popup.e-combobox .e-list-item:hover {
-				background: var(--primary-light);
-				color: var(--text-dark);
-			}
-
-			::deep .e-popup.e-autocomplete .e-list-item.e-active,
-			::deep .e-popup.e-combobox .e-list-item.e-active {
-				background: var(--primary-color);
-				color: white;
-			}
-
-			::deep .e-popup.e-autocomplete .e-list-item:last-child,
-			::deep .e-popup.e-combobox .e-list-item:last-child {
-				border-bottom: none;
-			}
-
-	/* Grid Container - Desktop Optimized */
-	.grid-container {
-		flex: 1;
-		padding: 8px;
-		overflow: hidden;
-	}
-
-	/* Unit Section */
-	.unit-section {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 4px 0;
-	}
-
-	.unit-text {
-		font-size: 10px;
-		color: var(--text-light);
-		font-weight: 500;
-		text-transform: uppercase;
-		background: var(--bg-light);
-		padding: 2px 6px;
-		border-radius: 8px;
-		border: 1px solid var(--border-color);
-	}
-
-	/* Quantity Section */
-	.quantity-section {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 100%;
-		padding: 8px 0;
-	}
-
-	/* Add Button - Desktop Optimized */
-	.add-button {
-		background: var(--primary-color);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		padding: 8px 14px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 4px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-weight: 500;
-		font-size: 14px;
-		box-shadow: var(--shadow-light);
-		min-height: 36px;
-		min-width: 60px;
-	}
-
-		.add-button:hover {
-			background: var(--primary-dark);
-			transform: translateY(-1px);
-			box-shadow: var(--shadow-medium);
-		}
-
-		.add-button:active {
-			transform: translateY(0);
-		}
-
-	.add-text {
-		display: inline;
-		font-weight: 600;
-	}
-
-	/* Quantity Controls - Desktop Optimized */
-	.quantity-controls {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		width: 100%;
-		justify-content: center;
-		max-width: 200px;
-	}
-
-	.quantity-input-wrapper {
-		flex: 1;
-		min-width: 60px;
-		max-width: 200px;
-	}
-
-	.quantity-input {
-		width: 100% !important;
-	}
-
-		.quantity-input input {
-			text-align: center !important;
-			border: 1px solid var(--border-color);
-			border-radius: 4px;
-			padding: 6px 8px !important;
-			font-weight: 600;
-			font-size: 16px !important;
-			color: var(--text-dark);
-			transition: all 0.2s ease;
-			height: 36px !important;
-			box-sizing: border-box;
-		}
-
-			.quantity-input input:focus {
-				border-color: var(--primary-color);
-				box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
-				outline: none;
-			}
-
-	/* Rate Section */
-	.rate-section {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 100%;
-		padding: 2px 0;
-	}
-
-	.rate-input {
-		width: 100% !important;
-	}
-
-		.rate-input input {
-			text-align: center !important;
-			border: 1px solid var(--border-color);
-			border-radius: 4px;
-			padding: 6px 8px !important;
-			font-weight: 600;
-			font-size: 16px !important;
-			color: var(--text-dark);
-			transition: all 0.2s ease;
-			height: 36px !important;
-			box-sizing: border-box;
-		}
-
-			.rate-input input:focus {
-				border-color: var(--primary-color);
-				box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1);
-				outline: none;
-			}
-
-	.rate-display {
-		font-size: 10px;
-		font-weight: 700;
-		color: var(--text-dark);
-	}
-
-	/* Total Value Styling */
-	.total-value {
-		font-weight: 700;
-		color: var(--primary-color);
-		font-size: 10px;
-	}
-
-	/* Unit Display */
-	.unit-display {
-		font-size: 9px;
-		color: var(--text-light);
-		font-weight: 500;
-		text-transform: uppercase;
-	}
-
-	/* Edit Button Styling - Desktop Optimized */
-	.edit-button {
-		background: var(--info-color);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		padding: 6px 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: var(--shadow-light);
-		font-size: 14px;
-		min-height: 32px;
-	}
-
-		.edit-button:hover {
-			background: #138496;
-			transform: scale(1.05);
-			box-shadow: var(--shadow-medium);
-		}
-
-		.edit-button:active {
-			transform: scale(0.95);
-		}
-
-	.edit-icon {
-		font-size: 14px;
-	}
-
-	/* Action Buttons Group Styling */
-	.action-buttons-group {
-		display: flex;
-		gap: 4px;
-		justify-content: center;
-		align-items: center;
-	}
-
-	/* Remove Button Styling */
-	.remove-button {
-		background: var(--danger-color);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		padding: 6px 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: var(--shadow-light);
-		font-size: 14px;
-		min-height: 32px;
-	}
-
-		.remove-button:hover:not(:disabled) {
-			background: #c82333;
-			transform: scale(1.05);
-			box-shadow: var(--shadow-medium);
-		}
-
-		.remove-button:active {
-			transform: scale(0.95);
-		}
-
-		.remove-button:disabled {
-			background: var(--text-light);
-			cursor: not-allowed;
-			transform: none;
-		}
-
-	.remove-icon {
-		font-size: 14px;
-	}
-
-	/* Cart Footer - Desktop Optimized */
-	.cart-footer {
-		position: sticky;
-		bottom: 0;
-		background: white;
-		padding: 8px 16px;
-		box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.1);
-		z-index: 100;
-		animation: slideUp 0.3s ease-out;
-	}
-
-	.cart-button {
-		width: 100%;
-		background: var(--primary-color);
-		color: white;
-		border: none;
-		border-radius: 4px;
-		padding: 8px 12px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-weight: 600;
-		font-size: 12px;
-		box-shadow: var(--shadow-medium);
-		position: relative;
-		min-height: 36px;
-	}
-
-		.cart-button:hover {
-			background: var(--primary-dark);
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-		}
-
-		.cart-button:active {
-			transform: translateY(0);
-		}
-
-	.cart-count {
-		background: white;
-		color: var(--primary-color);
-		border-radius: 50%;
-		width: 20px;
-		height: 20px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 700;
-		font-size: 10px;
-		position: absolute;
-		right: 8px;
-		top: 50%;
-		transform: translateY(-50%);
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-	}
-
-	/* Grid Styling - Desktop Optimized */
-	::deep .e-grid {
-		border-radius: 8px;
-		overflow: hidden;
-		background: white;
-		box-shadow: var(--shadow-light);
-		border: none;
-		font-size: 11px;
-	}
-
-		::deep .e-grid .e-gridheader {
-			background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-		}
-
-		::deep .e-grid .e-headercell {
-			background: transparent;
-			color: white;
-			font-weight: 600;
-			border: none;
-			padding: 6px 4px;
-			font-size: 10px;
-		}
-
-		::deep .e-grid .e-rowcell {
-			border: none;
-			border-bottom: 1px solid var(--border-color);
-			padding: 4px 3px;
-			vertical-align: middle;
-			font-size: 10px;
-			line-height: 1.2;
-		}
-
-		::deep .e-grid .e-row:nth-child(even) {
-			background-color: #fafafa;
-		}
-
-		::deep .e-grid .e-row:hover {
-			background-color: var(--primary-light);
-		}
-
-	/* Dialog Styling */
-	.dialog-header {
 		font-size: 20px;
 		font-weight: 600;
-		color: var(--text-dark);
-		display: flex;
-		align-items: center;
-		gap: 10px;
+		color: #0f172a;
+		margin: 0;
+		letter-spacing: -0.3px;
 	}
 
-	.supplier-icon,
-	.material-icon {
-		font-size: 24px;
-		color: var(--primary-color);
-	}
-
-	.dialog-content {
-		padding: 20px;
-		max-height: 70vh;
-		overflow-y: auto;
-	}
-
-	/* Supplier Info Card */
-	.supplier-info-card {
-		background-color: var(--bg-light);
-		border-radius: 12px;
-		padding: 20px;
-		margin-top: 15px;
-		border: 1px solid var(--border-color);
-		box-shadow: var(--shadow-light);
-	}
-
-	.supplier-info-header {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-weight: 600;
-		color: var(--text-dark);
-		margin-bottom: 15px;
-		border-bottom: 2px solid var(--primary-color);
-		padding-bottom: 8px;
-	}
-
-	.supplier-info-content {
-		padding-left: 26px;
-	}
-
-	.info-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 8px 0;
-		border-bottom: 1px solid var(--border-color);
-	}
-
-		.info-item:last-child {
-			border-bottom: none;
-		}
-
-	.info-label {
-		font-weight: 600;
-		color: var(--text-dark);
-		flex-shrink: 0;
-	}
-
-	.info-value {
-		color: var(--text-light);
-		font-weight: 500;
-		text-align: right;
-		word-break: break-word;
-	}
-
-	.info-icon {
-		font-size: 18px;
-		color: var(--primary-color);
-		flex-shrink: 0;
-	}
-
-	/* Material Details Dialog Styling */
-	.material-info-section {
-		margin-bottom: 25px;
-		padding: 20px;
-		background: var(--bg-light);
-		border-radius: 12px;
-		border: 1px solid var(--border-color);
-	}
-
-	.material-title {
-		margin: 0 0 15px 0;
-		color: var(--text-dark);
-		font-size: 18px;
-		font-weight: 600;
-		text-align: center;
-	}
-
-	.material-summary {
-		display: flex;
-		justify-content: space-around;
-		flex-wrap: wrap;
-		gap: 10px;
-	}
-
-	.summary-item {
-		font-size: 14px;
-		color: var(--text-light);
-		text-align: center;
-	}
-
-		.summary-item strong {
-			color: var(--text-dark);
-		}
-
-	/* Action Buttons Section */
-	.action-buttons-section {
-		display: flex;
-		flex-direction: column;
-		gap: 15px;
-	}
-
-	.detail-action-button {
-		display: flex;
-		align-items: center;
-		gap: 15px;
-		padding: 20px;
-		border: none;
-		border-radius: 12px;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		text-align: left;
-		box-shadow: var(--shadow-light);
-		position: relative;
-		overflow: hidden;
-	}
-
-		.detail-action-button:hover {
-			transform: translateY(-2px);
-			box-shadow: var(--shadow-medium);
-		}
-
-		.detail-action-button:active {
-			transform: translateY(0);
-		}
-
-	.basic-button {
-		background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
-		color: white;
-	}
-
-		.basic-button:hover {
-			background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-		}
-
-	.discount-button {
-		background: linear-gradient(135deg, var(--discount-color) 0%, #ff5722 100%);
-		color: white;
-	}
-
-		.discount-button:hover {
-			background: linear-gradient(135deg, #e55a4e 0%, #d84315 100%);
-		}
-
-	.tax-button {
-		background: linear-gradient(135deg, var(--tax-color) 0%, #5a39c5 100%);
-		color: white;
-	}
-
-		.tax-button:hover {
-			background: linear-gradient(135deg, #5e379b 0%, #483593 100%);
-		}
-
-	.button-icon {
-		font-size: 24px;
-		flex-shrink: 0;
-	}
-
-	.button-text {
-		font-size: 18px;
-		font-weight: 600;
-		display: block;
-		margin-bottom: 4px;
-	}
-
-	.button-description {
+	.page-subtitle {
 		font-size: 13px;
-		opacity: 0.9;
+		color: #64748b;
+		margin: 4px 0 0 0;
 		font-weight: 400;
 	}
 
-	/* Consolidated Dialog Styling */
-	.consolidated-form {
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-
-	.form-section {
-		background: var(--bg-light);
-		border-radius: 8px;
-		padding: 16px;
-		border: 1px solid var(--border-color);
-	}
-
-	.section-title {
+	.header-right {
 		display: flex;
 		align-items: center;
+		justify-content: flex-end;
 		gap: 8px;
-		margin: 0 0 16px 0;
-		font-size: 16px;
-		font-weight: 600;
-		color: var(--text-dark);
-		border-bottom: 2px solid var(--primary-color);
-		padding-bottom: 8px;
+	}
+
+	.btn-icon {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #e2e8f0;
+		background: #ffffff;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		color: #64748b;
+	}
+
+		.btn-icon:hover {
+			background: #f8fafc;
+			border-color: #3b82f6;
+			color: #3b82f6;
+		}
+
+		.btn-icon:active {
+			transform: scale(0.95);
+		}
+
+	.btn-icon-save {
+		color: #10b981;
+		border-color: #10b981;
+	}
+
+		.btn-icon-save:hover {
+			background: #ecfdf5;
+			border-color: #059669;
+			color: #059669;
+		}
+
+	/* Main Container */
+	.purchase-container {
+		padding: 16px 32px;
+		max-width: 1920px;
+		margin: 0 auto;
+		background: #f8fafc;
+		min-height: calc(100vh - 72px);
+	}
+
+	/* Two Column Layout */
+	.two-column-layout {
+		display: flex;
+		gap: 16px;
+		margin-bottom: 16px;
+	}
+
+		.two-column-layout > :first-child {
+			flex: 0 0 75%;
+		}
+
+		.two-column-layout > :last-child {
+			flex: 0 0 calc(25% - 16px);
+		}
+
+	/* Section Card Styles */
+	.section-card {
+		background: #ffffff;
+		border-radius: 12px;
+		border: 1px solid #e2e8f0;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		margin-bottom: 16px;
+		overflow: hidden;
+	}
+
+	.section-header {
+		padding: 16px 20px;
+		border-bottom: 1px solid #e2e8f0;
+		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+	}
+
+	.section-title-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 12px;
 	}
 
 	.section-icon {
-		font-size: 18px;
+		color: #3b82f6;
+		flex-shrink: 0;
 	}
 
-	/* Compact Form Layout */
-	.form-row-compact {
+	.section-title {
+		font-size: 16px;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0;
+		letter-spacing: -0.2px;
+	}
+
+	.section-body {
+		padding: 16px 20px;
+	}
+
+	/* Form Grid Layout */
+	.form-grid {
 		display: grid;
-		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 16px 20px;
+	}
+
+	.form-grid-single {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 16px 20px;
+	}
+
+	.form-field {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.form-field-full {
+		grid-column: 1 / -1;
+	}
+
+	.field-label {
+		font-size: 13px;
+		font-weight: 600;
+		color: #334155;
+		letter-spacing: 0.1px;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.required {
+		color: #ef4444;
+		font-weight: 700;
+	}
+
+	/* Transaction Date and Financial Year Wrapper */
+	.date-year-wrapper {
+		display: flex;
 		gap: 12px;
+		align-items: stretch;
+	}
+
+		.date-year-wrapper > :first-child {
+			flex: 1;
+		}
+
+		.date-year-wrapper > :last-child {
+			flex: 1;
+		}
+
+	/* Transaction Number with Auto-generate Checkbox */
+	.transaction-no-wrapper {
+		display: flex;
+		gap: 12px;
+		align-items: stretch;
+	}
+
+		.transaction-no-wrapper > :first-child {
+			flex: 1;
+		}
+
+	.auto-generate-checkbox {
+		display: flex;
+		align-items: center;
+		padding: 0 16px;
+		background: #f8fafc;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		white-space: nowrap;
+		min-width: 140px;
+		justify-content: center;
+	}
+
+		.auto-generate-checkbox ::deep .custom-checkbox {
+			font-size: 13px;
+			font-weight: 500;
+		}
+
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 12px;
+	}
+
+	.btn-primary,
+	.btn-secondary {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		height: 44px;
+		padding: 0 24px;
+		border: none;
+		border-radius: 8px;
+		font-size: 14px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		letter-spacing: 0.3px;
+		flex: 1;
+	}
+
+		.btn-primary svg,
+		.btn-secondary svg {
+			flex-shrink: 0;
+		}
+
+	.btn-primary {
+		background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+		color: #ffffff;
+		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+	}
+
+		.btn-primary:hover {
+			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+			transform: translateY(-1px);
+			background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+		}
+
+		.btn-primary:active {
+			transform: translateY(0);
+			box-shadow: 0 1px 4px rgba(59, 130, 246, 0.3);
+		}
+
+	.btn-secondary {
+		background: #ffffff;
+		color: #64748b;
+		border: 2px solid #e2e8f0;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
+
+		.btn-secondary:hover {
+			background: #f8fafc;
+			border-color: #cbd5e1;
+			color: #475569;
+			box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+			transform: translateY(-1px);
+		}
+
+		.btn-secondary:active {
+			transform: translateY(0);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+
+	/* Financial Grid Layout */
+	.financial-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.financial-row {
+		display: grid;
+		grid-template-columns: 100px 1fr;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.financial-row-dual {
+		display: grid;
+		grid-template-columns: 100px 1fr;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.dual-inputs {
+		display: grid;
+		grid-template-columns: 1.5fr 1.5fr;
+		gap: 8px;
+		align-items: center;
+	}
+
+	.financial-row.total-row {
+		margin-top: 4px;
+		padding-top: 8px;
+		border-top: 2px solid #e2e8f0;
+	}
+
+	.financial-label {
+		font-size: 13px;
+		font-weight: 500;
+		color: #475569;
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	.financial-label-total {
+		font-size: 14px;
+		font-weight: 700;
+		color: #0f172a;
+		text-align: right;
+		white-space: nowrap;
+	}
+
+	.financial-divider {
+		height: 1px;
+		background: #e2e8f0;
+		margin: 4px 0;
+	}
+
+	/* Syncfusion Component Overrides */
+	.custom-numeric .e-input {
+		text-align: right;
+	}
+
+	.custom-numeric {
+		padding-right: 16px;
+	}
+
+	::deep .custom-autocomplete,
+	::deep .custom-datepicker,
+	::deep .custom-textbox,
+	::deep .custom-numeric {
+		width: 100%;
+	}
+
+		::deep .custom-autocomplete .e-input-group,
+		::deep .custom-datepicker .e-input-group,
+		::deep .custom-textbox .e-input-group,
+		::deep .custom-numeric .e-input-group {
+			border: 1px solid #cbd5e1;
+			border-radius: 6px;
+			background: #ffffff;
+			transition: all 0.2s ease;
+			height: 40px;
+		}
+
+			::deep .custom-autocomplete .e-input-group:hover,
+			::deep .custom-datepicker .e-input-group:hover,
+			::deep .custom-textbox .e-input-group:hover,
+			::deep .custom-numeric .e-input-group:not(.e-disabled):hover {
+				border-color: #94a3b8;
+			}
+
+			::deep .custom-autocomplete .e-input-group.e-input-focus,
+			::deep .custom-datepicker .e-input-group.e-input-focus,
+			::deep .custom-textbox .e-input-group.e-input-focus,
+			::deep .custom-numeric .e-input-group.e-input-focus {
+				border-color: #3b82f6;
+				box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+			}
+
+			::deep .custom-autocomplete .e-input-group input,
+			::deep .custom-datepicker .e-input-group input,
+			::deep .custom-textbox .e-input-group input,
+			::deep .custom-textbox .e-input-group textarea,
+			::deep .custom-numeric .e-input-group input {
+				font-size: 14px;
+				color: #1e293b;
+				padding: 8px 12px;
+			}
+
+				::deep .custom-autocomplete .e-input-group input::placeholder,
+				::deep .custom-datepicker .e-input-group input::placeholder,
+				::deep .custom-textbox .e-input-group input::placeholder,
+				::deep .custom-textbox .e-input-group textarea::placeholder,
+				::deep .custom-numeric .e-input-group input::placeholder {
+					color: #94a3b8;
+				}
+
+	::deep .readonly-field .e-input-group {
+		background: #f8fafc;
+		cursor: not-allowed;
+	}
+
+		::deep .readonly-field .e-input-group input {
+			color: #64748b;
+			font-weight: 500;
+		}
+
+	::deep .editable-field .e-input-group {
+		border-color: #3b82f6;
+		background: #eff6ff;
+	}
+
+		::deep .editable-field .e-input-group input {
+			font-weight: 600;
+			color: #1e40af;
+		}
+
+	::deep .small-input .e-input-group {
+		width: 100%;
+	}
+
+		::deep .small-input .e-input-group input {
+			text-align: center;
+			padding: 8px;
+		}
+
+	::deep .discount-field .e-input-group input {
+		color: #dc2626;
+		font-weight: 500;
+	}
+
+	::deep .total-field .e-input-group {
+		background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+		border: 2px solid #3b82f6;
+		height: 48px;
+	}
+
+		::deep .total-field .e-input-group input {
+			font-size: 18px;
+			font-weight: 700;
+			color: #1e40af;
+		}
+
+	::deep .textarea-field .e-input-group {
+		height: auto;
+		min-height: 80px;
+	}
+
+		::deep .textarea-field .e-input-group textarea {
+			resize: vertical;
+			min-height: 80px;
+		}
+
+	::deep .textarea-field-small .e-input-group {
+		height: auto;
+		min-height: 60px;
+	}
+
+		::deep .textarea-field-small .e-input-group textarea {
+			resize: vertical;
+			min-height: 60px;
+		}
+
+	/* Add to Cart Section Styles */
+	.cart-row {
+		display: grid;
+		grid-template-columns: 2fr repeat(7, 1fr) 1.5fr 100px;
+		gap: 12px;
+		align-items: end;
 		margin-bottom: 12px;
 	}
 
-	.form-group-compact {
+	.cart-field {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.cart-field-item {
+		grid-column: span 2;
+	}
+
+	.cart-field-small {
+		/* Standard single column */
+	}
+
+	.cart-field-medium {
+		grid-column: span 1;
+	}
+
+	.cart-field-button {
+		display: flex;
+		align-items: flex-end;
+	}
+
+	.cart-label {
+		font-size: 12px;
+		font-weight: 600;
+		color: #475569;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
+	}
+
+		.cart-label .required {
+			color: #dc2626;
+			margin-left: 2px;
+		}
+
+	::deep .cart-field .e-input-group,
+	::deep .cart-field .custom-numeric .e-input-group,
+	::deep .cart-field .custom-autocomplete .e-input-group,
+	::deep .cart-field .custom-textbox .e-input-group {
+		height: 38px;
+		background: #eff6ff;
+		border: 1px solid #3b82f6;
+	}
+
+		::deep .cart-field .e-input-group input,
+		::deep .cart-field .custom-numeric .e-input-group input,
+		::deep .cart-field .custom-autocomplete .e-input-group input,
+		::deep .cart-field .custom-textbox .e-input-group input {
+			font-size: 14px;
+			font-weight: 500;
+			color: #1e293b;
+			padding: 8px 12px;
+		}
+
+	.btn-add {
+		height: 38px;
+		padding: 0 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+		color: #ffffff;
+		border: none;
+		border-radius: 6px;
+		font-weight: 600;
+		font-size: 14px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+		white-space: nowrap;
+	}
+
+		.btn-add:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+		}
+
+		.btn-add:active {
+			transform: scale(0.98);
+		}
+
+		.btn-add svg {
+			flex-shrink: 0;
+		}
+
+	/* Checkbox Wrapper in Cart Row */
+	.checkbox-wrapper {
+		height: 38px;
+		display: flex;
+		align-items: center;
+		padding: 0 12px;
+		background: #f8fafc;
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+	}
+
+	::deep .checkbox-wrapper .custom-checkbox {
+		font-size: 13px;
+		font-weight: 500;
+	}
+
+	/* Cart Amounts Row - Aligned with Input Fields Above */
+	.cart-amounts-row {
+		display: grid;
+		grid-template-columns: 2fr repeat(7, 1fr) 1.5fr 100px;
+		gap: 12px;
+		margin-top: 8px;
+	}
+
+	.amount-field {
 		display: flex;
 		flex-direction: column;
 	}
 
-		.form-group-compact label {
-			font-size: 12px;
-			font-weight: 500;
-			color: var(--text-dark);
-			margin-bottom: 4px;
-		}
-
-	.form-control-compact {
-		width: 100%;
-		border-radius: 4px;
+	.amount-field-item {
+		grid-column: span 2;
 	}
 
-		.form-control-compact input {
-			padding: 8px 10px !important;
-			font-size: 16px !important;
-			height: 40px !important;
-			border: 1px solid var(--border-color) !important;
-			border-radius: 4px !important;
-		}
+	.amount-field-small {
+		/* Standard single column */
+	}
 
-			.form-control-compact input:focus {
-				border-color: var(--primary-color) !important;
-				box-shadow: 0 0 0 1px rgba(40, 167, 69, 0.2) !important;
-			}
+	.amount-field-medium {
+		grid-column: span 1;
+	}
 
-	/* Amount Display Styling */
+	.amount-field-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.amount-display {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		flex-direction: column;
+		gap: 4px;
 		padding: 8px 12px;
-		background: var(--primary-light);
-		border-radius: 4px;
-		margin-top: 8px;
-		border: 1px solid var(--primary-color);
+		background: #ffffff;
+		border-radius: 6px;
+		border: 1px solid #e2e8f0;
+		min-height: 58px;
 	}
 
+		.amount-display.identification-field {
+			padding: 0;
+			background: transparent;
+			border: none;
+			min-height: 38px;
+			justify-content: center;
+		}
+
+		.amount-display.empty-display {
+			background: #f8fafc;
+		}
+
+		.amount-display.total-display {
+			background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+			border: 2px solid #3b82f6;
+		}
+
+			.amount-display.total-display .amount-label {
+				color: #1e40af;
+			}
+
+			.amount-display.total-display .amount-value {
+				color: #1e40af;
+				font-size: 16px;
+			}
+
+	::deep .identification-field .identification-input .e-input-group {
+		height: 38px;
+		background: #ffffff;
+		border: 1px solid #cbd5e1;
+	}
+
+		::deep .identification-field .identification-input .e-input-group input {
+			font-size: 13px;
+			color: #64748b;
+			font-weight: 500;
+			padding: 8px 12px;
+		}
+
+			::deep .identification-field .identification-input .e-input-group input::placeholder {
+				color: #94a3b8;
+				font-style: italic;
+			}
+
 	.amount-label {
-		font-size: 12px;
+		font-size: 10px;
 		font-weight: 600;
-		color: var(--text-dark);
+		color: #64748b;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
 	}
 
 	.amount-value {
-		font-size: 13px;
+		font-size: 14px;
 		font-weight: 700;
-		color: var(--primary-color);
-	}
-
-	/* Readonly Amount Styling */
-	.readonly-amount {
-		padding: 6px 8px;
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--primary-color);
-		background: var(--bg-light);
-		border: 1px solid var(--border-color);
-		border-radius: 4px;
-		text-align: center;
-		margin-top: 4px;
-	}
-
-	/* Tax Amount Display */
-	.tax-amount {
-		font-size: 10px;
-		font-weight: 600;
-		color: var(--success-color);
-		text-align: center;
-		margin-top: 2px;
-		padding: 2px 4px;
-		background: rgba(40, 167, 69, 0.1);
-		border-radius: 3px;
-	}
-
-	/* Form Controls */
-	.form-group {
-		margin-bottom: 15px;
-	}
-
-		.form-group label {
-			display: block;
-			margin-bottom: 8px;
-			font-weight: 500;
-			color: var(--text-dark);
-		}
-
-	.form-control {
+		color: #1e293b;
+		text-align: right;
 		width: 100%;
-		border-radius: 6px;
+		display: block;
 	}
 
-	.form-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 20px;
-		margin-bottom: 20px;
-	}
-
-		.form-row .full-width {
-			grid-column: 1 / -1;
+		.amount-value.discount-amt {
+			color: #dc2626;
 		}
 
-	/* Summary card styling */
-	.basic-summary,
-	.discount-summary,
-	.tax-summary {
-		margin-top: 25px;
-	}
-
-	.summary-card {
-		background-color: var(--bg-light);
-		border-radius: 12px;
-		padding: 20px;
-		border: 1px solid var(--border-color);
-		box-shadow: var(--shadow-light);
-	}
-
-	.summary-row {
+	.checkbox-display {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		padding: 10px 0;
-		border-bottom: 1px solid var(--border-color);
+		justify-content: center;
+		padding: 8px;
+		background: #f8fafc;
+		border-radius: 6px;
+		border: 1px solid #e2e8f0;
+		min-height: 58px;
 	}
 
-		.summary-row:last-child {
-			border-bottom: none;
+	::deep .custom-checkbox {
+		font-size: 12px;
+		font-weight: 500;
+	}
+
+		::deep .custom-checkbox label {
+			white-space: nowrap;
 		}
 
-	.summary-label {
-		font-weight: 500;
-		color: var(--text-dark);
-		font-size: 14px;
+	/* Professional Grid Styles */
+	.e-grid .e-summaryrow .e-summarycell {
+		background-color: #deecf9;
 	}
 
-	.summary-value {
+	.grid-body {
+		padding: 0 !important;
+	}
+
+	::deep .professional-grid {
+		border: none;
+	}
+
+		::deep .professional-grid .e-gridheader {
+			background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+			border-bottom: 2px solid #e2e8f0;
+		}
+
+		::deep .professional-grid .e-headercell {
+			background: transparent;
+			color: #475569;
+			font-weight: 600;
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.3px;
+			border-right: 1px solid #e2e8f0;
+			padding: 12px 8px;
+		}
+
+			::deep .professional-grid .e-headercell:last-child {
+				border-right: none;
+			}
+
+		::deep .professional-grid .e-gridcontent {
+			background: #ffffff;
+		}
+
+		::deep .professional-grid .e-row {
+			transition: background-color 0.2s ease;
+		}
+
+			::deep .professional-grid .e-row:hover {
+				background-color: #f8fafc;
+			}
+
+			::deep .professional-grid .e-row.e-altrow {
+				background-color: #fafbfc;
+			}
+
+				::deep .professional-grid .e-row.e-altrow:hover {
+					background-color: #f8fafc;
+				}
+
+		::deep .professional-grid .e-rowcell {
+			border-right: 1px solid #f1f5f9;
+			border-bottom: 1px solid #f1f5f9;
+			padding: 10px 8px;
+			font-size: 13px;
+			color: #1e293b;
+		}
+
+			::deep .professional-grid .e-rowcell:last-child {
+				border-right: none;
+			}
+
+	.grid-discount {
+		color: #dc2626;
 		font-weight: 600;
-		color: var(--text-dark);
+	}
+
+	.grid-total {
+		color: #1e40af;
+		font-weight: 700;
 		font-size: 14px;
 	}
 
-	.summary-divider {
-		height: 2px;
-		background-color: var(--border-color);
-		margin: 10px 0;
-		border-radius: 1px;
+	.grid-checkbox {
+		display: inline-block;
+		width: 20px;
+		height: 20px;
+		line-height: 20px;
+		text-align: center;
+		border-radius: 4px;
+		font-weight: 700;
+		font-size: 14px;
 	}
 
-	.total-row {
-		margin-top: 10px;
-		padding-top: 15px;
-		border-top: 2px solid var(--primary-color) !important;
-		border-bottom: none !important;
+	/* Grid Footer Aggregates */
+	::deep .professional-grid .e-gridfooter {
+		background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
+		border-top: 2px solid #cbd5e1;
 	}
 
-		.total-row .summary-label,
-		.total-row .summary-value {
-			font-size: 16px;
-			font-weight: 700;
+	::deep .professional-grid .e-summarycell {
+		font-weight: 600;
+		color: #1e293b;
+		padding: 12px 8px;
+		border-right: 1px solid #cbd5e1;
+	}
+
+		::deep .professional-grid .e-summarycell:last-child {
+			border-right: none;
 		}
 
-	.total-value {
-		color: var(--primary-color) !important;
+	.aggregate-label {
+		text-align: left;
+		font-size: 13px;
+		color: #475569;
 	}
 
-	.discount-value {
-		color: #dc3545 !important;
+	.aggregate-value {
+		text-align: right;
+		font-size: 13px;
+		color: #1e293b;
 	}
 
-	.tax-value {
-		color: var(--warning-color) !important;
-	}
+		.aggregate-value.aggregate-discount {
+			color: #dc2626;
+		}
 
-	.material-name {
-		color: var(--text-dark);
-		font-weight: 500;
-	}
-
-	/* Tax grid styling */
-	.tax-grid {
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-		margin-bottom: 25px;
-	}
-
-	.tax-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 20px;
-		align-items: end;
-	}
-
-	.tax-column {
-		display: flex;
-		flex-direction: column;
-	}
-
-		.tax-column label {
-			margin-bottom: 8px;
-			font-weight: 500;
-			color: var(--text-dark);
+		.aggregate-value.aggregate-total {
+			color: #1e40af;
 			font-size: 14px;
 		}
 
-	/* Tax info card */
-	.tax-info {
-		margin-top: 20px;
-	}
+			.aggregate-value.aggregate-total strong {
+				font-size: 15px;
+			}
 
-	.info-card {
-		background-color: #e3f2fd;
-		border: 1px solid #2196f3;
-		border-radius: 8px;
-		padding: 15px;
+		.aggregate-label strong,
+		.aggregate-value strong {
+			font-weight: 700;
+		}
+
+	.grid-actions {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		justify-content: center;
+		gap: 6px;
 	}
 
-	.info-text {
-		color: #1565c0;
-		font-size: 14px;
-		font-weight: 500;
-		line-height: 1.4;
-	}
-
-	/* Dialog Footer */
-	.dialog-footer {
+	.btn-grid-action {
+		width: 32px;
+		height: 32px;
 		display: flex;
-		justify-content: flex-end;
 		align-items: center;
-		padding: 15px 20px;
-		background-color: var(--bg-light);
-		border-top: 1px solid var(--border-color);
-		gap: 10px;
-	}
-
-	.dialog-button {
-		background-color: var(--text-light);
-		color: white;
-		border: none;
-		padding: 10px 20px;
+		justify-content: center;
+		border: 1px solid #e2e8f0;
+		background: #ffffff;
 		border-radius: 6px;
-		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.2s ease;
+		padding: 0;
 	}
 
-		.dialog-button:hover {
-			background-color: #6c757d;
+		.btn-grid-action:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		}
 
-	.footer-buttons {
+		.btn-grid-action:active {
+			transform: scale(0.95);
+		}
+
+		.btn-grid-action.btn-edit {
+			color: #3b82f6;
+			border-color: #3b82f6;
+		}
+
+			.btn-grid-action.btn-edit:hover {
+				background: #eff6ff;
+				box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+			}
+
+		.btn-grid-action.btn-delete {
+			color: #dc2626;
+			border-color: #dc2626;
+		}
+
+			.btn-grid-action.btn-delete:hover {
+				background: #fef2f2;
+				box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+			}
+
+	/* Dialog Button Styles */
+	.dialog-btn {
 		display: flex;
-		gap: 10px;
-		flex-wrap: wrap;
-	}
-
-		.footer-buttons .dialog-button {
-			min-width: 120px;
-		}
-
-	/* Animations */
-	@@keyframes slideUp {
-		from {
-			transform: translateY(100%);
-			opacity: 0;
-		}
-
-		to {
-			transform: translateY(0);
-			opacity: 1;
-		}
-	}
-
-	/* Enhanced column font sizes for better visibility */
-	::deep .e-grid .e-rowcell:nth-child(2), /* Rate column */
-	::deep .e-grid .e-rowcell:nth-child(3), /* Quantity column */
-	::deep .e-grid .e-rowcell:nth-child(4), /* Total column */
-	::deep .e-grid .e-rowcell:nth-child(5) { /* Unit column */
-		font-size: 14px !important;
-		font-weight: 600 !important;
-	}
-
-	::deep .e-grid .e-headercell:nth-child(2), /* Rate header */
-	::deep .e-grid .e-headercell:nth-child(3), /* Quantity header */
-	::deep .e-grid .e-headercell:nth-child(4), /* Total header */
-	::deep .e-grid .e-headercell:nth-child(5) { /* Unit header */
-		font-size: 14px !important;
-		font-weight: 700 !important;
-	}
-
-	/* Rate input styling for better visibility */
-	.rate-section .rate-input input {
-		font-size: 16px !important;
-		font-weight: 700 !important;
-	}
-
-	/* Total value styling */
-	.total-value {
-		font-size: 16px !important;
-		font-weight: 800 !important;
-		color: var(--primary-color) !important;
-	}
-
-	/* Quantity display styling */
-	.quantity-display {
-		font-size: 14px !important;
-		font-weight: 700 !important;
-	}
-
-	/* Unit input styling */
-	.unit-input input {
-		font-size: 16px !important;
-		font-weight: 700 !important;
-		text-align: center !important;
-		border: 1px solid var(--border-color) !important;
-		border-radius: 4px !important;
-		padding: 6px 8px !important;
-		transition: all 0.2s ease;
-		height: 36px !important;
-	}
-
-		.unit-input input:focus {
-			border-color: var(--primary-color) !important;
-			box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.1) !important;
-			outline: none !important;
-		}
-
-	/* Unit section styling */
-	.unit-section {
-		display: flex;
-		justify-content: center;
 		align-items: center;
-		width: 100%;
-		padding: 2px 0;
+		justify-content: center;
+		gap: 8px;
+		padding: 12px 20px;
+		border: none;
+		border-radius: 8px;
+		font-size: 14px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 	}
 
-	/* Desktop-Only Layout - No Mobile Responsiveness */
+		.dialog-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+		}
+
+		.dialog-btn:active {
+			transform: translateY(0);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+		}
+
+		.dialog-btn svg {
+			flex-shrink: 0;
+		}
+
+	.dialog-btn-primary {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+	}
+
+		.dialog-btn-primary:hover {
+			background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+		}
+
+	.dialog-btn-info {
+		background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+		color: white;
+	}
+
+		.dialog-btn-info:hover {
+			background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+		}
+
+	.dialog-btn-danger {
+		background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+		color: white;
+	}
+
+		.dialog-btn-danger:hover {
+			background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+		}
+
+	/* Custom Uploader Styles */
+	::deep .custom-uploader .e-upload {
+		border: none;
+		background: transparent;
+	}
+
+	::deep .custom-uploader .e-file-select-wrap {
+		padding: 0;
+	}
+
+	::deep .custom-uploader .e-file-select {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		border: none;
+		padding: 12px 32px;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 14px;
+		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+		transition: all 0.2s ease;
+	}
+
+		::deep .custom-uploader .e-file-select:hover {
+			background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+		}
+
+	::deep .custom-uploader .e-file-drop {
+		border: none;
+		background: transparent;
+		min-height: auto;
+	}
+
+	::deep .custom-uploader .e-upload-files {
+		margin-top: 16px;
+		border: 1px solid #e2e8f0;
+		border-radius: 8px;
+		padding: 12px;
+		background: white;
+	}
+
+	::deep .custom-uploader .e-upload-file-list {
+		padding: 8px;
+		background: #f8fafc;
+		border-radius: 6px;
+		border: 1px solid #e2e8f0;
+	}
+
+	::deep .custom-uploader .e-file-name {
+		font-size: 14px;
+		color: #0f172a;
+		font-weight: 500;
+	}
+
+	::deep .custom-uploader .e-file-size {
+		font-size: 12px;
+		color: #64748b;
+	}
+
+	::deep .custom-uploader .e-file-status {
+		font-size: 12px;
+		color: #10b981;
+		font-weight: 600;
+	}
+
+	::deep .custom-uploader .e-icons.e-file-delete-btn,
+	::deep .custom-uploader .e-icons.e-file-remove-btn {
+		color: #dc2626;
+		font-size: 18px;
+		transition: all 0.2s ease;
+	}
+
+		::deep .custom-uploader .e-icons.e-file-delete-btn:hover,
+		::deep .custom-uploader .e-icons.e-file-remove-btn:hover {
+			color: #991b1b;
+			transform: scale(1.1);
+		}
+
+	::deep .custom-uploader .e-upload-progress-wrap {
+		height: 4px;
+		background: #e2e8f0;
+		border-radius: 2px;
+		overflow: hidden;
+	}
+
+	::deep .custom-uploader .e-upload-progress-bar {
+		background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+		height: 100%;
+	}
+
+	/* Empty Grid State */
+	::deep .professional-grid .e-emptyrow {
+		text-align: center;
+		padding: 48px 24px;
+		color: #94a3b8;
+		font-size: 14px;
+	}
 </style>

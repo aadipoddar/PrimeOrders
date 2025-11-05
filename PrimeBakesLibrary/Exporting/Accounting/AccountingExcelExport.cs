@@ -62,7 +62,7 @@ public static class AccountingExcelExport
 		];
 
 		// Define custom column settings
-		Dictionary<string, ExcelExportUtil.ColumnSetting> columnSettings = new()
+		Dictionary<string, ExcelExportUtilOld.ColumnSetting> columnSettings = new()
 		{
 			[nameof(AccountingOverviewModel.AccountingId)] = new()
 			{
@@ -162,7 +162,7 @@ public static class AccountingExcelExport
 				{
 					if (value == null) return null;
 					var amount = Convert.ToDecimal(value);
-					return new ExcelExportUtil.FormatInfo
+					return new ExcelExportUtilOld.FormatInfo
 					{
 						Bold = amount > 100000,
 						FontColor = amount > 500000 ? Syncfusion.Drawing.Color.FromArgb(56, 142, 60) : null
@@ -195,7 +195,7 @@ public static class AccountingExcelExport
 
 		string worksheetName = "Accounting Details";
 
-		return ExcelExportUtil.ExportToExcel(
+		return ExcelExportUtilOld.ExportToExcel(
 			accountingOverviews,
 			reportTitle,
 			worksheetName,

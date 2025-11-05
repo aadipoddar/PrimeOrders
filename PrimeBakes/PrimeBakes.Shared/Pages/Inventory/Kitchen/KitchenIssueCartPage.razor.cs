@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.DataAccess;

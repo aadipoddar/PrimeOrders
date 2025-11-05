@@ -2,9 +2,8 @@
 	@PurchaseId INT
 AS
 BEGIN
-	SELECT
-		*
-	FROM PurchaseDetail
-	WHERE PurchaseId = @PurchaseId
-		AND Status = 1
+	SELECT *
+	FROM [dbo].[PurchaseDetail]
+	WHERE [PurchaseId] = @PurchaseId
+	AND [Status] = 1
 END

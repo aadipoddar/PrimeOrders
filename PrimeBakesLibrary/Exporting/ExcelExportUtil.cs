@@ -7,7 +7,7 @@ using Syncfusion.XlsIO;
 namespace PrimeBakesLibrary.Exporting;
 
 /// <summary>
-/// Generic Excel exporter for all report types in the application
+/// Generic Excel exporter for all report types in the Prime Bakes application
 /// </summary>
 public static class ExcelExportUtil
 {
@@ -22,7 +22,6 @@ public static class ExcelExportUtil
 	/// <param name="worksheetName">The name of the worksheet</param>
 	/// <param name="dateRangeStart">Optional start date for date range reports</param>
 	/// <param name="dateRangeEnd">Optional end date for date range reports</param>
-	/// <param name="summaryItems">Optional dictionary of summary values to display</param>
 	/// <param name="columnSettings">Optional custom column settings</param>
 	/// <param name="columnOrder">Optional custom column display order</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
@@ -32,7 +31,6 @@ public static class ExcelExportUtil
 		string worksheetName,
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
-		Dictionary<string, object> summaryItems = null,
 		Dictionary<string, ColumnSetting> columnSettings = null,
 		List<string> columnOrder = null)
 	{
@@ -64,12 +62,11 @@ public static class ExcelExportUtil
 				// Setup the worksheet
 				int currentRow = SetupHeader(worksheet, reportTitle, effectiveColumnOrder.Count, dateRangeStart, dateRangeEnd);
 
-				// Add summary section if provided
-				if (summaryItems is not null && summaryItems.Count > 0)
-					currentRow = AddSummarySection(worksheet, summaryItems, effectiveColumnOrder.Count, currentRow);
-
 				// Add data to worksheet
 				currentRow = AddDataSection(worksheet, data, effectiveColumnOrder, columnSettings, currentRow);
+
+				// Add branding footer
+				AddBrandingFooter(worksheet, currentRow, effectiveColumnOrder.Count);
 
 				// Apply final formatting
 				ApplyFinalFormatting(worksheet, effectiveColumnOrder.Count);
@@ -118,12 +115,7 @@ public static class ExcelExportUtil
 		public ExcelHAlign Alignment { get; set; } = ExcelHAlign.HAlignCenter;
 
 		/// <summary>
-		/// Whether the column is a currency column
-		/// </summary>
-		public bool IsCurrency { get; set; }
-
-		/// <summary>
-		/// Whether to highlight negative values
+		/// Whether to highlight negative values in red
 		/// </summary>
 		public bool HighlightNegative { get; set; }
 
@@ -178,35 +170,30 @@ public static class ExcelExportUtil
 			// Set appropriate format and alignment based on property type
 			var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
-			// Currency fields detection based on common naming patterns
-			if (prop.Name.Contains("Amount") || prop.Name.Contains("Price") ||
-				prop.Name.Contains("Cost") || prop.Name.Contains("Value") ||
-				prop.Name.Contains("Paid") || prop.Name.Contains("Dues") ||
-				prop.Name.Contains("Salary") || prop.Name.Contains("Revenue") ||
-				prop.Name.Contains("Total") || prop.Name.Contains("Cash") ||
-				prop.Name.Contains("Card") || prop.Name.Contains("UPI") ||
-				prop.Name.Contains("Credit") || prop.Name.EndsWith("Fee"))
+			// Numeric types - all should be included in totals
+			if (propType == typeof(decimal) || propType == typeof(double) || propType == typeof(float))
 			{
 				setting.Alignment = ExcelHAlign.HAlignRight;
+				setting.Format = "#,##0.00";
 				setting.IncludeInTotal = true;
-				setting.IsCurrency = true;
-				setting.Format = propType == typeof(int) ? "₹#,##0" : "₹#,##0.00";
 				setting.HighlightNegative = true;
 			}
-
 			else if (propType == typeof(int) || propType == typeof(long) || propType == typeof(short))
-				setting.Alignment = ExcelHAlign.HAlignCenter;
-
-			else if (propType == typeof(decimal) || propType == typeof(double) || propType == typeof(float))
 			{
-				setting.Alignment = ExcelHAlign.HAlignRight;
-				if (prop.Name.Contains("Quantity") || prop.Name.Contains("Qty"))
+				// Check if it's likely an ID field (skip totals for IDs)
+				if (prop.Name.EndsWith("Id") || prop.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
 				{
-					setting.Format = "#,##0.00";
+					setting.Alignment = ExcelHAlign.HAlignCenter;
+					setting.IncludeInTotal = false;
+				}
+				else
+				{
+					setting.Alignment = ExcelHAlign.HAlignRight;
+					setting.Format = "#,##0";
 					setting.IncludeInTotal = true;
 				}
 			}
-
+			// DateTime types
 			else if (propType == typeof(DateTime) || propType == typeof(DateOnly))
 			{
 				setting.Alignment = ExcelHAlign.HAlignCenter;
@@ -216,34 +203,38 @@ public static class ExcelExportUtil
 				else
 					setting.Format = "dd-MMM-yyyy";
 			}
-
-			else if (propType == typeof(TimeOnly) ||
-					propType == typeof(DateTime) &&
-					 (prop.Name.Contains("Time") || prop.Name.EndsWith("At")))
+			// TimeOnly type
+			else if (propType == typeof(TimeOnly))
 			{
 				setting.Alignment = ExcelHAlign.HAlignCenter;
 				setting.Format = "hh:mm";
 			}
-
+			// Boolean type
 			else if (propType == typeof(bool))
 			{
 				setting.Alignment = ExcelHAlign.HAlignCenter;
 
 				// For status-related properties, add conditional formatting
-				if (prop.Name.Contains("Status") || prop.Name.Contains("Active"))
+				if (prop.Name.Contains("Status") || prop.Name.Contains("Active") || prop.Name.Contains("Is"))
 				{
-					setting.FormatCallback = (value) => new FormatInfo
+					setting.FormatCallback = (value) =>
 					{
-						Bold = true,
-						FontColor = (bool)value ? Color.FromArgb(56, 142, 60) : Color.FromArgb(198, 40, 40),
-						FormattedText = (bool)value ? "Active" : "Inactive"
+						if (value == null) return null;
+						bool boolValue = (bool)value;
+						return new FormatInfo
+						{
+							Bold = true,
+							FontColor = boolValue ? Color.FromArgb(22, 163, 74) : Color.FromArgb(220, 38, 38),
+							FormattedText = boolValue ? "Yes" : "No"
+						};
 					};
 				}
 			}
-
 			// Default for strings and other types
 			else
+			{
 				setting.Alignment = ExcelHAlign.HAlignLeft;
+			}
 
 			// Add to collection
 			settings[prop.Name] = setting;
@@ -292,23 +283,12 @@ public static class ExcelExportUtil
 		headerRange.CellStyle.Font.Bold = true;
 		headerRange.CellStyle.Font.Size = 20;
 		headerRange.CellStyle.Font.FontName = "Calibri";
-		headerRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Updated to app's main color #e2137b
+		headerRange.CellStyle.Font.RGBColor = Color.FromArgb(59, 130, 246); // Blue theme color
 		headerRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
 
 		int currentRow = 2;
 
-		// Row 2: Company tagline
-		IRange taglineRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
-		taglineRange.Merge();
-		taglineRange.Text = "Celebrating happiness";
-		taglineRange.CellStyle.Font.Size = 11;
-		taglineRange.CellStyle.Font.FontName = "Calibri";
-		taglineRange.CellStyle.Font.Italic = true;
-		taglineRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		taglineRange.CellStyle.Font.RGBColor = Color.FromArgb(193, 14, 105); // Darker variant of primary color
-		currentRow++;
-
-		// Row 3: Date range if available
+		// Row 2: Date range if available
 		if (!string.IsNullOrEmpty(dateRangeText))
 		{
 			IRange dateRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
@@ -318,7 +298,7 @@ public static class ExcelExportUtil
 			dateRange.CellStyle.Font.FontName = "Calibri";
 			dateRange.CellStyle.Font.Bold = true;
 			dateRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-			dateRange.CellStyle.Font.RGBColor = Color.FromArgb(193, 14, 105); // Secondary color
+			dateRange.CellStyle.Font.RGBColor = Color.FromArgb(71, 85, 105); // Slate gray
 			currentRow++;
 		}
 
@@ -330,138 +310,22 @@ public static class ExcelExportUtil
 		companyRange.CellStyle.Font.FontName = "Calibri";
 		companyRange.CellStyle.Font.Bold = true;
 		companyRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		companyRange.CellStyle.Font.RGBColor = Color.FromArgb(33, 150, 243); // Complementary blue
+		companyRange.CellStyle.Font.RGBColor = Color.FromArgb(15, 23, 42); // Dark slate
 
 		// Add decorative header background
 		IRange headerBackgroundRange = worksheet.Range[$"A1:{colLetter}{currentRow}"];
-		headerBackgroundRange.CellStyle.Color = Color.FromArgb(252, 228, 236); // Light pink background matching the theme
+		headerBackgroundRange.CellStyle.Color = Color.FromArgb(239, 246, 255); // Light blue background
 
 		// Add border bottom for header section
 		IRange borderRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
 		borderRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].LineStyle = ExcelLineStyle.Medium;
-		borderRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].ColorRGB = Color.FromArgb(226, 19, 123); // Primary color
+		borderRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].ColorRGB = Color.FromArgb(59, 130, 246); // Blue
 
 		// Space after header
 		currentRow++;
 		worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"].RowHeight = 10;
 
 		return currentRow + 1; // Return the next row to use
-	}
-
-	/// <summary>
-	/// Add summary section to the worksheet
-	/// </summary>
-	private static int AddSummarySection(
-		IWorksheet worksheet,
-		Dictionary<string, object> summaryItems,
-		int columnCount,
-		int startRow)
-	{
-		// Get the column letter for the spreadsheet width
-		string colLetter = GetExcelColumnName(columnCount);
-
-		// Summary Title
-		IRange summaryTitleRange = worksheet.Range[$"A{startRow}:{colLetter}{startRow}"];
-		summaryTitleRange.Merge();
-		summaryTitleRange.Text = "SUMMARY INFORMATION";
-		summaryTitleRange.CellStyle.Font.Bold = true;
-		summaryTitleRange.CellStyle.Font.Size = 12;
-		summaryTitleRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		summaryTitleRange.CellStyle.Color = Color.FromArgb(252, 228, 236); // Light pink background matching theme
-		summaryTitleRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
-
-		startRow++;
-
-		// Determine layout based on number of summary items
-		int columns = Math.Min(3, summaryItems.Count);
-		int rows = (int)Math.Ceiling(summaryItems.Count / (double)columns);
-
-		// Calculate cell width based on spreadsheet width
-		int cellWidth = columnCount / columns;
-
-		// Track current position
-		int currentItemIndex = 0;
-
-		// Create summary grid
-		for (int row = 0; row < rows; row++)
-		{
-			for (int col = 0; col < columns && currentItemIndex < summaryItems.Count; col++)
-			{
-				var item = summaryItems.ElementAt(currentItemIndex);
-				currentItemIndex++;
-
-				// Calculate cell coordinates
-				int startCol = col * cellWidth + 1;
-				int endCol = (col + 1) * cellWidth;
-				if (col == columns - 1) endCol = columnCount; // Last column takes remaining space
-
-				string startColLetter = GetExcelColumnName(startCol);
-				string endColLetter = GetExcelColumnName(endCol);
-
-				// Label cell
-				IRange labelCell = worksheet.Range[$"{startColLetter}{startRow + row * 2}:{endColLetter}{startRow + row * 2}"];
-				labelCell.Merge();
-				labelCell.Text = item.Key;
-				labelCell.CellStyle.Font.Bold = true;
-				labelCell.CellStyle.Font.Size = 11;
-				labelCell.CellStyle.Color = Color.FromArgb(248, 215, 225); // Lighter pink
-				labelCell.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color
-				labelCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-
-				// Value cell
-				IRange valueCell = worksheet.Range[$"{startColLetter}{startRow + row * 2 + 1}:{endColLetter}{startRow + row * 2 + 1}"];
-				valueCell.Merge();
-
-				// Format value based on type
-				if (item.Value is decimal decimalValue)
-				{
-					valueCell.Number = (double)decimalValue;
-
-					// Check if this might be currency
-					if (item.Key.Contains("Revenue") || item.Key.Contains("Salary") ||
-						item.Key.Contains("Dues") || item.Key.Contains("Paid") ||
-						item.Key.Contains("Amount") || item.Key.Contains("Total") ||
-						item.Key.Contains("Cash") || item.Key.Contains("Card") ||
-						item.Key.Contains("UPI") || item.Key.Contains("Credit"))
-					{
-						valueCell.CellStyle.NumberFormat = "₹#,##0.00";
-						valueCell.CellStyle.Font.RGBColor = Color.FromArgb(193, 14, 105); // Secondary color for money
-
-						// Highlight negative values in red
-						if (decimalValue < 0)
-							valueCell.CellStyle.Font.RGBColor = Color.FromArgb(198, 40, 40); // Red
-					}
-				}
-
-				else if (item.Value is double doubleValue)
-				{
-					valueCell.Number = doubleValue;
-					valueCell.CellStyle.NumberFormat = "#,##0.00";
-				}
-
-				else if (item.Value is int intValue)
-				{
-					valueCell.Number = intValue;
-					valueCell.CellStyle.Font.RGBColor = Color.FromArgb(33, 150, 243); // Blue accent color for counts
-				}
-
-				else
-					valueCell.Text = item.Value?.ToString() ?? "";
-
-				// Common value cell styling
-				valueCell.CellStyle.Font.Size = 14;
-				valueCell.CellStyle.Font.Bold = true;
-				valueCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-			}
-		}
-
-		// Calculate the last row used
-		int lastRowUsed = startRow + rows * 2 - 1;
-
-		// Add space after summary section
-		worksheet.Range[$"A{lastRowUsed + 1}:{colLetter}{lastRowUsed + 1}"].RowHeight = 15;
-
-		return lastRowUsed + 2; // Return the next row to use
 	}
 
 	/// <summary>
@@ -479,18 +343,6 @@ public static class ExcelExportUtil
 
 		string colLetter = GetExcelColumnName(columnOrder.Count);
 
-		// Create table title
-		IRange tableTitleRange = worksheet.Range[$"A{startRow}:{colLetter}{startRow}"];
-		tableTitleRange.Merge();
-		tableTitleRange.Text = "DETAILED DATA";
-		tableTitleRange.CellStyle.Font.Bold = true;
-		tableTitleRange.CellStyle.Font.Size = 12;
-		tableTitleRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-		tableTitleRange.CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
-		tableTitleRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
-
-		startRow++;
-
 		// Create header row
 		for (int i = 0; i < columnOrder.Count; i++)
 		{
@@ -501,10 +353,13 @@ public static class ExcelExportUtil
 			IRange headerCell = worksheet.Range[cellAddress];
 			headerCell.Text = setting.DisplayName;
 			headerCell.CellStyle.Font.Bold = true;
-			headerCell.CellStyle.Color = Color.FromArgb(226, 19, 123); // Primary color background
+			headerCell.CellStyle.Font.Size = 11;
+			headerCell.CellStyle.Color = Color.FromArgb(59, 130, 246); // Blue background
 			headerCell.CellStyle.Font.RGBColor = Color.White;
 			headerCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
-			headerCell.CellStyle.Borders.ColorRGB = Color.FromArgb(193, 14, 105); // Secondary color border
+			headerCell.CellStyle.VerticalAlignment = ExcelVAlign.VAlignCenter;
+			headerCell.CellStyle.Borders.ColorRGB = Color.FromArgb(37, 99, 235); // Darker blue border
+			worksheet.SetRowHeight(startRow, 25);
 		}
 
 		startRow++;
@@ -513,8 +368,8 @@ public static class ExcelExportUtil
 		int rowIndex = startRow;
 		var properties = typeof(T).GetProperties().ToDictionary(p => p.Name);
 
-		// Keep track of which columns are valid for totals
-		var columnsToTotal = new HashSet<string>();
+		// Keep track of which columns have numeric data for totals
+		var columnsWithData = new HashSet<string>();
 
 		foreach (var item in data)
 		{
@@ -531,22 +386,23 @@ public static class ExcelExportUtil
 
 					// Apply the value to the cell based on its type
 					if (value is null)
+					{
 						cell.Text = "";
-
+					}
 					else if (value is decimal decimalValue)
 					{
 						cell.Number = (double)decimalValue;
 						if (!string.IsNullOrEmpty(setting.Format))
 							cell.CellStyle.NumberFormat = setting.Format;
 
-						// Track this column for totals if appropriate
+						// Track this column for totals
 						if (setting.IncludeInTotal)
-							columnsToTotal.Add(columnName);
+							columnsWithData.Add(columnName);
 
 						// Apply conditional formatting for negative values if needed
 						if (setting.HighlightNegative && decimalValue < 0)
 						{
-							cell.CellStyle.Font.RGBColor = Color.FromArgb(198, 40, 40); // Red
+							cell.CellStyle.Font.RGBColor = Color.FromArgb(220, 38, 38); // Red
 							cell.CellStyle.Font.Bold = true;
 						}
 					}
@@ -557,9 +413,17 @@ public static class ExcelExportUtil
 							cell.CellStyle.NumberFormat = setting.Format;
 
 						if (setting.IncludeInTotal)
-							columnsToTotal.Add(columnName);
+							columnsWithData.Add(columnName);
 					}
+					else if (value is float floatValue)
+					{
+						cell.Number = floatValue;
+						if (!string.IsNullOrEmpty(setting.Format))
+							cell.CellStyle.NumberFormat = setting.Format;
 
+						if (setting.IncludeInTotal)
+							columnsWithData.Add(columnName);
+					}
 					else if (value is int intValue)
 					{
 						cell.Number = intValue;
@@ -567,32 +431,49 @@ public static class ExcelExportUtil
 							cell.CellStyle.NumberFormat = setting.Format;
 
 						if (setting.IncludeInTotal)
-							columnsToTotal.Add(columnName);
+							columnsWithData.Add(columnName);
 					}
+					else if (value is long longValue)
+					{
+						cell.Number = longValue;
+						if (!string.IsNullOrEmpty(setting.Format))
+							cell.CellStyle.NumberFormat = setting.Format;
 
+						if (setting.IncludeInTotal)
+							columnsWithData.Add(columnName);
+					}
+					else if (value is short shortValue)
+					{
+						cell.Number = shortValue;
+						if (!string.IsNullOrEmpty(setting.Format))
+							cell.CellStyle.NumberFormat = setting.Format;
+
+						if (setting.IncludeInTotal)
+							columnsWithData.Add(columnName);
+					}
 					else if (value is DateTime dateTimeValue)
 					{
 						cell.DateTime = dateTimeValue;
 						cell.CellStyle.NumberFormat = setting.Format ?? "dd-MMM-yyyy";
 					}
-
 					else if (value is DateOnly dateOnlyValue)
 					{
 						cell.DateTime = dateOnlyValue.ToDateTime(TimeOnly.MinValue);
 						cell.CellStyle.NumberFormat = setting.Format ?? "dd-MMM-yyyy";
 					}
-
 					else if (value is TimeOnly timeOnlyValue)
 					{
 						cell.DateTime = DateTime.Today.Add(timeOnlyValue.ToTimeSpan());
 						cell.CellStyle.NumberFormat = setting.Format ?? "hh:mm";
 					}
-
 					else if (value is bool boolValue)
+					{
 						cell.Text = boolValue.ToString();
-
+					}
 					else
+					{
 						cell.Text = value.ToString();
+					}
 
 					// Apply formatting callback if available
 					if (setting.FormatCallback != null)
@@ -638,53 +519,91 @@ public static class ExcelExportUtil
 			tableRange.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].LineStyle = ExcelLineStyle.Thin;
 		}
 
-		// Add totals row if there are numeric columns
-		if (columnsToTotal.Count > 0)
+		// Add totals row for all numeric columns with data
+		if (columnsWithData.Count > 0)
 		{
-			// Add grand total row
 			rowIndex += 1;
 
-			// Find where to start the total label based on the number of columns to total
-			int totalLabelColumnCount = Math.Max(1, columnOrder.Count - columnsToTotal.Count);
-			string totalLabelStartCol = "A";
-			string totalLabelEndCol = GetExcelColumnName(totalLabelColumnCount);
+			// Add the total label in the first column
+			worksheet.Range[$"A{rowIndex}"].Text = "TOTAL";
+			worksheet.Range[$"A{rowIndex}"].CellStyle.Font.Bold = true;
+			worksheet.Range[$"A{rowIndex}"].CellStyle.HorizontalAlignment = ExcelHAlign.HAlignLeft;
+			worksheet.Range[$"A{rowIndex}"].CellStyle.Color = Color.FromArgb(219, 234, 254); // Light blue background
+			worksheet.Range[$"A{rowIndex}"].CellStyle.Font.RGBColor = Color.FromArgb(30, 64, 175); // Dark blue text
+			worksheet.Range[$"A{rowIndex}"].CellStyle.Font.Size = 11;
 
-			// Create the total label
-			IRange totalLabelRange = worksheet.Range[$"{totalLabelStartCol}{rowIndex}:{totalLabelEndCol}{rowIndex}"];
-			totalLabelRange.Merge();
-			totalLabelRange.Text = "GRAND TOTAL";
-			totalLabelRange.CellStyle.Font.Bold = true;
-			totalLabelRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignRight;
-			totalLabelRange.CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
-			totalLabelRange.CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
-
-			// Add the total formulas
-			foreach (var columnName in columnsToTotal)
+			// Add the total formulas for numeric columns
+			for (int i = 0; i < columnOrder.Count; i++)
 			{
-				int colIndex = columnOrder.IndexOf(columnName);
-				if (colIndex >= 0)
-				{
-					colLetter = GetExcelColumnName(colIndex + 1);
-					string cellAddress = $"{colLetter}{rowIndex}";
+				string columnName = columnOrder[i];
 
-					worksheet.Range[cellAddress].Formula = $"=SUM({colLetter}{startRow}:{colLetter}{rowIndex - 1})";
+				if (columnsWithData.Contains(columnName))
+				{
+					string colLtr = GetExcelColumnName(i + 1);
+					string cellAddress = $"{colLtr}{rowIndex}";
+
+					worksheet.Range[cellAddress].Formula = $"=SUM({colLtr}{startRow}:{colLtr}{rowIndex - 1})";
 
 					// Apply appropriate formatting
 					var setting = columnSettings[columnName];
 					worksheet.Range[cellAddress].CellStyle.NumberFormat = setting.Format;
-
-					// Style total cells
 					worksheet.Range[cellAddress].CellStyle.Font.Bold = true;
-					worksheet.Range[cellAddress].CellStyle.Color = Color.FromArgb(248, 215, 225); // Light pink background
-					worksheet.Range[cellAddress].CellStyle.Font.RGBColor = Color.FromArgb(226, 19, 123); // Primary color text
+					worksheet.Range[cellAddress].CellStyle.Color = Color.FromArgb(219, 234, 254); // Light blue background
+					worksheet.Range[cellAddress].CellStyle.Font.RGBColor = Color.FromArgb(30, 64, 175); // Dark blue text
+					worksheet.Range[cellAddress].CellStyle.HorizontalAlignment = setting.Alignment;
+					worksheet.Range[cellAddress].CellStyle.Font.Size = 11;
+				}
+				else
+				{
+					// Empty cell for non-numeric columns
+					string colLtr = GetExcelColumnName(i + 1);
+					string cellAddress = $"{colLtr}{rowIndex}";
+					worksheet.Range[cellAddress].CellStyle.Color = Color.FromArgb(219, 234, 254); // Light blue background
 				}
 			}
-			;
+
+			// Add border to total row
+			IRange totalRow = worksheet.Range[$"A{rowIndex}:{colLetter}{rowIndex}"];
+			totalRow.CellStyle.Borders[ExcelBordersIndex.EdgeTop].LineStyle = ExcelLineStyle.Medium;
+			totalRow.CellStyle.Borders[ExcelBordersIndex.EdgeTop].ColorRGB = Color.FromArgb(59, 130, 246); // Blue
+			totalRow.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].LineStyle = ExcelLineStyle.Medium;
+			totalRow.CellStyle.Borders[ExcelBordersIndex.EdgeBottom].ColorRGB = Color.FromArgb(59, 130, 246); // Blue
+			worksheet.SetRowHeight(rowIndex, 25);
 
 			rowIndex++;
 		}
 
 		return rowIndex + 1;
+	}
+
+	/// <summary>
+	/// Add branding footer to the worksheet
+	/// </summary>
+	private static void AddBrandingFooter(IWorksheet worksheet, int startRow, int columnCount)
+	{
+		try
+		{
+			// Add empty row for spacing
+			startRow += 1;
+
+			// Add branding row
+			string colLetter = GetExcelColumnName(columnCount);
+			IRange brandingRange = worksheet.Range[$"A{startRow}:{colLetter}{startRow}"];
+			brandingRange.Merge();
+			brandingRange.Text = $"© {DateTime.Now.Year} A Product By AadiSoft | www.aadisoft.vercel.app";
+			brandingRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
+			brandingRange.CellStyle.VerticalAlignment = ExcelVAlign.VAlignCenter;
+			brandingRange.CellStyle.Font.Size = 10;
+			brandingRange.CellStyle.Font.Italic = true;
+			brandingRange.CellStyle.Font.RGBColor = Color.FromArgb(107, 114, 128); // Gray-500
+			brandingRange.CellStyle.Color = Color.FromArgb(249, 250, 251); // Gray-50 background
+			worksheet.SetRowHeight(startRow, 22);
+		}
+		catch (Exception ex)
+		{
+			// Log error but continue - don't let branding issues prevent export
+			Console.WriteLine($"Error in AddBrandingFooter: {ex.Message}");
+		}
 	}
 
 	/// <summary>
@@ -706,9 +625,8 @@ public static class ExcelExportUtil
 
 					if (width < 8)
 						worksheet.Columns[i].ColumnWidth = 8;
-
-					else if (width > 40)
-						worksheet.Columns[i].ColumnWidth = 40;
+					else if (width > 50)
+						worksheet.Columns[i].ColumnWidth = 50;
 				}
 				catch
 				{
@@ -717,8 +635,9 @@ public static class ExcelExportUtil
 				}
 			}
 
-			// Add footer with date and page numbers
-			worksheet.PageSetup.CenterFooter = "&D &T";
+			// Add footer with AadiSoft branding, date and page numbers
+			worksheet.PageSetup.LeftFooter = $"© {DateTime.Now.Year} A Product By AadiSoft";
+			worksheet.PageSetup.CenterFooter = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
 			worksheet.PageSetup.RightFooter = "Page &P of &N";
 
 			// Set print options for better presentation

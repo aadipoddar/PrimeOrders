@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Data.Common;
+﻿using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
@@ -39,15 +40,15 @@ public static class SaleReturnA4Print
 				Total = item.Total
 			});
 
-		var (pdfDocument, pdfPage) = PDFExportUtil.CreateA4Document();
+		var (pdfDocument, pdfPage) = PDFExportUtilOld.CreateA4Document();
 
-		float currentY = await PDFExportUtil.DrawCompanyInformation(pdfPage, "SALES RETURN INVOICE");
+		float currentY = await PDFExportUtilOld.DrawCompanyInformation(pdfPage, "SALES RETURN INVOICE");
 
 		currentY = DrawInvoiceDetailsAsync(pdfPage, currentY, saleReturn);
 		var result = DrawItemDetails(pdfPage, currentY, saleReturnProductCartModel);
 		DrawSummary(pdfDocument, result.Page, result.Bounds.Bottom + 20, saleReturn, saleReturnDetails);
 
-		return PDFExportUtil.FinalizePdfDocument(pdfDocument);
+		return PDFExportUtilOld.FinalizePdfDocument(pdfDocument);
 	}
 
 	private static float DrawInvoiceDetailsAsync(PdfPage pdfPage, float currentY, SaleReturnOverviewModel saleReturn)
@@ -73,7 +74,7 @@ public static class SaleReturnA4Print
 		if (!string.IsNullOrEmpty(saleReturn.Remarks))
 			leftColumnDetails["Remarks"] = saleReturn.Remarks;
 
-		return PDFExportUtil.DrawInvoiceDetailsSection(pdfPage, currentY, "Invoice Details", leftColumnDetails, rightColumnDetails);
+		return PDFExportUtilOld.DrawInvoiceDetailsSection(pdfPage, currentY, "Invoice Details", leftColumnDetails, rightColumnDetails);
 	}
 
 	private static PdfGridLayoutResult DrawItemDetails(PdfPage pdfPage, float currentY, List<SaleReturnProductCartModel> saleDetails)
@@ -89,7 +90,7 @@ public static class SaleReturnA4Print
 			Total = (int)item.Total
 		}).ToList();
 
-		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtil._pageMargin * 2;
+		var tableWidth = pdfPage.GetClientSize().Width - PDFExportUtilOld._pageMargin * 2;
 		var columnWidths = new float[]
 		{
 			tableWidth * 0.08f, // S.No
@@ -112,10 +113,10 @@ public static class SaleReturnA4Print
 			PdfTextAlignment.Right   // Total
 		};
 
-		var pdfGrid = PDFExportUtil.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
+		var pdfGrid = PDFExportUtilOld.CreateStyledGrid(dataSource, columnWidths, columnAlignments);
 
-		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtil._pageMargin, currentY, tableWidth,
-			pdfPage.GetClientSize().Height - currentY - PDFExportUtil._pageMargin));
+		var result = pdfGrid.Draw(pdfPage, new RectangleF(PDFExportUtilOld._pageMargin, currentY, tableWidth,
+			pdfPage.GetClientSize().Height - currentY - PDFExportUtilOld._pageMargin));
 
 		return result;
 	}
@@ -170,7 +171,7 @@ public static class SaleReturnA4Print
 
 		var paymentMode = GetPaymentMode(saleReturn);
 
-		return PDFExportUtil.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, saleReturn.Total, paymentMode);
+		return PDFExportUtilOld.DrawSummarySection(pdfDocument, pdfPage, currentY, summaryItems, saleReturn.Total, paymentMode);
 	}
 
 	private static string GetPaymentMode(SaleReturnOverviewModel sale)
