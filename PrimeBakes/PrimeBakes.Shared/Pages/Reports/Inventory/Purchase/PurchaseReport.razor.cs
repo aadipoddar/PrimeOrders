@@ -25,7 +25,9 @@ public partial class PurchaseReport
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
 	private bool _showPurchaseReturns = false;
+	private bool _showDeleted = false;
 	private bool _isDeleteDialogVisible = false;
+	private bool _isRecoverDialogVisible = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -46,10 +48,13 @@ public partial class PurchaseReport
 	private string _successMessage = string.Empty;
 	private string _deleteTransactionNo = string.Empty;
 	private int _deleteTransactionId = 0;
+	private string _recoverTransactionNo = string.Empty;
+	private int _recoverTransactionId = 0;
 
 	private SfToast _sfErrorToast;
 	private SfToast _sfSuccessToast;
 	private SfDialog _deleteConfirmationDialog;
+	private SfDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -113,7 +118,8 @@ public partial class PurchaseReport
 
 			_purchaseOverviews = await PurchaseData.LoadPurchaseOverviewByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
+			!_showDeleted);
 
 			if (_selectedCompany?.Id > 0)
 				_purchaseOverviews = [.. _purchaseOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
@@ -143,7 +149,8 @@ public partial class PurchaseReport
 	{
 		_purchaseReturnOverviews = await PurchaseReturnData.LoadPurchaseReturnOverviewByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
+			 !_showDeleted);
 
 		if (_selectedCompany?.Id > 0)
 			_purchaseReturnOverviews = [.. _purchaseReturnOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
@@ -200,7 +207,8 @@ public partial class PurchaseReport
 			TotalQuantity = -pr.TotalQuantity,
 			TotalTaxAmount = -pr.TotalTaxAmount,
 			TransactionNo = pr.TransactionNo,
-			OtherChargesPercent = pr.OtherChargesPercent
+			OtherChargesPercent = pr.OtherChargesPercent,
+			Status = pr.Status
 		}));
 
 		_purchaseOverviews = [.. _purchaseOverviews.OrderBy(_ => _.TransactionDateTime)];
@@ -324,7 +332,7 @@ public partial class PurchaseReport
 			// Call the Excel export utility
 			var stream = await Task.Run(() =>
 				PurchaseReportExcelExport.ExportPurchaseReport(
-					_purchaseOverviews,
+					_purchaseOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
@@ -334,9 +342,7 @@ public partial class PurchaseReport
 			// Generate file name with date range
 			string fileName = $"PURCHASE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-			{
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-			}
 			fileName += ".xlsx";
 
 			// Save and view the Excel file
@@ -372,7 +378,7 @@ public partial class PurchaseReport
 			// Call the PDF export utility
 			var stream = await Task.Run(() =>
 				PurchaseReportPDFExport.ExportPurchaseReport(
-					_purchaseOverviews,
+					_purchaseOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
@@ -382,9 +388,7 @@ public partial class PurchaseReport
 			// Generate file name with date range
 			string fileName = $"PURCHASE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-			{
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-			}
 			fileName += ".pdf";
 
 			// Save and view the PDF file
@@ -401,11 +405,6 @@ public partial class PurchaseReport
 			_isProcessing = false;
 			StateHasChanged();
 		}
-	}
-
-	private async Task ExportPowerBI(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-	{
-		await ShowToast("Info", "Power BI export is not implemented yet.", "error");
 	}
 	#endregion
 
@@ -621,15 +620,14 @@ public partial class PurchaseReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, _deleteTransactionId);
-			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchase.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-				throw new InvalidOperationException("Cannot delete purchase transaction as the financial year is locked.");
-
 			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to delete this purchase transaction.");
+				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-			await PurchaseData.DeletePurchase(_deleteTransactionId);
+			if (_deleteTransactionId < 0)
+				await PurchaseReturnData.DeletePurchaseReturn(Math.Abs(_deleteTransactionId));
+			else
+				await PurchaseData.DeletePurchase(_deleteTransactionId);
+
 			await ShowToast("Success", $"Purchase transaction {_deleteTransactionNo} has been deleted successfully.", "success");
 
 			_deleteTransactionId = 0;
@@ -661,6 +659,91 @@ public partial class PurchaseReport
 		_showPurchaseReturns = !_showPurchaseReturns;
 		await LoadPurchaseOverviews();
 		StateHasChanged();
+	}
+
+	private async Task ToggleDeleted()
+	{
+		_showDeleted = !_showDeleted;
+		await LoadPurchaseOverviews();
+		StateHasChanged();
+	}
+
+	private async Task ConfirmRecover()
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isRecoverDialogVisible = false;
+			_isProcessing = true;
+			StateHasChanged();
+
+			if (!_user.Admin)
+				throw new UnauthorizedAccessException("You do not have permission to recover this purchase transaction.");
+
+			if (_recoverTransactionId == 0)
+			{
+				await ShowToast("Error", "Invalid purchase transaction selected for recovery.", "error");
+				return;
+			}
+
+			if (_recoverTransactionId < 0)
+				await RecoverPurchaseReturnTransaction(Math.Abs(_recoverTransactionId));
+			else
+				await RecoverPurchaseTransaction(_recoverTransactionId);
+
+			await ShowToast("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", "success");
+
+			_recoverTransactionId = 0;
+			_recoverTransactionNo = string.Empty;
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while recovering purchase transaction: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+			await LoadPurchaseOverviews();
+		}
+	}
+
+	private async Task RecoverPurchaseTransaction(int recoverTransactionId)
+	{
+		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, recoverTransactionId);
+		if (purchase is null)
+		{
+			await ShowToast("Error", "Purchase transaction not found.", "error");
+			return;
+		}
+
+		// Update the Status to true (active)
+		purchase.Status = true;
+		purchase.LastModifiedBy = _user.Id;
+		purchase.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+		purchase.LastModifiedFromPlatform = FormFactor.GetFormFactor();
+
+		await PurchaseData.RecoverPurchaseTransaction(purchase);
+	}
+
+	private async Task RecoverPurchaseReturnTransaction(int recoverTransactionId)
+	{
+		var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, recoverTransactionId);
+		if (purchaseReturn is null)
+		{
+			await ShowToast("Error", "Purchase Return transaction not found.", "error");
+			return;
+		}
+
+		// Update the Status to true (active)
+		purchaseReturn.Status = true;
+		purchaseReturn.LastModifiedBy = _user.Id;
+		purchaseReturn.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+		purchaseReturn.LastModifiedFromPlatform = FormFactor.GetFormFactor();
+
+		await PurchaseReturnData.RecoverPurchaseReturnTransaction(purchaseReturn);
 	}
 	#endregion
 
@@ -720,6 +803,22 @@ public partial class PurchaseReport
 		_deleteTransactionId = 0;
 		_deleteTransactionNo = string.Empty;
 		_isDeleteDialogVisible = false;
+		StateHasChanged();
+	}
+
+	private void ShowRecoverConfirmation(int id, string transactionNo)
+	{
+		_recoverTransactionId = id;
+		_recoverTransactionNo = transactionNo;
+		_isRecoverDialogVisible = true;
+		StateHasChanged();
+	}
+
+	private void CancelRecover()
+	{
+		_recoverTransactionId = 0;
+		_recoverTransactionNo = string.Empty;
+		_isRecoverDialogVisible = false;
 		StateHasChanged();
 	}
 	#endregion

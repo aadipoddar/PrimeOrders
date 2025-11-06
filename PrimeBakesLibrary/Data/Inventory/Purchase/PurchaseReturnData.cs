@@ -21,8 +21,8 @@ public static class PurchaseReturnData
 	public static async Task<List<PurchaseReturnDetailModel>> LoadPurchaseReturnDetailByPurchaseReturn(int PurchaseReturnId) =>
 		await SqlDataAccess.LoadData<PurchaseReturnDetailModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnDetailByPurchaseReturn, new { PurchaseReturnId });
 
-	public static async Task<List<PurchaseReturnOverviewModel>> LoadPurchaseReturnOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-		await SqlDataAccess.LoadData<PurchaseReturnOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnOverviewByDate, new { StartDate, EndDate });
+	public static async Task<List<PurchaseReturnOverviewModel>> LoadPurchaseReturnOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
+		await SqlDataAccess.LoadData<PurchaseReturnOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
 	public static async Task<List<PurchaseReturnItemOverviewModel>> LoadPurchaseReturnItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
 		await SqlDataAccess.LoadData<PurchaseReturnItemOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnItemOverviewByDate, new { StartDate, EndDate });
@@ -46,6 +46,39 @@ public static class PurchaseReturnData
 				await AccountingData.InsertAccounting(existingAccounting);
 			}
 		}
+	}
+
+	public static async Task RecoverPurchaseReturnTransaction(PurchaseReturnModel purchaseReturn)
+	{
+		var purchaseDetails = await LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturn.Id);
+		List<PurchaseReturnItemCartModel> purchaseItemCarts = [];
+
+		foreach (var item in purchaseDetails)
+			purchaseItemCarts.Add(new()
+			{
+				ItemId = item.RawMaterialId,
+				ItemName = "",
+				UnitOfMeasurement = item.UnitOfMeasurement,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				BaseTotal = item.BaseTotal,
+				DiscountPercent = item.DiscountPercent,
+				DiscountAmount = item.DiscountAmount,
+				AfterDiscount = item.AfterDiscount,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = item.CGSTAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = item.SGSTAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = item.IGSTAmount,
+				InclusiveTax = item.InclusiveTax,
+				TotalTaxAmount = item.TotalTaxAmount,
+				Total = item.Total,
+				NetRate = item.NetRate,
+				Remarks = item.Remarks
+			});
+
+		await SavePurchaseReturnTransaction(purchaseReturn, purchaseItemCarts);
 	}
 
 	public static async Task<int> SavePurchaseReturnTransaction(PurchaseReturnModel purchaseReturn, List<PurchaseReturnItemCartModel> purchaseReturnDetails)

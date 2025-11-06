@@ -31,6 +31,7 @@ public static class PDFInvoiceExportUtil
 		public decimal RoundOffAmount { get; set; }
 		public decimal TotalAmount { get; set; }
 		public string Remarks { get; set; }
+		public bool Status { get; set; } = true; // True = Active, False = Deleted
 	}
 
 	/// <summary>
@@ -93,6 +94,12 @@ public static class PDFInvoiceExportUtil
 
 			// 2. Invoice Type and Number
 			currentY = DrawInvoiceTitle(graphics, invoiceType, invoiceData.TransactionNo, leftMargin, pageWidth, currentY);
+
+			// 2.5. Draw DELETED status badge if Status is false
+			if (!invoiceData.Status)
+			{
+				currentY = DrawDeletedStatusBadge(graphics, pageWidth, currentY);
+			}
 
 			// 3. Company and Customer Information (Two Columns)
 			currentY = DrawCompanyAndCustomerInfo(graphics, company, customer, invoiceData, leftMargin, pageWidth, currentY);
@@ -216,6 +223,35 @@ public static class PDFInvoiceExportUtil
 
 		currentY += 20;
 		return currentY;
+	}
+
+	/// <summary>
+	/// Draw DELETED status badge when invoice is deleted
+	/// </summary>
+	private static float DrawDeletedStatusBadge(PdfGraphics graphics, float pageWidth, float startY)
+	{
+		// Draw a prominent red badge/box with "DELETED" text
+		float badgeWidth = 120;
+		float badgeHeight = 30;
+		float badgeX = (pageWidth - badgeWidth) / 2; // Center horizontally
+		float badgeY = startY + 5;
+
+		// Draw red background rectangle with rounded corners
+		PdfBrush redBrush = new PdfSolidBrush(new PdfColor(220, 38, 38)); // Red-600
+		PdfPen redPen = new(new PdfColor(220, 38, 38), 2f);
+		graphics.DrawRectangle(redBrush, new RectangleF(badgeX, badgeY, badgeWidth, badgeHeight));
+
+		// Draw white "DELETED" text centered in the badge
+		PdfStandardFont badgeFont = new(PdfFontFamily.Helvetica, 14, PdfFontStyle.Bold);
+		PdfBrush whiteBrush = new PdfSolidBrush(new PdfColor(255, 255, 255));
+		string deletedText = "DELETED";
+		SizeF textSize = badgeFont.MeasureString(deletedText);
+		float textX = badgeX + (badgeWidth - textSize.Width) / 2;
+		float textY = badgeY + (badgeHeight - textSize.Height) / 2;
+		graphics.DrawString(deletedText, badgeFont, whiteBrush, new PointF(textX, textY));
+
+		// Return updated Y position (badge Y + badge height + spacing)
+		return badgeY + badgeHeight + 10;
 	}
 
 	/// <summary>

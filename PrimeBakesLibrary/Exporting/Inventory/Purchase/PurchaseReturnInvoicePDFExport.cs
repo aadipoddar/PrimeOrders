@@ -67,7 +67,8 @@ public static class PurchaseReturnInvoicePDFExport
 			CashDiscountPercent = purchaseReturnHeader.CashDiscountPercent,
 			RoundOffAmount = purchaseReturnHeader.RoundOffAmount,
 			TotalAmount = purchaseReturnHeader.TotalAmount,
-			Remarks = purchaseReturnHeader.Remarks
+			Remarks = purchaseReturnHeader.Remarks,
+			Status = purchaseReturnHeader.Status
 		};
 
 		// Generate invoice PDF with generic models
@@ -121,7 +122,8 @@ public static class PurchaseReturnInvoicePDFExport
 			CashDiscountPercent = purchaseReturnHeader.CashDiscountPercent,
 			RoundOffAmount = purchaseReturnHeader.RoundOffAmount,
 			TotalAmount = purchaseReturnHeader.TotalAmount,
-			Remarks = purchaseReturnHeader.Remarks
+			Remarks = purchaseReturnHeader.Remarks,
+			Status = purchaseReturnHeader.Status
 		};
 
 		// Generate invoice PDF with generic models

@@ -52,7 +52,9 @@ SELECT
 	[p].[LastModifiedBy],
 	[lm].[Name] AS LastModifiedByUserName,
 	[p].[LastModifiedAt],
-	[p].[LastModifiedFromPlatform]
+	[p].[LastModifiedFromPlatform],
+
+	[p].[Status]
 
 FROM
 	[dbo].[PurchaseReturn] AS p
@@ -70,8 +72,7 @@ INNER JOIN
 	[dbo].[PurchaseReturnDetail] AS pd ON p.Id = pd.PurchaseReturnId
 
 WHERE
-	p.Status = 1
-	AND pd.Status = 1
+	pd.Status = 1
 
 GROUP BY
 	[p].[Id],
@@ -99,4 +100,5 @@ GROUP BY
 	[p].[LastModifiedBy],
 	[lm].[Name],
 	[p].[LastModifiedAt],
-	[p].[LastModifiedFromPlatform]
+	[p].[LastModifiedFromPlatform],
+	[p].[Status]

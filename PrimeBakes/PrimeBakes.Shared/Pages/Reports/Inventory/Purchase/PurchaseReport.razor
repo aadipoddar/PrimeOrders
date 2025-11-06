@@ -186,6 +186,15 @@ else
 					<h2 class="section-title">Purchase Transactions</h2>
 				</div>
 				<div class="header-actions">
+					<button class="btn-toggle-deleted @(_showDeleted ? "active" : "")" @onclick="ToggleDeleted" title="@(_showDeleted ? "Hide Deleted Items" : "Show Deleted Items")" disabled="@_isProcessing">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="3 6 5 6 21 6" />
+							<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+							<line x1="10" y1="11" x2="10" y2="17" />
+							<line x1="14" y1="11" x2="14" y2="17" />
+						</svg>
+						@(_showDeleted ? "Hide Deleted" : "Show Deleted")
+					</button>
 					<button class="btn-toggle-returns @(_showPurchaseReturns ? "active" : "")" @onclick="TogglePurchaseReturns" title="@(_showPurchaseReturns ? "Hide Purchase Returns" : "Show Purchase Returns")" disabled="@_isProcessing">
 						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<polyline points="9 14 4 9 9 4" />
@@ -383,36 +392,55 @@ else
 									var purchase = (context as PurchaseOverviewModel);
 								}
 								<div class="grid-actions">
-									<button class="btn-grid-action btn-view" @onclick="() => ViewPurchase(purchase.Id)" title="View Purchase" disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-											<circle cx="12" cy="12" r="3" />
-										</svg>
-									</button>
-									<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(purchase.Id)" title="Download Invoice" disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-											<polyline points="7 10 12 15 17 10" />
-											<line x1="12" y1="15" x2="12" y2="3" />
-										</svg>
-									</button>
-									<button class="btn-grid-action btn-original" @onclick="() => DownloadOriginalInvoice(purchase.DocumentUrl)" disabled="@(string.IsNullOrEmpty(purchase.DocumentUrl) || _isProcessing)" title="Download Original">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-											<polyline points="14 2 14 8 20 8" />
-											<line x1="16" y1="13" x2="8" y2="13" />
-											<line x1="16" y1="17" x2="8" y2="17" />
-											<polyline points="10 9 9 9 8 9" />
-										</svg>
-									</button>
-									<button class="btn-grid-action btn-delete" @onclick="() => ShowDeleteConfirmation(purchase.Id, purchase.TransactionNo)" title="Delete Purchase" disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<polyline points="3 6 5 6 21 6" />
-											<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-											<line x1="10" y1="11" x2="10" y2="17" />
-											<line x1="14" y1="11" x2="14" y2="17" />
-										</svg>
-									</button>
+									@if (purchase.Status == false)
+									{
+										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(purchase.Id)" title="Download Invoice" disabled="@_isProcessing">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+												<polyline points="7 10 12 15 17 10" />
+												<line x1="12" y1="15" x2="12" y2="3" />
+											</svg>
+										</button>
+										<button class="btn-grid-action btn-recover" @onclick="() => ShowRecoverConfirmation(purchase.Id, purchase.TransactionNo)" title="Recover Purchase" disabled="@_isProcessing">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<polyline points="23 4 23 10 17 10"></polyline>
+												<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+											</svg>
+										</button>
+									}
+									else
+									{
+										<button class="btn-grid-action btn-view" @onclick="() => ViewPurchase(purchase.Id)" title="View Purchase" disabled="@_isProcessing">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+												<circle cx="12" cy="12" r="3" />
+											</svg>
+										</button>
+										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(purchase.Id)" title="Download Invoice" disabled="@_isProcessing">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+												<polyline points="7 10 12 15 17 10" />
+												<line x1="12" y1="15" x2="12" y2="3" />
+											</svg>
+										</button>
+										<button class="btn-grid-action btn-original" @onclick="() => DownloadOriginalInvoice(purchase.DocumentUrl)" disabled="@(string.IsNullOrEmpty(purchase.DocumentUrl) || _isProcessing)" title="Download Original">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+												<polyline points="14 2 14 8 20 8" />
+												<line x1="16" y1="13" x2="8" y2="13" />
+												<line x1="16" y1="17" x2="8" y2="17" />
+												<polyline points="10 9 9 9 8 9" />
+											</svg>
+										</button>
+										<button class="btn-grid-action btn-delete" @onclick="() => ShowDeleteConfirmation(purchase.Id, purchase.TransactionNo)" title="Delete Purchase" disabled="@_isProcessing">
+											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<polyline points="3 6 5 6 21 6" />
+												<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+												<line x1="10" y1="11" x2="10" y2="17" />
+												<line x1="14" y1="11" x2="14" y2="17" />
+											</svg>
+										</button>
+									}
 								</div>
 							</Template>
 						</GridColumn>
@@ -517,7 +545,7 @@ else
 		<Content>
 			<div style="padding: 24px;">
 				<p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
-					Are you sure you want to delete this purchase transaction?
+					Are you sure you want to delete this transaction?
 				</p>
 				<div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
 					<p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">Transaction Details:</p>
@@ -546,6 +574,58 @@ else
 							<line x1="14" y1="11" x2="14" y2="17" />
 						</svg>
 						<span>Delete</span>
+					</button>
+				</div>
+			</div>
+		</Content>
+	</DialogTemplates>
+</SfDialog>
+
+<SfDialog @ref="_recoverConfirmationDialog"
+		  Width="500px"
+		  IsModal="true"
+		  ShowCloseIcon="true"
+		  @bind-Visible="_isRecoverDialogVisible">
+	<DialogTemplates>
+		<Header>
+			<div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #10b981;">
+					<polyline points="23 4 23 10 17 10"></polyline>
+					<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+				</svg>
+				<span style="font-size: 18px; font-weight: 600; color: #0f172a;">Confirm Recover</span>
+			</div>
+		</Header>
+		<Content>
+			<div style="padding: 24px;">
+				<p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
+					Are you sure you want to recover this purchase transaction?
+				</p>
+				<div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+					<p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46; font-weight: 600;">Transaction Details:</p>
+					<p style="margin: 0; font-size: 13px; color: #047857; line-height: 1.5;">
+						<strong>Transaction No:</strong> @_recoverTransactionNo
+					</p>
+				</div>
+				<div style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+					<p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
+						<strong>Note:</strong> This will restore the transaction and make it active again.
+					</p>
+				</div>
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+					<button class="dialog-btn dialog-btn-cancel" @onclick="CancelRecover" disabled="@_isProcessing">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="18" y1="6" x2="6" y2="18" />
+							<line x1="6" y1="6" x2="18" y2="18" />
+						</svg>
+						<span>Cancel</span>
+					</button>
+					<button class="dialog-btn dialog-btn-recover" @onclick="ConfirmRecover" disabled="@_isProcessing">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="23 4 23 10 17 10"></polyline>
+							<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+						</svg>
+						<span>Recover</span>
 					</button>
 				</div>
 			</div>
@@ -788,6 +868,54 @@ else
 		}
 
 		.btn-toggle-returns svg {
+			flex-shrink: 0;
+		}
+
+	/* Toggle Deleted Button */
+	.btn-toggle-deleted {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		height: 38px;
+		padding: 0 20px;
+		border: 1px solid #e2e8f0;
+		background: #ffffff;
+		border-radius: 8px;
+		font-size: 13px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		color: #64748b;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
+
+		.btn-toggle-deleted:hover {
+			background: #fef2f2;
+			border-color: #f97316;
+			color: #f97316;
+			box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
+			transform: translateY(-1px);
+		}
+
+		.btn-toggle-deleted.active {
+			background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+			border-color: #ea580c;
+			color: #ffffff;
+			box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+		}
+
+			.btn-toggle-deleted.active:hover {
+				background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+				box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+			}
+
+		.btn-toggle-deleted:active {
+			transform: translateY(0);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		}
+
+		.btn-toggle-deleted svg {
 			flex-shrink: 0;
 		}
 
@@ -1183,6 +1311,16 @@ else
 				box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
 			}
 
+		.btn-grid-action.btn-recover {
+			color: #ef4444;
+			border-color: #ef4444;
+		}
+
+			.btn-grid-action.btn-recover:not(:disabled):hover {
+				background: #fef2f2;
+				box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+			}
+
 	/* Dialog Button Styles */
 	.dialog-btn {
 		display: flex;
@@ -1232,6 +1370,15 @@ else
 
 		.dialog-btn-delete:hover {
 			background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+		}
+
+	.dialog-btn-recover {
+		background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+		color: white;
+	}
+
+		.dialog-btn-recover:hover {
+			background: linear-gradient(135deg, #059669 0%, #047857 100%);
 		}
 
 	/* Responsive Design */

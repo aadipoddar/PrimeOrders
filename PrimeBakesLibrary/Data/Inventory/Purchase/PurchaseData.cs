@@ -22,8 +22,8 @@ public static class PurchaseData
 	public static async Task<List<PurchaseDetailModel>> LoadPurchaseDetailByPurchase(int PurchaseId) =>
 		await SqlDataAccess.LoadData<PurchaseDetailModel, dynamic>(StoredProcedureNames.LoadPurchaseDetailByPurchase, new { PurchaseId });
 
-	public static async Task<List<PurchaseOverviewModel>> LoadPurchaseOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-		await SqlDataAccess.LoadData<PurchaseOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseOverviewByDate, new { StartDate, EndDate });
+	public static async Task<List<PurchaseOverviewModel>> LoadPurchaseOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
+		await SqlDataAccess.LoadData<PurchaseOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
 	public static async Task<List<PurchaseItemOverviewModel>> LoadPurchaseItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
 		await SqlDataAccess.LoadData<PurchaseItemOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseItemOverviewByDate, new { StartDate, EndDate });
@@ -53,17 +53,50 @@ public static class PurchaseData
 		}
 	}
 
+	public static async Task RecoverPurchaseTransaction(PurchaseModel purchase)
+	{
+		var purchaseDetails = await LoadPurchaseDetailByPurchase(purchase.Id);
+		List<PurchaseItemCartModel> purchaseItemCarts = [];
+
+		foreach (var item in purchaseDetails)
+			purchaseItemCarts.Add(new()
+			{
+				ItemId = item.RawMaterialId,
+				ItemName = "",
+				UnitOfMeasurement = item.UnitOfMeasurement,
+				Quantity = item.Quantity,
+				Rate = item.Rate,
+				BaseTotal = item.BaseTotal,
+				DiscountPercent = item.DiscountPercent,
+				DiscountAmount = item.DiscountAmount,
+				AfterDiscount = item.AfterDiscount,
+				CGSTPercent = item.CGSTPercent,
+				CGSTAmount = item.CGSTAmount,
+				SGSTPercent = item.SGSTPercent,
+				SGSTAmount = item.SGSTAmount,
+				IGSTPercent = item.IGSTPercent,
+				IGSTAmount = item.IGSTAmount,
+				InclusiveTax = item.InclusiveTax,
+				TotalTaxAmount = item.TotalTaxAmount,
+				Total = item.Total,
+				NetRate = item.NetRate,
+				Remarks = item.Remarks
+			});
+
+		await SavePurchaseTransaction(purchase, purchaseItemCarts);
+	}
+
 	public static async Task<int> SavePurchaseTransaction(PurchaseModel purchase, List<PurchaseItemCartModel> purchaseDetails)
 	{
 		bool update = purchase.Id > 0;
 
-		//if (update)
-		//{
-		//	var existingPurchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchase.Id);
-		//	var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchase.FinancialYearId);
-		//	if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-		//		throw new InvalidOperationException("Cannot update purchase transaction as the financial year is locked.");
-		//}
+		if (update)
+		{
+			var existingPurchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchase.Id);
+			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchase.FinancialYearId);
+			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+				throw new InvalidOperationException("Cannot update purchase transaction as the financial year is locked.");
+		}
 
 		purchase.Id = await InsertPurchase(purchase);
 		await SavePurchaseDetail(purchase, purchaseDetails, update);

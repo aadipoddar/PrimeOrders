@@ -67,7 +67,8 @@ public static class PurchaseInvoicePDFExport
 			CashDiscountPercent = purchaseHeader.CashDiscountPercent,
 			RoundOffAmount = purchaseHeader.RoundOffAmount,
 			TotalAmount = purchaseHeader.TotalAmount,
-			Remarks = purchaseHeader.Remarks
+			Remarks = purchaseHeader.Remarks,
+			Status = purchaseHeader.Status
 		};
 
 		// Generate invoice PDF with generic models
@@ -121,7 +122,8 @@ public static class PurchaseInvoicePDFExport
 			CashDiscountPercent = purchaseHeader.CashDiscountPercent,
 			RoundOffAmount = purchaseHeader.RoundOffAmount,
 			TotalAmount = purchaseHeader.TotalAmount,
-			Remarks = purchaseHeader.Remarks
+			Remarks = purchaseHeader.Remarks,
+			Status = purchaseHeader.Status
 		};
 
 		// Generate invoice PDF with generic models

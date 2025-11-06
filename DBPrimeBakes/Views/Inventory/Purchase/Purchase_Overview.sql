@@ -52,7 +52,9 @@ SELECT
 	[p].[LastModifiedBy],
 	[lm].[Name] AS LastModifiedByUserName,
 	[p].[LastModifiedAt],
-	[p].[LastModifiedFromPlatform]
+	[p].[LastModifiedFromPlatform],
+
+	[p].[Status]
 
 FROM
 	[dbo].[Purchase] AS p
@@ -70,8 +72,7 @@ INNER JOIN
 	[dbo].[PurchaseDetail] AS pd ON p.Id = pd.PurchaseId
 
 WHERE
-	p.Status = 1
-	AND pd.Status = 1
+	pd.Status = 1
 
 GROUP BY
 	[p].[Id],
@@ -82,8 +83,8 @@ GROUP BY
 	[l].[Name],
 	[p].[TransactionDateTime],
 	[p].[FinancialYearId],
-	fy.StartDate,
-	fy.EndDate,
+	[fy].StartDate,
+	[fy].EndDate,
 	[p].[OtherChargesPercent],
 	[p].[OtherChargesAmount],
 	[p].[CashDiscountPercent],
@@ -99,4 +100,5 @@ GROUP BY
 	[p].[LastModifiedBy],
 	[lm].[Name],
 	[p].[LastModifiedAt],
-	[p].[LastModifiedFromPlatform]
+	[p].[LastModifiedFromPlatform],
+	[p].[Status]
