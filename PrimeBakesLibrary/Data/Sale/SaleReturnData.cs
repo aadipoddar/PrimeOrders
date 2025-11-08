@@ -100,7 +100,7 @@ public static class SaleReturnData
 		if (update)
 		{
 			await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(saleReturn.BillNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.SaleReturn.ToString(), saleReturn.Id, saleReturn.BillNo);
 		}
 
 		LedgerModel party = null;
@@ -155,10 +155,10 @@ public static class SaleReturnData
 					RawMaterialId = recipeItem.RawMaterialId,
 					Quantity = recipeItem.Quantity * product.Quantity,
 					NetRate = product.NetRate / recipeItem.Quantity,
+					TransactionId = saleReturn.Id,
 					TransactionNo = saleReturn.BillNo,
 					Type = StockType.SaleReturn.ToString(),
-					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
-					LocationId = 1
+					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime)
 				});
 		}
 	}
@@ -250,7 +250,7 @@ public static class SaleReturnData
 		saleReturn.Status = false;
 		await InsertSaleReturn(saleReturn);
 		await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
-		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(saleReturn.BillNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.SaleReturn.ToString(), saleReturn.Id, saleReturn.BillNo);
 
 		if (saleReturn.LocationId != 1)
 			return;

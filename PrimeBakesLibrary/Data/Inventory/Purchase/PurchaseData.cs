@@ -42,7 +42,7 @@ public static class PurchaseData
 		{
 			purchase.Status = false;
 			await InsertPurchase(purchase);
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchase.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Purchase.ToString(), purchase.Id, purchase.TransactionNo);
 
 			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchase.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
@@ -93,10 +93,14 @@ public static class PurchaseData
 		if (update)
 		{
 			var existingPurchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchase.Id);
-			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchase.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-				throw new InvalidOperationException("Cannot update purchase transaction as the financial year is locked.");
+			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchase.FinancialYearId);
+			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 		}
+
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchase.FinancialYearId);
+		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 		purchase.Id = await InsertPurchase(purchase);
 		await SavePurchaseDetail(purchase, purchaseDetails, update);
@@ -150,7 +154,7 @@ public static class PurchaseData
 	private static async Task SaveRawMaterialStock(PurchaseModel purchase, List<PurchaseItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchase.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Purchase.ToString(), purchase.Id, purchase.TransactionNo);
 
 		foreach (var item in cart)
 			await RawMaterialStockData.InsertRawMaterialStock(new()
@@ -160,9 +164,9 @@ public static class PurchaseData
 				Quantity = item.Quantity,
 				NetRate = item.NetRate,
 				Type = StockType.Purchase.ToString(),
+				TransactionId = purchase.Id,
 				TransactionNo = purchase.TransactionNo,
-				TransactionDate = DateOnly.FromDateTime(purchase.TransactionDateTime),
-				LocationId = 1 // Purchases are always to primary location
+				TransactionDate = DateOnly.FromDateTime(purchase.TransactionDateTime)
 			});
 	}
 

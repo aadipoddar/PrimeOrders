@@ -7,9 +7,9 @@ public class RawMaterialStockModel
 	public decimal Quantity { get; set; }
 	public decimal? NetRate { get; set; }
 	public string Type { get; set; }
+	public int? TransactionId { get; set; }
 	public string TransactionNo { get; set; }
 	public DateOnly TransactionDate { get; set; }
-	public int LocationId { get; set; }
 }
 
 public enum StockType
@@ -32,9 +32,9 @@ public class RawMaterialStockDetailsModel
 	public decimal Quantity { get; set; }
 	public decimal? NetRate { get; set; }
 	public string Type { get; set; }
+	public int? TransactionId { get; set; }
 	public string TransactionNo { get; set; }
 	public DateOnly TransactionDate { get; set; }
-	public int LocationId { get; set; }
 }
 
 public class RawMaterialStockSummaryModel
@@ -44,11 +44,14 @@ public class RawMaterialStockSummaryModel
 	public string RawMaterialCode { get; set; }
 	public int RawMaterialCategoryId { get; set; }
 	public string RawMaterialCategoryName { get; set; }
+	public string UnitOfMeasurement { get; set; }
 	public decimal OpeningStock { get; set; }
 	public decimal PurchaseStock { get; set; }
 	public decimal SaleStock { get; set; }
 	public decimal MonthlyStock { get; set; }
 	public decimal ClosingStock { get; set; }
+	public decimal Rate { get; set; }
+	public decimal ClosingValue { get; set; }
 	public decimal AveragePrice { get; set; }
 	public decimal LastPurchasePrice { get; set; }
 	public decimal WeightedAverageValue { get; set; }
@@ -57,37 +60,10 @@ public class RawMaterialStockSummaryModel
 
 public class RawMaterialStockAdjustmentCartModel
 {
-	public int RawMaterialCategoryId { get; set; }
 	public int RawMaterialId { get; set; }
 	public string RawMaterialName { get; set; }
+	public decimal Stock { get; set; }
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }
 	public decimal Total { get; set; }
 }
-
-#region Charts and Helper Model
-public class StockOverviewRawMaterialChartData
-{
-	public string Component { get; set; }
-	public decimal Value { get; set; }
-}
-
-public class CategoryDistributionRawMaterialChartData
-{
-	public string CategoryName { get; set; }
-	public decimal StockCount { get; set; }
-}
-
-public class TopMovingItemsRawMaterialChartData
-{
-	public string ItemName { get; set; }
-	public decimal Movement { get; set; }
-}
-
-public class OpeningClosingRawMaterialChartData
-{
-	public string ItemName { get; set; }
-	public decimal OpeningStock { get; set; }
-	public decimal ClosingStock { get; set; }
-}
-#endregion

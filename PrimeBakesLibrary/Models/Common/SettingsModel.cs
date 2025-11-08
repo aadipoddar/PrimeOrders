@@ -24,6 +24,8 @@ public static class SettingsKeys
 
 	public static string PurchaseTransactionPrefix => "PurchaseTransactionPrefix";
 	public static string PurchaseReturnTransactionPrefix => "PurchaseReturnTransactionPrefix";
+	public static string RawMaterialStockAdjustmentTransactionPrefix => "RawMaterialStockAdjustmentTransactionPrefix";
+
 	public static string UpdateItemMasterRateOnPurchase => "UpdateRawMaterialMasterRateOnPurchase";
 	public static string UpdateItemMasterUOMOnPurchase => "UpdateRawMaterialMasterUOMOnPurchase";
 }

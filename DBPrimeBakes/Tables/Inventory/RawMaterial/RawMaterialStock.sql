@@ -5,9 +5,8 @@
     [Quantity] MONEY NOT NULL,
     [NetRate] MONEY NULL, 
     [Type] VARCHAR(20) NOT NULL, 
-    [TransactionNo] VARCHAR(20) NOT NULL, 
+    [TransactionId] INT NULL, 
+    [TransactionNo] VARCHAR(MAX) NOT NULL, 
     [TransactionDate] DATE NOT NULL, 
-    [LocationId] INT NOT NULL, 
-    CONSTRAINT [FK_RawMaterialStock_ToRawMaterial] FOREIGN KEY (RawMaterialId) REFERENCES [RawMaterial](Id), 
-    CONSTRAINT [FK_RawMaterialStock_ToLocation] FOREIGN KEY (LocationId) REFERENCES [Location](Id)
+    CONSTRAINT [FK_RawMaterialStock_ToRawMaterial] FOREIGN KEY (RawMaterialId) REFERENCES [RawMaterial](Id)
 )

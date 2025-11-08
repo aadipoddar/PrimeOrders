@@ -141,7 +141,7 @@ public partial class SaleSummaryPage
 		if (totalSales == 0)
 			return 0;
 
-		return (locationSales / totalSales) * 100;
+		return locationSales / totalSales * 100;
 	}
 	#endregion
 
@@ -257,7 +257,7 @@ public partial class SaleSummaryPage
 		if (totalTax == 0)
 			return 0;
 
-		return (taxAmount / totalTax) * 100;
+		return taxAmount / totalTax * 100;
 	}
 
 	public class TaxBreakdownModel
@@ -290,7 +290,7 @@ public partial class SaleSummaryPage
 		if (totalSales == 0)
 			return 0;
 
-		return (paymentAmount / totalSales) * 100;
+		return paymentAmount / totalSales * 100;
 	}
 
 	public class PaymentBreakdownModel

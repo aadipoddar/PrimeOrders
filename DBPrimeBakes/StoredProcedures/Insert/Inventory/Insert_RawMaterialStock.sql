@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_RawMaterialStock]
-	@Id INT,
+	@Id INT OUTPUT,
 	@RawMaterialId INT, 
 	@Quantity MONEY, 
 	@NetRate MONEY,
 	@Type VARCHAR(20), 
+	@TransactionId INT,
 	@TransactionNo VARCHAR(20),
-	@TransactionDate DATE, 
-	@LocationId INT
+	@TransactionDate DATE
 AS
 BEGIN
 	IF @Id = 0
@@ -17,9 +17,9 @@ BEGIN
 			[Quantity], 
 			[NetRate],
 			[Type], 
+			[TransactionId],
 			[TransactionNo],
-			[TransactionDate], 
-			[LocationId]
+			[TransactionDate]
 		)
 		VALUES
 		(
@@ -27,10 +27,12 @@ BEGIN
 			@Quantity, 
 			@NetRate,
 			@Type, 
+			@TransactionId,
 			@TransactionNo,
-			@TransactionDate, 
-			@LocationId
+			@TransactionDate
 		);
+
+		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
 
@@ -41,9 +43,11 @@ BEGIN
 			[Quantity] = @Quantity, 
 			[NetRate] = @NetRate,
 			[Type] = @Type, 
+			[TransactionId] = @TransactionId,
 			[TransactionNo] = @TransactionNo,
-			[TransactionDate] = @TransactionDate, 
-			[LocationId] = @LocationId
+			[TransactionDate] = @TransactionDate
 		WHERE [Id] = @Id;
 	END
+
+	SELECT @Id AS Id;
 END;

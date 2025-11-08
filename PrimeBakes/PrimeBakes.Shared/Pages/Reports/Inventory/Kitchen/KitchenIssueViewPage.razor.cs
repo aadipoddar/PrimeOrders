@@ -10,6 +10,7 @@ using PrimeBakesLibrary.Exporting.Kitchen;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Popups;
 
@@ -148,7 +149,7 @@ public partial class KitchenIssueViewPage
 
 		kitchenIssue.Status = false;
 		await KitchenIssueData.InsertKitchenIssue(kitchenIssue);
-		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.KitchenIssue.ToString(), kitchenIssue.Id, kitchenIssue.TransactionNo);
 		VibrationService.VibrateWithTime(500);
 		NavigationManager.NavigateTo("/Reports/Kitchen-Issue");
 

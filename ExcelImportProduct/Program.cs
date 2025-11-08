@@ -4,26 +4,29 @@ using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Inventory.Purchase;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
-FileInfo fileInfo = new(@"C:\Others\purchase.xlsx");
+//FileInfo fileInfo = new(@"C:\Others\purchase.xlsx");
 
-ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+//ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-using var package = new ExcelPackage(fileInfo);
+//using var package = new ExcelPackage(fileInfo);
 
-await package.LoadAsync(fileInfo);
+//await package.LoadAsync(fileInfo);
 
-var worksheet1 = package.Workbook.Worksheets[0];
-var worksheet2 = package.Workbook.Worksheets[1];
+//var worksheet1 = package.Workbook.Worksheets[0];
 
 // await InsertProducts(worksheet);
 
@@ -48,6 +51,8 @@ var worksheet2 = package.Workbook.Worksheets[1];
 // await UpdateProductLocation();
 
 // await InsertPurchase(worksheet1, worksheet2);
+
+await UpdateRMStockPurchaseIssue();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -654,6 +659,59 @@ static async Task InsertPurchase(ExcelWorksheet worksheet1, ExcelWorksheet works
 	}
 }
 
+static async Task UpdateRMStockPurchaseIssue()
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+	var purchases = await CommonData.LoadTableDataByStatus<PurchaseOverviewModel>(ViewNames.PurchaseOverview);
+	foreach (var purchase in purchases)
+	{
+		Console.WriteLine("Updating RM Stock Purchase Issue for Purchase Id: " + purchase.Id);
+
+		var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(purchase.Id);
+
+		foreach (var detail in purchaseDetails)
+		{
+			Console.WriteLine("Inserting RM Stock for Raw Material Id: " + detail.RawMaterialId + " Quantity: " + detail.Quantity);
+
+			await RawMaterialStockData.InsertRawMaterialStock(new()
+			{
+				Id = 0,
+				RawMaterialId = detail.RawMaterialId,
+				Quantity = detail.Quantity,
+				Type = StockType.Purchase.ToString(),
+				TransactionId = purchase.Id,
+				NetRate = detail.NetRate,
+				TransactionDate = DateOnly.FromDateTime(purchase.TransactionDateTime),
+				TransactionNo = purchase.TransactionNo,
+			});
+		}
+	}
+
+	var issues = await CommonData.LoadTableDataByStatus<KitchenIssueModel>(TableNames.KitchenIssue);
+	foreach (var issue in issues)
+	{
+		Console.WriteLine("Updating RM Stock Kitchen Issue for Kitchen Issue Id: " + issue.Id);
+
+		var issueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(issue.Id);
+
+		foreach (var detail in issueDetails)
+		{
+			Console.WriteLine("Inserting RM Stock for Raw Material Id: " + detail.RawMaterialId + " Quantity: " + detail.Quantity);
+			await RawMaterialStockData.InsertRawMaterialStock(new()
+			{
+				Id = 0,
+				RawMaterialId = detail.RawMaterialId,
+				Quantity = -detail.Quantity,
+				Type = StockType.KitchenIssue.ToString(),
+				TransactionId = issue.Id,
+				NetRate = null,
+				TransactionDate = DateOnly.FromDateTime(issue.IssueDate),
+				TransactionNo = issue.TransactionNo,
+			});
+		}
+	}
+}
 
 class PurchaseModelOld
 {

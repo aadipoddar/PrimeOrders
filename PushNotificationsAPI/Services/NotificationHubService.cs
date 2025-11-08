@@ -75,9 +75,9 @@ public class NotificationHubService : INotificationService
 	{
 		if ((notificationRequest.Silent &&
 			string.IsNullOrWhiteSpace(notificationRequest?.Action)) ||
-			(!notificationRequest.Silent &&
-			(string.IsNullOrWhiteSpace(notificationRequest?.Text)) ||
-			string.IsNullOrWhiteSpace(notificationRequest?.Action)))
+			!notificationRequest.Silent &&
+			string.IsNullOrWhiteSpace(notificationRequest?.Text) ||
+			string.IsNullOrWhiteSpace(notificationRequest?.Action))
 			return false;
 
 		var androidPushTemplate = notificationRequest.Silent ?

@@ -170,6 +170,15 @@ public static class GenerateCodes
 		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{purchaseReturnPrefix}000001", 6, CodeType.PurchaseReturn);
 	}
 
+	public static async Task<string> GenerateRawMaterialStockAdjustmentTransactionNo(DateTime transactionDateTime)
+	{
+		var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(transactionDateTime);
+		var companyPrefix = (await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, 1)).PrefixCode;
+		var adjustmentPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.RawMaterialStockAdjustmentTransactionPrefix)).Value;
+
+		return $"{companyPrefix}{financialYear.YearNo}{adjustmentPrefix}{transactionDateTime:ddMMyy}{transactionDateTime:HHmmss}";
+	}
+
 	public static async Task<string> GenerateOrderBillNo(OrderModel order)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId);

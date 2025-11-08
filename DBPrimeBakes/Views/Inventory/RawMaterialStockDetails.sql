@@ -8,9 +8,9 @@ SELECT
 	RMS.Quantity,
 	RMS.NetRate,
 	RMS.Type,
+	RMS.TransactionId,
 	RMS.TransactionNo,
-	RMS.TransactionDate,
-	RMS.LocationId
+	RMS.TransactionDate
 
 FROM
 	RawMaterialStock AS RMS

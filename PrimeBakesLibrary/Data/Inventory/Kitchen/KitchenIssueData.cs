@@ -78,7 +78,7 @@ public static class KitchenIssueData
 	private static async Task SaveStock(KitchenIssueModel kitchenIssue, List<KitchenIssueRawMaterialCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(kitchenIssue.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.KitchenIssue.ToString(), kitchenIssue.Id, kitchenIssue.TransactionNo);
 
 		if (kitchenIssue.Status)
 			foreach (var item in cart)
@@ -87,10 +87,11 @@ public static class KitchenIssueData
 					Id = 0,
 					RawMaterialId = item.RawMaterialId,
 					Quantity = -item.Quantity,
+					NetRate = item.Rate,
 					Type = StockType.KitchenIssue.ToString(),
+					TransactionId = kitchenIssue.Id,
 					TransactionNo = kitchenIssue.TransactionNo,
-					TransactionDate = DateOnly.FromDateTime(kitchenIssue.IssueDate),
-					LocationId = 1
+					TransactionDate = DateOnly.FromDateTime(kitchenIssue.IssueDate)
 				});
 	}
 }

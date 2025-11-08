@@ -418,9 +418,9 @@ public partial class PurchaseReport
 				// Navigate to Purchase Return Page
 				int actualId = Math.Abs(purchaseId);
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchasereturn/{actualId}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{actualId}", "_blank");
 				else
-					NavigationManager.NavigateTo($"/inventory/purchasereturn/{actualId}");
+					NavigationManager.NavigateTo($"/inventory/purchase-return/{actualId}");
 			}
 			else
 			{
@@ -759,9 +759,9 @@ public partial class PurchaseReport
 	private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchaseitem", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", "/report/purchase-item", "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchaseitem");
+			NavigationManager.NavigateTo("/report/purchase-item");
 	}
 
 	private async Task ShowToast(string title, string message, string type)

@@ -87,7 +87,7 @@ public partial class PurchasePage
 		await LoadExistingPurchase();
 		await LoadItems();
 		await LoadExistingCart();
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task LoadCompanies()
@@ -202,7 +202,7 @@ public partial class PurchasePage
 		}
 		finally
 		{
-			await SavePurchaseFile();
+			await SaveTransactionFile();
 		}
 	}
 
@@ -280,7 +280,7 @@ public partial class PurchasePage
 		}
 		finally
 		{
-			await SavePurchaseFile();
+			await SaveTransactionFile();
 		}
 	}
 	#endregion
@@ -304,7 +304,7 @@ public partial class PurchasePage
 		_selectedCompany = args.Value;
 		_purchase.CompanyId = _selectedCompany.Id;
 
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task OnPartyChanged(ChangeEventArgs<LedgerModel, LedgerModel> args)
@@ -326,38 +326,38 @@ public partial class PurchasePage
 		_purchase.PartyId = _selectedParty.Id;
 
 		await LoadItems();
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task OnTransactionDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime> args)
 	{
 		_purchase.TransactionDateTime = args.Value;
 		await LoadItems();
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task OnAutoGenerateTransactionNoChecked(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
 	{
 		_autoGenerateTransactionNo = args.Checked;
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task OnCashDiscountPercentChanged(ChangeEventArgs<decimal> args)
 	{
 		_purchase.CashDiscountPercent = args.Value;
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task OnOtherDiscountPercentChanged(ChangeEventArgs<decimal> args)
 	{
 		_purchase.OtherChargesPercent = args.Value;
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task OnRoundOffAmountChanged(ChangeEventArgs<decimal> args)
 	{
 		_purchase.RoundOffAmount = args.Value;
-		await SavePurchaseFile(true);
+		await SaveTransactionFile(true);
 	}
 	#endregion
 
@@ -542,7 +542,7 @@ public partial class PurchasePage
 		_selectedCart = new();
 
 		await _sfItemAutoComplete.FocusAsync();
-		await SavePurchaseFile();
+		await SaveTransactionFile();
 	}
 
 	private async Task EditCartItem(PurchaseItemCartModel cartItem)
@@ -575,22 +575,7 @@ public partial class PurchasePage
 	private async Task RemoveItemFromCart(PurchaseItemCartModel cartItem)
 	{
 		_cart.Remove(cartItem);
-		await SavePurchaseFile();
-	}
-
-	private async Task ClearCart()
-	{
-		if (_cart.Count == 0)
-		{
-			await ShowToast("Cart Empty", "The cart is already empty.", "error");
-			return;
-		}
-
-		_cart.Clear();
-		_selectedRawMaterial = null;
-		_selectedCart = new();
-		await SavePurchaseFile();
-		await ShowToast("Cart Cleared", "All items have been removed from the cart.", "success");
+		await SaveTransactionFile();
 	}
 	#endregion
 
@@ -668,7 +653,7 @@ public partial class PurchasePage
 			_purchase.TransactionNo = await GenerateCodes.GeneratePurchaseTransactionNo(_purchase);
 	}
 
-	private async Task SavePurchaseFile(bool customRoundOff = false)
+	private async Task SaveTransactionFile(bool customRoundOff = false)
 	{
 		if (_isProcessing || _isLoading)
 			return;
@@ -684,7 +669,7 @@ public partial class PurchasePage
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Saving Purchase Data", ex.Message, "error");
+			await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
 		}
 		finally
 		{
@@ -793,7 +778,7 @@ public partial class PurchasePage
 		{
 			_isProcessing = true;
 
-			await SavePurchaseFile(true);
+			await SaveTransactionFile(true);
 
 			if (!await ValidateForm())
 			{
@@ -909,7 +894,7 @@ public partial class PurchasePage
 			await BlobStorageAccess.DeleteFileFromBlobStorage(fileName, BlobStorageContainers.purchase);
 			_purchase.DocumentUrl = null;
 
-			await SavePurchaseFile();
+			await SaveTransactionFile();
 			await ShowToast("Document Removed", "The uploaded document has been removed successfully.", "success");
 		}
 		catch (Exception ex)
@@ -955,7 +940,7 @@ public partial class PurchasePage
 				await using var file = uploadedFiles[0].File.OpenReadStream(maxAllowedSize: 52428800); // 50 MB
 				var fileName = $"{Guid.NewGuid()}_{uploadedFiles[0].File.Name}";
 				var fileUrl = await BlobStorageAccess.UploadFileToBlobStorage(file, fileName, BlobStorageContainers.purchase);
-				_purchase.DocumentUrl = fileUrl; await SavePurchaseFile();
+				_purchase.DocumentUrl = fileUrl; await SaveTransactionFile();
 				await ShowToast("Document Uploaded Successfully", "The document has been uploaded and linked to the purchase transaction.", "success");
 			}
 		}

@@ -46,7 +46,7 @@ public static class AadiSoftUpdater
 
 			if (totalBytes > 0 && progress != null)
 			{
-				var percentage = (int)((downloadedBytes * 100) / totalBytes);
+				var percentage = (int)(downloadedBytes * 100 / totalBytes);
 				progress.Report(percentage);
 			}
 		}

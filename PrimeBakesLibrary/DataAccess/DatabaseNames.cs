@@ -58,11 +58,6 @@ public static class StoredProcedureNames
 
 	public static string LoadFinancialYearByDateTime => "Load_FinancialYear_By_DateTime";
 
-	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
-
-	public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
-	public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
-
 	public static string LoadRawMaterialByPartyPurchaseDateTime => "Load_RawMaterial_By_Party_PurchaseDateTime";
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 	public static string LoadPurchaseOverviewByDate => "Load_PurchaseOverview_By_Date";
@@ -70,6 +65,13 @@ public static class StoredProcedureNames
 	public static string LoadPurchaseReturnOverviewByDate => "Load_PurchaseReturn_Overview_By_Date";
 	public static string LoadPurchaseItemOverviewByDate => "Load_Purchase_Item_Overview_By_Date";
 	public static string LoadPurchaseReturnItemOverviewByDate => "Load_PurchaseReturn_Item_Overview_By_Date";
+
+	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
+	public static string LoadRawMaterialStockDetailsByDate => "Load_RawMaterialStockDetails_By_Date";
+	public static string LoadRawMaterialStockSummaryByDate => "Load_RawMaterialStockSummary_By_Date";
+
+	public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
+	public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
 
 	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
 	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
@@ -105,8 +107,6 @@ public static class StoredProcedureNames
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
-	public static string LoadRawMaterialStockDetailsByDateLocationId => "Load_RawMaterialStockDetails_By_Date_LocationId";
-	public static string LoadRawMaterialStockSummaryByDateLocationId => "Load_RawMaterialStockSummary_By_Date_LocationId";
 	public static string LoadProductStockSummaryByDateLocationId => "Load_ProductStockSummary_By_Date_LocationId";
 	public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
 	public static string LoadKitchenIssueDetailsByDate => "Load_KitchenIssueDetails_By_Date";
@@ -179,7 +179,7 @@ public static class StoredProcedureNames
 	public static string InsertAccountingDetails => "Insert_AccountingDetails";
 
 	public static string DeleteProductStockByTransactionNo => "Delete_ProductStock_By_TransactionNo";
-	public static string DeleteRawMaterialStockByTransactionNo => "Delete_RawMaterialStock_By_TransactionNo";
+	public static string DeleteRawMaterialStockByTypeIdNo => "Delete_RawMaterialStock_By_Type_Id_No";
 }
 
 public static class ViewNames

@@ -99,10 +99,12 @@
     <Folder Include="Views\Inventory" />
     <Folder Include="Views\Inventory\Purchase" />
     <Folder Include="Tables\Inventory\RawMaterial" />
+    <Folder Include="Tables\Inventory\Kitchen" />
+    <Folder Include="Tables\Inventory\Recipe" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_TransactionNo.sql" />
-    <Build Include="StoredProcedures\Delete\Delete_RawMaterialStock_By_TransactionNo.sql" />
+    <Build Include="StoredProcedures\Delete\Delete_RawMaterialStock_By_Type_Id_No.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_Accounting.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_AccountingDetails.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_AccountType.sql" />
@@ -176,7 +178,6 @@
     <Build Include="StoredProcedures\Reports\Sale\Load_SaleDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Sale\Load_SaleReturnDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Stock\Load_ProductStockSummary_By_Date_LocationId.sql" />
-    <Build Include="StoredProcedures\Reports\Stock\Load_RawMaterialStockSummary_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Load_OrderDetails_By_Date_LocationId.sql" />
     <Build Include="Tables\Accounts\FinancialAccounting\Accounting.sql" />
     <Build Include="Tables\Accounts\FinancialAccounting\AccountingDetails.sql" />
@@ -190,14 +191,6 @@
     <Build Include="Tables\Common\Settings.sql" />
     <Build Include="Tables\Common\StateUT.sql" />
     <Build Include="Tables\Common\User.sql" />
-    <Build Include="Tables\Inventory\Kitchen.sql" />
-    <Build Include="Tables\Inventory\KitchenIssue.sql" />
-    <Build Include="Tables\Inventory\KitchenIssueDetail.sql" />
-    <Build Include="Tables\Inventory\KitchenProduction.sql" />
-    <Build Include="Tables\Inventory\KitchenProductionDetail.sql" />
-    <Build Include="Tables\Inventory\ProductStock.sql" />
-    <Build Include="Tables\Inventory\Recipe.sql" />
-    <Build Include="Tables\Inventory\RecipeDetail.sql" />
     <Build Include="Tables\Order\Order.sql" />
     <Build Include="Tables\Order\OrderDetail.sql" />
     <Build Include="Tables\Products\Product.sql" />
@@ -216,8 +209,6 @@
     <Build Include="Views\Product_Overview.sql" />
     <Build Include="Views\Sale_Overview.sql" />
     <Build Include="Views\SaleReturn_Overview.sql" />
-    <Build Include="Views\RawMaterialStockDetails.sql" />
-    <Build Include="StoredProcedures\Reports\Stock\Load_RawMaterialStockDetails_By_Date_LocationId.sql" />
     <Build Include="Views\ProductStockDetails.sql" />
     <Build Include="StoredProcedures\Reports\Stock\Load_ProductStockDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_OrderNo.sql" />
@@ -260,6 +251,17 @@
     <Build Include="Tables\Inventory\RawMaterial\RawMaterial.sql" />
     <Build Include="Tables\Inventory\RawMaterial\RawMaterialCategory.sql" />
     <Build Include="Tables\Inventory\RawMaterial\RawMaterialStock.sql" />
+    <Build Include="Tables\Inventory\RawMaterial\ProductStock.sql" />
+    <Build Include="Views\Inventory\RawMaterialStockDetails.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterialStockSummary_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterialStockDetails_By_Date.sql" />
+    <Build Include="Tables\Inventory\Kitchen\Kitchen.sql" />
+    <Build Include="Tables\Inventory\Kitchen\KitchenIssue.sql" />
+    <Build Include="Tables\Inventory\Kitchen\KitchenIssueDetail.sql" />
+    <Build Include="Tables\Inventory\Kitchen\KitchenProduction.sql" />
+    <Build Include="Tables\Inventory\Kitchen\KitchenProductionDetail.sql" />
+    <Build Include="Tables\Inventory\Recipe\Recipe.sql" />
+    <Build Include="Tables\Inventory\Recipe\RecipeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

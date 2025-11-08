@@ -389,9 +389,9 @@ public partial class PurchaseItemReport
 			{
 				int actualId = Math.Abs(purchaseId);
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchasereturn/{actualId}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{actualId}", "_blank");
 				else
-					NavigationManager.NavigateTo($"/inventory/purchasereturn/{actualId}");
+					NavigationManager.NavigateTo($"/inventory/purchase-return/{actualId}");
 			}
 			else
 			{

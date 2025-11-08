@@ -1,7 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[Load_RawMaterialStockSummary_By_Date_LocationId]
+﻿CREATE PROCEDURE [dbo].[Load_RawMaterialStockSummary_By_Date]
 	@FromDate DATETIME,
-	@ToDate DATETIME,
-	@LocationId INT
+	@ToDate DATETIME
 AS
 BEGIN
 	SELECT
@@ -10,14 +9,14 @@ BEGIN
         r.Code RawMaterialCode,
         r.RawMaterialCategoryId,
         rc.[Name] RawMaterialCategoryName,
+        r.UnitOfMeasurement,
 
         ISNULL
         (
            (SELECT SUM (Quantity)
             FROM [RawMaterialStock]
             WHERE     RawMaterialId = s.RawMaterialId
-                  AND TransactionDate < @FromDate
-                  AND LocationId = @LocationId),
+                  AND TransactionDate < @FromDate),
            0) AS OpeningStock,
 
         ISNULL
@@ -27,8 +26,7 @@ BEGIN
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
                   AND TransactionDate <= @ToDate
-                  AND Type = 'Purchase'
-                  AND LocationId = @LocationId),
+                  AND Quantity > 0),
            0) AS PurchaseStock,
 
         ISNULL
@@ -38,8 +36,7 @@ BEGIN
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
                   AND TransactionDate <= @ToDate
-                  AND Type = 'KitchenIssue'
-                  AND LocationId = @LocationId),
+                  AND Quantity < 0),
            0) AS SaleStock,
 
         ISNULL
@@ -48,8 +45,7 @@ BEGIN
             FROM [RawMaterialStock]
             WHERE     RawMaterialId = s.RawMaterialId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate <= @ToDate
-                  AND LocationId = @LocationId),
+                  AND TransactionDate <= @ToDate),
            0) AS MonthlyStock,
 
         ISNULL
@@ -57,9 +53,24 @@ BEGIN
            (SELECT SUM (Quantity)
             FROM [RawMaterialStock]
             WHERE     RawMaterialId = s.RawMaterialId
-                  AND TransactionDate <= @ToDate
-                  AND LocationId = @LocationId),
+                  AND TransactionDate <= @ToDate),
            0) AS ClosingStock,
+
+        [r].Rate,
+
+        ISNULL
+        (
+            (SELECT [r].Rate *
+                (
+                    ISNULL
+                     (
+                        (SELECT SUM (Quantity)
+                         FROM [RawMaterialStock]
+                         WHERE     RawMaterialId = s.RawMaterialId
+                               AND TransactionDate <= @ToDate),
+                        0)
+                )
+             ), 0) AS ClosingValue,
 
         ISNULL
         (
@@ -68,23 +79,9 @@ BEGIN
              WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Purchase'
-                   AND NetRate IS NOT NULL
-                   AND LocationId = @LocationId),
+                   AND Quantity > 0
+                   AND NetRate IS NOT NULL),
         0) AS AveragePrice,
-
-        ISNULL
-        (
-            (SELECT TOP 1 NetRate
-             FROM [RawMaterialStock]
-             WHERE     RawMaterialId = s.RawMaterialId
-                   AND TransactionDate >= @FromDate
-                   AND TransactionDate <= @ToDate
-                   AND Type = 'Purchase'
-                   AND NetRate IS NOT NULL
-                   AND LocationId = @LocationId
-             ORDER BY TransactionDate DESC),
-        0) AS LastPurchasePrice,
 
         ISNULL
         (
@@ -95,18 +92,28 @@ BEGIN
                         (SELECT SUM (Quantity)
                          FROM [RawMaterialStock]
                          WHERE     RawMaterialId = s.RawMaterialId
-                               AND TransactionDate <= @ToDate
-                               AND LocationId = @LocationId),
+                               AND TransactionDate <= @ToDate),
                         0)
                 )
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Purchase'
-                   AND NetRate IS NOT NULL
-                   AND LocationId = @LocationId),
+                   AND Quantity > 0
+                   AND NetRate IS NOT NULL),
         0) AS WeightedAverageValue,
+
+        ISNULL
+        (
+            (SELECT TOP 1 NetRate
+             FROM [RawMaterialStock]
+             WHERE     RawMaterialId = s.RawMaterialId
+                   AND TransactionDate >= @FromDate
+                   AND TransactionDate <= @ToDate
+                   AND Quantity > 0
+                   AND NetRate IS NOT NULL
+             ORDER BY TransactionDate DESC),
+        0) AS LastPurchasePrice,
 
         ISNULL
         (
@@ -117,17 +124,15 @@ BEGIN
                         (SELECT SUM (Quantity)
                          FROM [RawMaterialStock]
                          WHERE     RawMaterialId = s.RawMaterialId
-                               AND TransactionDate <= @ToDate
-                               AND LocationId = @LocationId),
+                               AND TransactionDate <= @ToDate),
                         0)
                 )
              FROM [RawMaterialStock]
              WHERE     RawMaterialId = s.RawMaterialId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Purchase'
+                   AND Quantity > 0
                    AND NetRate IS NOT NULL
-                   AND LocationId = @LocationId
              ORDER BY TransactionDate DESC),
         0) AS LastPurchaseValue
     FROM
@@ -138,11 +143,11 @@ BEGIN
     LEFT JOIN
         dbo.RawMaterialCategory rc ON rc.Id = r.RawMaterialCategoryId
     
-    WHERE s.LocationId = @LocationId
-
     GROUP BY s.RawMaterialId,
             r.[Name],
             r.Code,
             r.RawMaterialCategoryId,
-            rc.Name;
+            rc.Name,
+            r.UnitOfMeasurement,
+            r.Rate;
 END

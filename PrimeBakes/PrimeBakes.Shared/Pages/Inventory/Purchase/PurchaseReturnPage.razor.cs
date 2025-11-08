@@ -141,7 +141,7 @@ public partial class PurchaseReturnPage
 				if (_purchaseReturn is null)
 				{
 					await ShowToast("Purchase Return Not Found", "The requested purchase return could not be found.", "error");
-					NavigationManager.NavigateTo("/inventory/purchasereturn", true);
+					NavigationManager.NavigateTo("/inventory/purchase-return", true);
 				}
 			}
 
@@ -813,7 +813,7 @@ public partial class PurchaseReturnPage
 			_purchaseReturn.Id = await PurchaseReturnData.SavePurchaseReturnTransaction(_purchaseReturn, _cart);
 			await GenerateAndDownloadInvoice();
 			await DeleteLocalFiles();
-			NavigationManager.NavigateTo("/inventory/purchasereturn", true);
+			NavigationManager.NavigateTo("/inventory/purchase-return", true);
 
 			await ShowToast("Save Transaction", "Transaction saved successfully! Invoice has been generated.", "success");
 		}
@@ -982,15 +982,15 @@ public partial class PurchaseReturnPage
 	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo("/inventory/purchasereturn", true);
+		NavigationManager.NavigateTo("/inventory/purchase-return", true);
 	}
 
 	private async Task NavigateToTransactionHistoryPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchasereturn", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", "/report/purchase-return", "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchasereturn");
+			NavigationManager.NavigateTo("/report/purchase-return");
 	}
 
 	private async Task ShowToast(string title, string message, string type)

@@ -336,7 +336,7 @@ public partial class FinancialAccountingPage
 		}
 
 		_accountingCart.Add(_selectedCart);
-		await ShowSuccessToast($"Added {_selectedCart.Name} (₹{(_selectedCart.Debit ?? _selectedCart.Credit):N2}) to cart.");
+		await ShowSuccessToast($"Added {_selectedCart.Name} (₹{_selectedCart.Debit ?? _selectedCart.Credit:N2}) to cart.");
 
 		// Reset selection
 		_selectedLedger = default;

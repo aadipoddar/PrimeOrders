@@ -113,7 +113,7 @@ public static class SaleData
 		if (update)
 		{
 			await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(sale.BillNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Sale.ToString(), sale.Id, sale.BillNo);
 		}
 
 		foreach (var product in cart)
@@ -165,10 +165,10 @@ public static class SaleData
 					RawMaterialId = recipeItem.RawMaterialId,
 					Quantity = -recipeItem.Quantity * product.Quantity,
 					NetRate = product.NetRate / recipeItem.Quantity,
+					TransactionId = sale.Id,
 					TransactionNo = sale.BillNo,
 					Type = StockType.Sale.ToString(),
-					TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
-					LocationId = 1
+					TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime)
 				});
 		}
 	}
@@ -283,7 +283,7 @@ public static class SaleData
 		sale.Status = false;
 		await InsertSale(sale);
 		await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
-		await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(sale.BillNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Sale.ToString(), sale.Id, sale.BillNo);
 
 		if (sale.LocationId != 1)
 			return;

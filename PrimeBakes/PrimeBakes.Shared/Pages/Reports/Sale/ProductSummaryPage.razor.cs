@@ -174,19 +174,19 @@ public partial class ProductSummaryPage
 	private decimal GetDiscountPercentage()
 	{
 		var totalSales = GetTotalProductSales();
-		return totalSales > 0 ? (GetTotalDiscount() / totalSales) * 100 : 0;
+		return totalSales > 0 ? GetTotalDiscount() / totalSales * 100 : 0;
 	}
 
 	private decimal GetTaxPercentage()
 	{
 		var totalSales = GetTotalProductSales();
-		return totalSales > 0 ? (GetTotalTax() / totalSales) * 100 : 0;
+		return totalSales > 0 ? GetTotalTax() / totalSales * 100 : 0;
 	}
 
 	private decimal GetCategoryPercentage(decimal categorySales)
 	{
 		var totalSales = GetTotalProductSales();
-		return totalSales > 0 ? (categorySales / totalSales) * 100 : 0;
+		return totalSales > 0 ? categorySales / totalSales * 100 : 0;
 	}
 	#endregion
 

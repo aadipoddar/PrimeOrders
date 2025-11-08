@@ -1,0 +1,229 @@
+﻿using PrimeBakesLibrary.Models.Inventory.Stock;
+
+namespace PrimeBakesLibrary.Exporting.Inventory.Stock;
+
+/// <summary>
+/// PDF export functionality for Raw Material Stock Report
+/// </summary>
+public static class RawMaterialStockSummaryReportPDFExport
+{
+    /// <summary>
+    /// Export Raw Material Stock Report to PDF with custom column order and formatting
+    /// </summary>
+    /// <param name="stockData">Collection of raw material stock summary records</param>
+    /// <param name="dateRangeStart">Start date of the report</param>
+    /// <param name="dateRangeEnd">End date of the report</param>
+    /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <returns>MemoryStream containing the PDF file</returns>
+    public static MemoryStream ExportRawMaterialStockReport(
+        IEnumerable<RawMaterialStockSummaryModel> stockData,
+        DateOnly? dateRangeStart = null,
+        DateOnly? dateRangeEnd = null,
+        bool showAllColumns = true)
+    {
+        // Define custom column settings matching Excel export
+        var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
+
+        // Define column order based on visibility setting (matching Excel export)
+        List<string> columnOrder;
+
+        if (showAllColumns)
+        {
+            // All columns - detailed view (matching Excel export)
+            columnOrder =
+            [
+                "RawMaterialName",
+                "RawMaterialCode",
+                "RawMaterialCategoryName",
+                "UnitOfMeasurement",
+                "OpeningStock",
+                "PurchaseStock",
+                "SaleStock",
+                "MonthlyStock",
+                "ClosingStock",
+                "Rate",
+                "ClosingValue",
+                "AveragePrice",
+                "LastPurchasePrice",
+                "WeightedAverageValue",
+                "LastPurchaseValue"
+            ];
+        }
+        else
+        {
+            // Summary columns - key fields only (matching Excel export)
+            columnOrder =
+            [
+                "RawMaterialName",
+                "UnitOfMeasurement",
+                "OpeningStock",
+                "PurchaseStock",
+                "SaleStock",
+                "ClosingStock",
+                "Rate",
+                "ClosingValue"
+            ];
+        }
+
+        // Customize specific columns for PDF display (matching Excel column names)
+        columnSettings["RawMaterialName"] = new() { DisplayName = "Raw Material Name", IncludeInTotal = false };
+        columnSettings["RawMaterialCode"] = new() { DisplayName = "Material Code", IncludeInTotal = false };
+        columnSettings["RawMaterialCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
+        columnSettings["UnitOfMeasurement"] = new()
+        {
+            DisplayName = "Unit",
+            IncludeInTotal = false,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Center,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        // Stock quantity fields - All with totals
+        columnSettings["OpeningStock"] = new()
+        {
+            DisplayName = "Opening Stock",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["PurchaseStock"] = new()
+        {
+            DisplayName = "Purchase Stock",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["SaleStock"] = new()
+        {
+            DisplayName = "Sale Stock",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["MonthlyStock"] = new()
+        {
+            DisplayName = "Monthly Stock",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["ClosingStock"] = new()
+        {
+            DisplayName = "Closing Stock",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        // Rate/Price fields - Right aligned, no totals
+        columnSettings["Rate"] = new()
+        {
+            DisplayName = "Rate",
+            Format = "#,##0.00",
+            IncludeInTotal = false,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["AveragePrice"] = new()
+        {
+            DisplayName = "Average Price",
+            Format = "#,##0.00",
+            IncludeInTotal = false,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["LastPurchasePrice"] = new()
+        {
+            DisplayName = "Last Purchase Price",
+            Format = "#,##0.00",
+            IncludeInTotal = false,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        // Value fields - All with totals
+        columnSettings["ClosingValue"] = new()
+        {
+            DisplayName = "Closing Value",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["WeightedAverageValue"] = new()
+        {
+            DisplayName = "Weighted Avg Value",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        columnSettings["LastPurchaseValue"] = new()
+        {
+            DisplayName = "Last Purchase Value",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+        // Call the generic PDF export utility with landscape mode for all columns
+        return PDFReportExportUtil.ExportToPdf(
+            stockData,
+            "RAW MATERIAL STOCK REPORT",
+            dateRangeStart,
+            dateRangeEnd,
+            columnSettings,
+            columnOrder,
+            useLandscape: showAllColumns  // Use landscape when showing all columns
+        );
+    }
+}

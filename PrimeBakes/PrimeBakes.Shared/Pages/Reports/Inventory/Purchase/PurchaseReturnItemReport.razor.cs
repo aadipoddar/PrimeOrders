@@ -336,9 +336,9 @@ public partial class PurchaseReturnItemReport
 			else
 			{
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchasereturn/{purchaseReturnId}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{purchaseReturnId}", "_blank");
 				else
-					NavigationManager.NavigateTo($"/inventory/purchasereturn/{purchaseReturnId}");
+					NavigationManager.NavigateTo($"/inventory/purchase-return/{purchaseReturnId}");
 			}
 		}
 		catch (Exception ex)
@@ -428,17 +428,17 @@ public partial class PurchaseReturnItemReport
 	private async Task NavigateToPurchaseReturnPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/inventory/purchasereturn", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", "/inventory/purchase-return", "_blank");
 		else
-			NavigationManager.NavigateTo("/inventory/purchasereturn");
+			NavigationManager.NavigateTo("/inventory/purchase-return");
 	}
 
 	private async Task NavigateToPurchaseReturnReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchasereturn", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", "/report/purchase-return", "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchasereturn");
+			NavigationManager.NavigateTo("/report/purchase-return");
 	}
 
 	private async Task ShowToast(string title, string message, string type)

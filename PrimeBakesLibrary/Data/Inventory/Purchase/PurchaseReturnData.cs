@@ -38,7 +38,7 @@ public static class PurchaseReturnData
 		{
 			purchaseReturn.Status = false;
 			await InsertPurchaseReturn(purchaseReturn);
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchaseReturn.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.PurchaseReturn.ToString(), purchaseReturn.Id, purchaseReturn.TransactionNo);
 			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchaseReturn.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
@@ -88,10 +88,14 @@ public static class PurchaseReturnData
 		if (update)
 		{
 			var existingPurchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturn.Id);
-			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchaseReturn.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-				throw new InvalidOperationException("Cannot update purchase return transaction as the financial year is locked.");
+			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchaseReturn.FinancialYearId);
+			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 		}
+
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchaseReturn.FinancialYearId);
+		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 		purchaseReturn.Id = await InsertPurchaseReturn(purchaseReturn);
 		await SavePurchaseReturnDetail(purchaseReturn, purchaseReturnDetails, update);
@@ -144,7 +148,7 @@ public static class PurchaseReturnData
 	private static async Task SaveRawMaterialStock(PurchaseReturnModel purchaseReturn, List<PurchaseReturnItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTransactionNo(purchaseReturn.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.PurchaseReturn.ToString(), purchaseReturn.Id, purchaseReturn.TransactionNo);
 
 		foreach (var item in cart)
 			await RawMaterialStockData.InsertRawMaterialStock(new()
@@ -153,10 +157,10 @@ public static class PurchaseReturnData
 				RawMaterialId = item.ItemId,
 				Quantity = -item.Quantity,
 				NetRate = item.NetRate,
+				TransactionId = purchaseReturn.Id,
 				Type = StockType.PurchaseReturn.ToString(),
 				TransactionNo = purchaseReturn.TransactionNo,
-				TransactionDate = DateOnly.FromDateTime(purchaseReturn.TransactionDateTime),
-				LocationId = 1 // Purchase Returns are always to primary location
+				TransactionDate = DateOnly.FromDateTime(purchaseReturn.TransactionDateTime)
 			});
 	}
 
