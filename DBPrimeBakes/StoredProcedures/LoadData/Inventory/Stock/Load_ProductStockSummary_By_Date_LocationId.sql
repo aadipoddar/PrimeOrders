@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Load_ProductStockSummary_By_Date_LocationId]
-	@FromDate DATETIME,
-	@ToDate DATETIME,
+	@FromDate DATE,
+	@ToDate DATE,
 	@LocationId INT
 AS
 BEGIN
@@ -48,7 +48,7 @@ BEGIN
             FROM [ProductStock]
             WHERE     ProductId = s.ProductId
                   AND TransactionDate >= @FromDate
-                  AND TransactionDate < @ToDate
+                  AND TransactionDate <= @ToDate
                   AND LocationId = @LocationId),
            0) AS MonthlyStock,
 
@@ -63,28 +63,44 @@ BEGIN
 
         ISNULL
         (
+            (SELECT TOP 1 Rate
+                FROM dbo.ProductLocation
+                WHERE ProductId = s.ProductId
+                  AND LocationId = @LocationId
+                  AND Status = 1)
+         , p.Rate) AS Rate,
+
+        ISNULL
+        (
+            ISNULL
+            (
+                (SELECT TOP 1 Rate
+                    FROM dbo.ProductLocation
+                    WHERE ProductId = s.ProductId
+                      AND LocationId = @LocationId
+                      AND Status = 1)
+             , p.Rate) *
+                ISNULL
+                  (
+                     (SELECT SUM (Quantity)
+                      FROM [ProductStock]
+                      WHERE     ProductId = s.ProductId
+                            AND TransactionDate <= @ToDate
+                            AND LocationId = @LocationId),
+                     0)
+        , 0) AS ClosingValue,
+
+        ISNULL
+        (
             (SELECT AVG (NetRate)
              FROM [ProductStock]
              WHERE     ProductId = s.ProductId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Quantity < 0
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId),
         0) AS AveragePrice,
-
-        ISNULL
-        (
-            (SELECT TOP 1 NetRate
-             FROM [ProductStock]
-             WHERE     ProductId = s.ProductId
-                   AND TransactionDate >= @FromDate
-                   AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
-                   AND NetRate IS NOT NULL
-                   AND LocationId = @LocationId
-             ORDER BY TransactionDate DESC),
-        0) AS LastSalePrice,
 
         ISNULL
         (
@@ -103,10 +119,23 @@ BEGIN
              WHERE     ProductId = s.ProductId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Quantity < 0
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId),
         0) AS WeightedAverageValue,
+
+        ISNULL
+        (
+            (SELECT TOP 1 NetRate
+             FROM [ProductStock]
+             WHERE     ProductId = s.ProductId
+                   AND TransactionDate >= @FromDate
+                   AND TransactionDate <= @ToDate
+                   AND Quantity < 0
+                   AND NetRate IS NOT NULL
+                   AND LocationId = @LocationId
+             ORDER BY TransactionDate DESC),
+        0) AS LastSalePrice,
 
         ISNULL
         (
@@ -125,24 +154,11 @@ BEGIN
              WHERE     ProductId = s.ProductId
                    AND TransactionDate >= @FromDate
                    AND TransactionDate <= @ToDate
-                   AND Type = 'Sale'
+                   AND Quantity < 0
                    AND NetRate IS NOT NULL
                    AND LocationId = @LocationId
              ORDER BY TransactionDate DESC),
-        0) AS LastSaleValue,
-
-        ISNULL
-        (
-            p.Rate *
-                ISNULL
-                  (
-                     (SELECT SUM (Quantity)
-                      FROM [ProductStock]
-                      WHERE     ProductId = s.ProductId
-                            AND TransactionDate <= @ToDate
-                            AND LocationId = @LocationId),
-                     0)
-        , 0) AS StockValueAtProductRate
+        0) AS LastSaleValue
 
     FROM
         [ProductStock] s

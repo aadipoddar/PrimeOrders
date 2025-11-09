@@ -5,7 +5,7 @@
 	@NetRate MONEY,
 	@Type VARCHAR(20), 
 	@TransactionId INT,
-	@TransactionNo VARCHAR(20),
+	@TransactionNo VARCHAR(MAX),
 	@TransactionDate DATE
 AS
 BEGIN

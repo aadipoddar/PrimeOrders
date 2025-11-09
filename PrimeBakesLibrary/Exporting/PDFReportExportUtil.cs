@@ -29,6 +29,7 @@ public static class PDFReportExportUtil
 	/// <param name="autoAdjustColumnWidth">Optional: Automatically adjust column widths</param>
 	/// <param name="logoPath">Optional: Custom path to company logo image (PNG, JPG, etc.)</param>
 	/// <param name="useLandscape">Optional: Use landscape orientation for wide tables</param>
+	/// <param name="locationName">Optional: Location name to display in header</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
 	public static MemoryStream ExportToPdf<T>(
 		IEnumerable<T> data,
@@ -40,7 +41,8 @@ public static class PDFReportExportUtil
 		bool useBuiltInStyle = false,
 		bool autoAdjustColumnWidth = true,
 		string logoPath = null,
-		bool useLandscape = false)
+		bool useLandscape = false,
+		string locationName = null)
 	{
 		MemoryStream ms = new();
 
@@ -69,7 +71,7 @@ public static class PDFReportExportUtil
 				}
 
 				// Setup header
-				float currentY = SetupHeader(page, reportTitle, dateRangeStart, dateRangeEnd, logoPath);
+				float currentY = SetupHeader(page, reportTitle, dateRangeStart, dateRangeEnd, logoPath, locationName);
 
 				// Add data grid
 				currentY = AddDataGrid(page, pdfDocument, data, effectiveColumnOrder, columnSettings, currentY,
@@ -205,7 +207,8 @@ public static class PDFReportExportUtil
 		string reportTitle,
 		DateOnly? dateRangeStart,
 		DateOnly? dateRangeEnd,
-		string customLogoPath = null)
+		string customLogoPath = null,
+		string locationName = null)
 	{
 		float currentY = 10;
 		float leftMargin = 15;
@@ -291,6 +294,16 @@ public static class PDFReportExportUtil
 			PdfStandardFont dateFont = new(PdfFontFamily.Helvetica, 8);
 			PdfBrush dateBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
 			page.Graphics.DrawString(dateRange, dateFont, dateBrush, new PointF(leftMargin, currentY));
+			currentY += 10;
+		}
+
+		// Location
+		if (!string.IsNullOrEmpty(locationName))
+		{
+			string locationText = $"Location: {locationName}";
+			PdfStandardFont locationFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
+			PdfBrush locationBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
+			page.Graphics.DrawString(locationText, locationFont, locationBrush, new PointF(leftMargin, currentY));
 			currentY += 10;
 		}
 

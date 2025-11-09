@@ -1,11 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_ProductStock]
 	@Id INT,
 	@ProductId INT, 
-	@Quantity DECIMAL(7, 3), 
+	@Quantity MONEY, 
 	@NetRate MONEY,
 	@Type VARCHAR(20), 
-	@TransactionNo VARCHAR(20),
-	@TransactionDate DATE, 
+	@TransactionId INT,
+	@TransactionNo VARCHAR(MAX),
+	@TransactionDate DATE,
 	@LocationId INT
 AS
 BEGIN
@@ -17,6 +18,7 @@ BEGIN
 			[Quantity], 
 			[NetRate],
 			[Type], 
+			[TransactionId],
 			[TransactionNo],
 			[TransactionDate], 
 			[LocationId]
@@ -27,10 +29,13 @@ BEGIN
 			@Quantity,
 			@NetRate,
 			@Type, 
+			@TransactionId,
 			@TransactionNo,
 			@TransactionDate, 
 			@LocationId
 		);
+
+		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
 
@@ -41,9 +46,12 @@ BEGIN
 			[Quantity] = @Quantity, 
 			[NetRate] = @NetRate,
 			[Type] = @Type, 
+			[TransactionId] = @TransactionId,
 			[TransactionNo] = @TransactionNo,
 			[TransactionDate] = @TransactionDate, 
 			[LocationId] = @LocationId
 		WHERE [Id] = @Id;
 	END
+
+	SELECT @Id AS Id;
 END;

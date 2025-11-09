@@ -9,6 +9,7 @@ using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Kitchen;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Product;
 
 using Syncfusion.Blazor.Popups;
@@ -146,7 +147,7 @@ public partial class KitchenProductionViewPage
 
 		kitchenProduction.Status = false;
 		await KitchenProductionData.InsertKitchenProduction(kitchenProduction);
-		await ProductStockData.DeleteProductStockByTransactionNo(kitchenProduction.TransactionNo);
+		await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.KitchenProduction.ToString(), kitchenProduction.Id);
 
 		VibrationService.VibrateWithTime(500);
 		NavigationManager.NavigateTo("/Reports/Kitchen-Production");

@@ -99,8 +99,8 @@ public static class SaleReturnData
 	{
 		if (update)
 		{
-			await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.SaleReturn.ToString(), saleReturn.Id, saleReturn.BillNo);
+			await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
 		}
 
 		LedgerModel party = null;
@@ -117,6 +117,7 @@ public static class SaleReturnData
 					ProductId = product.ProductId,
 					Quantity = -product.Quantity,
 					NetRate = product.NetRate,
+					TransactionId = saleReturn.Id,
 					TransactionNo = saleReturn.BillNo,
 					Type = StockType.SaleReturn.ToString(),
 					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
@@ -130,6 +131,7 @@ public static class SaleReturnData
 				ProductId = product.ProductId,
 				Quantity = product.Quantity,
 				NetRate = product.NetRate,
+				TransactionId = saleReturn.Id,
 				TransactionNo = saleReturn.BillNo,
 				Type = StockType.SaleReturn.ToString(),
 				TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
@@ -249,8 +251,8 @@ public static class SaleReturnData
 	{
 		saleReturn.Status = false;
 		await InsertSaleReturn(saleReturn);
-		await ProductStockData.DeleteProductStockByTransactionNo(saleReturn.BillNo);
-		await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.SaleReturn.ToString(), saleReturn.Id, saleReturn.BillNo);
+		await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
 
 		if (saleReturn.LocationId != 1)
 			return;

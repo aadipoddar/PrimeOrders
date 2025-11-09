@@ -55,16 +55,22 @@ else
 					<p>Manage items issued to kitchen for production</p>
 				</div>
 
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Kitchen-Production")'>
+					<div class="card-icon production-icon">🍲</div>
+					<h3>Kitchen Production</h3>
+					<p>Manage kitchen production and baking activities</p>
+				</div>
+
 				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/raw-material-stock-adjustment")'>
 					<div class="card-icon stock-icon">📊</div>
 					<h3>Raw Material Stock Adjustment</h3>
 					<p>Adjust and manage raw material stock levels</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Kitchen-Production")'>
-					<div class="card-icon production-icon">🍲</div>
-					<h3>Kitchen Production</h3>
-					<p>Manage kitchen production and baking activities</p>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/product-stock-adjustment")'>
+					<div class="card-icon product-stock-icon">📦</div>
+					<h3>Finished Goods / Product Stock Adjustment</h3>
+					<p>Adjust and manage finished product inventory</p>
 				</div>
 
 				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Recipe")'>
@@ -73,12 +79,6 @@ else
 					<p>Manage and view recipes</p>
 				</div>
 			}
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/ProductStockAdjustment")'>
-				<div class="card-icon product-stock-icon">📦</div>
-				<h3>Finished Goods / Product Stock Adjustment</h3>
-				<p>Adjust and manage finished product inventory</p>
-			</div>
 		</div>
 
 		<div class="dashboard-footer">

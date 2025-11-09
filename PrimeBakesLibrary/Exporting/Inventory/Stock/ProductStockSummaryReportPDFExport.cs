@@ -3,23 +3,25 @@
 namespace PrimeBakesLibrary.Exporting.Inventory.Stock;
 
 /// <summary>
-/// PDF export functionality for Raw Material Stock Report
+/// PDF export functionality for Product Stock Report
 /// </summary>
-public static class RawMaterialStockSummaryReportPDFExport
+public static class ProductStockSummaryReportPDFExport
 {
 	/// <summary>
-	/// Export Raw Material Stock Report to PDF with custom column order and formatting
+	/// Export Product Stock Report to PDF with custom column order and formatting
 	/// </summary>
-	/// <param name="stockData">Collection of raw material stock summary records</param>
+	/// <param name="stockData">Collection of product stock summary records</param>
 	/// <param name="dateRangeStart">Start date of the report</param>
 	/// <param name="dateRangeEnd">End date of the report</param>
 	/// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+	/// <param name="locationName">Optional location name to display in header</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportRawMaterialStockReport(
-		IEnumerable<RawMaterialStockSummaryModel> stockData,
+	public static MemoryStream ExportProductStockReport(
+		IEnumerable<ProductStockSummaryModel> stockData,
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
-		bool showAllColumns = true)
+		bool showAllColumns = true,
+		string locationName = null)
 	{
 		// Define custom column settings matching Excel export
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -32,10 +34,9 @@ public static class RawMaterialStockSummaryReportPDFExport
 			// All columns - detailed view (matching Excel export)
 			columnOrder =
 			[
-				"RawMaterialName",
-				"RawMaterialCode",
-				"RawMaterialCategoryName",
-				"UnitOfMeasurement",
+				"ProductName",
+				"ProductCode",
+				"ProductCategoryName",
 				"OpeningStock",
 				"PurchaseStock",
 				"SaleStock",
@@ -45,8 +46,8 @@ public static class RawMaterialStockSummaryReportPDFExport
 				"ClosingValue",
 				"AveragePrice",
 				"WeightedAverageValue",
-				"LastPurchasePrice",
-				"LastPurchaseValue"
+				"LastSalePrice",
+				"LastSaleValue"
 			];
 		}
 		else
@@ -54,8 +55,7 @@ public static class RawMaterialStockSummaryReportPDFExport
 			// Summary columns - key fields only (matching Excel export)
 			columnOrder =
 			[
-				"RawMaterialName",
-				"UnitOfMeasurement",
+				"ProductName",
 				"OpeningStock",
 				"PurchaseStock",
 				"SaleStock",
@@ -66,19 +66,9 @@ public static class RawMaterialStockSummaryReportPDFExport
 		}
 
 		// Customize specific columns for PDF display (matching Excel column names)
-		columnSettings["RawMaterialName"] = new() { DisplayName = "Raw Material Name", IncludeInTotal = false };
-		columnSettings["RawMaterialCode"] = new() { DisplayName = "Material Code", IncludeInTotal = false };
-		columnSettings["RawMaterialCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
-		columnSettings["UnitOfMeasurement"] = new()
-		{
-			DisplayName = "Unit",
-			IncludeInTotal = false,
-			StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-			{
-				Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Center,
-				LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-			}
-		};
+		columnSettings["ProductName"] = new() { DisplayName = "Product Name", IncludeInTotal = false };
+		columnSettings["ProductCode"] = new() { DisplayName = "Product Code", IncludeInTotal = false };
+		columnSettings["ProductCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
 
 		// Stock quantity fields - All with totals
 		columnSettings["OpeningStock"] = new()
@@ -166,9 +156,9 @@ public static class RawMaterialStockSummaryReportPDFExport
 			}
 		};
 
-		columnSettings["LastPurchasePrice"] = new()
+		columnSettings["LastSalePrice"] = new()
 		{
-			DisplayName = "Last Purchase Price",
+			DisplayName = "Last Sale Price",
 			Format = "#,##0.00",
 			IncludeInTotal = false,
 			StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -203,9 +193,9 @@ public static class RawMaterialStockSummaryReportPDFExport
 			}
 		};
 
-		columnSettings["LastPurchaseValue"] = new()
+		columnSettings["LastSaleValue"] = new()
 		{
-			DisplayName = "Last Purchase Value",
+			DisplayName = "Last Sale Value",
 			Format = "#,##0.00",
 			HighlightNegative = true,
 			StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -218,12 +208,13 @@ public static class RawMaterialStockSummaryReportPDFExport
 		// Call the generic PDF export utility with landscape mode for all columns
 		return PDFReportExportUtil.ExportToPdf(
 			stockData,
-			"RAW MATERIAL STOCK REPORT",
+			"PRODUCT STOCK REPORT",
 			dateRangeStart,
 			dateRangeEnd,
 			columnSettings,
 			columnOrder,
-			useLandscape: showAllColumns  // Use landscape when showing all columns
+			useLandscape: showAllColumns,  // Use landscape when showing all columns
+			locationName: locationName
 		);
 	}
 }

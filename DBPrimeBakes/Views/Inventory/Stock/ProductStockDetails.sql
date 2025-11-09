@@ -8,6 +8,7 @@ SELECT
 	PS.Quantity,
 	PS.NetRate,
 	PS.Type,
+	PS.TransactionId,
 	PS.TransactionNo,
 	PS.TransactionDate,
 	PS.LocationId,

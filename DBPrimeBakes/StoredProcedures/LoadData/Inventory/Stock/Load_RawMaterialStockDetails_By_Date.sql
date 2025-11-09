@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Load_RawMaterialStockDetails_By_Date]
-	@FromDate DATETIME,
-	@ToDate DATETIME
+	@FromDate DATE,
+	@ToDate DATE
 AS
 BEGIN
 	SELECT *

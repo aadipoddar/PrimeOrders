@@ -55,7 +55,7 @@ public partial class RawMaterialStockReport
 		if (!firstRender)
 			return;
 
-		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		await LoadData();
 		_isLoading = false;
 		StateHasChanged();
@@ -82,9 +82,7 @@ public partial class RawMaterialStockReport
 		{
 			_isProcessing = true;
 
-			_stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDate(
-				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+			_stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDate(_fromDate, _toDate);
 
 			_stockSummary = [.. _stockSummary.Where(_ => _.OpeningStock != 0 ||
 												  _.PurchaseStock != 0 ||
@@ -114,10 +112,7 @@ public partial class RawMaterialStockReport
 
 	private async Task LoadStockDetails()
 	{
-		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDate(
-			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
-
+		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDate(_fromDate, _toDate);
 		_stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDate).ThenBy(_ => _.RawMaterialName)];
 	}
 	#endregion
@@ -432,7 +427,7 @@ public partial class RawMaterialStockReport
 			_isDeleteDialogVisible = false;
 			StateHasChanged();
 
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Adjustment.ToString(), TransactionId: null, _deleteTransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockById(_deleteAdjustmentId);
 			await ShowToast("Success", "Stock adjustment deleted successfully.", "success");
 		}
 		catch (Exception ex)

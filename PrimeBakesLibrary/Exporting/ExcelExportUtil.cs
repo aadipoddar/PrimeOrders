@@ -24,6 +24,7 @@ public static class ExcelExportUtil
 	/// <param name="dateRangeEnd">Optional end date for date range reports</param>
 	/// <param name="columnSettings">Optional custom column settings</param>
 	/// <param name="columnOrder">Optional custom column display order</param>
+	/// <param name="locationName">Optional location name to display in header</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
 	public static MemoryStream ExportToExcel<T>(
 		IEnumerable<T> data,
@@ -32,7 +33,8 @@ public static class ExcelExportUtil
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
 		Dictionary<string, ColumnSetting> columnSettings = null,
-		List<string> columnOrder = null)
+		List<string> columnOrder = null,
+		string locationName = null)
 	{
 		MemoryStream ms = new();
 
@@ -60,7 +62,7 @@ public static class ExcelExportUtil
 				List<string> effectiveColumnOrder = DetermineColumnOrder<T>(columnSettings, columnOrder);
 
 				// Setup the worksheet
-				int currentRow = SetupHeader(worksheet, reportTitle, effectiveColumnOrder.Count, dateRangeStart, dateRangeEnd);
+				int currentRow = SetupHeader(worksheet, reportTitle, effectiveColumnOrder.Count, dateRangeStart, dateRangeEnd, locationName);
 
 				// Add data to worksheet
 				currentRow = AddDataSection(worksheet, data, effectiveColumnOrder, columnSettings, currentRow);
@@ -266,7 +268,8 @@ public static class ExcelExportUtil
 		string reportTitle,
 		int columnCount,
 		DateOnly? dateRangeStart,
-		DateOnly? dateRangeEnd)
+		DateOnly? dateRangeEnd,
+		string locationName = null)
 	{
 		// Set column range based on data width
 		string colLetter = GetExcelColumnName(columnCount);
@@ -299,6 +302,20 @@ public static class ExcelExportUtil
 			dateRange.CellStyle.Font.Bold = true;
 			dateRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
 			dateRange.CellStyle.Font.RGBColor = Color.FromArgb(71, 85, 105); // Slate gray
+			currentRow++;
+		}
+
+		// Location if available
+		if (!string.IsNullOrEmpty(locationName))
+		{
+			IRange locationRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
+			locationRange.Merge();
+			locationRange.Text = $"Location: {locationName}";
+			locationRange.CellStyle.Font.Size = 11;
+			locationRange.CellStyle.Font.FontName = "Calibri";
+			locationRange.CellStyle.Font.Bold = true;
+			locationRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
+			locationRange.CellStyle.Font.RGBColor = Color.FromArgb(100, 116, 139); // Slate gray
 			currentRow++;
 		}
 

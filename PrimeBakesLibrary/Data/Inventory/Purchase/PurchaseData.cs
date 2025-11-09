@@ -42,7 +42,7 @@ public static class PurchaseData
 		{
 			purchase.Status = false;
 			await InsertPurchase(purchase);
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Purchase.ToString(), purchase.Id, purchase.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Purchase.ToString(), purchase.Id);
 
 			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchase.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
@@ -154,7 +154,7 @@ public static class PurchaseData
 	private static async Task SaveRawMaterialStock(PurchaseModel purchase, List<PurchaseItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Purchase.ToString(), purchase.Id, purchase.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Purchase.ToString(), purchase.Id);
 
 		foreach (var item in cart)
 			await RawMaterialStockData.InsertRawMaterialStock(new()

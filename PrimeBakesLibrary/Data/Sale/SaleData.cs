@@ -112,8 +112,8 @@ public static class SaleData
 	{
 		if (update)
 		{
-			await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Sale.ToString(), sale.Id, sale.BillNo);
+			await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
 		}
 
 		foreach (var product in cart)
@@ -125,6 +125,7 @@ public static class SaleData
 				NetRate = product.NetRate,
 				TransactionNo = sale.BillNo,
 				Type = StockType.Sale.ToString(),
+				TransactionId = sale.Id,
 				TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
 				LocationId = sale.LocationId
 			});
@@ -143,6 +144,7 @@ public static class SaleData
 					NetRate = product.NetRate,
 					Type = StockType.Purchase.ToString(),
 					TransactionNo = sale.BillNo,
+					TransactionId = sale.Id,
 					TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
 					LocationId = supplier.LocationId.Value
 				});
@@ -282,8 +284,8 @@ public static class SaleData
 	{
 		sale.Status = false;
 		await InsertSale(sale);
-		await ProductStockData.DeleteProductStockByTransactionNo(sale.BillNo);
-		await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.Sale.ToString(), sale.Id, sale.BillNo);
+		await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
 
 		if (sale.LocationId != 1)
 			return;

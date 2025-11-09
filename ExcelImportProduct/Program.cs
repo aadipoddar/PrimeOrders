@@ -11,6 +11,7 @@ using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Inventory.Purchase;
@@ -52,7 +53,8 @@ using PrimeBakesLibrary.Models.Sale;
 
 // await InsertPurchase(worksheet1, worksheet2);
 
-await UpdateRMStockPurchaseIssue();
+// await UpdateRMStockPurchaseIssue();
+await UpdateProductStockSaleAndReturn();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -710,6 +712,93 @@ static async Task UpdateRMStockPurchaseIssue()
 				TransactionNo = issue.TransactionNo,
 			});
 		}
+	}
+}
+
+static async Task UpdateProductStockSaleAndReturn()
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+	var sales = await CommonData.LoadTableDataByStatus<SaleModel>(TableNames.Sale);
+	foreach (var sale in sales)
+	{
+		Console.WriteLine("Updating Stock for Sale Id: " + sale.Id);
+
+		List<SaleDetailModel>? saleDetails = await SaleData.LoadSaleDetailBySale(sale.Id);
+
+		foreach (var product in saleDetails)
+			await ProductStockData.InsertProductStock(new()
+			{
+				Id = 0,
+				ProductId = product.ProductId,
+				Quantity = -product.Quantity,
+				NetRate = product.NetRate,
+				TransactionNo = sale.BillNo,
+				Type = StockType.Sale.ToString(),
+				TransactionId = sale.Id,
+				TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
+				LocationId = sale.LocationId
+			});
+
+		if (sale.PartyId is null || sale.PartyId <= 0)
+			continue;
+
+		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
+		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
+			foreach (var product in saleDetails)
+				await ProductStockData.InsertProductStock(new()
+				{
+					Id = 0,
+					ProductId = product.ProductId,
+					Quantity = product.Quantity,
+					NetRate = product.NetRate,
+					Type = StockType.Purchase.ToString(),
+					TransactionId = sale.Id,
+					TransactionNo = sale.BillNo,
+					TransactionDate = DateOnly.FromDateTime(sale.SaleDateTime),
+					LocationId = supplier.LocationId.Value
+				});
+	}
+
+	var saleReturns = await CommonData.LoadTableDataByStatus<SaleReturnModel>(TableNames.SaleReturn);
+	foreach (var saleReturn in saleReturns)
+	{
+		Console.WriteLine("Updating RM Stock Kitchen Issue for Kitchen Issue Id: " + saleReturn.Id);
+
+		var saleDetails = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(saleReturn.Id);
+
+		foreach (var product in saleDetails)
+			await ProductStockData.InsertProductStock(new()
+			{
+				Id = 0,
+				ProductId = product.ProductId,
+				Quantity = product.Quantity,
+				NetRate = product.NetRate,
+				TransactionNo = saleReturn.BillNo,
+				Type = StockType.SaleReturn.ToString(),
+				TransactionId = saleReturn.Id,
+				TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
+				LocationId = saleReturn.LocationId
+			});
+
+		if (saleReturn.PartyId is null || saleReturn.PartyId <= 0)
+			continue;
+
+		var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, saleReturn.PartyId.Value);
+		if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
+			foreach (var product in saleDetails)
+				await ProductStockData.InsertProductStock(new()
+				{
+					Id = 0,
+					ProductId = product.ProductId,
+					Quantity = -product.Quantity,
+					NetRate = product.NetRate,
+					Type = StockType.SaleReturn.ToString(),
+					TransactionId = saleReturn.Id,
+					TransactionNo = saleReturn.BillNo,
+					TransactionDate = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime),
+					LocationId = supplier.LocationId.Value
+				});
 	}
 }
 

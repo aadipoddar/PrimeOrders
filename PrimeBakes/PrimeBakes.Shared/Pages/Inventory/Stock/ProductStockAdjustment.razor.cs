@@ -1,240 +1,472 @@
+using Microsoft.JSInterop;
+
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Product;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
+using Syncfusion.Blazor.Inputs;
+using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Inventory.Stock;
 
 public partial class ProductStockAdjustment
 {
-	private UserModel _user;
 	private bool _isLoading = true;
-	private bool _isSaving = false;
+	private bool _isProcessing = false;
 
-	private int _selectedLocationId = 1;
-	private int _selectedCategoryId = 0;
-	private bool _adjustmentConfirmationDialogVisible = false;
-	private bool _validationErrorDialogVisible = false;
+	private DateTime _transactionDateTime = DateTime.Now;
+	private string _transactionNo = string.Empty;
+
+	private FinancialYearModel _selectedFinancialYear = new();
+	private LocationModel _selectedLocation;
+	private ProductLocationOverviewModel? _selectedProduct = new();
+	private ProductStockAdjustmentCartModel _selectedCart = new();
 
 	private List<LocationModel> _locations = [];
-	private List<ProductCategoryModel> _productCategories = [];
-	private readonly List<ProductStockAdjustmentCartModel> _cart = [];
-	private readonly List<ValidationError> _validationErrors = [];
+	private List<ProductLocationOverviewModel> _products = [];
+	private List<ProductStockAdjustmentCartModel> _cart = [];
+	private List<ProductStockSummaryModel> _stockSummary = [];
 
-	public class ValidationError
-	{
-		public string Field { get; set; } = string.Empty;
-		public string Message { get; set; } = string.Empty;
-	}
+	private SfAutoComplete<ProductLocationOverviewModel?, ProductLocationOverviewModel> _sfItemAutoComplete;
+	private SfGrid<ProductStockAdjustmentCartModel> _sfCartGrid;
 
-	private SfGrid<ProductStockAdjustmentCartModel> _sfGrid;
+	private string _errorTitle = string.Empty;
+	private string _errorMessage = string.Empty;
 
-	private SfDialog _sfAdjustmentConfirmationDialog;
-	private SfDialog _sfValidationErrorDialog;
+	private string _successTitle = string.Empty;
+	private string _successMessage = string.Empty;
+
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	#region Load Data
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
-		_user = authResult.User;
+		if (!firstRender)
+			return;
+
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		await LoadData();
 		_isLoading = false;
+		StateHasChanged();
 	}
 
 	private async Task LoadData()
 	{
+		_transactionDateTime = await CommonData.LoadCurrentDateTime();
 		await LoadLocations();
-		await LoadCategories();
-		await LoadProducts();
 		await LoadStock();
-
-		if (_sfGrid is not null)
-			await _sfGrid.Refresh();
-
-		StateHasChanged();
+		await LoadItems();
+		await LoadExistingCart();
 	}
 
 	private async Task LoadLocations()
 	{
-		if (_user.LocationId == 1)
+		try
+		{
 			_locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
 
-		_selectedLocationId = _user.LocationId;
-	}
-
-	private async Task LoadCategories()
-	{
-		_productCategories = await CommonData.LoadTableDataByStatus<ProductCategoryModel>(TableNames.ProductCategory);
-		_productCategories.Add(new()
-		{
-			Id = 0,
-			Name = "All Categories"
-		});
-		_productCategories.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.Ordinal));
-		_selectedCategoryId = 0;
-	}
-
-	private async Task LoadProducts()
-	{
-		var allProducts = await ProductData.LoadProductByLocation(_selectedLocationId);
-		foreach (var product in allProducts)
-			_cart.Add(new()
+			_locations = [.. _locations.OrderBy(s => s.Name)];
+			_locations.Insert(0, new()
 			{
-				ProductCategoryId = product.ProductCategoryId,
-				ProductId = product.ProductId,
-				ProductName = product.Name,
-				Quantity = 0,
-				Rate = product.Rate,
-				Total = 0
+				Id = 0,
+				Name = "Create New Location ..."
 			});
 
-		_cart.Sort((x, y) => string.Compare(x.ProductName, y.ProductName, StringComparison.Ordinal));
+			_selectedLocation = _locations.FirstOrDefault(_ => _.Id == 1);
+			_transactionNo = await GenerateCodes.GenerateProductStockAdjustmentTransactionNo(_transactionDateTime, _selectedLocation.Id);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Loading Locations", ex.Message, "error");
+		}
 	}
 
 	private async Task LoadStock()
 	{
-		var stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(
-					DateTime.Now.AddDays(-1),
-					DateTime.Now.AddDays(1),
-					_selectedLocationId);
+		try
+		{
+			_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_transactionDateTime);
+			_stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(_transactionDateTime, _transactionDateTime, _selectedLocation.Id);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Loading Stock Data", ex.Message, "error");
+		}
+	}
 
-		foreach (var item in stockSummary)
-			if (_cart.Any(c => c.ProductId == item.ProductId))
-				_cart.FirstOrDefault(c => c.ProductId == item.ProductId).Quantity = item.ClosingStock;
+	private async Task LoadItems()
+	{
+		try
+		{
+			_products = await ProductData.LoadProductByLocation(_selectedLocation.Id);
+
+			_products = [.. _products.OrderBy(s => s.Name)];
+			_products.Add(new()
+			{
+				Id = 0,
+				Name = "Create New Item ..."
+			});
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Loading Items", ex.Message, "error");
+		}
+	}
+
+	private async Task LoadExistingCart()
+	{
+		try
+		{
+			_cart.Clear();
+
+			if (await DataStorageService.LocalExists(StorageFileNames.ProductStockAdjustmentCartDataFileName))
+				_cart = System.Text.Json.JsonSerializer.Deserialize<List<ProductStockAdjustmentCartModel>>(await DataStorageService.LocalGetAsync(StorageFileNames.ProductStockAdjustmentCartDataFileName));
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Loading Existing Cart", ex.Message, "error");
+			await DeleteLocalFiles();
+		}
+		finally
+		{
+			await SaveTransactionFile();
+		}
 	}
 	#endregion
 
-	#region Dialog Methods
-	private void CloseConfirmationDialog()
+	#region Change Events
+	private async Task OnTransactionDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime> args)
 	{
-		_adjustmentConfirmationDialogVisible = false;
-		StateHasChanged();
-	}
-	#endregion
-
-	#region Location and Products
-	private async Task OnLocationChanged(ChangeEventArgs<int, LocationModel> args)
-	{
-		if (args is null || args.Value <= 0)
-			return;
-
-		_selectedLocationId = args.Value;
-		_cart.Clear();
-
-		// Reload everything based on new location
-		await LoadCategories();
-		await LoadProducts();
+		_transactionDateTime = args.Value;
 		await LoadStock();
+		await LoadItems();
+		await SaveTransactionFile();
+	}
 
-		if (_sfGrid is not null)
-			await _sfGrid.Refresh();
+	private async Task OnLocationChanged(ChangeEventArgs<LocationModel, LocationModel> args)
+	{
+		args.Value ??= _locations.FirstOrDefault(_ => _.Id == 1);
+
+		if (args.Value.Id == 0)
+		{
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", "/Admin/Location", "_blank");
+			else
+				NavigationManager.NavigateTo("/Admin/Location");
+			return;
+		}
+
+		_selectedLocation = args.Value;
+		await LoadStock();
+		await LoadItems();
+		await SaveTransactionFile();
+	}
+	#endregion
+
+	#region Cart
+	private async Task OnItemChanged(ChangeEventArgs<ProductLocationOverviewModel?, ProductLocationOverviewModel> args)
+	{
+		if (args.Value is null)
+			return;
+
+		if (args.Value.Id == 0)
+		{
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", "/Admin/Product", "_blank");
+			else
+				NavigationManager.NavigateTo("/Admin/Product");
+
+			return;
+		}
+
+		_selectedProduct = args.Value;
+
+		if (_selectedProduct is null)
+			_selectedCart = new()
+			{
+				ProductId = 0,
+				ProductName = "",
+				Stock = 0,
+				Quantity = 1,
+				Total = 0,
+				Rate = 0,
+			};
+
+		else
+		{
+			_selectedCart.Stock = _stockSummary.FirstOrDefault(s => s.ProductId == _selectedProduct.ProductId)?.ClosingStock ?? 0;
+			_selectedCart.Quantity = _stockSummary.FirstOrDefault(s => s.ProductId == _selectedProduct.ProductId)?.ClosingStock ?? 0;
+			_selectedCart.Rate = _selectedProduct.Rate;
+			_selectedCart.Total = _selectedCart.Rate * _selectedCart.Quantity;
+		}
+
+		UpdateSelectedItemFinancialDetails();
+	}
+
+	private void OnItemQuantityChanged(ChangeEventArgs<decimal> args)
+	{
+		_selectedCart.Quantity = args.Value;
+		UpdateSelectedItemFinancialDetails();
+	}
+
+	private void UpdateSelectedItemFinancialDetails()
+	{
+		if (_selectedProduct is null)
+			return;
+
+		_selectedCart.ProductId = _selectedProduct.ProductId;
+		_selectedCart.ProductName = _selectedProduct.Name;
+		_selectedCart.Rate = _selectedProduct.Rate;
+		_selectedCart.Stock = _stockSummary.FirstOrDefault(s => s.ProductId == _selectedProduct.ProductId)?.ClosingStock ?? 0;
+		_selectedCart.Total = _selectedCart.Quantity * _selectedCart.Rate;
 
 		StateHasChanged();
 	}
 
-	private async Task OnProductCategoryChanged(ChangeEventArgs<int, ProductCategoryModel> args)
+	private async Task AddItemToCart()
 	{
-		if (args is null || args.Value <= 0)
-			_selectedCategoryId = 0;
-		else
-			_selectedCategoryId = args.Value;
+		if (_selectedProduct is null || _selectedProduct.ProductId <= 0)
+		{
+			await ShowToast("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", "error");
+			return;
+		}
 
-		await SaveAdjustmentFile();
+		UpdateSelectedItemFinancialDetails();
+
+		var existingItem = _cart.FirstOrDefault(s => s.ProductId == _selectedCart.ProductId);
+		if (existingItem is not null)
+		{
+			existingItem.Quantity = _selectedCart.Quantity;
+			existingItem.Rate = _selectedCart.Rate;
+		}
+		else
+			_cart.Add(new()
+			{
+				ProductId = _selectedCart.ProductId,
+				ProductName = _selectedCart.ProductName,
+				Stock = _selectedCart.Stock,
+				Quantity = _selectedCart.Quantity,
+				Rate = _selectedCart.Rate,
+				Total = _selectedCart.Total
+			});
+
+		_selectedProduct = null;
+		_selectedCart = new();
+
+		await _sfItemAutoComplete.FocusAsync();
+		await SaveTransactionFile();
 	}
 
-	private async Task UpdateQuantity(ProductStockAdjustmentCartModel item, decimal newQuantity)
+	private async Task EditCartItem(ProductStockAdjustmentCartModel cartItem)
 	{
-		if (item is null)
+		_selectedProduct = _products.FirstOrDefault(s => s.ProductId == cartItem.ProductId);
+
+		if (_selectedProduct is null)
 			return;
 
-		item.Quantity = newQuantity;
-		await SaveAdjustmentFile();
+		_selectedCart = new()
+		{
+			ProductId = cartItem.ProductId,
+			ProductName = cartItem.ProductName,
+			Stock = _stockSummary.FirstOrDefault(s => s.ProductId == cartItem.ProductId)?.ClosingStock ?? 0,
+			Quantity = cartItem.Quantity,
+			Rate = cartItem.Rate,
+			Total = cartItem.Total
+		};
+
+		await _sfItemAutoComplete.FocusAsync();
+		UpdateSelectedItemFinancialDetails();
+		await RemoveItemFromCart(cartItem);
+	}
+
+	private async Task RemoveItemFromCart(ProductStockAdjustmentCartModel cartItem)
+	{
+		_cart.Remove(cartItem);
+		await SaveTransactionFile();
 	}
 	#endregion
 
 	#region Saving
-	private async Task SaveAdjustmentFile()
+	private async Task UpdateFinancialDetails()
 	{
-		VibrationService.VibrateHapticClick();
-		await _sfGrid.Refresh();
-		StateHasChanged();
-	}
-
-	private bool ValidateForm()
-	{
-		_validationErrors.Clear();
-
-		// Check for extremely negative quantities that might be unintentional
-		var extremeNegativeItems = _cart.Where(x => x.Quantity < -1000).ToList();
-		if (extremeNegativeItems.Count != 0)
+		foreach (var item in _cart)
 		{
-			_validationErrors.Add(new()
-			{
-				Field = "Large Negative Quantities",
-				Message = $"Some items have very large negative quantities. Please verify: {string.Join(", ", extremeNegativeItems.Select(x => $"{x.ProductName} ({x.Quantity})"))}"
-			});
+			item.Stock = _stockSummary.FirstOrDefault(s => s.ProductId == item.ProductId)?.ClosingStock ?? 0;
+			item.Quantity = item.Quantity;
+			item.Total = item.Rate * item.Quantity;
 		}
 
-		return _validationErrors.Count == 0;
+		#region Financial Year
+		_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_transactionDateTime);
+		if (_selectedFinancialYear is null || _selectedFinancialYear.Locked || _selectedFinancialYear.Status == false)
+		{
+			await ShowToast("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", "error");
+			_transactionDateTime = await CommonData.LoadCurrentDateTime();
+			_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_transactionDateTime);
+			_stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(_transactionDateTime, _transactionDateTime, _selectedLocation.Id);
+		}
+		#endregion
+
+		_transactionNo = await GenerateCodes.GenerateProductStockAdjustmentTransactionNo(_transactionDateTime, _selectedLocation.Id);
 	}
 
-	private async Task ConfirmAdjustment()
+	private async Task SaveTransactionFile()
 	{
-		if (_isSaving)
+		if (_isProcessing || _isLoading)
 			return;
-
-		_isSaving = true;
-		StateHasChanged();
 
 		try
 		{
-			await SaveAdjustmentFile();
+			_isProcessing = true;
 
-			if (!ValidateForm())
-			{
-				_validationErrorDialogVisible = true;
-				_adjustmentConfirmationDialogVisible = false;
-				return;
-			}
+			await UpdateFinancialDetails();
 
-			await ProductStockData.SaveProductStockAdjustment(_cart, _selectedLocationId);
-			_cart.Clear();
-			await SendLocalNotification();
-			NavigationManager.NavigateTo("/Inventory/ProductStockAdjustment/Confirmed", true);
+			await DataStorageService.LocalSaveAsync(StorageFileNames.ProductStockAdjustmentCartDataFileName, System.Text.Json.JsonSerializer.Serialize(_cart));
 		}
 		catch (Exception ex)
 		{
-			_validationErrors.Add(new()
-			{
-				Field = "System Error",
-				Message = $"An error occurred while saving the adjustment: {ex.Message}"
-			});
-			_validationErrorDialogVisible = true;
-			_adjustmentConfirmationDialogVisible = false;
+			await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
 		}
 		finally
 		{
-			_isSaving = false;
+			if (_sfCartGrid is not null)
+				await _sfCartGrid?.Refresh();
+
+			_isProcessing = false;
 			StateHasChanged();
 		}
 	}
 
-	private async Task SendLocalNotification()
+	private async Task<bool> ValidateForm()
 	{
-		await NotificationService.ShowLocalNotification(
-			100,
-			 "Product Stock Adjustment Saved",
-			 "Stock Adjusted.",
-			   $"Product Stock Adjustment has been successfully saved on {DateTime.Now:dd/MM/yy hh:mm tt}. Please check the Stock Adjustment report for details.");
+		if (_cart.Count == 0)
+		{
+			await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
+			return false;
+		}
+
+		if (string.IsNullOrWhiteSpace(_transactionNo))
+		{
+			await ShowToast("Transaction Number Missing", "Transaction number is missing for the adjustment.", "error");
+			return false;
+		}
+
+		if (_transactionDateTime == default)
+		{
+			await ShowToast("Transaction Date Missing", "Please select a valid transaction date for the adjustment.", "error");
+			return false;
+		}
+
+		if (_selectedFinancialYear is null || _selectedFinancialYear.Id <= 0)
+		{
+			await ShowToast("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", "error");
+			return false;
+		}
+
+		if (_selectedFinancialYear.Locked)
+		{
+			await ShowToast("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", "error");
+			return false;
+		}
+
+		if (_selectedFinancialYear.Status == false)
+		{
+			await ShowToast("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", "error");
+			return false;
+		}
+
+		return true;
+	}
+
+	private async Task SaveTransaction()
+	{
+		if (_isProcessing || _isLoading)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+
+			await SaveTransactionFile();
+
+			if (!await ValidateForm())
+			{
+				_isProcessing = false;
+				return;
+			}
+
+			await ProductStockData.SaveProductStockAdjustment(_transactionDateTime, _selectedLocation.Id, _cart);
+			await DeleteLocalFiles();
+			NavigationManager.NavigateTo("/inventory/product-stock-adjustment", true);
+
+			await ShowToast("Save Transaction", "Transaction saved successfully!", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Saving Transaction", ex.Message, "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+		}
+	}
+
+	private async Task DeleteLocalFiles() =>
+		await DataStorageService.LocalRemove(StorageFileNames.ProductStockAdjustmentCartDataFileName);
+	#endregion
+
+	#region Utilities
+	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	{
+		await DeleteLocalFiles();
+		NavigationManager.NavigateTo("/inventory/product-stock-adjustment", true);
+	}
+
+	private async Task NavigateToProductStockReportPage()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", "/report/product-stock", "_blank");
+		else
+			NavigationManager.NavigateTo("/report/product-stock");
+	}
+
+	private async Task ShowToast(string title, string message, string type)
+	{
+		VibrationService.VibrateWithTime(200);
+
+		if (type == "error")
+		{
+			_errorTitle = title;
+			_errorMessage = message;
+			await _sfErrorToast.ShowAsync(new()
+			{
+				Title = _errorTitle,
+				Content = _errorMessage
+			});
+		}
+
+		else if (type == "success")
+		{
+			_successTitle = title;
+			_successMessage = message;
+			await _sfSuccessToast.ShowAsync(new()
+			{
+				Title = _successTitle,
+				Content = _successMessage
+			});
+		}
 	}
 	#endregion
 }

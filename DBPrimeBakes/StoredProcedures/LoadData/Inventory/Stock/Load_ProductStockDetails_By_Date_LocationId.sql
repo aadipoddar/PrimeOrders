@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Load_ProductStockDetails_By_Date_LocationId]
-	@FromDate DATETIME,
-	@ToDate DATETIME,
+	@FromDate DATE,
+	@ToDate DATE,
 	@LocationId INT
 AS
 BEGIN

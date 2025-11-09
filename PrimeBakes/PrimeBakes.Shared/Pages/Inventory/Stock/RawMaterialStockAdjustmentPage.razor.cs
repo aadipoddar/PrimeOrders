@@ -53,7 +53,7 @@ public partial class RawMaterialStockAdjustmentPage
 		if (!firstRender)
 			return;
 
-		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		await LoadData();
 		_isLoading = false;
 		StateHasChanged();

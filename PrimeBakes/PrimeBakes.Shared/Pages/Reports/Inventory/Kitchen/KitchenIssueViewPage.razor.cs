@@ -149,7 +149,7 @@ public partial class KitchenIssueViewPage
 
 		kitchenIssue.Status = false;
 		await KitchenIssueData.InsertKitchenIssue(kitchenIssue);
-		await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.KitchenIssue.ToString(), kitchenIssue.Id, kitchenIssue.TransactionNo);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.KitchenIssue.ToString(), kitchenIssue.Id);
 		VibrationService.VibrateWithTime(500);
 		NavigationManager.NavigateTo("/Reports/Kitchen-Issue");
 

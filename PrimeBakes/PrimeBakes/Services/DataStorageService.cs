@@ -29,6 +29,7 @@ public class DataStorageService : IDataStorageService
 		await LocalRemove(StorageFileNames.PurchaseReturnDataFileName);
 		await LocalRemove(StorageFileNames.PurchaseReturnCartDataFileName);
 		await LocalRemove(StorageFileNames.RawMaterialStockAdjustmentCartDataFileName);
+		await LocalRemove(StorageFileNames.ProductStockAdjustmentCartDataFileName);
 		await LocalRemove(StorageFileNames.KitchenIssueDataFileName);
 		await LocalRemove(StorageFileNames.KitchenIssueCartDataFileName);
 		await LocalRemove(StorageFileNames.KitchenProductionDataFileName);

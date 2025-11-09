@@ -38,7 +38,7 @@ public static class PurchaseReturnData
 		{
 			purchaseReturn.Status = false;
 			await InsertPurchaseReturn(purchaseReturn);
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.PurchaseReturn.ToString(), purchaseReturn.Id, purchaseReturn.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.PurchaseReturn.ToString(), purchaseReturn.Id);
 			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchaseReturn.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
@@ -148,7 +148,7 @@ public static class PurchaseReturnData
 	private static async Task SaveRawMaterialStock(PurchaseReturnModel purchaseReturn, List<PurchaseReturnItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeIdNo(StockType.PurchaseReturn.ToString(), purchaseReturn.Id, purchaseReturn.TransactionNo);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.PurchaseReturn.ToString(), purchaseReturn.Id);
 
 		foreach (var item in cart)
 			await RawMaterialStockData.InsertRawMaterialStock(new()
