@@ -73,8 +73,8 @@ public static class ProductStockReportExcelExport
 				"ClosingValue",
 				"AveragePrice",
 				"WeightedAverageValue",
-				"LastPurchasePrice",
-				"LastPurchaseValue"
+				"LastSalePrice",
+				"LastSaleValue"
 			];
 
 		// Summary columns only (key information)
