@@ -49,43 +49,48 @@
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-maccatalyst|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-maccatalyst|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-windows10.0.19041.0|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 		<AndroidPackageFormat>apk</AndroidPackageFormat>
+		<AndroidKeyStore>true</AndroidKeyStore>
+		<AndroidSigningKeyStore>PrimeBakes.keystore</AndroidSigningKeyStore>
+		<AndroidSigningKeyAlias>prime bakes</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>123456</AndroidSigningKeyPass>
+		<AndroidSigningStorePass>123456</AndroidSigningStorePass>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-maccatalyst|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-maccatalyst|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-windows10.0.19041.0|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.19041.0|AnyCPU'">
 		<ApplicationTitle>Prime Bakes</ApplicationTitle>
 		<ApplicationId>com.aadisoft.primebakes</ApplicationId>
 	</PropertyGroup>
@@ -134,7 +139,7 @@
 		<!-- Use compatible AndroidX versions that work with Firebase Messaging -->
 		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.16.0.3" />
 		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Runtime" Version="2.9.2.1" />
-		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.3" />
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.9.2.1" />
 		<PackageReference Include="Xamarin.AndroidX.SavedState" Version="1.3.1.1" />
 		<PackageReference Include="Xamarin.AndroidX.SavedState.SavedState.Ktx" Version="1.3.1.1" />
 		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Common" Version="2.9.2.1" />

@@ -41,9 +41,8 @@ public static class SaleReturnData
 		saleReturn.Status = true;
 		saleReturn.CreatedAt = DateTime.Now;
 		saleReturn.LocationId = 1;
-		saleReturn.SaleReturnDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(saleReturn.SaleReturnDateTime)
-			.ToDateTime(new TimeOnly(saleReturn.SaleReturnDateTime.Hour, saleReturn.SaleReturnDateTime.Minute, saleReturn.SaleReturnDateTime.Second)),
-			"India Standard Time");
+		var currentDateTime = await CommonData.LoadCurrentDateTime();
+		saleReturn.SaleReturnDateTime = DateOnly.FromDateTime(saleReturn.SaleReturnDateTime).ToDateTime(new TimeOnly(currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second));
 
 		if (update)
 			saleReturn.BillNo = (await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturn.Id)).BillNo;

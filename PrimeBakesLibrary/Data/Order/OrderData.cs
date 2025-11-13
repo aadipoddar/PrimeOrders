@@ -40,9 +40,8 @@ public static class OrderData
 
 		order.Status = true;
 		order.CreatedAt = DateTime.Now;
-		order.OrderDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(order.OrderDateTime)
-			.ToDateTime(new TimeOnly(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second)),
-			"India Standard Time");
+		var currentDateTime = await CommonData.LoadCurrentDateTime();
+		order.OrderDateTime = DateOnly.FromDateTime(order.OrderDateTime).ToDateTime(new TimeOnly(currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second));
 
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, order.UserId);
 

@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.5.5</AssemblyVersion>
+    <AssemblyVersion>1.0.5.6</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,16 +13,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
-    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="31.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.5" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="31.2.10" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.10" />
   </ItemGroup>
 
   <ItemGroup>
