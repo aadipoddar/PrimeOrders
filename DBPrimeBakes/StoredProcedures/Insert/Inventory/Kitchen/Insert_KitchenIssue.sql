@@ -1,19 +1,49 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_KitchenIssue]
 	@Id INT OUTPUT,
+	@TransactionNo VARCHAR(MAX),
+	@CompanyId INT,
+	@TransactionDateTime DATETIME,
+	@FinancialYearId INT,
 	@KitchenId INT,
-	@LocationId INT,
-	@UserId INT,
-	@TransactionNo VARCHAR(20),
-	@IssueDate DATETIME,
-	@Remarks VARCHAR(250),
+	@TotalAmount MONEY,
+	@Remarks VARCHAR(MAX),
+	@CreatedBy INT,
 	@CreatedAt DATETIME,
-	@Status BIT
+	@CreatedFromPlatform VARCHAR(MAX),
+	@Status BIT,
+	@LastModifiedBy INT,
+	@LastModifiedAt DATETIME,
+	@LastModifiedFromPlatform VARCHAR(MAX)
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[KitchenIssue] (KitchenId, LocationId, UserId, TransactionNo, IssueDate, Remarks, Status)
-		VALUES (@KitchenId, @LocationId, @UserId, @TransactionNo, @IssueDate, @Remarks, @Status);
+		INSERT INTO [dbo].[KitchenIssue]
+		(
+			[TransactionNo],
+			[CompanyId],
+			[TransactionDateTime],
+			[FinancialYearId],
+			[KitchenId],
+			[TotalAmount],
+			[Remarks],
+			[CreatedBy],
+			[CreatedFromPlatform],
+			[Status]
+		)
+		VALUES
+		(
+			@TransactionNo,
+			@CompanyId,
+			@TransactionDateTime,
+			@FinancialYearId,
+			@KitchenId,
+			@TotalAmount,
+			@Remarks,
+			@CreatedBy,
+			@CreatedFromPlatform,
+			@Status
+		);
 
 		SET @Id = SCOPE_IDENTITY();
 	END
@@ -21,13 +51,18 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE [dbo].[KitchenIssue]
-		SET KitchenId = @KitchenId,
-			LocationId = @LocationId,
-			UserId = @UserId,
-			TransactionNo = @TransactionNo,
-			IssueDate = @IssueDate,
-			Remarks = @Remarks,
-			Status = @Status
+		SET
+			[TransactionNo] = @TransactionNo,
+			[CompanyId] = @CompanyId,
+			[TransactionDateTime] = @TransactionDateTime,
+			[FinancialYearId] = @FinancialYearId,
+			[KitchenId] = @KitchenId,
+			[TotalAmount] = @TotalAmount,
+			[Remarks] = @Remarks,
+			[Status] = @Status,
+			[LastModifiedBy] = @LastModifiedBy,
+			[LastModifiedAt] = @LastModifiedAt,
+			[LastModifiedFromPlatform] = @LastModifiedFromPlatform
 		WHERE Id = @Id;
 	END
 

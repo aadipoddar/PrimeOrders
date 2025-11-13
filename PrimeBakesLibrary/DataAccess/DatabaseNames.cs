@@ -58,15 +58,19 @@ public static class StoredProcedureNames
 
 	public static string LoadFinancialYearByDateTime => "Load_FinancialYear_By_DateTime";
 
+	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
+
 	public static string LoadRawMaterialByPartyPurchaseDateTime => "Load_RawMaterial_By_Party_PurchaseDateTime";
 	public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
 	public static string LoadPurchaseOverviewByDate => "Load_PurchaseOverview_By_Date";
+	public static string LoadPurchaseItemOverviewByDate => "Load_Purchase_Item_Overview_By_Date";
 	public static string LoadPurchaseReturnDetailByPurchaseReturn => "Load_PurchaseReturnDetail_By_PurchaseReturn";
 	public static string LoadPurchaseReturnOverviewByDate => "Load_PurchaseReturn_Overview_By_Date";
-	public static string LoadPurchaseItemOverviewByDate => "Load_Purchase_Item_Overview_By_Date";
 	public static string LoadPurchaseReturnItemOverviewByDate => "Load_PurchaseReturn_Item_Overview_By_Date";
 
-	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
+	public static string LoadKitchenIssueDetailByKitchenIssue => "Load_KitchenIssueDetail_By_KitchenIssue";
+	public static string LoadKitchenIssueOverviewByDate => "Load_KitchenIssueOverview_By_Date";
+	public static string LoadKitchenIssueItemOverviewByDate => "Load_KitchenIssue_Item_Overview_By_Date";
 
 	public static string LoadRawMaterialStockSummaryByDate => "Load_RawMaterialStockSummary_By_Date";
 	public static string LoadRawMaterialStockDetailsByDate => "Load_RawMaterialStockDetails_By_Date";
@@ -97,11 +101,6 @@ public static class StoredProcedureNames
 	public static string LoadSaleReturnOverviewBySaleReturnId => "Load_SaleReturnOverview_By_SaleReturnId";
 	public static string LoadSaleReturnByBillNo => "Load_SaleReturn_By_BillNo";
 
-	public static string LoadLastKitchenIssueByLocation => "Load_LastKitchenIssue_By_Location";
-	public static string LoadKitchenIssueDetailByKitchenIssue => "Load_KitchenIssueDetail_By_KitchenIssue";
-	public static string LoadKitchenIssueOverviewByKitchenIssueId => "Load_KitchenIssueOverview_By_KitchenIssueId";
-	public static string LoadKitchenIssueByTransactionNo => "Load_KitchenIssue_By_TransactionNo";
-
 	public static string LoadLastKitchenProductionByLocation => "Load_LastKitchenProduction_By_Location";
 	public static string LoadKitchenProductionDetailByKitchenProduction => "Load_KitchenProductionDetail_By_KitchenProduction";
 	public static string LoadKitchenProductionByTransactionNo => "Load_KitchenProduction_By_TransactionNo";
@@ -110,7 +109,6 @@ public static class StoredProcedureNames
 	public static string LoadSaleDetailsByDateLocationId => "Load_SaleDetails_By_Date_LocationId";
 	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";
 	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
-	public static string LoadKitchenIssueDetailsByDate => "Load_KitchenIssueDetails_By_Date";
 	public static string LoadKitchenProductionDetailsByDate => "Load_KitchenProductionDetails_By_Date";
 	public static string LoadSaleReturnDetailsByDateLocationId => "Load_SaleReturnDetails_By_Date_LocationId";
 
@@ -136,8 +134,6 @@ public static class StoredProcedureNames
 	public static string InsertCompany => "Insert_Company";
 	public static string InsertTax => "Insert_Tax";
 
-	public static string InsertKitchen => "Insert_Kitchen";
-
 	public static string InsertProductCategory => "Insert_ProductCategory";
 	public static string InsertProduct => "Insert_Product";
 	public static string InsertProductLocation => "Insert_ProductLocation";
@@ -153,6 +149,12 @@ public static class StoredProcedureNames
 	public static string InsertPurchaseReturn => "Insert_PurchaseReturn";
 	public static string InsertPurchaseReturnDetail => "Insert_PurchaseReturnDetail";
 
+	public static string InsertKitchen => "Insert_Kitchen";
+	public static string InsertKitchenIssue => "Insert_KitchenIssue";
+	public static string InsertKitchenIssueDetail => "Insert_KitchenIssueDetail";
+	public static string InsertKitchenProduction => "Insert_KitchenProduction";
+	public static string InsertKitchenProductionDetail => "Insert_KitchenProductionDetail";
+
 	public static string InsertProductStock => "Insert_ProductStock";
 	public static string InsertRawMaterialStock => "Insert_RawMaterialStock";
 
@@ -164,12 +166,6 @@ public static class StoredProcedureNames
 	public static string InsertSaleReturn => "Insert_SaleReturn";
 	public static string InsertSaleReturnDetail => "Insert_SaleReturnDetail";
 
-	public static string InsertKitchenIssue => "Insert_KitchenIssue";
-	public static string InsertKitchenIssueDetail => "Insert_KitchenIssueDetail";
-
-	public static string InsertKitchenProduction => "Insert_KitchenProduction";
-	public static string InsertKitchenProductionDetail => "Insert_KitchenProductionDetail";
-
 	public static string InsertLedger => "Insert_Ledger";
 	public static string InsertGroup => "Insert_Group";
 	public static string InsertAccountType => "Insert_AccountType";
@@ -180,7 +176,7 @@ public static class StoredProcedureNames
 	public static string InsertAccountingDetails => "Insert_AccountingDetails";
 
 	public static string DeleteProductStockById => "Delete_ProductStock_By_Id";
-	public static string DeleteProductStockByTypeTransactionId => "Delete_ProductStock_By_Type_TransactionId";
+	public static string DeleteProductStockByTypeTransactionIdLocationId => "Delete_ProductStock_By_Type_TransactionId_LocationId";
 	public static string DeleteRawMaterialStockById => "Delete_RawMaterialStock_By_Id";
 	public static string DeleteRawMaterialStockByTypeTransactionId => "Delete_RawMaterialStock_By_Type_TransactionId";
 }
@@ -192,6 +188,9 @@ public static class ViewNames
 	public static string PurchaseItemOverview => "Purchase_Item_Overview";
 	public static string PurchaseReturnItemOverview => "PurchaseReturn_Item_Overview";
 
+	public static string KitchenIssueOverview => "KitchenIssue_Overview";
+	public static string KitchenIssueItemOverview => "KitchenIssue_Item_Overview";
+
 	public static string RawMaterialStockDetails => "RawMaterialStockDetails";
 	public static string ProductStockDetails => "ProductStockDetails";
 
@@ -199,7 +198,6 @@ public static class ViewNames
 	public static string SaleReturnOverview => "SaleReturn_Overview";
 	public static string OrderOverview => "Order_Overview";
 	public static string ProductOverview => "Product_Overview";
-	public static string KitchenIssueOverview => "KitchenIssue_Overview";
 	public static string KitchenProductionOverview => "KitchenProduction_Overview";
 	public static string AccountingOverview => "Accounting_Overview";
 	public static string LedgerOverview => "Ledger_Overview";

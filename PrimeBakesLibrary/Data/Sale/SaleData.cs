@@ -43,9 +43,8 @@ public static class SaleData
 
 		sale.Status = true;
 		sale.CreatedAt = DateTime.Now;
-		sale.SaleDateTime = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateOnly.FromDateTime(sale.SaleDateTime)
-			.ToDateTime(new TimeOnly(sale.SaleDateTime.Hour, sale.SaleDateTime.Minute, sale.SaleDateTime.Second)),
-			"India Standard Time");
+		var currentDateTime = await CommonData.LoadCurrentDateTime();
+		sale.SaleDateTime = DateOnly.FromDateTime(sale.SaleDateTime).ToDateTime(new TimeOnly(currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second));
 
 		var user = await CommonData.LoadTableDataById<UserModel>(TableNames.User, sale.UserId);
 
@@ -112,8 +111,15 @@ public static class SaleData
 	{
 		if (update)
 		{
-			await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Sale.ToString(), sale.Id, sale.LocationId);
 			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+
+			if (sale.PartyId is not null || sale.PartyId > 0)
+			{
+				var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
+				if (party.LocationId.HasValue && party.LocationId.Value > 0)
+					await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Purchase.ToString(), sale.Id, party.LocationId.Value);
+			}	
 		}
 
 		foreach (var product in cart)
@@ -284,8 +290,15 @@ public static class SaleData
 	{
 		sale.Status = false;
 		await InsertSale(sale);
-		await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Sale.ToString(), sale.Id, sale.LocationId);
 		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+
+		if (sale.PartyId is not null || sale.PartyId > 0)
+		{
+			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
+			if (party.LocationId.HasValue && party.LocationId.Value > 0)
+				await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Purchase.ToString(), sale.Id, party.LocationId.Value);
+		}
 
 		if (sale.LocationId != 1)
 			return;

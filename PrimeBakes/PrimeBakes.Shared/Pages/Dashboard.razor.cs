@@ -200,6 +200,7 @@ public partial class Dashboard
 		}
 		catch (Exception)
 		{
+			await Logout();
 			_hasConnectionError = true;
 			_isLoadingText = "Unable to connect to the internet";
 		}

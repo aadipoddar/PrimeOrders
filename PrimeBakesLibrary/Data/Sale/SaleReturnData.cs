@@ -99,8 +99,15 @@ public static class SaleReturnData
 	{
 		if (update)
 		{
-			await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
+			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.SaleReturn.ToString(), saleReturn.Id, saleReturn.LocationId);
 			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
+
+			if (saleReturn.PartyId is not null || saleReturn.PartyId > 0)
+			{
+				var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, saleReturn.PartyId.Value);
+				if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
+					await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.SaleReturn.ToString(), saleReturn.Id, supplier.LocationId.Value);
+			}
 		}
 
 		LedgerModel party = null;
@@ -251,8 +258,15 @@ public static class SaleReturnData
 	{
 		saleReturn.Status = false;
 		await InsertSaleReturn(saleReturn);
-		await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
+		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.SaleReturn.ToString(), saleReturn.Id, saleReturn.LocationId);
 		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.SaleReturn.ToString(), saleReturn.Id);
+
+		if (saleReturn.PartyId is not null || saleReturn.PartyId > 0)
+		{
+			var supplier = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, saleReturn.PartyId.Value);
+			if (supplier.LocationId.HasValue && supplier.LocationId.Value > 0)
+				await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.SaleReturn.ToString(), saleReturn.Id, supplier.LocationId.Value);
+		}
 
 		if (saleReturn.LocationId != 1)
 			return;

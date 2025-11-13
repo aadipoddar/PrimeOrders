@@ -6,6 +6,7 @@ using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 namespace PrimeBakesLibrary.Data.Notification;
 
@@ -73,9 +74,9 @@ public static class SendNotification
 		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
 		users = [.. users.Where(u => u.Admin && u.LocationId == 1 || u.Inventory && u.LocationId == 1)];
 
-		var kitchenIssue = await KitchenIssueData.LoadKitchenIssueOverviewByKitchenIssueId(kitchenIssueId);
+		var kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueOverviewModel>(ViewNames.KitchenIssueOverview, kitchenIssueId);
 		var title = $"New Kitchen Issue Placed to {kitchenIssue.KitchenName}";
-		var text = $"Kitchen Issue No: {kitchenIssue.TransactionNo} | Total Items: {kitchenIssue.TotalProducts} | Total Qty: {kitchenIssue.TotalQuantity} | Kitchen: {kitchenIssue.KitchenName} | User: {kitchenIssue.UserName} | Date: {kitchenIssue.IssueDate:dd/MM/yy hh:mm tt} | Remarks: {kitchenIssue.Remarks}";
+		var text = $"Kitchen Issue No: {kitchenIssue.TransactionNo} | Total Items: {kitchenIssue.TotalItems} | Total Qty: {kitchenIssue.TotalQuantity} | Kitchen: {kitchenIssue.KitchenName} | User: {kitchenIssue.CreatedByName} | Date: {kitchenIssue.TransactionDateTime:dd/MM/yy hh:mm tt} | Remarks: {kitchenIssue.Remarks}";
 
 		await SendNotificationToAPI(users, title, text);
 	}

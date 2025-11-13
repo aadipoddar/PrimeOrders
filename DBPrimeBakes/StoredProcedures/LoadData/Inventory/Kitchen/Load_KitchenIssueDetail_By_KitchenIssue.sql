@@ -2,9 +2,8 @@
 	@KitchenIssueId INT
 AS
 BEGIN
-	SELECT
-	*
-	FROM [dbo].[KitchenIssueDetail] AS kid
-	WHERE kid.KitchenIssueId = @KitchenIssueId
-	AND kid.Status = 1
+	SELECT *
+	FROM [dbo].[KitchenIssueDetail]
+	WHERE [KitchenIssueId] = @KitchenIssueId
+	AND [Status] = 1
 END

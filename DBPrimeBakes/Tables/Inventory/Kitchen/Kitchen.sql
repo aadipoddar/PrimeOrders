@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[Kitchen]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [Name] VARCHAR(50) NOT NULL, 
+    [Name] VARCHAR(500) NOT NULL UNIQUE,
+    [Remarks] VARCHAR(MAX) NULL,
     [Status] BIT NOT NULL DEFAULT 1
 )

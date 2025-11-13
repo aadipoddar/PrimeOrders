@@ -147,7 +147,7 @@ public class PurchaseReturnItemOverviewModel
 	public string CompanyName { get; set; }
 	public int PartyId { get; set; }
 	public string PartyName { get; set; }
-	public string PurchaseReturnRemarks { get; set; }
+	public string? PurchaseReturnRemarks { get; set; }
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }
 	public decimal BaseTotal { get; set; }

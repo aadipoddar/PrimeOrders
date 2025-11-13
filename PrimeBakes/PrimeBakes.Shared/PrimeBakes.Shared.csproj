@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyVersion>1.0.5.5</AssemblyVersion>
@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.5" />
     <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.5" />
     <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.5" />

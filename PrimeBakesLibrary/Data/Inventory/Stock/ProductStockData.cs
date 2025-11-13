@@ -15,8 +15,8 @@ public static class ProductStockData
 	public static async Task<List<ProductStockDetailsModel>> LoadProductStockDetailsByDateLocationId(DateTime FromDate, DateTime ToDate, int LocationId) =>
 		await SqlDataAccess.LoadData<ProductStockDetailsModel, dynamic>(StoredProcedureNames.LoadProductStockDetailsByDateLocationId, new { FromDate = DateOnly.FromDateTime(FromDate), ToDate = DateOnly.FromDateTime(ToDate), LocationId });
 
-	public static async Task DeleteProductStockByTypeTransactionId(string Type, int TransactionId) =>
-		await SqlDataAccess.SaveData(StoredProcedureNames.DeleteProductStockByTypeTransactionId, new { Type, TransactionId });
+	public static async Task DeleteProductStockByTypeTransactionIdLocationId(string Type, int TransactionId, int LocationId) =>
+		await SqlDataAccess.SaveData(StoredProcedureNames.DeleteProductStockByTypeTransactionIdLocationId, new { Type, TransactionId, LocationId });
 
 	public static async Task DeleteProductStockById(int Id)
 	{

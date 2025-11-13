@@ -147,7 +147,7 @@ public partial class KitchenProductionViewPage
 
 		kitchenProduction.Status = false;
 		await KitchenProductionData.InsertKitchenProduction(kitchenProduction);
-		await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.KitchenProduction.ToString(), kitchenProduction.Id);
+		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.KitchenProduction.ToString(), kitchenProduction.Id, 1);
 
 		VibrationService.VibrateWithTime(500);
 		NavigationManager.NavigateTo("/Reports/Kitchen-Production");

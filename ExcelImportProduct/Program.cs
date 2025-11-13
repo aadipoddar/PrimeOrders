@@ -19,15 +19,16 @@ using PrimeBakesLibrary.Models.Inventory.Stock;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sale;
 
-//FileInfo fileInfo = new(@"C:\Others\purchase.xlsx");
+FileInfo fileInfo = new(@"C:\Others\issue.xlsx");
 
-//ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-//using var package = new ExcelPackage(fileInfo);
+using var package = new ExcelPackage(fileInfo);
 
-//await package.LoadAsync(fileInfo);
+await package.LoadAsync(fileInfo);
 
-//var worksheet1 = package.Workbook.Worksheets[0];
+var worksheet1 = package.Workbook.Worksheets[0];
+var worksheet2 = package.Workbook.Worksheets[1];
 
 // await InsertProducts(worksheet);
 
@@ -54,7 +55,10 @@ using PrimeBakesLibrary.Models.Sale;
 // await InsertPurchase(worksheet1, worksheet2);
 
 // await UpdateRMStockPurchaseIssue();
-await UpdateProductStockSaleAndReturn();
+
+//await UpdateProductStockSaleAndReturn();
+
+await InsertIssues(worksheet1, worksheet2);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -708,7 +712,7 @@ static async Task UpdateRMStockPurchaseIssue()
 				Type = StockType.KitchenIssue.ToString(),
 				TransactionId = issue.Id,
 				NetRate = null,
-				TransactionDate = DateOnly.FromDateTime(issue.IssueDate),
+				TransactionDate = DateOnly.FromDateTime(DateTime.Now),
 				TransactionNo = issue.TransactionNo,
 			});
 		}
@@ -802,6 +806,123 @@ static async Task UpdateProductStockSaleAndReturn()
 	}
 }
 
+static async Task InsertIssues(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+	var row = 1;
+
+	List<KitchenIssueOldModel> kitchenIssue = [];
+	List<KitchenIssueDetailOLdModel> kitchenIssueDetails = [];
+
+	while (worksheet1.Cells[row, 1].Value != null)
+	{
+		var id = worksheet1.Cells[row, 1].Value.ToString();
+		var kitchenId = worksheet1.Cells[row, 2].Value.ToString();
+		var locationId = worksheet1.Cells[row, 3].Value.ToString();
+		var userId = worksheet1.Cells[row, 4].Value.ToString();
+		var billNo = worksheet1.Cells[row, 5].Value.ToString();
+		var billDateTime = worksheet1.Cells[row, 6].Value.ToString();
+		var remarks = worksheet1.Cells[row, 7].Value?.ToString() ?? string.Empty;
+		var status = worksheet1.Cells[row, 9].Value.ToString();
+
+		kitchenIssue.Add(new()
+		{
+			Id = int.Parse(id),
+			IssueDate = DateTime.Parse(billDateTime),
+			TransactionNo = billNo,
+			KitchenId = int.Parse(kitchenId),
+			LocationId = int.Parse(locationId),
+			Remarks = remarks == "NULL" ? string.Empty : remarks,
+			UserId = int.Parse(userId),
+			CreatedAt = DateTime.Now,
+			Status = status.ToLower() == "true",
+		});
+
+		row++;
+	}
+
+	kitchenIssue.RemoveAll(_ => _.Status == false);
+
+	row = 1;
+	while (worksheet2.Cells[row, 1].Value != null)
+	{
+		var id = worksheet2.Cells[row, 1].Value.ToString();
+		var kitchenIssueId = worksheet2.Cells[row, 2].Value.ToString();
+		var rawMaterialId = worksheet2.Cells[row, 3].Value.ToString();
+		var measurementUnit = worksheet2.Cells[row, 4].Value.ToString();
+		var quantity = worksheet2.Cells[row, 5].Value.ToString();
+		var rate = worksheet2.Cells[row, 6].Value.ToString();
+		var total = worksheet2.Cells[row, 7].Value.ToString();
+		var status = worksheet2.Cells[row, 8].Value.ToString();
+
+		kitchenIssueDetails.Add(new()
+		{
+			Id = int.Parse(id),
+			KitchenIssueId = int.Parse(kitchenIssueId),
+			RawMaterialId = int.Parse(rawMaterialId),
+			Quantity = decimal.Parse(quantity),
+			MeasurementUnit = measurementUnit,
+			Rate = decimal.Parse(rate),
+			Total = decimal.Parse(total),
+			Status = status.ToLower() == "true",
+		});
+
+		row++;
+	}
+
+	kitchenIssueDetails.RemoveAll(_ => _.Status == false);
+
+	Console.WriteLine("Loaded " + kitchenIssue.Count + " kitchen issues.");
+	Console.WriteLine("Loaded " + kitchenIssueDetails.Count + " kitchen issue details.");
+
+	foreach (var issue in kitchenIssue)
+	{
+		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
+
+		var kitchenIssueDetail = kitchenIssueDetails.Where(pd => pd.KitchenIssueId == issue.Id).ToList();
+		if (kitchenIssueDetail.Count == 0)
+		{
+			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
+			continue;
+		}
+		List<KitchenIssueItemCartModel> issueCart = [];
+
+		foreach (var detail in kitchenIssueDetail)
+			issueCart.Add(new()
+			{
+				ItemId = detail.RawMaterialId,
+				ItemName = "",
+				UnitOfMeasurement = detail.MeasurementUnit,
+				Remarks = null,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+			});
+
+		foreach (var item in issueCart)
+			item.Total = item.Rate * item.Quantity;
+
+		KitchenIssueModel finalIssue = new()
+		{
+			Id = 0,
+			TransactionNo = issue.TransactionNo,
+			KitchenId = issue.KitchenId,
+			TransactionDateTime = issue.IssueDate,
+			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
+			CreatedBy = issue.UserId,
+			TotalAmount = issueCart.Sum(x => x.Total),
+			CompanyId = 1,
+			FinancialYearId = 1,
+			CreatedFromPlatform = "ImportScript",
+			CreatedAt = issue.CreatedAt,
+			Status = true,
+		};
+
+		await KitchenIssueData.SaveKitchenIssueTransaction(finalIssue, issueCart);
+		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+	}
+}
+
 class PurchaseModelOld
 {
 	public int Id { get; set; }
@@ -836,5 +957,30 @@ class PurchaseDetailModelOld
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
 	public decimal NetRate { get; set; }
+	public bool Status { get; set; }
+}
+
+class KitchenIssueOldModel
+{
+	public int Id { get; set; }
+	public int KitchenId { get; set; }
+	public int LocationId { get; set; }
+	public int UserId { get; set; }
+	public string TransactionNo { get; set; }
+	public DateTime IssueDate { get; set; }
+	public string Remarks { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public bool Status { get; set; }
+}
+
+class KitchenIssueDetailOLdModel
+{
+	public int Id { get; set; }
+	public int KitchenIssueId { get; set; }
+	public int RawMaterialId { get; set; }
+	public string MeasurementUnit { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal Total { get; set; }
 	public bool Status { get; set; }
 }

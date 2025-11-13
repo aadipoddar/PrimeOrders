@@ -59,10 +59,6 @@ public static class GenerateCodes
 					var saleReturn = await SaleReturnData.LoadSaleReturnByBillNo(code);
 					isDuplicate = saleReturn is not null;
 					break;
-				case CodeType.KitchenIssue:
-					var kitchenIssue = await KitchenIssueData.LoadKitchenIssueByTransactionNo(code);
-					isDuplicate = kitchenIssue is not null;
-					break;
 				case CodeType.KitchenProduction:
 					var kitchenProduction = await KitchenProductionData.LoadKitchenProductionByTransactionNo(code);
 					isDuplicate = kitchenProduction is not null;
@@ -103,6 +99,10 @@ public static class GenerateCodes
 				case CodeType.PurchaseReturn:
 					var purchaseReturn = await CommonData.LoadTableDataByTransactionNo<PurchaseReturnModel>(TableNames.PurchaseReturn, code);
 					isDuplicate = purchaseReturn is not null;
+					break;
+				case CodeType.KitchenIssue:
+					var kitchenIssue = await CommonData.LoadTableDataByTransactionNo<KitchenIssueModel>(TableNames.KitchenIssue, code);
+					isDuplicate = kitchenIssue is not null;
 					break;
 			}
 
@@ -188,6 +188,30 @@ public static class GenerateCodes
 		return $"{locationPrefix}{financialYear.YearNo}{adjustmentPrefix}{transactionDateTime:ddMMyy}{transactionDateTime:HHmmss}";
 	}
 
+	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
+	{
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenIssue.FinancialYearId);
+		var companyPrefix = (await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, 1)).PrefixCode;
+		var kitchenIssuePrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.KitchenIssueTransactionPrefix)).Value;
+
+		var lastKitchenIssue = await CommonData.LoadLastTableDataByCompanyFinancialYear<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssue.CompanyId, kitchenIssue.FinancialYearId);
+		if (lastKitchenIssue is not null)
+		{
+			var lastTransactionNo = lastKitchenIssue.TransactionNo;
+			if (lastTransactionNo.StartsWith($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}"))
+			{
+				var lastNumberPart = lastTransactionNo[(companyPrefix.Length + financialYear.YearNo.ToString().Length + kitchenIssuePrefix.Length)..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}{nextNumber:D6}", 6, CodeType.Purchase);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}000001", 6, CodeType.Purchase);
+	}
+
 	public static async Task<string> GenerateOrderBillNo(OrderModel order)
 	{
 		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId);
@@ -264,32 +288,6 @@ public static class GenerateCodes
 		}
 
 		return await CheckDuplicateCode($"{location.PrefixCode}{year}SR000001", CodeType.SaleReturn);
-	}
-
-	public static async Task<string> GenerateKitchenIssueTransactionNo(KitchenIssueModel kitchenIssue)
-	{
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenIssue.LocationId);
-		var year = $"{kitchenIssue.IssueDate:yy}";
-		if (kitchenIssue.IssueDate.Month <= 3)
-			year = $"{kitchenIssue.IssueDate.AddYears(-1):yy}";
-
-		var lastIssue = await KitchenIssueData.LoadLastKitchenIssueByLocation(kitchenIssue.LocationId);
-		if (lastIssue is not null)
-		{
-			var lastSaleNo = lastIssue.TransactionNo;
-			if (lastSaleNo.StartsWith(location.PrefixCode))
-			{
-				var lastYear = lastSaleNo.Substring(location.PrefixCode.Length, 2);
-				if (lastYear == year)
-				{
-					int lastNumber = int.Parse(lastSaleNo[(location.PrefixCode.Length + 4)..]);
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{location.PrefixCode}{year}RM{nextNumber:D6}", CodeType.KitchenIssue);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{location.PrefixCode}{year}RM000001", CodeType.KitchenIssue);
 	}
 
 	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)

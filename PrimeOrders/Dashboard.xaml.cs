@@ -4,7 +4,6 @@ using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 
-using PrimeOrders.Inventory;
 using PrimeOrders.Sale;
 
 namespace PrimeOrders;
@@ -40,11 +39,6 @@ public partial class Dashboard : Window
 			if (!isSale)
 				saleButton.Visibility = Visibility.Collapsed;
 
-			if (!isInventory)
-			{
-				kitchenIssueButton.Visibility = Visibility.Collapsed;
-			}
-
 			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, _user.LocationId);
 
 			userLabel.Text = $"Hello {_user.Name} to {location.Name}";
@@ -55,12 +49,6 @@ public partial class Dashboard : Window
 	{
 		SaleWindow saleWindow = new(_user);
 		saleWindow.Show();
-	}
-
-	private void kitchenIssueButton_Click(object sender, RoutedEventArgs e)
-	{
-		KitchenIssueWindow kitchenIssueWindow = new(_user);
-		kitchenIssueWindow.Show();
 	}
 
 	private void Window_Closed(object sender, EventArgs e) =>

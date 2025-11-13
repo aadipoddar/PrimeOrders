@@ -77,7 +77,7 @@ public static class KitchenProductionData
 	private static async Task SaveStock(KitchenProductionModel kitchenProduction, List<KitchenProductionProductCartModel> cart, bool update)
 	{
 		if (update)
-			await ProductStockData.DeleteProductStockByTypeTransactionId(StockType.KitchenProduction.ToString(), kitchenProduction.Id);
+			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.KitchenProduction.ToString(), kitchenProduction.Id, 1);
 
 		if (kitchenProduction.Status)
 			foreach (var item in cart)
