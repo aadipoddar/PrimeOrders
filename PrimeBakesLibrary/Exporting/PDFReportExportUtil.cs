@@ -336,7 +336,7 @@ public static class PDFReportExportUtil
 
 		// Enable features
 		pdfGrid.RepeatHeader = true; // Repeat headers on each page
-		pdfGrid.AllowRowBreakAcrossPages = false; // Keep rows together
+		pdfGrid.AllowRowBreakAcrossPages = true; // Allow pagination for large datasets
 
 		// Calculate available width and set fixed column widths to prevent overflow
 		float pageWidth = page.GetClientSize().Width;
@@ -522,23 +522,16 @@ public static class PDFReportExportUtil
 		}
 
 		// Draw grid with improved layout
-		float footerHeight = 50; // Height of the footer template
+		float footerHeight = 30; // Height of the footer template
 		float pageHeight = page.GetClientSize().Height;
-		RectangleF paginateBounds = new(
-			15, // left margin
-			0, // top
-			pageWidth - 30, // width
-			pageHeight - footerHeight // height, leaving space for footer
-		);
 
 		PdfGridLayoutFormat layoutFormat = new()
 		{
 			Layout = PdfLayoutType.Paginate,
-			Break = PdfLayoutBreakType.FitPage,
-			PaginateBounds = paginateBounds
+			Break = PdfLayoutBreakType.FitPage
 		};
 
-		PdfGridLayoutResult result = pdfGrid.Draw(page, new PointF(15, startY), layoutFormat);
+		PdfGridLayoutResult result = pdfGrid.Draw(page, new RectangleF(15, startY, pageWidth - 30, pageHeight - startY - footerHeight), layoutFormat);
 
 		return result.Bounds.Bottom + 10;
 	}
@@ -551,20 +544,20 @@ public static class PDFReportExportUtil
 		try
 		{
 			// Create footer template
-			PdfPageTemplateElement footer = new(new RectangleF(0, 0, document.Pages[0].GetClientSize().Width, 50));
+			PdfPageTemplateElement footer = new(new RectangleF(0, 0, document.Pages[0].GetClientSize().Width, 25));
 
 			PdfStandardFont footerFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Italic);
 			PdfBrush footerBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
 
 			// Left: AadiSoft branding
 			string branding = $"© {DateTime.Now.Year} A Product By aadisoft.vercel.app";
-			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 10));
+			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 5));
 
 			// Center: Export date
 			string exportDate = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
 			SizeF exportDateSize = footerFont.MeasureString(exportDate);
 			float centerX = (document.Pages[0].GetClientSize().Width - exportDateSize.Width) / 2;
-			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 10));
+			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 5));
 
 			// Right: Page numbers
 			PdfPageNumberField pageNumber = new();
@@ -579,7 +572,7 @@ public static class PDFReportExportUtil
 			string pageText = "Page 999 of 999"; // Max width for alignment
 			SizeF pageInfoSize = footerFont.MeasureString(pageText);
 			float rightX = document.Pages[0].GetClientSize().Width - pageInfoSize.Width - 15;
-			pageInfo.Draw(footer.Graphics, new PointF(rightX, 10));
+			pageInfo.Draw(footer.Graphics, new PointF(rightX, 5));
 
 			// Add footer to document
 			document.Template.Bottom = footer;

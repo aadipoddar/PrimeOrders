@@ -1,6 +1,9 @@
-﻿using PrimeBakesLibrary.Models.Accounts.Masters;
+﻿using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Purchase;
+
+using NumericWordsConversion;
 
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
@@ -32,6 +35,30 @@ public static class PDFInvoiceExportUtil
 		public decimal TotalAmount { get; set; }
 		public string Remarks { get; set; }
 		public bool Status { get; set; } = true; // True = Active, False = Deleted
+	}
+
+	/// <summary>
+	/// Column configuration for invoice line items table
+	/// </summary>
+	public class InvoiceColumnSetting
+	{
+		public string PropertyName { get; set; }
+		public string DisplayName { get; set; }
+		public float Width { get; set; }
+		public PdfTextAlignment Alignment { get; set; } = PdfTextAlignment.Right;
+		public string Format { get; set; }
+		public bool ShowOnlyIfHasValue { get; set; } = false;
+
+		public InvoiceColumnSetting(string propertyName, string displayName, float width,
+			PdfTextAlignment alignment = PdfTextAlignment.Right, string format = null, bool showOnlyIfHasValue = false)
+		{
+			PropertyName = propertyName;
+			DisplayName = displayName;
+			Width = width;
+			Alignment = alignment;
+			Format = format;
+			ShowOnlyIfHasValue = showOnlyIfHasValue;
+		}
 	}
 
 	/// <summary>
@@ -105,16 +132,21 @@ public static class PDFInvoiceExportUtil
 			currentY = DrawCompanyAndCustomerInfo(graphics, company, customer, invoiceData, leftMargin, pageWidth, currentY);
 
 			// 4. Line Items Table
-			currentY = DrawLineItemsTable(page, pdfDocument, lineItems, leftMargin, rightMargin, pageWidth, currentY);
+			PdfGridLayoutResult gridResult = DrawLineItemsTableWithResult(page, pdfDocument, lineItems, leftMargin, rightMargin, pageWidth, currentY);
 
-			// 5. Summary Section with Remarks (two-column layout)
-			currentY = DrawSummaryAndRemarks(graphics, invoiceData, leftMargin, pageWidth, currentY);
+			// Get the last page where the grid ended
+			PdfPage lastPage = gridResult.Page;
+			PdfGraphics lastPageGraphics = lastPage.Graphics;
+			currentY = gridResult.Bounds.Bottom + 8;
 
-			// 6. Amount in Words
-			currentY = DrawAmountInWords(graphics, invoiceData.TotalAmount, leftMargin, pageWidth, currentY);
+			// 5. Summary Section with Remarks (two-column layout on the last page)
+			currentY = DrawSummaryAndRemarks(lastPageGraphics, invoiceData, leftMargin, pageWidth, currentY);
 
-			// 7. Software Branding Footer
-			DrawSoftwareBrandingFooter(graphics, leftMargin, pageWidth, page.GetClientSize().Height);
+			// 6. Amount in Words (on the last page)
+			currentY = DrawAmountInWords(lastPageGraphics, invoiceData.TotalAmount, leftMargin, pageWidth, currentY);
+
+			// 7. Software Branding Footer (on all pages)
+			AddBrandingFooter(pdfDocument);
 
 			// Save PDF document to stream
 			pdfDocument.Save(ms);
@@ -368,37 +400,40 @@ public static class PDFInvoiceExportUtil
 	/// <summary>
 	/// Draw line items table
 	/// </summary>
-	private static float DrawLineItemsTable(PdfPage page, PdfDocument document, List<InvoiceLineItem> lineItems,
+	private static PdfGridLayoutResult DrawLineItemsTableWithResult(PdfPage page, PdfDocument document, List<InvoiceLineItem> lineItems,
 		float leftMargin, float rightMargin, float pageWidth, float startY)
 	{
 		PdfGrid pdfGrid = new();
 
-		// Define columns (removed HSN/SAC)
-		string[] columns = ["#", "Item Description", "Qty", "UOM", "Rate", "Disc %", "Taxable", "Tax %", "Tax Amt", "Total"];
-		pdfGrid.Columns.Add(columns.Length);
+		// Check if any item has discount or tax
+		bool hasDiscount = lineItems.Any(i => i.DiscountPercent > 0);
+		bool hasTax = lineItems.Any(i => i.CGSTPercent > 0 || i.SGSTPercent > 0 || i.IGSTPercent > 0 || i.TotalTaxAmount > 0);
 
-		// Set column widths - optimized to fit within page
+		// Define column settings
+		var columnSettings = GetInvoiceColumnSettings(hasDiscount, hasTax);
+
+		// Calculate available width and adjust description column
 		float availableWidth = pageWidth - leftMargin - rightMargin;
-		pdfGrid.Columns[0].Width = 18;  // #
-		pdfGrid.Columns[1].Width = availableWidth * 0.28f;  // Item Description
-		pdfGrid.Columns[2].Width = 32;  // Qty
-		pdfGrid.Columns[3].Width = 32;  // UOM
-		pdfGrid.Columns[4].Width = 45;  // Rate
-		pdfGrid.Columns[5].Width = 35;  // Disc %
-		pdfGrid.Columns[6].Width = 50;  // Taxable
-		pdfGrid.Columns[7].Width = 35;  // Tax %
-		pdfGrid.Columns[8].Width = 45;  // Tax Amt
-		pdfGrid.Columns[9].Width = 55;  // Total
+		float fixedWidths = columnSettings.Where(c => c.PropertyName != "ItemName").Sum(c => c.Width);
+		var descColumn = columnSettings.First(c => c.PropertyName == "ItemName");
+		descColumn.Width = availableWidth - fixedWidths;
+
+		// Add columns to grid
+		pdfGrid.Columns.Add(columnSettings.Count);
+		for (int i = 0; i < columnSettings.Count; i++)
+		{
+			pdfGrid.Columns[i].Width = columnSettings[i].Width;
+		}
 
 		pdfGrid.Style.AllowHorizontalOverflow = false;
 		pdfGrid.RepeatHeader = true;
-		pdfGrid.AllowRowBreakAcrossPages = false;
+		pdfGrid.AllowRowBreakAcrossPages = true;
 
 		// Add header row
 		PdfGridRow headerRow = pdfGrid.Headers.Add(1)[0];
-		for (int i = 0; i < columns.Length; i++)
+		for (int i = 0; i < columnSettings.Count; i++)
 		{
-			headerRow.Cells[i].Value = columns[i];
+			headerRow.Cells[i].Value = columnSettings[i].DisplayName;
 			headerRow.Cells[i].Style.BackgroundBrush = new PdfSolidBrush(new PdfColor(59, 130, 246));
 			headerRow.Cells[i].Style.TextBrush = PdfBrushes.White;
 			headerRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6.5f, PdfFontStyle.Bold);
@@ -417,58 +452,29 @@ public static class PDFInvoiceExportUtil
 		{
 			PdfGridRow row = pdfGrid.Rows.Add();
 
-			row.Cells[0].Value = rowNumber.ToString();
-			row.Cells[1].Value = item.ItemName;
-			row.Cells[2].Value = item.Quantity.ToString("#,##0.00");
-			row.Cells[3].Value = item.UnitOfMeasurement;
-			row.Cells[4].Value = item.Rate.ToString("#,##0.00");
-			row.Cells[5].Value = item.DiscountPercent > 0 ? item.DiscountPercent.ToString("#,##0.00") : "-";
-			row.Cells[6].Value = item.AfterDiscount.ToString("#,##0.00");
-			row.Cells[7].Value = item.CGSTPercent + item.SGSTPercent + item.IGSTPercent > 0 ? (item.CGSTPercent + item.SGSTPercent + item.IGSTPercent).ToString("#,##0.00") : "-";
-			row.Cells[8].Value = item.TotalTaxAmount > 0 ? item.TotalTaxAmount.ToString("#,##0.00") : "-";
-			row.Cells[9].Value = item.Total.ToString("#,##0.00");
-
-			// Cell styling
-			for (int i = 0; i < columns.Length; i++)
+			// Populate cells based on column settings
+			for (int i = 0; i < columnSettings.Count; i++)
 			{
+				var column = columnSettings[i];
+				string cellValue = GetCellValue(item, column, rowNumber);
+				row.Cells[i].Value = cellValue;
+
+				// Apply styling
 				row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6.5f);
 				row.Cells[i].Style.Borders.All = new PdfPen(new PdfColor(220, 220, 220), 0.5f);
 				row.Cells[i].Style.CellPadding = new PdfPaddings(1.5f, 1.5f, 1.5f, 1.5f);
-
-				// Right align numeric columns
-				if (i >= 2 && i <= 9)
+				row.Cells[i].Style.StringFormat = new PdfStringFormat
 				{
-					row.Cells[i].Style.StringFormat = new PdfStringFormat
-					{
-						Alignment = PdfTextAlignment.Right,
-						LineAlignment = PdfVerticalAlignment.Middle,
-						WordWrap = PdfWordWrapType.Word
-					};
-				}
-				else if (i == 1) // Description - left align
-				{
-					row.Cells[i].Style.StringFormat = new PdfStringFormat
-					{
-						Alignment = PdfTextAlignment.Left,
-						LineAlignment = PdfVerticalAlignment.Middle,
-						WordWrap = PdfWordWrapType.Word
-					};
-				}
-				else // Center align for #
-				{
-					row.Cells[i].Style.StringFormat = new PdfStringFormat
-					{
-						Alignment = PdfTextAlignment.Center,
-						LineAlignment = PdfVerticalAlignment.Middle,
-						WordWrap = PdfWordWrapType.Word
-					};
-				}
+					Alignment = column.Alignment,
+					LineAlignment = PdfVerticalAlignment.Middle,
+					WordWrap = PdfWordWrapType.Word
+				};
 			}
 
 			// Alternating row colors
 			if (rowNumber % 2 == 0)
 			{
-				for (int i = 0; i < columns.Length; i++)
+				for (int i = 0; i < columnSettings.Count; i++)
 				{
 					row.Cells[i].Style.BackgroundBrush = new PdfSolidBrush(new PdfColor(249, 250, 251));
 				}
@@ -477,17 +483,74 @@ public static class PDFInvoiceExportUtil
 			rowNumber++;
 		}
 
-		// Draw grid
+		// Draw grid with improved pagination layout
+		float footerHeight = 35; // Height reserved for footer (reduced to minimize wasted space)
+		float pageHeight = page.GetClientSize().Height;
+
 		PdfGridLayoutFormat layoutFormat = new()
 		{
 			Layout = PdfLayoutType.Paginate,
-			Break = PdfLayoutBreakType.FitPage,
-			PaginateBounds = new RectangleF(leftMargin, startY, pageWidth - leftMargin - rightMargin,
-				page.GetClientSize().Height - startY - 150)
+			Break = PdfLayoutBreakType.FitPage
 		};
 
-		PdfGridLayoutResult result = pdfGrid.Draw(page, new PointF(leftMargin, startY), layoutFormat);
-		return result.Bounds.Bottom + 8;
+		PdfGridLayoutResult result = pdfGrid.Draw(page, new RectangleF(leftMargin, startY, pageWidth - leftMargin - rightMargin, pageHeight - startY - footerHeight), layoutFormat);
+
+		// Return the layout result so caller can get the last page
+		return result;
+	}
+
+	/// <summary>
+	/// Get invoice column settings based on whether items have discount/tax
+	/// </summary>
+	private static List<InvoiceColumnSetting> GetInvoiceColumnSettings(bool hasDiscount, bool hasTax)
+	{
+		var settings = new List<InvoiceColumnSetting>
+		{
+			new("RowNumber", "#", 25, PdfTextAlignment.Center),
+			new("ItemName", "Item Description", 0, PdfTextAlignment.Left), // Width calculated dynamically
+			new("Quantity", "Qty", 40, PdfTextAlignment.Right, "#,##0.00"),
+			new("UnitOfMeasurement", "UOM", 40, PdfTextAlignment.Center),
+			new("Rate", "Rate", 55, PdfTextAlignment.Right, "#,##0.00")
+		};
+
+		if (hasDiscount)
+			settings.Add(new("DiscountPercent", "Disc %", 45, PdfTextAlignment.Right, "#,##0.00", true));
+
+		if (hasTax)
+		{
+			settings.Add(new("AfterDiscount", "Taxable", 60, PdfTextAlignment.Right, "#,##0.00"));
+			settings.Add(new("TotalTaxPercent", "Tax %", 45, PdfTextAlignment.Right, "#,##0.00", true));
+			settings.Add(new("TotalTaxAmount", "Tax Amt", 55, PdfTextAlignment.Right, "#,##0.00", true));
+		}
+
+		settings.Add(new("Total", "Total", 65, PdfTextAlignment.Right, "#,##0.00"));
+
+		return settings;
+	}
+
+	/// <summary>
+	/// Get cell value based on column property name
+	/// </summary>
+	private static string GetCellValue(InvoiceLineItem item, InvoiceColumnSetting column, int rowNumber)
+	{
+		string value = column.PropertyName switch
+		{
+			"RowNumber" => rowNumber.ToString(),
+			"ItemName" => item.ItemName,
+			"Quantity" => item.Quantity.ToString(column.Format ?? "#,##0.00"),
+			"UnitOfMeasurement" => item.UnitOfMeasurement,
+			"Rate" => item.Rate.ToString(column.Format ?? "#,##0.00"),
+			"DiscountPercent" => item.DiscountPercent > 0 ? item.DiscountPercent.ToString(column.Format ?? "#,##0.00") : "-",
+			"AfterDiscount" => item.AfterDiscount.ToString(column.Format ?? "#,##0.00"),
+			"TotalTaxPercent" => (item.CGSTPercent + item.SGSTPercent + item.IGSTPercent) > 0
+				? (item.CGSTPercent + item.SGSTPercent + item.IGSTPercent).ToString(column.Format ?? "#,##0.00")
+				: "-",
+			"TotalTaxAmount" => item.TotalTaxAmount > 0 ? item.TotalTaxAmount.ToString(column.Format ?? "#,##0.00") : "-",
+			"Total" => item.Total.ToString(column.Format ?? "#,##0.00"),
+			_ => ""
+		};
+
+		return value;
 	}
 
 	/// <summary>
@@ -553,7 +616,7 @@ public static class PDFInvoiceExportUtil
 		// ===== RIGHT SIDE: SUMMARY =====
 		// Subtotal
 		graphics.DrawString("Subtotal:", labelFont, labelBrush, new PointF(summaryColumnX, summaryStartY));
-		string subtotalText = $"{invoiceData.ItemsTotalAmount:N2}";
+		string subtotalText = invoiceData.ItemsTotalAmount.FormatIndianCurrency();
 		SizeF subtotalSize = valueFont.MeasureString(subtotalText);
 		graphics.DrawString(subtotalText, valueFont, valueBrush, new PointF(pageWidth - rightMargin - subtotalSize.Width, summaryStartY));
 		summaryStartY += 10;
@@ -565,7 +628,7 @@ public static class PDFInvoiceExportUtil
 				? $"Other Charges ({invoiceData.OtherChargesPercent:N2}%):"
 				: "Other Charges:";
 			graphics.DrawString(otherChargesLabel, labelFont, labelBrush, new PointF(summaryColumnX, summaryStartY));
-			string otherChargesText = $"{invoiceData.OtherChargesAmount:N2}";
+			string otherChargesText = invoiceData.OtherChargesAmount.FormatIndianCurrency();
 			SizeF otherChargesSize = valueFont.MeasureString(otherChargesText);
 			graphics.DrawString(otherChargesText, valueFont, valueBrush, new PointF(pageWidth - rightMargin - otherChargesSize.Width, summaryStartY));
 			summaryStartY += 10;
@@ -578,7 +641,7 @@ public static class PDFInvoiceExportUtil
 				? $"Cash Discount ({invoiceData.CashDiscountPercent:N2}%):"
 				: "Cash Discount:";
 			graphics.DrawString(cashDiscountLabel, labelFont, labelBrush, new PointF(summaryColumnX, summaryStartY));
-			string cashDiscountText = $"- {invoiceData.CashDiscountAmount:N2}";
+			string cashDiscountText = $"- {invoiceData.CashDiscountAmount.FormatIndianCurrency()}";
 			SizeF cashDiscountSize = valueFont.MeasureString(cashDiscountText);
 			graphics.DrawString(cashDiscountText, valueFont, valueBrush, new PointF(pageWidth - rightMargin - cashDiscountSize.Width, summaryStartY));
 			summaryStartY += 10;
@@ -588,7 +651,7 @@ public static class PDFInvoiceExportUtil
 		if (invoiceData.RoundOffAmount != 0)
 		{
 			graphics.DrawString("Round Off:", labelFont, labelBrush, new PointF(summaryColumnX, summaryStartY));
-			string roundOffText = $"{(invoiceData.RoundOffAmount >= 0 ? "+" : "")} {invoiceData.RoundOffAmount:N2}";
+			string roundOffText = $"{(invoiceData.RoundOffAmount >= 0 ? "+" : "")} {invoiceData.RoundOffAmount.FormatIndianCurrency()}";
 			SizeF roundOffSize = valueFont.MeasureString(roundOffText);
 			graphics.DrawString(roundOffText, valueFont, valueBrush, new PointF(pageWidth - rightMargin - roundOffSize.Width, summaryStartY));
 			summaryStartY += 10;
@@ -602,7 +665,7 @@ public static class PDFInvoiceExportUtil
 		// Total Amount
 		PdfBrush totalBrush = new PdfSolidBrush(new PdfColor(59, 130, 246));
 		graphics.DrawString("TOTAL:", totalFont, totalBrush, new PointF(summaryColumnX, summaryStartY));
-		string totalText = $"{invoiceData.TotalAmount:N2}";
+		string totalText = invoiceData.TotalAmount.FormatIndianCurrency();
 		SizeF totalSize = totalFont.MeasureString(totalText);
 		graphics.DrawString(totalText, totalFont, totalBrush, new PointF(pageWidth - rightMargin - totalSize.Width, summaryStartY));
 		summaryStartY += 15;
@@ -636,92 +699,50 @@ public static class PDFInvoiceExportUtil
 	}
 
 	/// <summary>
-	/// Draw remarks section
+	/// Add branding footer to all pages
 	/// </summary>
-	/// <summary>
-	/// Draw software branding footer
-	/// </summary>
-	private static void DrawSoftwareBrandingFooter(PdfGraphics graphics, float leftMargin, float pageWidth, float pageHeight)
+	private static void AddBrandingFooter(PdfDocument document)
 	{
-		float footerY = pageHeight - 20;
+		try
+		{
+			// Create footer template
+			PdfPageTemplateElement footer = new(new RectangleF(0, 0, document.Pages[0].GetClientSize().Width, 25));
 
-		PdfStandardFont footerFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Regular);
-		PdfBrush footerBrush = new PdfSolidBrush(new PdfColor(100, 100, 100));
+			PdfStandardFont footerFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Italic);
+			PdfBrush footerBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
 
-		// Draw separator line
-		PdfPen separatorPen = new(new PdfColor(200, 200, 200), 0.5f);
-		graphics.DrawLine(separatorPen, new PointF(leftMargin, footerY - 5), new PointF(pageWidth - 20, footerY - 5));
+			// Left: AadiSoft branding
+			string branding = $"© {DateTime.Now.Year} A Product By aadisoft.vercel.app";
+			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 5));
 
-		// Draw branding text centered
-		string brandingText = "Generated from Prime Bakes - A Product of aadisoft.vercel.app";
-		SizeF textSize = footerFont.MeasureString(brandingText);
-		float textX = (pageWidth - textSize.Width) / 2;
+			// Center: Export date
+			string exportDate = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
+			SizeF exportDateSize = footerFont.MeasureString(exportDate);
+			float centerX = (document.Pages[0].GetClientSize().Width - exportDateSize.Width) / 2;
+			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 5));
 
-		graphics.DrawString(brandingText, footerFont, footerBrush, new PointF(textX, footerY));
-	}
+			// Right: Page numbers
+			PdfPageNumberField pageNumber = new();
+			PdfPageCountField pageCount = new();
+			PdfCompositeField pageInfo = new(
+				footerFont,
+				footerBrush,
+				"Page {0} of {1}",
+				pageNumber,
+				pageCount);
 
-	/// <summary>
-	/// Draw terms and conditions
-	/// </summary>
-	private static float DrawTermsAndConditions(PdfGraphics graphics, string termsAndConditions, float leftMargin, float pageWidth, float startY)
-	{
-		if (string.IsNullOrEmpty(termsAndConditions))
-			return startY;
+			string pageText = "Page 999 of 999"; // Max width for alignment
+			SizeF pageInfoSize = footerFont.MeasureString(pageText);
+			float rightX = document.Pages[0].GetClientSize().Width - pageInfoSize.Width - 15;
+			pageInfo.Draw(footer.Graphics, new PointF(rightX, 5));
 
-		float currentY = startY;
-
-		PdfStandardFont labelFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
-		PdfStandardFont valueFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Regular);
-		PdfBrush labelBrush = new PdfSolidBrush(new PdfColor(0, 0, 0));
-
-		graphics.DrawString("Terms & Conditions:", labelFont, labelBrush, new PointF(leftMargin, currentY));
-		currentY += 10;
-
-		DrawWrappedText(graphics, termsAndConditions, valueFont, labelBrush,
-			new RectangleF(leftMargin, currentY, pageWidth - 40, 40));
-
-		// Calculate approximate height based on text length (more compact)
-		int lineCount = Math.Max(1, termsAndConditions.Length / 100);
-		currentY += Math.Min(lineCount * 10, 35);
-
-		return currentY;
-	}
-
-	/// <summary>
-	/// Draw invoice footer with bank details and signature
-	/// </summary>
-	private static void DrawInvoiceFooter(PdfGraphics graphics, CompanyModel company, PurchaseModel purchaseHeader,
-		float leftMargin, float pageWidth, float pageHeight)
-	{
-		float footerY = pageHeight - 80;
-
-		PdfStandardFont labelFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Bold);
-		PdfStandardFont valueFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Regular);
-		PdfBrush labelBrush = new PdfSolidBrush(new PdfColor(0, 0, 0));
-
-		// Authorized Signature (Right side)
-		float signatureX = pageWidth - 150;
-		float signatureY = pageHeight - 80;
-
-		graphics.DrawString("For " + company.Name, valueFont, labelBrush, new PointF(signatureX, signatureY));
-		signatureY += 30;
-
-		// Signature line
-		PdfPen signaturePen = new(new PdfColor(0, 0, 0), 0.5f);
-		graphics.DrawLine(signaturePen, new PointF(signatureX, signatureY), new PointF(pageWidth - 20, signatureY));
-		signatureY += 5;
-
-		graphics.DrawString("Authorized Signatory", valueFont, labelBrush, new PointF(signatureX, signatureY));
-
-		// Bottom footer
-		float bottomY = pageHeight - 15;
-		PdfStandardFont footerFont = new(PdfFontFamily.Helvetica, 6, PdfFontStyle.Italic);
-		PdfBrush footerBrush = new PdfSolidBrush(new PdfColor(120, 120, 120));
-
-		string footerText = $"This is a computer-generated invoice | Generated on {DateTime.Now:dd-MMM-yyyy HH:mm}";
-		SizeF footerSize = footerFont.MeasureString(footerText);
-		graphics.DrawString(footerText, footerFont, footerBrush,
-			new PointF((pageWidth - footerSize.Width) / 2, bottomY));
+			// Add footer to document
+			document.Template.Bottom = footer;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error adding branding footer: {ex.Message}");
+		}
 	}
 
 	/// <summary>
@@ -749,93 +770,23 @@ public static class PDFInvoiceExportUtil
 	{
 		try
 		{
-			if (amount == 0)
-				return "Zero Rupees Only";
-
-			string[] ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-			string[] teens = ["Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-			string[] tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-
-			long rupees = (long)amount;
-			int paise = (int)((amount - rupees) * 100);
-
-			string words = "";
-
-			if (rupees >= 10000000) // Crores
+			// Use NumericWordsConversion package for Indian currency
+			var converter = new CurrencyWordsConverter(new CurrencyWordsConversionOptions
 			{
-				words += ConvertNumberToWords(rupees / 10000000, ones, teens, tens) + " Crore ";
-				rupees %= 10000000;
-			}
+				Culture = Culture.Hindi,
+				CurrencyUnit = "Rupee",
+				SubCurrencyUnit = "Paise",
+				EndOfWordsMarker = "Only"
+			});
 
-			if (rupees >= 100000) // Lakhs
-			{
-				words += ConvertNumberToWords(rupees / 100000, ones, teens, tens) + " Lakh ";
-				rupees %= 100000;
-			}
-
-			if (rupees >= 1000) // Thousands
-			{
-				words += ConvertNumberToWords(rupees / 1000, ones, teens, tens) + " Thousand ";
-				rupees %= 1000;
-			}
-
-			if (rupees >= 100) // Hundreds
-			{
-				words += ConvertNumberToWords(rupees / 100, ones, teens, tens) + " Hundred ";
-				rupees %= 100;
-			}
-
-			if (rupees > 0)
-			{
-				if (rupees < 10)
-					words += ones[rupees];
-				else if (rupees < 20)
-					words += teens[rupees - 10];
-				else
-				{
-					words += tens[rupees / 10];
-					if (rupees % 10 > 0)
-						words += " " + ones[rupees % 10];
-				}
-			}
-
-			words = words.Trim() + " Rupees";
-
-			if (paise > 0)
-			{
-				words += " and " + ConvertNumberToWords(paise, ones, teens, tens) + " Paise";
-			}
-
-			words += " Only";
-
+			string words = converter.ToWords(amount);
 			return words;
 		}
-		catch
+		catch (Exception ex)
 		{
+			Console.WriteLine($"Error converting amount to words: {ex.Message}");
 			return "Amount in Words Not Available";
 		}
-	}
-
-	private static string ConvertNumberToWords(long number, string[] ones, string[] teens, string[] tens)
-	{
-		if (number == 0)
-			return "";
-
-		if (number < 10)
-			return ones[number];
-
-		if (number < 20)
-			return teens[number - 10];
-
-		if (number < 100)
-		{
-			string result = tens[number / 10];
-			if (number % 10 > 0)
-				result += " " + ones[number % 10];
-			return result;
-		}
-
-		return "";
 	}
 
 	#endregion
