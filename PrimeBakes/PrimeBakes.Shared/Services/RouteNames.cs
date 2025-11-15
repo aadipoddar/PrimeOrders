@@ -15,8 +15,12 @@ internal static class PageRouteNames
 
 	public static string ReportPurchase => "/report/purchase";
 	public static string ReportPurchaseReturn => "/report/purchase-return";
+	public static string ReportPurchaseItem => "/report/purchase-item";
+	public static string ReportPurchaseReturnItem => "/report/purchase-return-item";
 	public static string ReportKitchenIssue => "/report/kitchen-issue";
 	public static string ReportKitchenProduction => "/report/kitchen-production";
+	public static string ReportKitchenIssueItem => "/report/kitchen-issue-item";
+	public static string ReportKitchenProductionItem => "/report/kitchen-production-item";
 	public static string ReportRawMaterialStock => "/report/raw-material-stock";
 	public static string ReportProductStock => "/report/product-stock";
 

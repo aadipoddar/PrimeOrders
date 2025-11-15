@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_RecipeDetail]
-	@Id INT,
+	@Id INT OUTPUT,
 	@RecipeId INT,
 	@RawMaterialId INT,
-	@Quantity DECIMAL(7, 3),
+	@Quantity MONEY,
 	@Status BIT
 AS
 BEGIN
@@ -10,6 +10,8 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[RecipeDetail] ([RecipeId], [RawMaterialId], [Quantity], [Status])
 		VALUES (@RecipeId, @RawMaterialId, @Quantity, @Status);
+
+		SET @Id = SCOPE_IDENTITY();
 	END
 	ELSE
 	BEGIN
@@ -20,4 +22,6 @@ BEGIN
 			[Status] = @Status
 		WHERE [Id] = @Id;
 	END
+
+	SELECT @Id AS Id;
 END

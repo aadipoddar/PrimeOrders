@@ -16,7 +16,7 @@ public class RecipeDetailModel
 	public bool Status { get; set; }
 }
 
-public class ItemRecipeModel
+public class RecipeItemCartModel
 {
 	public int ItemId { get; set; }
 	public string ItemName { get; set; }

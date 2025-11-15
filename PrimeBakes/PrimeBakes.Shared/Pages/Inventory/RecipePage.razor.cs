@@ -1,4 +1,3 @@
-
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Common;
@@ -18,6 +17,7 @@ namespace PrimeBakes.Shared.Pages.Inventory;
 public partial class RecipePage
 {
 	private bool _isLoading = true;
+	private bool _isProcessing = false;
 
 	private decimal _selectedRawMaterialQuantity;
 
@@ -27,36 +27,43 @@ public partial class RecipePage
 
 	private List<ProductLocationOverviewModel> _products = [];
 	private List<RawMaterialModel> _rawMaterials = [];
-	private readonly List<ItemRecipeModel> _recipeItems = [];
+	private readonly List<RecipeItemCartModel> _recipeItems = [];
 
-	private SfGrid<ItemRecipeModel> _sfGrid;
-	private SfToast _sfToast;
-	private SfToast _sfErrorToast;
-	private SfToast _sfUpdateToast;
+	private SfAutoComplete<RawMaterialModel?, RawMaterialModel> _sfItemAutoComplete;
+	private SfGrid<RecipeItemCartModel> _sfCartGrid;
 
-	private string _successMessage = string.Empty;
+	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
-	private string _infoMessage = string.Empty;
+
+	private string _successTitle = string.Empty;
+	private string _successMessage = string.Empty;
+
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
 	#region Load Data
-	protected override async Task OnInitializedAsync()
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+		await LoadData();
+		_isLoading = false;
+		StateHasChanged();
+	}
+
+	private async Task LoadData()
 	{
 		try
 		{
-			await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
-
 			_products = await ProductData.LoadProductByLocation(1);
 			_rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
-
 			_selectedProduct = _products.FirstOrDefault();
-
-			_isLoading = false;
 		}
 		catch (Exception ex)
 		{
-			_isLoading = false;
-			_errorMessage = $"Error loading data: {ex.Message}";
-			await _sfErrorToast?.ShowAsync();
+			await ShowToast("An Error Occurred While Loading Data", ex.Message, "error");
 		}
 	}
 
@@ -81,29 +88,24 @@ public partial class RecipePage
 
 	private async Task LoadRecipe()
 	{
+		if (_isProcessing || _selectedProduct is null || _selectedProduct.ProductId == 0 || _isLoading)
+			return;
+
 		try
 		{
-			if (_selectedProduct is null || _selectedProduct.ProductId == 0)
-				return;
+			_isProcessing = true;
 
 			_recipeItems.Clear();
-
-			if (_sfGrid is not null)
-				await _sfGrid?.Refresh();
+			if (_sfCartGrid is not null)
+				await _sfCartGrid?.Refresh();
 
 			_recipe = await RecipeData.LoadRecipeByProduct(_selectedProduct.ProductId);
 			if (_recipe is null)
-			{
-				StateHasChanged();
 				return;
-			}
 
 			var recipeDetails = await RecipeData.LoadRecipeDetailByRecipe(_recipe.Id);
 			if (recipeDetails is null || recipeDetails.Count == 0)
-			{
-				StateHasChanged();
 				return;
-			}
 
 			_recipeItems.Clear();
 
@@ -119,179 +121,175 @@ public partial class RecipePage
 				});
 			}
 
-			_infoMessage = $"Recipe loaded for {_selectedProduct.Name} with {_recipeItems.Count} items";
-			await _sfUpdateToast?.ShowAsync();
-			if (_sfGrid is not null)
-				await _sfGrid?.Refresh();
-			StateHasChanged();
+			await ShowToast("Recipe Loaded", $"Recipe loaded for {_selectedProduct.Name} with {_recipeItems.Count} items", "success");
 		}
 		catch (Exception ex)
 		{
-			_errorMessage = $"Error loading recipe: {ex.Message}";
-			await _sfErrorToast?.ShowAsync();
+			await ShowToast("Error Loading Recipe", ex.Message, "error");
+		}
+		finally
+		{
+			if (_sfCartGrid is not null)
+				await _sfCartGrid?.Refresh();
+
+			_isProcessing = false;
+			StateHasChanged();
 		}
 	}
 	#endregion
 
 	#region Cart
-	private async Task AddRawMaterialToRecipe()
+	private async Task AddItemToCart()
 	{
-		try
-		{
-			if (_selectedRawMaterial is null || _selectedRawMaterial.Id == 0 || _selectedRawMaterialQuantity <= 0)
+		if (_selectedRawMaterial is null || _selectedRawMaterial.Id == 0 || _selectedRawMaterialQuantity <= 0)
+			return;
+
+		var existingRecipe = _recipeItems.FirstOrDefault(r => r.ItemId == _selectedRawMaterial.Id);
+		if (existingRecipe is not null)
+			existingRecipe.Quantity += _selectedRawMaterialQuantity;
+		else
+			_recipeItems.Add(new()
 			{
-				_errorMessage = "Please select a raw material and enter a valid quantity";
-				await _sfErrorToast?.ShowAsync();
-				return;
-			}
+				ItemId = _selectedRawMaterial.Id,
+				ItemName = _selectedRawMaterial.Name,
+				Quantity = _selectedRawMaterialQuantity,
+			});
 
-			var existingRecipe = _recipeItems.FirstOrDefault(r => r.ItemId == _selectedRawMaterial.Id);
-			if (existingRecipe is not null)
-			{
-				existingRecipe.Quantity += _selectedRawMaterialQuantity;
-				_successMessage = $"Updated quantity for {_selectedRawMaterial.Name}";
-			}
-			else
-			{
-				_recipeItems.Add(new()
-				{
-					ItemId = _selectedRawMaterial.Id,
-					ItemName = (await CommonData.LoadTableDataById<RawMaterialModel>(TableNames.RawMaterial, _selectedRawMaterial.Id)).Name,
-					Quantity = _selectedRawMaterialQuantity,
-				});
-				_successMessage = $"Added {_selectedRawMaterial.Name} to recipe";
-			}
+		_selectedRawMaterial = null;
+		_selectedRawMaterialQuantity = 0;
 
-			await _sfToast?.ShowAsync();
+		_sfItemAutoComplete?.FocusAsync();
 
-			// Reset selection
-			_selectedRawMaterial = null;
-			_selectedRawMaterialQuantity = 0;
+		if (_sfCartGrid is not null)
+			await _sfCartGrid?.Refresh();
 
-			if (_sfGrid is not null)
-				await _sfGrid?.Refresh();
-			StateHasChanged();
-		}
-		catch (Exception ex)
-		{
-			_errorMessage = $"Error adding raw material: {ex.Message}";
-			await _sfErrorToast?.ShowAsync();
-		}
+		StateHasChanged();
 	}
 
-	public async Task RowSelectHandler(RowSelectEventArgs<ItemRecipeModel> args)
+	private async Task EditCartItem(RecipeItemCartModel cartItem)
 	{
-		try
-		{
-			if (args.Data is not null)
-			{
-				var itemName = args.Data.ItemName;
-				_recipeItems.Remove(args.Data);
-				_successMessage = $"Removed {itemName} from recipe";
-				await _sfToast?.ShowAsync();
-			}
+		_selectedRawMaterial = _rawMaterials.FirstOrDefault(r => r.Id == cartItem.ItemId);
+		_selectedRawMaterialQuantity = cartItem.Quantity;
+		_recipeItems.Remove(cartItem);
 
-			if (_sfGrid is not null)
-				await _sfGrid?.Refresh();
-			StateHasChanged();
-		}
-		catch (Exception ex)
-		{
-			_errorMessage = $"Error removing item: {ex.Message}";
-			await _sfErrorToast?.ShowAsync();
-		}
+		_sfItemAutoComplete?.FocusAsync();
+
+		if (_sfCartGrid is not null)
+			await _sfCartGrid?.Refresh();
+
+		StateHasChanged();
 	}
 
-	private async Task RemoveItem(ItemRecipeModel item)
+	private async Task RemoveItemFromCart(RecipeItemCartModel cartItem)
 	{
-		try
-		{
-			if (item is not null)
-			{
-				var itemName = item.ItemName;
-				_recipeItems.Remove(item);
-				_successMessage = $"Removed {itemName} from recipe";
-				await _sfToast?.ShowAsync();
-			}
+		_recipeItems.Remove(cartItem);
 
-			if (_sfGrid is not null)
-				await _sfGrid?.Refresh();
-			StateHasChanged();
-		}
-		catch (Exception ex)
-		{
-			_errorMessage = $"Error removing item: {ex.Message}";
-			await _sfErrorToast?.ShowAsync();
-		}
+		if (_sfCartGrid is not null)
+			await _sfCartGrid?.Refresh();
+
+		StateHasChanged();
 	}
 	#endregion
 
 	#region Saving
-	private async Task OnSaveButtonClick()
+	private async Task DeleteRecipe()
 	{
+		if (_isProcessing || _recipe is null || _recipe.Id == 0 || _isLoading)
+			return;
+
 		try
 		{
-			if (_sfGrid is not null)
-				await _sfGrid?.Refresh();
+			_recipe.Status = false;
+			await RecipeData.InsertRecipe(_recipe);
+			NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error Deleting Recipe", ex.Message, "error");
+		}
+		finally
+		{
+			if (_sfCartGrid is not null)
+				await _sfCartGrid?.Refresh();
+
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task OnSaveButtonClick()
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
 
 			if (_selectedProduct is null || _selectedProduct.Id == 0)
 			{
-				_errorMessage = "Please select a product";
-				await _sfErrorToast?.ShowAsync();
+				await ShowToast("No Product Selected", "Please select a product to save the recipe for", "error");
 				return;
 			}
 
 			if (_recipeItems.Count == 0)
 			{
-				_errorMessage = "Please add at least one raw material to the recipe";
-				await _sfErrorToast?.ShowAsync();
+				await ShowToast("No Raw Materials Added", "Please add at least one raw material to the recipe", "error");
 				return;
 			}
 
-			// Disable existing recipe details if recipe exists
-			if (_recipe is not null)
-			{
-				var recipeDetails = await RecipeData.LoadRecipeDetailByRecipe(_recipe.Id);
-
-				foreach (var detail in recipeDetails)
-				{
-					detail.Status = false;
-					await RecipeData.InsertRecipeDetail(detail);
-				}
-			}
-
-			// Insert or update recipe
-			var recipeId = await RecipeData.InsertRecipe(new()
+			await RecipeData.SaveRecipe(new()
 			{
 				Id = _recipe?.Id ?? 0,
 				ProductId = _selectedProduct.ProductId,
 				Status = true,
-			});
+			}, _recipeItems);
 
-			// Insert new recipe details
-			foreach (var rawMaterialRecipe in _recipeItems)
-			{
-				await RecipeData.InsertRecipeDetail(new()
-				{
-					Id = 0,
-					RecipeId = recipeId,
-					RawMaterialId = rawMaterialRecipe.ItemId,
-					Quantity = rawMaterialRecipe.Quantity,
-					Status = true,
-				});
-			}
-
-			_successMessage = $"Recipe saved successfully for {_selectedProduct.Name} with {_recipeItems.Count} items!";
-			await _sfToast?.ShowAsync();
-
-			// Reload recipe to reflect saved state
-			await Task.Delay(500);
-			await LoadRecipe();
+			await ShowToast("Recipe Saved", $"Recipe saved successfully for {_selectedProduct.Name} with {_recipeItems.Count} items!", "success");
+			NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
 		}
 		catch (Exception ex)
 		{
-			_errorMessage = $"Error saving recipe: {ex.Message}";
-			await _sfErrorToast?.ShowAsync();
+			await ShowToast("Error Saving Recipe", ex.Message, "error");
+		}
+		finally
+		{
+			if (_sfCartGrid is not null)
+				await _sfCartGrid?.Refresh();
+
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Utilities
+	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args) =>
+		NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
+
+	private async Task ShowToast(string title, string message, string type)
+	{
+		VibrationService.VibrateWithTime(200);
+
+		if (type == "error")
+		{
+			_errorTitle = title;
+			_errorMessage = message;
+			await _sfErrorToast.ShowAsync(new()
+			{
+				Title = _errorTitle,
+				Content = _errorMessage
+			});
+		}
+
+		else if (type == "success")
+		{
+			_successTitle = title;
+			_successMessage = message;
+			await _sfSuccessToast.ShowAsync(new()
+			{
+				Title = _successTitle,
+				Content = _successMessage
+			});
 		}
 	}
 	#endregion
