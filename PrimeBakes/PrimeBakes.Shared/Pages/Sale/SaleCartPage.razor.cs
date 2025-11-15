@@ -650,7 +650,7 @@ public partial class SaleCartPage
 	{
 		var memoryStream = await SaleA4Print.GenerateA4SaleBill(_sale.Id);
 		var fileName = $"Sale_Bill_{_sale.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 	}
 
 	private async Task DeleteCartSale()

@@ -32,10 +32,6 @@ public partial class KitchenIssuePage
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 
-	private decimal _itemBaseTotal = 0;
-	private decimal _itemDiscountTotal = 0;
-	private decimal _itemAfterDiscountTotal = 0;
-	private decimal _itemTaxTotal = 0;
 	private decimal _itemAfterTaxTotal = 0;
 
 	private CompanyModel _selectedCompany = new();
@@ -52,8 +48,6 @@ public partial class KitchenIssuePage
 
 	private SfAutoComplete<RawMaterialModel?, RawMaterialModel> _sfItemAutoComplete;
 	private SfGrid<KitchenIssueItemCartModel> _sfCartGrid;
-	private SfDialog _uploadDocumentDialog;
-	private SfUploader _sfDocumentUploader;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
@@ -138,7 +132,7 @@ public partial class KitchenIssuePage
 				if (_kitchenIssue is null)
 				{
 					await ShowToast("Kitchen Issue Not Found", "The requested kitchen issue could not be found.", "error");
-					NavigationManager.NavigateTo("/inventory/kitchen-issue", true);
+					NavigationManager.NavigateTo(PageRouteNames.KitchenIssue, true);
 				}
 			}
 
@@ -270,9 +264,9 @@ public partial class KitchenIssuePage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Company", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminCompany, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Company");
+				NavigationManager.NavigateTo(PageRouteNames.AdminCompany);
 
 			return;
 		}
@@ -291,9 +285,9 @@ public partial class KitchenIssuePage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Kitchen", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminKitchen, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Kitchen");
+				NavigationManager.NavigateTo(PageRouteNames.AdminKitchen);
 
 			return;
 		}
@@ -322,9 +316,9 @@ public partial class KitchenIssuePage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/RawMaterial", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminRawMaterial, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/RawMaterial");
+				NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial);
 
 			return;
 		}
@@ -477,7 +471,8 @@ public partial class KitchenIssuePage
 		}
 		#endregion
 
-		_kitchenIssue.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(_kitchenIssue);
+		if (Id is null)
+			_kitchenIssue.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(_kitchenIssue);
 	}
 
 	private async Task SaveTransactionFile()
@@ -620,9 +615,10 @@ public partial class KitchenIssuePage
 			_kitchenIssue.LastModifiedBy = _user.Id;
 
 			_kitchenIssue.Id = await KitchenIssueData.SaveKitchenIssueTransaction(_kitchenIssue, _cart);
-			await GenerateAndDownloadInvoice();
+			var (pdfStream, fileName) = await KitchenIssueData.GenerateAndDownloadInvoice(_kitchenIssue.Id);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			await DeleteLocalFiles();
-			NavigationManager.NavigateTo("/inventory/kitchen-issue", true);
+			NavigationManager.NavigateTo(PageRouteNames.KitchenIssue, true);
 
 			await ShowToast("Save Transaction", "Transaction saved successfully! Invoice has been generated.", "success");
 		}
@@ -633,77 +629,6 @@ public partial class KitchenIssuePage
 		finally
 		{
 			_isProcessing = false;
-		}
-	}
-
-	private async Task GenerateAndDownloadInvoice()
-	{
-		try
-		{
-			// Load saved kitchen issue details (since _kitchenIssue now has the Id)
-			var savedKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, _kitchenIssue.Id);
-			if (savedKitchenIssue is null)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - kitchen issue data not found.", "error");
-				return;
-			}
-
-			// Load kitchen issue details from database
-			var kitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(_kitchenIssue.Id);
-			if (kitchenIssueDetails is null || kitchenIssueDetails.Count == 0)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - no line items found.", "error");
-				return;
-			}
-
-			// Load company and kitchen
-			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedKitchenIssue.CompanyId);
-			var kitchen = await CommonData.LoadTableDataById<LocationModel>(TableNames.Kitchen, savedKitchenIssue.KitchenId);
-
-			if (company == null || kitchen == null)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - company or kitchen not found.", "error");
-				return;
-			}
-
-			// Convert kitchen issue details to cart items with item names
-			var cartItems = new List<KitchenIssueItemCartModel>();
-			foreach (var detail in kitchenIssueDetails)
-			{
-				var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == detail.RawMaterialId);
-				cartItems.Add(new KitchenIssueItemCartModel
-				{
-					ItemId = detail.RawMaterialId,
-					ItemName = rawMaterial?.Name ?? "Unknown Item",
-					Quantity = detail.Quantity,
-					UnitOfMeasurement = detail.UnitOfMeasurement,
-					Rate = detail.Rate,
-					Total = detail.Total,
-					Remarks = detail.Remarks
-				});
-			}
-
-			// Generate invoice PDF
-			var pdfStream = await Task.Run(() =>
-				KitchenIssueInvoicePDFExport.ExportKitchenIssueInvoiceWithItems(
-					savedKitchenIssue,
-					cartItems,
-					company,
-					kitchen,
-					null, // logo path - uses default
-					"KITCHEN ISSUE INVOICE"
-				)
-			);
-
-			// Generate file name
-			string fileName = $"KITCHEN_ISSUE_INVOICE_{savedKitchenIssue.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-			// Save and view the PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfStream);
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Invoice Generation Failed", $"Transaction saved but invoice generation failed: {ex.Message}", "error");
 		}
 	}
 
@@ -718,15 +643,15 @@ public partial class KitchenIssuePage
 	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo("/inventory/kitchen-issue", true);
+		NavigationManager.NavigateTo(PageRouteNames.KitchenIssue, true);
 	}
 
 	private async Task NavigateToTransactionHistoryPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/kitchen-issue", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenIssue, "_blank");
 		else
-			NavigationManager.NavigateTo("/report/kitchen-issue");
+			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

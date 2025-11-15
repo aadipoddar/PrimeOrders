@@ -1,4 +1,4 @@
-﻿@page "/Inventory-Dashboard"
+﻿@page "/inventory"
 
 <PageTitle>Inventory Dashboard - Prime Bakes</PageTitle>
 
@@ -23,7 +23,7 @@ else
 			</div>
 			<div class="user-info">
 				<span class="user-name">@_user?.Name</span>
-				<button @onclick='() => NavigationManager.NavigateTo("/")' class="back-button">
+				<button @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' class="back-button">
 					<span class="back-icon">←</span> Back to Dashboard
 				</button>
 			</div>
@@ -37,43 +37,43 @@ else
 		<div class="dashboard-cards">
 			@if (_user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/purchase")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Purchase)'>
 					<div class="card-icon purchase-icon">🛒</div>
 					<h3>New Raw Material Purchase</h3>
 					<p>Create a new purchase order for raw materials</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/purchase-return")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn)'>
 					<div class="card-icon purchase-icon">🛒</div>
 					<h3>New Raw Material Purchase Return</h3>
 					<p>Create a new purchase order for raw materials</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Kitchen-Issue")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.KitchenIssue)'>
 					<div class="card-icon kitchen-icon">👨‍🍳</div>
 					<h3>Kitchen Issue</h3>
 					<p>Manage items issued to kitchen for production</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Kitchen-Production")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.KitchenProduction)'>
 					<div class="card-icon production-icon">🍲</div>
 					<h3>Kitchen Production</h3>
 					<p>Manage kitchen production and baking activities</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/raw-material-stock-adjustment")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment)'>
 					<div class="card-icon stock-icon">📊</div>
 					<h3>Raw Material Stock Adjustment</h3>
 					<p>Adjust and manage raw material stock levels</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/inventory/product-stock-adjustment")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment)'>
 					<div class="card-icon product-stock-icon">📦</div>
 					<h3>Finished Goods / Product Stock Adjustment</h3>
 					<p>Adjust and manage finished product inventory</p>
 				</div>
 
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory/Recipe")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Recipe)'>
 					<div class="card-icon production-icon">🧾</div>
 					<h3>Recipes</h3>
 					<p>Manage and view recipes</p>

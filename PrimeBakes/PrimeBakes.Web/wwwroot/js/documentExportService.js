@@ -1,5 +1,5 @@
-﻿// Excel download functionality
-window.saveExcel = function (base64String, filename) {
+﻿// Generic file download functionality for all file types
+window.saveFile = function (base64String, filename, mimeType = null) {
 	const byteCharacters = atob(base64String);
 	const byteArrays = [];
 
@@ -9,36 +9,50 @@ window.saveExcel = function (base64String, filename) {
 	}
 	const byteArray = new Uint8Array(byteArrays);
 
-	// Create a blob from the byte array
-	const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+	// Auto-detect MIME type based on file extension if not provided
+	let contentType = mimeType;
+	if (!contentType) {
+		const extension = filename.split('.').pop().toLowerCase();
+		const mimeTypes = {
+			// Documents
+			'pdf': 'application/pdf',
+			'doc': 'application/msword',
+			'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 
-	// Create a download link and trigger the download
-	const link = document.createElement('a');
-	link.href = URL.createObjectURL(blob);
-	link.download = filename;
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
+			// Spreadsheets
+			'xls': 'application/vnd.ms-excel',
+			'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'csv': 'text/csv',
 
-	// Clean up the object URL
-	setTimeout(() => {
-		URL.revokeObjectURL(link.href);
-	}, 100);
-};
+			// Images
+			'jpg': 'image/jpeg',
+			'jpeg': 'image/jpeg',
+			'png': 'image/png',
+			'gif': 'image/gif',
+			'bmp': 'image/bmp',
+			'svg': 'image/svg+xml',
+			'webp': 'image/webp',
 
-// PDF download functionality
-window.savePDF = function (base64String, filename) {
-	const byteCharacters = atob(base64String);
-	const byteArrays = [];
+			// Archives
+			'zip': 'application/zip',
+			'rar': 'application/x-rar-compressed',
+			'7z': 'application/x-7z-compressed',
 
-	// Convert the base64 string to byte array
-	for (let i = 0; i < byteCharacters.length; i++) {
-		byteArrays.push(byteCharacters.charCodeAt(i));
+			// Text
+			'txt': 'text/plain',
+			'json': 'application/json',
+			'xml': 'application/xml',
+
+			// Other
+			'ppt': 'application/vnd.ms-powerpoint',
+			'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+		};
+
+		contentType = mimeTypes[extension] || 'application/octet-stream';
 	}
-	const byteArray = new Uint8Array(byteArrays);
 
 	// Create a blob from the byte array
-	const blob = new Blob([byteArray], { type: 'application/pdf' });
+	const blob = new Blob([byteArray], { type: contentType });
 
 	// Create a download link and trigger the download
 	const link = document.createElement('a');

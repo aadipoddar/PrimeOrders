@@ -72,9 +72,16 @@ public partial class PurchaseReturnReport
 
 	private async Task LoadData()
 	{
+		await LoadDates();
 		await LoadCompanies();
 		await LoadParties();
 		await LoadPurchaseReturnOverviews();
+	}
+
+	private async Task LoadDates()
+	{
+		_fromDate = await CommonData.LoadCurrentDateTime();
+		_toDate = _fromDate;
 	}
 
 	private async Task LoadCompanies()
@@ -268,7 +275,7 @@ public partial class PurchaseReturnReport
 			fileName += ".xlsx";
 
 			// Save and view the Excel file
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", stream);
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await ShowToast("Success", "Purchase return report exported to Excel successfully.", "success");
 		}
@@ -314,7 +321,7 @@ public partial class PurchaseReturnReport
 			fileName += ".pdf";
 
 			// Save and view the PDF file
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await ShowToast("Success", "Purchase return report exported to PDF successfully.", "success");
 		}
@@ -327,11 +334,6 @@ public partial class PurchaseReturnReport
 			_isProcessing = false;
 			StateHasChanged();
 		}
-	}
-
-	private async Task ExportPowerBI(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-	{
-		await ShowToast("Info", "Power BI export is not implemented yet.", "error");
 	}
 	#endregion
 
@@ -361,57 +363,8 @@ public partial class PurchaseReturnReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			// Load purchase return header
-			var purchaseReturnHeader = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId);
-			if (purchaseReturnHeader is null)
-			{
-				await ShowToast("Error", "Purchase return not found.", "error");
-				return;
-			}
-
-			// Load purchase return details
-			var purchaseReturnDetails = await PurchaseReturnData.LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturnId);
-			if (purchaseReturnDetails is null || purchaseReturnDetails.Count == 0)
-			{
-				await ShowToast("Error", "No line items found for this purchase return.", "error");
-				return;
-			}
-
-			// Load company information
-			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, purchaseReturnHeader.CompanyId);
-			if (company is null)
-			{
-				await ShowToast("Error", "Company information not found.", "error");
-				return;
-			}
-
-			// Load party (supplier) information
-			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, purchaseReturnHeader.PartyId);
-			if (party == null)
-			{
-				await ShowToast("Error", "Party information not found.", "error");
-				return;
-			}
-
-			// Generate invoice PDF
-			var pdfStream = await Task.Run(() =>
-				PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
-					purchaseReturnHeader,
-					purchaseReturnDetails,
-					company,
-					party,
-					null, // logo path - uses default
-					"PURCHASE RETURN INVOICE"
-				)
-			);
-
-			// Generate file name
-			string fileName = $"PURCHASE_RETURN_{purchaseReturnHeader.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-			// Save and view the PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfStream);
-
-			await ShowToast("Success", "Purchase return invoice generated successfully.", "success");
+			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(purchaseReturnId);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 		}
 		catch (Exception ex)
 		{
@@ -441,7 +394,7 @@ public partial class PurchaseReturnReport
 
 			var (fileStream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(documentUrl, BlobStorageContainers.purchasereturn);
 			var fileName = documentUrl.Split('/').Last();
-			await SaveAndViewService.SaveAndView(fileName, contentType, fileStream);
+			await SaveAndViewService.SaveAndView(fileName, fileStream);
 		}
 		catch (Exception ex)
 		{
@@ -526,7 +479,7 @@ public partial class PurchaseReturnReport
 			purchaseReturn.Status = true;
 			purchaseReturn.LastModifiedBy = _user.Id;
 			purchaseReturn.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			purchaseReturn.LastModifiedFromPlatform = FormFactor.GetFormFactor();
+			purchaseReturn.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 
 			await PurchaseReturnData.RecoverPurchaseReturnTransaction(purchaseReturn);
 			await ShowToast("Success", $"Transaction '{_recoverTransactionNo}' has been successfully recovered.", "success");

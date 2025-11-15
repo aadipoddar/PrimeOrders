@@ -201,7 +201,7 @@ public partial class OrderCartPage
 	{
 		var ms = await OrderA4Print.GenerateA4OrderDocument(_order.Id);
 		var fileName = $"Order_Bill_{_order.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", ms);
+		await SaveAndViewService.SaveAndView(fileName, ms);
 	}
 
 	private async Task SendLocalNotification()

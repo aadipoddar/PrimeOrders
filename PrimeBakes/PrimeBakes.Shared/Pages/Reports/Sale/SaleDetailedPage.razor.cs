@@ -248,7 +248,7 @@ public partial class SaleDetailedPage
 		var locationName = _selectedLocation?.Name ?? "All Locations";
 		var excelData = SaleExcelExport.ExportSaleOverviewExcel(_filteredSaleOverviews, _startDate, _endDate);
 		var fileName = $"Sales_Details_{locationName}_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelData);
+		await SaveAndViewService.SaveAndView(fileName, excelData);
 		VibrationService.VibrateWithTime(100);
 	}
 
@@ -259,7 +259,7 @@ public partial class SaleDetailedPage
 
 		var pdfData = await SaleReportPDFExport.GenerateA4SaleReport(_filteredSaleOverviews, _startDate, _endDate, _selectedSupplier);
 		var fileName = $"Sales_Register_{_selectedSupplier?.Name ?? "All"}_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfData);
+		await SaveAndViewService.SaveAndView(fileName, pdfData);
 		VibrationService.VibrateWithTime(100);
 	}
 	#endregion

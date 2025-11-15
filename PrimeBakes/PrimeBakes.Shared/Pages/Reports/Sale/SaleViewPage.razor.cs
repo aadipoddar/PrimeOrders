@@ -117,7 +117,7 @@ public partial class SaleViewPage
 
 		var pdfData = await SaleA4Print.GenerateA4SaleBill(SaleId);
 		var fileName = $"Sale_{_saleOverview.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfData);
+		await SaveAndViewService.SaveAndView(fileName, pdfData);
 		VibrationService.VibrateWithTime(100);
 
 		_isProcessing = false;

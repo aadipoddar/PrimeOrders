@@ -7,64 +7,68 @@ namespace PrimeBakes.Services;
 
 public partial class SaveService
 {
-	public partial string SaveAndView(string filename, string contentType, MemoryStream stream)
+	public partial string SaveAndView(string filename, MemoryStream stream)
 	{
 		StorageFile stFile;
-		string extension = Path.GetExtension(filename);
+		string extension = Path.GetExtension(filename).ToLower();
 		//Gets process windows handle to open the dialog in application process. 
 		IntPtr windowHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 		if (!Windows.Foundation.Metadata.ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons"))
 		{
-			//Creates file save picker to save a file. 
-			FileSavePicker savePicker = new();
-			if (extension == ".xlsx")
+            //Creates file save picker to save a file. 
+            FileSavePicker savePicker = new()
+            {
+                SuggestedFileName = filename
+            };
+
+            // Comprehensive file type mappings
+            var fileTypeMappings = new Dictionary<string, (string description, string[] extensions)>
 			{
-				savePicker.DefaultFileExtension = ".xlsx";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as xlsx file.
-				savePicker.FileTypeChoices.Add("XLSX", [".xlsx"]);
+				// Documents
+				{ ".pdf", ("PDF", [".pdf"]) },
+				{ ".doc", ("DOC", [".doc"]) },
+				{ ".docx", ("DOCX", [".docx"]) },
+				{ ".rtf", ("RTF", [".rtf"]) },
+				
+				// Spreadsheets
+				{ ".xls", ("XLS", [".xls"]) },
+				{ ".xlsx", ("XLSX", [".xlsx"]) },
+				{ ".csv", ("CSV", [".csv"]) },
+				
+				// Images
+				{ ".jpg", ("JPEG", [".jpg"]) },
+				{ ".jpeg", ("JPEG", [".jpeg"]) },
+				{ ".png", ("PNG", [".png"]) },
+				{ ".gif", ("GIF", [".gif"]) },
+				{ ".bmp", ("BMP", [".bmp"]) },
+				{ ".svg", ("SVG", [".svg"]) },
+				{ ".webp", ("WEBP", [".webp"]) },
+				
+				// Presentations
+				{ ".ppt", ("PPT", [".ppt"]) },
+				{ ".pptx", ("PPTX", [".pptx"]) },
+				
+				// Archives
+				{ ".zip", ("ZIP", [".zip"]) },
+				{ ".rar", ("RAR", [".rar"]) },
+				{ ".7z", ("7Z", [".7z"]) },
+				
+				// Text
+				{ ".txt", ("TXT", [".txt"]) },
+				{ ".json", ("JSON", [".json"]) },
+				{ ".xml", ("XML", [".xml"]) }
+			};
+
+			if (fileTypeMappings.TryGetValue(extension, out var fileType))
+			{
+				savePicker.DefaultFileExtension = extension;
+                savePicker.FileTypeChoices.Add(fileType.description, fileType.extensions);
 			}
-			if (extension == ".docx")
+			else
 			{
-				savePicker.DefaultFileExtension = ".docx";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as Docx file.
-				savePicker.FileTypeChoices.Add("DOCX", [".docx"]);
-			}
-			else if (extension == ".doc")
-			{
-				savePicker.DefaultFileExtension = ".doc";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as Doc file.
-				savePicker.FileTypeChoices.Add("DOC", [".doc"]);
-			}
-			else if (extension == ".rtf")
-			{
-				savePicker.DefaultFileExtension = ".rtf";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as Rtf file.
-				savePicker.FileTypeChoices.Add("RTF", [".rtf"]);
-			}
-			else if (extension == ".pdf")
-			{
-				savePicker.DefaultFileExtension = ".pdf";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as Pdf file.
-				savePicker.FileTypeChoices.Add("PDF", [".pdf"]);
-			}
-			else if (extension == ".pptx")
-			{
-				savePicker.DefaultFileExtension = ".pptx";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as pptx file.
-				savePicker.FileTypeChoices.Add("PPTX", [".pptx"]);
-			}
-			else if (extension == ".png")
-			{
-				savePicker.DefaultFileExtension = ".png";
-				savePicker.SuggestedFileName = filename;
-				//Saves the file as png file.
-				savePicker.FileTypeChoices.Add("PNG", [".png"]);
+				// Default fallback for unknown file types
+				savePicker.DefaultFileExtension = extension;
+				savePicker.FileTypeChoices.Add("All Files", [extension]);
 			}
 
 			WinRT.Interop.InitializeWithWindow.Initialize(savePicker, windowHandle);
@@ -75,7 +79,8 @@ public partial class SaveService
 			StorageFolder local = ApplicationData.Current.LocalFolder;
 			stFile = local.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting).GetAwaiter().GetResult();
 		}
-		if (stFile != null)
+
+		if (stFile is not null)
 		{
 			using (IRandomAccessStream zipStream = stFile.OpenAsync(FileAccessMode.ReadWrite).GetAwaiter().GetResult())
 			{

@@ -52,7 +52,6 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[KitchenIssue]
 		SET
-			[TransactionNo] = @TransactionNo,
 			[CompanyId] = @CompanyId,
 			[TransactionDateTime] = @TransactionDateTime,
 			[FinancialYearId] = @FinancialYearId,

@@ -127,7 +127,7 @@ public partial class ProductSummaryPage
 			);
 
 			var fileName = $"ProductSummary_{_startDate:yyyyMMdd}_{_endDate:yyyyMMdd}.xlsx";
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelData);
+			await SaveAndViewService.SaveAndView(fileName, excelData);
 		}
 		catch (Exception ex)
 		{

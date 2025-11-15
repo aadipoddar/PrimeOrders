@@ -365,7 +365,7 @@ public partial class ProductStockReport
 		fileName = fileName.Replace("/", "_").Replace("\\", "_"); // Clean up transaction number
 
 		// Save and view the invoice PDF
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
+		await SaveAndViewService.SaveAndView(fileName, stream);
 
 		await ShowToast("Success", $"Invoice generated successfully for {purchaseHeader.TransactionNo}", "success");
 	}
@@ -421,7 +421,7 @@ public partial class ProductStockReport
 		fileName = fileName.Replace("/", "_").Replace("\\", "_"); // Clean up transaction number
 
 		// Save and view the invoice PDF
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
+		await SaveAndViewService.SaveAndView(fileName, stream);
 
 		await ShowToast("Success", $"Purchase return invoice generated successfully for {purchaseReturnHeader.TransactionNo}", "success");
 	}
@@ -508,7 +508,7 @@ public partial class ProductStockReport
 
 			// Generate file name
 			string fileName = $"PRODUCT_STOCK_REPORT_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", stream);
+			await SaveAndViewService.SaveAndView(fileName, stream);
 			await ShowToast("Success", "Stock report exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
@@ -550,7 +550,7 @@ public partial class ProductStockReport
 			string summaryFileName = $"PRODUCT_STOCK_SUMMARY_{timestamp}.pdf";
 
 			// Save and view the summary PDF file
-			await SaveAndViewService.SaveAndView(summaryFileName, "application/pdf", summaryStream);
+			await SaveAndViewService.SaveAndView(summaryFileName, summaryStream);
 
 			// If details are shown, generate and export the details PDF as well
 			if (_showDetails)
@@ -577,7 +577,7 @@ public partial class ProductStockReport
 					string detailsFileName = $"PRODUCT_STOCK_DETAILS_{timestamp}.pdf";
 
 					// Save and view the details PDF file
-					await SaveAndViewService.SaveAndView(detailsFileName, "application/pdf", detailsStream);
+					await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
 
 					await ShowToast("Success", "Stock summary and details exported to PDF successfully.", "success");
 				}

@@ -93,7 +93,7 @@ public partial class OrderViewPage
 		var orderDetails = await OrderData.LoadOrderDetailByOrder(_orderOverview.OrderId);
 		var memoryStream = await OrderExcelExport.ExportOrderChallanExcel(_orderOverview, orderDetails);
 		var fileName = $"Challan_{_orderOverview.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 
 		_isProcessing = false;
 		StateHasChanged();
@@ -109,7 +109,7 @@ public partial class OrderViewPage
 
 		var memoryStream = await OrderA4Print.GenerateA4OrderDocument(_orderOverview.OrderId);
 		var fileName = $"Order_{_orderOverview.OrderNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 
 		_isProcessing = false;
 		StateHasChanged();

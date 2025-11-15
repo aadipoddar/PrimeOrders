@@ -113,14 +113,14 @@ public partial class OrderHistoryPage
 
 		var memoryStream = await OrderExcelExport.ExportPendingProductsExcel(pendingOrders, _startDate, _endDate);
 		var fileName = $"Pending_Orders_Products_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 	}
 
 	private async Task ExportToExcel()
 	{
 		var memoryStream = OrderExcelExport.ExportOrderOverviewExcel(_orderOverviews, _startDate, _endDate);
 		var fileName = $"Order_History_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 	}
 	#endregion
 

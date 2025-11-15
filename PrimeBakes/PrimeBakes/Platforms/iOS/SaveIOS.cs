@@ -8,7 +8,7 @@ namespace PrimeBakes.Services;
 
 public partial class SaveService
 {
-	public partial string SaveAndView(string filename, string contentType, MemoryStream stream)
+	public partial string SaveAndView(string filename, MemoryStream stream)
 	{
 		string exception = string.Empty;
 		string path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
@@ -24,8 +24,9 @@ public partial class SaveService
 		catch (Exception e)
 		{
 			exception = e.ToString();
+			return $"Error saving file: {e}";
 		}
-		if (contentType != "application/html" || exception == string.Empty)
+		if (exception == string.Empty)
 		{
 			UIWindow window = GetKeyWindow();
 			if (window != null && window.RootViewController != null)
@@ -63,15 +64,9 @@ public partial class SaveService
 	}
 }
 
-public class QLPreviewItemFileSystem : QLPreviewItem
+public class QLPreviewItemFileSystem(string fileName, string filePath) : QLPreviewItem
 {
-	readonly string _fileName, _filePath;
-
-	public QLPreviewItemFileSystem(string fileName, string filePath)
-	{
-		_fileName = fileName;
-		_filePath = filePath;
-	}
+	readonly string _fileName = fileName, _filePath = filePath;
 
 	public override string PreviewItemTitle
 	{
@@ -89,14 +84,9 @@ public class QLPreviewItemFileSystem : QLPreviewItem
 	}
 }
 
-public class QLPreviewItemBundle : QLPreviewItem
+public class QLPreviewItemBundle(string fileName, string filePath) : QLPreviewItem
 {
-	readonly string _fileName, _filePath;
-	public QLPreviewItemBundle(string fileName, string filePath)
-	{
-		_fileName = fileName;
-		_filePath = filePath;
-	}
+	readonly string _fileName = fileName, _filePath = filePath;
 
 	public override string PreviewItemTitle
 	{
@@ -117,16 +107,11 @@ public class QLPreviewItemBundle : QLPreviewItem
 	}
 }
 
-public class PreviewControllerDS : QLPreviewControllerDataSource
+public class PreviewControllerDS(QLPreviewItem item) : QLPreviewControllerDataSource
 {
-	private readonly QLPreviewItem _item;
+	private readonly QLPreviewItem _item = item;
 
-	public PreviewControllerDS(QLPreviewItem item)
-	{
-		_item = item;
-	}
-
-	public override nint PreviewItemCount(QLPreviewController controller)
+    public override nint PreviewItemCount(QLPreviewController controller)
 	{
 		return 1;
 	}

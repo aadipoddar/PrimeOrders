@@ -2,9 +2,8 @@
 	@KitchenProductionId INT
 AS
 BEGIN
-	SELECT
-		*
-	FROM [dbo].[KitchenProductionDetail] AS kpd
-	WHERE kpd.KitchenProductionId = @KitchenProductionId
-	AND kpd.Status = 1
+	SELECT *
+	FROM [dbo].[KitchenProductionDetail]
+	WHERE [KitchenProductionId] = @KitchenProductionId
+	AND [Status] = 1
 END

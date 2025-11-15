@@ -213,7 +213,7 @@ public partial class FinancialAccountingViewPage
 			// Generate PDF for accounting record
 			var memoryStream = await AccountingA4Print.GenerateA4AccountingVoucher(AccountingId);
 			var fileName = $"Accounting_{_accountingOverview.TransactionNo}_{DateTime.Now:yyyy-MM-dd}.pdf";
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
+			await SaveAndViewService.SaveAndView(fileName,	memoryStream);
 		}
 		catch (Exception ex)
 		{

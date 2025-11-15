@@ -2,6 +2,7 @@
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Exporting.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
@@ -26,6 +27,48 @@ public static class PurchaseReturnData
 
 	public static async Task<List<PurchaseReturnItemOverviewModel>> LoadPurchaseReturnItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
 		await SqlDataAccess.LoadData<PurchaseReturnItemOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnItemOverviewByDate, new { StartDate, EndDate });
+
+	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int purchaseReturnId)
+	{
+		try
+		{
+			// Load saved purchase return details (since _purchaseReturn now has the Id)
+			var savedPurchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId) ??
+				throw new InvalidOperationException("Saved purchase return transaction not found.");
+
+            // Load purchase return details from database
+            var purchaseReturnDetails = await LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturnId);
+			if (purchaseReturnDetails is null || purchaseReturnDetails.Count == 0)
+				throw new InvalidOperationException("No purchase return details found for invoice generation.");
+
+			// Load company and party
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedPurchaseReturn.CompanyId);
+			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedPurchaseReturn.PartyId);
+			if (company is null || party is null)
+				throw new InvalidOperationException("Invoice generation skipped - company or party not found.");
+
+			// Generate invoice PDF
+			var pdfStream = await Task.Run(() =>
+				PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
+					savedPurchaseReturn,
+					purchaseReturnDetails,
+					company,
+					party,
+					null, // logo path - uses default
+					"PURCHASE RETURN INVOICE"
+				)
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"PURCHASE_RETURN_INVOICE_{savedPurchaseReturn.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+			return (pdfStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
+		}
+	}
 
 	public static async Task DeletePurchaseReturn(int purchaseReturnId)
 	{

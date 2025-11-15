@@ -254,12 +254,10 @@ public partial class KitchenIssueItemReport
 
             string fileName = $"KITCHEN_ISSUE_ITEM_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-            {
                 fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            }
             fileName += ".xlsx";
 
-            await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", stream);
+            await SaveAndViewService.SaveAndView(fileName, stream);
 
             await ShowToast("Success", "Kitchen issue item report exported to Excel successfully.", "success");
         }
@@ -298,12 +296,10 @@ public partial class KitchenIssueItemReport
 
             string fileName = $"KITCHEN_ISSUE_ITEM_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-            {
                 fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            }
             fileName += ".pdf";
 
-            await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
+            await SaveAndViewService.SaveAndView(fileName, stream);
 
             await ShowToast("Success", "Kitchen issue item report exported to PDF successfully.", "success");
         }
@@ -345,8 +341,9 @@ public partial class KitchenIssueItemReport
             _isProcessing = true;
             StateHasChanged();
 
-            await DownloadKitchenIssueInvoice(kitchenIssueId);
-        }
+            var (pdfStream, fileName) = await KitchenIssueData.GenerateAndDownloadInvoice(kitchenIssueId);
+            await SaveAndViewService.SaveAndView(fileName, pdfStream);
+		}
         catch (Exception ex)
         {
             await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
@@ -356,55 +353,6 @@ public partial class KitchenIssueItemReport
             _isProcessing = false;
             StateHasChanged();
         }
-    }
-
-    private async Task DownloadKitchenIssueInvoice(int kitchenIssueId)
-    {
-        var kitchenIssueHeader = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId);
-        if (kitchenIssueHeader is null)
-        {
-            await ShowToast("Error", "Kitchen issue record not found.", "error");
-            return;
-        }
-
-        var kitchenIssueDetails = await KitchenIssueData.LoadKitchenIssueDetailByKitchenIssue(kitchenIssueId);
-        if (kitchenIssueDetails is null || kitchenIssueDetails.Count == 0)
-        {
-            await ShowToast("Error", "No kitchen issue details found for this transaction.", "error");
-            return;
-        }
-
-        var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, kitchenIssueHeader.CompanyId);
-        if (company is null)
-        {
-            await ShowToast("Error", "Company information not found.", "error");
-            return;
-        }
-
-        var kitchen = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenIssueHeader.KitchenId);
-        if (kitchen is null)
-        {
-            await ShowToast("Error", "Kitchen information not found.", "error");
-            return;
-        }
-
-        var stream = await Task.Run(() =>
-        KitchenIssueInvoicePDFExport.ExportKitchenIssueInvoice(
-        kitchenIssueHeader,
-        kitchenIssueDetails,
-        company,
-        kitchen,
-        logoPath: null,
-        invoiceType: "KITCHEN ISSUE"
-        )
-        );
-
-        string fileName = $"KITCHEN_ISSUE_INVOICE_{kitchenIssueHeader.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-        fileName = fileName.Replace("/", "_").Replace("\\", "_");
-
-        await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
-
-        await ShowToast("Success", $"Invoice generated successfully for {kitchenIssueHeader.TransactionNo}", "success");
     }
 
     private async Task ToggleDetailsView()

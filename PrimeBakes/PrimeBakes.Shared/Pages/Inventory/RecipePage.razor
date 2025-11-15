@@ -1,4 +1,4 @@
-﻿@page "/Inventory/Recipe"
+﻿@page "/inventory/recipe"
 
 @using PrimeBakesLibrary.Models.Common;
 @using PrimeBakesLibrary.Models.Inventory;
@@ -67,7 +67,7 @@ else
 	<div class="recipe-container">
 		<!-- Header -->
 		<div class="page-header">
-			<button @onclick='() => NavigationManager.NavigateTo("/")' class="back-button">
+			<button @onclick='() => NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard)' class="back-button">
 				🏠
 			</button>
 			<h1 class="page-title">🧾 Recipe Management</h1>

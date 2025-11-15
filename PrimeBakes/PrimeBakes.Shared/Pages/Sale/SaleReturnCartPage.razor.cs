@@ -638,7 +638,7 @@ public partial class SaleReturnCartPage
 	{
 		var memoryStream = await SaleReturnA4Print.GenerateA4SaleReturnBill(_saleReturn.Id);
 		var fileName = $"SaleReturn_Bill_{_saleReturn.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 	}
 
 	private async Task DeleteCartSale()

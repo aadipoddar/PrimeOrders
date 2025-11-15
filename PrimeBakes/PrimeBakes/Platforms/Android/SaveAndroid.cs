@@ -11,12 +11,11 @@ namespace PrimeBakes.Services;
 
 public partial class SaveService
 {
-	public partial string SaveAndView(string filename, string contentType, MemoryStream stream)
+    public partial string SaveAndView(string filename, MemoryStream stream)
 	{
-		string exception = string.Empty;
-		string root = null;
+        string root;
 
-		if (Environment.IsExternalStorageEmulated)
+        if (Environment.IsExternalStorageEmulated)
 			root = Application.Context!.GetExternalFilesDir(Environment.DirectoryDownloads)!.AbsolutePath;
 		else
 			root = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
@@ -27,9 +26,7 @@ public partial class SaveService
 		Java.IO.File file = new(myDir, filename);
 
 		if (file.Exists())
-		{
 			file.Delete();
-		}
 
 		try
 		{
@@ -39,12 +36,52 @@ public partial class SaveService
 			outs.Flush();
 			outs.Close();
 		}
-		catch (Exception e)
-		{
-			exception = e.ToString();
+		catch (Exception ex)
+        {
+			return $"Error saving file: {ex}";
 		}
+
 		if (file.Exists())
 		{
+			string extension = Path.GetExtension(filename).ToLower();
+			var mimeTypes = new Dictionary<string, string>
+				{
+					// Documents
+					{ ".pdf", "application/pdf" },
+					{ ".doc", "application/msword" },
+					{ ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+					
+					// Spreadsheets
+					{ ".xls", "application/vnd.ms-excel" },
+					{ ".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+					{ ".csv", "text/csv" },
+					
+					// Images
+					{ ".jpg", "image/jpeg" },
+					{ ".jpeg", "image/jpeg" },
+					{ ".png", "image/png" },
+					{ ".gif", "image/gif" },
+					{ ".bmp", "image/bmp" },
+					{ ".svg", "image/svg+xml" },
+					{ ".webp", "image/webp" },
+					
+					// Archives
+					{ ".zip", "application/zip" },
+					{ ".rar", "application/x-rar-compressed" },
+					{ ".7z", "application/x-7z-compressed" },
+					
+					// Text
+					{ ".txt", "text/plain" },
+					{ ".json", "application/json" },
+					{ ".xml", "application/xml" },
+					
+					// Other
+					{ ".ppt", "application/vnd.ms-powerpoint" },
+					{ ".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation" }
+				};
+
+            var contentType = mimeTypes.TryGetValue(extension, out string value) ? value : "application/octet-stream";
+
 			if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
 			{
 				var fileUri = AndroidX.Core.Content.FileProvider.GetUriForFile(Application.Context, Application.Context.PackageName + ".provider", file);

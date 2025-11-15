@@ -94,7 +94,7 @@ public partial class SaleReturnViewPage
 
 		var pdfData = await SaleReturnA4Print.GenerateA4SaleReturnBill(SaleReturnId);
 		var fileName = $"SaleReturn_{_saleReturnOverview.BillNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfData);
+		await SaveAndViewService.SaveAndView(fileName, pdfData);
 		VibrationService.VibrateWithTime(100);
 
 		_isProcessing = false;

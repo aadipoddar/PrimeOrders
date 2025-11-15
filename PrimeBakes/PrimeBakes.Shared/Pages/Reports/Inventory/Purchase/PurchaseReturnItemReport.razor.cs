@@ -255,12 +255,10 @@ public partial class PurchaseReturnItemReport
 
 			string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-			{
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-			}
 			fileName += ".xlsx";
 
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", stream);
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await ShowToast("Success", "Purchase return item report exported to Excel successfully.", "success");
 		}
@@ -299,12 +297,10 @@ public partial class PurchaseReturnItemReport
 
 			string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-			{
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-			}
 			fileName += ".pdf";
 
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
 			await ShowToast("Success", "Purchase return item report exported to PDF successfully.", "success");
 		}
@@ -357,51 +353,8 @@ public partial class PurchaseReturnItemReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			var purchaseReturnHeader = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId);
-			if (purchaseReturnHeader == null)
-			{
-				await ShowToast("Error", "Purchase return record not found.", "error");
-				return;
-			}
-
-			var purchaseReturnDetails = await PurchaseReturnData.LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturnId);
-			if (purchaseReturnDetails is null || purchaseReturnDetails.Count == 0)
-			{
-				await ShowToast("Error", "No purchase return details found for this transaction.", "error");
-				return;
-			}
-
-			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, purchaseReturnHeader.CompanyId);
-			if (company is null)
-			{
-				await ShowToast("Error", "Company information not found.", "error");
-				return;
-			}
-
-			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, purchaseReturnHeader.PartyId);
-			if (party is null)
-			{
-				await ShowToast("Error", "Party information not found.", "error");
-				return;
-			}
-
-			var stream = await Task.Run(() =>
-			PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
-			purchaseReturnHeader,
-			purchaseReturnDetails,
-			company,
-			party,
-			logoPath: null,
-			invoiceType: "PURCHASE RETURN INVOICE"
-			)
-			);
-
-			string fileName = $"PURCHASE_RETURN_INVOICE_{purchaseReturnHeader.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-			fileName = fileName.Replace("/", "_").Replace("\\", "_");
-
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", stream);
-
-			await ShowToast("Success", $"Purchase return invoice generated successfully for {purchaseReturnHeader.TransactionNo}", "success");
+			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(purchaseReturnId);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 		}
 		catch (Exception ex)
 		{

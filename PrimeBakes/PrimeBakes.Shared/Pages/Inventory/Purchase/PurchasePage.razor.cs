@@ -8,7 +8,6 @@ using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Exporting.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
@@ -141,7 +140,7 @@ public partial class PurchasePage
 				if (_purchase is null)
 				{
 					await ShowToast("Purchase Not Found", "The requested purchase could not be found.", "error");
-					NavigationManager.NavigateTo("/inventory/purchase", true);
+					NavigationManager.NavigateTo(PageRouteNames.Purchase, true);
 				}
 			}
 
@@ -294,9 +293,9 @@ public partial class PurchasePage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Company", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminCompany, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Company");
+				NavigationManager.NavigateTo(PageRouteNames.AdminCompany);
 
 			return;
 		}
@@ -315,9 +314,9 @@ public partial class PurchasePage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Ledger", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminLedger, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Ledger");
+				NavigationManager.NavigateTo(PageRouteNames.AdminLedger);
 
 			return;
 		}
@@ -370,9 +369,9 @@ public partial class PurchasePage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/RawMaterial", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminRawMaterial, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/RawMaterial");
+				NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial);
 
 			return;
 		}
@@ -731,7 +730,7 @@ public partial class PurchasePage
 			return false;
 		}
 
-		if (_purchase.TotalAmount <= 0)
+		if (_purchase.TotalAmount < 0)
 		{
 			await ShowToast("Invalid Total Amount", "The total amount of the purchase transaction must be greater than zero.", "error");
 			return false;
@@ -796,9 +795,10 @@ public partial class PurchasePage
 			_purchase.LastModifiedBy = _user.Id;
 
 			_purchase.Id = await PurchaseData.SavePurchaseTransaction(_purchase, _cart);
-			await GenerateAndDownloadInvoice();
+			var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(_purchase.Id);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			await DeleteLocalFiles();
-			NavigationManager.NavigateTo("/inventory/purchase", true);
+			NavigationManager.NavigateTo(PageRouteNames.Purchase, true);
 
 			await ShowToast("Save Transaction", "Transaction saved successfully! Invoice has been generated.", "success");
 		}
@@ -809,60 +809,6 @@ public partial class PurchasePage
 		finally
 		{
 			_isProcessing = false;
-		}
-	}
-
-	private async Task GenerateAndDownloadInvoice()
-	{
-		try
-		{
-			// Load saved purchase details (since _purchase now has the Id)
-			var savedPurchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, _purchase.Id);
-			if (savedPurchase is null)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - purchase data not found.", "error");
-				return;
-			}
-
-			// Load purchase details from database
-			var purchaseDetails = await PurchaseData.LoadPurchaseDetailByPurchase(_purchase.Id);
-			if (purchaseDetails is null || purchaseDetails.Count == 0)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - no line items found.", "error");
-				return;
-			}
-
-			// Company and party are already loaded (_selectedCompany, _selectedParty)
-			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedPurchase.CompanyId);
-			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedPurchase.PartyId);
-
-			if (company == null || party == null)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - company or party not found.", "error");
-				return;
-			}
-
-			// Generate invoice PDF
-			var pdfStream = await Task.Run(() =>
-				PurchaseInvoicePDFExport.ExportPurchaseInvoice(
-					savedPurchase,
-					purchaseDetails,
-					company,
-					party,
-					null, // logo path - uses default
-					"PURCHASE INVOICE"
-				)
-			);
-
-			// Generate file name
-			string fileName = $"PURCHASE_INVOICE_{savedPurchase.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-			// Save and view the PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfStream);
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Invoice Generation Failed", $"Transaction saved but invoice generation failed: {ex.Message}", "error");
 		}
 	}
 
@@ -912,7 +858,7 @@ public partial class PurchasePage
 
 			var (fileStream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(_purchase.DocumentUrl, BlobStorageContainers.purchase);
 			var fileName = _purchase.DocumentUrl.Split('/').Last();
-			await SaveAndViewService.SaveAndView(fileName, contentType, fileStream);
+			await SaveAndViewService.SaveAndView(fileName, fileStream);
 		}
 		catch (Exception ex)
 		{
@@ -967,15 +913,15 @@ public partial class PurchasePage
 	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo("/inventory/purchase", true);
+		NavigationManager.NavigateTo(PageRouteNames.Purchase, true);
 	}
 
 	private async Task NavigateToTransactionHistoryPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchase", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchase, "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchase");
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchase);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

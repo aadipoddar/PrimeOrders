@@ -245,7 +245,7 @@ else
 
 			@if (_user.Inventory)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Inventory-Dashboard")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard)'>
 					<div class="card-icon inventory-icon">📦</div>
 					<h3>Inventory</h3>
 					<p>Manage stock levels and inventory control</p>

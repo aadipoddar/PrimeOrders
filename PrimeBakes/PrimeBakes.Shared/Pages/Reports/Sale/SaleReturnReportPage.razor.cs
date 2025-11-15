@@ -249,7 +249,7 @@ public partial class SaleReturnReportPage
 	{
 		var excelData = SaleReturnExcelExport.ExportSaleReturnOverviewExcel(_filteredSaleReturnOverviews, _startDate, _endDate);
 		var fileName = $"Sale_Return_Details_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelData);
+		await SaveAndViewService.SaveAndView(fileName, excelData);
 		VibrationService.VibrateWithTime(100);
 	}
 }

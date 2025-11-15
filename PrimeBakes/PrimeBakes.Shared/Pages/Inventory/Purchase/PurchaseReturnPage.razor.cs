@@ -141,7 +141,7 @@ public partial class PurchaseReturnPage
 				if (_purchaseReturn is null)
 				{
 					await ShowToast("Purchase Return Not Found", "The requested purchase return could not be found.", "error");
-					NavigationManager.NavigateTo("/inventory/purchase-return", true);
+					NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn, true);
 				}
 			}
 
@@ -294,9 +294,9 @@ public partial class PurchaseReturnPage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Company", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminCompany, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Company");
+				NavigationManager.NavigateTo(PageRouteNames.AdminCompany);
 
 			return;
 		}
@@ -315,9 +315,9 @@ public partial class PurchaseReturnPage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Ledger", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminLedger, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Ledger");
+				NavigationManager.NavigateTo(PageRouteNames.AdminLedger);
 
 			return;
 		}
@@ -370,9 +370,9 @@ public partial class PurchaseReturnPage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/RawMaterial", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminRawMaterial, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/RawMaterial");
+				NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial);
 
 			return;
 		}
@@ -746,7 +746,7 @@ public partial class PurchaseReturnPage
 			return false;
 		}
 
-		if (_purchaseReturn.TotalAmount <= 0)
+		if (_purchaseReturn.TotalAmount < 0)
 		{
 			await ShowToast("Invalid Total Amount", "The total amount of the purchase return transaction must be greater than zero.", "error");
 			return false;
@@ -811,9 +811,10 @@ public partial class PurchaseReturnPage
 			_purchaseReturn.LastModifiedBy = _user.Id;
 
 			_purchaseReturn.Id = await PurchaseReturnData.SavePurchaseReturnTransaction(_purchaseReturn, _cart);
-			await GenerateAndDownloadInvoice();
+			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(_purchaseReturn.Id);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			await DeleteLocalFiles();
-			NavigationManager.NavigateTo("/inventory/purchase-return", true);
+			NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn, true);
 
 			await ShowToast("Save Transaction", "Transaction saved successfully! Invoice has been generated.", "success");
 		}
@@ -824,60 +825,6 @@ public partial class PurchaseReturnPage
 		finally
 		{
 			_isProcessing = false;
-		}
-	}
-
-	private async Task GenerateAndDownloadInvoice()
-	{
-		try
-		{
-			// Load saved purchase return details (since _purchaseReturn now has the Id)
-			var savedPurchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, _purchaseReturn.Id);
-			if (savedPurchaseReturn is null)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - purchase return data not found.", "error");
-				return;
-			}
-
-			// Load purchase return details from database
-			var purchaseReturnDetails = await PurchaseReturnData.LoadPurchaseReturnDetailByPurchaseReturn(_purchaseReturn.Id);
-			if (purchaseReturnDetails is null || purchaseReturnDetails.Count == 0)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - no line items found.", "error");
-				return;
-			}
-
-			// Load company and party
-			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedPurchaseReturn.CompanyId);
-			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedPurchaseReturn.PartyId);
-
-			if (company is null || party is null)
-			{
-				await ShowToast("Warning", "Invoice generation skipped - company or party not found.", "error");
-				return;
-			}
-
-			// Generate invoice PDF
-			var pdfStream = await Task.Run(() =>
-				PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
-					savedPurchaseReturn,
-					purchaseReturnDetails,
-					company,
-					party,
-					null, // logo path - uses default
-					"PURCHASE RETURN INVOICE"
-				)
-			);
-
-			// Generate file name
-			string fileName = $"PURCHASE_RETURN_INVOICE_{savedPurchaseReturn.TransactionNo}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
-			// Save and view the PDF
-			await SaveAndViewService.SaveAndView(fileName, "application/pdf", pdfStream);
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Invoice Generation Failed", $"Transaction saved but invoice generation failed: {ex.Message}", "error");
 		}
 	}
 
@@ -927,7 +874,7 @@ public partial class PurchaseReturnPage
 
 			var (fileStream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(_purchaseReturn.DocumentUrl, BlobStorageContainers.purchasereturn);
 			var fileName = _purchaseReturn.DocumentUrl.Split('/').Last();
-			await SaveAndViewService.SaveAndView(fileName, contentType, fileStream);
+			await SaveAndViewService.SaveAndView(fileName, fileStream);
 		}
 		catch (Exception ex)
 		{
@@ -982,15 +929,15 @@ public partial class PurchaseReturnPage
 	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo("/inventory/purchase-return", true);
+		NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn, true);
 	}
 
 	private async Task NavigateToTransactionHistoryPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchase-return", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturn, "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchase-return");
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

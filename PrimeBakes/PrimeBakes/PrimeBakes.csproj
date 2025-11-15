@@ -48,6 +48,7 @@
 		<GenerateTestArtifacts>True</GenerateTestArtifacts>
 		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 		<PackageCertificateThumbprint>F291F033A7C50A646ECABA0D81F9C30F2454238B</PackageCertificateThumbprint>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
@@ -116,6 +117,13 @@
 
 	<ItemGroup>
 	  <Content Remove="Platforms\Android\google-services.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Prime Bakes.keyInfo" />
+	  <None Remove="PrimeBakes.cer" />
+	  <None Remove="PrimeBakes.keystore" />
+	  <None Remove="PrimeBakes_TemporaryKey.pfx" />
 	</ItemGroup>
 
 	<ItemGroup>

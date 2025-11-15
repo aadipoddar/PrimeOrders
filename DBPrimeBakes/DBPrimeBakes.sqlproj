@@ -80,7 +80,6 @@
     <Folder Include="StoredProcedures\LoadData\Sale" />
     <Folder Include="StoredProcedures\Reports" />
     <Folder Include="StoredProcedures\Reports\Accounts" />
-    <Folder Include="StoredProcedures\Reports\Kitchen" />
     <Folder Include="StoredProcedures\Reports\Sale" />
     <Folder Include="Tables" />
     <Folder Include="Tables\Accounts" />
@@ -142,8 +141,6 @@
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Status.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Passcode.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionDetail_By_KitchenProduction.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_LastKitchenProduction_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseDetail_By_Purchase.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_By_RawMaterialCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Recipe\Load_Recipe_By_Product.sql" />
@@ -165,7 +162,6 @@
     <Build Include="StoredProcedures\Reports\Accounts\Load_AccountingDetails_By_Date.sql" />
     <Build Include="StoredProcedures\Reports\Accounts\Load_LedgerDetails_By_Date_Ledger.sql" />
     <Build Include="StoredProcedures\Reports\Accounts\Load_TrialBalance_By_Date.sql" />
-    <Build Include="StoredProcedures\Reports\Kitchen\Load_KitchenProductionDetails_By_Date.sql" />
     <Build Include="StoredProcedures\Reports\Sale\Load_ProductDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Sale\Load_SaleDetails_By_Date_LocationId.sql" />
     <Build Include="StoredProcedures\Reports\Sale\Load_SaleReturnDetails_By_Date_LocationId.sql" />
@@ -193,7 +189,6 @@
     <Build Include="Tables\Sales\SaleReturn.sql" />
     <Build Include="Tables\Sales\SaleReturnDetail.sql" />
     <Build Include="Views\Accounting_Overview.sql" />
-    <Build Include="Views\KitchenProduction_Overview.sql" />
     <Build Include="Views\Ledger_Overview.sql" />
     <Build Include="Views\Order_Overview.sql" />
     <Build Include="Views\Product_Overview.sql" />
@@ -202,9 +197,7 @@
     <Build Include="StoredProcedures\LoadData\Order\Load_Order_By_OrderNo.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_Sale_By_BillNo.sql" />
     <Build Include="StoredProcedures\LoadData\Sale\Load_SaleReturn_By_BillNo.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_StateUT.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionOverview_By_KitchenProductionId.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_Accounting_By_TransactionNo.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Load_LedgerOverview_By_AccountingId.sql" />
     <Build Include="Views\ProductLocation_Overview.sql" />
@@ -270,6 +263,11 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssueDetail_By_KitchenIssue.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssue_Item_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssueOverview_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_Item_Overview_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionDetail_By_KitchenProduction.sql" />
+    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionOverview_By_Date.sql" />
+    <Build Include="Views\Inventory\Kitchen\KitchenProduction_Overview.sql" />
+    <Build Include="Views\Inventory\Kitchen\KitchenProduction_Item_Overview.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

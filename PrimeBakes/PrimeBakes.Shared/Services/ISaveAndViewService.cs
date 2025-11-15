@@ -2,5 +2,5 @@
 
 public interface ISaveAndViewService
 {
-	public Task<string> SaveAndView(string fileName, string contentType, MemoryStream stream);
+	public Task<string> SaveAndView(string fileName, MemoryStream stream);
 }

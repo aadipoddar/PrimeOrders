@@ -579,7 +579,7 @@ public partial class FinancialAccountingPage
 	{
 		var memoryStream = await AccountingA4Print.GenerateA4AccountingVoucher(_accounting.Id);
 		var fileName = $"AccountingVoucher_{_accounting.TransactionNo}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, "application/pdf", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 	}
 
 	private async Task DeleteCart()

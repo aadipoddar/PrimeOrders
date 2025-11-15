@@ -111,7 +111,7 @@ public partial class FinancialAccountingReportPage
 			var memoryStream = AccountingExcelExport.ExportAccountingOverviewExcel(
 			_accountingOverviews, _startDate, _endDate, _selectedVoucherId, _vouchers);
 			var fileName = $"Accounting_Report_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+			await SaveAndViewService.SaveAndView(fileName, memoryStream);
 		}
 		catch (Exception ex)
 		{

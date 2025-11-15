@@ -162,9 +162,9 @@ public partial class ProductStockAdjustment
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Location", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminLocation, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Location");
+				NavigationManager.NavigateTo(PageRouteNames.AdminLocation);
 			return;
 		}
 
@@ -184,9 +184,9 @@ public partial class ProductStockAdjustment
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/Product", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminProduct, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/Product");
+				NavigationManager.NavigateTo(PageRouteNames.AdminProduct);
 
 			return;
 		}
@@ -409,7 +409,7 @@ public partial class ProductStockAdjustment
 
 			await ProductStockData.SaveProductStockAdjustment(_transactionDateTime, _selectedLocation.Id, _cart);
 			await DeleteLocalFiles();
-			NavigationManager.NavigateTo("/inventory/product-stock-adjustment", true);
+			NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment, true);
 
 			await ShowToast("Save Transaction", "Transaction saved successfully!", "success");
 		}
@@ -431,15 +431,15 @@ public partial class ProductStockAdjustment
 	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo("/inventory/product-stock-adjustment", true);
+		NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment, true);
 	}
 
 	private async Task NavigateToProductStockReportPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/product-stock", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportProductStock, "_blank");
 		else
-			NavigationManager.NavigateTo("/report/product-stock");
+			NavigationManager.NavigateTo(PageRouteNames.ReportProductStock);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

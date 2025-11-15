@@ -145,7 +145,7 @@ public partial class LedgerReportsPage
 
 			var fileName = $"Ledger_Report{filenameSuffix}_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
 
-			await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+			await SaveAndViewService.SaveAndView(fileName, memoryStream);
 		}
 		catch (Exception ex)
 		{

@@ -2,6 +2,7 @@
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Exporting.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
@@ -30,6 +31,48 @@ public static class PurchaseData
 
 	public static async Task<List<RawMaterialModel>> LoadRawMaterialByPartyPurchaseDateTime(int PartyId, DateTime PurchaseDateTime, bool OnlyActive = true) =>
 		await SqlDataAccess.LoadData<RawMaterialModel, dynamic>(StoredProcedureNames.LoadRawMaterialByPartyPurchaseDateTime, new { PartyId, PurchaseDateTime, OnlyActive });
+
+	public static async Task<(MemoryStream stream, string fileName)> GenerateAndDownloadInvoice(int purchaseId)
+	{
+		try
+		{
+			// Load saved purchase details (since _purchase now has the Id)
+			var savedPurchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchaseId)
+				?? throw new InvalidOperationException("Saved purchase data not found.");
+
+			// Load purchase details from database
+			var purchaseDetails = await LoadPurchaseDetailByPurchase(savedPurchase.Id);
+			if (purchaseDetails is null || purchaseDetails.Count == 0)
+				throw new InvalidOperationException("No purchase details found for the saved purchase.");
+
+			// Company and party are already loaded (_selectedCompany, _selectedParty)
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedPurchase.CompanyId);
+			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedPurchase.PartyId);
+			if (company is null || party is null)
+				throw new InvalidOperationException("Company or party information is missing.");
+
+			// Generate invoice PDF
+			var pdfStream = await Task.Run(() =>
+				PurchaseInvoicePDFExport.ExportPurchaseInvoice(
+					savedPurchase,
+					purchaseDetails,
+					company,
+					party,
+					null, // logo path - uses default
+					"PURCHASE INVOICE"
+				)
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"PURCHASE_INVOICE_{savedPurchase.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+			return (pdfStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException("Failed to generate and download invoice.", ex);
+		}
+	}
 
 	public static async Task DeletePurchase(int purchaseId)
 	{

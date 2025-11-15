@@ -1,7 +1,9 @@
 ﻿using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
-using PrimeBakesLibrary.Data.Notification;
+using PrimeBakesLibrary.Exporting.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
@@ -23,6 +25,66 @@ public static class KitchenIssueData
 
 	public static async Task<List<KitchenIssueItemOverviewModel>> LoadKitchenIssueItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
 		await SqlDataAccess.LoadData<KitchenIssueItemOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenIssueItemOverviewByDate, new { StartDate, EndDate });
+
+	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int kitchenIssueId)
+	{
+		try
+		{
+			// Load saved kitchen issue details (since _kitchenIssue now has the Id)
+			var savedKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId) ??
+				throw new InvalidOperationException("Kitchen issue transaction not found.");
+
+            // Load kitchen issue details from database
+            var kitchenIssueDetails = await LoadKitchenIssueDetailByKitchenIssue(savedKitchenIssue.Id);
+			if (kitchenIssueDetails is null || kitchenIssueDetails.Count == 0)
+				throw new InvalidOperationException("No kitchen issue details found for the transaction.");
+
+			// Load company and kitchen
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedKitchenIssue.CompanyId);
+			var kitchen = await CommonData.LoadTableDataById<LocationModel>(TableNames.Kitchen, savedKitchenIssue.KitchenId);
+			if (company is null || kitchen is null)
+				throw new InvalidOperationException("Company or kitchen details not found.");
+
+			// Convert kitchen issue details to cart items with item names
+			var rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
+			var cartItems = new List<KitchenIssueItemCartModel>();
+			foreach (var detail in kitchenIssueDetails)
+			{
+				var rawMaterial = rawMaterials.FirstOrDefault(rm => rm.Id == detail.RawMaterialId);
+				cartItems.Add(new KitchenIssueItemCartModel
+				{
+					ItemId = detail.RawMaterialId,
+					ItemName = rawMaterial?.Name ?? "Unknown Item",
+					Quantity = detail.Quantity,
+					UnitOfMeasurement = detail.UnitOfMeasurement,
+					Rate = detail.Rate,
+					Total = detail.Total,
+					Remarks = detail.Remarks
+				});
+			}
+
+			// Generate invoice PDF
+			var pdfStream = await Task.Run(() =>
+				KitchenIssueInvoicePDFExport.ExportKitchenIssueInvoiceWithItems(
+					savedKitchenIssue,
+					cartItems,
+					company,
+					kitchen,
+					null, // logo path - uses default
+					"KITCHEN ISSUE INVOICE"
+				)
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"KITCHEN_ISSUE_INVOICE_{savedKitchenIssue.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+			return (pdfStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException("Failed to generate and download invoice.", ex);
+		}
+	}
 
 	public static async Task DeleteKitchenIssue(int kitchenIssueId)
 	{

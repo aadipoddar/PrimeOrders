@@ -99,7 +99,7 @@ public partial class SaleSummaryPage
 
 		var memoryStream = SaleExcelExport.ExportSaleOverviewExcel(_saleOverviews, _startDate, _endDate);
 		var fileName = $"Sale_Summary_{_startDate:yyyy-MM-dd}_to_{_endDate:yyyy-MM-dd}.xlsx";
-		await SaveAndViewService.SaveAndView(fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", memoryStream);
+		await SaveAndViewService.SaveAndView(fileName, memoryStream);
 
 		_isProcessing = false;
 		StateHasChanged();

@@ -59,10 +59,6 @@ public static class GenerateCodes
 					var saleReturn = await SaleReturnData.LoadSaleReturnByBillNo(code);
 					isDuplicate = saleReturn is not null;
 					break;
-				case CodeType.KitchenProduction:
-					var kitchenProduction = await KitchenProductionData.LoadKitchenProductionByTransactionNo(code);
-					isDuplicate = kitchenProduction is not null;
-					break;
 				case CodeType.Accounting:
 					var accounting = await AccountingData.LoadAccountingByTransactionNo(code);
 					isDuplicate = accounting is not null;
@@ -103,6 +99,10 @@ public static class GenerateCodes
 				case CodeType.KitchenIssue:
 					var kitchenIssue = await CommonData.LoadTableDataByTransactionNo<KitchenIssueModel>(TableNames.KitchenIssue, code);
 					isDuplicate = kitchenIssue is not null;
+					break;
+				case CodeType.KitchenProduction:
+					var kitchenProduction = await CommonData.LoadTableDataByTransactionNo<KitchenProductionModel>(TableNames.KitchenProduction, code);
+					isDuplicate = kitchenProduction is not null;
 					break;
 			}
 
@@ -204,13 +204,40 @@ public static class GenerateCodes
 				if (int.TryParse(lastNumberPart, out int lastNumber))
 				{
 					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}{nextNumber:D6}", 6, CodeType.Purchase);
+					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}{nextNumber:D6}", 6, CodeType.KitchenIssue);
 				}
 			}
 		}
 
-		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}000001", 6, CodeType.Purchase);
+		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenIssuePrefix}000001", 6, CodeType.KitchenIssue);
 	}
+
+	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
+	{
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenProduction.FinancialYearId);
+		var companyPrefix = (await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, 1)).PrefixCode;
+		var kitchenProductionPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.KitchenProductionTransactionPrefix)).Value;
+
+		var lastKitchenProduction = await CommonData.LoadLastTableDataByCompanyFinancialYear<KitchenProductionModel>(TableNames.KitchenProduction, kitchenProduction.CompanyId, kitchenProduction.FinancialYearId);
+		if (lastKitchenProduction is not null)
+		{
+			var lastTransactionNo = lastKitchenProduction.TransactionNo;
+			if (lastTransactionNo.StartsWith($"{companyPrefix}{financialYear.YearNo}{kitchenProductionPrefix}"))
+			{
+				var lastNumberPart = lastTransactionNo[(companyPrefix.Length + financialYear.YearNo.ToString().Length + kitchenProductionPrefix.Length)..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenProductionPrefix}{nextNumber:D6}", 6, CodeType.KitchenProduction);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{companyPrefix}{financialYear.YearNo}{kitchenProductionPrefix}000001", 6, CodeType.KitchenProduction);
+	}
+
+
+
 
 	public static async Task<string> GenerateOrderBillNo(OrderModel order)
 	{
@@ -288,32 +315,6 @@ public static class GenerateCodes
 		}
 
 		return await CheckDuplicateCode($"{location.PrefixCode}{year}SR000001", CodeType.SaleReturn);
-	}
-
-	public static async Task<string> GenerateKitchenProductionTransactionNo(KitchenProductionModel kitchenProduction)
-	{
-		var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, kitchenProduction.LocationId);
-		var year = $"{kitchenProduction.ProductionDate:yy}";
-		if (kitchenProduction.ProductionDate.Month <= 3)
-			year = $"{kitchenProduction.ProductionDate.AddYears(-1):yy}";
-
-		var lastProduction = await KitchenProductionData.LoadLastKitchenProductionByLocation(kitchenProduction.LocationId);
-		if (lastProduction is not null)
-		{
-			var lastSaleNo = lastProduction.TransactionNo;
-			if (lastSaleNo.StartsWith(location.PrefixCode))
-			{
-				var lastYear = lastSaleNo.Substring(location.PrefixCode.Length, 2);
-				if (lastYear == year)
-				{
-					int lastNumber = int.Parse(lastSaleNo[(location.PrefixCode.Length + 4)..]);
-					int nextNumber = lastNumber + 1;
-					return await CheckDuplicateCode($"{location.PrefixCode}{year}FP{nextNumber:D6}", CodeType.KitchenProduction);
-				}
-			}
-		}
-
-		return await CheckDuplicateCode($"{location.PrefixCode}{year}FP000001", CodeType.KitchenProduction);
 	}
 
 	public static async Task<string> GenerateAccountingTransactionNo(AccountingModel accounting)

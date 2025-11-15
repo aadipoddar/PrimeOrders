@@ -8,7 +8,7 @@ namespace PrimeBakes.Services;
 
 public partial class SaveService
 {
-	public partial string SaveAndView(string filename, string contentType, MemoryStream stream)
+	public partial string SaveAndView(string filename, MemoryStream stream)
 	{
 		string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 		string filePath = Path.Combine(path, filename);

@@ -4,39 +4,37 @@ using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory.Purchase;
+using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Exporting.Inventory.Purchase;
+using PrimeBakesLibrary.Exporting.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory.Purchase;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeBakes.Shared.Pages.Reports.Inventory.Purchase;
+namespace PrimeBakes.Shared.Pages.Reports.Inventory.Kitchen;
 
-public partial class PurchaseItemReport
+public partial class KitchenProductionItemReport
 {
 	private UserModel _user;
 
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
-	private bool _showPurchaseReturns = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
 
 	private CompanyModel _selectedCompany = new();
-	private LedgerModel _selectedParty = new();
+	private LocationModel _selectedKitchen = new();
 
 	private List<CompanyModel> _companies = [];
-	private List<LedgerModel> _parties = [];
-	private List<PurchaseItemOverviewModel> _purchaseItemOverviews = [];
-	private List<PurchaseReturnItemOverviewModel> _purchaseReturnItemOverviews = [];
+	private List<LocationModel> _kitchens = [];
+	private List<KitchenProductionItemOverviewModel> _kitchenProductionItemOverviews = [];
 
-	private SfGrid<PurchaseItemOverviewModel> _sfPurchaseItemGrid;
+	private SfGrid<KitchenProductionItemOverviewModel> _sfKitchenProductionItemGrid;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
@@ -63,8 +61,8 @@ public partial class PurchaseItemReport
 	{
 		await LoadDates();
 		await LoadCompanies();
-		await LoadParties();
-		await LoadPurchaseItemOverviews();
+		await LoadKitchens();
+		await LoadKitchenProductionItemOverviews();
 	}
 
 	private async Task LoadDates()
@@ -85,19 +83,19 @@ public partial class PurchaseItemReport
 		_selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadParties()
+	private async Task LoadKitchens()
 	{
-		_parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
-		_parties.Add(new()
+		_kitchens = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		_kitchens.Add(new()
 		{
 			Id = 0,
-			Name = "All Parties"
+			Name = "All Kitchens"
 		});
-		_parties = [.. _parties.OrderBy(s => s.Name)];
-		_selectedParty = _parties.FirstOrDefault(_ => _.Id == 0);
+		_kitchens = [.. _kitchens.OrderBy(s => s.Name)];
+		_selectedKitchen = _kitchens.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadPurchaseItemOverviews()
+	private async Task LoadKitchenProductionItemOverviews()
 	{
 		if (_isProcessing)
 			return;
@@ -106,88 +104,29 @@ public partial class PurchaseItemReport
 		{
 			_isProcessing = true;
 
-			_purchaseItemOverviews = await PurchaseData.LoadPurchaseItemOverviewByDate(
+			_kitchenProductionItemOverviews = await KitchenProductionData.LoadKitchenProductionItemOverviewByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
 			if (_selectedCompany?.Id > 0)
-				_purchaseItemOverviews = [.. _purchaseItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+				_kitchenProductionItemOverviews = [.. _kitchenProductionItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
-			if (_selectedParty?.Id > 0)
-				_purchaseItemOverviews = [.. _purchaseItemOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
+			if (_selectedKitchen?.Id > 0)
+				_kitchenProductionItemOverviews = [.. _kitchenProductionItemOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
 
-			_purchaseItemOverviews = [.. _purchaseItemOverviews.OrderBy(_ => _.TransactionDateTime)];
-
-			if (_showPurchaseReturns)
-				await LoadPurchaseReturnItemOverviews();
+			_kitchenProductionItemOverviews = [.. _kitchenProductionItemOverviews.OrderBy(_ => _.TransactionDateTime)];
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading purchase item overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading kitchen production item overviews: {ex.Message}", "error");
 		}
 		finally
 		{
-			if (_sfPurchaseItemGrid is not null)
-				await _sfPurchaseItemGrid.Refresh();
+			if (_sfKitchenProductionItemGrid is not null)
+				await _sfKitchenProductionItemGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
-	}
-
-	private async Task LoadPurchaseReturnItemOverviews()
-	{
-		_purchaseReturnItemOverviews = await PurchaseReturnData.LoadPurchaseReturnItemOverviewByDate(
-		DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-		DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
-
-		if (_selectedCompany?.Id > 0)
-			_purchaseReturnItemOverviews = [.. _purchaseReturnItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
-
-		if (_selectedParty?.Id > 0)
-			_purchaseReturnItemOverviews = [.. _purchaseReturnItemOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
-
-		_purchaseReturnItemOverviews = [.. _purchaseReturnItemOverviews.OrderBy(_ => _.TransactionDateTime)];
-
-		MergePurchaseAndReturns();
-	}
-
-	private void MergePurchaseAndReturns()
-	{
-		_purchaseItemOverviews.AddRange(_purchaseReturnItemOverviews.Select(pr => new PurchaseItemOverviewModel
-		{
-			Id = pr.Id,
-			PurchaseId = -pr.PurchaseReturnId,
-			ItemName = pr.ItemName,
-			ItemCode = pr.ItemCode,
-			ItemCategoryId = pr.ItemCategoryId,
-			ItemCategoryName = pr.ItemCategoryName,
-			CompanyId = pr.CompanyId,
-			CompanyName = pr.CompanyName,
-			PartyId = pr.PartyId,
-			PartyName = pr.PartyName,
-			TransactionNo = pr.TransactionNo,
-			TransactionDateTime = pr.TransactionDateTime,
-			PurchaseRemarks = pr.PurchaseReturnRemarks,
-			Quantity = -pr.Quantity,
-			Rate = pr.Rate,
-			BaseTotal = -pr.BaseTotal,
-			DiscountPercent = pr.DiscountPercent,
-			DiscountAmount = -pr.DiscountAmount,
-			AfterDiscount = -pr.AfterDiscount,
-			CGSTPercent = pr.CGSTPercent,
-			CGSTAmount = -pr.CGSTAmount,
-			SGSTPercent = pr.SGSTPercent,
-			SGSTAmount = -pr.SGSTAmount,
-			IGSTPercent = pr.IGSTPercent,
-			IGSTAmount = -pr.IGSTAmount,
-			TotalTaxAmount = -pr.TotalTaxAmount,
-			InclusiveTax = pr.InclusiveTax,
-			Total = -pr.Total,
-			NetRate = pr.NetRate,
-			Remarks = pr.Remarks
-		}));
-
-		_purchaseItemOverviews = [.. _purchaseItemOverviews.OrderBy(_ => _.TransactionDateTime)];
 	}
 	#endregion
 
@@ -196,19 +135,19 @@ public partial class PurchaseItemReport
 	{
 		_fromDate = args.StartDate;
 		_toDate = args.EndDate;
-		await LoadPurchaseItemOverviews();
+		await LoadKitchenProductionItemOverviews();
 	}
 
 	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
 	{
 		_selectedCompany = args.Value;
-		await LoadPurchaseItemOverviews();
+		await LoadKitchenProductionItemOverviews();
 	}
 
-	private async Task OnPartyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
+	private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
 	{
-		_selectedParty = args.Value;
-		await LoadPurchaseItemOverviews();
+		_selectedKitchen = args.Value;
+		await LoadKitchenProductionItemOverviews();
 	}
 
 	private async Task SetDateRange(DateRangeType rangeType)
@@ -284,7 +223,7 @@ public partial class PurchaseItemReport
 		finally
 		{
 			_isProcessing = false;
-			await LoadPurchaseItemOverviews();
+			await LoadKitchenProductionItemOverviews();
 			StateHasChanged();
 		}
 	}
@@ -305,22 +244,22 @@ public partial class PurchaseItemReport
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await Task.Run(() =>
-			PurchaseItemReportExcelExport.ExportPurchaseItemReport(
-					_purchaseItemOverviews,
+			KitchenProductionItemReportExcelExport.ExportKitchenProductionItemReport(
+					_kitchenProductionItemOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
 				)
 			);
 
-			string fileName = $"PURCHASE_ITEM_REPORT";
+			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Purchase item report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Kitchen production item report exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -347,22 +286,22 @@ public partial class PurchaseItemReport
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await Task.Run(() =>
-			PurchaseItemReportPDFExport.ExportPurchaseItemReport(
-			_purchaseItemOverviews,
+			KitchenProductionItemReportPDFExport.ExportKitchenProductionItemReport(
+			_kitchenProductionItemOverviews,
 			dateRangeStart,
 			dateRangeEnd,
 			_showAllColumns
 			)
 			);
 
-			string fileName = $"PURCHASE_ITEM_REPORT";
+			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".pdf";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Purchase item report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Kitchen production item report exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -377,33 +316,22 @@ public partial class PurchaseItemReport
 	#endregion
 
 	#region Actions
-	private async Task ViewPurchase(int purchaseId)
+	private async Task ViewKitchenProduction(int kitchenProductionId)
 	{
 		try
 		{
-			if (purchaseId < 0)
-			{
-				int actualId = Math.Abs(purchaseId);
-				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{actualId}", "_blank");
-				else
-					NavigationManager.NavigateTo($"/inventory/purchase-return/{actualId}");
-			}
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", $"/inventory/kitchen-production/{kitchenProductionId}", "_blank");
 			else
-			{
-				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase/{purchaseId}", "_blank");
-				else
-					NavigationManager.NavigateTo($"/inventory/purchase/{purchaseId}");
-			}
+				NavigationManager.NavigateTo($"/inventory/kitchen-production/{kitchenProductionId}");
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening purchase: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while opening kitchen production: {ex.Message}", "error");
 		}
 	}
 
-	private async Task DownloadInvoice(int purchaseId)
+	private async Task DownloadInvoice(int kitchenProductionId)
 	{
 		if (_isProcessing)
 			return;
@@ -413,19 +341,8 @@ public partial class PurchaseItemReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			bool isPurchaseReturn = purchaseId < 0;
-			int actualId = Math.Abs(purchaseId);
-
-			if (isPurchaseReturn)
-			{
-				var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(actualId);
-				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			}
-			else
-			{
-				var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(actualId);
-				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			}
+			var (fileName, pdfStream) = await KitchenProductionData.GenerateAndDownloadInvoice(kitchenProductionId);
+			await SaveAndViewService.SaveAndView(pdfStream, fileName);
 		}
 		catch (Exception ex)
 		{
@@ -443,33 +360,26 @@ public partial class PurchaseItemReport
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_sfPurchaseItemGrid is not null)
-			await _sfPurchaseItemGrid.Refresh();
-	}
-
-	private async Task TogglePurchaseReturns()
-	{
-		_showPurchaseReturns = !_showPurchaseReturns;
-		await LoadPurchaseItemOverviews();
-		StateHasChanged();
+		if (_sfKitchenProductionItemGrid is not null)
+			await _sfKitchenProductionItemGrid.Refresh();
 	}
 	#endregion
 
 	#region Utilities
-	private async Task NavigateToPurchasePage()
+	private async Task NavigateToKitchenProductionPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/inventory/purchase", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", "/inventory/kitchen-production", "_blank");
 		else
-			NavigationManager.NavigateTo("/inventory/purchase");
+			NavigationManager.NavigateTo("/inventory/kitchen-production");
 	}
 
-	private async Task NavigateToPurchaseReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	private async Task NavigateToKitchenProductionReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchase", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", "/report/kitchen-production", "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchase");
+			NavigationManager.NavigateTo("/report/kitchen-production");
 	}
 
 	private async Task ShowToast(string title, string message, string type)

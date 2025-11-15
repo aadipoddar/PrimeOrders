@@ -140,9 +140,9 @@ public partial class RawMaterialStockAdjustmentPage
 		if (args.Value.Id == 0)
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", "/Admin/RawMaterial", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminRawMaterial, "_blank");
 			else
-				NavigationManager.NavigateTo("/Admin/RawMaterial");
+				NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial);
 
 			return;
 		}
@@ -365,7 +365,7 @@ public partial class RawMaterialStockAdjustmentPage
 
 			await RawMaterialStockData.SaveRawMaterialStockAdjustment(_transactionDateTime, _cart);
 			await DeleteLocalFiles();
-			NavigationManager.NavigateTo("/inventory/raw-material-stock-adjustment", true);
+			NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment, true);
 
 			await ShowToast("Save Transaction", "Transaction saved successfully!", "success");
 		}
@@ -387,15 +387,15 @@ public partial class RawMaterialStockAdjustmentPage
 	private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		await DeleteLocalFiles();
-		NavigationManager.NavigateTo("/inventory/raw-material-stock-adjustment", true);
+		NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment, true);
 	}
 
 	private async Task NavigateToRawMaterialStockReportPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/raw-material-stock", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportRawMaterialStock, "_blank");
 		else
-			NavigationManager.NavigateTo("/report/raw-material-stock");
+			NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock);
 	}
 
 	private async Task ShowToast(string title, string message, string type)
