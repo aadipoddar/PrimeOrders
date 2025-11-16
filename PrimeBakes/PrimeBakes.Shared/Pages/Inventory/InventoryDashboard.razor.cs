@@ -9,13 +9,11 @@ namespace PrimeBakes.Shared.Pages.Inventory;
 public partial class InventoryDashboard
 {
 	private bool _isLoading = true;
-	private UserModel _user;
 
 	protected override async Task OnInitializedAsync()
 	{
 		_isLoading = true;
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
-		_user = authResult.User;
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		_isLoading = false;
 	}
 
@@ -24,7 +22,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.Purchase, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.Purchase);
+			NavigationManager.NavigateTo(PageRouteNames.Purchase, true);
 	}
 
 	private async Task NavigateToPurchaseReturn()
@@ -32,7 +30,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.PurchaseReturn, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn);
+			NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn, true);
 	}
 
 	private async Task NavigateToKitchenIssue()
@@ -40,7 +38,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenIssue, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.KitchenIssue);
+			NavigationManager.NavigateTo(PageRouteNames.KitchenIssue, true);
 	}
 
 	private async Task NavigateToKitchenProduction()
@@ -48,7 +46,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenProduction, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.KitchenProduction);
+			NavigationManager.NavigateTo(PageRouteNames.KitchenProduction, true);
 	}
 
 	private async Task NavigateToRawMaterialAdjustment()
@@ -56,7 +54,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.RawMaterialStockAdjustment, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment);
+			NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment, true);
 	}
 
 	private async Task NavigateToProductAdjustment()
@@ -64,7 +62,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ProductStockAdjustment, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment);
+			NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment, true);
 	}
 
 	private async Task NavigateToRecipe()
@@ -72,7 +70,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.Recipe, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.Recipe);
+			NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
 	}
 
 	private async Task NavigateToPurchaseReport()
@@ -80,7 +78,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchase, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportPurchase);
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchase, true);
 	}
 
 	private async Task NavigateToPurchaseReturnReport()
@@ -88,7 +86,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturn, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn);
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn, true);
 	}
 
 	private async Task NavigateToKitchenIssueReport()
@@ -96,7 +94,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenIssue, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue);
+			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue, true);
 	}
 
 	private async Task NavigateToKitchenProductionReport()
@@ -104,7 +102,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProduction, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction);
+			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction, true);
 	}
 
 	private async Task NavigateToRawMaterialStockReport()
@@ -112,7 +110,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportRawMaterialStock, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock);
+			NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock, true);
 	}
 
 	private async Task NavigateToProductStockReport()
@@ -120,7 +118,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportProductStock, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportProductStock);
+			NavigationManager.NavigateTo(PageRouteNames.ReportProductStock, true);
 	}
 
 	private async Task NavigateToPurchaseItemReport()
@@ -128,7 +126,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseItem, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem);
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem, true);
 	}
 
 	private async Task NavigateToPurchaseReturnItemReport()
@@ -136,7 +134,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturnItem, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem);
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem, true);
 	}
 
 	private async Task NavigateToKitchenIssueItemReport()
@@ -144,7 +142,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenIssueItem, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem);
+			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem, true);
 	}
 
 	private async Task NavigateToKitchenProductionItemReport()
@@ -152,7 +150,7 @@ public partial class InventoryDashboard
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProductionItem, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem);
+			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem, true);
 	}
 
 	private async Task Logout() =>
