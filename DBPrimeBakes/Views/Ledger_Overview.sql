@@ -31,7 +31,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
 			(SELECT TransactionNo FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
-			(SELECT BillNo FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+			(SELECT TransactionNo FROM [dbo].[SaleReturn_Overview] WHERE Id = [ad].[ReferenceId])
 	END) AS ReferenceNo,
 
 	(CASE
@@ -40,7 +40,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
 			(SELECT TransactionDateTime FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
-			(SELECT SaleReturnDateTime FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+			(SELECT TransactionDateTime FROM [dbo].[SaleReturn_Overview] WHERE Id = [ad].[ReferenceId])
 	END) AS ReferenceDate,
 
 	(CASE
@@ -49,7 +49,7 @@ SELECT
 		WHEN [ad].[ReferenceType] = 'Purchase' THEN
 			(SELECT TotalAmount FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'SaleReturn' THEN
-			(SELECT Total FROM [dbo].[SaleReturn_Overview] WHERE SaleReturnId = [ad].[ReferenceId])
+			(SELECT TotalAmount FROM [dbo].[SaleReturn_Overview] WHERE Id = [ad].[ReferenceId])
 	END) AS ReferenceAmount,
 
 	SUM([ad].[Debit]) AS Debit,

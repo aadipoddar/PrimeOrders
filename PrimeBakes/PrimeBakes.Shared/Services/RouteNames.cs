@@ -13,6 +13,10 @@ internal static class PageRouteNames
 	public static string RawMaterialStockAdjustment => "/inventory/raw-material-stock-adjustment";
 	public static string Recipe => "/inventory/recipe";
 
+	public static string SalesDashboard => "/sales";
+	public static string SaleReturn => "/sales/sale-return";
+
+	public static string ReportDashboard => "/report";
 	public static string ReportPurchase => "/report/purchase";
 	public static string ReportPurchaseReturn => "/report/purchase-return";
 	public static string ReportPurchaseItem => "/report/purchase-item";
@@ -23,6 +27,9 @@ internal static class PageRouteNames
 	public static string ReportKitchenProductionItem => "/report/kitchen-production-item";
 	public static string ReportRawMaterialStock => "/report/raw-material-stock";
 	public static string ReportProductStock => "/report/product-stock";
+	
+	public static string ReportSaleReturn => "/report/sale-return";
+	public static string ReportSaleReturnItem => "/report/sale-return-item";
 
 	public static string AdminLocation => "/admin/location";
 	public static string AdminRawMaterial => "/admin/raw-material";

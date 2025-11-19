@@ -236,7 +236,7 @@ else
 
 			@if (_user.Sales && _user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/SaleReturn")'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.SaleReturn)'>
 					<div class="card-icon sale-return-icon">↩️</div>
 					<h3>Sale Return</h3>
 					<p>Process returns and refunds for customer purchases</p>

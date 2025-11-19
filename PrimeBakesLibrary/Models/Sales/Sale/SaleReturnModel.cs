@@ -1,0 +1,191 @@
+﻿namespace PrimeBakesLibrary.Models.Sales.Sale;
+
+public class SaleReturnModel
+{
+	public int Id { get; set; }
+	public string TransactionNo { get; set; }
+	public int CompanyId { get; set; }
+	public int LocationId { get; set; }
+	public int? PartyId { get; set; }
+	public int? CustomerId { get; set; }
+	public DateTime TransactionDateTime { get; set; }
+	public int FinancialYearId { get; set; }
+	public decimal ItemsTotalAmount { get; set; }
+	public decimal OtherChargesPercent { get; set; }
+	public decimal OtherChargesAmount { get; set; }
+	public decimal DiscountPercent { get; set; }
+	public decimal DiscountAmount { get; set; }
+	public decimal RoundOffAmount { get; set; }
+	public decimal TotalAmount { get; set; }
+	public decimal Cash { get; set; }
+	public decimal Card { get; set; }
+	public decimal UPI { get; set; }
+	public decimal Credit { get; set; }
+	public string? Remarks { get; set; }
+	public int CreatedBy { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public string CreatedFromPlatform { get; set; }
+	public bool Status { get; set; }
+	public int? LastModifiedBy { get; set; }
+	public DateTime? LastModifiedAt { get; set; }
+	public string? LastModifiedFromPlatform { get; set; }
+}
+
+public class SaleReturnDetailModel
+{
+	public int Id { get; set; }
+	public int SaleReturnId { get; set; }
+	public int ProductId { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal DiscountPercent { get; set; }
+	public decimal DiscountAmount { get; set; }
+	public decimal AfterDiscount { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal TotalTaxAmount { get; set; }
+	public bool InclusiveTax { get; set; }
+	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
+	public string? Remarks { get; set; }
+	public bool Status { get; set; }
+}
+
+public class SaleReturnItemCartModel
+{
+	public int ItemId { get; set; }
+	public string ItemName { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal DiscountPercent { get; set; }
+	public decimal DiscountAmount { get; set; }
+	public decimal AfterDiscount { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal TotalTaxAmount { get; set; }
+	public bool InclusiveTax { get; set; }
+	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
+	public string? Remarks { get; set; }
+}
+
+public class SaleReturnOverviewModel
+{
+	public int Id { get; set; }
+	public string TransactionNo { get; set; }
+	public int CompanyId { get; set; }
+	public string CompanyName { get; set; }
+	public int LocationId { get; set; }
+	public string LocationName { get; set; }
+
+	public int? PartyId { get; set; }
+	public string? PartyName { get; set; }
+	public int? CustomerId { get; set; }
+	public string? CustomerName { get; set; }
+	public DateTime TransactionDateTime { get; set; }
+	public int FinancialYearId { get; set; }
+	public string FinancialYear { get; set; }
+
+	public decimal OtherChargesPercent { get; set; }
+	public decimal OtherChargesAmount { get; set; }
+	public decimal DiscountPercent { get; set; }
+	public decimal DiscountAmount { get; set; }
+
+	public int TotalItems { get; set; }
+	public decimal TotalQuantity { get; set; }
+
+	public decimal BaseTotal { get; set; }
+
+	public decimal ItemDiscountPercent { get; set; }
+	public decimal ItemDiscountAmount { get; set; }
+
+	public decimal AfterDiscount { get; set; }
+
+	public decimal SGSTPercent { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal IGSTPercent { get; set; }
+
+	public decimal SGSTAmount { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal IGSTAmount { get; set; }
+
+	public decimal TotalTaxAmount { get; set; }
+
+	public decimal TotalAfterTax { get; set; }
+
+	public decimal TotalAfterOtherCharges { get; set; }
+	public decimal TotalAfterDiscount { get; set; }
+	public decimal RoundOffAmount { get; set; }
+	public decimal TotalAmount { get; set; }
+
+	public decimal Cash { get; set; }
+	public decimal Card { get; set; }
+	public decimal UPI { get; set; }
+	public decimal Credit { get; set; }
+
+	public string? Remarks { get; set; }
+	public int CreatedBy { get; set; }
+	public string CreatedByName { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public string CreatedFromPlatform { get; set; }
+	public int? LastModifiedBy { get; set; }
+	public string? LastModifiedByUserName { get; set; }
+	public DateTime? LastModifiedAt { get; set; }
+	public string? LastModifiedFromPlatform { get; set; }
+	public bool Status { get; set; }
+}
+
+public class SaleReturnItemOverviewModel
+{
+	public int Id { get; set; }
+	public string ItemName { get; set; }
+	public string ItemCode { get; set; }
+	public int ItemCategoryId { get; set; }
+	public string ItemCategoryName { get; set; }
+
+	public int SaleReturnId { get; set; }
+	public string TransactionNo { get; set; }
+	public DateTime TransactionDateTime { get; set; }
+	public int CompanyId { get; set; }
+	public string CompanyName { get; set; }
+	public int LocationId { get; set; }
+	public string LocationName { get; set; }
+
+	public int? PartyId { get; set; }
+	public string? PartyName { get; set; }
+	public int? CustomerId { get; set; }
+	public string? CustomerName { get; set; }
+	public string? SaleReturnRemarks { get; set; }
+
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal BaseTotal { get; set; }
+
+	public decimal DiscountPercent { get; set; }
+	public decimal DiscountAmount { get; set; }
+	public decimal AfterDiscount { get; set; }
+
+	public decimal CGSTPercent { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal TotalTaxAmount { get; set; }
+	public bool InclusiveTax { get; set; }
+
+	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
+
+	public string? Remarks { get; set; }
+}

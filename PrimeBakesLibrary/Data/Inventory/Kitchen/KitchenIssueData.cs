@@ -127,11 +127,15 @@ public static class KitchenIssueData
 
 		if (update)
 		{
-			var existingkitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssue.Id);
-			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingkitchenIssue.FinancialYearId);
+			var existingKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssue.Id);
+			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingKitchenIssue.FinancialYearId);
 			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
+
+			kitchenIssue.TransactionNo = existingKitchenIssue.TransactionNo;
 		}
+		else
+			kitchenIssue.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(kitchenIssue);
 
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenIssue.FinancialYearId);
 		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
@@ -140,7 +144,6 @@ public static class KitchenIssueData
 		kitchenIssue.Id = await InsertKitchenIssue(kitchenIssue);
 		await SaveKitchenIssueDetail(kitchenIssue, kitchenIssueDetails, update);
 		await SaveRawMaterialStock(kitchenIssue, kitchenIssueDetails, update);
-		// await SendNotification.SendKitchenIssueNotificationMainLocationAdminInventory(kitchenIssue.Id);
 
 		return kitchenIssue.Id;
 	}

@@ -6,12 +6,11 @@ using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.Data.Inventory.Stock;
+using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Exporting.Inventory.Purchase;
 using PrimeBakesLibrary.Exporting.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Grids;
@@ -260,12 +259,12 @@ public partial class ProductStockReport
 		{
 			var url = type?.ToLower() switch
 			{
-				"purchase" => $"/inventory/purchase/{transactionId}",
-				"purchasereturn" => $"/inventory/purchase-return/{transactionId}",
+				"purchase" => $"{PageRouteNames.Purchase}/{transactionId}",
+				"purchasereturn" => $"{PageRouteNames.PurchaseReturn}/{transactionId}",
 				"sale" => $"/sale/sale/{transactionId}",
-				"salereturn" => $"/sale/sale-return/{transactionId}",
-				"kitchenissue" => $"/production/kitchen-issue/{transactionId}",
-				"kitchenproduction" => $"/production/kitchen-production/{transactionId}",
+				"salereturn" => $"{PageRouteNames.SaleReturn}/{transactionId}",
+				"kitchenissue" => $"{PageRouteNames.KitchenIssue}/{transactionId}",
+				"kitchenproduction" => $"{PageRouteNames.KitchenProduction}/{transactionId}",
 				_ => null
 			};
 
@@ -295,6 +294,32 @@ public partial class ProductStockReport
 		{
 			_isProcessing = true;
 			StateHasChanged();
+
+			if (type.ToLower() == "purchase")
+			{
+				var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+				await ShowToast("Success", "Invoice downloaded successfully.", "success");
+				return;
+			}
+			else if (type.ToLower() == "purchasereturn")
+			{
+				var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+				await ShowToast("Success", "Invoice downloaded successfully.", "success");
+				return;
+			}
+			else if (type.ToLower() == "sale")
+			{
+				return;
+			}
+			else if (type.ToLower() == "salereturn")
+			{
+				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+				await ShowToast("Success", "Invoice downloaded successfully.", "success");
+				return;
+			}
 
 			await ShowToast("Info", "Invoice download functionality to be implemented.", "error");
 		}
@@ -439,13 +464,11 @@ public partial class ProductStockReport
 			if (_showDetails)
 			{
 				// Load details if not already loaded
-				if (_stockDetails == null || _stockDetails.Count == 0)
-				{
+				if (_stockDetails is null || _stockDetails.Count == 0)
 					await LoadStockDetails();
-				}
 
 				// Generate the details PDF file
-				if (_stockDetails != null && _stockDetails.Count > 0)
+				if (_stockDetails is not null && _stockDetails.Count > 0)
 				{
 					var detailsStream = await Task.Run(() =>
 						ProductStockDetailsReportPDFExport.ExportProductStockDetailsReport(
@@ -458,21 +481,11 @@ public partial class ProductStockReport
 
 					// Generate details file name
 					string detailsFileName = $"PRODUCT_STOCK_DETAILS_{timestamp}.pdf";
-
-					// Save and view the details PDF file
 					await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
+				}
+			}
 
-					await ShowToast("Success", "Stock summary and details exported to PDF successfully.", "success");
-				}
-				else
-				{
-					await ShowToast("Success", "Stock summary exported to PDF successfully. No details available.", "success");
-				}
-			}
-			else
-			{
-				await ShowToast("Success", "Stock summary exported to PDF successfully.", "success");
-			}
+			await ShowToast("Success", "Stock exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{

@@ -51,7 +51,7 @@ public partial class PurchaseReturnItemReport
 		if (!firstRender)
 			return;
 
-		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
+		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
 		_user = authResult.User;
 		await LoadData();
 		_isLoading = false;
@@ -325,16 +325,16 @@ public partial class PurchaseReturnItemReport
 			{
 				int actualId = Math.Abs(purchaseReturnId);
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase/{actualId}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{actualId}", "_blank");
 				else
-					NavigationManager.NavigateTo($"/inventory/purchase/{actualId}");
+					NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{actualId}");
 			}
 			else
 			{
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{purchaseReturnId}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{purchaseReturnId}", "_blank");
 				else
-					NavigationManager.NavigateTo($"/inventory/purchase-return/{purchaseReturnId}");
+					NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{purchaseReturnId}");
 			}
 		}
 		catch (Exception ex)
@@ -381,17 +381,17 @@ public partial class PurchaseReturnItemReport
 	private async Task NavigateToPurchaseReturnPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/inventory/purchase-return", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.PurchaseReturn, "_blank");
 		else
-			NavigationManager.NavigateTo("/inventory/purchase-return");
+			NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn);
 	}
 
 	private async Task NavigateToPurchaseReturnReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", "/report/purchase-return", "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturn, "_blank");
 		else
-			NavigationManager.NavigateTo("/report/purchase-return");
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

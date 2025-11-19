@@ -32,6 +32,10 @@ public static class PDFInvoiceExportUtil
 		public decimal CashDiscountPercent { get; set; }
 		public decimal RoundOffAmount { get; set; }
 		public decimal TotalAmount { get; set; }
+		public decimal Cash { get; set; }
+		public decimal Card { get; set; }
+		public decimal UPI { get; set; }
+		public decimal Credit { get; set; }
 		public string Remarks { get; set; }
 		public bool Status { get; set; } = true; // True = Active, False = Deleted
 	}
@@ -89,17 +93,20 @@ public static class PDFInvoiceExportUtil
 	/// <param name="invoiceData">Generic invoice header data</param>
 	/// <param name="lineItems">Generic invoice line items</param>
 	/// <param name="company">Company information (Bill From)</param>
-	/// <param name="customer">Customer/Party information (Bill To)</param>
+	/// <param name="billTo">Customer/Party information (Bill To)</param>
 	/// <param name="logoPath">Optional: Path to company logo</param>
 	/// <param name="invoiceType">Type of invoice (INVOICE, PURCHASE RETURN, SALES INVOICE, etc.)</param>
+	/// <param name="outlet">Optional: Outlet/Location name</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
 	public static MemoryStream ExportInvoiceToPdf(
 		InvoiceData invoiceData,
 		List<InvoiceLineItem> lineItems,
 		CompanyModel company,
-		LedgerModel customer,
+		LedgerModel billTo,
 		string logoPath = null,
-		string invoiceType = "INVOICE")
+		string invoiceType = "INVOICE",
+		string outlet = null,
+		CustomerModel customer = null)
 	{
 		MemoryStream ms = new();
 
@@ -119,7 +126,7 @@ public static class PDFInvoiceExportUtil
 			currentY = DrawInvoiceHeader(graphics, company, logoPath, leftMargin, pageWidth, currentY);
 
 			// 2. Invoice Type and Number
-			currentY = DrawInvoiceTitle(graphics, invoiceType, invoiceData.TransactionNo, leftMargin, pageWidth, currentY);
+			currentY = DrawInvoiceTitle(graphics, invoiceType, invoiceData.TransactionNo, leftMargin, pageWidth, currentY, outlet);
 
 			// 2.5. Draw DELETED status badge if Status is false
 			if (!invoiceData.Status)
@@ -128,7 +135,7 @@ public static class PDFInvoiceExportUtil
 			}
 
 			// 3. Company and Customer Information (Two Columns)
-			currentY = DrawCompanyAndCustomerInfo(graphics, company, customer, invoiceData, leftMargin, pageWidth, currentY);
+			currentY = DrawCompanyAndCustomerInfo(graphics, company, billTo, customer, invoiceData, leftMargin, pageWidth, currentY);
 
 			// 4. Line Items Table
 			PdfGridLayoutResult gridResult = DrawLineItemsTableWithResult(page, pdfDocument, lineItems, leftMargin, rightMargin, pageWidth, currentY);
@@ -141,8 +148,11 @@ public static class PDFInvoiceExportUtil
 			// 5. Summary Section with Remarks (two-column layout on the last page)
 			currentY = DrawSummaryAndRemarks(lastPageGraphics, invoiceData, leftMargin, pageWidth, currentY);
 
-			// 6. Amount in Words (on the last page)
-			currentY = DrawAmountInWords(lastPageGraphics, invoiceData.TotalAmount, leftMargin, pageWidth, currentY);
+			// 6. Amount in Words and Payment Methods side by side (on the last page)
+			float amountInWordsStartY = currentY;
+			float amountInWordsEndY = DrawAmountInWords(lastPageGraphics, invoiceData.TotalAmount, leftMargin, pageWidth, currentY);
+			float paymentMethodsEndY = DrawPaymentMethods(lastPageGraphics, invoiceData, leftMargin, pageWidth, amountInWordsStartY);
+			currentY = Math.Max(amountInWordsEndY, paymentMethodsEndY);
 
 			// 7. Software Branding Footer (on all pages)
 			AddBrandingFooter(pdfDocument);
@@ -236,7 +246,7 @@ public static class PDFInvoiceExportUtil
 	/// <summary>
 	/// Draw invoice type and number
 	/// </summary>
-	private static float DrawInvoiceTitle(PdfGraphics graphics, string invoiceType, string invoiceNumber, float leftMargin, float pageWidth, float startY)
+	private static float DrawInvoiceTitle(PdfGraphics graphics, string invoiceType, string invoiceNumber, float leftMargin, float pageWidth, float startY, string outlet = null)
 	{
 		float currentY = startY;
 
@@ -253,6 +263,17 @@ public static class PDFInvoiceExportUtil
 			new PointF(pageWidth - 20 - numberSize.Width, currentY));
 
 		currentY += 20;
+
+		// Draw Outlet label if provided
+		if (!string.IsNullOrWhiteSpace(outlet))
+		{
+			PdfStandardFont outletFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold);
+			PdfBrush outletBrush = new PdfSolidBrush(new PdfColor(100, 100, 100));
+			string outletText = $"Outlet: {outlet}";
+			graphics.DrawString(outletText, outletFont, outletBrush, new PointF(leftMargin, currentY));
+			currentY += 18;
+		}
+
 		return currentY;
 	}
 
@@ -289,7 +310,7 @@ public static class PDFInvoiceExportUtil
 	/// Draw company and customer information in two columns
 	/// </summary>
 	private static float DrawCompanyAndCustomerInfo(PdfGraphics graphics, CompanyModel company,
-		LedgerModel customer, InvoiceData invoiceData, float leftMargin, float pageWidth, float startY)
+		LedgerModel billTo, CustomerModel customer, InvoiceData invoiceData, float leftMargin, float pageWidth, float startY)
 	{
 		float currentY = startY;
 		float columnWidth = (pageWidth - 40 - 10) / 2; // 10px gap between columns
@@ -341,50 +362,71 @@ public static class PDFInvoiceExportUtil
 			leftTextY += 9;
 		}
 
-		// Right Column - To (Customer)
-		graphics.DrawString("BILL TO:", labelFont, labelBrush, new PointF(rightColumnX + padding, rightTextY));
-		rightTextY += 10;
-
-		graphics.DrawString(customer.Name, valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
-		rightTextY += 9;
-
-		if (!string.IsNullOrEmpty(customer.Address))
+		// Right Column - To (Customer/Party) - skip entire section if null
+		if (billTo != null)
 		{
-			// Calculate actual address height dynamically
-			int addressLines = Math.Max(1, customer.Address.Length / 50);
-			float addressHeight = addressLines * 9;
-			DrawWrappedText(graphics, customer.Address, valueFont, valueBrush,
-				new RectangleF(rightColumnX + padding, rightTextY, columnWidth - 2 * padding, addressHeight + 5));
-			rightTextY += addressHeight + 2;
+			graphics.DrawString("BILL TO:", labelFont, labelBrush, new PointF(rightColumnX + padding, rightTextY));
+			rightTextY += 10;
+
+			graphics.DrawString(billTo.Name, valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
+			rightTextY += 9;
+
+			if (!string.IsNullOrEmpty(billTo.Address))
+			{
+				// Calculate actual address height dynamically
+				int addressLines = Math.Max(1, billTo.Address.Length / 50);
+				float addressHeight = addressLines * 9;
+				DrawWrappedText(graphics, billTo.Address, valueFont, valueBrush,
+					new RectangleF(rightColumnX + padding, rightTextY, columnWidth - 2 * padding, addressHeight + 5));
+				rightTextY += addressHeight + 2;
+			}
+
+			if (!string.IsNullOrEmpty(billTo.Phone))
+			{
+				graphics.DrawString($"Phone: {billTo.Phone}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
+				rightTextY += 9;
+			}
+
+			if (!string.IsNullOrEmpty(billTo.Email))
+			{
+				graphics.DrawString($"Email: {billTo.Email}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
+				rightTextY += 9;
+			}
+
+			if (!string.IsNullOrEmpty(billTo.GSTNo))
+			{
+				graphics.DrawString($"GSTIN: {billTo.GSTNo}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
+				rightTextY += 9;
+			}
 		}
 
-		if (!string.IsNullOrEmpty(customer.Phone))
+		// Customer Information (if present) - displayed after BILL TO section or standalone
+		if (customer != null && (!string.IsNullOrEmpty(customer.Name) || !string.IsNullOrEmpty(customer.Number)))
 		{
-			graphics.DrawString($"Phone: {customer.Phone}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
-			rightTextY += 9;
-		}
+			// Add spacing if billTo section exists
+			if (billTo != null)
+				rightTextY += 5;
 
-		if (!string.IsNullOrEmpty(customer.Email))
-		{
-			graphics.DrawString($"Email: {customer.Email}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
-			rightTextY += 9;
-		}
+			graphics.DrawString("CUSTOMER:", labelFont, labelBrush, new PointF(rightColumnX + padding, rightTextY));
+			rightTextY += 10;
 
-		if (!string.IsNullOrEmpty(customer.GSTNo))
-		{
-			graphics.DrawString($"GSTIN: {customer.GSTNo}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
-			rightTextY += 9;
+			if (!string.IsNullOrEmpty(customer.Name))
+			{
+				graphics.DrawString(customer.Name, valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
+				rightTextY += 9;
+			}
+
+			if (!string.IsNullOrEmpty(customer.Number))
+			{
+				graphics.DrawString($"Phone: {customer.Number}", valueFont, valueBrush, new PointF(rightColumnX + padding, rightTextY));
+				rightTextY += 9;
+			}
 		}
 
 		// Calculate dynamic box height based on content
 		float leftContentHeight = leftTextY - leftStartY;
 		float rightContentHeight = rightTextY - rightStartY;
 		float boxHeight = Math.Max(leftContentHeight, rightContentHeight) + padding;
-
-		// No borders - removed for cleaner look
-		// PdfPen boxPen = new(new PdfColor(200, 200, 200), 1f);
-		// graphics.DrawRectangle(boxPen, new RectangleF(leftMargin, currentY, columnWidth, boxHeight));
-		// graphics.DrawRectangle(boxPen, new RectangleF(rightColumnX, currentY, columnWidth, boxHeight));
 
 		currentY += boxHeight + 8;
 
@@ -404,12 +446,13 @@ public static class PDFInvoiceExportUtil
 	{
 		PdfGrid pdfGrid = new();
 
-		// Check if any item has discount or tax
+		// Check if any item has discount, tax, or UOM
 		bool hasDiscount = lineItems.Any(i => i.DiscountPercent > 0);
 		bool hasTax = lineItems.Any(i => i.CGSTPercent > 0 || i.SGSTPercent > 0 || i.IGSTPercent > 0 || i.TotalTaxAmount > 0);
+		bool hasUOM = lineItems.Any(i => !string.IsNullOrWhiteSpace(i.UnitOfMeasurement));
 
 		// Define column settings
-		var columnSettings = GetInvoiceColumnSettings(hasDiscount, hasTax);
+		var columnSettings = GetInvoiceColumnSettings(hasDiscount, hasTax, hasUOM);
 
 		// Calculate available width and adjust description column
 		float availableWidth = pageWidth - leftMargin - rightMargin;
@@ -499,18 +542,21 @@ public static class PDFInvoiceExportUtil
 	}
 
 	/// <summary>
-	/// Get invoice column settings based on whether items have discount/tax
+	/// Get invoice column settings based on whether items have discount/tax/UOM
 	/// </summary>
-	private static List<InvoiceColumnSetting> GetInvoiceColumnSettings(bool hasDiscount, bool hasTax)
+	private static List<InvoiceColumnSetting> GetInvoiceColumnSettings(bool hasDiscount, bool hasTax, bool hasUOM)
 	{
 		var settings = new List<InvoiceColumnSetting>
 		{
 			new("RowNumber", "#", 25, PdfTextAlignment.Center),
 			new("ItemName", "Item Description", 0, PdfTextAlignment.Left), // Width calculated dynamically
-			new("Quantity", "Qty", 40, PdfTextAlignment.Right, "#,##0.00"),
-			new("UnitOfMeasurement", "UOM", 40, PdfTextAlignment.Center),
-			new("Rate", "Rate", 55, PdfTextAlignment.Right, "#,##0.00")
+			new("Quantity", "Qty", 40, PdfTextAlignment.Right, "#,##0.00")
 		};
+
+		if (hasUOM)
+			settings.Add(new("UnitOfMeasurement", "UOM", 40, PdfTextAlignment.Center, null, true));
+
+		settings.Add(new("Rate", "Rate", 55, PdfTextAlignment.Right, "#,##0.00"));
 
 		if (hasDiscount)
 			settings.Add(new("DiscountPercent", "Disc %", 45, PdfTextAlignment.Right, "#,##0.00", true));
@@ -675,7 +721,7 @@ public static class PDFInvoiceExportUtil
 	}
 
 	/// <summary>
-	/// Draw amount in words
+	/// Draw amount in words and payment methods side by side
 	/// </summary>
 	private static float DrawAmountInWords(PdfGraphics graphics, decimal amount, float leftMargin, float pageWidth, float startY)
 	{
@@ -687,13 +733,74 @@ public static class PDFInvoiceExportUtil
 
 		string amountInWords = ConvertAmountToWords(amount);
 
+		// Left column width for amount in words
+		float leftColumnWidth = (pageWidth - 40) * 0.6f; // 60% for amount in words
+
 		graphics.DrawString("Amount in Words:", labelFont, labelBrush, new PointF(leftMargin, currentY));
 		currentY += 10;
 
 		DrawWrappedText(graphics, amountInWords, valueFont, labelBrush,
-			new RectangleF(leftMargin, currentY, pageWidth - 40, 20));
+			new RectangleF(leftMargin, currentY, leftColumnWidth, 20));
 		currentY += 18;
 
+		return currentY;
+	}
+
+	/// <summary>
+	/// Draw payment methods breakdown
+	/// </summary>
+	private static float DrawPaymentMethods(PdfGraphics graphics, InvoiceData invoiceData, float leftMargin, float pageWidth, float startY)
+	{
+		// Check if any payment method has value
+		bool hasPayments = invoiceData.Cash > 0 || invoiceData.Card > 0 || invoiceData.UPI > 0 || invoiceData.Credit > 0;
+		if (!hasPayments)
+			return startY;
+
+		PdfStandardFont labelFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
+		PdfStandardFont valueFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Regular);
+		PdfBrush labelBrush = new PdfSolidBrush(new PdfColor(0, 0, 0));
+		PdfBrush valueBrush = new PdfSolidBrush(new PdfColor(37, 99, 235)); // Blue for amounts
+
+		// Position payment methods on the right side (40% of width)
+		float rightColumnX = leftMargin + (pageWidth - 40) * 0.6f + 20; // Start after amount in words
+		float currentY = startY;
+
+		graphics.DrawString("Payment Methods:", labelFont, labelBrush, new PointF(rightColumnX, currentY));
+		currentY += 12;
+
+		// Draw each payment method that has a value > 0
+		float methodX = rightColumnX + 10;
+		float amountX = rightColumnX + 80;
+
+		if (invoiceData.Cash > 0)
+		{
+			graphics.DrawString("Cash:", valueFont, labelBrush, new PointF(methodX, currentY));
+			graphics.DrawString(invoiceData.Cash.FormatIndianCurrency(), valueFont, valueBrush, new PointF(amountX, currentY));
+			currentY += 10;
+		}
+
+		if (invoiceData.Card > 0)
+		{
+			graphics.DrawString("Card:", valueFont, labelBrush, new PointF(methodX, currentY));
+			graphics.DrawString(invoiceData.Card.FormatIndianCurrency(), valueFont, valueBrush, new PointF(amountX, currentY));
+			currentY += 10;
+		}
+
+		if (invoiceData.UPI > 0)
+		{
+			graphics.DrawString("UPI:", valueFont, labelBrush, new PointF(methodX, currentY));
+			graphics.DrawString(invoiceData.UPI.FormatIndianCurrency(), valueFont, valueBrush, new PointF(amountX, currentY));
+			currentY += 10;
+		}
+
+		if (invoiceData.Credit > 0)
+		{
+			graphics.DrawString("Credit:", valueFont, labelBrush, new PointF(methodX, currentY));
+			graphics.DrawString(invoiceData.Credit.FormatIndianCurrency(), valueFont, valueBrush, new PointF(amountX, currentY));
+			currentY += 10;
+		}
+
+		currentY += 5; // Add spacing after payment methods
 		return currentY;
 	}
 

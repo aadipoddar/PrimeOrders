@@ -576,21 +576,6 @@ public partial class PurchaseReturnPage
 		_cart.Remove(cartItem);
 		await SavePurchaseReturnFile();
 	}
-
-	private async Task ClearCart()
-	{
-		if (_cart.Count == 0)
-		{
-			await ShowToast("Cart Empty", "The cart is already empty.", "error");
-			return;
-		}
-
-		_cart.Clear();
-		_selectedRawMaterial = null;
-		_selectedCart = new();
-		await SavePurchaseReturnFile();
-		await ShowToast("Cart Cleared", "All items have been removed from the cart.", "success");
-	}
 	#endregion
 
 	#region Saving

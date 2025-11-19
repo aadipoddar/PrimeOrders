@@ -66,7 +66,7 @@ else
 						<p>Comprehensive transaction-level sales analysis</p>
 					</div>
 
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/SaleReturn")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturn)'>
 						<div class="card-icon sale-return-icon">
 							<i class="fas fa-undo-alt"></i>
 						</div>
@@ -116,7 +116,7 @@ else
 
 				@if (_user.Inventory)
 				{
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/product-stock")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportProductStock)'>
 						<div class="card-icon product-stock-icon">
 							<i class="fas fa-warehouse"></i>
 						</div>
@@ -136,7 +136,7 @@ else
 					<p>Track kitchen operations and production efficiency</p>
 				</div>
 				<div class="dashboard-cards">
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/kitchen-issue")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue)'>
 						<div class="card-icon kitchen-issue-icon">
 							<i class="fas fa-exclamation-triangle"></i>
 						</div>
@@ -144,7 +144,7 @@ else
 						<p>Monitor kitchen incidents and issue tracking</p>
 					</div>
 
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Kitchen-Production")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction)'>
 						<div class="card-icon kitchen-production-icon">
 							<i class="fas fa-industry"></i>
 						</div>
@@ -161,7 +161,7 @@ else
 					<p>Manage supply chain and raw material analytics</p>
 				</div>
 				<div class="dashboard-cards">
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/purchase")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchase)'>
 						<div class="card-icon purchase-report-icon">
 							<i class="fas fa-receipt"></i>
 						</div>
@@ -169,7 +169,7 @@ else
 						<p>Track procurement activities and expenditures</p>
 					</div>
 
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/purchase-return")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn)'>
 						<div class="card-icon purchase-report-icon">
 							<i class="fas fa-receipt"></i>
 						</div>
@@ -177,7 +177,7 @@ else
 						<p>Track procurement activities and expenditures</p>
 					</div>
 
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/report/raw-material-stock")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock)'>
 						<div class="card-icon stock-report-icon">
 							<i class="fas fa-boxes"></i>
 						</div>

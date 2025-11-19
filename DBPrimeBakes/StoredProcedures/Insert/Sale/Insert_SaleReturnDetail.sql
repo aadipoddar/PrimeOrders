@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_SaleReturnDetail]
-	@Id INT,
+	@Id INT OUTPUT,
 	@SaleReturnId INT,
 	@ProductId INT,
-	@Quantity DECIMAL(7, 3),
+	@Quantity MONEY,
 	@Rate MONEY,
 	@BaseTotal MONEY,
-	@DiscPercent DECIMAL(5, 2),
-	@DiscAmount MONEY,
+	@DiscountPercent DECIMAL(5, 2),
+	@DiscountAmount MONEY,
 	@AfterDiscount MONEY,
 	@CGSTPercent DECIMAL(5, 2),
 	@CGSTAmount MONEY,
@@ -14,8 +14,11 @@
 	@SGSTAmount MONEY,
 	@IGSTPercent DECIMAL(5, 2),
 	@IGSTAmount MONEY,
+	@TotalTaxAmount MONEY,
+	@InclusiveTax BIT,
 	@Total MONEY,
 	@NetRate MONEY,
+	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
 BEGIN
@@ -23,32 +26,36 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[SaleReturnDetail]
 		(
-			SaleReturnId,
-			ProductId,
-			Quantity,
-			Rate,
-			BaseTotal,
-			DiscPercent,
-			DiscAmount,
-			AfterDiscount,
-			CGSTPercent,
-			CGSTAmount,
-			SGSTPercent,
-			SGSTAmount,
-			IGSTPercent,
-			IGSTAmount,
-			Total,
-			NetRate,
-			Status
-		) VALUES
+			[SaleReturnId],
+			[ProductId],
+			[Quantity],
+			[Rate],
+			[BaseTotal],
+			[DiscountPercent],
+			[DiscountAmount],
+			[AfterDiscount],
+			[CGSTPercent],
+			[CGSTAmount],
+			[SGSTPercent],
+			[SGSTAmount],
+			[IGSTPercent],
+			[IGSTAmount],
+			[TotalTaxAmount],
+			[InclusiveTax],
+			[Total],
+			[NetRate],
+			[Remarks],
+			[Status]
+		)
+		VALUES
 		(
 			@SaleReturnId,
 			@ProductId,
 			@Quantity,
 			@Rate,
 			@BaseTotal,
-			@DiscPercent,
-			@DiscAmount,
+			@DiscountPercent,
+			@DiscountAmount,
 			@AfterDiscount,
 			@CGSTPercent,
 			@CGSTAmount,
@@ -56,33 +63,44 @@ BEGIN
 			@SGSTAmount,
 			@IGSTPercent,
 			@IGSTAmount,
+			@TotalTaxAmount,
+			@InclusiveTax,
 			@Total,
 			@NetRate,
+			@Remarks,
 			@Status
-		);
+		)
+		SET @Id = SCOPE_IDENTITY()
 	END
 
 	ELSE
 	BEGIN
 		UPDATE [dbo].[SaleReturnDetail]
 		SET
-			SaleReturnId = @SaleReturnId,
-			ProductId = @ProductId,
-			Quantity = @Quantity,
-			Rate = @Rate,
-			BaseTotal = @BaseTotal,
-			DiscPercent = @DiscPercent,
-			DiscAmount = @DiscAmount,
-			AfterDiscount = @AfterDiscount,
-			CGSTPercent = @CGSTPercent,
-			CGSTAmount = @CGSTAmount,
-			SGSTPercent = @SGSTPercent,
-			SGSTAmount = @SGSTAmount,
-			IGSTPercent = @IGSTPercent,
-			IGSTAmount = @IGSTAmount,
-			Total = @Total, 
-			NetRate = @NetRate,
-			Status = @Status
-		WHERE Id = @Id;
+			[SaleReturnId] = @SaleReturnId,
+			[ProductId] = @ProductId,
+			[Quantity] = @Quantity,
+			[Rate] = @Rate,
+			[BaseTotal] = @BaseTotal,
+			[DiscountPercent] = @DiscountPercent,
+			[DiscountAmount] = @DiscountAmount,
+			[AfterDiscount] = @AfterDiscount,
+			[CGSTPercent] = @CGSTPercent,
+			[CGSTAmount] = @CGSTAmount,
+			[SGSTPercent] = @SGSTPercent,
+			[SGSTAmount] = @SGSTAmount,
+			[IGSTPercent] = @IGSTPercent,
+			[IGSTAmount] = @IGSTAmount,
+			[TotalTaxAmount] = @TotalTaxAmount,
+			[InclusiveTax] = @InclusiveTax,
+			[Total] = @Total,
+			[NetRate] = @NetRate,
+			[Remarks] = @Remarks,
+			[Status] = @Status
+		WHERE
+			[Id] = @Id
 	END
-END;
+
+	SELECT @Id AS Id
+
+END

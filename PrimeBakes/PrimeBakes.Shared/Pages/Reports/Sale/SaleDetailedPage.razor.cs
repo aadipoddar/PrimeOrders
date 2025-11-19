@@ -10,6 +10,7 @@ using PrimeBakesLibrary.Exporting.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sale;
+using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.DropDowns;
@@ -134,62 +135,6 @@ public partial class SaleDetailedPage
 		if (_selectedSupplier is not null && _user.LocationId == 1)
 		{
 			filtered = [.. filtered.Where(s => s.PartyId == _selectedSupplier.Id)];
-
-			var allSaleReturns = await SaleReturnData.LoadSaleReturnDetailsByDateLocationId(
-				_startDate.ToDateTime(TimeOnly.MinValue),
-				_endDate.ToDateTime(TimeOnly.MaxValue),
-				1);
-
-			var saleReturns = allSaleReturns
-				.Where(sr => sr.PartyId == _selectedSupplier.Id).ToList();
-
-			// Apply payment method filter
-			if (!string.IsNullOrEmpty(_selectedPaymentFilter) && _selectedPaymentFilter != "All")
-				saleReturns = [.. saleReturns.Where(s => GetPrimaryPaymentMethod(s) == _selectedPaymentFilter)];
-
-			foreach (var saleReturn in saleReturns)
-				filtered.Add(new()
-				{
-					SaleId = -saleReturn.SaleReturnId, // Negative ID to differentiate
-					BillNo = saleReturn.BillNo,
-					UserId = saleReturn.UserId,
-					UserName = saleReturn.UserName,
-					SaleDateTime = saleReturn.SaleReturnDateTime,
-					LocationId = saleReturn.LocationId,
-					LocationName = saleReturn.LocationName,
-					PartyId = saleReturn.PartyId,
-					PartyName = saleReturn.PartyName,
-					OrderId = null,
-					OrderNo = null,
-					CustomerId = saleReturn.CustomerId,
-					CustomerName = saleReturn.CustomerName,
-					CustomerNumber = saleReturn.CustomerNumber,
-					TotalProducts = -saleReturn.TotalProducts,
-					TotalQuantity = -saleReturn.TotalQuantity,
-					BaseTotal = -saleReturn.BaseTotal,
-					ProductDiscountAmount = -saleReturn.ProductDiscountAmount,
-					SubTotal = -saleReturn.SubTotal,
-					CGSTPercent = saleReturn.CGSTPercent,
-					CGSTAmount = -saleReturn.CGSTAmount,
-					SGSTPercent = saleReturn.SGSTPercent,
-					SGSTAmount = -saleReturn.SGSTAmount,
-					IGSTPercent = saleReturn.IGSTPercent,
-					IGSTAmount = -saleReturn.IGSTAmount,
-					TotalTaxAmount = -saleReturn.TotalTaxAmount,
-					AfterTax = -saleReturn.AfterTax,
-					BillDiscountPercent = saleReturn.BillDiscountPercent,
-					BillDiscountAmount = -saleReturn.BillDiscountAmount,
-					BillDiscountReason = saleReturn.BillDiscountReason,
-					AfterBillDiscount = -saleReturn.AfterBillDiscount,
-					RoundOff = -saleReturn.RoundOff,
-					Total = -saleReturn.Total,
-					Cash = -saleReturn.Cash,
-					Card = -saleReturn.Card,
-					UPI = -saleReturn.UPI,
-					Credit = -saleReturn.Credit,
-					CreatedAt = saleReturn.CreatedAt,
-					Remarks = saleReturn.Remarks
-				});
 		}
 
 		filtered = [.. filtered.OrderBy(s => s.SaleDateTime.Date).ThenByDescending(s => s.SaleId)];
@@ -254,13 +199,6 @@ public partial class SaleDetailedPage
 
 	private async Task ExportToPdf()
 	{
-		if (_filteredSaleOverviews == null || !_filteredSaleOverviews.Any())
-			return;
-
-		var pdfData = await SaleReportPDFExport.GenerateA4SaleReport(_filteredSaleOverviews, _startDate, _endDate, _selectedSupplier);
-		var fileName = $"Sales_Register_{_selectedSupplier?.Name ?? "All"}_{_startDate:yyyyMMdd}_to_{_endDate:yyyyMMdd}.pdf";
-		await SaveAndViewService.SaveAndView(fileName, pdfData);
-		VibrationService.VibrateWithTime(100);
 	}
 	#endregion
 

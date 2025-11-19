@@ -32,14 +32,10 @@ public static class PurchaseReturnReportPdfExport
 			// All columns - detailed view (matching Excel export)
 			columnOrder =
 			[
-				"Id",
 				"TransactionNo",
-				"CompanyId",
 				"CompanyName",
-				"PartyId",
 				"PartyName",
 				"TransactionDateTime",
-				"FinancialYearId",
 				"FinancialYear",
 				"TotalItems",
 				"TotalQuantity",
@@ -65,11 +61,9 @@ public static class PurchaseReturnReportPdfExport
 				"TotalAmount",
 				"Remarks",
 				"DocumentUrl",
-				"CreatedBy",
 				"CreatedByName",
 				"CreatedAt",
 				"CreatedFromPlatform",
-				"LastModifiedBy",
 				"LastModifiedByUserName",
 				"LastModifiedAt",
 				"LastModifiedFromPlatform"
@@ -92,22 +86,16 @@ public static class PurchaseReturnReportPdfExport
 		}
 
 		// Customize specific columns for PDF display (matching Excel column names)
-		columnSettings["Id"] = new() { DisplayName = "ID", IncludeInTotal = false };
 		columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-		columnSettings["CompanyId"] = new() { DisplayName = "Company ID", IncludeInTotal = false };
 		columnSettings["CompanyName"] = new() { DisplayName = "Company Name", IncludeInTotal = false };
-		columnSettings["PartyId"] = new() { DisplayName = "Party ID", IncludeInTotal = false };
 		columnSettings["PartyName"] = new() { DisplayName = "Party Name", IncludeInTotal = false };
 		columnSettings["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false };
-		columnSettings["FinancialYearId"] = new() { DisplayName = "Financial Year ID", IncludeInTotal = false };
 		columnSettings["FinancialYear"] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
 		columnSettings["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false };
 		columnSettings["DocumentUrl"] = new() { DisplayName = "Document URL", IncludeInTotal = false };
-		columnSettings["CreatedBy"] = new() { DisplayName = "Created By ID", IncludeInTotal = false };
 		columnSettings["CreatedByName"] = new() { DisplayName = "Created By", IncludeInTotal = false };
 		columnSettings["CreatedAt"] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
 		columnSettings["CreatedFromPlatform"] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
-		columnSettings["LastModifiedBy"] = new() { DisplayName = "Modified By ID", IncludeInTotal = false };
 		columnSettings["LastModifiedByUserName"] = new() { DisplayName = "Modified By", IncludeInTotal = false };
 		columnSettings["LastModifiedAt"] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
 		columnSettings["LastModifiedFromPlatform"] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };

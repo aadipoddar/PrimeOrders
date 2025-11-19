@@ -129,7 +129,11 @@ public static class KitchenProductionData
 			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingKitchenProduction.FinancialYearId);
 			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
+
+			kitchenProduction.TransactionNo = existingKitchenProduction.TransactionNo;
 		}
+		else
+			kitchenProduction.TransactionNo = await GenerateCodes.GenerateKitchenProductionTransactionNo(kitchenProduction);
 
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenProduction.FinancialYearId);
 		if (financialYear is null || financialYear.Locked || financialYear.Status == false)

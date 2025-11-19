@@ -17,8 +17,11 @@ public static class CommonData
 	public static async Task<T> LoadTableDataByTransactionNo<T>(string TableName, string TransactionNo) where T : new() =>
 		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadTableDataByTransactionNo, new { TableName, TransactionNo })).FirstOrDefault();
 
-	public static async Task<T> LoadLastTableDataByCompanyFinancialYear<T>(string TableName, int CompanyId, int FinancialYearId) where T : new() =>
-		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadLastTableDataByCompanyFinancialYear, new { TableName, CompanyId, FinancialYearId })).FirstOrDefault();
+	public static async Task<T> LoadLastTableDataByFinancialYear<T>(string TableName, int FinancialYearId) where T : new() =>
+		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadLastTableDataByFinancialYear, new { TableName, FinancialYearId })).FirstOrDefault();
+
+	public static async Task<T> LoadLastTableDataByLocationFinancialYear<T>(string TableName, int LocationId, int FinancialYearId) where T : new() =>
+		(await SqlDataAccess.LoadData<T, dynamic>(StoredProcedureNames.LoadLastTableDataByLocationFinancialYear, new { TableName, LocationId, FinancialYearId })).FirstOrDefault();
 
 	public static async Task<DateTime> LoadCurrentDateTime() =>
 		(await SqlDataAccess.LoadData<DateTime, dynamic>(StoredProcedureNames.LoadCurrentDateTime, new { })).FirstOrDefault();

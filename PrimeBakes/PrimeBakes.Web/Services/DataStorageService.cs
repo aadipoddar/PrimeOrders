@@ -2,7 +2,6 @@
 
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakes.Web.Services;
@@ -45,50 +44,15 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
 	}
 
 
-	public async Task<bool> LocalExists(string key)
-	{
-		await Task.CompletedTask;
+	public async Task<bool> LocalExists(string key) =>
+		(await _protectedLocalStorage.GetAsync<string>(key)).Success;
 
-		var directoryPath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-			Secrets.DatabaseName);
+	public async Task LocalSaveAsync(string key, string value) =>
+		await SecureSaveAsync(key, value);
 
-		return File.Exists(Path.Combine(directoryPath, key));
-	}
+	public async Task<string?> LocalGetAsync(string key) =>
+		await SecureGetAsync(key);
 
-	public async Task LocalSaveAsync(string key, string value)
-	{
-		var directoryPath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-			Secrets.DatabaseName);
-
-		Directory.CreateDirectory(directoryPath);
-
-		var filePath = Path.Combine(directoryPath, key);
-		await File.WriteAllTextAsync(filePath, value);
-	}
-
-	public async Task<string?> LocalGetAsync(string key)
-	{
-		var directoryPath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-			Secrets.DatabaseName);
-
-		if (await LocalExists(key))
-			return await File.ReadAllTextAsync(Path.Combine(directoryPath, key));
-
-		return null;
-	}
-
-	public async Task LocalRemove(string key)
-	{
-		await Task.CompletedTask;
-		var filePath = Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-			Secrets.DatabaseName,
-			key);
-
-		if (File.Exists(filePath))
-			File.Delete(filePath);
-	}
+	public async Task LocalRemove(string key) =>
+		await SecureRemove(key);
 }

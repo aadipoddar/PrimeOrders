@@ -28,6 +28,8 @@ public static class SettingsKeys
 	public static string KitchenProductionTransactionPrefix => "KitchenProductionTransactionPrefix";
 	public static string RawMaterialStockAdjustmentTransactionPrefix => "RawMaterialStockAdjustmentTransactionPrefix";
 	public static string ProductStockAdjustmentTransactionPrefix => "ProductStockAdjustmentTransactionPrefix";
+	
+	public static string SaleReturnTransactionPrefix => "SaleReturnTransactionPrefix";
 
 	public static string UpdateItemMasterRateOnPurchase => "UpdateRawMaterialMasterRateOnPurchase";
 	public static string UpdateItemMasterUOMOnPurchase => "UpdateRawMaterialMasterUOMOnPurchase";

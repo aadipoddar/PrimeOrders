@@ -24,14 +24,6 @@ public static class PurchaseReturnReportExcelExport
 		// Define custom column settings (same structure as PurchaseOverviewModel)
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
-			// IDs - Center aligned, no totals
-			["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-			["CompanyId"] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-			["PartyId"] = new() { DisplayName = "Party ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-			["FinancialYearId"] = new() { DisplayName = "Financial Year ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-			["CreatedBy"] = new() { DisplayName = "Created By ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-			["LastModifiedBy"] = new() { DisplayName = "Modified By ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-
 			// Text fields - Left aligned
 			["TransactionNo"] = new() { DisplayName = "Transaction No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 			["CompanyName"] = new() { DisplayName = "Company Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
@@ -84,8 +76,8 @@ public static class PurchaseReturnReportExcelExport
 			// All columns - detailed view
 			columnOrder =
 			[
-				"Id", "TransactionNo", "CompanyId", "CompanyName", "PartyId", "PartyName",
-				"TransactionDateTime", "FinancialYearId", "FinancialYear",
+				"TransactionNo", "CompanyName", "PartyName",
+				"TransactionDateTime", "FinancialYear",
 				"TotalItems", "TotalQuantity", "BaseTotal",
 				"DiscountPercent", "DiscountAmount", "AfterDiscount",
 				"SGSTPercent", "CGSTPercent", "IGSTPercent",
@@ -94,8 +86,8 @@ public static class PurchaseReturnReportExcelExport
 				"CashDiscountPercent", "CashDiscountAmount", "TotalAfterCashDiscount",
 				"RoundOffAmount", "TotalAmount",
 				"Remarks", "DocumentUrl",
-				"CreatedBy", "CreatedByName", "CreatedAt", "CreatedFromPlatform",
-				"LastModifiedBy", "LastModifiedByUserName", "LastModifiedAt", "LastModifiedFromPlatform"
+				"CreatedByName", "CreatedAt", "CreatedFromPlatform",
+				"LastModifiedByUserName", "LastModifiedAt", "LastModifiedFromPlatform"
 			];
 		}
 		else
