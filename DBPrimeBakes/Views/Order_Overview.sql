@@ -14,8 +14,8 @@
 		SUM(od.Quantity) AS TotalQuantity,
 
 		[o].[SaleId],
-		[s].[BillNo] AS SaleBillNo,
-		[s].[SaleDateTime],
+		[s].[TransactionNo] AS SaleBillNo,
+		[s].[TransactionDateTime],
 		[o].[CreatedAt]
 
 	FROM
@@ -43,6 +43,6 @@
 		[o].[OrderDateTime],
 		[o].[Remarks],
 		[o].[SaleId],
-		[s].[BillNo],
-		[s].[SaleDateTime],
+		[s].[TransactionNo],
+		[s].[TransactionDateTime],
 		[o].[CreatedAt]

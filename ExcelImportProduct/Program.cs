@@ -1,27 +1,11 @@
 ﻿using OfficeOpenXml;
 
-using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
-using PrimeBakesLibrary.Data.Accounts.Masters;
-using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
-using PrimeBakesLibrary.Data.Inventory.Kitchen;
-using PrimeBakesLibrary.Data.Inventory.Purchase;
-using PrimeBakesLibrary.Data.Inventory.Stock;
-using PrimeBakesLibrary.Data.Product;
-using PrimeBakesLibrary.Data.Sale;
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
-using PrimeBakesLibrary.Models.Accounts.Masters;
-using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory.Kitchen;
-using PrimeBakesLibrary.Models.Inventory.Purchase;
-using PrimeBakesLibrary.Models.Inventory.Stock;
-using PrimeBakesLibrary.Models.Product;
-using PrimeBakesLibrary.Models.Sale;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
-FileInfo fileInfo = new(@"C:\Others\return.xlsx");
+FileInfo fileInfo = new(@"C:\Others\sale.xlsx");
 
 ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
@@ -62,7 +46,9 @@ var worksheet2 = package.Workbook.Worksheets[1];
 
 // await InsertIssues(worksheet1, worksheet2);
 
-await InsertReturns(worksheet1, worksheet2);
+// await InsertReturns(worksheet1, worksheet2);
+
+await InsertSales(worksheet1, worksheet2);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -1104,6 +1090,190 @@ static async Task InsertReturns(ExcelWorksheet worksheet1, ExcelWorksheet worksh
 	}
 }
 
+static async Task InsertSales(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+	var row = 2;
+
+	List<SaleOldModel> sale = [];
+	List<SaleDetailOldModel> saleDetails = [];
+
+	while (worksheet1.Cells[row, 1].Value != null)
+	{
+		var id = worksheet1.Cells[row, 1].Value.ToString();
+		var billNo = worksheet1.Cells[row, 2].Value.ToString();
+		var discPercent = worksheet1.Cells[row, 3].Value.ToString();
+		var rounfOff = worksheet1.Cells[row, 5].Value.ToString();
+		var userId = worksheet1.Cells[row, 7].Value.ToString();
+		var locationId = worksheet1.Cells[row, 8].Value.ToString();
+		var billDateTime = worksheet1.Cells[row, 9].Value.ToString();
+		var partyId = worksheet1.Cells[row, 10].Value.ToString();
+		var orderId = worksheet1.Cells[row, 11].Value.ToString();
+		var cash = worksheet1.Cells[row, 12].Value.ToString();
+		var card = worksheet1.Cells[row, 13].Value.ToString();
+		var upi = worksheet1.Cells[row, 14].Value.ToString();
+		var credit = worksheet1.Cells[row, 15].Value.ToString();
+		var customerId = worksheet1.Cells[row, 16].Value.ToString();
+		var status = worksheet1.Cells[row, 18].Value.ToString();
+
+		sale.Add(new()
+		{
+			Id = int.Parse(id),
+			BillNo = billNo,
+			PartyId = partyId == "NULL" ? null : int.Parse(partyId),
+			OrderId = orderId == "NULL" ? null : int.Parse(orderId),
+			SaleDateTime = DateTime.Parse(billDateTime),
+			Card = decimal.Parse(card),
+			Cash = decimal.Parse(cash),
+			Credit = decimal.Parse(credit),
+			CustomerId = customerId == "NULL" ? null : int.Parse(customerId),
+			DiscPercent = decimal.Parse(discPercent),
+			DiscReason = null,
+			LocationId = int.Parse(locationId),
+			RoundOff = decimal.Parse(rounfOff),
+			UPI = decimal.Parse(upi),
+			Remarks = null,
+			UserId = int.Parse(userId),
+			CreatedAt = DateTime.Now,
+			Status = status.ToLower() == "1",
+		});
+
+		row++;
+	}
+
+	sale.RemoveAll(_ => _.Status == false);
+
+	row = 2;
+	while (worksheet2.Cells[row, 1].Value != null)
+	{
+		var id = worksheet2.Cells[row, 1].Value.ToString();
+		var saleId = worksheet2.Cells[row, 2].Value.ToString();
+		var productId = worksheet2.Cells[row, 3].Value.ToString();
+		var quantity = worksheet2.Cells[row, 4].Value.ToString();
+		var rate = worksheet2.Cells[row, 5].Value.ToString();
+		var baseTotal = worksheet2.Cells[row, 6].Value.ToString();
+		var discPercent = worksheet2.Cells[row, 7].Value.ToString();
+		var discAmount = worksheet2.Cells[row, 8].Value.ToString();
+		var afterDiscount = worksheet2.Cells[row, 9].Value.ToString();
+		var cgstPercent = worksheet2.Cells[row, 10].Value.ToString();
+		var cgstAmount = worksheet2.Cells[row, 11].Value.ToString();
+		var sgstPercent = worksheet2.Cells[row, 12].Value.ToString();
+		var sgstAmount = worksheet2.Cells[row, 13].Value.ToString();
+		var igstPercent = worksheet2.Cells[row, 14].Value.ToString();
+		var igstAmount = worksheet2.Cells[row, 15].Value.ToString();
+		var total = worksheet2.Cells[row, 16].Value.ToString();
+		var netRate = worksheet2.Cells[row, 17].Value.ToString();
+		var status = worksheet2.Cells[row, 18].Value.ToString();
+
+		saleDetails.Add(new()
+		{
+			Id = int.Parse(id),
+			SaleId = int.Parse(saleId),
+			ProductId = int.Parse(productId),
+			Quantity = decimal.Parse(quantity),
+			Rate = decimal.Parse(rate),
+			BaseTotal = decimal.Parse(baseTotal),
+			DiscPercent = decimal.Parse(discPercent),
+			DiscAmount = decimal.Parse(discAmount),
+			AfterDiscount = decimal.Parse(afterDiscount),
+			CGSTPercent = decimal.Parse(cgstPercent),
+			CGSTAmount = decimal.Parse(cgstAmount),
+			SGSTPercent = decimal.Parse(sgstPercent),
+			SGSTAmount = decimal.Parse(sgstAmount),
+			IGSTPercent = decimal.Parse(igstPercent),
+			IGSTAmount = decimal.Parse(igstAmount),
+			NetRate = decimal.Parse(netRate),
+			Total = decimal.Parse(total),
+			Status = status.ToLower() == "1",
+		});
+
+		row++;
+	}
+
+	saleDetails.RemoveAll(_ => _.Status == false);
+
+	Console.WriteLine("Loaded " + sale.Count + " kitchen issues.");
+	Console.WriteLine("Loaded " + saleDetails.Count + " kitchen issue details.");
+
+	foreach (var issue in sale)
+	{
+		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
+
+		var kitchenIssueDetail = saleDetails.Where(pd => pd.SaleId == issue.Id).ToList();
+		if (kitchenIssueDetail.Count == 0)
+		{
+			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
+			continue;
+		}
+		List<SaleItemCartModel> returnCart = [];
+
+		foreach (var detail in kitchenIssueDetail)
+			returnCart.Add(new()
+			{
+				ItemId = detail.ProductId,
+				ItemName = "",
+				Remarks = null,
+				Quantity = detail.Quantity,
+				Rate = detail.Rate,
+				BaseTotal = detail.BaseTotal,
+				DiscountPercent = detail.DiscPercent,
+				DiscountAmount = detail.DiscAmount,
+				CGSTPercent = detail.CGSTPercent,
+				CGSTAmount = detail.CGSTAmount,
+				SGSTPercent = detail.SGSTPercent,
+				SGSTAmount = detail.SGSTAmount,
+				IGSTPercent = detail.IGSTPercent,
+				IGSTAmount = detail.IGSTAmount,
+				AfterDiscount = detail.AfterDiscount,
+				TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
+				InclusiveTax = false,
+				Total = detail.Total,
+				NetRate = detail.NetRate,
+			});
+
+
+		SaleModel finalIssue = new()
+		{
+			Id = 0,
+			TransactionNo = issue.BillNo,
+			CustomerId = null,
+			ItemsTotalAmount = returnCart.Sum(x => x.Total),
+			OtherChargesPercent = 0,
+			OtherChargesAmount = 0,
+			OrderId = issue.OrderId,
+			LocationId = 1,
+			PartyId = issue.PartyId,
+			RoundOffAmount = issue.RoundOff,
+			DiscountPercent = issue.DiscPercent,
+			DiscountAmount = returnCart.Sum(x => x.Total) * (issue.DiscPercent / 100),
+			TransactionDateTime = issue.SaleDateTime,
+			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
+			CreatedBy = issue.UserId,
+			TotalAmount = issue.Cash + issue.Card + issue.Credit + issue.UPI,
+			Card = issue.Card,
+			Cash = issue.Cash,
+			Credit = issue.Credit,
+			UPI = issue.UPI,
+			CompanyId = 1,
+			FinancialYearId = 1,
+			CreatedFromPlatform = "ImportScript",
+			CreatedAt = issue.CreatedAt,
+			Status = true,
+		};
+
+		finalIssue.TransactionNo = await GenerateCodes.GenerateSaleTransactionNo(finalIssue);
+
+		if (finalIssue.Credit > 0 && finalIssue.PartyId is null)
+		{
+			finalIssue.Cash += finalIssue.Credit;
+			finalIssue.Credit = 0;
+		}
+		await SaleData.SaveSaleTransaction(finalIssue, returnCart);
+		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+	}
+}
+
 class PurchaseModelOld
 {
 	public int Id { get; set; }
@@ -1166,7 +1336,7 @@ class KitchenIssueDetailOldModel
 	public bool Status { get; set; }
 }
 
-public class SaleReturnOldModel
+class SaleReturnOldModel
 {
 	public int Id { get; set; }
 	public string BillNo { get; set; }
@@ -1187,10 +1357,54 @@ public class SaleReturnOldModel
 	public bool Status { get; set; }
 }
 
-public class SaleReturnDetailOldModel
+class SaleReturnDetailOldModel
 {
 	public int Id { get; set; }
 	public int SaleReturnId { get; set; }
+	public int ProductId { get; set; }
+	public decimal Quantity { get; set; }
+	public decimal Rate { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal DiscPercent { get; set; }
+	public decimal DiscAmount { get; set; }
+	public decimal AfterDiscount { get; set; }
+	public decimal CGSTPercent { get; set; }
+	public decimal CGSTAmount { get; set; }
+	public decimal SGSTPercent { get; set; }
+	public decimal SGSTAmount { get; set; }
+	public decimal IGSTPercent { get; set; }
+	public decimal IGSTAmount { get; set; }
+	public decimal Total { get; set; }
+	public decimal NetRate { get; set; }
+	public bool Status { get; set; }
+}
+
+class SaleOldModel
+{
+	public int Id { get; set; }
+	public string BillNo { get; set; }
+	public decimal DiscPercent { get; set; }
+	public string DiscReason { get; set; }
+	public decimal RoundOff { get; set; }
+	public string Remarks { get; set; }
+	public int UserId { get; set; }
+	public int LocationId { get; set; }
+	public DateTime SaleDateTime { get; set; }
+	public int? PartyId { get; set; }
+	public int? OrderId { get; set; }
+	public decimal Cash { get; set; }
+	public decimal Card { get; set; }
+	public decimal UPI { get; set; }
+	public decimal Credit { get; set; }
+	public int? CustomerId { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public bool Status { get; set; }
+}
+
+class SaleDetailOldModel
+{
+	public int Id { get; set; }
+	public int SaleId { get; set; }
 	public int ProductId { get; set; }
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }

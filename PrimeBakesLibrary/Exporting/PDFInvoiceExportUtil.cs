@@ -25,6 +25,8 @@ public static class PDFInvoiceExportUtil
 	{
 		public string TransactionNo { get; set; }
 		public DateTime TransactionDateTime { get; set; }
+		public string OrderTransactionNo { get; set; }
+		public DateTime? OrderDateTime { get; set; }
 		public decimal ItemsTotalAmount { get; set; }
 		public decimal OtherChargesAmount { get; set; }
 		public decimal OtherChargesPercent { get; set; }
@@ -126,7 +128,7 @@ public static class PDFInvoiceExportUtil
 			currentY = DrawInvoiceHeader(graphics, company, logoPath, leftMargin, pageWidth, currentY);
 
 			// 2. Invoice Type and Number
-			currentY = DrawInvoiceTitle(graphics, invoiceType, invoiceData.TransactionNo, leftMargin, pageWidth, currentY, outlet);
+			currentY = DrawInvoiceTitle(graphics, invoiceType, invoiceData.TransactionNo, invoiceData.TransactionDateTime, leftMargin, pageWidth, currentY, outlet);
 
 			// 2.5. Draw DELETED status badge if Status is false
 			if (!invoiceData.Status)
@@ -246,7 +248,7 @@ public static class PDFInvoiceExportUtil
 	/// <summary>
 	/// Draw invoice type and number
 	/// </summary>
-	private static float DrawInvoiceTitle(PdfGraphics graphics, string invoiceType, string invoiceNumber, float leftMargin, float pageWidth, float startY, string outlet = null)
+	private static float DrawInvoiceTitle(PdfGraphics graphics, string invoiceType, string invoiceNumber, DateTime transactionDateTime, float leftMargin, float pageWidth, float startY, string outlet = null)
 	{
 		float currentY = startY;
 
@@ -264,15 +266,23 @@ public static class PDFInvoiceExportUtil
 
 		currentY += 20;
 
-		// Draw Outlet label if provided
+		// Draw Outlet label and Invoice Date on same line
 		if (!string.IsNullOrWhiteSpace(outlet))
 		{
 			PdfStandardFont outletFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold);
 			PdfBrush outletBrush = new PdfSolidBrush(new PdfColor(100, 100, 100));
 			string outletText = $"Outlet: {outlet}";
 			graphics.DrawString(outletText, outletFont, outletBrush, new PointF(leftMargin, currentY));
-			currentY += 18;
 		}
+
+		// Invoice Date (right aligned, on same line as outlet)
+		PdfStandardFont dateFont = new(PdfFontFamily.Helvetica, 10);
+		string invoiceDateText = $"Invoice Date: {transactionDateTime:dd-MMM-yyyy hh:mm tt}";
+		SizeF dateSize = dateFont.MeasureString(invoiceDateText);
+		graphics.DrawString(invoiceDateText, dateFont, PdfBrushes.Black,
+			new PointF(pageWidth - 20 - dateSize.Width, currentY));
+
+		currentY += 18;
 
 		return currentY;
 	}
@@ -430,10 +440,20 @@ public static class PDFInvoiceExportUtil
 
 		currentY += boxHeight + 8;
 
-		// Invoice Details Row (Date & Time)
-		graphics.DrawString($"Invoice Date: {invoiceData.TransactionDateTime:dd-MMM-yyyy hh:mm tt}", valueFont, valueBrush,
-			new PointF(leftMargin, currentY));
-		currentY += 15;
+		// Order Details (if present)
+		if (!string.IsNullOrWhiteSpace(invoiceData.OrderTransactionNo))
+		{
+			graphics.DrawString($"Order No: {invoiceData.OrderTransactionNo}", valueFont, valueBrush,
+				new PointF(leftMargin, currentY));
+			currentY += 12;
+
+			if (invoiceData.OrderDateTime.HasValue)
+			{
+				graphics.DrawString($"Order Date: {invoiceData.OrderDateTime.Value:dd-MMM-yyyy hh:mm tt}", valueFont, valueBrush,
+					new PointF(leftMargin, currentY));
+				currentY += 15;
+			}
+		}
 
 		return currentY;
 	}
@@ -526,8 +546,21 @@ public static class PDFInvoiceExportUtil
 		}
 
 		// Draw grid with improved pagination layout
-		float footerHeight = 35; // Height reserved for footer (reduced to minimize wasted space)
+		// Reserve more space for footer to accommodate summary, payment methods, and amount in words
+		float footerHeight = 130; // Increased to prevent content from being cut off
 		float pageHeight = page.GetClientSize().Height;
+
+		// Calculate maximum available height for the grid
+		float maxGridHeight = pageHeight - startY - footerHeight;
+
+		// Ensure minimum space is available for grid
+		if (maxGridHeight < 100)
+		{
+			// If not enough space on current page, start on next page
+			page = document.Pages.Add();
+			startY = 20; // Reset to top margin on new page
+			maxGridHeight = pageHeight - startY - footerHeight;
+		}
 
 		PdfGridLayoutFormat layoutFormat = new()
 		{
@@ -535,7 +568,7 @@ public static class PDFInvoiceExportUtil
 			Break = PdfLayoutBreakType.FitPage
 		};
 
-		PdfGridLayoutResult result = pdfGrid.Draw(page, new RectangleF(leftMargin, startY, pageWidth - leftMargin - rightMargin, pageHeight - startY - footerHeight), layoutFormat);
+		PdfGridLayoutResult result = pdfGrid.Draw(page, new RectangleF(leftMargin, startY, pageWidth - leftMargin - rightMargin, maxGridHeight), layoutFormat);
 
 		// Return the layout result so caller can get the last page
 		return result;

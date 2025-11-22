@@ -3,22 +3,22 @@
 namespace PrimeBakesLibrary.Exporting.Sales.Sale;
 
 /// <summary>
-/// PDF export functionality for Sale Return Report
+/// PDF export functionality for Sale Report
 /// </summary>
-public static class SaleReturnReportPdfExport
+public static class SaleReportPdfExport
 {
     /// <summary>
-    /// Export Sale Return Report to PDF with custom column order and formatting
+    /// Export Sale Report to PDF with custom column order and formatting
     /// </summary>
-    /// <param name="saleReturnData">Collection of sale return overview records</param>
+    /// <param name="saleData">Collection of sale overview records</param>
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="showLocation">Whether to include location column</param>
     /// <param name="locationName">Name of the location for report header</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportSaleReturnReport(
-        IEnumerable<SaleReturnOverviewModel> saleReturnData,
+    public static MemoryStream ExportSaleReport(
+        IEnumerable<SaleOverviewModel> saleData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
@@ -37,6 +37,7 @@ public static class SaleReturnReportPdfExport
             columnOrder =
             [
                 "TransactionNo",
+                "OrderTransactionNo",
                 "CompanyName"
             ];
 
@@ -95,6 +96,7 @@ public static class SaleReturnReportPdfExport
             columnOrder =
             [
                 "TransactionNo",
+                "OrderTransactionNo",
                 "TransactionDateTime"
             ];
 
@@ -119,6 +121,7 @@ public static class SaleReturnReportPdfExport
 
         // Customize specific columns for PDF display (matching Excel column names)
         columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
+        columnSettings["OrderTransactionNo"] = new() { DisplayName = "Order Transaction No", IncludeInTotal = false };
         columnSettings["CompanyName"] = new() { DisplayName = "Company Name", IncludeInTotal = false };
         columnSettings["LocationName"] = new() { DisplayName = "Location Name", IncludeInTotal = false };
         columnSettings["PartyName"] = new() { DisplayName = "Party Name", IncludeInTotal = false };
@@ -131,7 +134,9 @@ public static class SaleReturnReportPdfExport
         columnSettings["CreatedFromPlatform"] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
         columnSettings["LastModifiedByUserName"] = new() { DisplayName = "Modified By", IncludeInTotal = false };
         columnSettings["LastModifiedAt"] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["LastModifiedFromPlatform"] = new() { DisplayName = "Modified Platform", IncludeInTotal = false }; columnSettings["TotalItems"] = new()
+        columnSettings["LastModifiedFromPlatform"] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };
+
+        columnSettings["TotalItems"] = new()
         {
             DisplayName = "Total Items",
             Format = "#,##0",
@@ -157,7 +162,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Base Total",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -181,7 +185,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Item Discount Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -193,7 +196,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "After Discount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -241,7 +243,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "SGST Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -253,7 +254,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "CGST Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -265,7 +265,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "IGST Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -277,7 +276,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Total Tax",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -289,7 +287,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Sub Total",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -313,7 +310,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Other Charges",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -325,7 +321,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "After Other Charges",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -349,7 +344,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Discount Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -361,7 +355,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "After Discount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -373,7 +366,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Round Off",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -385,7 +377,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Total Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -397,7 +388,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Cash",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -409,7 +399,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Card",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -421,7 +410,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "UPI",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -433,7 +421,6 @@ public static class SaleReturnReportPdfExport
         {
             DisplayName = "Credit",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -449,8 +436,8 @@ public static class SaleReturnReportPdfExport
 
         // Call the generic PDF export utility with landscape mode for all columns
         return PDFReportExportUtil.ExportToPdf(
-            saleReturnData,
-            "SALE RETURN REPORT",
+            saleData,
+            "SALE REPORT",
             dateRangeStart,
             dateRangeEnd,
             columnSettings,

@@ -17,6 +17,7 @@ BEGIN
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'UpdateRawMaterialMasterRateOnPurchase'	, N'true'	, N'Update Raw Material Master Rate on Purchase Transactions')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'UpdateRawMaterialMasterUOMOnPurchase'	, N'true'	, N'Update Raw Material Master Unit of Measurement on Purchase Transactions')
 	
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SaleTransactionPrefix' 		, N'SAL'	, N'Prefix for Sale Transaction Numbers')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SaleReturnTransactionPrefix'		, N'SALRET'	, N'Prefix for Sale Return Transaction Numbers')
 
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SalesVoucherId', N'3', N'Voucher type for Sales transactions')

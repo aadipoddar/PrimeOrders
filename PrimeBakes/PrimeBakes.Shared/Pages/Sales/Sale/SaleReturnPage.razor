@@ -106,11 +106,8 @@ else
 									<AutoCompleteFieldSettings Value="Name" />
 								</SfAutoComplete>
 							</div>
-						}
 
 						<!-- Company -->
-						@if (_user.LocationId == 1)
-						{
 							<div class="form-field">
 								<label class="field-label">
 									Company <span class="required">*</span>
@@ -137,7 +134,7 @@ else
 									DataSource="@_parties" Autofill="true" Placeholder="Select a Party"
 									FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
 									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
-									<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel"
+									<AutoCompleteEvents TItem="LedgerModel?" TValue="LedgerModel?"
 										ValueChange="OnPartyChanged" />
 									<AutoCompleteFieldSettings Value="Name" />
 								</SfAutoComplete>
@@ -157,11 +154,8 @@ else
 									<DatePickerEvents TValue="DateTime" ValueChange="OnTransactionDateChanged" />
 								</SfDatePicker>
 							</div>
-						}
 
 						<!-- Financial Year -->
-						@if (_user.LocationId == 1)
-						{
 							<div class="form-field">
 								<label class="field-label">
 									Financial Year
@@ -171,11 +165,8 @@ else
 									Readonly="true" Placeholder="Financial Year" FloatLabelType="FloatLabelType.Never"
 									CssClass="custom-textbox readonly-field" />
 							</div>
-						}
 
 						<!-- Transaction No -->
-						@if (_user.LocationId == 1)
-						{
 							<div class="form-field">
 								<label class="field-label">
 									Transaction No
@@ -340,7 +331,7 @@ else
 							DataSource="@_products" Autofill="true" Placeholder="Select Item"
 							FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
 							FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
-							<AutoCompleteEvents TItem="ProductLocationOverviewModel" TValue="ProductLocationOverviewModel"
+							<AutoCompleteEvents TItem="ProductLocationOverviewModel?" TValue="ProductLocationOverviewModel?"
 								ValueChange="OnItemChanged" />
 							<AutoCompleteFieldSettings Value="Name" />
 						</SfAutoComplete>

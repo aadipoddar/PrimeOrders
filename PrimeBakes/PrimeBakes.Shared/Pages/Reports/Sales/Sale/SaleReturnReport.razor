@@ -515,7 +515,7 @@ else
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.IGSTAmount)" HeaderText="IGST" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.TotalTaxAmount)" HeaderText="Tax Amt" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="150" Format="N2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(SaleReturnOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(SaleReturnOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.OtherChargesAmount)" HeaderText="Other Charges" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.TotalAfterOtherCharges)" HeaderText="After Other Charges" Width="170" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="150" Format="N2" TextAlign="TextAlign.Center" />
@@ -569,6 +569,7 @@ else
                                 }
                             </Template>
                         </GridColumn>
+                        <GridColumn Field="@nameof(SaleReturnOverviewModel.PaymentModes)" HeaderText="Payment Modes" Width="180" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleReturnOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />

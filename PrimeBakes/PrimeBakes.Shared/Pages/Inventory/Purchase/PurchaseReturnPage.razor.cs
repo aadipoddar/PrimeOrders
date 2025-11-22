@@ -405,6 +405,7 @@ public partial class PurchaseReturnPage
 			_selectedCart.CGSTPercent = _taxes.FirstOrDefault(s => s.Id == _selectedRawMaterial.TaxId).CGST;
 			_selectedCart.SGSTPercent = isSameState ? _taxes.FirstOrDefault(s => s.Id == _selectedRawMaterial.TaxId).SGST : 0;
 			_selectedCart.IGSTPercent = isSameState ? 0 : _taxes.FirstOrDefault(s => s.Id == _selectedRawMaterial.TaxId).IGST;
+			_selectedCart.InclusiveTax = _taxes.FirstOrDefault(s => s.Id == _selectedRawMaterial.TaxId).Inclusive;
 		}
 
 		UpdateSelectedItemFinancialDetails();
@@ -610,6 +611,10 @@ public partial class PurchaseReturnPage
 			var perUnitCost = item.Total / item.Quantity;
 			var withOtherCharges = perUnitCost * (1 + _purchaseReturn.OtherChargesPercent / 100);
 			item.NetRate = withOtherCharges * (1 - _purchaseReturn.CashDiscountPercent / 100);
+
+			item.Remarks = item.Remarks?.Trim();
+			if (string.IsNullOrWhiteSpace(item.Remarks))
+				item.Remarks = null;
 		}
 
 		_purchaseReturn.ItemsTotalAmount = _cart.Sum(x => x.Total);
@@ -762,6 +767,7 @@ public partial class PurchaseReturnPage
 		if (string.IsNullOrWhiteSpace(_purchaseReturn.DocumentUrl))
 			_purchaseReturn.DocumentUrl = null;
 
+		_purchaseReturn.Remarks = _purchaseReturn.Remarks?.Trim();
 		if (string.IsNullOrWhiteSpace(_purchaseReturn.Remarks))
 			_purchaseReturn.Remarks = null;
 

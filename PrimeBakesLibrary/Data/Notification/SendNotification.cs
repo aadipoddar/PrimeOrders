@@ -2,10 +2,10 @@
 
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Order;
-using PrimeBakesLibrary.Data.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Sales.Sale;
 
 namespace PrimeBakesLibrary.Data.Notification;
 
@@ -49,7 +49,7 @@ public static class SendNotification
 
 	public static async Task SendSaleNotificationPartyAdmin(int saleId)
 	{
-		var sale = await SaleData.LoadSaleOverviewBySaleId(saleId);
+		var sale = await CommonData.LoadTableDataById<SaleOverviewModel>(ViewNames.SaleOverview, saleId);
 
 		if (sale.PartyId is null || sale.PartyId <= 0)
 			return;
@@ -63,7 +63,7 @@ public static class SendNotification
 		users = [.. users.Where(u => u.Admin && u.LocationId == party.LocationId)];
 
 		var title = $"New Sale Created for {party.Name}";
-		var text = $"Sale No: {sale.BillNo} | Party: {party.Name} | Total Items: {sale.TotalProducts} | Total Qty: {sale.TotalQuantity} | Total Amount: {sale.Total.FormatIndianCurrency()} | User: {sale.UserName} | Date: {sale.SaleDateTime:dd/MM/yy hh:mm tt} | Remarks: {sale.Remarks} | Order No: {sale.OrderNo}";
+		var text = $"Sale No: {sale.TransactionNo} | Party: {party.Name} | Total Items: {sale.TotalItems} | Total Qty: {sale.TotalQuantity} | Total Amount: {sale.TotalAmount.FormatIndianCurrency()} | User: {sale.CreatedByName} | Date: {sale.TransactionDateTime:dd/MM/yy hh:mm tt} | Remarks: {sale.Remarks} | Order No: {sale.TransactionNo}";
 
 		await SendNotificationToAPI(users, title, text);
 	}

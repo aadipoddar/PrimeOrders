@@ -1,6 +1,6 @@
 ﻿namespace PrimeBakesLibrary.Models.Sales.Sale;
 
-public class SaleReturnModel
+public class SaleModel
 {
 	public int Id { get; set; }
 	public string TransactionNo { get; set; }
@@ -8,6 +8,7 @@ public class SaleReturnModel
 	public int LocationId { get; set; }
 	public int? PartyId { get; set; }
 	public int? CustomerId { get; set; }
+	public int? OrderId { get; set; }
 	public DateTime TransactionDateTime { get; set; }
 	public int FinancialYearId { get; set; }
 	public decimal ItemsTotalAmount { get; set; }
@@ -31,10 +32,10 @@ public class SaleReturnModel
 	public string? LastModifiedFromPlatform { get; set; }
 }
 
-public class SaleReturnDetailModel
+public class SaleDetailModel
 {
 	public int Id { get; set; }
-	public int SaleReturnId { get; set; }
+	public int SaleId { get; set; }
 	public int ProductId { get; set; }
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }
@@ -56,7 +57,7 @@ public class SaleReturnDetailModel
 	public bool Status { get; set; }
 }
 
-public class SaleReturnItemCartModel
+public class SaleItemCartModel
 {
 	public int ItemId { get; set; }
 	public string ItemName { get; set; }
@@ -79,7 +80,7 @@ public class SaleReturnItemCartModel
 	public string? Remarks { get; set; }
 }
 
-public class SaleReturnOverviewModel
+public class SaleOverviewModel
 {
 	public int Id { get; set; }
 	public string TransactionNo { get; set; }
@@ -92,6 +93,12 @@ public class SaleReturnOverviewModel
 	public string? PartyName { get; set; }
 	public int? CustomerId { get; set; }
 	public string? CustomerName { get; set; }
+
+	public int? OrderId { get; set; }
+	public string? OrderTransactionNo { get; set; }
+	public DateTime? OrderDateTime { get; set; }
+	public decimal? OrderTotalQuantity { get; set; }
+
 	public DateTime TransactionDateTime { get; set; }
 	public int FinancialYearId { get; set; }
 	public string FinancialYear { get; set; }
@@ -147,7 +154,7 @@ public class SaleReturnOverviewModel
 	public bool Status { get; set; }
 }
 
-public class SaleReturnItemOverviewModel
+public class SaleItemOverviewModel
 {
 	public int Id { get; set; }
 	public string ItemName { get; set; }
@@ -155,7 +162,7 @@ public class SaleReturnItemOverviewModel
 	public int ItemCategoryId { get; set; }
 	public string ItemCategoryName { get; set; }
 
-	public int SaleReturnId { get; set; }
+	public int SaleId { get; set; }
 	public string TransactionNo { get; set; }
 	public DateTime TransactionDateTime { get; set; }
 	public int CompanyId { get; set; }
@@ -167,7 +174,9 @@ public class SaleReturnItemOverviewModel
 	public string? PartyName { get; set; }
 	public int? CustomerId { get; set; }
 	public string? CustomerName { get; set; }
-	public string? SaleReturnRemarks { get; set; }
+	public int? OrderId { get; set; }
+	public string? OrderTransactionNo { get; set; }
+	public string? SaleRemarks { get; set; }
 
 	public decimal Quantity { get; set; }
 	public decimal Rate { get; set; }

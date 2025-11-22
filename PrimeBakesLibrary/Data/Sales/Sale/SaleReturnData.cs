@@ -121,7 +121,7 @@ public static class SaleReturnData
 		foreach (var item in saleDetails)
 			saleItemCarts.Add(new()
 			{
-				ItemId = item.SaleReturnId,
+				ItemId = item.ProductId,
 				ItemName = "",
 				Quantity = item.Quantity,
 				Rate = item.Rate,

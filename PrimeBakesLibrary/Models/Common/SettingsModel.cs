@@ -29,6 +29,7 @@ public static class SettingsKeys
 	public static string RawMaterialStockAdjustmentTransactionPrefix => "RawMaterialStockAdjustmentTransactionPrefix";
 	public static string ProductStockAdjustmentTransactionPrefix => "ProductStockAdjustmentTransactionPrefix";
 	
+	public static string SaleTransactionPrefix => "SaleTransactionPrefix";
 	public static string SaleReturnTransactionPrefix => "SaleReturnTransactionPrefix";
 
 	public static string UpdateItemMasterRateOnPurchase => "UpdateRawMaterialMasterRateOnPurchase";

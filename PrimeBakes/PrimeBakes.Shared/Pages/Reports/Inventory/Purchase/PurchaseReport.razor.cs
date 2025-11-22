@@ -617,7 +617,7 @@ public partial class PurchaseReport
 		purchase.Status = true;
 		purchase.LastModifiedBy = _user.Id;
 		purchase.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-		purchase.LastModifiedFromPlatform = FormFactor.GetFormFactor();
+		purchase.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 
 		await PurchaseData.RecoverPurchaseTransaction(purchase);
 	}

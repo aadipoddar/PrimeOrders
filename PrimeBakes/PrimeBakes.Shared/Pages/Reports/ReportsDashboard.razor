@@ -58,7 +58,7 @@ else
 						<p>View overall business performance metrics and KPIs</p>
 					</div>
 
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/Detailed/")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportSale)'>
 						<div class="card-icon detailed-report-icon">
 							<i class="fas fa-list-alt"></i>
 						</div>
@@ -105,7 +105,7 @@ else
 						<p>Aggregated product sales analytics with charts</p>
 					</div>
 
-					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports/Sale/ProductDetailed")'>
+					<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem)'>
 						<div class="card-icon item-report-icon">
 							<i class="fas fa-cubes"></i>
 						</div>

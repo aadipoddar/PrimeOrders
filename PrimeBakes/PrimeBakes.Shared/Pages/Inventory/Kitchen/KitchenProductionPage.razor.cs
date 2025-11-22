@@ -438,6 +438,10 @@ public partial class KitchenProductionPage
 				_cart.Remove(item);
 
 			item.Total = item.Rate * item.Quantity;
+
+			item.Remarks = item.Remarks?.Trim();
+			if (string.IsNullOrWhiteSpace(item.Remarks))
+				item.Remarks = null;
 		}
 
 		_kitchenProduction.TotalAmount = _cart.Sum(x => x.Total);
@@ -571,6 +575,7 @@ public partial class KitchenProductionPage
 			}
 		}
 
+		_kitchenProduction.Remarks = _kitchenProduction.Remarks?.Trim();
 		if (string.IsNullOrWhiteSpace(_kitchenProduction.Remarks))
 			_kitchenProduction.Remarks = null;
 

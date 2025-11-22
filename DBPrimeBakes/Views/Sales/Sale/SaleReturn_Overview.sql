@@ -53,6 +53,15 @@ SELECT
 	[sr].[UPI],
 	[sr].[Credit],
 
+	STUFF(
+		CONCAT(
+			CASE WHEN [sr].[Cash] > 0 THEN ',Cash' ELSE '' END,
+			CASE WHEN [sr].[Card] > 0 THEN ',Card' ELSE '' END,
+			CASE WHEN [sr].[UPI] > 0 THEN ',UPI' ELSE '' END,
+			CASE WHEN [sr].[Credit] > 0 THEN ',Credit' ELSE '' END
+		), 1, 1, ''
+	) AS PaymentModes,
+
 	[sr].[Remarks],
 	[sr].[CreatedBy],
 	[u].[Name] AS CreatedByName,

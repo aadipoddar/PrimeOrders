@@ -17,14 +17,17 @@ using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Sales.Sale;
 
-public partial class SaleReturnReport
+public partial class SaleReport
 {
 	private UserModel _user;
 
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSaleReturns = false;
 	private bool _showDeleted = false;
+	private bool _isDeleteDialogVisible = false;
+	private bool _isRecoverDialogVisible = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -36,23 +39,19 @@ public partial class SaleReturnReport
 	private List<LocationModel> _locations = [];
 	private List<CompanyModel> _companies = [];
 	private List<LedgerModel> _parties = [];
+	private List<SaleOverviewModel> _saleOverviews = [];
 	private List<SaleReturnOverviewModel> _saleReturnOverviews = [];
 
-	private SfGrid<SaleReturnOverviewModel> _sfSaleReturnGrid;
+	private SfGrid<SaleOverviewModel> _sfSaleGrid;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
-
 	private string _successTitle = string.Empty;
 	private string _successMessage = string.Empty;
-
 	private string _deleteTransactionNo = string.Empty;
 	private int _deleteTransactionId = 0;
-	private bool _isDeleteDialogVisible = false;
-
 	private string _recoverTransactionNo = string.Empty;
 	private int _recoverTransactionId = 0;
-	private bool _isRecoverDialogVisible = false;
 
 	private SfToast _sfErrorToast;
 	private SfToast _sfSuccessToast;
@@ -78,7 +77,7 @@ public partial class SaleReturnReport
 		await LoadLocations();
 		await LoadCompanies();
 		await LoadParties();
-		await LoadSaleReturnOverviews();
+		await LoadSaleOverviews();
 	}
 
 	private async Task LoadDates()
@@ -123,7 +122,7 @@ public partial class SaleReturnReport
 		_selectedParty = _parties.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadSaleReturnOverviews()
+	private async Task LoadSaleOverviews()
 	{
 		if (_isProcessing)
 			return;
@@ -132,33 +131,120 @@ public partial class SaleReturnReport
 		{
 			_isProcessing = true;
 
-			_saleReturnOverviews = await SaleReturnData.LoadSaleReturnOverviewByDate(
+			_saleOverviews = await SaleData.LoadSaleOverviewByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
 			!_showDeleted);
 
 			if (_selectedLocation?.Id > 0)
-				_saleReturnOverviews = [.. _saleReturnOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
+				_saleOverviews = [.. _saleOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
 
 			if (_selectedCompany?.Id > 0)
-				_saleReturnOverviews = [.. _saleReturnOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+				_saleOverviews = [.. _saleOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
 			if (_selectedParty?.Id > 0)
-				_saleReturnOverviews = [.. _saleReturnOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
+				_saleOverviews = [.. _saleOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
 
-			_saleReturnOverviews = [.. _saleReturnOverviews.OrderBy(_ => _.TransactionDateTime)];
+			_saleOverviews = [.. _saleOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			if (_showSaleReturns)
+				await LoadSaleReturnOverviews();
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading sale return overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading sale overviews: {ex.Message}", "error");
 		}
 		finally
 		{
-			if (_sfSaleReturnGrid is not null)
-				await _sfSaleReturnGrid.Refresh();
+			if (_sfSaleGrid is not null)
+				await _sfSaleGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
+	}
+
+	private async Task LoadSaleReturnOverviews()
+	{
+		_saleReturnOverviews = await SaleReturnData.LoadSaleReturnOverviewByDate(
+			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
+			 !_showDeleted);
+
+		if (_selectedLocation?.Id > 0)
+			_saleReturnOverviews = [.. _saleReturnOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
+
+		if (_selectedCompany?.Id > 0)
+			_saleReturnOverviews = [.. _saleReturnOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+
+		if (_selectedParty?.Id > 0)
+			_saleReturnOverviews = [.. _saleReturnOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
+
+		_saleReturnOverviews = [.. _saleReturnOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+		MergeSaleAndReturns();
+	}
+
+	private void MergeSaleAndReturns()
+	{
+		_saleOverviews.AddRange(_saleReturnOverviews.Select(pr => new SaleOverviewModel
+		{
+			Id = pr.Id * -1, // Negative ID to differentiate returns
+			CompanyId = pr.CompanyId,
+			CompanyName = pr.CompanyName,
+			PartyId = pr.PartyId,
+			PartyName = pr.PartyName,
+			TransactionDateTime = pr.TransactionDateTime,
+			OtherChargesAmount = -pr.OtherChargesAmount,
+			RoundOffAmount = -pr.RoundOffAmount,
+			TotalAmount = -pr.TotalAmount,
+			AfterDiscount = -pr.AfterDiscount,
+			BaseTotal = -pr.BaseTotal,
+			CGSTAmount = -pr.CGSTAmount,
+			CGSTPercent = pr.CGSTPercent,
+			CreatedAt = pr.CreatedAt,
+			CreatedBy = pr.CreatedBy,
+			CreatedByName = pr.CreatedByName,
+			CreatedFromPlatform = pr.CreatedFromPlatform,
+			DiscountAmount = -pr.DiscountAmount,
+			DiscountPercent = pr.DiscountPercent,
+			FinancialYear = pr.FinancialYear,
+			FinancialYearId = pr.FinancialYearId,
+			IGSTAmount = -pr.IGSTAmount,
+			IGSTPercent = pr.IGSTPercent,
+			Remarks = pr.Remarks,
+			LastModifiedAt = pr.LastModifiedAt,
+			LastModifiedBy = pr.LastModifiedBy,
+			LastModifiedByUserName = pr.LastModifiedByUserName,
+			LastModifiedFromPlatform = pr.LastModifiedFromPlatform,
+			SGSTAmount = -pr.SGSTAmount,
+			SGSTPercent = pr.SGSTPercent,
+			Card = -pr.Card,
+			Credit = -pr.Credit,
+			Cash = -pr.Cash,
+			UPI = -pr.UPI,
+			CustomerId = pr.CustomerId,
+			CustomerName = pr.CustomerName,
+			LocationId = pr.LocationId,
+			LocationName = pr.LocationName,
+			ItemDiscountAmount = -pr.ItemDiscountAmount,
+			ItemDiscountPercent = pr.ItemDiscountPercent,
+			OrderDateTime = null,
+			OrderId = null,
+			OrderTotalQuantity = null,
+			OrderTransactionNo = null,
+			TotalAfterDiscount = -pr.TotalAfterDiscount,
+			TotalAfterOtherCharges = -pr.TotalAfterOtherCharges,
+			TotalAfterTax = -pr.TotalAfterTax,
+			TotalItems = pr.TotalItems,
+			TotalQuantity = -pr.TotalQuantity,
+			TotalTaxAmount = -pr.TotalTaxAmount,
+			TransactionNo = pr.TransactionNo,
+			PaymentModes = pr.PaymentModes,
+			OtherChargesPercent = pr.OtherChargesPercent,
+			Status = pr.Status
+		}));
+
+		_saleOverviews = [.. _saleOverviews.OrderBy(_ => _.TransactionDateTime)];
 	}
 	#endregion
 
@@ -167,7 +253,7 @@ public partial class SaleReturnReport
 	{
 		_fromDate = args.StartDate;
 		_toDate = args.EndDate;
-		await LoadSaleReturnOverviews();
+		await LoadSaleOverviews();
 	}
 
 	private async Task OnLocationChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
@@ -176,7 +262,7 @@ public partial class SaleReturnReport
 			return;
 
 		_selectedLocation = args.Value;
-		await LoadSaleReturnOverviews();
+		await LoadSaleOverviews();
 	}
 
 	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
@@ -185,7 +271,7 @@ public partial class SaleReturnReport
 			return;
 
 		_selectedCompany = args.Value;
-		await LoadSaleReturnOverviews();
+		await LoadSaleOverviews();
 	}
 
 	private async Task OnPartyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
@@ -194,7 +280,7 @@ public partial class SaleReturnReport
 			return;
 
 		_selectedParty = args.Value;
-		await LoadSaleReturnOverviews();
+		await LoadSaleOverviews();
 	}
 
 	private async Task SetDateRange(DateRangeType rangeType)
@@ -207,7 +293,7 @@ public partial class SaleReturnReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			var today = DateTime.Now.Date;
+			var today = await CommonData.LoadCurrentDateTime();
 			var currentYear = today.Year;
 			var currentMonth = today.Month;
 
@@ -247,7 +333,7 @@ public partial class SaleReturnReport
 						.OrderByDescending(fy => fy.StartDate)
 						.FirstOrDefault();
 
-					if (previousFY is null)
+					if (previousFY == null)
 					{
 						await ShowToast("Warning", "No previous financial year found.", "error");
 						return;
@@ -270,7 +356,7 @@ public partial class SaleReturnReport
 		finally
 		{
 			_isProcessing = false;
-			await LoadSaleReturnOverviews();
+			await LoadSaleOverviews();
 			StateHasChanged();
 		}
 	}
@@ -291,24 +377,20 @@ public partial class SaleReturnReport
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			// Determine if location should be shown (only for location ID 1 users)
-			bool showLocation = _user.LocationId == 1;
-			string locationName = _selectedLocation?.Id > 0 ? _selectedLocation.Name : null;
-
 			// Call the Excel export utility
 			var stream = await Task.Run(() =>
-				SaleReturnReportExcelExport.ExportSaleReturnReport(
-					_saleReturnOverviews.Where(_ => _.Status),
+				SaleReportExcelExport.ExportSaleReport(
+					_saleOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					showLocation,
-					locationName
+					_user.LocationId == 1,
+					_selectedLocation?.Name
 				)
 			);
 
 			// Generate file name with date range
-			string fileName = $"SALE_RETURN_REPORT";
+			string fileName = $"SALE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".xlsx";
@@ -316,7 +398,7 @@ public partial class SaleReturnReport
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Sale return report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Sale report exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -343,24 +425,20 @@ public partial class SaleReturnReport
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			// Determine if location should be shown (only for location ID 1 users)
-			bool showLocation = _user.LocationId == 1;
-			string locationName = _selectedLocation?.Id > 0 ? _selectedLocation.Name : null;
-
 			// Call the PDF export utility
 			var stream = await Task.Run(() =>
-				SaleReturnReportPdfExport.ExportSaleReturnReport(
-					_saleReturnOverviews.Where(_ => _.Status),
+				SaleReportPdfExport.ExportSaleReport(
+					_saleOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					showLocation,
-					locationName
+					_user.LocationId == 1,
+					_selectedLocation?.Name
 				)
 			);
 
 			// Generate file name with date range
-			string fileName = $"SALE_RETURN_REPORT";
+			string fileName = $"SALE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".pdf";
@@ -368,7 +446,7 @@ public partial class SaleReturnReport
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Sale return report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Sale report exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -383,22 +461,35 @@ public partial class SaleReturnReport
 	#endregion
 
 	#region Actions
-	private async Task ViewSaleReturn(int saleId)
+	private async Task ViewSale(int saleId)
 	{
 		try
 		{
-			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{saleId}", "_blank");
+			if (saleId < 0)
+			{
+				// Navigate to Sale Return Page
+				int actualId = Math.Abs(saleId);
+				if (FormFactor.GetFormFactor() == "Web")
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{actualId}", "_blank");
+				else
+					NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{actualId}");
+			}
 			else
-				NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{saleId}");
+			{
+				// Navigate to Sale Page
+				if (FormFactor.GetFormFactor() == "Web")
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Sale}/{saleId}", "_blank");
+				else
+					NavigationManager.NavigateTo($"{PageRouteNames.Sale}/{saleId}");
+			}
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening sale return: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while opening sale: {ex.Message}", "error");
 		}
 	}
 
-	private async Task DownloadInvoice(int saleReturnId)
+	private async Task DownloadInvoice(int saleId)
 	{
 		if (_isProcessing)
 			return;
@@ -408,8 +499,20 @@ public partial class SaleReturnReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(saleReturnId);
-			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			// Check if saleId is negative (indicates a sale return)
+			bool isPurchaseReturn = saleId < 0;
+			int actualId = Math.Abs(saleId);
+
+			if (isPurchaseReturn)
+			{
+				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(actualId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
+			else
+			{
+				var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(actualId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -434,28 +537,27 @@ public partial class SaleReturnReport
 			StateHasChanged();
 
 			if (!_user.Admin || _user.LocationId > 1)
-				throw new UnauthorizedAccessException("You do not have permission to delete this sale return transaction.");
+				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, _deleteTransactionId);
-			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, saleReturn.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-				throw new InvalidOperationException("Cannot delete sale return transaction as the financial year is locked.");
+			if (_deleteTransactionId < 0)
+				await SaleReturnData.DeleteSaleReturn(Math.Abs(_deleteTransactionId));
+			else
+				await SaleData.DeleteSale(_deleteTransactionId);
 
-			await SaleReturnData.DeleteSaleReturn(_deleteTransactionId);
-			await ShowToast("Success", $"Sale return '{_deleteTransactionNo}' has been successfully deleted.", "success");
+			await ShowToast("Success", $"Sale transaction {_deleteTransactionNo} has been deleted successfully.", "success");
 
 			_deleteTransactionId = 0;
 			_deleteTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete purchase return: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while deleting sale transaction: {ex.Message}", "error");
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-			await LoadSaleReturnOverviews();
+			await LoadSaleOverviews();
 		}
 	}
 
@@ -464,8 +566,15 @@ public partial class SaleReturnReport
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_sfSaleReturnGrid is not null)
-			await _sfSaleReturnGrid.Refresh();
+		if (_sfSaleGrid is not null)
+			await _sfSaleGrid.Refresh();
+	}
+
+	private async Task ToggleSaleReturns()
+	{
+		_showSaleReturns = !_showSaleReturns;
+		await LoadSaleOverviews();
+		StateHasChanged();
 	}
 
 	private async Task ToggleDeleted()
@@ -474,7 +583,8 @@ public partial class SaleReturnReport
 			return;
 
 		_showDeleted = !_showDeleted;
-		await LoadSaleReturnOverviews();
+		await LoadSaleOverviews();
+		StateHasChanged();
 	}
 
 	private async Task ConfirmRecover()
@@ -489,50 +599,88 @@ public partial class SaleReturnReport
 			StateHasChanged();
 
 			if (!_user.Admin || _user.LocationId > 1)
-				throw new UnauthorizedAccessException("You do not have permission to recover this sale return transaction.");
+				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
 
-			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, _recoverTransactionId);
+			if (_recoverTransactionId == 0)
+			{
+				await ShowToast("Error", "Invalid sale transaction selected for recovery.", "error");
+				return;
+			}
 
-			// Recover the sale return transaction
-			saleReturn.Status = true;
-			saleReturn.LastModifiedBy = _user.Id;
-			saleReturn.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			saleReturn.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+			if (_recoverTransactionId < 0)
+				await RecoverSaleReturnTransaction(Math.Abs(_recoverTransactionId));
+			else
+				await RecoverSaleTransaction(_recoverTransactionId);
 
-			await SaleReturnData.RecoverSaleReturnTransaction(saleReturn);
-			await ShowToast("Success", $"Transaction '{_recoverTransactionNo}' has been successfully recovered.", "success");
+			await ShowToast("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", "success");
 
 			_recoverTransactionId = 0;
 			_recoverTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover sale return: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while recovering sale transaction: {ex.Message}", "error");
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-			await LoadSaleReturnOverviews();
+			await LoadSaleOverviews();
 		}
+	}
+
+	private async Task RecoverSaleTransaction(int recoverTransactionId)
+	{
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, recoverTransactionId);
+		if (sale is null)
+		{
+			await ShowToast("Error", "Sale transaction not found.", "error");
+			return;
+		}
+
+		// Update the Status to true (active)
+		sale.Status = true;
+		sale.LastModifiedBy = _user.Id;
+		sale.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+		sale.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+
+		await SaleData.RecoverSaleTransaction(sale);
+	}
+
+	private async Task RecoverSaleReturnTransaction(int recoverTransactionId)
+	{
+		var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, recoverTransactionId);
+		if (saleReturn is null)
+		{
+			await ShowToast("Error", "Sale Return transaction not found.", "error");
+			return;
+		}
+
+		// Update the Status to true (active)
+		saleReturn.Status = true;
+		saleReturn.LastModifiedBy = _user.Id;
+		saleReturn.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+		saleReturn.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+
+		await SaleReturnData.RecoverSaleReturnTransaction(saleReturn);
 	}
 	#endregion
 
 	#region Utilities
-	private async Task NavigateToSaleReturnPage()
+	private async Task NavigateToSalePage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.SaleReturn, "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.Sale, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.SaleReturn);
+			NavigationManager.NavigateTo(PageRouteNames.Sale);
 	}
 
 	private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportSaleReturnItem, "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportSaleItem, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem);
+			NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem);
 	}
 
 	private async Task ShowToast(string title, string message, string type)
@@ -563,9 +711,6 @@ public partial class SaleReturnReport
 
 	private void ShowDeleteConfirmation(int id, string transactionNo)
 	{
-		if (_user.LocationId > 1)
-			return;
-
 		_deleteTransactionId = id;
 		_deleteTransactionNo = transactionNo;
 		_isDeleteDialogVisible = true;
@@ -574,17 +719,14 @@ public partial class SaleReturnReport
 
 	private void CancelDelete()
 	{
-		_isDeleteDialogVisible = false;
 		_deleteTransactionId = 0;
 		_deleteTransactionNo = string.Empty;
+		_isDeleteDialogVisible = false;
 		StateHasChanged();
 	}
 
 	private void ShowRecoverConfirmation(int id, string transactionNo)
 	{
-		if (_user.LocationId > 1)
-			return;
-
 		_recoverTransactionId = id;
 		_recoverTransactionNo = transactionNo;
 		_isRecoverDialogVisible = true;
@@ -593,9 +735,9 @@ public partial class SaleReturnReport
 
 	private void CancelRecover()
 	{
-		_isRecoverDialogVisible = false;
 		_recoverTransactionId = 0;
 		_recoverTransactionNo = string.Empty;
+		_isRecoverDialogVisible = false;
 		StateHasChanged();
 	}
 	#endregion
