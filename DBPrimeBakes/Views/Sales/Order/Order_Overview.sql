@@ -41,13 +41,13 @@
 	LEFT JOIN
 		[dbo].[Sale] s ON o.SaleId = s.Id
 	INNER JOIN
-		[dbo].[FinancialYear] AS fy ON s.FinancialYearId = fy.Id
+		[dbo].[FinancialYear] AS fy ON o.FinancialYearId = fy.Id
 	INNER JOIN
 		[dbo].[OrderDetail] od ON o.Id = od.OrderId
 	INNER JOIN
-		[dbo].[User] AS u ON s.CreatedBy = u.Id
+		[dbo].[User] AS u ON o.CreatedBy = u.Id
 	LEFT JOIN
-		[dbo].[User] AS lm ON s.LastModifiedBy = lm.Id
+		[dbo].[User] AS lm ON o.LastModifiedBy = lm.Id
 
 	WHERE
 		[o].[Status] = 1

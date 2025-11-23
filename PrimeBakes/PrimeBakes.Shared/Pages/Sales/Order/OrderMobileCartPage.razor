@@ -15,16 +15,17 @@ else
         <!-- Header with Back Button and Confirm Button -->
         <div class="page-header">
             <button @onclick='() => NavigationManager.NavigateTo(PageRouteNames.OrderMobile)' class="back-button"
-                title="Back">
+                    title="Back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
             </button>
             <h1 class="page-title">Cart</h1>
             @if (_cart.Any())
             {
-                <button @onclick="OpenConfirmDialog" class="confirm-button-header" title="Confirm Order" disabled="@_isProcessing">
+                <button @onclick="OpenConfirmDialog" class="confirm-button-header" title="Confirm Order"
+                        disabled="@_isProcessing">
                     @if (_isProcessing)
                     {
                         <span class="spinner-small"></span>
@@ -32,7 +33,7 @@ else
                     else
                     {
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 11 12 14 22 4"></polyline>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
@@ -44,7 +45,7 @@ else
         <!-- Cart Items Grid -->
         <div class="grid-container">
             <SfGrid @ref="_sfCartGrid" DataSource="_cart" AllowPaging="true" EnableAdaptiveUI="true" AllowTextWrap="true"
-                Toolbar="@(new List<string>() { "Search" })">
+                    Toolbar="@(new List<string>() { "Search" })">
 
                 <GridPageSettings PageSize="10" />
 
@@ -59,8 +60,8 @@ else
                             {
                                 <div class="quantity-section">
                                     <SfNumericTextBox TValue="decimal" Value="@item.Quantity"
-                                        ValueChanged="@((decimal value) => UpdateQuantity(item, value))" Min="0" Step="1"
-                                        Format="N0" CssClass="quantity-input" />
+                                                      ValueChanged="@((decimal value) => UpdateQuantity(item, value))" Min="0" Step="1"
+                                                      Format="N0" CssClass="quantity-input" />
                                 </div>
                             }
                         </Template>
@@ -72,13 +73,14 @@ else
 }
 
 <!-- Validation Error Dialog -->
-<SfDialog @bind-Visible="@_showValidationDialog" IsModal="true" Width="90%" ShowCloseIcon="true" CssClass="confirm-dialog error-dialog">
+<SfDialog @bind-Visible="@_showValidationDialog" IsModal="true" Width="90%" ShowCloseIcon="true"
+          CssClass="confirm-dialog error-dialog">
     <DialogTemplates>
         <Header>
             <div class="dialog-header error-header">
                 <div class="dialog-icon-wrapper error-icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -117,7 +119,7 @@ else
             <div class="dialog-footer">
                 <button @onclick="CloseValidationDialog" class="error-fix-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                     <span>Fix Issues</span>
@@ -134,7 +136,7 @@ else
             <div class="dialog-header">
                 <div class="dialog-icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
@@ -150,7 +152,7 @@ else
                 <div class="order-summary-card">
                     <div class="summary-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="9" cy="21" r="1"></circle>
                             <circle cx="20" cy="21" r="1"></circle>
                             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -171,13 +173,13 @@ else
                 <div class="remarks-section">
                     <label class="remarks-label">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
                         <span>Add Remarks (Optional)</span>
                     </label>
                     <SfTextBox @bind-Value="_orderRemarks" Placeholder="Enter any special instructions or notes here..."
-                        Multiline="true" CssClass="remarks-input" />
+                               Multiline="true" CssClass="remarks-input" />
                 </div>
             </div>
         </Content>
@@ -185,7 +187,7 @@ else
             <div class="dialog-footer">
                 <button @onclick="CloseConfirmDialog" class="cancel-btn" disabled="@_isProcessing">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
@@ -200,7 +202,7 @@ else
                     else
                     {
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         <span>Confirm & Submit</span>
@@ -299,15 +301,15 @@ else
         font-weight: bold;
     }
 
-    .back-button:hover {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-medium);
-    }
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
 
-    .back-button:active {
-        transform: translateY(0);
-    }
+        .back-button:active {
+            transform: translateY(0);
+        }
 
     .page-title {
         margin: 0;
@@ -336,20 +338,20 @@ else
         position: relative;
     }
 
-    .confirm-button-header:hover:not(:disabled) {
-        background: #218838;
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-medium);
-    }
+        .confirm-button-header:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
 
-    .confirm-button-header:active:not(:disabled) {
-        transform: translateY(0);
-    }
+        .confirm-button-header:active:not(:disabled) {
+            transform: translateY(0);
+        }
 
-    .confirm-button-header:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+        .confirm-button-header:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
     /* Grid Container */
     .grid-container {
@@ -372,23 +374,23 @@ else
         max-width: 120px;
     }
 
-    .quantity-input input {
-        text-align: center !important;
-        border: 2px solid var(--border-color);
-        border-radius: 8px;
-        padding: 8px !important;
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--text-dark);
-        transition: all 0.2s ease;
-        height: 40px;
-    }
+        .quantity-input input {
+            text-align: center !important;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px !important;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            height: 40px;
+        }
 
-    .quantity-input input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
-        outline: none;
-    }
+            .quantity-input input:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+                outline: none;
+            }
 
     /* Grid Styling */
     ::deep .e-grid {
@@ -399,32 +401,32 @@ else
         border: none;
     }
 
-    ::deep .e-grid .e-gridheader {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    }
+        ::deep .e-grid .e-gridheader {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        }
 
-    ::deep .e-grid .e-headercell {
-        background: transparent;
-        color: white;
-        font-weight: 600;
-        border: none;
-        padding: 15px 12px;
-    }
+        ::deep .e-grid .e-headercell {
+            background: transparent;
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 15px 12px;
+        }
 
-    ::deep .e-grid .e-rowcell {
-        border: none;
-        border-bottom: 1px solid var(--border-color);
-        padding: 12px;
-        vertical-align: middle;
-    }
+        ::deep .e-grid .e-rowcell {
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px;
+            vertical-align: middle;
+        }
 
-    ::deep .e-grid .e-row:nth-child(even) {
-        background-color: #fafafa;
-    }
+        ::deep .e-grid .e-row:nth-child(even) {
+            background-color: #fafafa;
+        }
 
-    ::deep .e-grid .e-row:hover {
-        background-color: var(--primary-light);
-    }
+        ::deep .e-grid .e-row:hover {
+            background-color: var(--primary-light);
+        }
 
     /* Dialog Styling */
     ::deep .confirm-dialog {
@@ -433,17 +435,17 @@ else
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     }
 
-    ::deep .confirm-dialog .e-dlg-header-content {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 14px 16px 12px 16px;
-        border-bottom: none;
-    }
+        ::deep .confirm-dialog .e-dlg-header-content {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 14px 16px 12px 16px;
+            border-bottom: none;
+        }
 
-    ::deep .confirm-dialog .e-dlg-content {
-        padding: 16px;
-        background: #fafbfc;
-    }
+        ::deep .confirm-dialog .e-dlg-content {
+            padding: 16px;
+            background: #fafbfc;
+        }
 
     .dialog-header {
         display: flex;
@@ -464,10 +466,10 @@ else
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .dialog-icon-wrapper svg {
-        width: 20px;
-        height: 20px;
-    }
+        .dialog-icon-wrapper svg {
+            width: 20px;
+            height: 20px;
+        }
 
     .dialog-title-wrapper {
         flex: 1;
@@ -517,10 +519,10 @@ else
         box-shadow: 0 2px 4px rgba(226, 19, 123, 0.25);
     }
 
-    .summary-icon svg {
-        width: 18px;
-        height: 18px;
-    }
+        .summary-icon svg {
+            width: 18px;
+            height: 18px;
+        }
 
     .summary-details {
         flex: 1;
@@ -567,36 +569,36 @@ else
         gap: 6px;
     }
 
-    .remarks-label svg {
-        color: var(--primary-color);
-        width: 14px;
-        height: 14px;
-    }
+        .remarks-label svg {
+            color: var(--primary-color);
+            width: 14px;
+            height: 14px;
+        }
 
     .remarks-input {
         width: 100%;
     }
 
-    .remarks-input textarea {
-        min-height: 60px;
-        border: 2px solid var(--border-color);
-        border-radius: 6px;
-        padding: 8px 10px;
-        font-size: 12px;
-        transition: all 0.2s ease;
-        line-height: 1.4;
-        resize: vertical;
-    }
+        .remarks-input textarea {
+            min-height: 60px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+            resize: vertical;
+        }
 
-    .remarks-input textarea:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
-        outline: none;
-    }
+            .remarks-input textarea:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+                outline: none;
+            }
 
-    .remarks-input textarea::placeholder {
-        color: #adb5bd;
-    }
+            .remarks-input textarea::placeholder {
+                color: #adb5bd;
+            }
 
     .dialog-footer {
         display: flex;
@@ -623,11 +625,11 @@ else
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     }
 
-    .cancel-btn svg,
-    .submit-btn svg {
-        width: 16px;
-        height: 16px;
-    }
+        .cancel-btn svg,
+        .submit-btn svg {
+            width: 16px;
+            height: 16px;
+        }
 
     .cancel-btn {
         background: #f8f9fa;
@@ -635,26 +637,26 @@ else
         border: 1px solid #dee2e6;
     }
 
-    .cancel-btn svg {
-        stroke-width: 2.5;
-    }
+        .cancel-btn svg {
+            stroke-width: 2.5;
+        }
 
-    .cancel-btn:hover:not(:disabled) {
-        background: #e9ecef;
-        border-color: #adb5bd;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+        .cancel-btn:hover:not(:disabled) {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .cancel-btn:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    }
+        .cancel-btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
 
-    .cancel-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+        .cancel-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
     .submit-btn {
         background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
@@ -662,26 +664,26 @@ else
         box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
     }
 
-    .submit-btn svg {
-        stroke-width: 2.5;
-    }
+        .submit-btn svg {
+            stroke-width: 2.5;
+        }
 
-    .submit-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, #1e7e34 0%, var(--success-color) 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
-    }
+        .submit-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1e7e34 0%, var(--success-color) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
 
-    .submit-btn:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-    }
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
 
-    .submit-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
 
     /* Error Dialog Styling */
     ::deep .error-dialog .e-dlg-header-content {
@@ -792,11 +794,11 @@ else
         padding: 10px;
     }
 
-    ::deep .e-pager .e-currentitem {
-        background: var(--primary-color);
-        color: white;
-        border-radius: 6px;
-    }
+        ::deep .e-pager .e-currentitem {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+        }
 
     /* Mobile Responsiveness */
     @@media (max-width: 576px) {
@@ -860,7 +862,9 @@ else
     }
 
     @@media (max-width: 400px) {
-        .back-button, .confirm-button-header {
+
+        .back-button,
+        .confirm-button-header {
             min-width: 40px;
             min-height: 40px;
             padding: 8px;
@@ -874,7 +878,9 @@ else
 
     /* Improved touch targets for mobile */
     @@media (hover: none) and (pointer: coarse) {
-        .back-button, .confirm-button-header {
+
+        .back-button,
+        .confirm-button-header {
             min-width: 48px;
             min-height: 48px;
         }
