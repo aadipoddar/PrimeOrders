@@ -5,28 +5,27 @@ using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Order;
+using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Sales.Order;
+using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Order;
+using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Sales.Order;
 
-public partial class OrderReport
+public partial class OrderItemReport
 {
 	private UserModel _user;
 
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
-	private bool _showDeleted = false;
-	private bool _isDeleteDialogVisible = false;
-	private bool _isRecoverDialogVisible = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -37,23 +36,17 @@ public partial class OrderReport
 
 	private List<LocationModel> _locations = [];
 	private List<CompanyModel> _companies = [];
-	private List<OrderOverviewModel> _orderOverviews = [];
+	private List<OrderItemOverviewModel> _orderItemOverviews = [];
 
-	private SfGrid<OrderOverviewModel> _sfOrderGrid;
+	private SfGrid<OrderItemOverviewModel> _sfOrderItemGrid;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
 	private string _successTitle = string.Empty;
 	private string _successMessage = string.Empty;
-	private string _deleteTransactionNo = string.Empty;
-	private int _deleteTransactionId = 0;
-	private string _recoverTransactionNo = string.Empty;
-	private int _recoverTransactionId = 0;
 
 	private SfToast _sfErrorToast;
 	private SfToast _sfSuccessToast;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -73,7 +66,7 @@ public partial class OrderReport
 		await LoadDates();
 		await LoadLocations();
 		await LoadCompanies();
-		await LoadOrderOverviews();
+		await LoadOrderItemOverviews();
 	}
 
 	private async Task LoadDates()
@@ -106,7 +99,7 @@ public partial class OrderReport
 		_selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadOrderOverviews()
+	private async Task LoadOrderItemOverviews()
 	{
 		if (_isProcessing)
 			return;
@@ -115,45 +108,44 @@ public partial class OrderReport
 		{
 			_isProcessing = true;
 
-			_orderOverviews = await OrderData.LoadOrderOverviewByDate(
+			_orderItemOverviews = await OrderData.LoadOrderItemOverviewByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-			!_showDeleted);
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
 			if (_selectedLocation?.Id > 0)
-				_orderOverviews = [.. _orderOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
+				_orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
 
 			if (_selectedCompany?.Id > 0)
-				_orderOverviews = [.. _orderOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+				_orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
 			// Filter by order status
 			if (_selectedOrderStatus == "Pending")
-				_orderOverviews = [.. _orderOverviews.Where(_ => _.SaleId == null)];
+				_orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.SaleId == null)];
 			else if (_selectedOrderStatus == "Completed")
-				_orderOverviews = [.. _orderOverviews.Where(_ => _.SaleId != null)];
+				_orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.SaleId != null)];
 
-			_orderOverviews = [.. _orderOverviews.OrderBy(_ => _.TransactionDateTime)];
+			_orderItemOverviews = [.. _orderItemOverviews.OrderBy(_ => _.TransactionDateTime)];
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading sale overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading purchase item overviews: {ex.Message}", "error");
 		}
 		finally
 		{
-			if (_sfOrderGrid is not null)
-				await _sfOrderGrid.Refresh();
+			if (_sfOrderItemGrid is not null)
+				await _sfOrderItemGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
 	}
 	#endregion
 
-	#region Changed Events
+	#region Change Events
 	private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
 	{
 		_fromDate = args.StartDate;
 		_toDate = args.EndDate;
-		await LoadOrderOverviews();
+		await LoadOrderItemOverviews();
 	}
 
 	private async Task OnLocationChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
@@ -162,7 +154,7 @@ public partial class OrderReport
 			return;
 
 		_selectedLocation = args.Value;
-		await LoadOrderOverviews();
+		await LoadOrderItemOverviews();
 	}
 
 	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
@@ -171,13 +163,13 @@ public partial class OrderReport
 			return;
 
 		_selectedCompany = args.Value;
-		await LoadOrderOverviews();
+		await LoadOrderItemOverviews();
 	}
 
 	private async Task OnOrderStatusChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
 	{
 		_selectedOrderStatus = args.Value;
-		await LoadOrderOverviews();
+		await LoadOrderItemOverviews();
 	}
 
 	private async Task SetDateRange(DateRangeType rangeType)
@@ -226,9 +218,9 @@ public partial class OrderReport
 					currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
 					var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
 					var previousFY = financialYears
-						.Where(fy => fy.Id != currentFY.Id)
-						.OrderByDescending(fy => fy.StartDate)
-						.FirstOrDefault();
+					.Where(fy => fy.Id != currentFY.Id)
+					.OrderByDescending(fy => fy.StartDate)
+					.FirstOrDefault();
 
 					if (previousFY == null)
 					{
@@ -253,7 +245,7 @@ public partial class OrderReport
 		finally
 		{
 			_isProcessing = false;
-			await LoadOrderOverviews();
+			await LoadOrderItemOverviews();
 			StateHasChanged();
 		}
 	}
@@ -270,14 +262,12 @@ public partial class OrderReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			// Convert DateTime to DateOnly for Excel export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			// Call the Excel export utility
 			var stream = await Task.Run(() =>
-				OrderReportExcelExport.ExportOrderReport(
-					_orderOverviews.Where(_ => _.Status),
+			OrderItemReportExcelExport.ExportOrderItemReport(
+					_orderItemOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
@@ -286,16 +276,14 @@ public partial class OrderReport
 				)
 			);
 
-			// Generate file name with date range
-			string fileName = $"ORDER_REPORT";
+			string fileName = $"ORDER_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".xlsx";
 
-			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Order report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Order item report exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -318,36 +306,116 @@ public partial class OrderReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			// Convert DateTime to DateOnly for PDF export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			// Call the PDF export utility
 			var stream = await Task.Run(() =>
-				OrderReportPdfExport.ExportOrderReport(
-					_orderOverviews.Where(_ => _.Status),
-					dateRangeStart,
-					dateRangeEnd,
-					_showAllColumns,
-					_user.LocationId == 1,
-					_selectedLocation?.Name
-				)
+			OrderItemReportPdfExport.ExportOrderItemReport(
+			_orderItemOverviews,
+			dateRangeStart,
+			dateRangeEnd,
+			_showAllColumns,
+			_user.LocationId == 1,
+			_selectedLocation?.Name
+			)
 			);
 
-			// Generate file name with date range
-			string fileName = $"ORDER_REPORT";
+			string fileName = $"ORDER_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".pdf";
 
-			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Order report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Order item report exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{
 			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportConsolidatedExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
+
+			var stream = await Task.Run(() =>
+			OrderItemConsolidatedExcelExport.ExportConsolidatedOrderItemReport(
+					_orderItemOverviews,
+					dateRangeStart,
+					dateRangeEnd,
+					_selectedLocation?.Name
+				)
+			);
+
+			string fileName = $"ORDER_ITEM_CONSOLIDATED_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".xlsx";
+
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await ShowToast("Success", "Consolidated order item report exported to Excel successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting consolidated report to Excel: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportConsolidatedPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
+
+			var stream = await Task.Run(() =>
+			OrderItemConsolidatedPdfExport.ExportConsolidatedOrderItemReport(
+				_orderItemOverviews,
+				dateRangeStart,
+				dateRangeEnd,
+				_selectedLocation?.Name
+				)
+			);
+
+			string fileName = $"ORDER_ITEM_CONSOLIDATED_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".pdf";
+
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await ShowToast("Success", "Consolidated order item report exported to PDF successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting consolidated report to PDF: {ex.Message}", "error");
 		}
 		finally
 		{
@@ -362,7 +430,6 @@ public partial class OrderReport
 	{
 		try
 		{
-			// Navigate to Order Page
 			if (FormFactor.GetFormFactor() == "Web")
 				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{orderId}", "_blank");
 			else
@@ -398,112 +465,13 @@ public partial class OrderReport
 		}
 	}
 
-	private async Task ConfirmDelete()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isDeleteDialogVisible = false;
-			_isProcessing = true;
-			StateHasChanged();
-
-			if (!_user.Admin || _user.LocationId > 1)
-				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
-
-			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _deleteTransactionId);
-			if (order.SaleId is not null && order.SaleId > 0)
-				throw new InvalidOperationException("Cannot delete order linked to a sale transaction. Please unlink the sale first.");
-
-			await OrderData.DeleteOrder(_deleteTransactionId);
-
-			await ShowToast("Success", $"Order transaction {_deleteTransactionNo} has been deleted successfully.", "success");
-
-			_deleteTransactionId = 0;
-			_deleteTransactionNo = string.Empty;
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while deleting order transaction: {ex.Message}", "error");
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadOrderOverviews();
-		}
-	}
-
 	private async Task ToggleDetailsView()
 	{
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_sfOrderGrid is not null)
-			await _sfOrderGrid.Refresh();
-	}
-
-	private async Task ToggleDeleted()
-	{
-		if (_user.LocationId > 1)
-			return;
-
-		_showDeleted = !_showDeleted;
-		await LoadOrderOverviews();
-		StateHasChanged();
-	}
-
-	private async Task ConfirmRecover()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isRecoverDialogVisible = false;
-			_isProcessing = true;
-			StateHasChanged();
-
-			if (!_user.Admin || _user.LocationId > 1)
-				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
-
-			if (_recoverTransactionId == 0)
-			{
-				await ShowToast("Error", "Invalid sale transaction selected for recovery.", "error");
-				return;
-			}
-
-			var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _recoverTransactionId);
-			if (order is null)
-			{
-				await ShowToast("Error", "Order transaction not found.", "error");
-				return;
-			}
-
-			// Update the Status to true (active)
-			order.Status = true;
-			order.LastModifiedBy = _user.Id;
-			order.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			order.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-
-			await OrderData.RecoverOrderTransaction(order);
-
-			await ShowToast("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", "success");
-
-			_recoverTransactionId = 0;
-			_recoverTransactionNo = string.Empty;
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while recovering sale transaction: {ex.Message}", "error");
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadOrderOverviews();
-		}
+		if (_sfOrderItemGrid is not null)
+			await _sfOrderItemGrid.Refresh();
 	}
 	#endregion
 
@@ -516,12 +484,12 @@ public partial class OrderReport
 			NavigationManager.NavigateTo(PageRouteNames.Order);
 	}
 
-	private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	private async Task NavigateToOrderReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportOrderItem, "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportOrder, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportOrderItem);
+			NavigationManager.NavigateTo(PageRouteNames.ReportOrder);
 	}
 
 	private async Task ShowToast(string title, string message, string type)
@@ -548,38 +516,6 @@ public partial class OrderReport
 				Content = _successMessage
 			});
 		}
-	}
-
-	private void ShowDeleteConfirmation(int id, string transactionNo)
-	{
-		_deleteTransactionId = id;
-		_deleteTransactionNo = transactionNo;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
-	}
-
-	private void CancelDelete()
-	{
-		_deleteTransactionId = 0;
-		_deleteTransactionNo = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
-	}
-
-	private void ShowRecoverConfirmation(int id, string transactionNo)
-	{
-		_recoverTransactionId = id;
-		_recoverTransactionNo = transactionNo;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
-	}
-
-	private void CancelRecover()
-	{
-		_recoverTransactionId = 0;
-		_recoverTransactionNo = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
 	}
 	#endregion
 }

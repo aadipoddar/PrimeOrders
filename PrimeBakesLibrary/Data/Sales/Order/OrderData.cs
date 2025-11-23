@@ -120,8 +120,8 @@ public static class OrderData
 			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
-			//if (existingOrder.SaleId is not null && existingOrder.SaleId > 0)
-			//	throw new InvalidOperationException("Cannot update order as it is already converted to a sale.");
+			if (existingOrder.SaleId is not null && existingOrder.SaleId > 0)
+				throw new InvalidOperationException("Cannot update order as it is already converted to a sale.");
 
 			order.TransactionNo = existingOrder.TransactionNo;
 		}

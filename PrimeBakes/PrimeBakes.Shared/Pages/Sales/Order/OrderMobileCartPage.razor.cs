@@ -6,14 +6,9 @@ using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Order;
-using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sales.Order;
-using PrimeBakesLibrary.Models.Sales.Sale;
 
-using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
@@ -26,10 +21,12 @@ public partial class OrderMobileCartPage
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showConfirmDialog = false;
+	private bool _showValidationDialog = false;
 
 	private string _orderRemarks = string.Empty;
 
 	private List<OrderItemCartModel> _cart = [];
+	private List<(string Field, string Message)> _validationErrors = [];
 
 	private SfGrid<OrderItemCartModel> _sfCartGrid;
 
@@ -119,21 +116,21 @@ public partial class OrderMobileCartPage
 
 	private bool ValidateForm()
 	{
+		_validationErrors.Clear();
+
 		if (_cart.Count == 0)
-		{
-			ShowToast("Validation Error", "The Cart is Empty. Please Add Items to the Cart Before Saving the Order.", "error").Wait();
-			return false;
-		}
+			_validationErrors.Add(("Cart", "The Cart is Empty. Please Add Items to the Cart Before Saving the Order."));
 
 		if (_cart.Any(item => item.Quantity <= 0))
-		{
-			ShowToast("Validation Error", "All items in the cart must have a quantity greater than zero.", "error").Wait();
-			return false;
-		}
+			_validationErrors.Add(("Quantity", "All items in the cart must have a quantity greater than zero."));
 
 		if (_user.LocationId <= 1)
+			_validationErrors.Add(("Location", "Please select a valid location for the order."));
+
+		if (_validationErrors.Any())
 		{
-			ShowToast("Validation Error", "Please select a valid location for the order.", "error").Wait();
+			_showValidationDialog = true;
+			StateHasChanged();
 			return false;
 		}
 
@@ -201,6 +198,9 @@ public partial class OrderMobileCartPage
 
 	private void OpenConfirmDialog()
 	{
+		if (!ValidateForm())
+			return;
+
 		_showConfirmDialog = true;
 		StateHasChanged();
 	}
@@ -208,6 +208,12 @@ public partial class OrderMobileCartPage
 	private void CloseConfirmDialog()
 	{
 		_showConfirmDialog = false;
+		StateHasChanged();
+	}
+
+	private void CloseValidationDialog()
+	{
+		_showValidationDialog = false;
 		StateHasChanged();
 	}
 

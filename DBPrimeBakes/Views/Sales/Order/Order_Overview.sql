@@ -13,10 +13,13 @@
 		[s].[TransactionNo] AS SaleTransactionNo,
 		[s].[TransactionDateTime] AS SaleDateTime,
 
+		[o].[TransactionDateTime],
+		[o].[FinancialYearId],
+		CONVERT(VARCHAR(10), fy.StartDate, 103) + ' to ' + CONVERT(VARCHAR(10), fy.EndDate, 103) AS FinancialYear,
+
 		COUNT([od].[Id]) AS TotalItems,
 		SUM([od].[Quantity]) AS TotalQuantity,
 
-		[o].[TransactionDateTime],
 		[o].[Remarks],
 		[o].[CreatedBy],
 		[u].[Name] AS CreatedByName,
@@ -37,6 +40,8 @@
 		[dbo].[Location] l ON o.LocationId = l.Id
 	LEFT JOIN
 		[dbo].[Sale] s ON o.SaleId = s.Id
+	INNER JOIN
+		[dbo].[FinancialYear] AS fy ON s.FinancialYearId = fy.Id
 	INNER JOIN
 		[dbo].[OrderDetail] od ON o.Id = od.OrderId
 	INNER JOIN
@@ -59,6 +64,9 @@
 		[s].[TransactionNo],
 		[s].[TransactionDateTime],
 		[o].[TransactionDateTime],
+		[o].[FinancialYearId],
+		[fy].StartDate,
+		[fy].EndDate,
 		[o].[Remarks],
 		[o].[CreatedBy],
 		[u].[Name],

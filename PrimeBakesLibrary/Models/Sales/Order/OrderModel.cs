@@ -52,10 +52,13 @@ public class OrderOverviewModel
 	public string? SaleTransactionNo { get; set; }
 	public DateTime? SaleDateTime { get; set; }
 
-    public int TotalItems { get; set; }
+    public DateTime TransactionDateTime { get; set; }
+    public int FinancialYearId { get; set; }
+	public string FinancialYear { get; set; }
+
+	public int TotalItems { get; set; }
 	public decimal TotalQuantity { get; set; }
 
-    public DateTime TransactionDateTime { get; set; }
 	public string? Remarks { get; set; }
 	public int CreatedBy { get; set; }
 	public string CreatedByName { get; set; }
