@@ -1,11 +1,16 @@
-﻿using OfficeOpenXml;
+﻿using System.Security.AccessControl;
+
+using OfficeOpenXml;
 
 using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
-FileInfo fileInfo = new(@"C:\Others\sale.xlsx");
+FileInfo fileInfo = new(@"C:\Others\order.xlsx");
 
 ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
@@ -48,7 +53,9 @@ var worksheet2 = package.Workbook.Worksheets[1];
 
 // await InsertReturns(worksheet1, worksheet2);
 
-await InsertSales(worksheet1, worksheet2);
+// await InsertSales(worksheet1, worksheet2);
+
+await InsertOrder(worksheet1, worksheet2);
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -1093,7 +1100,6 @@ static async Task InsertReturns(ExcelWorksheet worksheet1, ExcelWorksheet worksh
 static async Task InsertSales(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
 {
 	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
 	var row = 2;
 
 	List<SaleOldModel> sale = [];
@@ -1237,12 +1243,12 @@ static async Task InsertSales(ExcelWorksheet worksheet1, ExcelWorksheet workshee
 		{
 			Id = 0,
 			TransactionNo = issue.BillNo,
-			CustomerId = null,
+			CustomerId = issue.CustomerId,
 			ItemsTotalAmount = returnCart.Sum(x => x.Total),
 			OtherChargesPercent = 0,
 			OtherChargesAmount = 0,
 			OrderId = issue.OrderId,
-			LocationId = 1,
+			LocationId = issue.LocationId,
 			PartyId = issue.PartyId,
 			RoundOffAmount = issue.RoundOff,
 			DiscountPercent = issue.DiscPercent,
@@ -1270,6 +1276,125 @@ static async Task InsertSales(ExcelWorksheet worksheet1, ExcelWorksheet workshee
 			finalIssue.Credit = 0;
 		}
 		await SaleData.SaveSaleTransaction(finalIssue, returnCart);
+		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+	}
+}
+
+static async Task InsertOrder(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+	var row = 2;
+
+	List<OrderModelOld> orders = [];
+	List<OrderDetailModelOld> orderDetails = [];
+
+	while (worksheet1.Cells[row, 1].Value != null)
+	{
+		var id = worksheet1.Cells[row, 1].Value.ToString();
+		var billNo = worksheet1.Cells[row, 2].Value.ToString();
+		var billDateTime = worksheet1.Cells[row, 3].Value.ToString();
+		var locationId = worksheet1.Cells[row, 4].Value.ToString();
+		var userId = worksheet1.Cells[row, 5].Value.ToString();
+		var saleId = worksheet1.Cells[row, 7].Value.ToString();
+		var status = worksheet1.Cells[row, 9].Value.ToString();
+
+
+		orders.Add(new()
+		{
+			Id = int.Parse(id),
+			OrderNo = billNo,
+			OrderDateTime = DateTime.Parse(billDateTime),
+			LocationId = int.Parse(locationId),
+			UserId = int.Parse(userId),
+			Remarks = "",
+			SaleId = saleId == "NULL" ? null : int.Parse(saleId),
+			CreatedAt = DateTime.Now,
+			Status = status.ToLower() == "1",
+		});
+
+		row++;
+	}
+
+	orders.RemoveAll(_ => _.Status == false);
+
+	row = 2;
+	while (worksheet2.Cells[row, 1].Value != null)
+	{
+		var id = worksheet2.Cells[row, 1].Value.ToString();
+		var orderId = worksheet2.Cells[row, 2].Value.ToString();
+		var productId = worksheet2.Cells[row, 3].Value.ToString();
+		var quantity = worksheet2.Cells[row, 4].Value.ToString();
+		var status = worksheet2.Cells[row, 5].Value.ToString();
+
+		orderDetails.Add(new()
+		{
+			Id = int.Parse(id),
+			OrderId = int.Parse(orderId),
+			ProductId = int.Parse(productId),
+			Quantity = decimal.Parse(quantity),
+			Status = status.ToLower() == "1",
+		});
+
+		row++;
+	}
+
+	orderDetails.RemoveAll(_ => _.Status == false);
+
+	Console.WriteLine("Loaded " + orders.Count + " kitchen issues.");
+	Console.WriteLine("Loaded " + orderDetails.Count + " kitchen issue details.");
+
+	foreach (var issue in orders)
+	{
+		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
+
+		var kitchenIssueDetail = orderDetails.Where(pd => pd.OrderId == issue.Id).ToList();
+		if (kitchenIssueDetail.Count == 0)
+		{
+			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
+			continue;
+		}
+		List<OrderItemCartModel> returnCart = [];
+
+		foreach (var detail in kitchenIssueDetail)
+			returnCart.Add(new()
+			{
+				ItemId = detail.ProductId,
+				ItemName = "",
+				Remarks = null,
+				Quantity = detail.Quantity,
+			});
+
+
+		OrderModel finalIssue = new()
+		{
+			Id = 0,
+			SaleId = issue.SaleId,
+			TransactionNo = issue.OrderNo,
+			LocationId = issue.LocationId,
+			TransactionDateTime = issue.OrderDateTime,
+			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
+			CreatedBy = issue.UserId,
+			CompanyId = 1,
+			FinancialYearId = 1,
+			CreatedFromPlatform = "ImportScript",
+			CreatedAt = issue.CreatedAt,
+			Status = true,
+		};
+
+		finalIssue.TransactionNo = await GenerateCodes.GenerateOrderTransactionNo(finalIssue);
+
+		finalIssue.Id = await OrderData.SaveOrderTransaction(finalIssue, returnCart);
+
+		if (finalIssue.SaleId is not null && finalIssue.SaleId > 0)
+		{
+			var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, finalIssue.SaleId.Value);
+			if (sale is not null)
+			{
+				sale.OrderId = finalIssue.Id;
+				await SaleData.InsertSale(sale);
+			}
+		}
+
 		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
 	}
 }
@@ -1420,5 +1545,27 @@ class SaleDetailOldModel
 	public decimal IGSTAmount { get; set; }
 	public decimal Total { get; set; }
 	public decimal NetRate { get; set; }
+	public bool Status { get; set; }
+}
+
+public class OrderModelOld
+{
+	public int Id { get; set; }
+	public string OrderNo { get; set; }
+	public DateTime OrderDateTime { get; set; }
+	public int LocationId { get; set; }
+	public int UserId { get; set; }
+	public string Remarks { get; set; }
+	public int? SaleId { get; set; }
+	public DateTime CreatedAt { get; set; }
+	public bool Status { get; set; }
+}
+
+public class OrderDetailModelOld
+{
+	public int Id { get; set; }
+	public int OrderId { get; set; }
+	public int ProductId { get; set; }
+	public decimal Quantity { get; set; }
 	public bool Status { get; set; }
 }

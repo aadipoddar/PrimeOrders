@@ -3,13 +3,13 @@ using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Stock;
-using PrimeBakesLibrary.Data.Order;
+using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
-using PrimeBakesLibrary.Models.Order;
+using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
 namespace PrimeBakesLibrary.Data.Sales.Sale;
@@ -73,8 +73,8 @@ public static class SaleData
 				company,
 				party,
 				customer,
-				order?.OrderNo,
-				order?.OrderDateTime,
+				order?.TransactionNo,
+				order?.TransactionDateTime,
 				null, // logo path - uses default
 				"SALE INVOICE",
 				location?.Name // outlet
@@ -99,14 +99,7 @@ public static class SaleData
 			throw new InvalidOperationException("Cannot delete sale transaction as the financial year is locked.");
 
 		if (sale.OrderId is not null && sale.OrderId > 0)
-		{
-			var order = await OrderData.LoadOrderBySale(sale.Id);
-			if (order is not null && order.Id > 0)
-			{
-				order.SaleId = null;
-				await OrderData.InsertOrder(order);
-			}
-		}
+			await UnlinkOrderFromSale(sale.Id);
 
 		sale.Status = false;
 		await InsertSale(sale);
@@ -163,11 +156,16 @@ public static class SaleData
 
 	public static async Task UnlinkOrderFromSale(int saleId)
 	{
-		var existingOrder = await OrderData.LoadOrderBySale(saleId);
-		if (existingOrder is not null && existingOrder.Id > 0)
+		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);
+
+		if (sale.OrderId is null || sale.OrderId <= 0)
+			return;
+
+		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, sale.OrderId.Value);
+		if (order is not null && order.Id > 0)
 		{
-			existingOrder.SaleId = null;
-			await OrderData.InsertOrder(existingOrder);
+			order.SaleId = null;
+			await OrderData.InsertOrder(order);
 		}
 	}
 

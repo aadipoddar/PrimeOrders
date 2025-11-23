@@ -1,0 +1,577 @@
+﻿@page "/sales/order/mobile"
+@using PrimeBakesLibrary.Models.Sales.Order
+@using PrimeBakesLibrary.Models.Product
+
+<PageTitle>Order - PrimeBakes</PageTitle>
+
+@if (_isLoading)
+{
+    <SfSpinner @bind-Visible="_isLoading" Label="Loading Products, Please Wait" />
+}
+else
+{
+    <div class="order-container safe-area">
+        <!-- Simple Header with Back Button -->
+        <div class="page-header">
+            <button @onclick='() => NavigationManager.NavigateTo("/")' class="back-button" title="Home">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+            </button>
+            <h1 class="page-title">Order</h1>
+        </div>
+
+        <!-- Category Filter Section -->
+        <div class="filter-section">
+            <SfDropDownList TValue="int" TItem="ProductCategoryModel" Placeholder="Select Category"
+                DataSource="_productCategories" Value="_selectedCategory?.Id ?? 0" CssClass="category-dropdown">
+                <DropDownListEvents TValue="int" TItem="ProductCategoryModel"
+                    ValueChange="@((args) => { _selectedCategory = args.ItemData; StateHasChanged(); })" />
+                <DropDownListFieldSettings Value="Id" Text="Name" />
+            </SfDropDownList>
+        </div>
+
+        <!-- Grid with 2 Columns: Name and Add Button -->
+        <div class="grid-container">
+            <SfGrid @ref="_sfCartGrid"
+                DataSource="_selectedCategory.Id == 0 ? _cart : _cart.Where(x => x.ItemCategoryId == _selectedCategory.Id)"
+                AllowPaging="true" EnableAdaptiveUI="true" AllowTextWrap="true"
+                Toolbar="@(new List<string>() { "Search" })">
+
+                <GridPageSettings PageSize="10" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(OrderItemCartModel.ItemName)" HeaderText="Product Name" Width="60%" />
+                    <GridColumn HeaderText="Action" Width="40%" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var item = (context as OrderItemCartModel);
+                            }
+                            @if (item is not null)
+                            {
+                                <div class="action-section">
+                                    @if (item.Quantity == 0)
+                                    {
+                                        <button class="add-button" @onclick="() => AddToCart(item)" @onclick:stopPropagation="true">
+                                            Add
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <div class="quantity-controls">
+                                            <SfNumericTextBox TValue="decimal" Value="@item.Quantity"
+                                                ValueChanged="@((decimal value) => UpdateQuantity(item, value))" Min="0" Step="1"
+                                                Format="N0" CssClass="quantity-input" />
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+        <!-- Cart Footer -->
+        @if (_cart.Any(c => c.Quantity > 0))
+        {
+            <div class="cart-footer">
+                <button @onclick="GoToCart" class="cart-button">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Go to Cart</span>
+                    <span class="cart-count">@_cart.Count(c => c.Quantity > 0)</span>
+                </button>
+            </div>
+        }
+    </div>
+}
+
+<!-- Toast Notifications -->
+<SfToast @ref="_sfSuccessToast" ID="toast_success" Icon="e-success" Timeout="5000" ShowProgressBar="true">
+    <ToastPosition X="Center" Y="Top" />
+</SfToast>
+
+<SfToast @ref="_sfErrorToast" ID="toast_error" Icon="e-error" Timeout="5000" ShowProgressBar="true">
+    <ToastPosition X="Center" Y="Top" />
+</SfToast>
+
+<style>
+    :root {
+        --primary-color: #e2137b;
+        --primary-dark: #c71068;
+        --primary-light: #f5c2d3;
+        --text-dark: #2c3e50;
+        --text-light: #7f8c8d;
+        --bg-light: #f8f9fa;
+        --border-color: #e9ecef;
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid var(--border-color);
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .order-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Safe Area Support */
+    .safe-area {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    /* Page Header */
+    .page-header {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        padding-top: calc(15px + env(safe-area-inset-top));
+        padding-left: calc(20px + env(safe-area-inset-left));
+        padding-right: calc(20px + env(safe-area-inset-right));
+        background: white;
+        box-shadow: var(--shadow-light);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        gap: 15px;
+    }
+
+    .back-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-light);
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .back-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .back-button:active {
+        transform: translateY(0);
+    }
+
+    .page-title {
+        margin: 0;
+        color: var(--text-dark);
+        font-size: 22px;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        margin: 15px;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+    }
+
+    .category-dropdown {
+        width: 100%;
+    }
+
+    ::deep .category-dropdown .e-input-group {
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    ::deep .category-dropdown .e-input-group:hover {
+        border-color: var(--primary-light);
+    }
+
+    ::deep .category-dropdown .e-input-group.e-input-focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+    }
+
+    ::deep .category-dropdown .e-input-group input {
+        padding: 10px 12px;
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    ::deep .category-dropdown .e-input-group .e-ddl-icon {
+        color: var(--primary-color);
+    }
+
+    /* Grid Container */
+    .grid-container {
+        flex: 1;
+        padding: 15px;
+        overflow: hidden;
+    }
+
+    /* Action Section */
+    .action-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    /* Add Button */
+    .add-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: var(--shadow-light);
+        min-height: 36px;
+        min-width: 70px;
+    }
+
+    .add-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .add-button:active {
+        transform: translateY(0);
+    }
+
+    /* Quantity Controls */
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 120px;
+        margin: 0 auto;
+    }
+
+    .quantity-input {
+        width: 100%;
+    }
+
+    .quantity-input input {
+        text-align: center !important;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 6px 8px !important;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-dark);
+        transition: all 0.2s ease;
+        height: 36px;
+    }
+
+    .quantity-input input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+        outline: none;
+    }
+
+    /* Cart Footer */
+    .cart-footer {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 15px 20px;
+        padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        padding-left: calc(20px + env(safe-area-inset-left));
+        padding-right: calc(20px + env(safe-area-inset-right));
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    .cart-button {
+        width: 100%;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: var(--shadow-medium);
+        position: relative;
+        min-height: 56px;
+    }
+
+    .cart-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(226, 19, 123, 0.3);
+    }
+
+    .cart-button:active {
+        transform: translateY(0);
+    }
+
+    .cart-count {
+        background: white;
+        color: var(--primary-color);
+        border-radius: 14px;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        position: absolute;
+        right: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Grid Styling */
+    ::deep .e-grid {
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        box-shadow: var(--shadow-light);
+        border: none;
+    }
+
+    ::deep .e-grid .e-gridheader {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    }
+
+    ::deep .e-grid .e-headercell {
+        background: transparent;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 15px 12px;
+    }
+
+    ::deep .e-grid .e-rowcell {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    ::deep .e-grid .e-row:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    ::deep .e-grid .e-row:hover {
+        background-color: var(--primary-light);
+    }
+
+    /* Toolbar Styling */
+    ::deep .e-toolbar {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 15px;
+    }
+
+    ::deep .e-toolbar .e-input-group input {
+        border-radius: 25px;
+        border: 2px solid var(--border-color);
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    ::deep .e-toolbar .e-input-group input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+    }
+
+    /* Pager Styling */
+    ::deep .e-pager {
+        background: white;
+        border-top: 1px solid var(--border-color);
+        padding: 10px;
+    }
+
+    ::deep .e-pager .e-currentitem {
+        background: var(--primary-color);
+        color: white;
+        border-radius: 6px;
+    }
+
+    /* Animations */
+    @@keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Mobile Responsiveness */
+    @@media (max-width: 576px) {
+        .page-header {
+            padding: 12px 15px;
+            padding-top: calc(12px + env(safe-area-inset-top));
+            padding-left: calc(15px + env(safe-area-inset-left));
+            padding-right: calc(15px + env(safe-area-inset-right));
+        }
+
+        .page-title {
+            font-size: 18px;
+        }
+
+        .filter-section {
+            margin: 10px;
+            padding: 12px;
+        }
+
+        .grid-container {
+            padding: 10px;
+        }
+
+        .add-button {
+            padding: 6px 16px;
+            font-size: 13px;
+            min-height: 32px;
+            min-width: 60px;
+        }
+
+        .quantity-input input {
+            font-size: 13px;
+            height: 32px;
+        }
+
+        .cart-footer {
+            padding: 12px 15px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            padding-left: calc(15px + env(safe-area-inset-left));
+            padding-right: calc(15px + env(safe-area-inset-right));
+        }
+
+        .cart-button {
+            padding: 12px 15px;
+            font-size: 14px;
+            min-height: 48px;
+        }
+
+        .cart-count {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+        }
+
+        ::deep .e-grid .e-headercell {
+            padding: 12px 8px;
+            font-size: 14px;
+        }
+
+        ::deep .e-grid .e-rowcell {
+            padding: 10px 8px;
+            font-size: 14px;
+        }
+    }
+
+    @@media (max-width: 400px) {
+        .back-button {
+            min-width: 40px;
+            min-height: 40px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .page-title {
+            font-size: 16px;
+        }
+
+        .add-button {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-height: 30px;
+            min-width: 55px;
+        }
+    }
+
+    /* Improved touch targets for mobile */
+    @@media (hover: none) and (pointer: coarse) {
+        .add-button {
+            min-height: 44px;
+            padding: 10px 20px;
+            min-width: 75px;
+        }
+
+        .back-button {
+            min-width: 48px;
+            min-height: 48px;
+        }
+    }
+
+    /* Tablet specific adjustments */
+    @@media (min-width: 577px) and (max-width: 1024px) {
+        .page-title {
+            font-size: 20px;
+        }
+
+        .grid-container {
+            padding: 20px;
+        }
+
+        ::deep .e-grid .e-headercell {
+            font-size: 15px;
+        }
+
+        ::deep .e-grid .e-rowcell {
+            font-size: 15px;
+        }
+    }
+</style>

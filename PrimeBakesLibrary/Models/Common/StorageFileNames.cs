@@ -6,6 +6,8 @@ public static class StorageFileNames
 
 	public static string OrderDataFileName => "order_data.json";
 	public static string OrderCartDataFileName => "order_cart_data.json";
+	public static string OrderMobileDataFileName => "order_mobile_data.json";
+	public static string OrderMobileCartDataFileName => "order_mobile_cart_data.json";
 
 	public static string SaleDataFileName => "sale_data.json";
 	public static string SaleCartDataFileName => "sale_cart_data.json";

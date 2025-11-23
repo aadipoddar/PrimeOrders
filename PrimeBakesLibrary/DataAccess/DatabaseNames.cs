@@ -84,10 +84,6 @@ public static class StoredProcedureNames
 	public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
 	public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
 
-	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
-	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
-	public static string LoadProductByLocation => "Load_Product_By_Location";
-
 	public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
 	public static string LoadSaleOverviewByDate => "Load_Sale_Overview_By_Date";
 	public static string LoadSaleItemOverviewByDate => "Load_Sale_Item_Overview_By_Date";
@@ -96,14 +92,13 @@ public static class StoredProcedureNames
 	public static string LoadSaleReturnItemOverviewByDate => "Load_SaleReturn_Item_Overview_By_Date";
 
 	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
-	public static string LoadOrderByLocation => "Load_Order_By_Location";
-	public static string LoadLastOrderByLocation => "Load_LastOrder_By_Location";
-	public static string LoadOrderBySale => "Load_Order_By_Sale";
-	public static string LoadOrderOverviewByOrderId => "Load_OrderOverview_By_OrderId";
-	public static string LoadOrderByOrderNo => "Load_Order_By_OrderNo";
+	public static string LoadOrderByLocationPending => "Load_Order_By_Location_Pending";
+	public static string LoadOrderOverviewByDate => "Load_Order_Overview_By_Date";
+	public static string LoadOrderItemOverviewByDate => "Load_Order_Item_Overview_By_Date";
 
-	public static string LoadOrderDetailsByDateLocationId => "Load_OrderDetails_By_Date_LocationId";
-	public static string LoadProductDetailsByDateLocationId => "Load_ProductDetails_By_Date_LocationId";
+	public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
+	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
+	public static string LoadProductByLocation => "Load_Product_By_Location";
 
 	public static string LoadLedgerByLocation => "Load_Ledger_By_Location";
 
@@ -195,6 +190,9 @@ public static class ViewNames
 	public static string SaleReturnItemOverview => "SaleReturn_Item_Overview";
 
 	public static string OrderOverview => "Order_Overview";
+	public static string OrderItemOverview => "Order_Item_Overview";
+
+
 	public static string AccountingOverview => "Accounting_Overview";
 	public static string LedgerOverview => "Ledger_Overview";
 	public static string ProductLocationOverview => "ProductLocation_Overview";

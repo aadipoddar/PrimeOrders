@@ -1,0 +1,775 @@
+﻿@page "/sales/order-cart/mobile"
+@using PrimeBakesLibrary.Models.Sales.Order
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Inputs
+
+<PageTitle>Order Cart - PrimeBakes</PageTitle>
+
+@if (_isLoading)
+{
+    <SfSpinner @bind-Visible="_isLoading" Label="Loading Cart, Please Wait" />
+}
+else
+{
+    <div class="cart-container safe-area">
+        <!-- Header with Back Button -->
+        <div class="page-header">
+            <button @onclick='() => NavigationManager.NavigateTo(PageRouteNames.OrderMobile)' class="back-button"
+                title="Back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <h1 class="page-title">Order Cart</h1>
+        </div>
+
+        <!-- Cart Items Grid -->
+        <div class="grid-container">
+            <SfGrid @ref="_sfCartGrid" DataSource="_cart" AllowPaging="true" EnableAdaptiveUI="true" AllowTextWrap="true"
+                Toolbar="@(new List<string>() { "Search" })">
+
+                <GridPageSettings PageSize="10" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(OrderItemCartModel.ItemName)" HeaderText="Product Name" Width="50%" />
+                    <GridColumn HeaderText="Quantity" Width="50%" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var item = (context as OrderItemCartModel);
+                            }
+                            @if (item is not null)
+                            {
+                                <div class="quantity-section">
+                                    <SfNumericTextBox TValue="decimal" Value="@item.Quantity"
+                                        ValueChanged="@((decimal value) => UpdateQuantity(item, value))" Min="0" Step="1"
+                                        Format="N0" CssClass="quantity-input" />
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+        <!-- Confirm Order Button -->
+        @if (_cart.Any())
+        {
+            <div class="cart-footer">
+                <button @onclick="OpenConfirmDialog" class="confirm-button" disabled="@_isProcessing">
+                    @if (_isProcessing)
+                    {
+                        <span class="spinner-small"></span>
+                        <span>Processing...</span>
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        <span>Confirm Order</span>
+                    }
+                </button>
+            </div>
+        }
+    </div>
+}
+
+<!-- Confirmation Dialog -->
+<SfDialog @bind-Visible="@_showConfirmDialog" IsModal="true" Width="90%" ShowCloseIcon="true" CssClass="confirm-dialog">
+    <DialogTemplates>
+        <Header>
+            <div class="dialog-header">
+                <div class="dialog-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <div class="dialog-title-wrapper">
+                    <h3 class="dialog-main-title">Confirm Your Order</h3>
+                    <p class="dialog-subtitle">Review and submit your order</p>
+                </div>
+            </div>
+        </Header>
+        <Content>
+            <div class="dialog-content">
+                <div class="order-summary-card">
+                    <div class="summary-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                    </div>
+                    <div class="summary-details">
+                        <div class="summary-row">
+                            <span class="summary-label">Total Items</span>
+                            <span class="summary-value">@_cart.Count</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Total Quantity</span>
+                            <span class="summary-value">@_cart.Sum(x => x.Quantity).ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="remarks-section">
+                    <label class="remarks-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>Add Remarks (Optional)</span>
+                    </label>
+                    <SfTextBox @bind-Value="_orderRemarks" Placeholder="Enter any special instructions or notes here..."
+                        Multiline="true" CssClass="remarks-input" />
+                </div>
+            </div>
+        </Content>
+        <FooterTemplate>
+            <div class="dialog-footer">
+                <button @onclick="CloseConfirmDialog" class="cancel-btn" disabled="@_isProcessing">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    <span>Cancel</span>
+                </button>
+                <button @onclick="ConfirmOrder" class="submit-btn" disabled="@_isProcessing">
+                    @if (_isProcessing)
+                    {
+                        <span class="spinner-small"></span>
+                        <span>Submitting...</span>
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Confirm & Submit</span>
+                    }
+                </button>
+            </div>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+<!-- Toast Notifications -->
+<SfToast @ref="_sfSuccessToast" ID="toast_success" Icon="e-success" Timeout="5000" ShowProgressBar="true">
+    <ToastPosition X="Center" Y="Top" />
+</SfToast>
+
+<SfToast @ref="_sfErrorToast" ID="toast_error" Icon="e-error" Timeout="5000" ShowProgressBar="true">
+    <ToastPosition X="Center" Y="Top" />
+</SfToast>
+
+<style>
+    :root {
+        --primary-color: #e2137b;
+        --primary-dark: #c71068;
+        --primary-light: #f5c2d3;
+        --text-dark: #2c3e50;
+        --text-light: #7f8c8d;
+        --bg-light: #f8f9fa;
+        --border-color: #e9ecef;
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --success-color: #28a745;
+    }
+
+    .spinner-small {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .safe-area {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .cart-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #ffeef5 0%, #fff5f9 100%);
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Page Header */
+    .page-header {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        padding-top: calc(15px + env(safe-area-inset-top));
+        padding-left: calc(20px + env(safe-area-inset-left));
+        padding-right: calc(20px + env(safe-area-inset-right));
+        background: white;
+        box-shadow: var(--shadow-light);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        gap: 15px;
+    }
+
+    .back-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-light);
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .back-button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .back-button:active {
+        transform: translateY(0);
+    }
+
+    .page-title {
+        margin: 0;
+        color: var(--text-dark);
+        font-size: 22px;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    /* Grid Container */
+    .grid-container {
+        flex: 1;
+        padding: 15px;
+        overflow: hidden;
+    }
+
+    /* Quantity Section */
+    .quantity-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 8px 0;
+    }
+
+    .quantity-input {
+        width: 100%;
+        max-width: 120px;
+    }
+
+    .quantity-input input {
+        text-align: center !important;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px !important;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-dark);
+        transition: all 0.2s ease;
+        height: 40px;
+    }
+
+    .quantity-input input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+        outline: none;
+    }
+
+    /* Cart Footer */
+    .cart-footer {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 15px 20px;
+        padding-bottom: calc(15px + env(safe-area-inset-bottom));
+        padding-left: calc(20px + env(safe-area-inset-left));
+        padding-right: calc(20px + env(safe-area-inset-right));
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+    }
+
+    .confirm-button {
+        width: 100%;
+        background: var(--success-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: var(--shadow-medium);
+        position: relative;
+        min-height: 56px;
+    }
+
+    .confirm-button:hover:not(:disabled) {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+    }
+
+    .confirm-button:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .confirm-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .item-count {
+        background: white;
+        color: var(--success-color);
+        border-radius: 50%;
+        padding: 4px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        position: absolute;
+        right: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Grid Styling */
+    ::deep .e-grid {
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        box-shadow: var(--shadow-light);
+        border: none;
+    }
+
+    ::deep .e-grid .e-gridheader {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    }
+
+    ::deep .e-grid .e-headercell {
+        background: transparent;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 15px 12px;
+    }
+
+    ::deep .e-grid .e-rowcell {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    ::deep .e-grid .e-row:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    ::deep .e-grid .e-row:hover {
+        background-color: var(--primary-light);
+    }
+
+    /* Dialog Styling */
+    ::deep .confirm-dialog {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    ::deep .confirm-dialog .e-dlg-header-content {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 14px 16px 12px 16px;
+        border-bottom: none;
+    }
+
+    ::deep .confirm-dialog .e-dlg-content {
+        padding: 16px;
+        background: #fafbfc;
+    }
+
+    .dialog-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dialog-icon-wrapper {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .dialog-icon-wrapper svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dialog-title-wrapper {
+        flex: 1;
+    }
+
+    .dialog-main-title {
+        margin: 0 0 2px 0;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+    }
+
+    .dialog-subtitle {
+        margin: 0;
+        font-size: 11px;
+        opacity: 0.85;
+        font-weight: 400;
+    }
+
+    .dialog-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .order-summary-card {
+        background: white;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e9ecef;
+    }
+
+    .summary-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: white;
+        box-shadow: 0 2px 4px rgba(226, 19, 123, 0.25);
+    }
+
+    .summary-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .summary-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-label {
+        font-size: 12px;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .summary-value {
+        font-size: 14px;
+        color: var(--text-dark);
+        font-weight: 700;
+    }
+
+    .remarks-section {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: white;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e9ecef;
+    }
+
+    .remarks-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .remarks-label svg {
+        color: var(--primary-color);
+        width: 14px;
+        height: 14px;
+    }
+
+    .remarks-input {
+        width: 100%;
+    }
+
+    .remarks-input textarea {
+        min-height: 60px;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        line-height: 1.4;
+        resize: vertical;
+    }
+
+    .remarks-input textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+        outline: none;
+    }
+
+    .remarks-input textarea::placeholder {
+        color: #adb5bd;
+    }
+
+    .dialog-footer {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        justify-content: flex-end;
+        background: white;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .cancel-btn,
+    .submit-btn {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 36px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .cancel-btn svg,
+    .submit-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .cancel-btn {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+
+    .cancel-btn svg {
+        stroke-width: 2.5;
+    }
+
+    .cancel-btn:hover:not(:disabled) {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cancel-btn:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .cancel-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .submit-btn svg {
+        stroke-width: 2.5;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #1e7e34 0%, var(--success-color) 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+    }
+
+    .submit-btn:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Pager Styling */
+    ::deep .e-pager {
+        background: white;
+        border-top: 1px solid var(--border-color);
+        padding: 10px;
+    }
+
+    ::deep .e-pager .e-currentitem {
+        background: var(--primary-color);
+        color: white;
+        border-radius: 6px;
+    }
+
+    /* Mobile Responsiveness */
+    @@media (max-width: 576px) {
+        .page-header {
+            padding: 12px 15px;
+            padding-top: calc(12px + env(safe-area-inset-top));
+            padding-left: calc(15px + env(safe-area-inset-left));
+            padding-right: calc(15px + env(safe-area-inset-right));
+        }
+
+        .page-title {
+            font-size: 18px;
+        }
+
+        .grid-container {
+            padding: 10px;
+        }
+
+        .quantity-input input {
+            font-size: 13px;
+            height: 36px;
+        }
+
+        .cart-footer {
+            padding: 12px 15px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            padding-left: calc(15px + env(safe-area-inset-left));
+            padding-right: calc(15px + env(safe-area-inset-right));
+        }
+
+        .confirm-button {
+            padding: 12px 15px;
+            font-size: 14px;
+            min-height: 48px;
+        }
+
+        .item-count {
+            font-size: 12px;
+            padding: 3px 10px;
+        }
+
+        ::deep .e-grid .e-headercell {
+            padding: 12px 8px;
+            font-size: 14px;
+        }
+
+        ::deep .e-grid .e-rowcell {
+            padding: 10px 8px;
+            font-size: 14px;
+        }
+
+        ::deep .confirm-dialog {
+            width: 95% !important;
+        }
+
+        .dialog-content {
+            gap: 15px;
+        }
+
+        .confirmation-text {
+            font-size: 14px;
+        }
+
+        .dialog-footer {
+            flex-direction: column;
+        }
+
+        .cancel-btn,
+        .submit-btn {
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 400px) {
+        .back-button {
+            min-width: 40px;
+            min-height: 40px;
+            padding: 8px;
+            font-size: 18px;
+        }
+
+        .page-title {
+            font-size: 16px;
+        }
+    }
+
+    /* Improved touch targets for mobile */
+    @@media (hover: none) and (pointer: coarse) {
+        .back-button {
+            min-width: 48px;
+            min-height: 48px;
+        }
+
+        .cancel-btn,
+        .submit-btn {
+            min-height: 48px;
+        }
+    }
+</style>

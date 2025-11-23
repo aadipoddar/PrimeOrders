@@ -1,11 +1,11 @@
 ﻿@page "/sales/sale"
 @page "/sales/sale/{Id:int}"
 
-@using PrimeBakesLibrary.Models.Common
 @using PrimeBakesLibrary.Models.Accounts.Masters
-@using PrimeBakesLibrary.Models.Sales.Sale
+@using PrimeBakesLibrary.Models.Common
 @using PrimeBakesLibrary.Models.Product
-@using PrimeBakesLibrary.Models.Order
+@using PrimeBakesLibrary.Models.Sales.Order
+@using PrimeBakesLibrary.Models.Sales.Sale
 
 <PageTitle>Sale - PrimeBakes</PageTitle>
 
@@ -155,7 +155,7 @@ else
                                                 FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="OrderModel ?" TValue="OrderModel ?"
                                                         ValueChange="OnOrderChanged" />
-                                    <AutoCompleteFieldSettings Value="OrderNo" />
+                                    <AutoCompleteFieldSettings Value="TransactionNo" />
                                 </SfAutoComplete>
                             </div>
 

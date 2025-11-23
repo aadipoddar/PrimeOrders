@@ -6,14 +6,14 @@ using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Data.Product;
+using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Order;
 using PrimeBakesLibrary.Models.Product;
+using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.DropDowns;
@@ -243,14 +243,17 @@ public partial class SalePage
 
 			if (_selectedParty is not null && _selectedParty.LocationId is not null && _selectedParty.LocationId > 0)
 			{
-				_orders = await OrderData.LoadOrderByLocation(_selectedParty.LocationId.Value);
-				_orders = [.. _orders.OrderByDescending(s => s.OrderDateTime)];
+				var location = _locations.FirstOrDefault(s => s.Id == _selectedParty.LocationId.Value);
+				_sale.DiscountPercent = location.Discount;
+
+				_orders = await OrderData.LoadOrderByLocationPending(_selectedParty.LocationId.Value);
+				_orders = [.. _orders.OrderByDescending(s => s.TransactionDateTime)];
 
 				if (_sale.OrderId is not null && _sale.OrderId > 0)
 				{
 					if (Id > 0)
 					{
-						var order = await OrderData.LoadOrderBySale(_sale.Id);
+						var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
 						if (order is not null && _selectedParty.LocationId == order.LocationId)
 						{
 							if (_orders.FirstOrDefault(s => s.Id == order.Id) is null)
@@ -480,12 +483,15 @@ public partial class SalePage
 
 		if (_selectedParty.LocationId is not null && _selectedParty.LocationId > 0)
 		{
-			_orders = await OrderData.LoadOrderByLocation(_selectedParty.LocationId.Value);
-			_orders = [.. _orders.OrderByDescending(s => s.OrderDateTime)];
+			var location = _locations.FirstOrDefault(s => s.Id == _selectedParty.LocationId.Value);
+			_sale.DiscountPercent = location.Discount;
+
+			_orders = await OrderData.LoadOrderByLocationPending(_selectedParty.LocationId.Value);
+			_orders = [.. _orders.OrderByDescending(s => s.TransactionDateTime)];
 
 			if (Id > 0)
 			{
-				var order = await OrderData.LoadOrderBySale(_sale.Id);
+				var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _sale.OrderId.Value);
 				if (order is not null && _selectedParty.LocationId == order.LocationId)
 				{
 					if (_orders.FirstOrDefault(s => s.Id == order.Id) is null)
@@ -1148,14 +1154,28 @@ public partial class SalePage
 
 	private async Task NavigateToSelectedOrderPage()
 	{
-		// TODO Implement
-		await ShowToast("View Order", "This feature is coming soon!", "info");
+		if (_selectedOrder is null)
+		{
+			await ShowToast("No Order Selected", "Please select an order to view its details.", "error");
+			return;
+		}
+
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{_selectedOrder.Id}", "_blank");
+		else
+			NavigationManager.NavigateTo($"{PageRouteNames.Order}/{_selectedOrder.Id}");
 	}
 
 	private async Task DownloadSelectedOrder()
 	{
-		// TODO Implement
-		await ShowToast("Download Order", "This feature is coming soon!", "info");
+		if (_selectedOrder is null)
+		{
+			await ShowToast("No Order Selected", "Please select an order to download its invoice.", "error");
+			return;
+		}
+
+		var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(_selectedOrder.Id);
+		await SaveAndViewService.SaveAndView(fileName, pdfStream);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

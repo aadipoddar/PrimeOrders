@@ -466,13 +466,15 @@ public static class PDFInvoiceExportUtil
 	{
 		PdfGrid pdfGrid = new();
 
-		// Check if any item has discount, tax, or UOM
+		// Check if any item has discount, tax, rate, total, or UOM
 		bool hasDiscount = lineItems.Any(i => i.DiscountPercent > 0);
 		bool hasTax = lineItems.Any(i => i.CGSTPercent > 0 || i.SGSTPercent > 0 || i.IGSTPercent > 0 || i.TotalTaxAmount > 0);
 		bool hasUOM = lineItems.Any(i => !string.IsNullOrWhiteSpace(i.UnitOfMeasurement));
+		bool hasRate = lineItems.Any(i => i.Rate > 0);
+		bool hasTotal = lineItems.Any(i => i.Total > 0);
 
 		// Define column settings
-		var columnSettings = GetInvoiceColumnSettings(hasDiscount, hasTax, hasUOM);
+		var columnSettings = GetInvoiceColumnSettings(hasDiscount, hasTax, hasUOM, hasRate, hasTotal);
 
 		// Calculate available width and adjust description column
 		float availableWidth = pageWidth - leftMargin - rightMargin;
@@ -577,7 +579,7 @@ public static class PDFInvoiceExportUtil
 	/// <summary>
 	/// Get invoice column settings based on whether items have discount/tax/UOM
 	/// </summary>
-	private static List<InvoiceColumnSetting> GetInvoiceColumnSettings(bool hasDiscount, bool hasTax, bool hasUOM)
+	private static List<InvoiceColumnSetting> GetInvoiceColumnSettings(bool hasDiscount, bool hasTax, bool hasUOM, bool hasRate, bool hasTotal)
 	{
 		var settings = new List<InvoiceColumnSetting>
 		{
@@ -589,7 +591,8 @@ public static class PDFInvoiceExportUtil
 		if (hasUOM)
 			settings.Add(new("UnitOfMeasurement", "UOM", 40, PdfTextAlignment.Center, null, true));
 
-		settings.Add(new("Rate", "Rate", 55, PdfTextAlignment.Right, "#,##0.00"));
+		if (hasRate)
+			settings.Add(new("Rate", "Rate", 55, PdfTextAlignment.Right, "#,##0.00"));
 
 		if (hasDiscount)
 			settings.Add(new("DiscountPercent", "Disc %", 45, PdfTextAlignment.Right, "#,##0.00", true));
@@ -601,7 +604,8 @@ public static class PDFInvoiceExportUtil
 			settings.Add(new("TotalTaxAmount", "Tax Amt", 55, PdfTextAlignment.Right, "#,##0.00", true));
 		}
 
-		settings.Add(new("Total", "Total", 65, PdfTextAlignment.Right, "#,##0.00"));
+		if (hasTotal)
+			settings.Add(new("Total", "Total", 65, PdfTextAlignment.Right, "#,##0.00"));
 
 		return settings;
 	}
@@ -716,8 +720,8 @@ public static class PDFInvoiceExportUtil
 		if (invoiceData.CashDiscountAmount > 0)
 		{
 			string cashDiscountLabel = invoiceData.CashDiscountPercent > 0
-				? $"Cash Discount ({invoiceData.CashDiscountPercent:N2}%):"
-				: "Cash Discount:";
+				? $"Discount ({invoiceData.CashDiscountPercent:N2}%):"
+				: "Discount:";
 			graphics.DrawString(cashDiscountLabel, labelFont, labelBrush, new PointF(summaryColumnX, summaryStartY));
 			string cashDiscountText = $"- {invoiceData.CashDiscountAmount.FormatIndianCurrency()}";
 			SizeF cashDiscountSize = valueFont.MeasureString(cashDiscountText);

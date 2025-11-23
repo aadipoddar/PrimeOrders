@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Order;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
 namespace PrimeBakesLibrary.Data.Notification;
@@ -40,9 +40,9 @@ public static class SendNotification
 		var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);
 		users = [.. users.Where(u => u.Admin && u.LocationId == 1)];
 
-		var order = await OrderData.LoadOrderOverviewByOrderId(orderId);
+		var order = await CommonData.LoadTableDataById<OrderOverviewModel>(ViewNames.OrderOverview, orderId);
 		var title = $"New Order Placed by {order.LocationName}";
-		var text = $"Order No: {order.OrderNo} | Total Items: {order.TotalProducts} | Total Qty: {order.TotalQuantity} | Location: {order.LocationName} | User: {order.UserName} | Date: {order.OrderDateTime:dd/MM/yy hh:mm tt} | Remarks: {order.Remarks}";
+		var text = $"Order No: {order.TransactionNo} | Total Items: {order.TotalItems} | Total Qty: {order.TotalQuantity} | Location: {order.LocationName} | User: {order.CreatedByName} | Date: {order.TransactionDateTime:dd/MM/yy hh:mm tt} | Remarks: {order.Remarks}";
 
 		await SendNotificationToAPI(users, title, text);
 	}

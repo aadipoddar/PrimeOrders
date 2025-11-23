@@ -14,8 +14,8 @@ SELECT
 	[cust].[Name] AS CustomerName,
 
 	[s].[OrderId],
-	[o].[OrderNo] AS OrderTransactionNo,
-	[o].[OrderDateTime],
+	[o].[TransactionNo] AS OrderTransactionNo,
+	[o].[TransactionDateTime] AS OrderDateTime,
 	[o].[TotalQuantity] AS OrderTotalQuantity,
 
 	[s].[TransactionDateTime],
@@ -91,7 +91,7 @@ LEFT JOIN
 LEFT JOIN
 	[dbo].[Customer] AS cust ON s.CustomerId = cust.Id
 LEFT JOIN
-	[dbo].[Order_Overview] AS o ON s.OrderId = o.OrderId
+	[dbo].[Order_Overview] AS o ON s.OrderId = o.Id
 INNER JOIN
 	[dbo].[FinancialYear] AS fy ON s.FinancialYearId = fy.Id
 INNER JOIN
@@ -116,8 +116,8 @@ GROUP BY
 	[s].[CustomerId],
 	[cust].[Name],
 	[s].[OrderId],
-	[o].[OrderNo],
-	[o].[OrderDateTime],
+	[o].[TransactionNo],
+	[o].[TransactionDateTime],
 	[o].[TotalQuantity],
 	[s].[TransactionDateTime],
 	[s].[FinancialYearId],
