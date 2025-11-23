@@ -225,30 +225,12 @@ else
 				</div>
 			}
 
-			@if (_user.Order)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Order)'>
-					<div class="card-icon order-icon">📋</div>
-					<h3>Orders</h3>
-					<p>Manage customer orders and track order fulfillment</p>
-				</div>
-			}
-
 			@if (_user.Sales)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Sale)'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.SalesDashboard)'>
 					<div class="card-icon sales-icon">📈</div>
-					<h3>Sales</h3>
+					<h3>Sales & Orders</h3>
 					<p>Track sales performance and revenue analytics</p>
-				</div>
-			}
-
-			@if (_user.Sales && _user.LocationId == 1)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.SaleReturn)'>
-					<div class="card-icon sale-return-icon">↩️</div>
-					<h3>Sale Return</h3>
-					<p>Process returns and refunds for customer purchases</p>
 				</div>
 			}
 
