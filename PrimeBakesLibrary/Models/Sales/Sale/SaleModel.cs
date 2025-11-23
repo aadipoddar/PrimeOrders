@@ -97,7 +97,6 @@ public class SaleOverviewModel
 	public int? OrderId { get; set; }
 	public string? OrderTransactionNo { get; set; }
 	public DateTime? OrderDateTime { get; set; }
-	public decimal? OrderTotalQuantity { get; set; }
 
 	public DateTime TransactionDateTime { get; set; }
 	public int FinancialYearId { get; set; }

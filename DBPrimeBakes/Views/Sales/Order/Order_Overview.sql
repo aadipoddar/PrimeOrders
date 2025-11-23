@@ -50,8 +50,7 @@
 		[dbo].[User] AS lm ON o.LastModifiedBy = lm.Id
 
 	WHERE
-		[o].[Status] = 1
-		AND [od].[Status] = 1
+		[od].[Status] = 1
 
 	GROUP BY
 		[o].[Id],

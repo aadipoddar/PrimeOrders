@@ -3,23 +3,29 @@
 using OfficeOpenXml;
 
 using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
-FileInfo fileInfo = new(@"C:\Others\order.xlsx");
+//FileInfo fileInfo = new(@"C:\Others\order.xlsx");
 
-ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
+//ExcelPackage.License.SetNonCommercialPersonal("AadiSoft");
 
-using var package = new ExcelPackage(fileInfo);
+//using var package = new ExcelPackage(fileInfo);
 
-await package.LoadAsync(fileInfo);
+//await package.LoadAsync(fileInfo);
 
-var worksheet1 = package.Workbook.Worksheets[0];
-var worksheet2 = package.Workbook.Worksheets[1];
+//var worksheet1 = package.Workbook.Worksheets[0];
+//var worksheet2 = package.Workbook.Worksheets[1];
 
 // await InsertProducts(worksheet);
 
@@ -55,7 +61,9 @@ var worksheet2 = package.Workbook.Worksheets[1];
 
 // await InsertSales(worksheet1, worksheet2);
 
-await InsertOrder(worksheet1, worksheet2);
+// await InsertOrder(worksheet1, worksheet2);
+
+await FixMasterNames();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -1396,6 +1404,19 @@ static async Task InsertOrder(ExcelWorksheet worksheet1, ExcelWorksheet workshee
 		}
 
 		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+	}
+}
+
+static async Task FixMasterNames()
+{
+	var products = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+
+	products = products.Where(p => p.Name.EndsWith("&#x20;")).ToList();
+
+	foreach (var product in products)
+	{
+		product.Name = product.Name.Replace("&#x20;", " ").TrimEnd();
+		await LedgerData.InsertLedger(product);
 	}
 }
 

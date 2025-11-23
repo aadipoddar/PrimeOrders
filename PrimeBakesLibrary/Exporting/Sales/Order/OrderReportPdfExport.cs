@@ -71,21 +71,11 @@ public static class OrderReportPdfExport
             [
                 "TransactionNo",
                 "SaleTransactionNo",
-                "TransactionDateTime"
-            ];
-
-            // Add location name if showLocation is true
-            if (showLocation)
-            {
-                columnOrder.Add("LocationName");
-            }
-
-            // Continue with remaining summary columns
-            columnOrder.AddRange(
-            [
+                "TransactionDateTime",
+                "LocationName",
                 "TotalItems",
                 "TotalQuantity"
-            ]);
+            ];
         }
 
         // Customize specific columns for PDF display (matching Excel column names)

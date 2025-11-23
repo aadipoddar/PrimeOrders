@@ -1,6 +1,10 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 
+using PrimeBakesLibrary.Data;
+
+using NumericWordsConversion;
+
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
@@ -13,9 +17,9 @@ namespace PrimeBakesLibrary.Exporting;
 /// </summary>
 public static class PDFReportExportUtil
 {
-	#region Public Methods
+	private static PdfLayoutFormat _layoutFormat;
 
-	/// <summary>
+	#region Public Methods	/// <summary>
 	/// Export data to PDF with automatic column detection and formatting
 	/// </summary>
 	/// <typeparam name="T">Type of data to export</typeparam>
@@ -70,15 +74,30 @@ public static class PDFReportExportUtil
 					page = pdfDocument.Pages.Add();
 				}
 
+				// Add footer template first
+				AddBrandingFooter(pdfDocument);
+
+				// Initialize layout format for proper pagination
+				_layoutFormat = new()
+				{
+					Layout = PdfLayoutType.Paginate,
+					Break = PdfLayoutBreakType.FitPage
+				};
+
 				// Setup header
 				float currentY = SetupHeader(page, reportTitle, dateRangeStart, dateRangeEnd, logoPath, locationName);
 
 				// Add data grid
-				currentY = AddDataGrid(page, pdfDocument, data, effectiveColumnOrder, columnSettings, currentY,
+				PdfLayoutResult gridResult = AddDataGrid(page, pdfDocument, data, effectiveColumnOrder, columnSettings, currentY,
 					useBuiltInStyle, autoAdjustColumnWidth);
 
-				// Add branding footer
-				AddBrandingFooter(pdfDocument);
+				// Get the last page where the grid ended
+				PdfPage lastPage = gridResult.Page;
+				PdfGraphics lastPageGraphics = lastPage.Graphics;
+				currentY = gridResult.Bounds.Bottom + 8;
+
+				// Add summary section
+				currentY = AddSummarySection(lastPageGraphics, data, columnSettings, effectiveColumnOrder, 15, lastPage.GetClientSize().Width, currentY);
 
 				// Save PDF document to stream
 				pdfDocument.Save(ms);
@@ -246,8 +265,8 @@ public static class PDFReportExportUtil
 				using FileStream imageStream = new(logoPath, FileMode.Open, FileAccess.Read);
 				PdfBitmap logoBitmap = new(imageStream);
 
-				// Calculate logo dimensions (max height 30, maintain aspect ratio)
-				float maxLogoHeight = 30;
+				// Calculate logo dimensions (compact for better space utilization)
+				float maxLogoHeight = 42;
 				float logoWidth = logoBitmap.Width;
 				float logoHeight = logoBitmap.Height;
 				float aspectRatio = logoWidth / logoHeight;
@@ -262,63 +281,52 @@ public static class PDFReportExportUtil
 				float logoX = (pageWidth - logoWidth) / 2;
 				page.Graphics.DrawImage(logoBitmap, new PointF(logoX, currentY), new SizeF(logoWidth, logoHeight));
 
-				currentY += logoHeight + 3; // Move down past logo with small spacing
+				currentY += logoHeight + 5; // Move down past logo with spacing
 			}
-
-			// Draw company name at left margin (always shown, whether logo exists or not)
-			PdfStandardFont companyFont = new(PdfFontFamily.Helvetica, 14, PdfFontStyle.Bold);
-			PdfBrush companyBrush = new PdfSolidBrush(new PdfColor(59, 130, 246)); // Blue
-			page.Graphics.DrawString("Prime Bakes", companyFont, companyBrush, new PointF(leftMargin, currentY));
-			currentY += 15;
 		}
 		catch (Exception ex)
 		{
-			// Fallback: Just show company name if logo loading fails
+			// Log error but continue without logo
 			Console.WriteLine($"Logo loading failed: {ex.Message}");
-			PdfStandardFont companyFont = new(PdfFontFamily.Helvetica, 14, PdfFontStyle.Bold);
-			PdfBrush companyBrush = new PdfSolidBrush(new PdfColor(59, 130, 246)); // Blue
-			page.Graphics.DrawString("Prime Bakes", companyFont, companyBrush, new PointF(leftMargin, currentY));
-			currentY += 15;
 		}
 
-		// Report title
-		PdfStandardFont titleFont = new(PdfFontFamily.Helvetica, 11, PdfFontStyle.Bold);
-		PdfBrush titleBrush = new PdfSolidBrush(new PdfColor(31, 41, 55)); // Dark gray
-		page.Graphics.DrawString(reportTitle, titleFont, titleBrush, new PointF(leftMargin, currentY));
-		currentY += 13;
+		// Draw a separator line (like invoice)
+		PdfPen separatorPen = new(new PdfColor(59, 130, 246), 2f);
+		page.Graphics.DrawLine(separatorPen, new PointF(leftMargin, currentY), new PointF(pageWidth - rightMargin, currentY));
+		currentY += 4;
 
-		// Date range
+		// Report title (in blue like invoice)
+		PdfStandardFont titleFont = new(PdfFontFamily.Helvetica, 14, PdfFontStyle.Bold);
+		PdfBrush titleBrush = new PdfSolidBrush(new PdfColor(59, 130, 246)); // Blue
+		page.Graphics.DrawString(reportTitle.ToUpper(), titleFont, titleBrush, new PointF(leftMargin, currentY));
+		currentY += 16;
+
+		// Location (left side, like outlet in invoice)
+		if (!string.IsNullOrEmpty(locationName))
+		{
+			PdfStandardFont locationFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold);
+			PdfBrush locationBrush = new PdfSolidBrush(new PdfColor(100, 100, 100)); // Gray
+			string locationText = $"Location: {locationName}";
+			page.Graphics.DrawString(locationText, locationFont, locationBrush, new PointF(leftMargin, currentY));
+		}
+
+		// Date range (right side, like invoice date)
 		if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 		{
 			string dateRange = $"Period: {dateRangeStart?.ToString("dd-MMM-yyyy") ?? "START"} to {dateRangeEnd?.ToString("dd-MMM-yyyy") ?? "END"}";
-			PdfStandardFont dateFont = new(PdfFontFamily.Helvetica, 8);
-			PdfBrush dateBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
-			page.Graphics.DrawString(dateRange, dateFont, dateBrush, new PointF(leftMargin, currentY));
-			currentY += 10;
+			PdfStandardFont dateFont = new(PdfFontFamily.Helvetica, 10);
+			PdfBrush dateBrush = PdfBrushes.Black;
+			SizeF dateSize = dateFont.MeasureString(dateRange);
+			page.Graphics.DrawString(dateRange, dateFont, dateBrush, new PointF(pageWidth - rightMargin - dateSize.Width, currentY));
 		}
 
-		// Location
-		if (!string.IsNullOrEmpty(locationName))
-		{
-			string locationText = $"Location: {locationName}";
-			PdfStandardFont locationFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
-			PdfBrush locationBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
-			page.Graphics.DrawString(locationText, locationFont, locationBrush, new PointF(leftMargin, currentY));
-			currentY += 10;
-		}
-
-		// Separator line
-		PdfPen separatorPen = new(new PdfColor(59, 130, 246), 1); // Blue
-		page.Graphics.DrawLine(separatorPen, new PointF(leftMargin, currentY), new PointF(pageWidth - rightMargin, currentY));
-		currentY += 5;
-
-		return currentY;
+		currentY += 14; return currentY;
 	}
 
 	/// <summary>
 	/// Add data grid to PDF
 	/// </summary>
-	private static float AddDataGrid<T>(
+	private static PdfLayoutResult AddDataGrid<T>(
 		PdfPage page,
 		PdfDocument document,
 		IEnumerable<T> data,
@@ -376,7 +384,7 @@ public static class PDFReportExportUtil
 			{
 				headerRow.Cells[i].Style.BackgroundBrush = new PdfSolidBrush(new PdfColor(59, 130, 246)); // Blue
 				headerRow.Cells[i].Style.TextBrush = PdfBrushes.White;
-				headerRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 5, PdfFontStyle.Bold);
+				headerRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 7, PdfFontStyle.Bold);
 				headerRow.Cells[i].Style.Borders.All = new PdfPen(Color.White, 0.5f);
 				headerRow.Cells[i].Style.StringFormat = new PdfStringFormat
 				{
@@ -412,7 +420,7 @@ public static class PDFReportExportUtil
 				// Apply cell styling (only if not using built-in style)
 				if (!useBuiltInStyle)
 				{
-					row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 4);
+					row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6);
 					row.Cells[i].Style.Borders.All = new PdfPen(new PdfColor(229, 231, 235), 0.5f); // Light gray border
 				}
 
@@ -460,7 +468,7 @@ public static class PDFReportExportUtil
 
 			// Add "TOTAL" label in first cell
 			totalRow.Cells[0].Value = "TOTAL";
-			totalRow.Cells[0].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 5, PdfFontStyle.Bold);
+			totalRow.Cells[0].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 7, PdfFontStyle.Bold);
 			totalRow.Cells[0].Style.BackgroundBrush = new PdfSolidBrush(new PdfColor(219, 234, 254)); // Light blue
 			totalRow.Cells[0].Style.TextBrush = new PdfSolidBrush(new PdfColor(30, 64, 175)); // Dark blue
 			totalRow.Cells[0].Style.Borders.All = new PdfPen(new PdfColor(59, 130, 246), 1f);
@@ -492,7 +500,7 @@ public static class PDFReportExportUtil
 
 					string displayValue = FormatValue(total, setting.Format);
 					totalRow.Cells[i].Value = displayValue;
-					totalRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 5, PdfFontStyle.Bold);
+					totalRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 7, PdfFontStyle.Bold);
 					totalRow.Cells[i].Style.TextBrush = new PdfSolidBrush(new PdfColor(30, 64, 175)); // Dark blue
 					totalRow.Cells[i].Style.StringFormat = setting.StringFormat;
 				}
@@ -501,7 +509,7 @@ public static class PDFReportExportUtil
 
 		// Grid styling
 		pdfGrid.Style.CellPadding = new PdfPaddings(2, 1, 2, 1);
-		pdfGrid.Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 4);
+		pdfGrid.Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6);
 
 		// Alternating row colors (only if not using built-in style)
 		if (!useBuiltInStyle)
@@ -521,19 +529,155 @@ public static class PDFReportExportUtil
 			}
 		}
 
-		// Draw grid with improved layout
-		float footerHeight = 30; // Height of the footer template
-		float pageHeight = page.GetClientSize().Height;
+		// Draw grid with proper pagination layout similar to reference code
+		// The footer template bounds are automatically handled by the document template
+		PdfLayoutResult result = pdfGrid.Draw(page, new PointF(15, startY), _layoutFormat);
 
-		PdfGridLayoutFormat layoutFormat = new()
+		return result;
+	}
+
+	/// <summary>
+	/// Add summary section with totals and amount in words
+	/// </summary>
+	private static float AddSummarySection<T>(
+		PdfGraphics graphics,
+		IEnumerable<T> data,
+		Dictionary<string, ColumnSetting> columnSettings,
+		List<string> columnOrder,
+		float leftMargin,
+		float pageWidth,
+		float startY)
+	{
+		float currentY = startY;
+		float summaryColumnX = pageWidth - 200; // Right side for summary
+		float rightMargin = 20;
+
+		PdfStandardFont labelFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Regular);
+		PdfStandardFont valueFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Regular);
+		PdfStandardFont totalFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold);
+		PdfBrush labelBrush = new PdfSolidBrush(new PdfColor(80, 80, 80));
+		PdfBrush valueBrush = new PdfSolidBrush(new PdfColor(0, 0, 0));
+
+		// Calculate totals for numeric columns
+		var totals = new Dictionary<string, decimal>();
+		decimal grandTotal = 0;
+
+		foreach (var columnName in columnOrder)
 		{
-			Layout = PdfLayoutType.Paginate,
-			Break = PdfLayoutBreakType.FitPage
+			if (columnSettings.TryGetValue(columnName, out var setting) && setting.IncludeInTotal)
+			{
+				decimal columnTotal = 0;
+				foreach (var item in data)
+				{
+					var propInfo = typeof(T).GetProperty(columnName);
+					if (propInfo != null)
+					{
+						var value = propInfo.GetValue(item);
+						if (value != null && decimal.TryParse(value.ToString(), out decimal numValue))
+						{
+							columnTotal += numValue;
+						}
+					}
+				}
+				totals[columnName] = columnTotal;
+
+				// Use last numeric column as grand total (usually the "Total" or "TotalAmount" column)
+				if (columnTotal != 0)
+					grandTotal = columnTotal;
+			}
+		}
+
+		// Draw summary on the right side
+		if (totals.Count > 0)
+		{
+			// Draw each total
+			foreach (var kvp in totals)
+			{
+				if (kvp.Value == 0) continue;
+
+				var setting = columnSettings[kvp.Key];
+				graphics.DrawString($"{setting.DisplayName}:", labelFont, labelBrush, new PointF(summaryColumnX, currentY));
+				string totalText = FormatValue(kvp.Value, setting.Format);
+				SizeF totalSize = valueFont.MeasureString(totalText);
+				graphics.DrawString(totalText, valueFont, valueBrush, new PointF(pageWidth - rightMargin - totalSize.Width, currentY));
+				currentY += 10;
+			}
+
+			// Draw line above grand total
+			PdfPen linePen = new(new PdfColor(59, 130, 246), 1f);
+			graphics.DrawLine(linePen, new PointF(summaryColumnX - 10, currentY), new PointF(pageWidth - 20, currentY));
+			currentY += 4;
+
+			// Grand Total
+			PdfBrush totalBrush = new PdfSolidBrush(new PdfColor(59, 130, 246));
+			graphics.DrawString("GRAND TOTAL:", totalFont, totalBrush, new PointF(summaryColumnX, currentY));
+			string grandTotalText = grandTotal.FormatIndianCurrency();
+			SizeF grandTotalSize = totalFont.MeasureString(grandTotalText);
+			graphics.DrawString(grandTotalText, totalFont, totalBrush, new PointF(pageWidth - rightMargin - grandTotalSize.Width, currentY));
+			currentY += 15;
+
+			// Amount in Words
+			if (grandTotal > 0)
+			{
+				PdfStandardFont amountLabelFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
+				PdfStandardFont amountValueFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Italic);
+
+				graphics.DrawString("Amount in Words:", amountLabelFont, valueBrush, new PointF(leftMargin, currentY));
+				currentY += 10;
+
+				string amountInWords = ConvertAmountToWords(grandTotal);
+				float leftColumnWidth = (pageWidth - 40) * 0.6f;
+				DrawWrappedText(graphics, amountInWords, amountValueFont, valueBrush,
+					new RectangleF(leftMargin, currentY, leftColumnWidth, 20));
+				currentY += 18;
+			}
+		}
+
+		return currentY;
+	}
+
+	/// <summary>
+	/// Helper method to draw wrapped text within a rectangle
+	/// </summary>
+	private static void DrawWrappedText(PdfGraphics graphics, string text, PdfFont font, PdfBrush brush, RectangleF bounds)
+	{
+		if (string.IsNullOrEmpty(text))
+			return;
+
+		PdfStringFormat format = new()
+		{
+			LineAlignment = PdfVerticalAlignment.Top,
+			Alignment = PdfTextAlignment.Left,
+			WordWrap = PdfWordWrapType.Word
 		};
 
-		PdfGridLayoutResult result = pdfGrid.Draw(page, new RectangleF(15, startY, pageWidth - 30, pageHeight - startY - footerHeight), layoutFormat);
+		graphics.DrawString(text, font, brush, bounds, format);
+	}
 
-		return result.Bounds.Bottom + 10;
+	/// <summary>
+	/// Convert amount to words (Indian format)
+	/// </summary>
+	private static string ConvertAmountToWords(decimal amount)
+	{
+		try
+		{
+			// Use NumericWordsConversion package for Indian currency
+			var converter = new CurrencyWordsConverter(new CurrencyWordsConversionOptions
+			{
+				Culture = Culture.Hindi,
+				CurrencyUnit = "Rupee",
+				SubCurrencyUnit = "Paise",
+				EndOfWordsMarker = "Only"
+			});
+
+			string words = converter.ToWords(amount);
+			return words;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error converting amount to words: {ex.Message}");
+			return "Amount in Words Not Available";
+		}
 	}
 
 	/// <summary>
@@ -543,21 +687,26 @@ public static class PDFReportExportUtil
 	{
 		try
 		{
-			// Create footer template
-			PdfPageTemplateElement footer = new(new RectangleF(0, 0, document.Pages[0].GetClientSize().Width, 25));
+			// Create footer template with proper bounds
+			RectangleF footerRect = new(0, 0, document.Pages[0].GetClientSize().Width, 30);
+			PdfPageTemplateElement footer = new(footerRect);
 
 			PdfStandardFont footerFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Italic);
 			PdfBrush footerBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
 
+			// Draw separator line at top
+			PdfPen separatorPen = new(new PdfColor(59, 130, 246), 0.5f);
+			footer.Graphics.DrawLine(separatorPen, new PointF(0, 0), new PointF(footer.Width, 0));
+
 			// Left: AadiSoft branding
 			string branding = $"© {DateTime.Now.Year} A Product By aadisoft.vercel.app";
-			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 5));
+			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 8));
 
 			// Center: Export date
 			string exportDate = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
 			SizeF exportDateSize = footerFont.MeasureString(exportDate);
 			float centerX = (document.Pages[0].GetClientSize().Width - exportDateSize.Width) / 2;
-			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 5));
+			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 8));
 
 			// Right: Page numbers
 			PdfPageNumberField pageNumber = new();
@@ -572,7 +721,7 @@ public static class PDFReportExportUtil
 			string pageText = "Page 999 of 999"; // Max width for alignment
 			SizeF pageInfoSize = footerFont.MeasureString(pageText);
 			float rightX = document.Pages[0].GetClientSize().Width - pageInfoSize.Width - 15;
-			pageInfo.Draw(footer.Graphics, new PointF(rightX, 5));
+			pageInfo.Draw(footer.Graphics, new PointF(rightX, 8));
 
 			// Add footer to document
 			document.Template.Bottom = footer;

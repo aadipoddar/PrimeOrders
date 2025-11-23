@@ -103,21 +103,11 @@ public static class OrderReportExcelExport
             [
                 "TransactionNo",
                 "SaleTransactionNo",
-                "TransactionDateTime"
-            ];
-
-            // Add location name if showLocation is true
-            if (showLocation)
-            {
-                columnOrder.Add("LocationName");
-            }
-
-            // Continue with remaining summary columns
-            columnOrder.AddRange(
-            [
+                "TransactionDateTime",
+                "LocationName",
                 "TotalItems",
                 "TotalQuantity"
-            ]);
+            ];
         }
 
         // Call the generic Excel export utility

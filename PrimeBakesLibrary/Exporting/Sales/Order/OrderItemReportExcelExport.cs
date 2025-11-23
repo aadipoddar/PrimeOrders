@@ -90,6 +90,7 @@ public static class OrderItemReportExcelExport
                 "ItemCode",
                 "TransactionNo",
                 "TransactionDateTime",
+                "LocationName",
                 "SaleTransactionNo",
                 "Quantity"
             ];

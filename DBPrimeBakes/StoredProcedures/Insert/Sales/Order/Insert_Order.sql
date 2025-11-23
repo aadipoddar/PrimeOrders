@@ -60,6 +60,7 @@ BEGIN
 			TransactionDateTime = @TransactionDateTime,
 			FinancialYearId = @FinancialYearId,
 			Remarks = @Remarks,
+			Status = @Status,
 			LastModifiedBy = @LastModifiedBy,
 			LastModifiedAt = @LastModifiedAt,
 			LastModifiedFromPlatform = @LastModifiedFromPlatform

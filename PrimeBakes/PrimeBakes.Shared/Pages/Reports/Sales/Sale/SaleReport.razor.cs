@@ -230,7 +230,6 @@ public partial class SaleReport
 			ItemDiscountPercent = pr.ItemDiscountPercent,
 			OrderDateTime = null,
 			OrderId = null,
-			OrderTotalQuantity = null,
 			OrderTransactionNo = null,
 			TotalAfterDiscount = -pr.TotalAfterDiscount,
 			TotalAfterOtherCharges = -pr.TotalAfterOtherCharges,

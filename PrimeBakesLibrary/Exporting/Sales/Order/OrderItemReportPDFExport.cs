@@ -63,6 +63,7 @@ public static class OrderItemReportPdfExport
                 "ItemCode",
                 "TransactionNo",
                 "TransactionDateTime",
+                "LocationName",
                 "SaleTransactionNo",
                 "Quantity"
             ];

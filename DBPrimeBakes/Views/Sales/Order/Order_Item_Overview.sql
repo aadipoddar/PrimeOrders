@@ -36,7 +36,7 @@ INNER JOIN
 INNER JOIN
 	[dbo].[Location] l ON o.LocationId = l.Id
 LEFT JOIN
-	[dbo].[Sale_Overview] s ON o.SaleId = s.Id
+	[dbo].[Sale] s ON o.SaleId = s.Id
 
 WHERE
 	[o].[Status] = 1 AND

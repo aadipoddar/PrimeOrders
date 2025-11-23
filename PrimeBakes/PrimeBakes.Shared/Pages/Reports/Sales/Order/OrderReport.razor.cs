@@ -360,18 +360,10 @@ public partial class OrderReport
 	#region Actions
 	private async Task ViewOrder(int orderId)
 	{
-		try
-		{
-			// Navigate to Order Page
-			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{orderId}", "_blank");
-			else
-				NavigationManager.NavigateTo($"{PageRouteNames.Order}/{orderId}");
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while opening order: {ex.Message}", "error");
-		}
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{orderId}", "_blank");
+		else
+			NavigationManager.NavigateTo($"{PageRouteNames.Order}/{orderId}");
 	}
 
 	private async Task DownloadInvoice(int orderId)

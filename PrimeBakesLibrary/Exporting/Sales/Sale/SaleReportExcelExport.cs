@@ -130,21 +130,11 @@ public static class SaleReportExcelExport
             // Summary columns - key fields only
             columnOrder =
             [
-                "TransactionNo", "OrderTransactionNo", "TransactionDateTime"
-            ];
-
-            // Add location name if showLocation is true
-            if (showLocation)
-            {
-                columnOrder.Add("LocationName");
-            }
-
-            // Continue with remaining summary columns
-            columnOrder.AddRange(
-            [
+                "TransactionNo", "OrderTransactionNo", "TransactionDateTime",
+                "LocationName",
                 "PartyName", "CustomerName",
                 "TotalQuantity", "TotalAfterTax", "DiscountPercent", "TotalAmount", "PaymentModes"
-            ]);
+            ];
         }
 
         // Call the generic Excel export utility

@@ -276,4 +276,7 @@
   <ItemGroup>
     <RefactorLog Include="DBPrimeBakes.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="PerformanceIndexes.sql" />
+  </ItemGroup>
 </Project>

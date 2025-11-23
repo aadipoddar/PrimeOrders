@@ -15,7 +15,7 @@ else
         <div class="page-header">
             <button @onclick='() => NavigationManager.NavigateTo("/")' class="back-button" title="Home">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
@@ -25,10 +25,10 @@ else
             {
                 <button @onclick="GoToCart" class="cart-button-header" title="Go to Cart">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1"/>
-                        <circle cx="20" cy="21" r="1"/>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                     </svg>
                     <span class="cart-count-header">@_cart.Count(c => c.Quantity > 0)</span>
                 </button>
@@ -38,9 +38,9 @@ else
         <!-- Category Filter Section -->
         <div class="filter-section">
             <SfDropDownList TValue="int" TItem="ProductCategoryModel" Placeholder="Select Category"
-                DataSource="_productCategories" Value="_selectedCategory?.Id ?? 0" CssClass="category-dropdown">
+                            DataSource="_productCategories" Value="_selectedCategory?.Id ?? 0" CssClass="category-dropdown">
                 <DropDownListEvents TValue="int" TItem="ProductCategoryModel"
-                    ValueChange="@((args) => { _selectedCategory = args.ItemData; StateHasChanged(); })" />
+                                    ValueChange="@((args) => { _selectedCategory = args.ItemData; StateHasChanged(); })" />
                 <DropDownListFieldSettings Value="Id" Text="Name" />
             </SfDropDownList>
         </div>
@@ -48,9 +48,9 @@ else
         <!-- Grid with 2 Columns: Name and Add Button -->
         <div class="grid-container">
             <SfGrid @ref="_sfCartGrid"
-                DataSource="_selectedCategory.Id == 0 ? _cart : _cart.Where(x => x.ItemCategoryId == _selectedCategory.Id)"
-                AllowPaging="true" EnableAdaptiveUI="true" AllowTextWrap="true"
-                Toolbar="@(new List<string>() { "Search" })">
+                    DataSource="_selectedCategory.Id == 0 ? _cart : _cart.Where(x => x.ItemCategoryId == _selectedCategory.Id)"
+                    AllowPaging="true" EnableAdaptiveUI="true" AllowTextWrap="true"
+                    Toolbar="@(new List<string>() { "Search" })">
 
                 <GridPageSettings PageSize="10" />
 
@@ -74,8 +74,8 @@ else
                                     {
                                         <div class="quantity-controls">
                                             <SfNumericTextBox TValue="decimal" Value="@item.Quantity"
-                                                ValueChanged="@((decimal value) => UpdateQuantity(item, value))" Min="0" Step="1"
-                                                Format="N0" CssClass="quantity-input" />
+                                                              ValueChanged="@((decimal value) => UpdateQuantity(item, value))" Min="0" Step="1" type="tel"
+                                                              Format="N0" CssClass="quantity-input" />
                                         </div>
                                     }
                                 </div>
@@ -183,15 +183,15 @@ else
         font-size: 16px;
     }
 
-    .back-button:hover {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-medium);
-    }
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
 
-    .back-button:active {
-        transform: translateY(0);
-    }
+        .back-button:active {
+            transform: translateY(0);
+        }
 
     .page-title {
         margin: 0;
@@ -220,15 +220,15 @@ else
         position: relative;
     }
 
-    .cart-button-header:hover {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-medium);
-    }
+        .cart-button-header:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
 
-    .cart-button-header:active {
-        transform: translateY(0);
-    }
+        .cart-button-header:active {
+            transform: translateY(0);
+        }
 
     .cart-count-header {
         position: absolute;
@@ -270,25 +270,25 @@ else
         background: white;
     }
 
-    ::deep .category-dropdown .e-input-group:hover {
-        border-color: var(--primary-light);
-    }
+        ::deep .category-dropdown .e-input-group:hover {
+            border-color: var(--primary-light);
+        }
 
-    ::deep .category-dropdown .e-input-group.e-input-focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
-    }
+        ::deep .category-dropdown .e-input-group.e-input-focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(226, 19, 123, 0.1);
+        }
 
-    ::deep .category-dropdown .e-input-group input {
-        padding: 10px 12px;
-        font-size: 14px;
-        color: var(--text-dark);
-        font-weight: 500;
-    }
+        ::deep .category-dropdown .e-input-group input {
+            padding: 10px 12px;
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
 
-    ::deep .category-dropdown .e-input-group .e-ddl-icon {
-        color: var(--primary-color);
-    }
+        ::deep .category-dropdown .e-input-group .e-ddl-icon {
+            color: var(--primary-color);
+        }
 
     /* Grid Container */
     .grid-container {
@@ -322,15 +322,15 @@ else
         min-width: 70px;
     }
 
-    .add-button:hover {
-        background: var(--primary-dark);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-medium);
-    }
+        .add-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
 
-    .add-button:active {
-        transform: translateY(0);
-    }
+        .add-button:active {
+            transform: translateY(0);
+        }
 
     /* Quantity Controls */
     .quantity-controls {
@@ -346,23 +346,23 @@ else
         width: 100%;
     }
 
-    .quantity-input input {
-        text-align: center !important;
-        border: 2px solid var(--border-color);
-        border-radius: 8px;
-        padding: 6px 8px !important;
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--text-dark);
-        transition: all 0.2s ease;
-        height: 36px;
-    }
+        .quantity-input input {
+            text-align: center !important;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 8px !important;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+            height: 36px;
+        }
 
-    .quantity-input input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
-        outline: none;
-    }
+            .quantity-input input:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+                outline: none;
+            }
 
     /* Grid Styling */
     ::deep .e-grid {
@@ -373,32 +373,32 @@ else
         border: none;
     }
 
-    ::deep .e-grid .e-gridheader {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    }
+        ::deep .e-grid .e-gridheader {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        }
 
-    ::deep .e-grid .e-headercell {
-        background: transparent;
-        color: white;
-        font-weight: 600;
-        border: none;
-        padding: 15px 12px;
-    }
+        ::deep .e-grid .e-headercell {
+            background: transparent;
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 15px 12px;
+        }
 
-    ::deep .e-grid .e-rowcell {
-        border: none;
-        border-bottom: 1px solid var(--border-color);
-        padding: 12px;
-        vertical-align: middle;
-    }
+        ::deep .e-grid .e-rowcell {
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px;
+            vertical-align: middle;
+        }
 
-    ::deep .e-grid .e-row:nth-child(even) {
-        background-color: #fafafa;
-    }
+        ::deep .e-grid .e-row:nth-child(even) {
+            background-color: #fafafa;
+        }
 
-    ::deep .e-grid .e-row:hover {
-        background-color: var(--primary-light);
-    }
+        ::deep .e-grid .e-row:hover {
+            background-color: var(--primary-light);
+        }
 
     /* Toolbar Styling */
     ::deep .e-toolbar {
@@ -407,17 +407,17 @@ else
         padding: 10px 15px;
     }
 
-    ::deep .e-toolbar .e-input-group input {
-        border-radius: 25px;
-        border: 2px solid var(--border-color);
-        padding: 10px 15px;
-        font-size: 14px;
-    }
+        ::deep .e-toolbar .e-input-group input {
+            border-radius: 25px;
+            border: 2px solid var(--border-color);
+            padding: 10px 15px;
+            font-size: 14px;
+        }
 
-    ::deep .e-toolbar .e-input-group input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
-    }
+            ::deep .e-toolbar .e-input-group input:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(226, 19, 123, 0.1);
+            }
 
     /* Pager Styling */
     ::deep .e-pager {
@@ -426,11 +426,11 @@ else
         padding: 10px;
     }
 
-    ::deep .e-pager .e-currentitem {
-        background: var(--primary-color);
-        color: white;
-        border-radius: 6px;
-    }
+        ::deep .e-pager .e-currentitem {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+        }
 
     /* Animations */
     @@keyframes slideUp {

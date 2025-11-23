@@ -79,6 +79,7 @@ public static class SaleItemReportPDFExport
                 "ItemCode",
                 "TransactionNo",
                 "TransactionDateTime",
+                "LocationName",
                 "PartyName",
                 "Quantity",
                 "Rate",

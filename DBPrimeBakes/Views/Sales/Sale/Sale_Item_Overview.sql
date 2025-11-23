@@ -64,7 +64,7 @@ LEFT JOIN
 LEFT JOIN
 	[dbo].[Customer] cust ON s.CustomerId = cust.Id
 LEFT JOIN
-	[dbo].[Order_Overview] o ON s.OrderId = o.Id
+	[dbo].[Order] o ON s.OrderId = o.Id
 
 WHERE
 	[s].[Status] = 1 AND

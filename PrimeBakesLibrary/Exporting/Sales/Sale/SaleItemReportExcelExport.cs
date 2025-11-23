@@ -124,6 +124,7 @@ public static class SaleItemReportExcelExport
                 "ItemCode",
                 "TransactionNo",
                 "TransactionDateTime",
+                "LocationName",
                 "PartyName",
                 "Quantity",
                 "Rate",

@@ -16,6 +16,8 @@ namespace PrimeBakesLibrary.Exporting;
 /// </summary>
 public static class PDFInvoiceExportUtil
 {
+	private static PdfLayoutFormat _layoutFormat;
+
 	#region Generic Invoice Models
 
 	/// <summary>
@@ -119,6 +121,16 @@ public static class PDFInvoiceExportUtil
 			PdfPage page = pdfDocument.Pages.Add();
 			PdfGraphics graphics = page.Graphics;
 
+			// Add footer template first
+			AddBrandingFooter(pdfDocument);
+
+			// Initialize layout format for proper pagination
+			_layoutFormat = new()
+			{
+				Layout = PdfLayoutType.Paginate,
+				Break = PdfLayoutBreakType.FitPage
+			};
+
 			float pageWidth = page.GetClientSize().Width;
 			float leftMargin = 20;
 			float rightMargin = 20;
@@ -155,9 +167,6 @@ public static class PDFInvoiceExportUtil
 			float amountInWordsEndY = DrawAmountInWords(lastPageGraphics, invoiceData.TotalAmount, leftMargin, pageWidth, currentY);
 			float paymentMethodsEndY = DrawPaymentMethods(lastPageGraphics, invoiceData, leftMargin, pageWidth, amountInWordsStartY);
 			currentY = Math.Max(amountInWordsEndY, paymentMethodsEndY);
-
-			// 7. Software Branding Footer (on all pages)
-			AddBrandingFooter(pdfDocument);
 
 			// Save PDF document to stream
 			pdfDocument.Save(ms);
@@ -213,8 +222,8 @@ public static class PDFInvoiceExportUtil
 				using FileStream imageStream = new(resolvedLogoPath, FileMode.Open, FileAccess.Read);
 				PdfBitmap logoBitmap = new(imageStream);
 
-				// Calculate logo dimensions (larger for top placement)
-				float maxLogoHeight = 50;
+				// Calculate logo dimensions (compact for better space utilization)
+				float maxLogoHeight = 42;
 				float logoWidth = logoBitmap.Width;
 				float logoHeight = logoBitmap.Height;
 				float aspectRatio = logoWidth / logoHeight;
@@ -228,7 +237,7 @@ public static class PDFInvoiceExportUtil
 				// Center the logo horizontally at the top
 				float logoX = (pageWidth - logoWidth) / 2;
 				graphics.DrawImage(logoBitmap, new PointF(logoX, currentY), new SizeF(logoWidth, logoHeight));
-				currentY += logoHeight + 8;
+				currentY += logoHeight + 5;
 			}
 		}
 		catch (Exception ex)
@@ -240,7 +249,7 @@ public static class PDFInvoiceExportUtil
 		// Draw a separator line
 		PdfPen separatorPen = new(new PdfColor(59, 130, 246), 2f);
 		graphics.DrawLine(separatorPen, new PointF(leftMargin, currentY), new PointF(pageWidth - 20, currentY));
-		currentY += 6;
+		currentY += 4;
 
 		return currentY;
 	}
@@ -264,7 +273,7 @@ public static class PDFInvoiceExportUtil
 		graphics.DrawString(invoiceNumberText, numberFont, new PdfSolidBrush(new PdfColor(0, 0, 0)),
 			new PointF(pageWidth - 20 - numberSize.Width, currentY));
 
-		currentY += 20;
+		currentY += 16;
 
 		// Draw Outlet label and Invoice Date on same line
 		if (!string.IsNullOrWhiteSpace(outlet))
@@ -282,7 +291,7 @@ public static class PDFInvoiceExportUtil
 		graphics.DrawString(invoiceDateText, dateFont, PdfBrushes.Black,
 			new PointF(pageWidth - 20 - dateSize.Width, currentY));
 
-		currentY += 18;
+		currentY += 14;
 
 		return currentY;
 	}
@@ -438,7 +447,7 @@ public static class PDFInvoiceExportUtil
 		float rightContentHeight = rightTextY - rightStartY;
 		float boxHeight = Math.Max(leftContentHeight, rightContentHeight) + padding;
 
-		currentY += boxHeight + 8;
+		currentY += boxHeight + 5;
 
 		// Order Details (if present)
 		if (!string.IsNullOrWhiteSpace(invoiceData.OrderTransactionNo))
@@ -451,7 +460,7 @@ public static class PDFInvoiceExportUtil
 			{
 				graphics.DrawString($"Order Date: {invoiceData.OrderDateTime.Value:dd-MMM-yyyy hh:mm tt}", valueFont, valueBrush,
 					new PointF(leftMargin, currentY));
-				currentY += 15;
+				currentY += 12;
 			}
 		}
 
@@ -500,7 +509,7 @@ public static class PDFInvoiceExportUtil
 			headerRow.Cells[i].Value = columnSettings[i].DisplayName;
 			headerRow.Cells[i].Style.BackgroundBrush = new PdfSolidBrush(new PdfColor(59, 130, 246));
 			headerRow.Cells[i].Style.TextBrush = PdfBrushes.White;
-			headerRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6.5f, PdfFontStyle.Bold);
+			headerRow.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 8f, PdfFontStyle.Bold);
 			headerRow.Cells[i].Style.StringFormat = new PdfStringFormat
 			{
 				Alignment = PdfTextAlignment.Center,
@@ -524,7 +533,7 @@ public static class PDFInvoiceExportUtil
 				row.Cells[i].Value = cellValue;
 
 				// Apply styling
-				row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6.5f);
+				row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 7.5f);
 				row.Cells[i].Style.Borders.All = new PdfPen(new PdfColor(220, 220, 220), 0.5f);
 				row.Cells[i].Style.CellPadding = new PdfPaddings(1.5f, 1.5f, 1.5f, 1.5f);
 				row.Cells[i].Style.StringFormat = new PdfStringFormat
@@ -547,33 +556,13 @@ public static class PDFInvoiceExportUtil
 			rowNumber++;
 		}
 
-		// Draw grid with improved pagination layout
-		// Reserve more space for footer to accommodate summary, payment methods, and amount in words
-		float footerHeight = 130; // Increased to prevent content from being cut off
-		float pageHeight = page.GetClientSize().Height;
-
-		// Calculate maximum available height for the grid
-		float maxGridHeight = pageHeight - startY - footerHeight;
-
-		// Ensure minimum space is available for grid
-		if (maxGridHeight < 100)
-		{
-			// If not enough space on current page, start on next page
-			page = document.Pages.Add();
-			startY = 20; // Reset to top margin on new page
-			maxGridHeight = pageHeight - startY - footerHeight;
-		}
-
-		PdfGridLayoutFormat layoutFormat = new()
-		{
-			Layout = PdfLayoutType.Paginate,
-			Break = PdfLayoutBreakType.FitPage
-		};
-
-		PdfGridLayoutResult result = pdfGrid.Draw(page, new RectangleF(leftMargin, startY, pageWidth - leftMargin - rightMargin, maxGridHeight), layoutFormat);
+		// Draw grid with proper pagination layout similar to reference code
+		// The footer template bounds are automatically handled by the document template
+		PdfLayoutResult result = pdfGrid.Draw(page, new PointF(leftMargin, startY), _layoutFormat);
 
 		// Return the layout result so caller can get the last page
-		return result;
+		// Cast to PdfGridLayoutResult for compatibility
+		return new PdfGridLayoutResult(result.Page, result.Bounds);
 	}
 
 	/// <summary>
@@ -848,21 +837,26 @@ public static class PDFInvoiceExportUtil
 	{
 		try
 		{
-			// Create footer template
-			PdfPageTemplateElement footer = new(new RectangleF(0, 0, document.Pages[0].GetClientSize().Width, 25));
+			// Create footer template with proper bounds
+			RectangleF footerRect = new(0, 0, document.Pages[0].GetClientSize().Width, 30);
+			PdfPageTemplateElement footer = new(footerRect);
 
 			PdfStandardFont footerFont = new(PdfFontFamily.Helvetica, 7, PdfFontStyle.Italic);
 			PdfBrush footerBrush = new PdfSolidBrush(new PdfColor(107, 114, 128)); // Gray
 
+			// Draw separator line at top
+			PdfPen separatorPen = new(new PdfColor(59, 130, 246), 0.5f);
+			footer.Graphics.DrawLine(separatorPen, new PointF(0, 0), new PointF(footer.Width, 0));
+
 			// Left: AadiSoft branding
 			string branding = $"© {DateTime.Now.Year} A Product By aadisoft.vercel.app";
-			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 5));
+			footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 8));
 
 			// Center: Export date
 			string exportDate = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
 			SizeF exportDateSize = footerFont.MeasureString(exportDate);
 			float centerX = (document.Pages[0].GetClientSize().Width - exportDateSize.Width) / 2;
-			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 5));
+			footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 8));
 
 			// Right: Page numbers
 			PdfPageNumberField pageNumber = new();
@@ -877,9 +871,7 @@ public static class PDFInvoiceExportUtil
 			string pageText = "Page 999 of 999"; // Max width for alignment
 			SizeF pageInfoSize = footerFont.MeasureString(pageText);
 			float rightX = document.Pages[0].GetClientSize().Width - pageInfoSize.Width - 15;
-			pageInfo.Draw(footer.Graphics, new PointF(rightX, 5));
-
-			// Add footer to document
+			pageInfo.Draw(footer.Graphics, new PointF(rightX, 8));          // Add footer to document
 			document.Template.Bottom = footer;
 		}
 		catch (Exception ex)

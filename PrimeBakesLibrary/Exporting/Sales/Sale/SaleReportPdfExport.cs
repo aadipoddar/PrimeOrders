@@ -97,18 +97,8 @@ public static class SaleReportPdfExport
             [
                 "TransactionNo",
                 "OrderTransactionNo",
-                "TransactionDateTime"
-            ];
-
-            // Add location name if showLocation is true
-            if (showLocation)
-            {
-                columnOrder.Add("LocationName");
-            }
-
-            // Continue with remaining summary columns
-            columnOrder.AddRange(
-            [
+                "TransactionDateTime",
+                "LocationName",
                 "PartyName",
                 "CustomerName",
                 "TotalQuantity",
@@ -116,7 +106,7 @@ public static class SaleReportPdfExport
                 "DiscountPercent",
                 "TotalAmount",
                 "PaymentModes"
-            ]);
+            ];
         }
 
         // Customize specific columns for PDF display (matching Excel column names)
