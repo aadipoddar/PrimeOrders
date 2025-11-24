@@ -1,23 +1,25 @@
-﻿CREATE PROCEDURE [dbo].[Insert_AccountingDetails]
-	@Id INT,
+﻿CREATE PROCEDURE [dbo].[Insert_AccountingDetail]
+	@Id INT OUTPUT,
 	@AccountingId INT,
 	@LedgerId INT,
-	@ReferenceType VARCHAR(20) = NULL,
-	@ReferenceId INT = NULL,
+	@ReferenceType VARCHAR(MAX),
+	@ReferenceId INT,
+	@ReferenceNo VARCHAR(MAX),
 	@Debit MONEY,
 	@Credit MONEY,
-	@Remarks VARCHAR(250),
+	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[AccountingDetails]
+		INSERT INTO [dbo].[AccountingDetail]
 		(
 			AccountingId,
 			LedgerId,
 			ReferenceType,
 			ReferenceId,
+			ReferenceNo,
 			Debit,
 			Credit,
 			Remarks,
@@ -28,25 +30,31 @@ BEGIN
 			@LedgerId,
 			@ReferenceType,
 			@ReferenceId,
+			@ReferenceNo,
 			@Debit,
 			@Credit,
 			@Remarks,
 			@Status
 		)
+
+		SET @Id = SCOPE_IDENTITY();
 	END
 
 	ELSE
 	BEGIN
-		UPDATE [dbo].[AccountingDetails]
+		UPDATE [dbo].[AccountingDetail]
 		SET
 			AccountingId = @AccountingId,
 			LedgerId = @LedgerId,
 			ReferenceType = @ReferenceType,
 			ReferenceId = @ReferenceId,
+			ReferenceNo = @ReferenceNo,
 			Debit = @Debit,
 			Credit = @Credit,
 			Remarks = @Remarks,
 			Status = @Status
 		WHERE Id = @Id
 	END
+
+	SELECT @Id AS Id
 END

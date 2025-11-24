@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <Folder Include="Exporting\Inventory\Purchase\" />
+    <Folder Include="Exporting\Accounts\" />
   </ItemGroup>
 
 </Project>

@@ -82,7 +82,9 @@ public static class PurchaseReturnData
 			purchaseReturn.Status = false;
 			await InsertPurchaseReturn(purchaseReturn);
 			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.PurchaseReturn.ToString(), purchaseReturn.Id);
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchaseReturn.TransactionNo);
+
+			var purchaseReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
+			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(purchaseReturnVoucher.Value), purchaseReturn.Id, purchaseReturn.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -211,7 +213,8 @@ public static class PurchaseReturnData
 	{
 		if (update)
 		{
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchaseReturn.TransactionNo);
+			var purchaseReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
+			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(purchaseReturnVoucher.Value), purchaseReturn.Id, purchaseReturn.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -220,71 +223,74 @@ public static class PurchaseReturnData
 		}
 
 		var purchaseReturnOverview = await CommonData.LoadTableDataById<PurchaseReturnOverviewModel>(ViewNames.PurchaseReturnOverview, purchaseReturn.Id);
+		if (purchaseReturnOverview is null)
+			return;
+
 		if (purchaseReturnOverview.TotalAmount <= 0 && purchaseReturnOverview.TotalTaxAmount <= 0)
 			return;
 
-		int accountingId = await AccountingData.InsertAccounting(new()
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
+		var accounting = new AccountingModel
 		{
 			Id = 0,
-			TransactionNo = purchaseReturn.TransactionNo,
-			AccountingDate = DateOnly.FromDateTime(purchaseReturn.TransactionDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(purchaseReturn.TransactionDateTime)).Id,
-			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId)).Value),
-			Remarks = purchaseReturn.Remarks,
-			UserId = purchaseReturn.CreatedBy,
-			GeneratedModule = GeneratedModules.PurchaseReturn.ToString(),
-			CreatedAt = await CommonData.LoadCurrentDateTime(),
+			TransactionNo = "",
+			CompanyId = purchaseReturnOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = purchaseReturnOverview.Id,
+			ReferenceNo = purchaseReturnOverview.TransactionNo,
+			TransactionDateTime = purchaseReturnOverview.TransactionDateTime,
+			FinancialYearId = purchaseReturnOverview.FinancialYearId,
+			Remarks = purchaseReturnOverview.Remarks,
+			CreatedBy = purchaseReturnOverview.CreatedBy,
+			CreatedAt = purchaseReturnOverview.CreatedAt,
+			CreatedFromPlatform = purchaseReturnOverview.CreatedFromPlatform,
 			Status = true
-		});
+		};
 
-		await SaveAccountingDetails(purchaseReturnOverview, accountingId);
-	}
+		var accountingCart = new List<AccountingItemCartModel>();
 
-	private static async Task SaveAccountingDetails(PurchaseReturnOverviewModel purchaseReturnOverview, int accountingId)
-	{
-		// Supplier Account Posting (Debit)
 		if (purchaseReturnOverview.TotalAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = purchaseReturnOverview.PartyId,
 				ReferenceId = purchaseReturnOverview.Id,
 				ReferenceType = ReferenceTypes.PurchaseReturn.ToString(),
+				ReferenceNo = purchaseReturnOverview.TransactionNo,
+				LedgerId = purchaseReturnOverview.PartyId,
 				Debit = purchaseReturnOverview.TotalAmount,
 				Credit = null,
-				Remarks = $"Party Account Posting For Purchase Bill {purchaseReturnOverview.TransactionNo}",
-				Status = true
+				Remarks = $"Party Account Posting For Purchase Return Bill {purchaseReturnOverview.TransactionNo}",
 			});
 
-		// Purchase Account Posting (Credit)
 		if (purchaseReturnOverview.TotalAmount - purchaseReturnOverview.TotalTaxAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		{
+			var purchaseLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value),
 				ReferenceId = purchaseReturnOverview.Id,
 				ReferenceType = ReferenceTypes.PurchaseReturn.ToString(),
+				ReferenceNo = purchaseReturnOverview.TransactionNo,
+				LedgerId = int.Parse(purchaseLedger.Value),
 				Debit = null,
 				Credit = purchaseReturnOverview.TotalAmount - purchaseReturnOverview.TotalTaxAmount,
-				Remarks = $"Purchase Account Posting For Purchase Bill {purchaseReturnOverview.TransactionNo}",
-				Status = true
+				Remarks = $"Purchase Account Posting For Purchase Return Bill {purchaseReturnOverview.TransactionNo}",
 			});
+		}
 
-		// GST Account Posting (Credit)
 		if (purchaseReturnOverview.TotalTaxAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		{
+			var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
 				ReferenceId = purchaseReturnOverview.Id,
 				ReferenceType = ReferenceTypes.PurchaseReturn.ToString(),
+				ReferenceNo = purchaseReturnOverview.TransactionNo,
+				LedgerId = int.Parse(gstLedger.Value),
 				Debit = null,
 				Credit = purchaseReturnOverview.TotalTaxAmount,
-				Remarks = $"GST Account Posting For Purchase Bill {purchaseReturnOverview.TransactionNo}",
-				Status = true
+				Remarks = $"GST Account Posting For Purchase Return Bill {purchaseReturnOverview.TransactionNo}",
 			});
+		}
+
+		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
 	}
 }

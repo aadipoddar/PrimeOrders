@@ -1,39 +1,51 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_Accounting]
 	@Id INT OUTPUT,
-	@TransactionNo VARCHAR(20),
+	@TransactionNo VARCHAR(MAX),
+	@CompanyId INT,
 	@VoucherId INT,
-	@Remarks VARCHAR(500),
-	@AccountingDate DATE,
+	@ReferenceId INT,
+	@ReferenceNo VARCHAR(MAX),
+	@TransactionDateTime DATETIME,
 	@FinancialYearId INT,
-	@GeneratedModule VARCHAR(20),
-	@UserId INT,
+	@Remarks VARCHAR(MAX),
+	@CreatedBy INT,
 	@CreatedAt DATETIME,
-	@Status BIT
+	@CreatedFromPlatform VARCHAR(MAX),
+	@Status BIT,
+	@LastModifiedBy INT,
+	@LastModifiedAt DATETIME,
+	@LastModifiedFromPlatform VARCHAR(MAX)
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
 		INSERT INTO [dbo].[Accounting]
 		(
-			[TransactionNo],
+			TransactionNo,
+			CompanyId,
 			VoucherId,
-			Remarks,
-			AccountingDate,
+			ReferenceId,
+			ReferenceNo,
+			TransactionDateTime,
 			FinancialYearId,
-			UserId,
-			GeneratedModule,
+			Remarks,
+			CreatedBy,
 			CreatedAt,
+			CreatedFromPlatform,
 			Status
 		) VALUES
 		(
 			@TransactionNo,
+			@CompanyId,
 			@VoucherId,
-			@Remarks,
-			@AccountingDate,
+			@ReferenceId,
+			@ReferenceNo,
+			@TransactionDateTime,
 			@FinancialYearId,
-			@UserId,
-			@GeneratedModule,
+			@Remarks,
+			@CreatedBy,
 			@CreatedAt,
+			@CreatedFromPlatform,
 			@Status
 		)
 
@@ -44,15 +56,18 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[Accounting]
 		SET
-			[TransactionNo] = @TransactionNo,
+			TransactionNo = @TransactionNo,
+			CompanyId = @CompanyId,
 			VoucherId = @VoucherId,
-			Remarks = @Remarks,
-			AccountingDate = @AccountingDate,
+			ReferenceId = @ReferenceId,
+			ReferenceNo = @ReferenceNo,
+			TransactionDateTime = @TransactionDateTime,
 			FinancialYearId = @FinancialYearId,
-			UserId = @UserId,
-			GeneratedModule = @GeneratedModule,
-			CreatedAt = @CreatedAt,
-			Status = @Status
+			Remarks = @Remarks,
+			Status = @Status,
+			LastModifiedBy = @LastModifiedBy,
+			LastModifiedAt = @LastModifiedAt,
+			LastModifiedFromPlatform = @LastModifiedFromPlatform
 		WHERE Id = @Id
 	END
 

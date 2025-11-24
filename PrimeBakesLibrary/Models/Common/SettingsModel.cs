@@ -33,6 +33,8 @@ public static class SettingsKeys
 	public static string SaleReturnTransactionPrefix => "SaleReturnTransactionPrefix";
 	public static string OrderTransactionPrefix => "OrderTransactionPrefix";
 
+	public static string AccountingTransactionPrefix => "AccountingTransactionPrefix";
+
 	public static string UpdateItemMasterRateOnPurchase => "UpdateRawMaterialMasterRateOnPurchase";
 	public static string UpdateItemMasterUOMOnPurchase => "UpdateRawMaterialMasterUOMOnPurchase";
 }

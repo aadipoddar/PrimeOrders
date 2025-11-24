@@ -8,11 +8,13 @@ using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
+using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -39,6 +41,7 @@ public partial class KitchenIssuePage
 	private KitchenIssueItemCartModel _selectedCart = new();
 	private KitchenIssueModel _kitchenIssue = new();
 
+	private List<RawMaterialStockSummaryModel> _stockSummary = [];
 	private List<CompanyModel> _companies = [];
 	private List<KitchenModel> _kitchens = [];
 	private List<RawMaterialModel> _rawMaterials = [];
@@ -200,6 +203,8 @@ public partial class KitchenIssuePage
 				Id = 0,
 				Name = "Create New Item ..."
 			});
+
+			_stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDate(_kitchenIssue.TransactionDateTime, _kitchenIssue.TransactionDateTime);
 		}
 		catch (Exception ex)
 		{

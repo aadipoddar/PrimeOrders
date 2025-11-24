@@ -6,12 +6,14 @@ using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
+using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Inventory;
+using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
@@ -63,10 +65,14 @@ using PrimeBakesLibrary.Models.Sales.Sale;
 
 // await InsertOrder(worksheet1, worksheet2);
 
-await FixMasterNames();
+// await FixMasterNames();
+
+await UpdateAccounts();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
+
+#region UnusedMethods
 
 //static async Task UpdateProducts()
 //{
@@ -1417,6 +1423,41 @@ static async Task FixMasterNames()
 	{
 		product.Name = product.Name.Replace("&#x20;", " ").TrimEnd();
 		await LedgerData.InsertLedger(product);
+	}
+}
+
+#endregion
+
+static async Task UpdateAccounts()
+{
+	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+	var sale = await CommonData.LoadTableDataByStatus<SaleModel>(TableNames.Sale);
+	foreach (var s in sale)
+	{
+		Console.WriteLine("Updating Accounts for Sale Id: " + s.Id);
+		await SaleData.SaveAccounting(s, false);
+	}
+
+	var saleReturn = await CommonData.LoadTableDataByStatus<SaleReturnModel>(TableNames.SaleReturn);
+	foreach (var sr in saleReturn)
+	{
+		Console.WriteLine("Updating Accounts for Sale Return Id: " + sr.Id);
+		await SaleReturnData.SaveAccounting(sr, false);
+	}
+
+	var purchase = await CommonData.LoadTableDataByStatus<PurchaseModel>(TableNames.Purchase);
+	foreach (var p in purchase)
+	{
+		Console.WriteLine("Updating Accounts for Purchase Id: " + p.Id);
+		await PurchaseData.SaveAccounting(p, false);
+	}
+
+	var purchaseReturn = await CommonData.LoadTableDataByStatus<PurchaseReturnModel>(TableNames.PurchaseReturn);
+	foreach (var pr in purchaseReturn)
+	{
+		Console.WriteLine("Updating Accounts for Purchase Return Id: " + pr.Id);
+		await PurchaseReturnData.SaveAccounting(pr, false);
 	}
 }
 

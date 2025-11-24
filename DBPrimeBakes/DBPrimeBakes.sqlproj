@@ -75,8 +75,6 @@
     <Folder Include="StoredProcedures\LoadData\Inventory\RawMaterial" />
     <Folder Include="StoredProcedures\LoadData\Inventory\Recipe" />
     <Folder Include="StoredProcedures\LoadData\Product" />
-    <Folder Include="StoredProcedures\Reports" />
-    <Folder Include="StoredProcedures\Reports\Accounts" />
     <Folder Include="Tables" />
     <Folder Include="Tables\Accounts" />
     <Folder Include="Tables\Accounts\FinancialAccounting" />
@@ -112,12 +110,15 @@
     <Folder Include="Tables\Sales\Order" />
     <Folder Include="StoredProcedures\LoadData\Sales\Order" />
     <Folder Include="StoredProcedures\Insert\Sales\Order" />
+    <Folder Include="Views\Accounts" />
+    <Folder Include="StoredProcedures\LoadData\Accounts\FinancialAccounting" />
+    <Folder Include="StoredProcedures\LoadData\Accounts\Masters" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Type_TransactionId_LocationId.sql" />
     <Build Include="StoredProcedures\Delete\Delete_RawMaterialStock_By_Type_TransactionId.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_Accounting.sql" />
-    <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_AccountingDetails.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\FinancialAccounting\Insert_AccountingDetail.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_AccountType.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_FinancialYear.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Group.sql" />
@@ -130,11 +131,6 @@
     <Build Include="StoredProcedures\Insert\Products\Insert_ProductCategory.sql" />
     <Build Include="StoredProcedures\Insert\Products\Insert_ProductLocation.sql" />
     <Build Include="StoredProcedures\Insert\Products\Insert_Tax.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingDetails_By_Accounting.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_AccountingOverview_By_AccountingId.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_FinancialYear_By_DateTime.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_LastAccounting_By_FinancialYear_Voucher.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_Ledger_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_Customer_By_Number.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
@@ -147,11 +143,7 @@
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_Product_By_ProductCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Product\Load_ProductRate_By_Product.sql" />
-    <Build Include="StoredProcedures\Reports\Accounts\Load_AccountingDetails_By_Date.sql" />
-    <Build Include="StoredProcedures\Reports\Accounts\Load_LedgerDetails_By_Date_Ledger.sql" />
-    <Build Include="StoredProcedures\Reports\Accounts\Load_TrialBalance_By_Date.sql" />
     <Build Include="Tables\Accounts\FinancialAccounting\Accounting.sql" />
-    <Build Include="Tables\Accounts\FinancialAccounting\AccountingDetails.sql" />
     <Build Include="Tables\Accounts\Masters\AccountType.sql" />
     <Build Include="Tables\Accounts\Masters\FinancialYear.sql" />
     <Build Include="Tables\Accounts\Masters\Group.sql" />
@@ -166,12 +158,7 @@
     <Build Include="Tables\Products\ProductCategory.sql" />
     <Build Include="Tables\Products\ProductLocation.sql" />
     <Build Include="Tables\Products\Tax.sql" />
-    <Build Include="Views\Accounting_Overview.sql" />
-    <Build Include="Views\Ledger_Overview.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_StateUT.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_Accounting_By_TransactionNo.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\Load_LedgerOverview_By_AccountingId.sql" />
-    <Build Include="Views\ProductLocation_Overview.sql" />
     <Build Include="Tables\Common\Company.sql" />
     <Build Include="StoredProcedures\Insert\Common\Reset_Settings.sql" />
     <Build Include="StoredProcedures\Insert\Common\Update_Settings.sql" />
@@ -268,6 +255,14 @@
     <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_Overview_By_Date.sql" />
     <Build Include="Views\Sales\Order\Order_Item_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_Item_Overview_By_Date.sql" />
+    <Build Include="Views\Accounts\Accounting_Overview.sql" />
+    <Build Include="Views\Sales\ProductLocation_Overview.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Masters\Load_Ledger_By_Location.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\Masters\Load_FinancialYear_By_DateTime.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_AccountingDetail_By_Accounting.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Overview_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_By_Voucher_Reference.sql" />
+    <Build Include="Tables\Accounts\FinancialAccounting\AccountingDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

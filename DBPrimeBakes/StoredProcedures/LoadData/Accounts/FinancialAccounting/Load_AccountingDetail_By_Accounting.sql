@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[Load_AccountingDetails_By_Accounting]
+﻿CREATE PROCEDURE [dbo].[Load_AccountingDetail_By_Accounting]
 	@AccountingId INT
 AS
 BEGIN

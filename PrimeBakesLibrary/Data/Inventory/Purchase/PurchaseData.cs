@@ -87,7 +87,8 @@ public static class PurchaseData
 			await InsertPurchase(purchase);
 			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Purchase.ToString(), purchase.Id);
 
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchase.TransactionNo);
+			var purchaseVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
+			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(purchaseVoucher.Value), purchase.Id, purchase.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -217,7 +218,8 @@ public static class PurchaseData
 	{
 		if (update)
 		{
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(purchase.TransactionNo);
+			var purchaseVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
+			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(purchaseVoucher.Value), purchase.Id, purchase.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -226,72 +228,75 @@ public static class PurchaseData
 		}
 
 		var purchaseOverview = await CommonData.LoadTableDataById<PurchaseOverviewModel>(ViewNames.PurchaseOverview, purchase.Id);
+		if (purchaseOverview is null)
+			return;
+
 		if (purchaseOverview.TotalAmount <= 0 && purchaseOverview.TotalTaxAmount <= 0)
 			return;
 
-		int accountingId = await AccountingData.InsertAccounting(new()
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
+		var accounting = new AccountingModel
 		{
 			Id = 0,
-			TransactionNo = purchase.TransactionNo,
-			AccountingDate = DateOnly.FromDateTime(purchase.TransactionDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(purchase.TransactionDateTime)).Id,
-			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId)).Value),
-			Remarks = purchase.Remarks,
-			UserId = purchase.CreatedBy,
-			GeneratedModule = GeneratedModules.Purchase.ToString(),
-			CreatedAt = await CommonData.LoadCurrentDateTime(),
+			TransactionNo = "",
+			CompanyId = purchaseOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = purchaseOverview.Id,
+			ReferenceNo = purchaseOverview.TransactionNo,
+			TransactionDateTime = purchaseOverview.TransactionDateTime,
+			FinancialYearId = purchaseOverview.FinancialYearId,
+			Remarks = purchaseOverview.Remarks,
+			CreatedBy = purchaseOverview.CreatedBy,
+			CreatedAt = purchaseOverview.CreatedAt,
+			CreatedFromPlatform = purchaseOverview.CreatedFromPlatform,
 			Status = true
-		});
+		};
 
-		await SaveAccountingDetails(purchaseOverview, accountingId);
-	}
+		var accountingCart = new List<AccountingItemCartModel>();
 
-	private static async Task SaveAccountingDetails(PurchaseOverviewModel purchaseOverview, int accountingId)
-	{
-		// Supplier Account Posting (Credit)
 		if (purchaseOverview.TotalAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = purchaseOverview.PartyId,
 				ReferenceId = purchaseOverview.Id,
 				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				ReferenceNo = purchaseOverview.TransactionNo,
+				LedgerId = purchaseOverview.PartyId,
 				Debit = null,
 				Credit = purchaseOverview.TotalAmount,
 				Remarks = $"Party Account Posting For Purchase Bill {purchaseOverview.TransactionNo}",
-				Status = true
 			});
 
-		// Purchase Account Posting (Debit)
 		if (purchaseOverview.TotalAmount - purchaseOverview.TotalTaxAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		{
+			var purchaseLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId)).Value),
 				ReferenceId = purchaseOverview.Id,
 				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				ReferenceNo = purchaseOverview.TransactionNo,
+				LedgerId = int.Parse(purchaseLedger.Value),
 				Debit = purchaseOverview.TotalAmount - purchaseOverview.TotalTaxAmount,
 				Credit = null,
 				Remarks = $"Purchase Account Posting For Purchase Bill {purchaseOverview.TransactionNo}",
-				Status = true
 			});
+		}
 
-		// GST Account Posting (Debit)
 		if (purchaseOverview.TotalTaxAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		{
+			var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
 				ReferenceId = purchaseOverview.Id,
 				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				ReferenceNo = purchaseOverview.TransactionNo,
+				LedgerId = int.Parse(gstLedger.Value),
 				Debit = purchaseOverview.TotalTaxAmount,
 				Credit = null,
 				Remarks = $"GST Account Posting For Purchase Bill {purchaseOverview.TransactionNo}",
-				Status = true
 			});
+		}
+
+		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
 	}
 
 	private static async Task UpdateRawMaterialRateAndUOMOnPurchase(List<PurchaseItemCartModel> purchaseDetails)

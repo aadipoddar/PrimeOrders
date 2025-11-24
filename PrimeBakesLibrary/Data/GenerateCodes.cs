@@ -36,36 +36,6 @@ public static class GenerateCodes
 		Accounting
 	}
 
-	private static async Task<string> CheckDuplicateCode(string code, CodeType type)
-	{
-		var isDuplicate = true;
-
-		while (isDuplicate)
-		{
-			switch (type)
-			{
-				case CodeType.Accounting:
-					var accounting = await AccountingData.LoadAccountingByTransactionNo(code);
-					isDuplicate = accounting is not null;
-					break;
-				default:
-					isDuplicate = false;
-					break;
-			}
-
-			if (!isDuplicate)
-				return code;
-
-			var prefix = code[..(code.Length - 6)];
-			var lastNumberPart = code[(code.Length - 6)..];
-			int lastNumber = int.Parse(lastNumberPart);
-			int nextNumber = lastNumber + 1;
-			code = $"{prefix}{nextNumber:D6}";
-		}
-
-		return code;
-	}
-
 	private static async Task<string> CheckDuplicateCode(string code, int numberLength, CodeType type)
 	{
 		var isDuplicate = true;
@@ -100,6 +70,10 @@ public static class GenerateCodes
 				case CodeType.Order:
 					var order = await CommonData.LoadTableDataByTransactionNo<OrderModel>(TableNames.Order, code);
 					isDuplicate = order is not null;
+					break;
+				case CodeType.Accounting:
+					var accounting = await CommonData.LoadTableDataByTransactionNo<AccountingModel>(TableNames.Accounting, code);
+					isDuplicate = accounting is not null;
 					break;
 			}
 
@@ -307,28 +281,28 @@ public static class GenerateCodes
 		return await CheckDuplicateCode($"{locationPrefix}{financialYear.YearNo}{orderPrefix}000001", 6, CodeType.Order);
 	}
 
-
-
-
 	public static async Task<string> GenerateAccountingTransactionNo(AccountingModel accounting)
 	{
-		var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, accounting.VoucherId);
-		var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(accounting.AccountingDate.ToDateTime(TimeOnly.MinValue));
-		var lastAccounting = await AccountingData.LoadLastAccountingByFinancialYearVoucher(financialYear.Id, accounting.VoucherId);
-		var year = financialYear.YearNo;
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, accounting.FinancialYearId);
+		var locationPrefix = (await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, 1)).PrefixCode;
+		var accountingPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.AccountingTransactionPrefix)).Value;
 
+		var lastAccounting = await CommonData.LoadLastTableDataByFinancialYear<AccountingModel>(TableNames.Accounting, accounting.FinancialYearId);
 		if (lastAccounting is not null)
 		{
 			var lastTransactionNo = lastAccounting.TransactionNo;
-			if (lastTransactionNo.StartsWith($"FA{year}{voucher.PrefixCode}"))
+			if (lastTransactionNo.StartsWith($"{locationPrefix}{financialYear.YearNo}{accountingPrefix}"))
 			{
-				var lastNumber = int.Parse(lastTransactionNo[(2 + year.GetNumberOfDigits() + voucher.PrefixCode.Length)..]);
-				int nextNumber = lastNumber + 1;
-				return await CheckDuplicateCode($"FA{year}{voucher.PrefixCode}{nextNumber:D6}", CodeType.Accounting);
+				var lastNumberPart = lastTransactionNo[(locationPrefix.Length + financialYear.YearNo.ToString().Length + accountingPrefix.Length)..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{locationPrefix}{financialYear.YearNo}{accountingPrefix}{nextNumber:D6}", 6, CodeType.Accounting);
+				}
 			}
 		}
 
-		return await CheckDuplicateCode($"FA{year}{voucher.PrefixCode}000001", CodeType.Accounting);
+		return await CheckDuplicateCode($"{locationPrefix}{financialYear.YearNo}{accountingPrefix}000001", 6, CodeType.Accounting);
 	}
 
 	public static string GenerateRawMaterialCode(string lastRawMaterialCode)

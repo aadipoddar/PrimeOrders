@@ -39,7 +39,7 @@ public static class TableNames
 	public static string Voucher => "Voucher";
 	public static string FinancialYear => "FinancialYear";
 	public static string Accounting => "Accounting";
-	public static string AccountingDetails => "AccountingDetails";
+	public static string AccountingDetail => "AccountingDetail";
 }
 
 public static class StoredProcedureNames
@@ -58,6 +58,7 @@ public static class StoredProcedureNames
 	public static string LoadCustomerByNumber => "Load_Customer_By_Number";
 
 	public static string LoadFinancialYearByDateTime => "Load_FinancialYear_By_DateTime";
+	public static string LoadLedgerByLocation => "Load_Ledger_By_Location";
 
 	public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
 
@@ -100,18 +101,9 @@ public static class StoredProcedureNames
 	public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";
 	public static string LoadProductByLocation => "Load_Product_By_Location";
 
-	public static string LoadLedgerByLocation => "Load_Ledger_By_Location";
-
-	public static string LoadLastAccountingByFinancialYearVoucher => "Load_LastAccounting_By_FinancialYear_Voucher";
-	public static string LoadAccountingDetailsByAccounting => "Load_AccountingDetails_By_Accounting";
-	public static string LoadAccountingByTransactionNo => "Load_Accounting_By_TransactionNo";
-
-	public static string LoadAccountingDetailsByDate => "Load_AccountingDetails_By_Date";
-	public static string LoadAccountingOverviewByAccountingId => "Load_AccountingOverview_By_AccountingId";
-
-	public static string LoadLedgerOverviewByAccountingId => "Load_LedgerOverview_By_AccountingId";
-	public static string LoadLedgerDetailsByDateLedger => "Load_LedgerDetails_By_Date_Ledger";
-	public static string LoadTrialBalanceByDate => "Load_TrialBalance_By_Date";
+	public static string LoadAccountingDetailByAccounting => "Load_AccountingDetail_By_Accounting";
+	public static string LoadAccountingOverviewByDate => "Load_AccountingOverview_By_Date";
+	public static string LoadAccountingByVoucherReference => "Load_Accounting_By_Voucher_Reference";
 
 	public static string InsertUser => "Insert_User";
 	public static string ResetSettings => "Reset_Settings";
@@ -161,7 +153,7 @@ public static class StoredProcedureNames
 	public static string InsertFinancialYear => "Insert_FinancialYear";
 
 	public static string InsertAccounting => "Insert_Accounting";
-	public static string InsertAccountingDetails => "Insert_AccountingDetails";
+	public static string InsertAccountingDetail => "Insert_AccountingDetail";
 
 	public static string DeleteProductStockById => "Delete_ProductStock_By_Id";
 	public static string DeleteProductStockByTypeTransactionIdLocationId => "Delete_ProductStock_By_Type_TransactionId_LocationId";
@@ -192,8 +184,9 @@ public static class ViewNames
 	public static string OrderOverview => "Order_Overview";
 	public static string OrderItemOverview => "Order_Item_Overview";
 
+	public static string ProductLocationOverview => "ProductLocation_Overview";
+
 
 	public static string AccountingOverview => "Accounting_Overview";
 	public static string LedgerOverview => "Ledger_Overview";
-	public static string ProductLocationOverview => "ProductLocation_Overview";
 }

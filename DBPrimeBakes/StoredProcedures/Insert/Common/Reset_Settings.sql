@@ -20,6 +20,7 @@ BEGIN
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SaleTransactionPrefix' 		, N'SAL'	, N'Prefix for Sale Transaction Numbers')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SaleReturnTransactionPrefix'		, N'SALRET'	, N'Prefix for Sale Return Transaction Numbers')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'OrderTransactionPrefix'		, N'ORD'	, N'Prefix for Order Transaction Numbers')
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'AccountingTransactionPrefix'	, N'ACCT'	, N'Prefix for Accounting Transaction Numbers')
 
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SalesVoucherId', N'3', N'Voucher type for Sales transactions')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SaleReturnVoucherId', N'5', N'Voucher type for Sale Return transactions')

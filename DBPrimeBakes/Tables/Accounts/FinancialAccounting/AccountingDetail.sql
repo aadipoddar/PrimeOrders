@@ -1,13 +1,14 @@
-﻿CREATE TABLE [dbo].[AccountingDetails]
+﻿CREATE TABLE [dbo].[AccountingDetail]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
     [AccountingId] INT NOT NULL,
     [LedgerId] INT NOT NULL, 
-    [ReferenceType] VARCHAR(20) NULL, 
+    [ReferenceType] VARCHAR(MAX) NULL, 
     [ReferenceId] INT NULL, 
+    [ReferenceNo] VARCHAR(MAX) NULL,
     [Debit] MONEY NULL, 
     [Credit] MONEY NULL, 
-    [Remarks] VARCHAR(500) NOT NULL, 
+    [Remarks] VARCHAR(MAX) NULL, 
     [Status] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_AccountingDetails_ToAccounting] FOREIGN KEY (AccountingId) REFERENCES [Accounting](Id), 
     CONSTRAINT [FK_AccountingDetails_ToLedger] FOREIGN KEY (LedgerId) REFERENCES [Ledger](Id)

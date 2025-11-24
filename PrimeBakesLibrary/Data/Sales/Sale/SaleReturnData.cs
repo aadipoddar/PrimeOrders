@@ -104,7 +104,8 @@ public static class SaleReturnData
 					await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.PurchaseReturn.ToString(), saleReturn.Id, party.LocationId.Value);
 			}
 
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.TransactionNo);
+			var saleReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
+			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(saleReturnVoucher.Value), saleReturn.Id, saleReturn.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -298,7 +299,8 @@ public static class SaleReturnData
 
 		if (update)
 		{
-			var existingAccounting = await AccountingData.LoadAccountingByTransactionNo(saleReturn.TransactionNo);
+			var saleReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
+			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(saleReturnVoucher.Value), saleReturn.Id, saleReturn.TransactionNo);
 			if (existingAccounting is not null && existingAccounting.Id > 0)
 			{
 				existingAccounting.Status = false;
@@ -307,71 +309,89 @@ public static class SaleReturnData
 		}
 
 		var saleReturnOverview = await CommonData.LoadTableDataById<SaleReturnOverviewModel>(ViewNames.SaleReturnOverview, saleReturn.Id);
+		if (saleReturnOverview is null)
+			return;
+
 		if (saleReturnOverview.TotalAmount <= 0 && saleReturnOverview.TotalTaxAmount <= 0)
 			return;
 
-		int accountingId = await AccountingData.InsertAccounting(new()
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
+		var accounting = new AccountingModel
 		{
 			Id = 0,
-			TransactionNo = saleReturn.TransactionNo,
-			AccountingDate = DateOnly.FromDateTime(saleReturn.TransactionDateTime),
-			FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(saleReturn.TransactionDateTime)).Id,
-			VoucherId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId)).Value),
-			Remarks = saleReturn.Remarks,
-			UserId = saleReturn.CreatedBy,
-			GeneratedModule = GeneratedModules.SaleReturn.ToString(),
-			CreatedAt = await CommonData.LoadCurrentDateTime(),
+			TransactionNo = "",
+			CompanyId = saleReturnOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = saleReturnOverview.Id,
+			ReferenceNo = saleReturnOverview.TransactionNo,
+			TransactionDateTime = saleReturnOverview.TransactionDateTime,
+			FinancialYearId = saleReturnOverview.FinancialYearId,
+			Remarks = saleReturnOverview.Remarks,
+			CreatedBy = saleReturnOverview.CreatedBy,
+			CreatedAt = saleReturnOverview.CreatedAt,
+			CreatedFromPlatform = saleReturnOverview.CreatedFromPlatform,
 			Status = true
-		});
+		};
 
-		await SaveAccountingDetails(saleReturnOverview, accountingId);
-	}
+		var accountingCart = new List<AccountingItemCartModel>();
 
-	private static async Task SaveAccountingDetails(SaleReturnOverviewModel saleReturnOverview, int accountingId)
-	{
-		// Party Account Posting (Credit)
-		if (saleReturnOverview.TotalAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		if (saleReturnOverview.Cash + saleReturnOverview.UPI + saleReturnOverview.Card > 0)
+		{
+			var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = saleReturnOverview.Credit > 0 ? saleReturnOverview.PartyId.Value : int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId)).Value),
 				ReferenceId = saleReturnOverview.Id,
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
+				ReferenceNo = saleReturnOverview.TransactionNo,
+				LedgerId = int.Parse(cashLedger.Value),
 				Debit = null,
-				Credit = saleReturnOverview.TotalAmount,
-				Remarks = $"Cash / Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
-				Status = true
+				Credit = saleReturnOverview.Cash + saleReturnOverview.UPI + saleReturnOverview.Card,
+				Remarks = $"Cash Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
+			});
+		}
+
+		if (saleReturnOverview.Credit > 0)
+			accountingCart.Add(new()
+			{
+				ReferenceId = saleReturnOverview.Id,
+				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
+				ReferenceNo = saleReturnOverview.TransactionNo,
+				LedgerId = saleReturnOverview.PartyId.Value,
+				Debit = null,
+				Credit = saleReturnOverview.Credit,
+				Remarks = $"Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			});
 
-		// Sale Return Account Posting (Debit)
 		if (saleReturnOverview.TotalAmount - saleReturnOverview.TotalTaxAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		{
+			var saleLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId)).Value),
 				ReferenceId = saleReturnOverview.Id,
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
+				ReferenceNo = saleReturnOverview.TransactionNo,
+				LedgerId = int.Parse(saleLedger.Value),
 				Debit = saleReturnOverview.TotalAmount - saleReturnOverview.TotalTaxAmount,
 				Credit = null,
 				Remarks = $"Sale Return Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
-				Status = true
 			});
+		}
 
-		// GST Account Posting (Debit)
 		if (saleReturnOverview.TotalTaxAmount > 0)
-			await AccountingData.InsertAccountingDetails(new()
+		{
+			var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
+			accountingCart.Add(new()
 			{
-				Id = 0,
-				AccountingId = accountingId,
-				LedgerId = int.Parse((await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId)).Value),
 				ReferenceId = saleReturnOverview.Id,
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
+				ReferenceNo = saleReturnOverview.TransactionNo,
+				LedgerId = int.Parse(gstLedger.Value),
 				Debit = saleReturnOverview.TotalTaxAmount,
 				Credit = null,
 				Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
-				Status = true
 			});
+		}
+
+		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
 	}
 }

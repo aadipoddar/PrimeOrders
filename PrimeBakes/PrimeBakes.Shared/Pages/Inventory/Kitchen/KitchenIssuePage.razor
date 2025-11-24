@@ -223,6 +223,17 @@ else
 						</SfAutoComplete>
 					</div>
 
+					<div class="cart-field cart-field-stock">
+						<label class="cart-label">Current Stock</label>
+						<SfNumericTextBox Value="@(_stockSummary.FirstOrDefault(s => s.RawMaterialId == _selectedRawMaterial?.Id)?.ClosingStock ?? 0)"
+										  TValue="decimal"
+										  Readonly="true"
+										  ShowSpinButton="false"
+										  Placeholder="0.00"
+										  FloatLabelType="FloatLabelType.Never"
+										  CssClass="custom-numeric readonly-field stock-field" />
+					</div>
+
 					<div class="cart-field cart-field-small">
 						<label class="cart-label">Qty</label>
 						<SfNumericTextBox Value="@_selectedCart.Quantity"
@@ -877,6 +888,17 @@ else
 			font-weight: 500;
 		}
 
+	::deep .stock-field .e-input-group {
+		background: #fef3c7;
+		border-color: #f59e0b;
+	}
+
+		::deep .stock-field .e-input-group input {
+			color: #92400e;
+			font-weight: 600;
+			text-align: center;
+		}
+
 	::deep .editable-field .e-input-group {
 		border-color: #3b82f6;
 		background: #eff6ff;
@@ -936,7 +958,7 @@ else
 	/* Add to Cart Section Styles */
 	.cart-row {
 		display: grid;
-		grid-template-columns: 2fr 1fr 1fr 1fr 2fr 1.2fr 120px;
+		grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr 1.2fr 120px;
 		gap: 12px;
 		align-items: end;
 		margin-bottom: 12px;
@@ -950,6 +972,10 @@ else
 
 	.cart-field-item {
 		/* Item field - 2fr */
+	}
+
+	.cart-field-stock {
+		/* Current Stock field - 1fr */
 	}
 
 	.cart-field-small {
