@@ -104,6 +104,7 @@ public static class StoredProcedureNames
 	public static string LoadAccountingDetailByAccounting => "Load_AccountingDetail_By_Accounting";
 	public static string LoadAccountingOverviewByDate => "Load_AccountingOverview_By_Date";
 	public static string LoadAccountingByVoucherReference => "Load_Accounting_By_Voucher_Reference";
+	public static string LoadAccountingLedgerOverviewByDate => "Load_Accounting_Ledger_Overview_By_Date";
 
 	public static string InsertUser => "Insert_User";
 	public static string ResetSettings => "Reset_Settings";
@@ -188,5 +189,5 @@ public static class ViewNames
 
 
 	public static string AccountingOverview => "Accounting_Overview";
-	public static string LedgerOverview => "Ledger_Overview";
+	public static string AccountingLedgerOverview => "Accounting_Ledger_Overview";
 }

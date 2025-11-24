@@ -97,7 +97,7 @@ else
                                     Location <span class="required">*</span>
                                 </label>
                                 <SfAutoComplete Value="@_selectedLocation" TValue="LocationModel" TItem="LocationModel"
-                                    DataSource="@_locations" Autofill="true" Placeholder="Select a Location"
+                                    DataSource="@_locations"  Placeholder="Select a Location"
                                     FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
                                     FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
@@ -112,7 +112,7 @@ else
                                     Company <span class="required">*</span>
                                 </label>
                                 <SfAutoComplete Value="@_selectedCompany" TValue="CompanyModel" TItem="CompanyModel"
-                                    DataSource="@_companies" Autofill="true" Placeholder="Select a Company"
+                                    DataSource="@_companies"  Placeholder="Select a Company"
                                     FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
                                     FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
@@ -228,7 +228,7 @@ else
                         <label class="cart-label">Item <span class="required">*</span></label>
                         <SfAutoComplete @ref="_sfItemAutoComplete" Value="@_selectedProduct"
                             TValue="ProductLocationOverviewModel" TItem="ProductLocationOverviewModel"
-                            DataSource="@_products" Autofill="true" Placeholder="Select Item"
+                            DataSource="@_products"  Placeholder="Select Item"
                             FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
                             FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
                             <AutoCompleteEvents TItem="ProductLocationOverviewModel" TValue="ProductLocationOverviewModel"

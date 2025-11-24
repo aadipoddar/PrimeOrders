@@ -3,7 +3,7 @@
 AS
 BEGIN
 	SELECT *
-	FROM [dbo].[AccountingDetails]
+	FROM [dbo].[AccountingDetail]
 	WHERE [AccountingId] = @AccountingId
 	AND Status = 1
 END

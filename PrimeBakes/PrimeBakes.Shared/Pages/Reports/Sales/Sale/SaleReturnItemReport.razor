@@ -122,7 +122,7 @@ else
                             <div class="form-field">
                                 <label class="field-label">Location</label>
                                 <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedLocation" TValue="LocationModel"
-                                                TItem="LocationModel" DataSource="@_locations" Autofill="true" Placeholder="All Locations"
+                                                TItem="LocationModel" DataSource="@_locations"  Placeholder="All Locations"
                                                 AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
                                     <AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
                                                         ValueChange="OnLocationChanged" />
@@ -134,7 +134,7 @@ else
                             <div class="form-field">
                                 <label class="field-label">Company</label>
                                 <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedCompany" TValue="CompanyModel"
-                                                TItem="CompanyModel" DataSource="@_companies" Autofill="true" Placeholder="All Companies"
+                                                TItem="CompanyModel" DataSource="@_companies"  Placeholder="All Companies"
                                                 AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
                                     <AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
                                                         ValueChange="OnCompanyChanged" />
@@ -146,7 +146,7 @@ else
                             <div class="form-field">
                                 <label class="field-label">Party</label>
                                 <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedParty" TValue="LedgerModel"
-                                                TItem="LedgerModel" DataSource="@_parties" Autofill="true" Placeholder="All Parties"
+                                                TItem="LedgerModel" DataSource="@_parties"  Placeholder="All Parties"
                                                 AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
                                     <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnPartyChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />

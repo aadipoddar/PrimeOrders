@@ -29,9 +29,4 @@
     <ProjectReference Include="..\..\PrimeBakesLibrary\PrimeBakesLibrary.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Accounts\" />
-    <Folder Include="Pages\Reports\Accounts\" />
-  </ItemGroup>
-
 </Project>

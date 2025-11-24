@@ -263,6 +263,8 @@
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_By_Voucher_Reference.sql" />
     <Build Include="Tables\Accounts\FinancialAccounting\AccountingDetail.sql" />
+    <Build Include="Views\Accounts\Accounting_Ledger_Overview.sql" />
+    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Ledger_Overview_By_Date.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

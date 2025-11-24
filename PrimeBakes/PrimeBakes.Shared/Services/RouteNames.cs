@@ -21,6 +21,9 @@ internal static class PageRouteNames
 	public static string OrderMobileCart => "/sales/order-cart/mobile";
 	public static string OrderMobileConfirmation => "/sales/order-confirmation/mobile";
 
+	public static string AccountsDashboard => "/accounts";
+	public static string FinancialAccounting => "/accounts/financial-accounting";
+
 	public static string ReportDashboard => "/report";
 	public static string ReportPurchase => "/report/purchase";
 	public static string ReportPurchaseReturn => "/report/purchase-return";
@@ -40,10 +43,13 @@ internal static class PageRouteNames
 	public static string ReportOrder => "/report/order";
 	public static string ReportOrderItem => "/report/order-item";
 
+	public static string ReportFinancialAccounting => "/report/financial-accounting";
+
 	public static string AdminLocation => "/admin/location";
 	public static string AdminRawMaterial => "/admin/raw-material";
 	public static string AdminKitchen => "/admin/kitchen";
 	public static string AdminProduct => "/admin/product";
 	public static string AdminCompany => "/admin/company";
 	public static string AdminLedger => "/admin/ledger";
+	public static string AdminVoucher => "/admin/voucher";
 }

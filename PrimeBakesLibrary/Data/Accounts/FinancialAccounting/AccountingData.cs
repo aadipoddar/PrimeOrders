@@ -2,6 +2,7 @@
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Sales.Order;
+using PrimeBakesLibrary.Exporting.Accounts;
 using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
@@ -29,66 +30,51 @@ public static class AccountingData
 	public static async Task<AccountingModel> LoadAccountingByVoucherReference(int VoucherId, int ReferenceId, string ReferenceNo) =>
 		(await SqlDataAccess.LoadData<AccountingModel, dynamic>(StoredProcedureNames.LoadAccountingByVoucherReference, new { VoucherId, ReferenceId, ReferenceNo })).FirstOrDefault();
 
+	public static async Task<List<AccountingLedgerOverviewModel>> LoadAccountingLedgerOverviewByDate(DateTime StartDate, DateTime EndDate) =>
+		await SqlDataAccess.LoadData<AccountingLedgerOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingLedgerOverviewByDate, new { StartDate, EndDate });
+
 	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int accountingId)
 	{
-		//try
-		//{
-		//	// Load saved sale details
-		//	var savedSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId) ??
-		//		throw new InvalidOperationException("Saved sale transaction not found.");
+		try
+		{
+			// Load saved accounting details
+			var savedAccounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId) ??
+				throw new InvalidOperationException("Saved accounting transaction not found.");
 
-		//	// Load sale details from database
-		//	var saleDetails = await LoadSaleDetailBySale(saleId);
-		//	if (saleDetails is null || saleDetails.Count == 0)
-		//		throw new InvalidOperationException("No sale details found for invoice generation.");
+			// Load accounting details from database
+			var accountingDetails = await LoadAccountingDetailByAccounting(accountingId);
+			if (accountingDetails is null || accountingDetails.Count == 0)
+				throw new InvalidOperationException("No accounting details found for invoice generation.");
 
-		//	// Load company, location, and party
-		//	var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedSale.CompanyId);
-		//	var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, savedSale.LocationId);
+			// Load company and voucher
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedAccounting.CompanyId);
+			var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, savedAccounting.VoucherId);
 
-		//	// Try to load party (party can be null for cash sales)
-		//	LedgerModel party = null;
-		//	if (savedSale.PartyId.HasValue && savedSale.PartyId.Value > 0)
-		//		party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedSale.PartyId.Value);
+			if (company is null)
+				throw new InvalidOperationException("Invoice generation skipped - company not found.");
 
-		//	// Try to load customer (customer can be null)
-		//	CustomerModel customer = null;
-		//	if (savedSale.CustomerId.HasValue && savedSale.CustomerId.Value > 0)
-		//		customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, savedSale.CustomerId.Value);
+			if (voucher is null)
+				throw new InvalidOperationException("Invoice generation skipped - voucher not found.");
 
-		//	// Try to load order information if OrderId is present
-		//	OrderModel order = null;
-		//	if (savedSale.OrderId.HasValue && savedSale.OrderId.Value > 0)
-		//		order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, savedSale.OrderId.Value);
+			// Generate invoice PDF
+			var pdfStream = await AccountingInvoicePDFExport.ExportAccountingInvoice(
+				savedAccounting,
+				accountingDetails,
+				company,
+				voucher,
+				null, // logo path - uses default
+				$"{voucher.Name.ToUpper()} VOUCHER"
+			);
 
-		//	if (company is null)
-		//		throw new InvalidOperationException("Invoice generation skipped - company not found.");
-
-		//	// Generate invoice PDF
-		//	var pdfStream = await SaleInvoicePDFExport.ExportSaleInvoice(
-		//		savedSale,
-		//		saleDetails,
-		//		company,
-		//		party,
-		//		customer,
-		//		order?.TransactionNo,
-		//		order?.TransactionDateTime,
-		//		null, // logo path - uses default
-		//		"SALE INVOICE",
-		//		location?.Name // outlet
-		//	);
-
-		//	// Generate file name
-		//	var currentDateTime = await CommonData.LoadCurrentDateTime();
-		//	string fileName = $"SALE_INVOICE_{savedSale.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
-		//	return (pdfStream, fileName);
-		//}
-		//catch (Exception ex)
-		//{
-		//	throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
-		//}
-
-		return (null, string.Empty); // Placeholder return
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"ACCOUNTING_VOUCHER_{savedAccounting.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+			return (pdfStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
+		}
 	}
 
 	public static async Task DeleteAccounting(int accountingId)

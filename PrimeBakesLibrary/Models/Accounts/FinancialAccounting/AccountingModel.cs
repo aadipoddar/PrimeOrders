@@ -97,3 +97,30 @@ public class AccountingOverviewModel
 	public string? LastModifiedFromPlatform { get; set; }
 	public bool Status { get; set; }
 }
+
+public class AccountingLedgerOverviewModel
+{
+	public int Id { get; set; }
+	public string LedgerName { get; set; }
+	public string LedgerCode { get; set; }
+	public int AccountTypeId { get; set; }
+	public string AccountTypeName { get; set; }
+	public int GroupId { get; set; }
+	public string GroupName { get; set; }
+	
+	public int AccountingId { get; set; }
+	public DateOnly TransactionDateTime { get; set; }
+	public string TransactionNo { get; set; }
+	public string AccountingRemarks { get; set; }
+
+	public int? ReferenceId { get; set; }
+	public string? ReferenceType { get; set; }
+	public string? ReferenceNo { get; set; }
+	public DateTime? ReferenceDateTime { get; set; }
+	public decimal? ReferenceAmount { get; set; }
+
+	public decimal? Debit { get; set; }
+	public decimal? Credit { get; set; }
+
+	public string? Remarks { get; set; }
+}
