@@ -46,15 +46,6 @@ public class AccountingItemCartModel
 	public string? Remarks { get; set; }
 }
 
-public enum GeneratedModules
-{
-	FinancialAccounting,
-	Sales,
-	Purchase,
-	PurchaseReturn,
-	SaleReturn,
-}
-
 public enum ReferenceTypes
 {
 	Purchase,
@@ -109,8 +100,10 @@ public class AccountingLedgerOverviewModel
 	public string GroupName { get; set; }
 	
 	public int AccountingId { get; set; }
-	public DateOnly TransactionDateTime { get; set; }
 	public string TransactionNo { get; set; }
+	public DateOnly TransactionDateTime { get; set; }
+	public int CompanyId { get; set; }
+	public string CompanyName { get; set; }
 	public string AccountingRemarks { get; set; }
 
 	public int? ReferenceId { get; set; }

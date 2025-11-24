@@ -2,6 +2,7 @@ using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -16,46 +17,36 @@ using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
-public partial class FinancialAccountingReport
+public partial class AccountingLedgerReport
 {
 	private UserModel _user;
 
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
-	private bool _showDeleted = false;
-	private bool _isDeleteDialogVisible = false;
-	private bool _isRecoverDialogVisible = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
 
 	private CompanyModel _selectedCompany = new();
-	private VoucherModel _selectedVoucher = new();
+	private LedgerModel _selectedLedger = new();
 
 	private List<CompanyModel> _companies = [];
-	private List<VoucherModel> _vouchers = [];
-	private List<AccountingOverviewModel> _accountingOverviews = [];
+	private List<LedgerModel> _ledgers = [];
+	private List<AccountingLedgerOverviewModel> _accountingLedgerOverviews = [];
 
-	private SfGrid<AccountingOverviewModel> _sfAccountingGrid;
+	private SfGrid<AccountingLedgerOverviewModel> _sfAccountingLedgerGrid;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
 	private string _successTitle = string.Empty;
 	private string _successMessage = string.Empty;
-	private string _deleteTransactionNo = string.Empty;
-	private int _deleteTransactionId = 0;
-	private string _recoverTransactionNo = string.Empty;
-	private int _recoverTransactionId = 0;
 
 	private SfToast _sfErrorToast;
 	private SfToast _sfSuccessToast;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -74,8 +65,8 @@ public partial class FinancialAccountingReport
 	{
 		await LoadDates();
 		await LoadCompanies();
-		await LoadVouchers();
-		await LoadAccountingOverviews();
+		await LoadLedgers();
+		await LoadAccountingLedgerOverviews();
 	}
 
 	private async Task LoadDates()
@@ -96,19 +87,20 @@ public partial class FinancialAccountingReport
 		_selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadVouchers()
+	private async Task LoadLedgers()
 	{
-		_vouchers = await CommonData.LoadTableDataByStatus<VoucherModel>(TableNames.Voucher);
-		_vouchers.Add(new()
+		_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
+		_ledgers.Add(new()
 		{
 			Id = 0,
-			Name = "All Vouchers"
+			Name = "All Ledgers"
 		});
-		_vouchers = [.. _vouchers.OrderBy(s => s.Name)];
-		_selectedVoucher = _vouchers.FirstOrDefault(_ => _.Id == 0);
+
+		_ledgers = [.. _ledgers.OrderBy(s => s.Name)];
+		_selectedLedger = _ledgers.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadAccountingOverviews()
+	private async Task LoadAccountingLedgerOverviews()
 	{
 		if (_isProcessing)
 			return;
@@ -117,51 +109,68 @@ public partial class FinancialAccountingReport
 		{
 			_isProcessing = true;
 
-			_accountingOverviews = await AccountingData.LoadAccountingOverviewByDate(
+			_accountingLedgerOverviews = await AccountingData.LoadAccountingLedgerOverviewByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-			!_showDeleted);
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
 			if (_selectedCompany?.Id > 0)
-				_accountingOverviews = [.. _accountingOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+				_accountingLedgerOverviews = [.. _accountingLedgerOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
-			if (_selectedVoucher?.Id > 0)
-				_accountingOverviews = [.. _accountingOverviews.Where(_ => _.VoucherId == _selectedVoucher.Id)];
+			// Filter by ledger with contra ledger details
+			if (_selectedLedger?.Id > 0)
+			{
+				List<AccountingLedgerOverviewModel> filteredOverviews = [];
+				var partyLedgers = _accountingLedgerOverviews.Where(l => l.Id == _selectedLedger.Id).ToList();
 
-			_accountingOverviews = [.. _accountingOverviews.OrderBy(_ => _.TransactionDateTime)];
+				foreach (var item in partyLedgers)
+				{
+					var referenceLedgers = _accountingLedgerOverviews
+						.Where(l => l.AccountingId == item.AccountingId && l.Id != _selectedLedger.Id)
+						.ToList();
+
+					var referenceLedgerNamesWithAmount = string.Join("\n",
+						referenceLedgers.Select(l =>
+						$"{l.LedgerName}\t({(l.Debit.HasValue && l.Debit.Value > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit.HasValue && l.Credit.Value > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})")); item.LedgerName = referenceLedgerNamesWithAmount;
+					filteredOverviews.Add(item);
+				}
+
+				_accountingLedgerOverviews = filteredOverviews;
+			}
+
+			_accountingLedgerOverviews = [.. _accountingLedgerOverviews.OrderBy(_ => _.TransactionDateTime)];
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading sale overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading accounting ledger overviews: {ex.Message}", "error");
 		}
 		finally
 		{
-			if (_sfAccountingGrid is not null)
-				await _sfAccountingGrid.Refresh();
+			if (_sfAccountingLedgerGrid is not null)
+				await _sfAccountingLedgerGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
 	}
 	#endregion
 
-	#region Changed Events
+	#region Change Events
 	private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
 	{
 		_fromDate = args.StartDate;
 		_toDate = args.EndDate;
-		await LoadAccountingOverviews();
+		await LoadAccountingLedgerOverviews();
 	}
 
 	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
 	{
 		_selectedCompany = args.Value;
-		await LoadAccountingOverviews();
+		await LoadAccountingLedgerOverviews();
 	}
 
-	private async Task OnPartyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<VoucherModel, VoucherModel> args)
+	private async Task OnLedgerChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
 	{
-		_selectedVoucher = args.Value;
-		await LoadAccountingOverviews();
+		_selectedLedger = args.Value;
+		await LoadAccountingLedgerOverviews();
 	}
 
 	private async Task SetDateRange(DateRangeType rangeType)
@@ -210,9 +219,9 @@ public partial class FinancialAccountingReport
 					currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
 					var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
 					var previousFY = financialYears
-						.Where(fy => fy.Id != currentFY.Id)
-						.OrderByDescending(fy => fy.StartDate)
-						.FirstOrDefault();
+					.Where(fy => fy.Id != currentFY.Id)
+					.OrderByDescending(fy => fy.StartDate)
+					.FirstOrDefault();
 
 					if (previousFY == null)
 					{
@@ -237,7 +246,7 @@ public partial class FinancialAccountingReport
 		finally
 		{
 			_isProcessing = false;
-			await LoadAccountingOverviews();
+			await LoadAccountingLedgerOverviews();
 			StateHasChanged();
 		}
 	}
@@ -254,33 +263,28 @@ public partial class FinancialAccountingReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			// Convert DateTime to DateOnly for Excel export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			// Call the Excel export utility
 			var stream = await Task.Run(() =>
-				AccountingReportExcelExport.ExportAccountingReport(
-					_accountingOverviews.Where(_ => _.Status),
+				AccountingLedgerReportExcelExport.ExportAccountingLedgerReport(
+					_accountingLedgerOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.Admin,
 					_selectedCompany?.Id > 0 ? _selectedCompany?.Name : null,
-					_selectedVoucher?.Id > 0 ? _selectedVoucher?.Name : null
+					_selectedLedger?.Id > 0 ? _selectedLedger?.Name : null
 				)
 			);
 
-			// Generate file name with date range
-			string fileName = $"ACCOUNTING_REPORT";
+			string fileName = $"LEDGER_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".xlsx";
 
-			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Accounting report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Ledger report exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -303,33 +307,28 @@ public partial class FinancialAccountingReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			// Convert DateTime to DateOnly for PDF export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			// Call the PDF export utility
 			var stream = await Task.Run(() =>
-				AccountingReportPdfExport.ExportAccountingReport(
-					_accountingOverviews.Where(_ => _.Status),
+				AccountingLedgerReportPdfExport.ExportAccountingLedgerReport(
+					_accountingLedgerOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.Admin,
 					_selectedCompany?.Id > 0 ? _selectedCompany?.Name : null,
-					_selectedVoucher?.Id > 0 ? _selectedVoucher?.Name : null
+					_selectedLedger?.Id > 0 ? _selectedLedger?.Name : null
 				)
 			);
 
-			// Generate file name with date range
-			string fileName = $"ACCOUNTING_REPORT";
+			string fileName = $"LEDGER_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".pdf";
 
-			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Accounting report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Ledger report exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -344,7 +343,7 @@ public partial class FinancialAccountingReport
 	#endregion
 
 	#region Actions
-	private async Task ViewAccountig(int accountingId)
+	private async Task ViewAccounting(int accountingId)
 	{
 		try
 		{
@@ -355,7 +354,7 @@ public partial class FinancialAccountingReport
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening sale: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while opening accounting: {ex.Message}", "error");
 		}
 	}
 
@@ -383,113 +382,18 @@ public partial class FinancialAccountingReport
 		}
 	}
 
-	private async Task ConfirmDelete()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isDeleteDialogVisible = false;
-			_isProcessing = true;
-			StateHasChanged();
-
-			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
-
-			await AccountingData.DeleteAccounting(_deleteTransactionId);
-
-			await ShowToast("Success", $"Financial Accounting transaction {_deleteTransactionNo} has been deleted successfully.", "success");
-
-			_deleteTransactionId = 0;
-			_deleteTransactionNo = string.Empty;
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while deleting financial accounting transaction: {ex.Message}", "error");
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadAccountingOverviews();
-		}
-	}
-
 	private async Task ToggleDetailsView()
 	{
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_sfAccountingGrid is not null)
-			await _sfAccountingGrid.Refresh();
-	}
-
-	private async Task ToggleDeleted()
-	{
-		if (_user.LocationId > 1)
-			return;
-
-		_showDeleted = !_showDeleted;
-		await LoadAccountingOverviews();
-		StateHasChanged();
-	}
-
-	private async Task ConfirmRecover()
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isRecoverDialogVisible = false;
-			_isProcessing = true;
-			StateHasChanged();
-
-			if (!_user.Admin)
-				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
-
-			if (_recoverTransactionId == 0)
-			{
-				await ShowToast("Error", "Invalid sale transaction selected for recovery.", "error");
-				return;
-			}
-
-			var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, _recoverTransactionId);
-			if (accounting is null)
-			{
-				await ShowToast("Error", "Financial Accounting transaction not found.", "error");
-				return;
-			}
-
-			// Update the Status to true (active)
-			accounting.Status = true;
-			accounting.LastModifiedBy = _user.Id;
-			accounting.LastModifiedAt = await CommonData.LoadCurrentDateTime();
-			accounting.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
-
-			await AccountingData.RecoverAccountingTransaction(accounting);
-
-			await ShowToast("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", "success");
-
-			_recoverTransactionId = 0;
-			_recoverTransactionNo = string.Empty;
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while recovering financial accounting transaction: {ex.Message}", "error");
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-			await LoadAccountingOverviews();
-		}
+		if (_sfAccountingLedgerGrid is not null)
+			await _sfAccountingLedgerGrid.Refresh();
 	}
 	#endregion
 
 	#region Utilities
-	private async Task NavigateToFinancialAccountingPage()
+	private async Task NavigateToAccountingPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.FinancialAccounting, "_blank");
@@ -497,12 +401,12 @@ public partial class FinancialAccountingReport
 			NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting);
 	}
 
-	private async Task NavigateToLedgerReport()
+	private async Task NavigateToAccountingReport()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportAccountingLedger, "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportFinancialAccounting, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger);
+			NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting);
 	}
 
 	private async Task ShowToast(string title, string message, string type)
@@ -529,38 +433,6 @@ public partial class FinancialAccountingReport
 				Content = _successMessage
 			});
 		}
-	}
-
-	private void ShowDeleteConfirmation(int id, string transactionNo)
-	{
-		_deleteTransactionId = id;
-		_deleteTransactionNo = transactionNo;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
-	}
-
-	private void CancelDelete()
-	{
-		_deleteTransactionId = 0;
-		_deleteTransactionNo = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
-	}
-
-	private void ShowRecoverConfirmation(int id, string transactionNo)
-	{
-		_recoverTransactionId = id;
-		_recoverTransactionNo = transactionNo;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
-	}
-
-	private void CancelRecover()
-	{
-		_recoverTransactionId = 0;
-		_recoverTransactionNo = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
 	}
 	#endregion
 }

@@ -10,8 +10,10 @@ SELECT
 	[g].[Name] AS GroupName,
 
 	[a].[Id] AS AccountingId,
-	[a].[TransactionDateTime],
 	[a].[TransactionNo],
+	[a].[TransactionDateTime],
+	[a].[CompanyId],
+	[c].[Name] AS CompanyName,
 	[a].[Remarks] AS AccountingRemarks,
 
 	[ad].[ReferenceId],
@@ -57,9 +59,7 @@ INNER JOIN
 INNER JOIN
 	[dbo].[Group] g ON l.GroupId = g.Id
 INNER JOIN
-	[dbo].[StateUT] s ON l.[StateUTId] = s.Id
-LEFT JOIN
-	[dbo].[Location] lo ON l.LocationId = lo.Id
+	[dbo].[Company] c ON a.CompanyId = c.Id
 
 WHERE
 	[a].[Status] = 1 AND
@@ -74,8 +74,10 @@ GROUP BY
 	[l].[GroupId],
 	[g].[Name],
 	[a].[Id],
-	[a].[TransactionDateTime],
 	[a].[TransactionNo],
+	[a].[TransactionDateTime],
+	[a].[CompanyId],
+	[c].[Name],
 	[a].[Remarks],
 	[ad].[ReferenceId],
 	[ad].[ReferenceType],

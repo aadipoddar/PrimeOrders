@@ -102,7 +102,7 @@ public static class StoredProcedureNames
 	public static string LoadProductByLocation => "Load_Product_By_Location";
 
 	public static string LoadAccountingDetailByAccounting => "Load_AccountingDetail_By_Accounting";
-	public static string LoadAccountingOverviewByDate => "Load_AccountingOverview_By_Date";
+	public static string LoadAccountingOverviewByDate => "Load_Accounting_Overview_By_Date";
 	public static string LoadAccountingByVoucherReference => "Load_Accounting_By_Voucher_Reference";
 	public static string LoadAccountingLedgerOverviewByDate => "Load_Accounting_Ledger_Overview_By_Date";
 
