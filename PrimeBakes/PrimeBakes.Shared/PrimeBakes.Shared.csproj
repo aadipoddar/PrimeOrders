@@ -13,16 +13,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
-    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="31.2.12" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.12" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Notifications" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Spinner" Version="31.2.15" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.15" />
   </ItemGroup>
 
   <ItemGroup>

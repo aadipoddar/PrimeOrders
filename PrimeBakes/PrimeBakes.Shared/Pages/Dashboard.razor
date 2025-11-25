@@ -1,94 +1,10 @@
 ﻿@page "/"
-@implements IDisposable
 
 <PageTitle>Dashboard - Prime Bakes</PageTitle>
 
 @if (_isLoading || _user is null)
 {
-	@if (_hasConnectionError)
-	{
-		<!-- Beautiful Connection Error UI -->
-		<div class="error-container">
-			<div class="error-card">
-				<div class="error-header">
-					<div class="error-icon-container">
-						<div class="error-icon">
-							<span class="wifi-icon">📶</span>
-							<div class="connection-lines">
-								<span class="line line-1"></span>
-								<span class="line line-2"></span>
-								<span class="line line-3"></span>
-							</div>
-						</div>
-					</div>
-					<h2 class="error-title">Connection Error</h2>
-					<p class="error-subtitle">Unable to connect to the internet</p>
-				</div>
-
-				<div class="error-body">
-					<div class="error-illustration">
-						<div class="cloud-container">
-							<div class="cloud cloud-1">☁️</div>
-							<div class="cloud cloud-2">☁️</div>
-							<div class="cloud cloud-3">⛅</div>
-						</div>
-						<div class="signal-waves">
-							<div class="wave-line wave-1"></div>
-							<div class="wave-line wave-2"></div>
-							<div class="wave-line wave-3"></div>
-						</div>
-					</div>
-
-					<div class="error-message">
-						<div class="message-icon">🌐</div>
-						<h3>No Internet Connection</h3>
-						<p>Please check your internet connection and try again. Make sure you're connected to Wi-Fi or mobile data.</p>
-					</div>
-
-					<div class="troubleshooting-tips">
-						<h4>Quick troubleshooting tips:</h4>
-						<ul class="tips-list">
-							<li>
-								<span class="tip-icon">📱</span>
-								<span>Check if mobile data or Wi-Fi is enabled</span>
-							</li>
-							<li>
-								<span class="tip-icon">🔄</span>
-								<span>Try turning airplane mode on and off</span>
-							</li>
-							<li>
-								<span class="tip-icon">📍</span>
-								<span>Move to an area with better signal</span>
-							</li>
-							<li>
-								<span class="tip-icon">⚡</span>
-								<span>Restart your device if the problem persists</span>
-							</li>
-						</ul>
-					</div>
-				</div>
-
-				<div class="error-footer">
-					<button @onclick="RetryConnection" class="retry-button">
-						<span class="retry-icon">🔄</span>
-						Try Again
-					</button>
-				</div>
-			</div>
-
-			<!-- Background Animation -->
-			<div class="error-background">
-				<div class="floating-particles">
-					<div class="particle particle-1"></div>
-					<div class="particle particle-2"></div>
-					<div class="particle particle-3"></div>
-					<div class="particle particle-4"></div>
-					<div class="particle particle-5"></div>
-				</div>
-			</div>
-		</div>
-	}
-	else if (_isUpdating || _isLoadingText.Contains("Updating application"))
+	@if (_isUpdating || _isLoadingText.Contains("Updating application"))
 	{
 		<!-- Beautiful Update UI -->
 		<div class="update-container">
@@ -115,7 +31,7 @@
 							</defs>
 							<circle class="progress-ring__circle-bg" cx="70" cy="70" r="60" />
 							<circle class="progress-ring__circle" cx="70" cy="70" r="60"
-									style="stroke-dasharray: @GetCircumference(); stroke-dashoffset: @GetStrokeOffset();" />
+								style="stroke-dasharray: @GetCircumference(); stroke-dashoffset: @GetStrokeOffset();" />
 						</svg>
 						<div class="progress-content">
 							<span class="progress-percentage">@_progressPercentage%</span>
@@ -160,7 +76,8 @@
 							<div class="step-icon">📦</div>
 							<span>Downloading</span>
 						</div>
-						<div class="step @(_progressPercentage >= 100 ? "completed" : _progressPercentage >= 10 ? "active" : "")">
+						<div
+							class="step @(_progressPercentage >= 100 ? "completed" : _progressPercentage >= 10 ? "active" : "")">
 							<div class="step-icon">⚙️</div>
 							<span>Installing</span>
 						</div>
@@ -245,14 +162,14 @@ else
 
 			@if (_user.Accounts && _user.LocationId == 1)
 			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting)'>
+				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard)'>
 					<div class="card-icon accounts-icon">💰</div>
 					<h3>Accounts</h3>
 					<p>Manage financial accounts and accounting operations</p>
 				</div>
 			}
 
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo("/Reports-Dashboard")'>
+			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportDashboard)'>
 				<div class="card-icon reports-icon">📊</div>
 				<h3>Reports</h3>
 				<p>View and generate comprehensive business reports</p>
@@ -291,7 +208,8 @@ else
 		</div>
 
 		<div class="dashboard-footer">
-			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
+			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank"
+					class="footer-link">AadiSoft</a>. All rights reserved.</p>
 		</div>
 	</div>
 }
@@ -361,7 +279,7 @@ else
 		font-size: 28px;
 		font-weight: 700;
 		margin: 0;
-		text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	.user-info {
@@ -391,11 +309,11 @@ else
 		font-size: 14px;
 	}
 
-		.logout-button:hover {
-			background-color: var(--primary-color);
-			color: white;
-			transform: translateY(-1px);
-		}
+	.logout-button:hover {
+		background-color: var(--primary-color);
+		color: white;
+		transform: translateY(-1px);
+	}
 
 	.logout-icon {
 		font-size: 16px;
@@ -411,19 +329,19 @@ else
 		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 	}
 
-		.welcome-section h2 {
-			color: var(--primary-color);
-			margin-bottom: 10px;
-			font-size: 24px;
-			font-weight: 600;
-		}
+	.welcome-section h2 {
+		color: var(--primary-color);
+		margin-bottom: 10px;
+		font-size: 24px;
+		font-weight: 600;
+	}
 
-		.welcome-section p {
-			color: var(--dark-text);
-			opacity: 0.8;
-			font-size: 16px;
-			margin: 0;
-		}
+	.welcome-section p {
+		color: var(--dark-text);
+		opacity: 0.8;
+		font-size: 16px;
+		margin: 0;
+	}
 
 	/* Dashboard cards */
 	.dashboard-cards {
@@ -451,26 +369,26 @@ else
 		overflow: hidden;
 	}
 
-		.dashboard-card::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 3px;
-			background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
-			transform: translateX(-100%);
-			transition: transform 0.3s ease;
-		}
+	.dashboard-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 3px;
+		background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+	}
 
-		.dashboard-card:hover::before {
-			transform: translateX(0);
-		}
+	.dashboard-card:hover::before {
+		transform: translateX(0);
+	}
 
-		.dashboard-card:hover {
-			transform: translateY(-8px);
-			box-shadow: 0 15px 35px rgba(226, 19, 123, 0.3);
-		}
+	.dashboard-card:hover {
+		transform: translateY(-8px);
+		box-shadow: 0 15px 35px rgba(226, 19, 123, 0.3);
+	}
 
 	.card-icon {
 		font-size: 45px;
@@ -525,10 +443,10 @@ else
 		border-left: 5px solid #ff9800;
 	}
 
-		.admin-card:hover {
-			background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
-			box-shadow: 0 15px 35px rgba(255, 152, 0, 0.3);
-		}
+	.admin-card:hover {
+		background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+		box-shadow: 0 15px 35px rgba(255, 152, 0, 0.3);
+	}
 
 	.dashboard-card h3 {
 		color: var(--dark-text);
@@ -556,15 +474,15 @@ else
 		border-left: 5px solid var(--info-color);
 	}
 
-		.device-info-card::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 4px;
-			background: var(--gradient-device);
-		}
+	.device-info-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 4px;
+		background: var(--gradient-device);
+	}
 
 	.device-info-header {
 		display: flex;
@@ -643,10 +561,10 @@ else
 		transition: color 0.2s ease;
 	}
 
-		.footer-link:hover {
-			color: var(--primary-dark);
-			text-decoration: underline;
-		}
+	.footer-link:hover {
+		color: var(--primary-dark);
+		text-decoration: underline;
+	}
 
 	/* Loading Animation */
 	.loader-container {
@@ -665,28 +583,28 @@ else
 		margin-bottom: 20px;
 	}
 
-		.circular-dots-loader .dot {
-			position: absolute;
-			width: 14px;
-			height: 14px;
-			border-radius: 50%;
-			animation: rotate 1.8s infinite linear;
-		}
+	.circular-dots-loader .dot {
+		position: absolute;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		animation: rotate 1.8s infinite linear;
+	}
 
-		.circular-dots-loader .dot-1 {
-			background-color: var(--primary-color);
-			animation-delay: 0s;
-		}
+	.circular-dots-loader .dot-1 {
+		background-color: var(--primary-color);
+		animation-delay: 0s;
+	}
 
-		.circular-dots-loader .dot-2 {
-			background-color: var(--primary-dark);
-			animation-delay: -0.6s;
-		}
+	.circular-dots-loader .dot-2 {
+		background-color: var(--primary-dark);
+		animation-delay: -0.6s;
+	}
 
-		.circular-dots-loader .dot-3 {
-			background-color: var(--accent-color);
-			animation-delay: -1.2s;
-		}
+	.circular-dots-loader .dot-3 {
+		background-color: var(--accent-color);
+		animation-delay: -1.2s;
+	}
 
 	.loading-text {
 		color: var(--dark-text);
@@ -809,10 +727,10 @@ else
 		box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
 	}
 
-		.retry-button:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-		}
+	.retry-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+	}
 
 	/* Update UI Styles - Compact version */
 	.update-container {
@@ -914,7 +832,9 @@ else
 	}
 
 	@@keyframes pulse {
-		0%, 100% {
+
+		0%,
+		100% {
 			transform: scale(1);
 		}
 
@@ -924,7 +844,9 @@ else
 	}
 
 	@@keyframes errorPulse {
-		0%, 100% {
+
+		0%,
+		100% {
 			transform: scale(1);
 			box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
 		}

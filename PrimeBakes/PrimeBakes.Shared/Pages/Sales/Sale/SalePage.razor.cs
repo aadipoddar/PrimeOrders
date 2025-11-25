@@ -243,8 +243,11 @@ public partial class SalePage
 
 			if (_selectedParty is not null && _selectedParty.LocationId is not null && _selectedParty.LocationId > 0)
 			{
-				var location = _locations.FirstOrDefault(s => s.Id == _selectedParty.LocationId.Value);
-				_sale.DiscountPercent = location.Discount;
+				if (Id is null)
+				{
+					var location = _locations.FirstOrDefault(s => s.Id == _selectedParty.LocationId.Value);
+					_sale.DiscountPercent = location.Discount;
+				}
 
 				_orders = await OrderData.LoadOrderByLocationPending(_selectedParty.LocationId.Value);
 				_orders = [.. _orders.OrderByDescending(s => s.TransactionDateTime)];

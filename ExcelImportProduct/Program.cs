@@ -65,9 +65,9 @@ using PrimeBakesLibrary.Models.Sales.Sale;
 
 // await InsertOrder(worksheet1, worksheet2);
 
-// await FixMasterNames();
+await FixMasterNames();
 
-await UpdateAccounts();
+// await UpdateAccounts();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -932,7 +932,42 @@ Console.ReadLine();
 //		await KitchenIssueData.SaveKitchenIssueTransaction(finalIssue, issueCart);
 //		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
 //	}
+
+//static async Task UpdateAccounts()
+//{
+//	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+//	var sale = await CommonData.LoadTableDataByStatus<SaleModel>(TableNames.Sale);
+//	foreach (var s in sale)
+//	{
+//		Console.WriteLine("Updating Accounts for Sale Id: " + s.Id);
+//		await SaleData.SaveAccounting(s, false);
+//	}
+
+//	var saleReturn = await CommonData.LoadTableDataByStatus<SaleReturnModel>(TableNames.SaleReturn);
+//	foreach (var sr in saleReturn)
+//	{
+//		Console.WriteLine("Updating Accounts for Sale Return Id: " + sr.Id);
+//		await SaleReturnData.SaveAccounting(sr, false);
+//	}
+
+//	var purchase = await CommonData.LoadTableDataByStatus<PurchaseModel>(TableNames.Purchase);
+//	foreach (var p in purchase)
+//	{
+//		Console.WriteLine("Updating Accounts for Purchase Id: " + p.Id);
+//		await PurchaseData.SaveAccounting(p, false);
+//	}
+
+//	var purchaseReturn = await CommonData.LoadTableDataByStatus<PurchaseReturnModel>(TableNames.PurchaseReturn);
+//	foreach (var pr in purchaseReturn)
+//	{
+//		Console.WriteLine("Updating Accounts for Purchase Return Id: " + pr.Id);
+//		await PurchaseReturnData.SaveAccounting(pr, false);
+//	}
 //}
+//}
+
+#endregion
 
 static async Task InsertReturns(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
 {
@@ -1417,49 +1452,15 @@ static async Task FixMasterNames()
 {
 	var products = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
 
-	products = products.Where(p => p.Name.EndsWith("&#x20;")).ToList();
+	products = products.Where(p => p.Name.EndsWith("&#X20;")).ToList();
 
 	foreach (var product in products)
 	{
-		product.Name = product.Name.Replace("&#x20;", " ").TrimEnd();
+		product.Name = product.Name.Replace("&#X20;", " ").TrimEnd();
 		await LedgerData.InsertLedger(product);
 	}
 }
 
-#endregion
-
-static async Task UpdateAccounts()
-{
-	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
-	var sale = await CommonData.LoadTableDataByStatus<SaleModel>(TableNames.Sale);
-	foreach (var s in sale)
-	{
-		Console.WriteLine("Updating Accounts for Sale Id: " + s.Id);
-		await SaleData.SaveAccounting(s, false);
-	}
-
-	var saleReturn = await CommonData.LoadTableDataByStatus<SaleReturnModel>(TableNames.SaleReturn);
-	foreach (var sr in saleReturn)
-	{
-		Console.WriteLine("Updating Accounts for Sale Return Id: " + sr.Id);
-		await SaleReturnData.SaveAccounting(sr, false);
-	}
-
-	var purchase = await CommonData.LoadTableDataByStatus<PurchaseModel>(TableNames.Purchase);
-	foreach (var p in purchase)
-	{
-		Console.WriteLine("Updating Accounts for Purchase Id: " + p.Id);
-		await PurchaseData.SaveAccounting(p, false);
-	}
-
-	var purchaseReturn = await CommonData.LoadTableDataByStatus<PurchaseReturnModel>(TableNames.PurchaseReturn);
-	foreach (var pr in purchaseReturn)
-	{
-		Console.WriteLine("Updating Accounts for Purchase Return Id: " + pr.Id);
-		await PurchaseReturnData.SaveAccounting(pr, false);
-	}
-}
 
 class PurchaseModelOld
 {

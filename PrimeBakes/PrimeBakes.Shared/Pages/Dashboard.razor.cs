@@ -41,85 +41,6 @@ public partial class Dashboard
 		};
 	#endregion
 
-	#region Connection
-	// HttpClient for connectivity checking
-	private readonly HttpClient _httpClient = new()
-	{
-		Timeout = TimeSpan.FromSeconds(10) // 10 second timeout for connection tests
-	};
-
-	// Reliable endpoints to test connectivity
-	private readonly string[] _connectivityTestEndpoints = [
-		"https://www.google.com",
-		"https://www.microsoft.com",
-		"https://httpbin.org/status/200"
-	];
-
-	private async Task CheckInternetConnectionAsync()
-	{
-		_isLoadingText = "Checking connection...";
-		StateHasChanged();
-
-		try
-		{
-			var isConnected = await PingTestEndpointsAsync();
-
-			if (!isConnected)
-				throw new Exception("No internet connection");
-		}
-		catch (Exception)
-		{
-			throw new Exception("No internet connection");
-		}
-	}
-
-	private async Task<bool> PingTestEndpointsAsync()
-	{
-		try
-		{
-			// Try multiple reliable endpoints to ensure connectivity
-			foreach (var endpoint in _connectivityTestEndpoints)
-			{
-				try
-				{
-					using var response = await _httpClient.GetAsync(endpoint);
-					if (response.IsSuccessStatusCode)
-						return true; // Successfully connected to at least one endpoint
-				}
-				catch (Exception)
-				{
-					// Continue to next endpoint if this one fails
-					continue;
-				}
-			}
-
-			// If all endpoints failed, return false
-			return false;
-		}
-		catch (Exception)
-		{
-			return false;
-		}
-	}
-
-	private async Task RetryConnection()
-	{
-		_hasConnectionError = false;
-		_isLoading = true;
-		_isLoadingText = "Retrying connection...";
-		StateHasChanged();
-
-		// Wait a moment for visual feedback
-		await Task.Delay(1000);
-
-		// Restart the initialization process
-		await OnInitializedAsync();
-	}
-
-	public void Dispose() =>
-		_httpClient?.Dispose();
-	#endregion
-
 	#region Updating
 	private readonly string[] _funFacts = [
 		"Did you know? Prime Bakes serves the freshest pastries in town! 🥐",
@@ -187,8 +108,6 @@ public partial class Dashboard
 
 		try
 		{
-			await CheckInternetConnectionAsync();
-
 			if (Factor == "Phone" && Platform.Contains("Android"))
 			{
 				var hasUpdate = await UpdateService.CheckForUpdatesAsync("aadipoddar", "PrimeOrders", AppVersion);
@@ -216,7 +135,9 @@ public partial class Dashboard
 		_isLoadingText = "Loading dashboard...";
 		var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
 		_user = authResult.User;
-		await NotificationService.RegisterDevicePushNotification(_user.Id.ToString());
+
+		if (Factor == "Phone" && Platform.Contains("Android"))
+			await NotificationService.RegisterDevicePushNotification(_user.Id.ToString());
 	}
 
 	private async Task Logout() =>

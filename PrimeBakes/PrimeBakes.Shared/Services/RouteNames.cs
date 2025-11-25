@@ -54,4 +54,8 @@ internal static class PageRouteNames
 	public static string AdminCompany => "/admin/company";
 	public static string AdminLedger => "/admin/ledger";
 	public static string AdminVoucher => "/admin/voucher";
+	public static string AdminGroup => "/admin/accountgroup";
+	public static string AdminAccountType => "/admin/accounttype";
+	public static string AdminFinancialYear => "/admin/financialyear";
+	public static string AdminState => "/admin/state";
 }
