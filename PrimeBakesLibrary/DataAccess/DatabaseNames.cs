@@ -105,6 +105,7 @@ public static class StoredProcedureNames
 	public static string LoadAccountingOverviewByDate => "Load_Accounting_Overview_By_Date";
 	public static string LoadAccountingByVoucherReference => "Load_Accounting_By_Voucher_Reference";
 	public static string LoadAccountingLedgerOverviewByDate => "Load_Accounting_Ledger_Overview_By_Date";
+	public static string LoadTrialBalanceByDate => "Load_TrialBalance_By_Date";
 
 	public static string InsertUser => "Insert_User";
 	public static string ResetSettings => "Reset_Settings";

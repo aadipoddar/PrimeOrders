@@ -10,7 +10,8 @@ public static class AccountingLedgerReportExcelExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         string companyName = null,
-        string ledgerName = null)
+        string ledgerName = null,
+        TrialBalanceModel trialBalance = null)
     {
         // Define column settings with proper formatting
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
@@ -51,8 +52,8 @@ public static class AccountingLedgerReportExcelExport
         if (showAllColumns)
         {
             // Detailed view - all columns
-            columnOrder = new()
-            {
+            columnOrder =
+            [
                 "LedgerName",
                 "LedgerCode",
                 "AccountTypeName",
@@ -74,29 +75,32 @@ public static class AccountingLedgerReportExcelExport
                 "GroupId",
                 "CompanyId",
                 "ReferenceId"
-            };
+            ];
         }
         else
         {
             // Summary view - essential columns only
-            columnOrder = new()
-            {
+            columnOrder =
+            [
                 "LedgerName",
                 "TransactionNo",
                 "TransactionDateTime",
-                "CompanyName",
                 "ReferenceNo",
                 "Debit",
                 "Credit"
-            };
+            ];
         }
 
-        // Build report location text
-        string reportLocation = "FINANCIAL LEDGER REPORT";
-        if (!string.IsNullOrWhiteSpace(companyName))
-            reportLocation += $" - {companyName}";
-        if (!string.IsNullOrWhiteSpace(ledgerName))
-            reportLocation += $" - {ledgerName}";
+        // Prepare custom summary fields if trial balance is provided
+        Dictionary<string, string> customSummaryFields = null;
+        if (trialBalance != null)
+        {
+            customSummaryFields = new Dictionary<string, string>
+            {
+                ["Opening Balance"] = $"₹ {trialBalance.OpeningBalance:N2}",
+                ["Closing Balance"] = $"₹ {trialBalance.ClosingBalance:N2}"
+            };
+        }
 
         // Call the generic Excel export utility
         return ExcelExportUtil.ExportToExcel(
@@ -107,7 +111,9 @@ public static class AccountingLedgerReportExcelExport
             dateRangeEnd,
             columnSettings,
             columnOrder,
-            reportLocation
+            null,
+            ledgerName,
+            customSummaryFields
         );
     }
 }

@@ -27,8 +27,10 @@ else
 			<p class="page-subtitle">View and analyze product stock</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing" title="Export to Excel">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
+				title="Export to Excel">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 					<polyline points="14 2 14 8 20 8" />
 					<line x1="16" y1="13" x2="8" y2="13" />
@@ -37,7 +39,8 @@ else
 				</svg>
 			</button>
 			<button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 					<polyline points="14 2 14 8 20 8" />
 					<line x1="16" y1="13" x2="8" y2="13" />
@@ -46,26 +49,33 @@ else
 				</svg>
 			</button>
 			<button class="btn-icon" @onclick="LoadStockData" title="Refresh Data" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<polyline points="23 4 23 10 17 10" />
 					<polyline points="1 20 1 14 7 14" />
 					<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick="NavigateToStockAdjustmentPage" title="Adjust Product Stock" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick="NavigateToStockAdjustmentPage" title="Adjust Product Stock"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="12" y1="5" x2="12" y2="19" />
 					<line x1="5" y1="12" x2="19" y2="12" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/")' title="Home" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/")' title="Home"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
 					<polyline points="9 22 9 12 15 12 15 22" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/reports")' title="Back" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/reports")' title="Back"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M19 12H5M12 19l-7-7 7-7" />
 				</svg>
 			</button>
@@ -79,7 +89,8 @@ else
 		<div class="section-card">
 			<div class="section-header">
 				<div class="section-title-wrapper">
-					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
 					</svg>
 					<h2 class="section-title">Filters</h2>
@@ -91,29 +102,19 @@ else
 						<!-- Date Range -->
 						<div class="form-field">
 							<label class="field-label">Date Range</label>
-							<SfDateRangePicker CssClass="custom-daterange"
-											   StartDate="_fromDate"
-											   EndDate="_toDate"
-											   TValue="DateTime"
-											   Format="dd/MM/yyyy"
-											   AllowEdit="true"
-											   Placeholder="Select date range">
+							<SfDateRangePicker CssClass="custom-daterange" StartDate="_fromDate" EndDate="_toDate"
+								TValue="DateTime" Format="dd/MM/yyyy" AllowEdit="true" Placeholder="Select date range">
 								<DateRangePickerEvents TValue="DateTime" ValueChange="OnDateRangeChanged" />
 							</SfDateRangePicker>
 						</div>
 
 						<div class="form-field">
 							<label class="field-label">Outlet</label>
-							<SfAutoComplete CssClass="custom-autocomplete"
-											Value="@_selectedLocation"
-											TValue="LocationModel"
-											TItem="LocationModel"
-											DataSource="@_locations"
-											
-											Placeholder="Select an Outlet"
-											AllowFiltering="true"
-											FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-								<AutoCompleteEvents TItem="LocationModel" TValue="LocationModel" ValueChange="OnLocationChanged" />
+							<SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedLocation" TValue="LocationModel"
+								TItem="LocationModel" DataSource="@_locations" Placeholder="Select an Outlet"
+								AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+								<AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
+									ValueChange="OnLocationChanged" />
 								<AutoCompleteFieldSettings Value="Name" />
 							</SfAutoComplete>
 						</div>
@@ -121,25 +122,32 @@ else
 
 					<!-- Date Utility Buttons -->
 					<div class="date-utilities">
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today"
+							disabled="@_isProcessing">
 							<span>Today</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)" title="Yesterday" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)"
+							title="Yesterday" disabled="@_isProcessing">
 							<span>Yesterday</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)" title="Current Month" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)"
+							title="Current Month" disabled="@_isProcessing">
 							<span>Current Month</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)" title="Previous Month" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)"
+							title="Previous Month" disabled="@_isProcessing">
 							<span>Previous Month</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)" title="Current Financial Year" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)"
+							title="Current Financial Year" disabled="@_isProcessing">
 							<span>Current FY</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)" title="Previous Financial Year" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)"
+							title="Previous Financial Year" disabled="@_isProcessing">
 							<span>Previous FY</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)" title="All Time" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)"
+							title="All Time" disabled="@_isProcessing">
 							<span>All Time</span>
 						</button>
 					</div>
@@ -151,7 +159,8 @@ else
 		<div class="section-card">
 			<div class="section-header">
 				<div class="section-title-wrapper">
-					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="8" y1="6" x2="21" y2="6" />
 						<line x1="8" y1="12" x2="21" y2="12" />
 						<line x1="8" y1="18" x2="21" y2="18" />
@@ -162,8 +171,10 @@ else
 					<h2 class="section-title">Raw Material Stock Summary</h2>
 				</div>
 				<div class="header-actions">
-					<button class="btn-toggle-details" @onclick="ToggleColumnsView" title="@(_showAllColumns ? "Show Less" : "Show All Columns")" disabled="@_isProcessing">
-						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<button class="btn-toggle-details" @onclick="ToggleColumnsView"
+						title="@(_showAllColumns ? "Show Less" : "Show All Columns")" disabled="@_isProcessing">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							@if (_showAllColumns)
 							{
 								<circle cx="12" cy="12" r="1" />
@@ -179,8 +190,11 @@ else
 						</svg>
 						@(_showAllColumns ? "Show Less" : "All Columns")
 					</button>
-					<button class="btn-toggle-details" @onclick="ToggleDetailsView" title="@(_showDetails ? "Hide Transaction Details" : "Show Transaction Details")" disabled="@_isProcessing">
-						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<button class="btn-toggle-details" @onclick="ToggleDetailsView"
+						title="@(_showDetails ? "Hide Transaction Details" : "Show Transaction Details")"
+						disabled="@_isProcessing">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
 							<polyline points="14 2 14 8 20 8"></polyline>
 							<line x1="16" y1="13" x2="8" y2="13"></line>
@@ -192,20 +206,10 @@ else
 				</div>
 			</div>
 			<div class="section-body grid-body">
-				<SfGrid ID="_sfStockGrid"
-						@ref="_sfStockGrid"
-						TValue="ProductStockSummaryModel"
-						DataSource="_stockSummary"
-						AllowTextWrap="true"
-						AllowPaging="true"
-						AllowSorting="true"
-						AllowResizing="true"
-						AllowFiltering="true"
-						AllowExcelExport="true"
-						AllowPdfExport="true"
-						GridLines="GridLine.Horizontal"
-						CssClass="professional-grid"
-						Toolbar="@(new List<string>() { "Search" })">
+				<SfGrid ID="_sfStockGrid" @ref="_sfStockGrid" TValue="ProductStockSummaryModel" DataSource="_stockSummary"
+					AllowTextWrap="true" AllowPaging="true" AllowSorting="true" AllowResizing="true" AllowFiltering="true"
+					AllowExcelExport="true" AllowPdfExport="true" GridLines="GridLine.Horizontal"
+					CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
 
 					<GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
 					<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
@@ -213,7 +217,8 @@ else
 					<GridAggregates>
 						<GridAggregate>
 							<GridAggregateColumns>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.ProductName)" Type="AggregateType.Count">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.ProductName)"
+									Type="AggregateType.Count">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -223,7 +228,8 @@ else
 										</div>
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.OpeningStock)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.OpeningStock)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -231,7 +237,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.PurchaseStock)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.PurchaseStock)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -239,7 +246,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.SaleStock)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.SaleStock)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -247,7 +255,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.MonthlyStock)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.MonthlyStock)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -255,7 +264,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.ClosingStock)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.ClosingStock)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -263,7 +273,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.ClosingValue)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.ClosingValue)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -271,7 +282,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.WeightedAverageValue)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.WeightedAverageValue)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -279,7 +291,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.LastSaleValue)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(ProductStockSummaryModel.LastSaleValue)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -292,23 +305,34 @@ else
 					</GridAggregates>
 
 					<GridColumns>
-						<GridColumn Field="@nameof(ProductStockSummaryModel.ProductCode)" HeaderText="Code" Width="120" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.ProductName)" HeaderText="Product" Width="250" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.ProductCategoryName)" HeaderText="Category" Width="180" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.OpeningStock)" HeaderText="Opening Stock" Width="150" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.PurchaseStock)" HeaderText="Purchase" Width="130" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.SaleStock)" HeaderText="Sale" Width="130" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.MonthlyStock)" HeaderText="Monthly Stock" Width="150" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.ClosingStock)" HeaderText="Closing Stock" Width="150" Format="N2" TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(ProductStockSummaryModel.ProductCode)" HeaderText="Code" Width="120"
+							Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.ProductName)" HeaderText="Product"
+							Width="250" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.ProductCategoryName)" HeaderText="Category"
+							Width="180" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.OpeningStock)" HeaderText="Opening Stock"
+							Width="150" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.PurchaseStock)" HeaderText="Purchase"
+							Width="130" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.SaleStock)" HeaderText="Sale" Width="130"
+							Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.MonthlyStock)" HeaderText="Monthly Stock"
+							Width="150" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.ClosingStock)" HeaderText="Closing Stock"
+							Width="150" Format="N2" TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var item = (context as ProductStockSummaryModel);
-									<span class="@(item.ClosingStock < 0 ? "stock-negative" : "")">@item.ClosingStock.ToString("N2")</span>
+									<span
+										class="@(item.ClosingStock < 0 ? "stock-negative" : "")">@item.ClosingStock.ToString("N2")</span>
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(ProductStockSummaryModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.ClosingValue)" HeaderText="Closing Value" Width="150" Format="N2" TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(ProductStockSummaryModel.Rate)" HeaderText="Rate" Width="120" Format="N2"
+							TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.ClosingValue)" HeaderText="Closing Value"
+							Width="150" Format="N2" TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var item = (context as ProductStockSummaryModel);
@@ -317,10 +341,15 @@ else
 							</Template>
 						</GridColumn>
 
-						<GridColumn Field="@nameof(ProductStockSummaryModel.AveragePrice)" HeaderText="Avg Price" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.WeightedAverageValue)" HeaderText="Weighted Avg Value" Width="180" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.LastSalePrice)" HeaderText="Last Sale Price" Width="170" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(ProductStockSummaryModel.LastSaleValue)" HeaderText="Last Sale Value" Width="180" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.AveragePrice)" HeaderText="Avg Price"
+							Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.WeightedAverageValue)"
+							HeaderText="Weighted Avg Value" Width="180" Format="N2" TextAlign="TextAlign.Right"
+							Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.LastSalePrice)" HeaderText="Last Sale Price"
+							Width="170" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(ProductStockSummaryModel.LastSaleValue)" HeaderText="Last Sale Value"
+							Width="180" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
 					</GridColumns>
 				</SfGrid>
 			</div>
@@ -332,7 +361,8 @@ else
 			<div class="section-card">
 				<div class="section-header">
 					<div class="section-title-wrapper">
-						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+							fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
 							<polyline points="14 2 14 8 20 8"></polyline>
 							<line x1="16" y1="13" x2="8" y2="13"></line>
@@ -343,20 +373,11 @@ else
 					</div>
 				</div>
 				<div class="section-body grid-body">
-					<SfGrid ID="_sfStockDetailsGrid"
-							@ref="_sfStockDetailsGrid"
-							TValue="ProductStockDetailsModel"
-							DataSource="_stockDetails"
-							AllowTextWrap="true"
-							AllowPaging="true"
-							AllowSorting="true"
-							AllowResizing="true"
-							AllowFiltering="true"
-							AllowExcelExport="true"
-							AllowPdfExport="true"
-							GridLines="GridLine.Horizontal"
-							CssClass="professional-grid"
-							Toolbar="@(new List<string>() { "Search" })">
+					<SfGrid ID="_sfStockDetailsGrid" @ref="_sfStockDetailsGrid" TValue="ProductStockDetailsModel"
+						DataSource="_stockDetails" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
+						AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
+						GridLines="GridLine.Horizontal" CssClass="professional-grid"
+						Toolbar="@(new List<string>() { "Search" })">
 
 						<GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
 						<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
@@ -364,7 +385,8 @@ else
 						<GridAggregates>
 							<GridAggregate>
 								<GridAggregateColumns>
-									<GridAggregateColumn Field="@nameof(ProductStockDetailsModel.ProductName)" Type="AggregateType.Count">
+									<GridAggregateColumn Field="@nameof(ProductStockDetailsModel.ProductName)"
+										Type="AggregateType.Count">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -374,7 +396,8 @@ else
 											</div>
 										</FooterTemplate>
 									</GridAggregateColumn>
-									<GridAggregateColumn Field="@nameof(ProductStockDetailsModel.Quantity)" Type="AggregateType.Sum" Format="N2">
+									<GridAggregateColumn Field="@nameof(ProductStockDetailsModel.Quantity)"
+										Type="AggregateType.Sum" Format="N2">
 										<FooterTemplate>
 											@{
 												var aggregate = (context as AggregateTemplateContext);
@@ -395,10 +418,14 @@ else
 									<div class="grid-actions">
 										@if (item.TransactionId is null && item.Type?.ToLower() == "adjustment")
 										{
-											<button class="btn-grid-action btn-delete" @onclick="() => DeleteAdjustment(item.Id)" title="Delete Adjustment" disabled="@_isProcessing">
-												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<button class="btn-grid-action btn-delete" @onclick="() => DeleteAdjustment(item.Id)"
+												title="Delete Adjustment" disabled="@_isProcessing">
+												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+													fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+													stroke-linejoin="round">
 													<polyline points="3 6 5 6 21 6" />
-													<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+													<path
+														d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
 													<line x1="10" y1="11" x2="10" y2="17" />
 													<line x1="14" y1="11" x2="14" y2="17" />
 												</svg>
@@ -406,14 +433,22 @@ else
 										}
 										@if (item.TransactionId is not null && item.Type?.ToLower() != "adjustment")
 										{
-											<button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(item.Type, item.TransactionId.Value)" title="View Transaction" disabled="@_isProcessing">
-												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<button class="btn-grid-action btn-view"
+												@onclick="() => ViewTransaction(item.Type, item.TransactionId.Value)"
+												title="View Transaction" disabled="@_isProcessing">
+												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+													fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+													stroke-linejoin="round">
 													<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
 													<circle cx="12" cy="12" r="3" />
 												</svg>
 											</button>
-											<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Type, item.TransactionId.Value)" title="Download Invoice" disabled="@_isProcessing">
-												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<button class="btn-grid-action btn-invoice"
+												@onclick="() => DownloadInvoice(item.Type, item.TransactionId.Value)"
+												title="Download Invoice" disabled="@_isProcessing">
+												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+													fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+													stroke-linejoin="round">
 													<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 													<polyline points="7 10 12 15 17 10" />
 													<line x1="12" y1="15" x2="12" y2="3" />
@@ -423,8 +458,10 @@ else
 									</div>
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(ProductStockDetailsModel.TransactionDate)" HeaderText="Date" Width="130" Format="dd/MM/yyyy" Type="ColumnType.Date" />
-							<GridColumn Field="@nameof(ProductStockDetailsModel.TransactionNo)" HeaderText="Transaction No" Width="180" />
+							<GridColumn Field="@nameof(ProductStockDetailsModel.TransactionDate)" HeaderText="Date" Width="130"
+								Format="dd/MM/yyyy" Type="ColumnType.Date" />
+							<GridColumn Field="@nameof(ProductStockDetailsModel.TransactionNo)" HeaderText="Transaction No"
+								Width="180" />
 							<GridColumn Field="@nameof(ProductStockDetailsModel.Type)" HeaderText="Type" Width="150">
 								<Template>
 									@{
@@ -436,8 +473,10 @@ else
 								</Template>
 							</GridColumn>
 							<GridColumn Field="@nameof(ProductStockDetailsModel.ProductCode)" HeaderText="Code" Width="120" />
-							<GridColumn Field="@nameof(ProductStockDetailsModel.ProductName)" HeaderText="Raw Material" Width="250" />
-							<GridColumn Field="@nameof(ProductStockDetailsModel.Quantity)" HeaderText="Quantity" Width="130" Format="N2" TextAlign="TextAlign.Right">
+							<GridColumn Field="@nameof(ProductStockDetailsModel.ProductName)" HeaderText="Raw Material"
+								Width="250" />
+							<GridColumn Field="@nameof(ProductStockDetailsModel.Quantity)" HeaderText="Quantity" Width="130"
+								Format="N2" TextAlign="TextAlign.Right">
 								<Template>
 									@{
 										var item = (context as ProductStockDetailsModel);
@@ -447,7 +486,8 @@ else
 									}
 								</Template>
 							</GridColumn>
-							<GridColumn Field="@nameof(ProductStockDetailsModel.NetRate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+							<GridColumn Field="@nameof(ProductStockDetailsModel.NetRate)" HeaderText="Rate" Width="120"
+								Format="N2" TextAlign="TextAlign.Right" />
 						</GridColumns>
 					</SfGrid>
 				</div>
@@ -456,35 +496,26 @@ else
 	</div>
 }
 
-<SfToast @ref="_sfErrorToast"
-		 ID="_sfErrorToast"
-		 Title="@_errorTitle"
-		 Content="@_errorMessage"
-		 Timeout="5000">
+<SfToast @ref="_sfErrorToast" ID="_sfErrorToast" Title="@_errorTitle" Content="@_errorMessage" Timeout="5000">
 	<ToastPosition X="Right" Y="Top" />
 	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
 	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
 </SfToast>
 
-<SfToast @ref="_sfSuccessToast"
-		 ID="_sfSuccessToast"
-		 Title="@_successTitle"
-		 Content="@_successMessage"
-		 Timeout="5000">
+<SfToast @ref="_sfSuccessToast" ID="_sfSuccessToast" Title="@_successTitle" Content="@_successMessage" Timeout="5000">
 	<ToastPosition X="Right" Y="Top" />
 	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
 	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
 </SfToast>
 
-<SfDialog @ref="_deleteConfirmationDialog"
-		  Width="500px"
-		  IsModal="true"
-		  ShowCloseIcon="true"
-		  @bind-Visible="_isDeleteDialogVisible">
+<SfDialog @ref="_deleteConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
+	@bind-Visible="_isDeleteDialogVisible">
 	<DialogTemplates>
 		<Header>
 			<div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444;">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+					style="color: #ef4444;">
 					<circle cx="12" cy="12" r="10" />
 					<line x1="12" y1="8" x2="12" y2="12" />
 					<line x1="12" y1="16" x2="12.01" y2="16" />
@@ -497,27 +528,33 @@ else
 				<p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
 					Are you sure you want to delete this stock adjustment?
 				</p>
-				<div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-					<p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">Adjustment Details:</p>
+				<div
+					style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+					<p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">Adjustment Details:
+					</p>
 					<p style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.5;">
 						<strong>Transaction No:</strong> @_deleteTransactionNo
 					</p>
 				</div>
-				<div style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+				<div
+					style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
 					<p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
-						<strong>Warning:</strong> This action cannot be undone. The stock adjustment will be permanently deleted and stock quantities will be recalculated.
+						<strong>Warning:</strong> This action cannot be undone. The stock adjustment will be permanently
+						deleted and stock quantities will be recalculated.
 					</p>
 				</div>
 				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
 					<button class="dialog-btn dialog-btn-cancel" @onclick="CancelDelete" disabled="@_isProcessing">
-						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<line x1="18" y1="6" x2="6" y2="18" />
 							<line x1="6" y1="6" x2="18" y2="18" />
 						</svg>
 						<span>Cancel</span>
 					</button>
 					<button class="dialog-btn dialog-btn-delete" @onclick="ConfirmDelete" disabled="@_isProcessing">
-						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<polyline points="3 6 5 6 21 6" />
 							<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
 							<line x1="10" y1="11" x2="10" y2="17" />
@@ -625,47 +662,47 @@ else
 		color: #64748b;
 	}
 
-		.btn-icon:hover {
-			background: #f8fafc;
-			border-color: #3b82f6;
-			color: #3b82f6;
-		}
+	.btn-icon:hover {
+		background: #f8fafc;
+		border-color: #3b82f6;
+		color: #3b82f6;
+	}
 
-		.btn-icon:active {
-			transform: scale(0.95);
-		}
+	.btn-icon:active {
+		transform: scale(0.95);
+	}
 
 	.btn-icon-excel {
 		color: #10b981;
 		border-color: #10b981;
 	}
 
-		.btn-icon-excel:hover {
-			background: #ecfdf5;
-			border-color: #059669;
-			color: #059669;
-		}
+	.btn-icon-excel:hover {
+		background: #ecfdf5;
+		border-color: #059669;
+		color: #059669;
+	}
 
-		.btn-icon-excel:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
+	.btn-icon-excel:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 
 	.btn-icon-pdf {
 		color: #ef4444;
 		border-color: #ef4444;
 	}
 
-		.btn-icon-pdf:hover {
-			background: #fef2f2;
-			border-color: #dc2626;
-			color: #dc2626;
-		}
+	.btn-icon-pdf:hover {
+		background: #fef2f2;
+		border-color: #dc2626;
+		color: #dc2626;
+	}
 
-		.btn-icon-pdf:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
+	.btn-icon-pdf:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 
 	/* Main Container */
 	.report-container {
@@ -740,34 +777,34 @@ else
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 	}
 
-		.btn-toggle-returns:hover {
-			background: #fef2f2;
-			border-color: #ef4444;
-			color: #ef4444;
-			box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-			transform: translateY(-1px);
-		}
+	.btn-toggle-returns:hover {
+		background: #fef2f2;
+		border-color: #ef4444;
+		color: #ef4444;
+		box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+		transform: translateY(-1px);
+	}
 
-		.btn-toggle-returns.active {
-			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-			border-color: #dc2626;
-			color: #ffffff;
-			box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
-		}
+	.btn-toggle-returns.active {
+		background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+		border-color: #dc2626;
+		color: #ffffff;
+		box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+	}
 
-			.btn-toggle-returns.active:hover {
-				background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-				box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-			}
+	.btn-toggle-returns.active:hover {
+		background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+		box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+	}
 
-		.btn-toggle-returns:active {
-			transform: translateY(0);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		}
+	.btn-toggle-returns:active {
+		transform: translateY(0);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
 
-		.btn-toggle-returns svg {
-			flex-shrink: 0;
-		}
+	.btn-toggle-returns svg {
+		flex-shrink: 0;
+	}
 
 	/* Toggle Deleted Button */
 	.btn-toggle-deleted {
@@ -788,34 +825,34 @@ else
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 	}
 
-		.btn-toggle-deleted:hover {
-			background: #fef2f2;
-			border-color: #f97316;
-			color: #f97316;
-			box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
-			transform: translateY(-1px);
-		}
+	.btn-toggle-deleted:hover {
+		background: #fef2f2;
+		border-color: #f97316;
+		color: #f97316;
+		box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
+		transform: translateY(-1px);
+	}
 
-		.btn-toggle-deleted.active {
-			background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-			border-color: #ea580c;
-			color: #ffffff;
-			box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
-		}
+	.btn-toggle-deleted.active {
+		background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+		border-color: #ea580c;
+		color: #ffffff;
+		box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+	}
 
-			.btn-toggle-deleted.active:hover {
-				background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-				box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
-			}
+	.btn-toggle-deleted.active:hover {
+		background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+		box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+	}
 
-		.btn-toggle-deleted:active {
-			transform: translateY(0);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		}
+	.btn-toggle-deleted:active {
+		transform: translateY(0);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
 
-		.btn-toggle-deleted svg {
-			flex-shrink: 0;
-		}
+	.btn-toggle-deleted svg {
+		flex-shrink: 0;
+	}
 
 	/* Toggle Details Button */
 	.btn-toggle-details {
@@ -836,21 +873,21 @@ else
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 	}
 
-		.btn-toggle-details:hover {
-			background: #eff6ff;
-			border-color: #3b82f6;
-			box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-			transform: translateY(-1px);
-		}
+	.btn-toggle-details:hover {
+		background: #eff6ff;
+		border-color: #3b82f6;
+		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+		transform: translateY(-1px);
+	}
 
-		.btn-toggle-details:active {
-			transform: translateY(0);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		}
+	.btn-toggle-details:active {
+		transform: translateY(0);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
 
-		.btn-toggle-details svg {
-			flex-shrink: 0;
-		}
+	.btn-toggle-details svg {
+		flex-shrink: 0;
+	}
 
 	.section-body {
 		padding: 24px;
@@ -902,18 +939,18 @@ else
 		white-space: nowrap;
 	}
 
-		.btn-date-utility:hover {
-			background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-			color: white;
-			border-color: #2563eb;
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-		}
+	.btn-date-utility:hover {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		border-color: #2563eb;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+	}
 
-		.btn-date-utility:active {
-			transform: translateY(0);
-			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-		}
+	.btn-date-utility:active {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+	}
 
 	.form-field {
 		display: flex;
@@ -936,42 +973,42 @@ else
 		width: 100%;
 	}
 
-		::deep .custom-autocomplete .e-input-group,
-		::deep .custom-datepicker .e-input-group,
-		::deep .custom-daterange .e-input-group {
-			border: 1px solid #cbd5e1;
-			border-radius: 6px;
-			background: #ffffff;
-			transition: all 0.2s ease;
-			height: 36px;
-		}
+	::deep .custom-autocomplete .e-input-group,
+	::deep .custom-datepicker .e-input-group,
+	::deep .custom-daterange .e-input-group {
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		background: #ffffff;
+		transition: all 0.2s ease;
+		height: 36px;
+	}
 
-			::deep .custom-autocomplete .e-input-group:hover,
-			::deep .custom-datepicker .e-input-group:hover,
-			::deep .custom-daterange .e-input-group:hover {
-				border-color: #94a3b8;
-			}
+	::deep .custom-autocomplete .e-input-group:hover,
+	::deep .custom-datepicker .e-input-group:hover,
+	::deep .custom-daterange .e-input-group:hover {
+		border-color: #94a3b8;
+	}
 
-			::deep .custom-autocomplete .e-input-group.e-input-focus,
-			::deep .custom-datepicker .e-input-group.e-input-focus,
-			::deep .custom-daterange .e-input-group.e-input-focus {
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-			}
+	::deep .custom-autocomplete .e-input-group.e-input-focus,
+	::deep .custom-datepicker .e-input-group.e-input-focus,
+	::deep .custom-daterange .e-input-group.e-input-focus {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
 
-			::deep .custom-autocomplete .e-input-group input,
-			::deep .custom-datepicker .e-input-group input,
-			::deep .custom-daterange .e-input-group input {
-				font-size: 14px;
-				color: #1e293b;
-				padding: 8px 12px;
-			}
+	::deep .custom-autocomplete .e-input-group input,
+	::deep .custom-datepicker .e-input-group input,
+	::deep .custom-daterange .e-input-group input {
+		font-size: 14px;
+		color: #1e293b;
+		padding: 8px 12px;
+	}
 
-				::deep .custom-autocomplete .e-input-group input::placeholder,
-				::deep .custom-datepicker .e-input-group input::placeholder,
-				::deep .custom-daterange .e-input-group input::placeholder {
-					color: #94a3b8;
-				}
+	::deep .custom-autocomplete .e-input-group input::placeholder,
+	::deep .custom-datepicker .e-input-group input::placeholder,
+	::deep .custom-daterange .e-input-group input::placeholder {
+		color: #94a3b8;
+	}
 
 	/* Professional Grid Styles */
 	.e-grid .e-summaryrow .e-summarycell {
@@ -982,111 +1019,111 @@ else
 		border: none;
 	}
 
-		::deep .professional-grid .e-gridheader {
-			background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-			border-bottom: 2px solid #e2e8f0;
-		}
+	::deep .professional-grid .e-gridheader {
+		background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+		border-bottom: 2px solid #e2e8f0;
+	}
 
-		::deep .professional-grid .e-headercell {
-			background: transparent;
-			color: #475569;
-			font-weight: 600;
-			font-size: 12px;
-			text-transform: uppercase;
-			letter-spacing: 0.3px;
-			border-right: 1px solid #e2e8f0;
-			padding: 12px 8px;
-		}
+	::deep .professional-grid .e-headercell {
+		background: transparent;
+		color: #475569;
+		font-weight: 600;
+		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
+		border-right: 1px solid #e2e8f0;
+		padding: 12px 8px;
+	}
 
-			::deep .professional-grid .e-headercell:last-child {
-				border-right: none;
-			}
+	::deep .professional-grid .e-headercell:last-child {
+		border-right: none;
+	}
 
-		::deep .professional-grid .e-gridcontent {
-			background: #ffffff;
-		}
+	::deep .professional-grid .e-gridcontent {
+		background: #ffffff;
+	}
 
-		::deep .professional-grid .e-row {
-			transition: background-color 0.2s ease;
-		}
+	::deep .professional-grid .e-row {
+		transition: background-color 0.2s ease;
+	}
 
-			::deep .professional-grid .e-row:hover {
-				background-color: #f8fafc;
-			}
+	::deep .professional-grid .e-row:hover {
+		background-color: #f8fafc;
+	}
 
-			::deep .professional-grid .e-row.e-altrow {
-				background-color: #fafbfc;
-			}
+	::deep .professional-grid .e-row.e-altrow {
+		background-color: #fafbfc;
+	}
 
-				::deep .professional-grid .e-row.e-altrow:hover {
-					background-color: #f8fafc;
-				}
+	::deep .professional-grid .e-row.e-altrow:hover {
+		background-color: #f8fafc;
+	}
 
-		::deep .professional-grid .e-rowcell {
-			border-right: 1px solid #f1f5f9;
-			border-bottom: 1px solid #f1f5f9;
-			padding: 10px 8px;
-			font-size: 13px;
-			color: #1e293b;
-		}
+	::deep .professional-grid .e-rowcell {
+		border-right: 1px solid #f1f5f9;
+		border-bottom: 1px solid #f1f5f9;
+		padding: 10px 8px;
+		font-size: 13px;
+		color: #1e293b;
+	}
 
-			::deep .professional-grid .e-rowcell:last-child {
-				border-right: none;
-			}
+	::deep .professional-grid .e-rowcell:last-child {
+		border-right: none;
+	}
 
-		/* Grid Pager Styling */
-		::deep .professional-grid .e-gridpager {
-			background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-			border-top: 2px solid #e2e8f0;
-			padding: 12px 16px;
-		}
+	/* Grid Pager Styling */
+	::deep .professional-grid .e-gridpager {
+		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+		border-top: 2px solid #e2e8f0;
+		padding: 12px 16px;
+	}
 
-			::deep .professional-grid .e-gridpager .e-pagercontainer {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-			}
+	::deep .professional-grid .e-gridpager .e-pagercontainer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
 
-			::deep .professional-grid .e-gridpager .e-numericitem,
-			::deep .professional-grid .e-gridpager .e-currentitem {
-				min-width: 32px;
-				height: 32px;
-				border-radius: 6px;
-				margin: 0 4px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 13px;
-				font-weight: 500;
-				transition: all 0.2s ease;
-			}
+	::deep .professional-grid .e-gridpager .e-numericitem,
+	::deep .professional-grid .e-gridpager .e-currentitem {
+		min-width: 32px;
+		height: 32px;
+		border-radius: 6px;
+		margin: 0 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
 
-			::deep .professional-grid .e-gridpager .e-numericitem {
-				background: #ffffff;
-				color: #64748b;
-				border: 1px solid #e2e8f0;
-			}
+	::deep .professional-grid .e-gridpager .e-numericitem {
+		background: #ffffff;
+		color: #64748b;
+		border: 1px solid #e2e8f0;
+	}
 
-				::deep .professional-grid .e-gridpager .e-numericitem:hover {
-					background: #f8fafc;
-					color: #3b82f6;
-					border-color: #3b82f6;
-				}
+	::deep .professional-grid .e-gridpager .e-numericitem:hover {
+		background: #f8fafc;
+		color: #3b82f6;
+		border-color: #3b82f6;
+	}
 
-			::deep .professional-grid .e-gridpager .e-currentitem {
-				background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-				color: #ffffff;
-				border: none;
-				box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-			}
+	::deep .professional-grid .e-gridpager .e-currentitem {
+		background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+		color: #ffffff;
+		border: none;
+		box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+	}
 
-		/* Empty Grid State */
-		::deep .professional-grid .e-emptyrow {
-			text-align: center;
-			padding: 48px 24px;
-			color: #94a3b8;
-			font-size: 14px;
-		}
+	/* Empty Grid State */
+	::deep .professional-grid .e-emptyrow {
+		text-align: center;
+		padding: 48px 24px;
+		color: #94a3b8;
+		font-size: 14px;
+	}
 
 	/* Grid Cell Text Coloring (matching Purchase screen) */
 	.grid-discount {
@@ -1113,9 +1150,9 @@ else
 		border-right: 1px solid #cbd5e1;
 	}
 
-		::deep .professional-grid .e-summarycell:last-child {
-			border-right: none;
-		}
+	::deep .professional-grid .e-summarycell:last-child {
+		border-right: none;
+	}
 
 	.aggregate-value.aggregate-discount {
 		color: #dc2626;
@@ -1126,9 +1163,9 @@ else
 		font-size: 14px;
 	}
 
-		.aggregate-value.aggregate-total strong {
-			font-size: 15px;
-		}
+	.aggregate-value.aggregate-total strong {
+		font-size: 15px;
+	}
 
 	/* Total Aggregate Footer Styling */
 	.total-aggregate {
@@ -1214,69 +1251,69 @@ else
 		padding: 0;
 	}
 
-		.btn-grid-action:disabled {
-			opacity: 0.4;
-			cursor: not-allowed;
-		}
+	.btn-grid-action:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
 
-		.btn-grid-action:not(:disabled):hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-		}
+	.btn-grid-action:not(:disabled):hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	}
 
-		.btn-grid-action:not(:disabled):active {
-			transform: scale(0.95);
-		}
+	.btn-grid-action:not(:disabled):active {
+		transform: scale(0.95);
+	}
 
-		.btn-grid-action.btn-view {
-			color: #3b82f6;
-			border-color: #3b82f6;
-		}
+	.btn-grid-action.btn-view {
+		color: #3b82f6;
+		border-color: #3b82f6;
+	}
 
-			.btn-grid-action.btn-view:not(:disabled):hover {
-				background: #eff6ff;
-				box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-			}
+	.btn-grid-action.btn-view:not(:disabled):hover {
+		background: #eff6ff;
+		box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+	}
 
-		.btn-grid-action.btn-invoice {
-			color: #10b981;
-			border-color: #10b981;
-		}
+	.btn-grid-action.btn-invoice {
+		color: #10b981;
+		border-color: #10b981;
+	}
 
-			.btn-grid-action.btn-invoice:not(:disabled):hover {
-				background: #ecfdf5;
-				box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-			}
+	.btn-grid-action.btn-invoice:not(:disabled):hover {
+		background: #ecfdf5;
+		box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+	}
 
-		.btn-grid-action.btn-original {
-			color: #8b5cf6;
-			border-color: #8b5cf6;
-		}
+	.btn-grid-action.btn-original {
+		color: #8b5cf6;
+		border-color: #8b5cf6;
+	}
 
-			.btn-grid-action.btn-original:not(:disabled):hover {
-				background: #f5f3ff;
-				box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
-			}
+	.btn-grid-action.btn-original:not(:disabled):hover {
+		background: #f5f3ff;
+		box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+	}
 
-		.btn-grid-action.btn-delete {
-			color: #ef4444;
-			border-color: #ef4444;
-		}
+	.btn-grid-action.btn-delete {
+		color: #ef4444;
+		border-color: #ef4444;
+	}
 
-			.btn-grid-action.btn-delete:not(:disabled):hover {
-				background: #fef2f2;
-				box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
-			}
+	.btn-grid-action.btn-delete:not(:disabled):hover {
+		background: #fef2f2;
+		box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+	}
 
-		.btn-grid-action.btn-recover {
-			color: #ef4444;
-			border-color: #ef4444;
-		}
+	.btn-grid-action.btn-recover {
+		color: #ef4444;
+		border-color: #ef4444;
+	}
 
-			.btn-grid-action.btn-recover:not(:disabled):hover {
-				background: #fef2f2;
-				box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
-			}
+	.btn-grid-action.btn-recover:not(:disabled):hover {
+		background: #fef2f2;
+		box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+	}
 
 	/* Dialog Button Styles */
 	.dialog-btn {
@@ -1294,19 +1331,19 @@ else
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 	}
 
-		.dialog-btn:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-		}
+	.dialog-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+	}
 
-		.dialog-btn:active {
-			transform: translateY(0);
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-		}
+	.dialog-btn:active {
+		transform: translateY(0);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+	}
 
-		.dialog-btn svg {
-			flex-shrink: 0;
-		}
+	.dialog-btn svg {
+		flex-shrink: 0;
+	}
 
 	.dialog-btn-cancel {
 		background: #ffffff;
@@ -1314,29 +1351,29 @@ else
 		border: 2px solid #e2e8f0;
 	}
 
-		.dialog-btn-cancel:hover {
-			background: #f8fafc;
-			border-color: #cbd5e1;
-			color: #475569;
-		}
+	.dialog-btn-cancel:hover {
+		background: #f8fafc;
+		border-color: #cbd5e1;
+		color: #475569;
+	}
 
 	.dialog-btn-delete {
 		background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 		color: white;
 	}
 
-		.dialog-btn-delete:hover {
-			background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-		}
+	.dialog-btn-delete:hover {
+		background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+	}
 
 	.dialog-btn-recover {
 		background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 		color: white;
 	}
 
-		.dialog-btn-recover:hover {
-			background: linear-gradient(135deg, #059669 0%, #047857 100%);
-		}
+	.dialog-btn-recover:hover {
+		background: linear-gradient(135deg, #059669 0%, #047857 100%);
+	}
 
 	/* Responsive Design */
 	@@media (max-width: 1400px) {

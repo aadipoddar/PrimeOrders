@@ -31,7 +31,7 @@ else
         <div class="header-right">
             <button class="btn-icon btn-icon-save" @onclick="SaveTransaction" title="Save Transaction">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                     <polyline points="17 21 17 13 7 13 7 21" />
                     <polyline points="7 3 7 8 15 8" />
@@ -39,29 +39,29 @@ else
             </button>
             <button class="btn-icon" title="Transaction History" @onclick="NavigateToTransactionHistoryPage">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 16 14" />
                 </svg>
             </button>
             <button class="btn-icon" @onclick="ResetPage" title="New Sale">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
             </button>
             <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
             </button>
             <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.SalesDashboard)'
-                    title="Back">
+                title="Back">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
             </button>
@@ -78,8 +78,8 @@ else
                 <div class="section-header">
                     <div class="section-title-wrapper">
                         <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                             stroke-linejoin="round">
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                             <polyline points="14 2 14 8 20 8" />
                             <line x1="16" y1="13" x2="8" y2="13" />
@@ -99,11 +99,11 @@ else
                                     Location <span class="required">*</span>
                                 </label>
                                 <SfAutoComplete Value="@_selectedLocation" TValue="LocationModel" TItem="LocationModel"
-                                                DataSource="@_locations"  Placeholder="Select a Location"
-                                                FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                                    DataSource="@_locations" Placeholder="Select a Location"
+                                    FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
-                                                        ValueChange="OnLocationChanged" />
+                                        ValueChange="OnLocationChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />
                                 </SfAutoComplete>
                             </div>
@@ -114,11 +114,11 @@ else
                                     Company <span class="required">*</span>
                                 </label>
                                 <SfAutoComplete Value="@_selectedCompany" TValue="CompanyModel" TItem="CompanyModel"
-                                                DataSource="@_companies"  Placeholder="Select a Company"
-                                                FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                                    DataSource="@_companies" Placeholder="Select a Company"
+                                    FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
-                                                        ValueChange="OnCompanyChanged" />
+                                        ValueChange="OnCompanyChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />
                                 </SfAutoComplete>
                             </div>
@@ -132,11 +132,11 @@ else
                                     Party
                                 </label>
                                 <SfAutoComplete Value="@_selectedParty" TValue="LedgerModel" TItem="LedgerModel"
-                                                DataSource="@_parties"  Placeholder="Select a Party"
-                                                FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                                    DataSource="@_parties" Placeholder="Select a Party" FloatLabelType="FloatLabelType.Never"
+                                    AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                    CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="LedgerModel ?" TValue="LedgerModel ?"
-                                                        ValueChange="OnPartyChanged" />
+                                        ValueChange="OnPartyChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />
                                 </SfAutoComplete>
                             </div>
@@ -150,16 +150,17 @@ else
                                     Order
                                 </label>
                                 <SfAutoComplete Value="@_selectedOrder" TValue="OrderModel" TItem="OrderModel"
-                                                DataSource="@_orders"  Placeholder="Select an Order"
-                                                FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                                    DataSource="@_orders" Placeholder="Select an Order" FloatLabelType="FloatLabelType.Never"
+                                    AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                                    CssClass="custom-autocomplete">
                                     <AutoCompleteEvents TItem="OrderModel ?" TValue="OrderModel ?"
-                                                        ValueChange="OnOrderChanged" />
+                                        ValueChange="OnOrderChanged" />
                                     <AutoCompleteFieldSettings Value="TransactionNo" />
                                 </SfAutoComplete>
                             </div>
 
-                            @if (_sale.OrderId is not null && _sale.OrderId > 0 && _selectedOrder is not null && _selectedOrder.Id > 0)
+                            @if (_sale.OrderId is not null && _sale.OrderId > 0 && _selectedOrder is not null &&
+                                                _selectedOrder.Id > 0)
                             {
                                 <!-- Order Action Buttons -->
                                 <div class="form-field">
@@ -167,16 +168,16 @@ else
                                     <div class="order-action-buttons">
                                         <button class="btn-order-action" title="View Order" @onclick="NavigateToSelectedOrderPage">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
+                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
                                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                                 <circle cx="12" cy="12" r="3" />
                                             </svg>
                                         </button>
                                         <button class="btn-order-action" title="Download Order" @onclick="DownloadSelectedOrder">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
+                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
                                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                                 <polyline points="7 10 12 15 17 10" />
                                                 <line x1="12" y1="15" x2="12" y2="3" />
@@ -203,8 +204,8 @@ else
                                     Transaction Date <span class="required">*</span>
                                 </label>
                                 <SfDatePicker Value="@_sale.TransactionDateTime" TValue="DateTime" Format="dd/MM/yy"
-                                              Placeholder="Select Date" FloatLabelType="FloatLabelType.Never"
-                                              CssClass="custom-datepicker">
+                                    Placeholder="Select Date" FloatLabelType="FloatLabelType.Never"
+                                    CssClass="custom-datepicker">
                                     <DatePickerEvents TValue="DateTime" ValueChange="OnTransactionDateChanged" />
                                 </SfDatePicker>
                             </div>
@@ -214,9 +215,10 @@ else
                                 <label class="field-label">
                                     Financial Year
                                 </label>
-                                <SfTextBox Value="@($"{_selectedFinancialYear?.StartDate:yyyy} to {_selectedFinancialYear?.EndDate:yyyy}")"
-                                           Readonly="true" Placeholder="Financial Year" FloatLabelType="FloatLabelType.Never"
-                                           CssClass="custom-textbox readonly-field" />
+                                <SfTextBox
+                                    Value="@($"{_selectedFinancialYear?.StartDate:yyyy} to {_selectedFinancialYear?.EndDate:yyyy}")"
+                                    Readonly="true" Placeholder="Financial Year" FloatLabelType="FloatLabelType.Never"
+                                    CssClass="custom-textbox readonly-field" />
                             </div>
 
                             <!-- Transaction No -->
@@ -226,8 +228,8 @@ else
                                 </label>
                                 <div class="transaction-no-wrapper">
                                     <SfTextBox @bind-Value="_sale.TransactionNo" Placeholder="Transaction No"
-                                               FloatLabelType="FloatLabelType.Never" Readonly="true"
-                                               CssClass="custom-textbox readonly-field" />
+                                        FloatLabelType="FloatLabelType.Never" Readonly="true"
+                                        CssClass="custom-textbox readonly-field" />
                                 </div>
                             </div>
                         }
@@ -238,8 +240,8 @@ else
                                 Customer Number
                             </label>
                             <SfTextBox Value="@_selectedCustomer?.Number" ValueChanged="OnCustomerNumberChanged"
-                                       Placeholder="Customer Mobile No" FloatLabelType="FloatLabelType.Never"
-                                       CssClass="custom-textbox" />
+                                Placeholder="Customer Mobile No" FloatLabelType="FloatLabelType.Never"
+                                CssClass="custom-textbox" />
                         </div>
 
                         <!-- Customer Name -->
@@ -248,7 +250,7 @@ else
                                 Customer Name
                             </label>
                             <SfTextBox @bind-Value="_selectedCustomer.Name" Placeholder="Customer Name"
-                                       FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                                FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                         </div>
 
                         <!-- Remarks -->
@@ -257,7 +259,7 @@ else
                                 Remarks / Narration
                             </label>
                             <SfTextBox @bind-Value="_sale.Remarks" Multiline="true" Placeholder="Enter remarks..."
-                                       FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox textarea-field-small" />
+                                FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox textarea-field-small" />
                         </div>
                     </div>
                 </div>
@@ -268,8 +270,8 @@ else
                 <div class="section-header">
                     <div class="section-title-wrapper">
                         <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                             stroke-linejoin="round">
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
                             <line x1="12" y1="1" x2="12" y2="23" />
                             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                         </svg>
@@ -282,8 +284,8 @@ else
                         <div class="financial-row">
                             <label class="financial-label">Sub Total</label>
                             <SfNumericTextBox Value="@_itemAfterTaxTotal" Readonly="true" TValue="decimal"
-                                              ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                              CssClass="custom-numeric readonly-field" />
+                                ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                                CssClass="custom-numeric readonly-field" />
                         </div>
 
                         <!-- Other Charges -->
@@ -291,14 +293,14 @@ else
                             <label class="financial-label">Other Charges</label>
                             <div class="dual-inputs">
                                 <SfNumericTextBox Value="@_sale.OtherChargesPercent" TValue="decimal" Max="100" Min="0"
-                                                  Decimals="2" ShowSpinButton="false" Placeholder="%"
-                                                  FloatLabelType="FloatLabelType.Never"
-                                                  CssClass="custom-numeric editable-field small-input">
+                                    Decimals="2" ShowSpinButton="false" Placeholder="%"
+                                    FloatLabelType="FloatLabelType.Never"
+                                    CssClass="custom-numeric editable-field small-input">
                                     <NumericTextBoxEvents TValue="decimal" ValueChange="OnOtherDiscountPercentChanged" />
                                 </SfNumericTextBox>
                                 <SfNumericTextBox Value="@_sale.OtherChargesAmount" Readonly="true" TValue="decimal"
-                                                  ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                                  CssClass="custom-numeric readonly-field" />
+                                    ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                                    CssClass="custom-numeric readonly-field" />
                             </div>
                         </div>
 
@@ -307,14 +309,14 @@ else
                             <label class="financial-label">Discount</label>
                             <div class="dual-inputs">
                                 <SfNumericTextBox Value="@_sale.DiscountPercent" TValue="decimal" Max="100" Min="0"
-                                                  Decimals="2" ShowSpinButton="false" Placeholder="%"
-                                                  FloatLabelType="FloatLabelType.Never"
-                                                  CssClass="custom-numeric editable-field small-input">
+                                    Decimals="2" ShowSpinButton="false" Placeholder="%"
+                                    FloatLabelType="FloatLabelType.Never"
+                                    CssClass="custom-numeric editable-field small-input">
                                     <NumericTextBoxEvents TValue="decimal" ValueChange="OnDiscountPercentChanged" />
                                 </SfNumericTextBox>
                                 <SfNumericTextBox Value="@_sale.DiscountAmount" Readonly="true" TValue="decimal"
-                                                  ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                                  CssClass="custom-numeric readonly-field discount-field" />
+                                    ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                                    CssClass="custom-numeric readonly-field discount-field" />
                             </div>
                         </div>
 
@@ -322,7 +324,7 @@ else
                         <div class="financial-row">
                             <label class="financial-label">Round Off</label>
                             <SfNumericTextBox Value="@_sale.RoundOffAmount" TValue="decimal" Placeholder="0.00"
-                                              FloatLabelType="FloatLabelType.Never" CssClass="custom-numeric editable-field">
+                                FloatLabelType="FloatLabelType.Never" CssClass="custom-numeric editable-field">
                                 <NumericTextBoxEvents TValue="decimal" ValueChange="OnRoundOffAmountChanged" />
                             </SfNumericTextBox>
                         </div>
@@ -331,8 +333,8 @@ else
                         <div class="financial-row total-row">
                             <label class="financial-label-total">Total Amount</label>
                             <SfNumericTextBox Value="@_sale.TotalAmount" Readonly="true" TValue="decimal"
-                                              ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                              CssClass="custom-numeric total-field" />
+                                ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                                CssClass="custom-numeric total-field" />
                         </div>
 
                         <div class="financial-divider"></div>
@@ -340,21 +342,21 @@ else
                         <!-- Cash / Card -->
                         <div class="dual-inputs">
                             <SfNumericTextBox @bind-Value="@_sale.Cash" TValue="decimal" Min="0" ShowSpinButton="false"
-                                              Placeholder="Cash" FloatLabelType="FloatLabelType.Always"
-                                              CssClass="custom-numeric editable-field small-input" />
+                                Placeholder="Cash" FloatLabelType="FloatLabelType.Always"
+                                CssClass="custom-numeric editable-field small-input" />
                             <SfNumericTextBox @bind-Value="@_sale.Card" TValue="decimal" Min="0" ShowSpinButton="false"
-                                              Placeholder="Card" FloatLabelType="FloatLabelType.Always"
-                                              CssClass="custom-numeric editable-field small-input" />
+                                Placeholder="Card" FloatLabelType="FloatLabelType.Always"
+                                CssClass="custom-numeric editable-field small-input" />
                         </div>
 
                         <!-- UPI / Credit -->
                         <div class="dual-inputs">
                             <SfNumericTextBox @bind-Value="@_sale.UPI" TValue="decimal" Min="0" ShowSpinButton="false"
-                                              Placeholder="UPI" FloatLabelType="FloatLabelType.Always"
-                                              CssClass="custom-numeric editable-field small-input" />
+                                Placeholder="UPI" FloatLabelType="FloatLabelType.Always"
+                                CssClass="custom-numeric editable-field small-input" />
                             <SfNumericTextBox @bind-Value="@_sale.Credit" TValue="decimal" Min="0" ShowSpinButton="false"
-                                              Placeholder="Credit" FloatLabelType="FloatLabelType.Always"
-                                              CssClass="custom-numeric editable-field small-input" />
+                                Placeholder="Credit" FloatLabelType="FloatLabelType.Always"
+                                CssClass="custom-numeric editable-field small-input" />
                         </div>
                     </div>
                 </div>
@@ -366,7 +368,7 @@ else
             <div class="section-header">
                 <div class="section-title-wrapper">
                     <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="21" r="1" />
                         <circle cx="20" cy="21" r="1" />
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -380,12 +382,12 @@ else
                     <div class="cart-field cart-field-item">
                         <label class="cart-label">Item <span class="required">*</span></label>
                         <SfAutoComplete @ref="_sfItemAutoComplete" Value="@_selectedProduct"
-                                        TValue="ProductLocationOverviewModel" TItem="ProductLocationOverviewModel"
-                                        DataSource="@_products"  Placeholder="Select Item"
-                                        FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-                                        FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            TValue="ProductLocationOverviewModel" TItem="ProductLocationOverviewModel"
+                            DataSource="@_products" Placeholder="Select Item" FloatLabelType="FloatLabelType.Never"
+                            AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                            CssClass="custom-autocomplete">
                             <AutoCompleteEvents TItem="ProductLocationOverviewModel ?"
-                                                TValue="ProductLocationOverviewModel ?" ValueChange="OnItemChanged" />
+                                TValue="ProductLocationOverviewModel ?" ValueChange="OnItemChanged" />
                             <AutoCompleteFieldSettings Value="Name" />
                         </SfAutoComplete>
                     </div>
@@ -393,8 +395,8 @@ else
                     <div class="cart-field cart-field-small">
                         <label class="cart-label">Qty</label>
                         <SfNumericTextBox Value="@_selectedCart.Quantity" TValue="decimal" Min="0" ShowSpinButton="false"
-                                          Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                          CssClass="custom-numeric editable-field">
+                            Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                            CssClass="custom-numeric editable-field">
                             <NumericTextBoxEvents TValue="decimal" ValueChange="OnItemQuantityChanged" />
                         </SfNumericTextBox>
                     </div>
@@ -402,8 +404,8 @@ else
                     <div class="cart-field cart-field-small">
                         <label class="cart-label">Rate</label>
                         <SfNumericTextBox Value="@_selectedCart.Rate" TValue="decimal" Min="0" ShowSpinButton="false"
-                                          Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                          CssClass="custom-numeric editable-field">
+                            Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                            CssClass="custom-numeric editable-field">
                             <NumericTextBoxEvents TValue="decimal" ValueChange="OnItemRateChanged" />
                         </SfNumericTextBox>
                     </div>
@@ -411,8 +413,8 @@ else
                     <div class="cart-field cart-field-small">
                         <label class="cart-label">Disc %</label>
                         <SfNumericTextBox Value="@_selectedCart.DiscountPercent" TValue="decimal" Decimals="2" Min="0"
-                                          Max="100" ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                          CssClass="custom-numeric editable-field">
+                            Max="100" ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                            CssClass="custom-numeric editable-field">
                             <NumericTextBoxEvents TValue="decimal" ValueChange="OnItemDiscountPercentChanged" />
                         </SfNumericTextBox>
                     </div>
@@ -420,8 +422,8 @@ else
                     <div class="cart-field cart-field-small">
                         <label class="cart-label">CGST %</label>
                         <SfNumericTextBox Value="@_selectedCart.CGSTPercent" TValue="decimal" Decimals="2" Min="0" Max="100"
-                                          ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                          CssClass="custom-numeric editable-field">
+                            ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                            CssClass="custom-numeric editable-field">
                             <NumericTextBoxEvents TValue="decimal" ValueChange="OnItemCGSTPercentChanged" />
                         </SfNumericTextBox>
                     </div>
@@ -429,8 +431,8 @@ else
                     <div class="cart-field cart-field-small">
                         <label class="cart-label">SGST %</label>
                         <SfNumericTextBox Value="@_selectedCart.SGSTPercent" TValue="decimal" Decimals="2" Min="0" Max="100"
-                                          ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                          CssClass="custom-numeric editable-field">
+                            ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                            CssClass="custom-numeric editable-field">
                             <NumericTextBoxEvents TValue="decimal" ValueChange="OnItemSGSTPercentChanged" />
                         </SfNumericTextBox>
                     </div>
@@ -438,8 +440,8 @@ else
                     <div class="cart-field cart-field-small">
                         <label class="cart-label">IGST %</label>
                         <SfNumericTextBox Value="@_selectedCart.IGSTPercent" TValue="decimal" Decimals="2" Min="0" Max="100"
-                                          ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
-                                          CssClass="custom-numeric editable-field">
+                            ShowSpinButton="false" Placeholder="0.00" FloatLabelType="FloatLabelType.Never"
+                            CssClass="custom-numeric editable-field">
                             <NumericTextBoxEvents TValue="decimal" ValueChange="OnItemIGSTPercentChanged" />
                         </SfNumericTextBox>
                     </div>
@@ -447,7 +449,7 @@ else
                     <div class="cart-field cart-field-button">
                         <div class="checkbox-wrapper">
                             <SfCheckBox @bind-Checked="_selectedCart.InclusiveTax" Label="Tax Incl." TChecked="bool"
-                                        ValueChange="OnItemInclusiveTaxChanged" CssClass="custom-checkbox" />
+                                ValueChange="OnItemInclusiveTaxChanged" CssClass="custom-checkbox" />
                         </div>
                     </div>
                 </div>
@@ -459,7 +461,7 @@ else
                         <div class="amount-display identification-field">
                             <label class="cart-label">Remarks</label>
                             <SfTextBox @bind-Value="_selectedCart.Remarks" Placeholder="Item Narration..."
-                                       FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox identification-input" />
+                                FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox identification-input" />
                         </div>
                     </div>
 
@@ -520,7 +522,7 @@ else
                     <div class="amount-field amount-field-button">
                         <button class="btn-add" @onclick="AddItemToCart">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19" />
                                 <line x1="5" y1="12" x2="19" y2="12" />
                             </svg>
@@ -536,7 +538,7 @@ else
             <div class="section-header">
                 <div class="section-title-wrapper">
                     <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 3h7a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H3V3z" />
                         <path d="M14 3h7v17h-7V3z" />
                     </svg>
@@ -545,8 +547,8 @@ else
             </div>
             <div class="section-body grid-body">
                 <SfGrid ID="_sfCartGrid" @ref="_sfCartGrid" DataSource="_cart" AllowTextWrap="true" AllowPaging="false"
-                        AllowSorting="true" AllowResizing="true" AllowFiltering="true" GridLines="GridLine.Horizontal"
-                        CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
+                    AllowSorting="true" AllowResizing="true" AllowFiltering="true" GridLines="GridLine.Horizontal"
+                    CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
 
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 
@@ -673,21 +675,22 @@ else
                                     var item = (context as dynamic);
                                     <div class="grid-actions">
                                         <button class="btn-grid-action btn-edit" title="Edit Item"
-                                                @onclick="@(() => EditCartItem(item))">
+                                            @onclick="@(() => EditCartItem(item))">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
+                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                             </svg>
                                         </button>
                                         <button class="btn-grid-action btn-delete" title="Remove Item"
-                                                @onclick="@(() => RemoveItemFromCart(item))">
+                                            @onclick="@(() => RemoveItemFromCart(item))">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
+                                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
                                                 <polyline points="3 6 5 6 21 6" />
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                <path
+                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                                 <line x1="10" y1="11" x2="10" y2="17" />
                                                 <line x1="14" y1="11" x2="14" y2="17" />
                                             </svg>
@@ -700,11 +703,11 @@ else
                         <GridColumn Field="Quantity" HeaderText="Qty" Width="100" TextAlign="TextAlign.Right" Format="N2" />
                         <GridColumn Field="Rate" HeaderText="Rate" Width="110" TextAlign="TextAlign.Right" Format="N2" />
                         <GridColumn Field="BaseTotal" HeaderText="Base Total" Width="150" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="DiscountPercent" HeaderText="Disc %" Width="120" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="DiscountAmount" HeaderText="Disc Amt" Width="140" TextAlign="TextAlign.Right"
-                                    Format="N2">
+                            Format="N2">
                             <Template>
                                 @{
                                     var item = (context as dynamic);
@@ -713,21 +716,21 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="AfterDiscount" HeaderText="After Disc" Width="140" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="CGSTPercent" HeaderText="CGST %" Width="140" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="CGSTAmount" HeaderText="CGST Amt" Width="150" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="SGSTPercent" HeaderText="SGST %" Width="140" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="SGSTAmount" HeaderText="SGST Amt" Width="150" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="IGSTPercent" HeaderText="IGST %" Width="140" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="IGSTAmount" HeaderText="IGST Amt" Width="150" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="TotalTaxAmount" HeaderText="Tax Total" Width="150" TextAlign="TextAlign.Right"
-                                    Format="N2" />
+                            Format="N2" />
                         <GridColumn Field="InclusiveTax" HeaderText="Tax Incl." Width="100" TextAlign="TextAlign.Center">
                             <Template>
                                 @{
@@ -881,23 +884,23 @@ else
         padding: 0;
     }
 
-        .btn-order-action:hover:not(:disabled) {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            color: #0f172a;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+    .btn-order-action:hover:not(:disabled) {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 
-        .btn-order-action:active:not(:disabled) {
-            transform: translateY(0);
-            box-shadow: none;
-        }
+    .btn-order-action:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: none;
+    }
 
-        .btn-order-action:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+    .btn-order-action:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
 
     .btn-icon:hover {
         background: #f8fafc;
@@ -914,11 +917,11 @@ else
         border-color: #10b981;
     }
 
-        .btn-icon-save:hover {
-            background: #ecfdf5;
-            border-color: #059669;
-            color: #059669;
-        }
+    .btn-icon-save:hover {
+        background: #ecfdf5;
+        border-color: #059669;
+        color: #059669;
+    }
 
     /* Main Container */
     .purchase-container {
@@ -936,13 +939,13 @@ else
         margin-bottom: 16px;
     }
 
-        .two-column-layout > :first-child {
-            flex: 0 0 75%;
-        }
+    .two-column-layout> :first-child {
+        flex: 0 0 75%;
+    }
 
-        .two-column-layout > :last-child {
-            flex: 0 0 calc(25% - 16px);
-        }
+    .two-column-layout> :last-child {
+        flex: 0 0 calc(25% - 16px);
+    }
 
     /* Section Card Styles */
     .section-card {
@@ -1034,9 +1037,9 @@ else
         align-items: stretch;
     }
 
-        .transaction-no-wrapper > :first-child {
-            flex: 1;
-        }
+    .transaction-no-wrapper> :first-child {
+        flex: 1;
+    }
 
     .auto-generate-checkbox {
         display: flex;
@@ -1050,10 +1053,10 @@ else
         justify-content: center;
     }
 
-        .auto-generate-checkbox ::deep .custom-checkbox {
-            font-size: 13px;
-            font-weight: 500;
-        }
+    .auto-generate-checkbox ::deep .custom-checkbox {
+        font-size: 13px;
+        font-weight: 500;
+    }
 
     /* Financial Grid Layout */
     .financial-grid {
@@ -1127,78 +1130,78 @@ else
         width: 100%;
     }
 
-        ::deep .custom-autocomplete .e-input-group,
-        ::deep .custom-datepicker .e-input-group,
-        ::deep .custom-textbox .e-input-group,
-        ::deep .custom-numeric .e-input-group {
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            background: #ffffff;
-            transition: all 0.2s ease;
-            height: 40px;
-        }
+    ::deep .custom-autocomplete .e-input-group,
+    ::deep .custom-datepicker .e-input-group,
+    ::deep .custom-textbox .e-input-group,
+    ::deep .custom-numeric .e-input-group {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+        height: 40px;
+    }
 
-            ::deep .custom-autocomplete .e-input-group:hover,
-            ::deep .custom-datepicker .e-input-group:hover,
-            ::deep .custom-textbox .e-input-group:hover,
-            ::deep .custom-numeric .e-input-group:not(.e-disabled):hover {
-                border-color: #94a3b8;
-            }
+    ::deep .custom-autocomplete .e-input-group:hover,
+    ::deep .custom-datepicker .e-input-group:hover,
+    ::deep .custom-textbox .e-input-group:hover,
+    ::deep .custom-numeric .e-input-group:not(.e-disabled):hover {
+        border-color: #94a3b8;
+    }
 
-            ::deep .custom-autocomplete .e-input-group.e-input-focus,
-            ::deep .custom-datepicker .e-input-group.e-input-focus,
-            ::deep .custom-textbox .e-input-group.e-input-focus,
-            ::deep .custom-numeric .e-input-group.e-input-focus {
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            }
+    ::deep .custom-autocomplete .e-input-group.e-input-focus,
+    ::deep .custom-datepicker .e-input-group.e-input-focus,
+    ::deep .custom-textbox .e-input-group.e-input-focus,
+    ::deep .custom-numeric .e-input-group.e-input-focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
 
-            ::deep .custom-autocomplete .e-input-group input,
-            ::deep .custom-datepicker .e-input-group input,
-            ::deep .custom-textbox .e-input-group input,
-            ::deep .custom-textbox .e-input-group textarea,
-            ::deep .custom-numeric .e-input-group input {
-                font-size: 14px;
-                color: #1e293b;
-                padding: 8px 12px;
-            }
+    ::deep .custom-autocomplete .e-input-group input,
+    ::deep .custom-datepicker .e-input-group input,
+    ::deep .custom-textbox .e-input-group input,
+    ::deep .custom-textbox .e-input-group textarea,
+    ::deep .custom-numeric .e-input-group input {
+        font-size: 14px;
+        color: #1e293b;
+        padding: 8px 12px;
+    }
 
-                ::deep .custom-autocomplete .e-input-group input::placeholder,
-                ::deep .custom-datepicker .e-input-group input::placeholder,
-                ::deep .custom-textbox .e-input-group input::placeholder,
-                ::deep .custom-textbox .e-input-group textarea::placeholder,
-                ::deep .custom-numeric .e-input-group input::placeholder {
-                    color: #94a3b8;
-                }
+    ::deep .custom-autocomplete .e-input-group input::placeholder,
+    ::deep .custom-datepicker .e-input-group input::placeholder,
+    ::deep .custom-textbox .e-input-group input::placeholder,
+    ::deep .custom-textbox .e-input-group textarea::placeholder,
+    ::deep .custom-numeric .e-input-group input::placeholder {
+        color: #94a3b8;
+    }
 
     ::deep .readonly-field .e-input-group {
         background: #f8fafc;
         cursor: not-allowed;
     }
 
-        ::deep .readonly-field .e-input-group input {
-            color: #64748b;
-            font-weight: 500;
-        }
+    ::deep .readonly-field .e-input-group input {
+        color: #64748b;
+        font-weight: 500;
+    }
 
     ::deep .editable-field .e-input-group {
         border-color: #3b82f6;
         background: #eff6ff;
     }
 
-        ::deep .editable-field .e-input-group input {
-            font-weight: 600;
-            color: #1e40af;
-        }
+    ::deep .editable-field .e-input-group input {
+        font-weight: 600;
+        color: #1e40af;
+    }
 
     ::deep .small-input .e-input-group {
         width: 100%;
     }
 
-        ::deep .small-input .e-input-group input {
-            text-align: center;
-            padding: 8px;
-        }
+    ::deep .small-input .e-input-group input {
+        text-align: center;
+        padding: 8px;
+    }
 
     ::deep .discount-field .e-input-group input {
         color: #dc2626;
@@ -1211,31 +1214,31 @@ else
         height: 48px;
     }
 
-        ::deep .total-field .e-input-group input {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1e40af;
-        }
+    ::deep .total-field .e-input-group input {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e40af;
+    }
 
     ::deep .textarea-field .e-input-group {
         height: auto;
         min-height: 80px;
     }
 
-        ::deep .textarea-field .e-input-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
+    ::deep .textarea-field .e-input-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
 
     ::deep .textarea-field-small .e-input-group {
         height: auto;
         min-height: 60px;
     }
 
-        ::deep .textarea-field-small .e-input-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
+    ::deep .textarea-field-small .e-input-group textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
 
     /* Add to Cart Section Styles */
     .cart-row {
@@ -1277,10 +1280,10 @@ else
         letter-spacing: 0.3px;
     }
 
-        .cart-label .required {
-            color: #dc2626;
-            margin-left: 2px;
-        }
+    .cart-label .required {
+        color: #dc2626;
+        margin-left: 2px;
+    }
 
     ::deep .cart-field .e-input-group,
     ::deep .cart-field .custom-numeric .e-input-group,
@@ -1291,15 +1294,15 @@ else
         border: 1px solid #3b82f6;
     }
 
-        ::deep .cart-field .e-input-group input,
-        ::deep .cart-field .custom-numeric .e-input-group input,
-        ::deep .cart-field .custom-autocomplete .e-input-group input,
-        ::deep .cart-field .custom-textbox .e-input-group input {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
-            padding: 8px 12px;
-        }
+    ::deep .cart-field .e-input-group input,
+    ::deep .cart-field .custom-numeric .e-input-group input,
+    ::deep .cart-field .custom-autocomplete .e-input-group input,
+    ::deep .cart-field .custom-textbox .e-input-group input {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1e293b;
+        padding: 8px 12px;
+    }
 
     .btn-add {
         height: 38px;
@@ -1320,18 +1323,18 @@ else
         white-space: nowrap;
     }
 
-        .btn-add:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-        }
+    .btn-add:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
 
-        .btn-add:active {
-            transform: scale(0.98);
-        }
+    .btn-add:active {
+        transform: scale(0.98);
+    }
 
-        .btn-add svg {
-            flex-shrink: 0;
-        }
+    .btn-add svg {
+        flex-shrink: 0;
+    }
 
     /* Checkbox Wrapper in Cart Row */
     .checkbox-wrapper {
@@ -1391,31 +1394,31 @@ else
         min-height: 58px;
     }
 
-        .amount-display.identification-field {
-            padding: 0;
-            background: transparent;
-            border: none;
-            min-height: 38px;
-            justify-content: center;
-        }
+    .amount-display.identification-field {
+        padding: 0;
+        background: transparent;
+        border: none;
+        min-height: 38px;
+        justify-content: center;
+    }
 
-        .amount-display.empty-display {
-            background: #f8fafc;
-        }
+    .amount-display.empty-display {
+        background: #f8fafc;
+    }
 
-        .amount-display.total-display {
-            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
-            border: 2px solid #3b82f6;
-        }
+    .amount-display.total-display {
+        background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+        border: 2px solid #3b82f6;
+    }
 
-            .amount-display.total-display .amount-label {
-                color: #1e40af;
-            }
+    .amount-display.total-display .amount-label {
+        color: #1e40af;
+    }
 
-            .amount-display.total-display .amount-value {
-                color: #1e40af;
-                font-size: 16px;
-            }
+    .amount-display.total-display .amount-value {
+        color: #1e40af;
+        font-size: 16px;
+    }
 
     ::deep .identification-field .identification-input .e-input-group {
         height: 38px;
@@ -1423,17 +1426,17 @@ else
         border: 1px solid #cbd5e1;
     }
 
-        ::deep .identification-field .identification-input .e-input-group input {
-            font-size: 13px;
-            color: #64748b;
-            font-weight: 500;
-            padding: 8px 12px;
-        }
+    ::deep .identification-field .identification-input .e-input-group input {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+        padding: 8px 12px;
+    }
 
-            ::deep .identification-field .identification-input .e-input-group input::placeholder {
-                color: #94a3b8;
-                font-style: italic;
-            }
+    ::deep .identification-field .identification-input .e-input-group input::placeholder {
+        color: #94a3b8;
+        font-style: italic;
+    }
 
     .amount-label {
         font-size: 10px;
@@ -1452,9 +1455,9 @@ else
         display: block;
     }
 
-        .amount-value.discount-amt {
-            color: #dc2626;
-        }
+    .amount-value.discount-amt {
+        color: #dc2626;
+    }
 
     .checkbox-display {
         display: flex;
@@ -1472,9 +1475,9 @@ else
         font-weight: 500;
     }
 
-        ::deep .custom-checkbox label {
-            white-space: nowrap;
-        }
+    ::deep .custom-checkbox label {
+        white-space: nowrap;
+    }
 
     /* Professional Grid Styles */
     .e-grid .e-summaryrow .e-summarycell {
@@ -1489,57 +1492,57 @@ else
         border: none;
     }
 
-        ::deep .professional-grid .e-gridheader {
-            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-            border-bottom: 2px solid #e2e8f0;
-        }
+    ::deep .professional-grid .e-gridheader {
+        background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 2px solid #e2e8f0;
+    }
 
-        ::deep .professional-grid .e-headercell {
-            background: transparent;
-            color: #475569;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border-right: 1px solid #e2e8f0;
-            padding: 12px 8px;
-        }
+    ::deep .professional-grid .e-headercell {
+        background: transparent;
+        color: #475569;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-right: 1px solid #e2e8f0;
+        padding: 12px 8px;
+    }
 
-            ::deep .professional-grid .e-headercell:last-child {
-                border-right: none;
-            }
+    ::deep .professional-grid .e-headercell:last-child {
+        border-right: none;
+    }
 
-        ::deep .professional-grid .e-gridcontent {
-            background: #ffffff;
-        }
+    ::deep .professional-grid .e-gridcontent {
+        background: #ffffff;
+    }
 
-        ::deep .professional-grid .e-row {
-            transition: background-color 0.2s ease;
-        }
+    ::deep .professional-grid .e-row {
+        transition: background-color 0.2s ease;
+    }
 
-            ::deep .professional-grid .e-row:hover {
-                background-color: #f8fafc;
-            }
+    ::deep .professional-grid .e-row:hover {
+        background-color: #f8fafc;
+    }
 
-            ::deep .professional-grid .e-row.e-altrow {
-                background-color: #fafbfc;
-            }
+    ::deep .professional-grid .e-row.e-altrow {
+        background-color: #fafbfc;
+    }
 
-                ::deep .professional-grid .e-row.e-altrow:hover {
-                    background-color: #f8fafc;
-                }
+    ::deep .professional-grid .e-row.e-altrow:hover {
+        background-color: #f8fafc;
+    }
 
-        ::deep .professional-grid .e-rowcell {
-            border-right: 1px solid #f1f5f9;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 10px 8px;
-            font-size: 13px;
-            color: #1e293b;
-        }
+    ::deep .professional-grid .e-rowcell {
+        border-right: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 10px 8px;
+        font-size: 13px;
+        color: #1e293b;
+    }
 
-            ::deep .professional-grid .e-rowcell:last-child {
-                border-right: none;
-            }
+    ::deep .professional-grid .e-rowcell:last-child {
+        border-right: none;
+    }
 
     .grid-discount {
         color: #dc2626;
@@ -1576,9 +1579,9 @@ else
         border-right: 1px solid #cbd5e1;
     }
 
-        ::deep .professional-grid .e-summarycell:last-child {
-            border-right: none;
-        }
+    ::deep .professional-grid .e-summarycell:last-child {
+        border-right: none;
+    }
 
     .aggregate-label {
         text-align: left;
@@ -1592,23 +1595,23 @@ else
         color: #1e293b;
     }
 
-        .aggregate-value.aggregate-discount {
-            color: #dc2626;
-        }
+    .aggregate-value.aggregate-discount {
+        color: #dc2626;
+    }
 
-        .aggregate-value.aggregate-total {
-            color: #1e40af;
-            font-size: 14px;
-        }
+    .aggregate-value.aggregate-total {
+        color: #1e40af;
+        font-size: 14px;
+    }
 
-            .aggregate-value.aggregate-total strong {
-                font-size: 15px;
-            }
+    .aggregate-value.aggregate-total strong {
+        font-size: 15px;
+    }
 
-        .aggregate-label strong,
-        .aggregate-value strong {
-            font-weight: 700;
-        }
+    .aggregate-label strong,
+    .aggregate-value strong {
+        font-weight: 700;
+    }
 
     .grid-actions {
         display: flex;
@@ -1631,34 +1634,34 @@ else
         padding: 0;
     }
 
-        .btn-grid-action:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    .btn-grid-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-        .btn-grid-action:active {
-            transform: scale(0.95);
-        }
+    .btn-grid-action:active {
+        transform: scale(0.95);
+    }
 
-        .btn-grid-action.btn-edit {
-            color: #3b82f6;
-            border-color: #3b82f6;
-        }
+    .btn-grid-action.btn-edit {
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
 
-            .btn-grid-action.btn-edit:hover {
-                background: #eff6ff;
-                box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-            }
+    .btn-grid-action.btn-edit:hover {
+        background: #eff6ff;
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+    }
 
-        .btn-grid-action.btn-delete {
-            color: #dc2626;
-            border-color: #dc2626;
-        }
+    .btn-grid-action.btn-delete {
+        color: #dc2626;
+        border-color: #dc2626;
+    }
 
-            .btn-grid-action.btn-delete:hover {
-                background: #fef2f2;
-                box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
-            }
+    .btn-grid-action.btn-delete:hover {
+        background: #fef2f2;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+    }
 
     /* Empty Grid State */
     ::deep .professional-grid .e-emptyrow {

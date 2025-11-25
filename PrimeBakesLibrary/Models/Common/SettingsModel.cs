@@ -16,6 +16,7 @@ public static class SettingsKeys
 	public static string SaleLedgerId => "SaleLedgerId";
 	public static string PurchaseLedgerId => "PurchaseLedgerId";
 	public static string CashLedgerId => "CashLedgerId";
+	public static string CashSalesLedgerId => "CashSalesLedgerId";
 	public static string GSTLedgerId => "GSTLedgerId";
 
 	public static string PrimaryCompanyLinkingId => "PrimaryCompanyLinkingId";

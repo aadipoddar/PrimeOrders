@@ -29,6 +29,7 @@ BEGIN
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'SaleLedgerId', N'144', N'Ledger account for Sales entries')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'PurchaseLedgerId', N'155', N'Ledger account for Purchase entries')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'CashLedgerId', N'1', N'Cash ledger account for Cash Entries')
+	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'CashSalesLedgerId', N'170', N'Cash ledger account for Cash Sales Entries')
 	INSERT INTO [dbo].[Settings] ([Key], [Value], [Description]) VALUES (N'GSTLedgerId', N'1751', N'GST ledger account for GST Tax Entries')
 
 END

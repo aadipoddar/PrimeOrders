@@ -34,6 +34,8 @@ public static class PDFReportExportUtil
 	/// <param name="logoPath">Optional: Custom path to company logo image (PNG, JPG, etc.)</param>
 	/// <param name="useLandscape">Optional: Use landscape orientation for wide tables</param>
 	/// <param name="locationName">Optional: Location name to display in header</param>
+	/// <param name="partyName">Optional: Party/ledger name to display in header</param>
+	/// <param name="customSummaryFields">Optional: Custom fields to display in summary section (key=label, value=formatted value)</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
 	public static MemoryStream ExportToPdf<T>(
 		IEnumerable<T> data,
@@ -46,7 +48,9 @@ public static class PDFReportExportUtil
 		bool autoAdjustColumnWidth = true,
 		string logoPath = null,
 		bool useLandscape = false,
-		string locationName = null)
+		string locationName = null,
+		string partyName = null,
+		Dictionary<string, string> customSummaryFields = null)
 	{
 		MemoryStream ms = new();
 
@@ -59,6 +63,9 @@ public static class PDFReportExportUtil
 
 				// Determine column order
 				List<string> effectiveColumnOrder = DetermineColumnOrder<T>(columnSettings, columnOrder);
+
+				// Filter out columns that have no data (all null or zero)
+				effectiveColumnOrder = FilterEmptyColumns(data, effectiveColumnOrder, columnSettings);
 
 				// Add page to the PDF document with orientation
 				PdfPage page;
@@ -85,7 +92,7 @@ public static class PDFReportExportUtil
 				};
 
 				// Setup header
-				float currentY = SetupHeader(page, reportTitle, dateRangeStart, dateRangeEnd, logoPath, locationName);
+				float currentY = SetupHeader(page, reportTitle, dateRangeStart, dateRangeEnd, logoPath, locationName, partyName);
 
 				// Add data grid
 				PdfLayoutResult gridResult = AddDataGrid(page, pdfDocument, data, effectiveColumnOrder, columnSettings, currentY,
@@ -97,7 +104,7 @@ public static class PDFReportExportUtil
 				currentY = gridResult.Bounds.Bottom + 8;
 
 				// Add summary section
-				currentY = AddSummarySection(lastPageGraphics, data, columnSettings, effectiveColumnOrder, 15, lastPage.GetClientSize().Width, currentY);
+				currentY = AddSummarySection(lastPageGraphics, data, columnSettings, effectiveColumnOrder, 15, lastPage.GetClientSize().Width, currentY, customSummaryFields);
 
 				// Save PDF document to stream
 				pdfDocument.Save(ms);
@@ -128,6 +135,8 @@ public static class PDFReportExportUtil
 		public bool IncludeInTotal { get; set; } = true;
 		public bool HighlightNegative { get; set; } = false;
 		public string Format { get; set; }
+		public bool IsRequired { get; set; }
+		public bool IsGrandTotal { get; set; }
 
 		public ColumnSetting()
 		{
@@ -219,6 +228,103 @@ public static class PDFReportExportUtil
 	}
 
 	/// <summary>
+	/// Filter out columns that have all null or zero values
+	/// </summary>
+	private static List<string> FilterEmptyColumns<T>(
+		IEnumerable<T> data,
+		List<string> columnOrder,
+		Dictionary<string, ColumnSetting> columnSettings = null)
+	{
+		if (data == null || !data.Any())
+			return columnOrder;
+
+		var filteredColumns = new List<string>();
+
+		foreach (var columnName in columnOrder)
+		{
+			var propInfo = typeof(T).GetProperty(columnName);
+			if (propInfo == null)
+			{
+				// Keep column if property not found (shouldn't happen)
+				filteredColumns.Add(columnName);
+				continue;
+			}
+
+			// Check if column is marked as required in columnSettings
+			if (columnSettings != null && columnSettings.TryGetValue(columnName, out var setting) && setting.IsRequired)
+			{
+				filteredColumns.Add(columnName);
+				continue;
+			}
+
+			bool hasNonEmptyValue = false;
+
+			foreach (var item in data)
+			{
+				var value = propInfo.GetValue(item);
+
+				// Check if value is not null and not zero
+				if (value != null)
+				{
+					// For numeric types, check if not zero
+					if (value is decimal decValue && decValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is double dblValue && dblValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is float fltValue && fltValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is int intValue && intValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is long lngValue && lngValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					// For non-numeric types, if it's not null, it has a value
+					else if (!(value is decimal || value is double || value is float || value is int || value is long))
+					{
+						// For strings, check if not empty
+						if (value is string strValue)
+						{
+							if (!string.IsNullOrWhiteSpace(strValue))
+							{
+								hasNonEmptyValue = true;
+								break;
+							}
+						}
+						else
+						{
+							// Other types - if not null, consider it has a value
+							hasNonEmptyValue = true;
+							break;
+						}
+					}
+				}
+			}
+
+			// Only add column if it has at least one non-empty/non-zero value
+			if (hasNonEmptyValue)
+			{
+				filteredColumns.Add(columnName);
+			}
+		}
+
+		return filteredColumns;
+	}
+
+	/// <summary>
 	/// Setup PDF header with title and date range
 	/// </summary>
 	private static float SetupHeader(
@@ -227,7 +333,8 @@ public static class PDFReportExportUtil
 		DateOnly? dateRangeStart,
 		DateOnly? dateRangeEnd,
 		string customLogoPath = null,
-		string locationName = null)
+		string locationName = null,
+		string partyName = null)
 	{
 		float currentY = 10;
 		float leftMargin = 15;
@@ -308,10 +415,24 @@ public static class PDFReportExportUtil
 			PdfBrush locationBrush = new PdfSolidBrush(new PdfColor(100, 100, 100)); // Gray
 			string locationText = $"Location: {locationName}";
 			page.Graphics.DrawString(locationText, locationFont, locationBrush, new PointF(leftMargin, currentY));
+
+			// Only add space if party name is also present
+			if (!string.IsNullOrEmpty(partyName))
+				currentY += 14;
+		}
+
+		// Party name (left side, below location if exists)
+		if (!string.IsNullOrEmpty(partyName))
+		{
+			PdfStandardFont partyFont = new(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold);
+			PdfBrush partyBrush = new PdfSolidBrush(new PdfColor(100, 100, 100)); // Gray
+			string partyText = $"Party: {partyName}";
+			page.Graphics.DrawString(partyText, partyFont, partyBrush, new PointF(leftMargin, currentY));
 		}
 
 		// Date range (right side, like invoice date)
-		if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+		bool hasPeriod = dateRangeStart.HasValue || dateRangeEnd.HasValue;
+		if (hasPeriod)
 		{
 			string dateRange = $"Period: {dateRangeStart?.ToString("dd-MMM-yyyy") ?? "START"} to {dateRangeEnd?.ToString("dd-MMM-yyyy") ?? "END"}";
 			PdfStandardFont dateFont = new(PdfFontFamily.Helvetica, 10);
@@ -320,7 +441,9 @@ public static class PDFReportExportUtil
 			page.Graphics.DrawString(dateRange, dateFont, dateBrush, new PointF(pageWidth - rightMargin - dateSize.Width, currentY));
 		}
 
-		currentY += 14; return currentY;
+		// Add final spacing if location, party, or period was displayed
+		if (!string.IsNullOrEmpty(locationName) || !string.IsNullOrEmpty(partyName) || hasPeriod)
+			currentY += 14; return currentY;
 	}
 
 	/// <summary>
@@ -420,7 +543,7 @@ public static class PDFReportExportUtil
 				// Apply cell styling (only if not using built-in style)
 				if (!useBuiltInStyle)
 				{
-					row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6);
+					row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 8);
 					row.Cells[i].Style.Borders.All = new PdfPen(new PdfColor(229, 231, 235), 0.5f); // Light gray border
 				}
 
@@ -509,7 +632,7 @@ public static class PDFReportExportUtil
 
 		// Grid styling
 		pdfGrid.Style.CellPadding = new PdfPaddings(2, 1, 2, 1);
-		pdfGrid.Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 6);
+		pdfGrid.Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 8);
 
 		// Alternating row colors (only if not using built-in style)
 		if (!useBuiltInStyle)
@@ -546,7 +669,8 @@ public static class PDFReportExportUtil
 		List<string> columnOrder,
 		float leftMargin,
 		float pageWidth,
-		float startY)
+		float startY,
+		Dictionary<string, string> customSummaryFields = null)
 	{
 		float currentY = startY;
 		float summaryColumnX = pageWidth - 200; // Right side for summary
@@ -581,9 +705,34 @@ public static class PDFReportExportUtil
 				}
 				totals[columnName] = columnTotal;
 
-				// Use last numeric column as grand total (usually the "Total" or "TotalAmount" column)
-				if (columnTotal != 0)
+				// Use column marked as IsGrandTotal, or fall back to TotalAmount, or last numeric column
+				if (setting.IsGrandTotal)
 					grandTotal = columnTotal;
+				else if (columnName == "TotalAmount" && !columnSettings.Values.Any(s => s.IsGrandTotal))
+					grandTotal = columnTotal;
+				else if (!totals.ContainsKey("TotalAmount") && !columnSettings.Values.Any(s => s.IsGrandTotal) && columnTotal != 0)
+					grandTotal = columnTotal;
+			}
+		}       // Draw custom summary fields first (if any)
+		if (customSummaryFields != null && customSummaryFields.Count > 0)
+		{
+			PdfStandardFont customFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
+			PdfBrush customBrush = new PdfSolidBrush(new PdfColor(59, 130, 246));
+
+			foreach (var field in customSummaryFields)
+			{
+				graphics.DrawString($"{field.Key}:", customFont, customBrush, new PointF(summaryColumnX, currentY));
+				SizeF fieldSize = customFont.MeasureString(field.Value);
+				graphics.DrawString(field.Value, customFont, customBrush, new PointF(pageWidth - rightMargin - fieldSize.Width, currentY));
+				currentY += 12;
+			}
+
+			// Add separator line after custom fields
+			if (totals.Count > 0)
+			{
+				PdfPen separatorPen = new(new PdfColor(200, 200, 200), 0.5f);
+				graphics.DrawLine(separatorPen, new PointF(summaryColumnX - 10, currentY), new PointF(pageWidth - 20, currentY));
+				currentY += 8;
 			}
 		}
 

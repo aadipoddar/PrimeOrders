@@ -26,8 +26,10 @@ else
 			<p class="page-subtitle">View and analyze kitchen issue item transactions</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing" title="Export to Excel">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
+				title="Export to Excel">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 					<polyline points="14 2 14 8 20 8" />
 					<line x1="16" y1="13" x2="8" y2="13" />
@@ -36,7 +38,8 @@ else
 				</svg>
 			</button>
 			<button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 					<polyline points="14 2 14 8 20 8" />
 					<line x1="16" y1="13" x2="8" y2="13" />
@@ -44,33 +47,43 @@ else
 					<line x1="10" y1="9" x2="8" y2="9" />
 				</svg>
 			</button>
-			<button class="btn-icon" title="Refresh Data" @onclick="LoadKitchenIssueItemOverviews" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" title="Refresh Data" @onclick="LoadKitchenIssueItemOverviews"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<polyline points="23 4 23 10 17 10" />
 					<polyline points="1 20 1 14 7 14" />
 					<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick="NavigateToKitchenIssueReport" title="Kitchen Issue Report" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick="NavigateToKitchenIssueReport" title="Kitchen Issue Report"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
 					<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick="NavigateToKitchenIssuePage" title="Create Kitchen Issue" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick="NavigateToKitchenIssuePage" title="Create Kitchen Issue"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="12" y1="5" x2="12" y2="19" />
 					<line x1="5" y1="12" x2="19" y2="12" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/")' title="Home" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/")' title="Home"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
 					<polyline points="9 22 9 12 15 12 15 22" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/reports")' title="Back" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo("/reports")' title="Back"
+				disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M19 12H5M12 19l-7-7 7-7" />
 				</svg>
 			</button>
@@ -84,7 +97,8 @@ else
 		<div class="section-card">
 			<div class="section-header">
 				<div class="section-title-wrapper">
-					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
 					</svg>
 					<h2 class="section-title">Filters</h2>
@@ -96,13 +110,8 @@ else
 						<!-- Date Range -->
 						<div class="form-field">
 							<label class="field-label">Date Range</label>
-							<SfDateRangePicker CssClass="custom-daterange"
-											   StartDate="_fromDate"
-											   EndDate="_toDate"
-											   TValue="DateTime"
-											   Format="dd/MM/yyyy"
-											   AllowEdit="true"
-											   Placeholder="Select date range">
+							<SfDateRangePicker CssClass="custom-daterange" StartDate="_fromDate" EndDate="_toDate"
+								TValue="DateTime" Format="dd/MM/yyyy" AllowEdit="true" Placeholder="Select date range">
 								<DateRangePickerEvents TValue="DateTime" ValueChange="OnDateRangeChanged" />
 							</SfDateRangePicker>
 						</div>
@@ -110,16 +119,11 @@ else
 						<!-- Company -->
 						<div class="form-field">
 							<label class="field-label">Company</label>
-							<SfAutoComplete CssClass="custom-autocomplete"
-											Value="@_selectedCompany"
-											TValue="CompanyModel"
-											TItem="CompanyModel"
-											DataSource="@_companies"
-											
-											Placeholder="All Companies"
-											AllowFiltering="true"
-											FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-								<AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel" ValueChange="OnCompanyChanged" />
+							<SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedCompany" TValue="CompanyModel"
+								TItem="CompanyModel" DataSource="@_companies" Placeholder="All Companies"
+								AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+								<AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
+									ValueChange="OnCompanyChanged" />
 								<AutoCompleteFieldSettings Value="Name" />
 							</SfAutoComplete>
 						</div>
@@ -127,16 +131,11 @@ else
 						<!-- Kitchen -->
 						<div class="form-field">
 							<label class="field-label">Kitchen</label>
-							<SfAutoComplete CssClass="custom-autocomplete"
-											Value="@_selectedKitchen"
-											TValue="LocationModel"
-											TItem="LocationModel"
-											DataSource="@_kitchens"
-											
-											Placeholder="All Kitchens"
-											AllowFiltering="true"
-											FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-								<AutoCompleteEvents TItem="LocationModel" TValue="LocationModel" ValueChange="OnKitchenChanged" />
+							<SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedKitchen" TValue="LocationModel"
+								TItem="LocationModel" DataSource="@_kitchens" Placeholder="All Kitchens"
+								AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+								<AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
+									ValueChange="OnKitchenChanged" />
 								<AutoCompleteFieldSettings Value="Name" />
 							</SfAutoComplete>
 						</div>
@@ -144,25 +143,32 @@ else
 
 					<!-- Date Utility Buttons -->
 					<div class="date-utilities">
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today"
+							disabled="@_isProcessing">
 							<span>Today</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)" title="Yesterday" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)"
+							title="Yesterday" disabled="@_isProcessing">
 							<span>Yesterday</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)" title="Current Month" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)"
+							title="Current Month" disabled="@_isProcessing">
 							<span>Current Month</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)" title="Previous Month" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)"
+							title="Previous Month" disabled="@_isProcessing">
 							<span>Previous Month</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)" title="Current Financial Year" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)"
+							title="Current Financial Year" disabled="@_isProcessing">
 							<span>Current FY</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)" title="Previous Financial Year" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)"
+							title="Previous Financial Year" disabled="@_isProcessing">
 							<span>Previous FY</span>
 						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)" title="All Time" disabled="@_isProcessing">
+						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)"
+							title="All Time" disabled="@_isProcessing">
 							<span>All Time</span>
 						</button>
 					</div>
@@ -174,7 +180,8 @@ else
 		<div class="section-card">
 			<div class="section-header">
 				<div class="section-title-wrapper">
-					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="8" y1="6" x2="21" y2="6" />
 						<line x1="8" y1="12" x2="21" y2="12" />
 						<line x1="8" y1="18" x2="21" y2="18" />
@@ -185,8 +192,10 @@ else
 					<h2 class="section-title">Kitchen Issue Item Transactions</h2>
 				</div>
 				<div class="header-actions">
-					<button class="btn-toggle-details" @onclick="ToggleDetailsView" title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
-						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<button class="btn-toggle-details" @onclick="ToggleDetailsView"
+						title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
+						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							@if (_showAllColumns)
 							{
 								<circle cx="12" cy="12" r="1" />
@@ -205,20 +214,11 @@ else
 				</div>
 			</div>
 			<div class="section-body grid-body">
-				<SfGrid ID="_sfKitchenIssueItemGrid"
-						@ref="_sfKitchenIssueItemGrid"
-						TValue="KitchenIssueItemOverviewModel"
-						DataSource="_kitchenIssueItemOverviews"
-						AllowTextWrap="true"
-						AllowPaging="true"
-						AllowSorting="true"
-						AllowResizing="true"
-						AllowFiltering="true"
-						AllowExcelExport="true"
-						AllowPdfExport="true"
-						GridLines="GridLine.Horizontal"
-						CssClass="professional-grid"
-						Toolbar="@(new List<string>() { "Search" })">
+				<SfGrid ID="_sfKitchenIssueItemGrid" @ref="_sfKitchenIssueItemGrid" TValue="KitchenIssueItemOverviewModel"
+					DataSource="_kitchenIssueItemOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
+					AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
+					GridLines="GridLine.Horizontal" CssClass="professional-grid"
+					Toolbar="@(new List<string>() { "Search" })">
 
 					<GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
 					<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
@@ -226,7 +226,8 @@ else
 					<GridAggregates>
 						<GridAggregate>
 							<GridAggregateColumns>
-								<GridAggregateColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemName)" Type="AggregateType.Count">
+								<GridAggregateColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemName)"
+									Type="AggregateType.Count">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -236,7 +237,8 @@ else
 										</div>
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(KitchenIssueItemOverviewModel.Quantity)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(KitchenIssueItemOverviewModel.Quantity)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -244,7 +246,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(KitchenIssueItemOverviewModel.Total)" Type="AggregateType.Sum" Format="N2">
+								<GridAggregateColumn Field="@nameof(KitchenIssueItemOverviewModel.Total)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -263,14 +266,22 @@ else
 									var item = (context as KitchenIssueItemOverviewModel);
 								}
 								<div class="grid-actions">
-									<button class="btn-grid-action btn-view" @onclick="() => ViewKitchenIssue(item.KitchenIssueId)" title="View Kitchen Issue" disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<button class="btn-grid-action btn-view"
+										@onclick="() => ViewKitchenIssue(item.KitchenIssueId)" title="View Kitchen Issue"
+										disabled="@_isProcessing">
+										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+											fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+											stroke-linejoin="round">
 											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
 											<circle cx="12" cy="12" r="3" />
 										</svg>
 									</button>
-									<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.KitchenIssueId)" title="Download Invoice" disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<button class="btn-grid-action btn-invoice"
+										@onclick="() => DownloadInvoice(item.KitchenIssueId)" title="Download Invoice"
+										disabled="@_isProcessing">
+										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+											fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+											stroke-linejoin="round">
 											<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 											<polyline points="7 10 12 15 17 10" />
 											<line x1="12" y1="15" x2="12" y2="3" />
@@ -279,16 +290,26 @@ else
 								</div>
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemName)" HeaderText="Item Name" Width="200" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCode)" HeaderText="Item Code" Width="130" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCategoryName)" HeaderText="Category" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionNo)" HeaderText="Transaction No" Width="170" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenName)" HeaderText="Kitchen" Width="200" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Quantity)" HeaderText="Quantity" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Total)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemName)" HeaderText="Item Name"
+							Width="200" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCode)" HeaderText="Item Code"
+							Width="130" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCategoryName)" HeaderText="Category"
+							Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionNo)" HeaderText="Transaction No"
+							Width="170" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionDateTime)" HeaderText="Date"
+							Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.CompanyName)" HeaderText="Company"
+							Width="180" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenName)" HeaderText="Kitchen"
+							Width="200" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Quantity)" HeaderText="Quantity"
+							Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Rate)" HeaderText="Rate" Width="120"
+							Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Total)" HeaderText="Total" Width="150"
+							TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var detailItem = (context as KitchenIssueItemOverviewModel);
@@ -296,8 +317,10 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenIssueRemarks)" HeaderText="Issue Remarks" Width="200" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Remarks)" HeaderText="Item Remarks" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenIssueRemarks)"
+							HeaderText="Issue Remarks" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Remarks)" HeaderText="Item Remarks"
+							Width="200" Visible="_showAllColumns" />
 					</GridColumns>
 				</SfGrid>
 			</div>
@@ -305,21 +328,13 @@ else
 	</div>
 }
 
-<SfToast @ref="_sfErrorToast"
-		 ID="_sfErrorToast"
-		 Title="@_errorTitle"
-		 Content="@_errorMessage"
-		 Timeout="5000">
+<SfToast @ref="_sfErrorToast" ID="_sfErrorToast" Title="@_errorTitle" Content="@_errorMessage" Timeout="5000">
 	<ToastPosition X="Right" Y="Top" />
 	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
 	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
 </SfToast>
 
-<SfToast @ref="_sfSuccessToast"
-		 ID="_sfSuccessToast"
-		 Title="@_successTitle"
-		 Content="@_successMessage"
-		 Timeout="5000">
+<SfToast @ref="_sfSuccessToast" ID="_sfSuccessToast" Title="@_successTitle" Content="@_successMessage" Timeout="5000">
 	<ToastPosition X="Right" Y="Top" />
 	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
 	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
@@ -419,47 +434,47 @@ else
 		color: #64748b;
 	}
 
-		.btn-icon:hover {
-			background: #f8fafc;
-			border-color: #3b82f6;
-			color: #3b82f6;
-		}
+	.btn-icon:hover {
+		background: #f8fafc;
+		border-color: #3b82f6;
+		color: #3b82f6;
+	}
 
-		.btn-icon:active {
-			transform: scale(0.95);
-		}
+	.btn-icon:active {
+		transform: scale(0.95);
+	}
 
 	.btn-icon-excel {
 		color: #10b981;
 		border-color: #10b981;
 	}
 
-		.btn-icon-excel:hover {
-			background: #ecfdf5;
-			border-color: #059669;
-			color: #059669;
-		}
+	.btn-icon-excel:hover {
+		background: #ecfdf5;
+		border-color: #059669;
+		color: #059669;
+	}
 
-		.btn-icon-excel:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
+	.btn-icon-excel:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 
 	.btn-icon-pdf {
 		color: #ef4444;
 		border-color: #ef4444;
 	}
 
-		.btn-icon-pdf:hover {
-			background: #fef2f2;
-			border-color: #dc2626;
-			color: #dc2626;
-		}
+	.btn-icon-pdf:hover {
+		background: #fef2f2;
+		border-color: #dc2626;
+		color: #dc2626;
+	}
 
-		.btn-icon-pdf:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
+	.btn-icon-pdf:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 
 	/* Main Container */
 	.report-container {
@@ -534,21 +549,21 @@ else
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 	}
 
-		.btn-toggle-details:hover {
-			background: #eff6ff;
-			border-color: #3b82f6;
-			box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-			transform: translateY(-1px);
-		}
+	.btn-toggle-details:hover {
+		background: #eff6ff;
+		border-color: #3b82f6;
+		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+		transform: translateY(-1px);
+	}
 
-		.btn-toggle-details:active {
-			transform: translateY(0);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		}
+	.btn-toggle-details:active {
+		transform: translateY(0);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
 
-		.btn-toggle-details svg {
-			flex-shrink: 0;
-		}
+	.btn-toggle-details svg {
+		flex-shrink: 0;
+	}
 
 	.section-body {
 		padding: 24px;
@@ -599,18 +614,18 @@ else
 		white-space: nowrap;
 	}
 
-		.btn-date-utility:hover {
-			background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-			color: white;
-			border-color: #2563eb;
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-		}
+	.btn-date-utility:hover {
+		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+		color: white;
+		border-color: #2563eb;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+	}
 
-		.btn-date-utility:active {
-			transform: translateY(0);
-			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-		}
+	.btn-date-utility:active {
+		transform: translateY(0);
+		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+	}
 
 	.form-field {
 		display: flex;
@@ -633,42 +648,42 @@ else
 		width: 100%;
 	}
 
-		::deep .custom-autocomplete .e-input-group,
-		::deep .custom-datepicker .e-input-group,
-		::deep .custom-daterange .e-input-group {
-			border: 1px solid #cbd5e1;
-			border-radius: 6px;
-			background: #ffffff;
-			transition: all 0.2s ease;
-			height: 36px;
-		}
+	::deep .custom-autocomplete .e-input-group,
+	::deep .custom-datepicker .e-input-group,
+	::deep .custom-daterange .e-input-group {
+		border: 1px solid #cbd5e1;
+		border-radius: 6px;
+		background: #ffffff;
+		transition: all 0.2s ease;
+		height: 36px;
+	}
 
-			::deep .custom-autocomplete .e-input-group:hover,
-			::deep .custom-datepicker .e-input-group:hover,
-			::deep .custom-daterange .e-input-group:hover {
-				border-color: #94a3b8;
-			}
+	::deep .custom-autocomplete .e-input-group:hover,
+	::deep .custom-datepicker .e-input-group:hover,
+	::deep .custom-daterange .e-input-group:hover {
+		border-color: #94a3b8;
+	}
 
-			::deep .custom-autocomplete .e-input-group.e-input-focus,
-			::deep .custom-datepicker .e-input-group.e-input-focus,
-			::deep .custom-daterange .e-input-group.e-input-focus {
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-			}
+	::deep .custom-autocomplete .e-input-group.e-input-focus,
+	::deep .custom-datepicker .e-input-group.e-input-focus,
+	::deep .custom-daterange .e-input-group.e-input-focus {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
 
-			::deep .custom-autocomplete .e-input-group input,
-			::deep .custom-datepicker .e-input-group input,
-			::deep .custom-daterange .e-input-group input {
-				font-size: 14px;
-				color: #1e293b;
-				padding: 8px 12px;
-			}
+	::deep .custom-autocomplete .e-input-group input,
+	::deep .custom-datepicker .e-input-group input,
+	::deep .custom-daterange .e-input-group input {
+		font-size: 14px;
+		color: #1e293b;
+		padding: 8px 12px;
+	}
 
-				::deep .custom-autocomplete .e-input-group input::placeholder,
-				::deep .custom-datepicker .e-input-group input::placeholder,
-				::deep .custom-daterange .e-input-group input::placeholder {
-					color: #94a3b8;
-				}
+	::deep .custom-autocomplete .e-input-group input::placeholder,
+	::deep .custom-datepicker .e-input-group input::placeholder,
+	::deep .custom-daterange .e-input-group input::placeholder {
+		color: #94a3b8;
+	}
 
 	/* Professional Grid Styles */
 	.e-grid .e-summaryrow .e-summarycell {
@@ -679,111 +694,111 @@ else
 		border: none;
 	}
 
-		::deep .professional-grid .e-gridheader {
-			background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-			border-bottom: 2px solid #e2e8f0;
-		}
+	::deep .professional-grid .e-gridheader {
+		background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+		border-bottom: 2px solid #e2e8f0;
+	}
 
-		::deep .professional-grid .e-headercell {
-			background: transparent;
-			color: #475569;
-			font-weight: 600;
-			font-size: 12px;
-			text-transform: uppercase;
-			letter-spacing: 0.3px;
-			border-right: 1px solid #e2e8f0;
-			padding: 12px 8px;
-		}
+	::deep .professional-grid .e-headercell {
+		background: transparent;
+		color: #475569;
+		font-weight: 600;
+		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.3px;
+		border-right: 1px solid #e2e8f0;
+		padding: 12px 8px;
+	}
 
-			::deep .professional-grid .e-headercell:last-child {
-				border-right: none;
-			}
+	::deep .professional-grid .e-headercell:last-child {
+		border-right: none;
+	}
 
-		::deep .professional-grid .e-gridcontent {
-			background: #ffffff;
-		}
+	::deep .professional-grid .e-gridcontent {
+		background: #ffffff;
+	}
 
-		::deep .professional-grid .e-row {
-			transition: background-color 0.2s ease;
-		}
+	::deep .professional-grid .e-row {
+		transition: background-color 0.2s ease;
+	}
 
-			::deep .professional-grid .e-row:hover {
-				background-color: #f8fafc;
-			}
+	::deep .professional-grid .e-row:hover {
+		background-color: #f8fafc;
+	}
 
-			::deep .professional-grid .e-row.e-altrow {
-				background-color: #fafbfc;
-			}
+	::deep .professional-grid .e-row.e-altrow {
+		background-color: #fafbfc;
+	}
 
-				::deep .professional-grid .e-row.e-altrow:hover {
-					background-color: #f8fafc;
-				}
+	::deep .professional-grid .e-row.e-altrow:hover {
+		background-color: #f8fafc;
+	}
 
-		::deep .professional-grid .e-rowcell {
-			border-right: 1px solid #f1f5f9;
-			border-bottom: 1px solid #f1f5f9;
-			padding: 10px 8px;
-			font-size: 13px;
-			color: #1e293b;
-		}
+	::deep .professional-grid .e-rowcell {
+		border-right: 1px solid #f1f5f9;
+		border-bottom: 1px solid #f1f5f9;
+		padding: 10px 8px;
+		font-size: 13px;
+		color: #1e293b;
+	}
 
-			::deep .professional-grid .e-rowcell:last-child {
-				border-right: none;
-			}
+	::deep .professional-grid .e-rowcell:last-child {
+		border-right: none;
+	}
 
-		/* Grid Pager Styling */
-		::deep .professional-grid .e-gridpager {
-			background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-			border-top: 2px solid #e2e8f0;
-			padding: 12px 16px;
-		}
+	/* Grid Pager Styling */
+	::deep .professional-grid .e-gridpager {
+		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+		border-top: 2px solid #e2e8f0;
+		padding: 12px 16px;
+	}
 
-			::deep .professional-grid .e-gridpager .e-pagercontainer {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-			}
+	::deep .professional-grid .e-gridpager .e-pagercontainer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
 
-			::deep .professional-grid .e-gridpager .e-numericitem,
-			::deep .professional-grid .e-gridpager .e-currentitem {
-				min-width: 32px;
-				height: 32px;
-				border-radius: 6px;
-				margin: 0 4px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 13px;
-				font-weight: 500;
-				transition: all 0.2s ease;
-			}
+	::deep .professional-grid .e-gridpager .e-numericitem,
+	::deep .professional-grid .e-gridpager .e-currentitem {
+		min-width: 32px;
+		height: 32px;
+		border-radius: 6px;
+		margin: 0 4px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 13px;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
 
-			::deep .professional-grid .e-gridpager .e-numericitem {
-				background: #ffffff;
-				color: #64748b;
-				border: 1px solid #e2e8f0;
-			}
+	::deep .professional-grid .e-gridpager .e-numericitem {
+		background: #ffffff;
+		color: #64748b;
+		border: 1px solid #e2e8f0;
+	}
 
-				::deep .professional-grid .e-gridpager .e-numericitem:hover {
-					background: #f8fafc;
-					color: #3b82f6;
-					border-color: #3b82f6;
-				}
+	::deep .professional-grid .e-gridpager .e-numericitem:hover {
+		background: #f8fafc;
+		color: #3b82f6;
+		border-color: #3b82f6;
+	}
 
-			::deep .professional-grid .e-gridpager .e-currentitem {
-				background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-				color: #ffffff;
-				border: none;
-				box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-			}
+	::deep .professional-grid .e-gridpager .e-currentitem {
+		background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+		color: #ffffff;
+		border: none;
+		box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+	}
 
-		/* Empty Grid State */
-		::deep .professional-grid .e-emptyrow {
-			text-align: center;
-			padding: 48px 24px;
-			color: #94a3b8;
-			font-size: 14px;
-		}
+	/* Empty Grid State */
+	::deep .professional-grid .e-emptyrow {
+		text-align: center;
+		padding: 48px 24px;
+		color: #94a3b8;
+		font-size: 14px;
+	}
 
 	/* Grid Cell Text Coloring */
 	.grid-total {
@@ -805,18 +820,18 @@ else
 		border-right: 1px solid #cbd5e1;
 	}
 
-		::deep .professional-grid .e-summarycell:last-child {
-			border-right: none;
-		}
+	::deep .professional-grid .e-summarycell:last-child {
+		border-right: none;
+	}
 
 	.aggregate-value.aggregate-total {
 		color: #1e40af;
 		font-size: 14px;
 	}
 
-		.aggregate-value.aggregate-total strong {
-			font-size: 15px;
-		}
+	.aggregate-value.aggregate-total strong {
+		font-size: 15px;
+	}
 
 	/* Total Aggregate Footer Styling */
 	.total-aggregate {
@@ -846,39 +861,39 @@ else
 		padding: 0;
 	}
 
-		.btn-grid-action:disabled {
-			opacity: 0.4;
-			cursor: not-allowed;
-		}
+	.btn-grid-action:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
 
-		.btn-grid-action:not(:disabled):hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-		}
+	.btn-grid-action:not(:disabled):hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	}
 
-		.btn-grid-action:not(:disabled):active {
-			transform: scale(0.95);
-		}
+	.btn-grid-action:not(:disabled):active {
+		transform: scale(0.95);
+	}
 
-		.btn-grid-action.btn-view {
-			color: #3b82f6;
-			border-color: #3b82f6;
-		}
+	.btn-grid-action.btn-view {
+		color: #3b82f6;
+		border-color: #3b82f6;
+	}
 
-			.btn-grid-action.btn-view:not(:disabled):hover {
-				background: #eff6ff;
-				box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-			}
+	.btn-grid-action.btn-view:not(:disabled):hover {
+		background: #eff6ff;
+		box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+	}
 
-		.btn-grid-action.btn-invoice {
-			color: #10b981;
-			border-color: #10b981;
-		}
+	.btn-grid-action.btn-invoice {
+		color: #10b981;
+		border-color: #10b981;
+	}
 
-			.btn-grid-action.btn-invoice:not(:disabled):hover {
-				background: #ecfdf5;
-				box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-			}
+	.btn-grid-action.btn-invoice:not(:disabled):hover {
+		background: #ecfdf5;
+		box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+	}
 
 	/* Responsive Design */
 	@@media (max-width: 1400px) {
@@ -928,5 +943,3 @@ else
 		}
 	}
 </style>
-
-

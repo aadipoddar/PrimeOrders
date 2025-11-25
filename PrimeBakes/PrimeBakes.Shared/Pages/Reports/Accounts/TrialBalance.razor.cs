@@ -2,7 +2,6 @@ using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -17,7 +16,7 @@ using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
-public partial class AccountingLedgerReport
+public partial class TrialBalance
 {
 	private UserModel _user;
 
@@ -28,15 +27,14 @@ public partial class AccountingLedgerReport
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
 
-	private CompanyModel _selectedCompany = new();
-	private LedgerModel _selectedLedger = new();
-	private TrialBalanceModel _selectedTrialBalance = new();
+	private GroupModel _selectedGroup = new();
+	private AccountTypeModel _selectedAccountType = new();
 
-	private List<CompanyModel> _companies = [];
-	private List<LedgerModel> _ledgers = [];
-	private List<AccountingLedgerOverviewModel> _accountingLedgerOverviews = [];
+	private List<GroupModel> _groups = [];
+	private List<AccountTypeModel> _accountTypes = [];
+	private List<TrialBalanceModel> _trialBalance = [];
 
-	private SfGrid<AccountingLedgerOverviewModel> _sfAccountingLedgerGrid;
+	private SfGrid<TrialBalanceModel> _sfTrialBalanceGrid;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
@@ -62,9 +60,9 @@ public partial class AccountingLedgerReport
 	private async Task LoadData()
 	{
 		await LoadDates();
-		await LoadCompanies();
-		await LoadLedgers();
-		await LoadAccountingLedgerOverviews();
+		await LoadGroups();
+		await LoadAccountTypes();
+		await LoadTrialBalance();
 	}
 
 	private async Task LoadDates()
@@ -73,32 +71,32 @@ public partial class AccountingLedgerReport
 		_toDate = _fromDate;
 	}
 
-	private async Task LoadCompanies()
+	private async Task LoadGroups()
 	{
-		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(TableNames.Company);
-		_companies.Add(new()
+		_groups = await CommonData.LoadTableDataByStatus<GroupModel>(TableNames.Group);
+		_groups.Add(new()
 		{
 			Id = 0,
-			Name = "All Companies"
+			Name = "All Groups"
 		});
-		_companies = [.. _companies.OrderBy(s => s.Name)];
-		_selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
+
+		_groups = [.. _groups.OrderBy(s => s.Name)];
+		_selectedGroup = _groups.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadLedgers()
+	private async Task LoadAccountTypes()
 	{
-		_ledgers = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
-		_ledgers.Add(new()
+		_accountTypes = await CommonData.LoadTableDataByStatus<AccountTypeModel>(TableNames.AccountType);
+		_accountTypes.Add(new()
 		{
 			Id = 0,
-			Name = "All Ledgers"
+			Name = "All Account Types"
 		});
-
-		_ledgers = [.. _ledgers.OrderBy(s => s.Name)];
-		_selectedLedger = _ledgers.FirstOrDefault(_ => _.Id == 0);
+		_accountTypes = [.. _accountTypes.OrderBy(s => s.Name)];
+		_selectedAccountType = _accountTypes.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadAccountingLedgerOverviews()
+	private async Task LoadTrialBalance()
 	{
 		if (_isProcessing)
 			return;
@@ -107,50 +105,26 @@ public partial class AccountingLedgerReport
 		{
 			_isProcessing = true;
 
-			_accountingLedgerOverviews = await AccountingData.LoadAccountingLedgerOverviewByDate(
+			_trialBalance = await AccountingData.LoadTrialBalanceByDate(
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
-			if (_selectedCompany?.Id > 0)
-				_accountingLedgerOverviews = [.. _accountingLedgerOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+			if (_selectedGroup?.Id > 0)
+				_trialBalance = [.. _trialBalance.Where(_ => _.GroupId == _selectedGroup.Id)];
 
-			// Filter by ledger with contra ledger details
-			if (_selectedLedger?.Id > 0)
-			{
-				List<AccountingLedgerOverviewModel> filteredOverviews = [];
-				var partyLedgers = _accountingLedgerOverviews.Where(l => l.Id == _selectedLedger.Id).ToList();
+			if (_selectedAccountType?.Id > 0)
+				_trialBalance = [.. _trialBalance.Where(_ => _.AccountTypeId == _selectedAccountType.Id)];
 
-				foreach (var item in partyLedgers)
-				{
-					var referenceLedgers = _accountingLedgerOverviews
-						.Where(l => l.AccountingId == item.AccountingId && l.Id != _selectedLedger.Id)
-						.ToList();
-
-					var referenceLedgerNamesWithAmount = string.Join("\n",
-						referenceLedgers.Select(l =>
-						$"{l.LedgerName}\t({(l.Debit.HasValue && l.Debit.Value > 0 ? "Dr " + l.Debit.Value.FormatIndianCurrency() : l.Credit.HasValue && l.Credit.Value > 0 ? "Cr " + l.Credit.Value.FormatIndianCurrency() : "0.00")})")); item.LedgerName = referenceLedgerNamesWithAmount;
-					filteredOverviews.Add(item);
-				}
-
-				_accountingLedgerOverviews = filteredOverviews;
-
-				var trialBalances = await AccountingData.LoadTrialBalanceByDate(
-					DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-					DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
-
-				_selectedTrialBalance = trialBalances.FirstOrDefault(tb => tb.LedgerId == _selectedLedger.Id);
-			}
-
-			_accountingLedgerOverviews = [.. _accountingLedgerOverviews.OrderBy(_ => _.TransactionDateTime)];
+			_trialBalance = [.. _trialBalance.OrderBy(_ => _.LedgerName)];
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading accounting ledger overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading trial balance: {ex.Message}", "error");
 		}
 		finally
 		{
-			if (_sfAccountingLedgerGrid is not null)
-				await _sfAccountingLedgerGrid.Refresh();
+			if (_sfTrialBalanceGrid is not null)
+				await _sfTrialBalanceGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
@@ -162,19 +136,19 @@ public partial class AccountingLedgerReport
 	{
 		_fromDate = args.StartDate;
 		_toDate = args.EndDate;
-		await LoadAccountingLedgerOverviews();
+		await LoadTrialBalance();
 	}
 
-	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
+	private async Task OnAccountTypeChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<AccountTypeModel, AccountTypeModel> args)
 	{
-		_selectedCompany = args.Value;
-		await LoadAccountingLedgerOverviews();
+		_selectedAccountType = args.Value;
+		await LoadTrialBalance();
 	}
 
-	private async Task OnLedgerChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
+	private async Task OnGroupChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<GroupModel, GroupModel> args)
 	{
-		_selectedLedger = args.Value;
-		await LoadAccountingLedgerOverviews();
+		_selectedGroup = args.Value;
+		await LoadTrialBalance();
 	}
 
 	private async Task SetDateRange(DateRangeType rangeType)
@@ -250,7 +224,7 @@ public partial class AccountingLedgerReport
 		finally
 		{
 			_isProcessing = false;
-			await LoadAccountingLedgerOverviews();
+			await LoadTrialBalance();
 			StateHasChanged();
 		}
 	}
@@ -271,25 +245,24 @@ public partial class AccountingLedgerReport
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await Task.Run(() =>
-				AccountingLedgerReportExcelExport.ExportAccountingLedgerReport(
-					_accountingLedgerOverviews,
+				TrialBalanceExcelExport.ExportTrialBalance(
+					_trialBalance,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany?.Name : null,
-					_selectedLedger?.Id > 0 ? _selectedLedger?.Name : null,
-					_selectedLedger?.Id > 0 ? _selectedTrialBalance : null
+					_selectedGroup?.Id > 0 ? _selectedGroup?.Name : null,
+					_selectedAccountType?.Id > 0 ? _selectedAccountType?.Name : null
 				)
 			);
 
-			string fileName = $"LEDGER_REPORT";
+			string fileName = $"TRIAL_BALANCE";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Ledger report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Trial balance exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -316,25 +289,24 @@ public partial class AccountingLedgerReport
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await Task.Run(() =>
-				AccountingLedgerReportPdfExport.ExportAccountingLedgerReport(
-					_accountingLedgerOverviews,
+				TrialBalancePdfExport.ExportTrialBalance(
+					_trialBalance,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_selectedCompany?.Id > 0 ? _selectedCompany?.Name : null,
-					_selectedLedger?.Id > 0 ? _selectedLedger?.Name : null,
-					_selectedLedger?.Id > 0 ? _selectedTrialBalance : null
+					_selectedGroup?.Id > 0 ? _selectedGroup?.Name : null,
+					_selectedAccountType?.Id > 0 ? _selectedAccountType?.Name : null
 				)
 			);
 
-			string fileName = $"LEDGER_REPORT";
+			string fileName = $"TRIAL_BALANCE";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
 				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
 			fileName += ".pdf";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Ledger report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Trial balance exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -348,57 +320,16 @@ public partial class AccountingLedgerReport
 	}
 	#endregion
 
-	#region Actions
-	private async Task ViewAccounting(int accountingId)
-	{
-		try
-		{
-			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.FinancialAccounting}/{accountingId}", "_blank");
-			else
-				NavigationManager.NavigateTo($"{PageRouteNames.FinancialAccounting}/{accountingId}");
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while opening accounting: {ex.Message}", "error");
-		}
-	}
-
-	private async Task DownloadInvoice(int accountingId)
-	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-
-			var (pdfStream, fileName) = await AccountingData.GenerateAndDownloadInvoice(accountingId);
-			await SaveAndViewService.SaveAndView(fileName, pdfStream);
-		}
-		catch (Exception ex)
-		{
-			await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
-		}
-		finally
-		{
-			_isProcessing = false;
-			StateHasChanged();
-		}
-	}
-
+	#region Utilities
 	private async Task ToggleDetailsView()
 	{
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_sfAccountingLedgerGrid is not null)
-			await _sfAccountingLedgerGrid.Refresh();
+		if (_sfTrialBalanceGrid is not null)
+			await _sfTrialBalanceGrid.Refresh();
 	}
-	#endregion
 
-	#region Utilities
 	private async Task NavigateToAccountingPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
@@ -407,17 +338,12 @@ public partial class AccountingLedgerReport
 			NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting);
 	}
 
-	private async Task NavigateToAccountingReport()
+	private async Task NavigateToLedgerReport()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
-			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportFinancialAccounting, "_blank");
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportAccountingLedger, "_blank");
 		else
-			NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting);
-	}
-
-	private void NavigateToTrialBalance()
-	{
-		NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance);
+			NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

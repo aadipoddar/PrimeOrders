@@ -8,16 +8,11 @@ using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
-using PrimeBakesLibrary.Data.Product;
-using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Product;
-using PrimeBakesLibrary.Models.Sales.Order;
-using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
@@ -754,6 +749,14 @@ public partial class FinancialAccounting
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportFinancialAccounting, "_blank");
 		else
 			NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting);
+	}
+
+	private async Task NavigateToTrialBalance()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportTrialBalance, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance);
 	}
 
 	private async Task ViewReferenceInvoice()

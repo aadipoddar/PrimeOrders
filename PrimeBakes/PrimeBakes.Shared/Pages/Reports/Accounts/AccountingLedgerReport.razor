@@ -8,946 +8,1221 @@
 
 @if (_isLoading)
 {
-	<SfSpinner @bind-Visible="_isLoading" Label="Page is Loading, Please Wait" />
+    <SfSpinner @bind-Visible="_isLoading" Label="Page is Loading, Please Wait" />
 }
 else
 {
-	<!-- Professional Header Section -->
-	<div class="page-header">
-		<div class="header-left">
-			<img src="images/logo.png" alt="Prime Bakes" class="header-logo" />
-			<div class="header-divider"></div>
-			<div class="header-text">
-				<span class="app-name">Prime Bakes</span>
-			</div>
-		</div>
-		<div class="header-center">
-			<h1 class="page-title">Financial Ledger Report</h1>
-			<p class="page-subtitle">View and analyze ledger-wise transactions</p>
-		</div>
-		<div class="header-right">
-			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
-					title="Export to Excel">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-					<polyline points="14 2 14 8 20 8" />
-					<line x1="16" y1="13" x2="8" y2="13" />
-					<line x1="16" y1="17" x2="8" y2="17" />
-					<polyline points="10 9 9 9 8 9" />
-				</svg>
-			</button>
-			<button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-					<polyline points="14 2 14 8 20 8" />
-					<line x1="16" y1="13" x2="8" y2="13" />
-					<line x1="16" y1="17" x2="8" y2="17" />
-					<line x1="10" y1="9" x2="8" y2="9" />
-				</svg>
-			</button>
-			<button class="btn-icon" title="Refresh Data" @onclick="LoadAccountingLedgerOverviews" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<polyline points="23 4 23 10 17 10" />
-					<polyline points="1 20 1 14 7 14" />
-					<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="NavigateToAccountingReport" title="Accounting Report"
-					disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-					<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="NavigateToAccountingPage" title="Create Transaction"
-					disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="12" y1="5" x2="12" y2="19" />
-					<line x1="5" y1="12" x2="19" y2="12" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home"
-					disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-					<polyline points="9 22 9 12 15 12 15 22" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportDashboard)'
-					title="Back" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M19 12H5M12 19l-7-7 7-7" />
-				</svg>
-			</button>
-		</div>
-	</div>
+    <!-- Professional Header Section -->
+    <div class="page-header">
+        <div class="header-left">
+            <img src="images/logo.png" alt="Prime Bakes" class="header-logo" />
+            <div class="header-divider"></div>
+            <div class="header-text">
+                <span class="app-name">Prime Bakes</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <h1 class="page-title">Financial Ledger Report</h1>
+            <p class="page-subtitle">View and analyze ledger-wise transactions</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
+                title="Export to Excel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                </svg>
+            </button>
+            <button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <line x1="10" y1="9" x2="8" y2="9" />
+                </svg>
+            </button>
+            <button class="btn-icon" title="Refresh Data" @onclick="LoadAccountingLedgerOverviews"
+                disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10" />
+                    <polyline points="1 20 1 14 7 14" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick="NavigateToAccountingReport" title="Accounting Report"
+                disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick="NavigateToTrialBalance" title="Trial Balance" disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                    <line x1="7" y1="7" x2="7" y2="11" />
+                    <line x1="12" y1="7" x2="12" y2="11" />
+                    <line x1="17" y1="7" x2="17" y2="11" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick="NavigateToAccountingPage" title="Create Transaction"
+                disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home"
+                disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportDashboard)'
+                title="Back" disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+            </button>
+        </div>
+    </div>
 
-	<!-- Main Content Container -->
-	<div class="report-container">
+    <!-- Main Content Container -->
+    <div class="report-container">
 
-		<!-- Filters Section -->
-		<div class="section-card">
-			<div class="section-header">
-				<div class="section-title-wrapper">
-					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-						 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-					</svg>
-					<h2 class="section-title">Filters</h2>
-				</div>
-			</div>
-			<div class="section-body">
-				<div class="filters-container">
-					<div class="filters-grid">
-						<!-- Date Range -->
-						<div class="form-field">
-							<label class="field-label">Date Range</label>
-							<SfDateRangePicker CssClass="custom-daterange" StartDate="_fromDate" EndDate="_toDate"
-											   TValue="DateTime" Format="dd/MM/yyyy" AllowEdit="true" Placeholder="Select date range">
-								<DateRangePickerEvents TValue="DateTime" ValueChange="OnDateRangeChanged" />
-							</SfDateRangePicker>
-						</div>
+        <!-- Filters Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                    </svg>
+                    <h2 class="section-title">Filters</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="filters-container">
+                    <div class="filters-grid">
+                        <!-- Date Range -->
+                        <div class="form-field">
+                            <label class="field-label">Date Range</label>
+                            <SfDateRangePicker CssClass="custom-daterange" StartDate="_fromDate" EndDate="_toDate"
+                                TValue="DateTime" Format="dd/MM/yyyy" AllowEdit="true" Placeholder="Select date range">
+                                <DateRangePickerEvents TValue="DateTime" ValueChange="OnDateRangeChanged" />
+                            </SfDateRangePicker>
+                        </div>
 
-						<!-- Company -->
-						<div class="form-field">
-							<label class="field-label">Company</label>
-							<SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedCompany" TValue="CompanyModel"
-											TItem="CompanyModel" DataSource="@_companies" Placeholder="All Companies"
-											AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-								<AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
-													ValueChange="OnCompanyChanged" />
-								<AutoCompleteFieldSettings Value="Name" />
-							</SfAutoComplete>
-						</div>
+                        <!-- Company -->
+                        <div class="form-field">
+                            <label class="field-label">Company</label>
+                            <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedCompany" TValue="CompanyModel"
+                                TItem="CompanyModel" DataSource="@_companies" Placeholder="All Companies"
+                                AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                <AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
+                                    ValueChange="OnCompanyChanged" />
+                                <AutoCompleteFieldSettings Value="Name" />
+                            </SfAutoComplete>
+                        </div>
 
-						<!-- Ledger -->
-						<div class="form-field">
-							<label class="field-label">Ledger</label>
-							<SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedLedger" TValue="LedgerModel"
-											TItem="LedgerModel" DataSource="@_ledgers" Placeholder="All Ledgers"
-											AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-								<AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnLedgerChanged" />
-								<AutoCompleteFieldSettings Value="Name" />
-							</SfAutoComplete>
-						</div>
-					</div>
+                        <!-- Ledger -->
+                        <div class="form-field">
+                            <label class="field-label">Ledger</label>
+                            <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedLedger" TValue="LedgerModel"
+                                TItem="LedgerModel" DataSource="@_ledgers" Placeholder="All Ledgers" AllowFiltering="true"
+                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel"
+                                    ValueChange="OnLedgerChanged" />
+                                <AutoCompleteFieldSettings Value="Name" />
+                            </SfAutoComplete>
+                        </div>
+                    </div>
 
-					<!-- Date Utility Buttons -->
-					<div class="date-utilities">
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today"
-								disabled="@_isProcessing">
-							<span>Today</span>
-						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)"
-								title="Yesterday" disabled="@_isProcessing">
-							<span>Yesterday</span>
-						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)"
-								title="Current Month" disabled="@_isProcessing">
-							<span>Current Month</span>
-						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)"
-								title="Previous Month" disabled="@_isProcessing">
-							<span>Previous Month</span>
-						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)"
-								title="Current Financial Year" disabled="@_isProcessing">
-							<span>Current FY</span>
-						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)"
-								title="Previous Financial Year" disabled="@_isProcessing">
-							<span>Previous FY</span>
-						</button>
-						<button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)"
-								title="All Time" disabled="@_isProcessing">
-							<span>All Time</span>
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
+                    <!-- Date Utility Buttons -->
+                    <div class="date-utilities">
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today"
+                            disabled="@_isProcessing">
+                            <span>Today</span>
+                        </button>
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)"
+                            title="Yesterday" disabled="@_isProcessing">
+                            <span>Yesterday</span>
+                        </button>
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)"
+                            title="Current Month" disabled="@_isProcessing">
+                            <span>Current Month</span>
+                        </button>
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)"
+                            title="Previous Month" disabled="@_isProcessing">
+                            <span>Previous Month</span>
+                        </button>
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)"
+                            title="Current Financial Year" disabled="@_isProcessing">
+                            <span>Current FY</span>
+                        </button>
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)"
+                            title="Previous Financial Year" disabled="@_isProcessing">
+                            <span>Previous FY</span>
+                        </button>
+                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)"
+                            title="All Time" disabled="@_isProcessing">
+                            <span>All Time</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<!-- Report Grid Section -->
-		<div class="section-card">
-			<div class="section-header">
-				<div class="section-title-wrapper">
-					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-						 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<line x1="8" y1="6" x2="21" y2="6" />
-						<line x1="8" y1="12" x2="21" y2="12" />
-						<line x1="8" y1="18" x2="21" y2="18" />
-						<line x1="3" y1="6" x2="3.01" y2="6" />
-						<line x1="3" y1="12" x2="3.01" y2="12" />
-						<line x1="3" y1="18" x2="3.01" y2="18" />
-					</svg>
-					<h2 class="section-title">Ledger Transactions</h2>
-				</div>
-				<div class="header-actions">
-					<button class="btn-toggle-details" @onclick="ToggleDetailsView"
-							title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
-						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-							 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							@if (_showAllColumns)
-							{
-								<circle cx="12" cy="12" r="1" />
-								<circle cx="19" cy="12" r="1" />
-								<circle cx="5" cy="12" r="1" />
-							}
-							else
-							{
-								<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-								<line x1="9" y1="9" x2="15" y2="9" />
-								<line x1="9" y1="15" x2="15" y2="15" />
-							}
-						</svg>
-						@(_showAllColumns ? "Show Less" : "Details")
-					</button>
-				</div>
-			</div>
-			<div class="section-body grid-body">
-				<SfGrid ID="_sfAccountingLedgerGrid" @ref="_sfAccountingLedgerGrid" TValue="AccountingLedgerOverviewModel"
-						DataSource="_accountingLedgerOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
-						AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
-						GridLines="GridLine.Horizontal" CssClass="professional-grid"
-						Toolbar="@(new List<string>() { "Search" })">
+        <!-- Trial Balance Summary Section (Shown when Ledger is selected) -->
+        @if (_selectedLedger?.Id > 0 && _selectedTrialBalance != null)
+        {
+            <div class="section-card trial-balance-summary">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                            <line x1="7" y1="7" x2="7" y2="11" />
+                            <line x1="12" y1="7" x2="12" y2="11" />
+                            <line x1="17" y1="7" x2="17" y2="11" />
+                        </svg>
+                        <div class="section-title-with-details">
+                            <h2 class="section-title">@_selectedTrialBalance.LedgerName</h2>
+                            <div class="ledger-badges">
+                                <span class="badge badge-group">@_selectedTrialBalance.GroupName</span>
+                                <span class="badge badge-account">@_selectedTrialBalance.AccountTypeName</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="trial-balance-grid">
+                        <!-- Opening Balance Card -->
+                        <div class="balance-info-card opening-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Opening Balance</div>
+                                <div class="card-value">₹@_selectedTrialBalance.OpeningBalance.ToString("N2")</div>
+                                <div class="card-breakdown">
+                                    <span class="breakdown-item">Dr: ₹@_selectedTrialBalance.OpeningDebit.ToString("N2")</span>
+                                    <span class="breakdown-item">Cr: ₹@_selectedTrialBalance.OpeningCredit.ToString("N2")</span>
+                                </div>
+                            </div>
+                        </div>
 
-					<GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
-					<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+                        <!-- Period Debit Card -->
+                        <div class="balance-info-card debit-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <polyline points="19 12 12 19 5 12" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Period Debit</div>
+                                <div class="card-value debit-amount">₹@_selectedTrialBalance.Debit.ToString("N2")</div>
+                            </div>
+                        </div>
 
-					<GridAggregates>
-						<GridAggregate>
-							<GridAggregateColumns>
-								<GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.LedgerName)"
-													 Type="AggregateType.Count">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-										}
-										<div class="aggregate-label">
-											<strong>Total Entries: @aggregate.Count</strong>
-										</div>
-									</FooterTemplate>
-								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.Debit)"
-													 Type="AggregateType.Sum" Format="N2">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-											<div class="aggregate-value aggregate-debit"><strong>@aggregate.Sum</strong></div>
-										}
-									</FooterTemplate>
-								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.Credit)"
-													 Type="AggregateType.Sum" Format="N2">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-											<div class="aggregate-value aggregate-credit"><strong>@aggregate.Sum</strong></div>
-										}
-									</FooterTemplate>
-								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceAmount)"
-													 Type="AggregateType.Sum" Format="N2">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-											<div><strong>@aggregate.Sum</strong></div>
-										}
-									</FooterTemplate>
-								</GridAggregateColumn>
-							</GridAggregateColumns>
-						</GridAggregate>
-					</GridAggregates>
+                        <!-- Period Credit Card -->
+                        <div class="balance-info-card credit-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="19" x2="12" y2="5" />
+                                    <polyline points="5 12 12 5 19 12" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Period Credit</div>
+                                <div class="card-value credit-amount">₹@_selectedTrialBalance.Credit.ToString("N2")</div>
+                            </div>
+                        </div>
 
-					<GridColumns>
-						<GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
-							<Template>
-								@{
-									var item = (context as AccountingLedgerOverviewModel);
-								}
-								<div class="grid-actions">
-									<button class="btn-grid-action btn-view"
-											@onclick="() => ViewAccounting(item.AccountingId)" title="View Transaction"
-											disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-											 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-											 stroke-linejoin="round">
-											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-											<circle cx="12" cy="12" r="3" />
-										</svg>
-									</button>
-									<button class="btn-grid-action btn-invoice"
-											@onclick="() => DownloadInvoice(item.AccountingId)" title="Download Voucher"
-											disabled="@_isProcessing">
-										<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-											 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-											 stroke-linejoin="round">
-											<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-											<polyline points="7 10 12 15 17 10" />
-											<line x1="12" y1="15" x2="12" y2="3" />
-										</svg>
-									</button>
-								</div>
-							</Template>
-						</GridColumn>
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.LedgerName)" HeaderText="Ledger Name" Width="200" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.LedgerCode)" HeaderText="Code" Width="120" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.AccountTypeName)" HeaderText="Account Type" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.GroupName)" HeaderText="Group" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.TransactionNo)" HeaderText="Transaction No" Width="170" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.TransactionDateTime)" HeaderText="Date" Width="130" Format="dd/MM/yyyy" Type="ColumnType.Date" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.CompanyName)" HeaderText="Company" Width="180" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceType)" HeaderText="Ref Type" Width="130" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceNo)" HeaderText="Reference No" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceDateTime)" HeaderText="Ref Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceAmount)" HeaderText="Ref Amt" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.Debit)" HeaderText="Debit" Width="140" TextAlign="TextAlign.Right">
-							<Template>
-								@{
-									var detailItem = (context as AccountingLedgerOverviewModel);
-									<span class="grid-debit">@(detailItem.Debit?.ToString("N2") ?? "-")</span>
-								}
-							</Template>
-						</GridColumn>
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.Credit)" HeaderText="Credit" Width="140" TextAlign="TextAlign.Right">
-							<Template>
-								@{
-									var detailItem = (context as AccountingLedgerOverviewModel);
-									<span class="grid-credit">@(detailItem.Credit?.ToString("N2") ?? "-")</span>
-								}
-							</Template>
-						</GridColumn>
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.AccountingRemarks)" HeaderText="Accounting Remarks" Width="200" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingLedgerOverviewModel.Remarks)" HeaderText="Ledger Remarks" Width="200" Visible="_showAllColumns" />
-					</GridColumns>
-				</SfGrid>
-			</div>
-		</div>
-	</div>
+                        <!-- Closing Balance Card -->
+                        <div class="balance-info-card closing-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                    <line x1="1" y1="10" x2="23" y2="10" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Closing Balance</div>
+                                <div class="card-value">₹@_selectedTrialBalance.ClosingBalance.ToString("N2")</div>
+                                <div class="card-breakdown">
+                                    <span class="breakdown-item">Dr: ₹@_selectedTrialBalance.ClosingDebit.ToString("N2")</span>
+                                    <span class="breakdown-item">Cr: ₹@_selectedTrialBalance.ClosingCredit.ToString("N2")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Report Grid Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg>
+                    <h2 class="section-title">Ledger Transactions</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-toggle-details" @onclick="ToggleDetailsView"
+                        title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @if (_showAllColumns)
+                            {
+                                <circle cx="12" cy="12" r="1" />
+                                <circle cx="19" cy="12" r="1" />
+                                <circle cx="5" cy="12" r="1" />
+                            }
+                            else
+                            {
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <line x1="9" y1="9" x2="15" y2="9" />
+                                <line x1="9" y1="15" x2="15" y2="15" />
+                            }
+                        </svg>
+                        @(_showAllColumns ? "Show Less" : "Details")
+                    </button>
+                </div>
+            </div>
+            <div class="section-body grid-body">
+                <SfGrid ID="_sfAccountingLedgerGrid" @ref="_sfAccountingLedgerGrid" TValue="AccountingLedgerOverviewModel"
+                    DataSource="_accountingLedgerOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
+                    AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
+                    GridLines="GridLine.Horizontal" CssClass="professional-grid"
+                    Toolbar="@(new List<string>() { "Search" })">
+
+                    <GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
+                    <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
+
+                    <GridAggregates>
+                        <GridAggregate>
+                            <GridAggregateColumns>
+                                <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.LedgerName)"
+                                    Type="AggregateType.Count">
+                                    <FooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Entries: @aggregate.Count</strong>
+                                        </div>
+                                    </FooterTemplate>
+                                </GridAggregateColumn>
+                                <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.Debit)"
+                                    Type="AggregateType.Sum" Format="N2">
+                                    <FooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-debit"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </FooterTemplate>
+                                </GridAggregateColumn>
+                                <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.Credit)"
+                                    Type="AggregateType.Sum" Format="N2">
+                                    <FooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-credit"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </FooterTemplate>
+                                </GridAggregateColumn>
+                                <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceAmount)"
+                                    Type="AggregateType.Sum" Format="N2">
+                                    <FooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </FooterTemplate>
+                                </GridAggregateColumn>
+                            </GridAggregateColumns>
+                        </GridAggregate>
+                    </GridAggregates>
+
+                    <GridColumns>
+                        <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
+                            <Template>
+                                @{
+                                    var item = (context as AccountingLedgerOverviewModel);
+                                }
+                                <div class="grid-actions">
+                                    <button class="btn-grid-action btn-view"
+                                        @onclick="() => ViewAccounting(item.AccountingId)" title="View Transaction"
+                                        disabled="@_isProcessing">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                            <circle cx="12" cy="12" r="3" />
+                                        </svg>
+                                    </button>
+                                    <button class="btn-grid-action btn-invoice"
+                                        @onclick="() => DownloadInvoice(item.AccountingId)" title="Download Voucher"
+                                        disabled="@_isProcessing">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.LedgerName)" HeaderText="Ledger Name"
+                            Width="350" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.LedgerCode)" HeaderText="Code" Width="120"
+                            Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.AccountTypeName)" HeaderText="Account Type"
+                            Width="150" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.GroupName)" HeaderText="Group" Width="150"
+                            Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.TransactionNo)" HeaderText="Transaction No"
+                            Width="170" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.TransactionDateTime)" HeaderText="Date"
+                            Width="130" Format="dd/MM/yyyy" Type="ColumnType.Date" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.CompanyName)" HeaderText="Company"
+                            Width="180" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceType)" HeaderText="Ref Type"
+                            Width="130" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceNo)" HeaderText="Reference No"
+                            Width="150" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceDateTime)" HeaderText="Ref Date"
+                            Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceAmount)" HeaderText="Ref Amt"
+                            Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.Debit)" HeaderText="Debit" Width="140"
+                            TextAlign="TextAlign.Right">
+                            <Template>
+                                @{
+                                    var detailItem = (context as AccountingLedgerOverviewModel);
+                                    <span class="grid-debit">@(detailItem.Debit?.ToString("N2") ?? "-")</span>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.Credit)" HeaderText="Credit" Width="140"
+                            TextAlign="TextAlign.Right">
+                            <Template>
+                                @{
+                                    var detailItem = (context as AccountingLedgerOverviewModel);
+                                    <span class="grid-credit">@(detailItem.Credit?.ToString("N2") ?? "-")</span>
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.AccountingRemarks)"
+                            HeaderText="Accounting Remarks" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(AccountingLedgerOverviewModel.Remarks)" HeaderText="Ledger Remarks"
+                            Width="200" Visible="_showAllColumns" />
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
 }
 
 <SfToast @ref="_sfErrorToast" ID="_sfErrorToast" Title="@_errorTitle" Content="@_errorMessage" Timeout="5000">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
-	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
+    <ToastPosition X="Right" Y="Top" />
+    <ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
+    <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
 </SfToast>
 
 <SfToast @ref="_sfSuccessToast" ID="_sfSuccessToast" Title="@_successTitle" Content="@_successMessage" Timeout="5000">
-	<ToastPosition X="Right" Y="Top" />
-	<ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
-	<ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
+    <ToastPosition X="Right" Y="Top" />
+    <ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
+    <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
 </SfToast>
 
 <style>
-	* {
-		box-sizing: border-box;
-	}
-
-	/* Professional Header Section */
-	.page-header {
-		position: sticky;
-		top: 0;
-		z-index: 1000;
-		background: #ffffff;
-		border-bottom: 2px solid #e2e8f0;
-		padding: 16px 32px;
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		align-items: center;
-		gap: 24px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-		min-height: 72px;
-	}
-
-	.header-left {
-		display: flex;
-		align-items: center;
-		gap: 16px;
-	}
-
-	.header-logo {
-		width: 40px;
-		height: 40px;
-		flex-shrink: 0;
-	}
-
-	.header-divider {
-		width: 1px;
-		height: 32px;
-		background: #e2e8f0;
-		flex-shrink: 0;
-	}
-
-	.header-text {
-		display: flex;
-		align-items: center;
-		font-size: 16px;
-		color: #0f172a;
-		font-weight: 600;
-	}
-
-	.app-name {
-		color: #0f172a;
-		font-weight: 600;
-		letter-spacing: 0.5px;
-	}
-
-	.header-center {
-		text-align: center;
-	}
-
-	.page-title {
-		font-size: 20px;
-		font-weight: 600;
-		color: #0f172a;
-		margin: 0 0 4px 0;
-		letter-spacing: -0.3px;
-	}
-
-	.page-subtitle {
-		font-size: 13px;
-		color: #64748b;
-		margin: 0;
-		font-weight: 400;
-	}
-
-	.header-right {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 8px;
-	}
-
-	.btn-icon {
-		width: 40px;
-		height: 40px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		color: #64748b;
-	}
-
-		.btn-icon:hover {
-			background: #f8fafc;
-			border-color: #3b82f6;
-			color: #3b82f6;
-		}
-
-		.btn-icon:active {
-			transform: scale(0.95);
-		}
-
-	.btn-icon-excel {
-		color: #10b981;
-		border-color: #10b981;
-	}
-
-		.btn-icon-excel:hover {
-			background: #ecfdf5;
-			border-color: #059669;
-			color: #059669;
-		}
-
-		.btn-icon-excel:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
-
-	.btn-icon-pdf {
-		color: #ef4444;
-		border-color: #ef4444;
-	}
-
-		.btn-icon-pdf:hover {
-			background: #fef2f2;
-			border-color: #dc2626;
-			color: #dc2626;
-		}
-
-		.btn-icon-pdf:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-		}
-
-	/* Main Container */
-	.report-container {
-		padding: 24px 32px;
-		max-width: 1920px;
-		margin: 0 auto;
-		background: #f8fafc;
-		min-height: calc(100vh - 72px);
-	}
-
-	/* Section Card Styles */
-	.section-card {
-		background: #ffffff;
-		border-radius: 12px;
-		border: 1px solid #e2e8f0;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		margin-bottom: 24px;
-		overflow: hidden;
-	}
-
-	.section-header {
-		padding: 20px 24px;
-		border-bottom: 1px solid #e2e8f0;
-		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.section-title-wrapper {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
-
-	.section-icon {
-		color: #3b82f6;
-		flex-shrink: 0;
-	}
-
-	.section-title {
-		font-size: 16px;
-		font-weight: 600;
-		color: #0f172a;
-		margin: 0;
-		letter-spacing: -0.2px;
-	}
-
-	/* Header Actions Container */
-	.header-actions {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
-
-	/* Toggle Details Button */
-	.btn-toggle-details {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		height: 38px;
-		padding: 0 20px;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
-		border-radius: 8px;
-		font-size: 13px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		color: #3b82f6;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-	}
-
-		.btn-toggle-details:hover {
-			background: #eff6ff;
-			border-color: #3b82f6;
-			box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
-			transform: translateY(-1px);
-		}
-
-		.btn-toggle-details:active {
-			transform: translateY(0);
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-		}
-
-		.btn-toggle-details svg {
-			flex-shrink: 0;
-		}
-
-	.section-body {
-		padding: 24px;
-	}
-
-	.grid-body {
-		padding: 0 !important;
-	}
-
-	/* Filters Container and Grid Layout */
-	.filters-container {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.filters-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(180px, 250px));
-		gap: 12px;
-		align-items: end;
-	}
-
-	/* Date Utilities */
-	.date-utilities {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		padding: 12px;
-		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-		border-radius: 8px;
-		border: 1px solid #e2e8f0;
-	}
-
-	.btn-date-utility {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 6px 12px;
-		background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-		color: #475569;
-		border: 1px solid #cbd5e1;
-		border-radius: 6px;
-		font-size: 12px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		white-space: nowrap;
-	}
-
-		.btn-date-utility:hover {
-			background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-			color: white;
-			border-color: #2563eb;
-			transform: translateY(-1px);
-			box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-		}
-
-		.btn-date-utility:active {
-			transform: translateY(0);
-			box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-		}
-
-	.form-field {
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-		max-width: 250px;
-	}
-
-	.field-label {
-		font-size: 12px;
-		font-weight: 600;
-		color: #334155;
-		letter-spacing: 0.1px;
-	}
-
-	/* Syncfusion Component Overrides */
-	::deep .custom-autocomplete,
-	::deep .custom-datepicker,
-	::deep .custom-daterange {
-		width: 100%;
-	}
-
-		::deep .custom-autocomplete .e-input-group,
-		::deep .custom-datepicker .e-input-group,
-		::deep .custom-daterange .e-input-group {
-			border: 1px solid #cbd5e1;
-			border-radius: 6px;
-			background: #ffffff;
-			transition: all 0.2s ease;
-			height: 36px;
-		}
-
-			::deep .custom-autocomplete .e-input-group:hover,
-			::deep .custom-datepicker .e-input-group:hover,
-			::deep .custom-daterange .e-input-group:hover {
-				border-color: #94a3b8;
-			}
-
-			::deep .custom-autocomplete .e-input-group.e-input-focus,
-			::deep .custom-datepicker .e-input-group.e-input-focus,
-			::deep .custom-daterange .e-input-group.e-input-focus {
-				border-color: #3b82f6;
-				box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-			}
-
-			::deep .custom-autocomplete .e-input-group input,
-			::deep .custom-datepicker .e-input-group input,
-			::deep .custom-daterange .e-input-group input {
-				font-size: 14px;
-				color: #1e293b;
-				padding: 8px 12px;
-			}
-
-				::deep .custom-autocomplete .e-input-group input::placeholder,
-				::deep .custom-datepicker .e-input-group input::placeholder,
-				::deep .custom-daterange .e-input-group input::placeholder {
-					color: #94a3b8;
-				}
-
-	/* Professional Grid Styles */
-	.e-grid .e-summaryrow .e-summarycell {
-		background-color: #deecf9;
-	}
-
-	::deep .professional-grid {
-		border: none;
-	}
-
-		::deep .professional-grid .e-gridheader {
-			background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-			border-bottom: 2px solid #e2e8f0;
-		}
-
-		::deep .professional-grid .e-headercell {
-			background: transparent;
-			color: #475569;
-			font-weight: 600;
-			font-size: 12px;
-			text-transform: uppercase;
-			letter-spacing: 0.3px;
-			border-right: 1px solid #e2e8f0;
-			padding: 12px 8px;
-		}
-
-			::deep .professional-grid .e-headercell:last-child {
-				border-right: none;
-			}
-
-		::deep .professional-grid .e-gridcontent {
-			background: #ffffff;
-		}
-
-		::deep .professional-grid .e-row {
-			transition: background-color 0.2s ease;
-		}
-
-			::deep .professional-grid .e-row:hover {
-				background-color: #f8fafc;
-			}
-
-			::deep .professional-grid .e-row.e-altrow {
-				background-color: #fafbfc;
-			}
-
-				::deep .professional-grid .e-row.e-altrow:hover {
-					background-color: #f8fafc;
-				}
-
-		::deep .professional-grid .e-rowcell {
-			border-right: 1px solid #f1f5f9;
-			border-bottom: 1px solid #f1f5f9;
-			padding: 10px 8px;
-			font-size: 13px;
-			color: #1e293b;
-		}
-
-			::deep .professional-grid .e-rowcell:last-child {
-				border-right: none;
-			}
-
-		/* Grid Pager Styling */
-		::deep .professional-grid .e-gridpager {
-			background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-			border-top: 2px solid #e2e8f0;
-			padding: 12px 16px;
-		}
-
-			::deep .professional-grid .e-gridpager .e-pagercontainer {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-			}
-
-			::deep .professional-grid .e-gridpager .e-numericitem,
-			::deep .professional-grid .e-gridpager .e-currentitem {
-				min-width: 32px;
-				height: 32px;
-				border-radius: 6px;
-				margin: 0 4px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 13px;
-				font-weight: 500;
-				transition: all 0.2s ease;
-			}
-
-			::deep .professional-grid .e-gridpager .e-numericitem {
-				background: #ffffff;
-				color: #64748b;
-				border: 1px solid #e2e8f0;
-			}
-
-				::deep .professional-grid .e-gridpager .e-numericitem:hover {
-					background: #f8fafc;
-					color: #3b82f6;
-					border-color: #3b82f6;
-				}
-
-			::deep .professional-grid .e-gridpager .e-currentitem {
-				background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-				color: #ffffff;
-				border: none;
-				box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-			}
-
-		/* Empty Grid State */
-		::deep .professional-grid .e-emptyrow {
-			text-align: center;
-			padding: 48px 24px;
-			color: #94a3b8;
-			font-size: 14px;
-		}
-
-	/* Grid Cell Text Coloring */
-	.grid-debit {
-		color: #dc2626;
-		font-weight: 600;
-	}
-
-	.grid-credit {
-		color: #059669;
-		font-weight: 600;
-	}
-
-	/* Grid Footer Aggregates */
-	::deep .professional-grid .e-gridfooter {
-		background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
-		border-top: 2px solid #cbd5e1;
-	}
-
-	::deep .professional-grid .e-summarycell {
-		font-weight: 600;
-		color: #1e293b;
-		padding: 12px 8px;
-		border-right: 1px solid #cbd5e1;
-	}
-
-		::deep .professional-grid .e-summarycell:last-child {
-			border-right: none;
-		}
-
-	.aggregate-value.aggregate-debit {
-		color: #dc2626;
-	}
-
-	.aggregate-value.aggregate-credit {
-		color: #059669;
-		font-size: 14px;
-	}
-
-		.aggregate-value.aggregate-credit strong {
-			font-size: 15px;
-		}
-
-	/* Grid Action Buttons */
-	.grid-actions {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-	}
-
-	.btn-grid-action {
-		width: 36px;
-		height: 36px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
-		border-radius: 6px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		padding: 0;
-	}
-
-		.btn-grid-action:disabled {
-			opacity: 0.4;
-			cursor: not-allowed;
-		}
-
-		.btn-grid-action:not(:disabled):hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-		}
-
-		.btn-grid-action:not(:disabled):active {
-			transform: scale(0.95);
-		}
-
-		.btn-grid-action.btn-view {
-			color: #3b82f6;
-			border-color: #3b82f6;
-		}
-
-			.btn-grid-action.btn-view:not(:disabled):hover {
-				background: #eff6ff;
-				box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-			}
-
-		.btn-grid-action.btn-invoice {
-			color: #10b981;
-			border-color: #10b981;
-		}
-
-			.btn-grid-action.btn-invoice:not(:disabled):hover {
-				background: #ecfdf5;
-				box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-			}
-
-	/* Responsive Design */
-	@@media (max-width: 1400px) {
-		.filters-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		.date-utilities {
-			justify-content: center;
-		}
-	}
-
-	@@media (max-width: 768px) {
-		.page-header {
-			grid-template-columns: 1fr;
-			gap: 16px;
-			padding: 16px;
-		}
-
-		.header-left {
-			justify-content: center;
-		}
-
-		.header-center {
-			order: -1;
-		}
-
-		.header-right {
-			justify-content: center;
-		}
-
-		.report-container {
-			padding: 16px;
-		}
-
-		.filters-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.date-utilities {
-			justify-content: center;
-		}
-
-		.btn-date-utility {
-			flex: 1 1 auto;
-			min-width: 120px;
-		}
-	}
+    * {
+        box-sizing: border-box;
+    }
+
+    /* Professional Header Section */
+    .page-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: #ffffff;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 16px 32px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        min-height: 72px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .header-logo {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+
+    .header-divider {
+        width: 1px;
+        height: 32px;
+        background: #e2e8f0;
+        flex-shrink: 0;
+    }
+
+    .header-text {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .app-name {
+        color: #0f172a;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .header-center {
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.3px;
+    }
+
+    .page-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #64748b;
+    }
+
+    .btn-icon:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .btn-icon:active {
+        transform: scale(0.95);
+    }
+
+    .btn-icon-excel {
+        color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-icon-excel:hover {
+        background: #ecfdf5;
+        border-color: #059669;
+        color: #059669;
+    }
+
+    .btn-icon-excel:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-icon-pdf {
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .btn-icon-pdf:hover {
+        background: #fef2f2;
+        border-color: #dc2626;
+        color: #dc2626;
+    }
+
+    .btn-icon-pdf:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Main Container */
+    .report-container {
+        padding: 24px 32px;
+        max-width: 1920px;
+        margin: 0 auto;
+        background: #f8fafc;
+        min-height: calc(100vh - 72px);
+    }
+
+    /* Section Card Styles */
+    .section-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .section-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-icon {
+        color: #3b82f6;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.2px;
+    }
+
+    /* Header Actions Container */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Toggle Details Button */
+    .btn-toggle-details {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 20px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #3b82f6;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-toggle-details:hover {
+        background: #eff6ff;
+        border-color: #3b82f6;
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .btn-toggle-details:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-toggle-details svg {
+        flex-shrink: 0;
+    }
+
+    .section-body {
+        padding: 24px;
+    }
+
+    .grid-body {
+        padding: 0 !important;
+    }
+
+    /* Filters Container and Grid Layout */
+    .filters-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 250px));
+        gap: 12px;
+        align-items: end;
+    }
+
+    /* Date Utilities */
+    .date-utilities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-date-utility {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .btn-date-utility:hover {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-date-utility:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-width: 250px;
+    }
+
+    .field-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+        letter-spacing: 0.1px;
+    }
+
+    /* Syncfusion Component Overrides */
+    ::deep .custom-autocomplete,
+    ::deep .custom-datepicker,
+    ::deep .custom-daterange {
+        width: 100%;
+    }
+
+    ::deep .custom-autocomplete .e-input-group,
+    ::deep .custom-datepicker .e-input-group,
+    ::deep .custom-daterange .e-input-group {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+        height: 36px;
+    }
+
+    ::deep .custom-autocomplete .e-input-group:hover,
+    ::deep .custom-datepicker .e-input-group:hover,
+    ::deep .custom-daterange .e-input-group:hover {
+        border-color: #94a3b8;
+    }
+
+    ::deep .custom-autocomplete .e-input-group.e-input-focus,
+    ::deep .custom-datepicker .e-input-group.e-input-focus,
+    ::deep .custom-daterange .e-input-group.e-input-focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    ::deep .custom-autocomplete .e-input-group input,
+    ::deep .custom-datepicker .e-input-group input,
+    ::deep .custom-daterange .e-input-group input {
+        font-size: 14px;
+        color: #1e293b;
+        padding: 8px 12px;
+    }
+
+    ::deep .custom-autocomplete .e-input-group input::placeholder,
+    ::deep .custom-datepicker .e-input-group input::placeholder,
+    ::deep .custom-daterange .e-input-group input::placeholder {
+        color: #94a3b8;
+    }
+
+    /* Professional Grid Styles */
+    .e-grid .e-summaryrow .e-summarycell {
+        background-color: #deecf9;
+    }
+
+    ::deep .professional-grid {
+        border: none;
+    }
+
+    ::deep .professional-grid .e-gridheader {
+        background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    ::deep .professional-grid .e-headercell {
+        background: transparent;
+        color: #475569;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-right: 1px solid #e2e8f0;
+        padding: 12px 8px;
+    }
+
+    ::deep .professional-grid .e-headercell:last-child {
+        border-right: none;
+    }
+
+    ::deep .professional-grid .e-gridcontent {
+        background: #ffffff;
+    }
+
+    ::deep .professional-grid .e-row {
+        transition: background-color 0.2s ease;
+    }
+
+    ::deep .professional-grid .e-row:hover {
+        background-color: #f8fafc;
+    }
+
+    ::deep .professional-grid .e-row.e-altrow {
+        background-color: #fafbfc;
+    }
+
+    ::deep .professional-grid .e-row.e-altrow:hover {
+        background-color: #f8fafc;
+    }
+
+    ::deep .professional-grid .e-rowcell {
+        border-right: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 10px 8px;
+        font-size: 13px;
+        color: #1e293b;
+    }
+
+    ::deep .professional-grid .e-rowcell:last-child {
+        border-right: none;
+    }
+
+    /* Grid Pager Styling */
+    ::deep .professional-grid .e-gridpager {
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+        border-top: 2px solid #e2e8f0;
+        padding: 12px 16px;
+    }
+
+    ::deep .professional-grid .e-gridpager .e-pagercontainer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    ::deep .professional-grid .e-gridpager .e-numericitem,
+    ::deep .professional-grid .e-gridpager .e-currentitem {
+        min-width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        margin: 0 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    ::deep .professional-grid .e-gridpager .e-numericitem {
+        background: #ffffff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+
+    ::deep .professional-grid .e-gridpager .e-numericitem:hover {
+        background: #f8fafc;
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    ::deep .professional-grid .e-gridpager .e-currentitem {
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Empty Grid State */
+    ::deep .professional-grid .e-emptyrow {
+        text-align: center;
+        padding: 48px 24px;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    /* Grid Cell Text Coloring */
+    .grid-debit {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .grid-credit {
+        color: #059669;
+        font-weight: 600;
+    }
+
+    /* Grid Footer Aggregates */
+    ::deep .professional-grid .e-gridfooter {
+        background: linear-gradient(to bottom, #f1f5f9 0%, #e2e8f0 100%);
+        border-top: 2px solid #cbd5e1;
+    }
+
+    ::deep .professional-grid .e-summarycell {
+        font-weight: 600;
+        color: #1e293b;
+        padding: 12px 8px;
+        border-right: 1px solid #cbd5e1;
+    }
+
+    ::deep .professional-grid .e-summarycell:last-child {
+        border-right: none;
+    }
+
+    .aggregate-value.aggregate-debit {
+        color: #dc2626;
+    }
+
+    .aggregate-value.aggregate-credit {
+        color: #059669;
+        font-size: 14px;
+    }
+
+    .aggregate-value.aggregate-credit strong {
+        font-size: 15px;
+    }
+
+    /* Grid Action Buttons */
+    .grid-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-grid-action {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+
+    .btn-grid-action:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .btn-grid-action:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-grid-action:not(:disabled):active {
+        transform: scale(0.95);
+    }
+
+    .btn-grid-action.btn-view {
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .btn-grid-action.btn-view:not(:disabled):hover {
+        background: #eff6ff;
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-grid-action.btn-invoice {
+        color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-grid-action.btn-invoice:not(:disabled):hover {
+        background: #ecfdf5;
+        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1400px) {
+        .filters-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .date-utilities {
+            justify-content: center;
+        }
+    }
+
+    /* Trial Balance Summary Section */
+    .trial-balance-summary {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    .section-title-with-details {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .ledger-badges {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .trial-balance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+    }
+
+    .balance-info-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .balance-info-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .balance-info-card .card-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .opening-card .card-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+        color: #ffffff;
+    }
+
+    .debit-card .card-icon {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        color: #ffffff;
+    }
+
+    .credit-card .card-icon {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: #ffffff;
+    }
+
+    .closing-card .card-icon {
+        background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+        color: #ffffff;
+    }
+
+    .balance-info-card:hover .card-icon {
+        transform: scale(1.05);
+    }
+
+    .balance-info-card .card-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .balance-info-card .card-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 5px;
+    }
+
+    .balance-info-card .card-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 3px;
+        line-height: 1.2;
+    }
+
+    .balance-info-card .debit-amount {
+        color: #dc2626;
+    }
+
+    .balance-info-card .credit-amount {
+        color: #059669;
+    }
+
+    .balance-info-card .card-breakdown {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 500;
+        margin-top: 5px;
+        color: #64748b;
+    }
+
+    .breakdown-item {
+        display: inline-flex;
+        white-space: nowrap;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    .badge-group {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+
+    .badge-account {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .header-left {
+            justify-content: center;
+        }
+
+        .header-center {
+            order: -1;
+        }
+
+        .header-right {
+            justify-content: center;
+        }
+
+        .report-container {
+            padding: 16px;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .date-utilities {
+            justify-content: center;
+        }
+
+        .btn-date-utility {
+            flex: 1 1 auto;
+            min-width: 120px;
+        }
+
+        .trial-balance-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .balance-info-card .card-value {
+            font-size: 20px;
+        }
+    }
 </style>
-

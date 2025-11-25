@@ -98,7 +98,7 @@ else
 									Location <span class="required">*</span>
 								</label>
 								<SfAutoComplete Value="@_selectedLocation" TValue="LocationModel" TItem="LocationModel"
-									DataSource="@_locations"  Placeholder="Select a Location"
+									DataSource="@_locations" Placeholder="Select a Location"
 									FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
 									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
 									<AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
@@ -107,13 +107,13 @@ else
 								</SfAutoComplete>
 							</div>
 
-						<!-- Company -->
+							<!-- Company -->
 							<div class="form-field">
 								<label class="field-label">
 									Company <span class="required">*</span>
 								</label>
 								<SfAutoComplete Value="@_selectedCompany" TValue="CompanyModel" TItem="CompanyModel"
-									DataSource="@_companies"  Placeholder="Select a Company"
+									DataSource="@_companies" Placeholder="Select a Company"
 									FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
 									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
 									<AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
@@ -131,10 +131,10 @@ else
 									Party
 								</label>
 								<SfAutoComplete Value="@_selectedParty" TValue="LedgerModel" TItem="LedgerModel"
-									DataSource="@_parties"  Placeholder="Select a Party"
-									FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-									FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
-									<AutoCompleteEvents TItem="LedgerModel?" TValue="LedgerModel?"
+									DataSource="@_parties" Placeholder="Select a Party" FloatLabelType="FloatLabelType.Never"
+									AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+									CssClass="custom-autocomplete">
+									<AutoCompleteEvents TItem="LedgerModel ?" TValue="LedgerModel ?"
 										ValueChange="OnPartyChanged" />
 									<AutoCompleteFieldSettings Value="Name" />
 								</SfAutoComplete>
@@ -155,7 +155,7 @@ else
 								</SfDatePicker>
 							</div>
 
-						<!-- Financial Year -->
+							<!-- Financial Year -->
 							<div class="form-field">
 								<label class="field-label">
 									Financial Year
@@ -166,7 +166,7 @@ else
 									CssClass="custom-textbox readonly-field" />
 							</div>
 
-						<!-- Transaction No -->
+							<!-- Transaction No -->
 							<div class="form-field">
 								<label class="field-label">
 									Transaction No
@@ -328,10 +328,10 @@ else
 						<label class="cart-label">Item <span class="required">*</span></label>
 						<SfAutoComplete @ref="_sfItemAutoComplete" Value="@_selectedProduct"
 							TValue="ProductLocationOverviewModel" TItem="ProductLocationOverviewModel"
-							DataSource="@_products"  Placeholder="Select Item"
-							FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
-							FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
-							<AutoCompleteEvents TItem="ProductLocationOverviewModel?" TValue="ProductLocationOverviewModel?"
+							DataSource="@_products" Placeholder="Select Item" FloatLabelType="FloatLabelType.Never"
+							AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+							CssClass="custom-autocomplete">
+							<AutoCompleteEvents TItem="ProductLocationOverviewModel ?" TValue="ProductLocationOverviewModel ?"
 								ValueChange="OnItemChanged" />
 							<AutoCompleteFieldSettings Value="Name" />
 						</SfAutoComplete>

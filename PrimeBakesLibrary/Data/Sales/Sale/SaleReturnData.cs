@@ -1,5 +1,4 @@
 ﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
-using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Stock;
@@ -312,7 +311,7 @@ public static class SaleReturnData
 		if (saleReturnOverview is null)
 			return;
 
-		if (saleReturnOverview.TotalAmount <= 0 && saleReturnOverview.TotalTaxAmount <= 0)
+		if (saleReturnOverview.TotalAmount <= 0)
 			return;
 
 		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
@@ -337,7 +336,7 @@ public static class SaleReturnData
 
 		if (saleReturnOverview.Cash + saleReturnOverview.UPI + saleReturnOverview.Card > 0)
 		{
-			var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId);
+			var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashSalesLedgerId);
 			accountingCart.Add(new()
 			{
 				ReferenceId = saleReturnOverview.Id,
@@ -362,7 +361,10 @@ public static class SaleReturnData
 				Remarks = $"Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			});
 
-		if (saleReturnOverview.TotalAmount - saleReturnOverview.TotalTaxAmount > 0)
+		var saleReturnDetails = await LoadSaleReturnDetailBySaleReturn(saleReturnOverview.Id);
+		var extraTaxAmount = saleReturnDetails.Where(x => !x.InclusiveTax).Sum(x => x.TotalTaxAmount);
+
+		if (saleReturnOverview.TotalAmount - extraTaxAmount > 0)
 		{
 			var saleLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId);
 			accountingCart.Add(new()
@@ -371,13 +373,13 @@ public static class SaleReturnData
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
 				ReferenceNo = saleReturnOverview.TransactionNo,
 				LedgerId = int.Parse(saleLedger.Value),
-				Debit = saleReturnOverview.TotalAmount - saleReturnOverview.TotalTaxAmount,
+				Debit = saleReturnOverview.TotalAmount - extraTaxAmount,
 				Credit = null,
 				Remarks = $"Sale Return Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			});
 		}
 
-		if (saleReturnOverview.TotalTaxAmount > 0)
+		if (extraTaxAmount > 0)
 		{
 			var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
 			accountingCart.Add(new()
@@ -386,7 +388,7 @@ public static class SaleReturnData
 				ReferenceType = ReferenceTypes.SaleReturn.ToString(),
 				ReferenceNo = saleReturnOverview.TransactionNo,
 				LedgerId = int.Parse(gstLedger.Value),
-				Debit = saleReturnOverview.TotalTaxAmount,
+				Debit = extraTaxAmount,
 				Credit = null,
 				Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
 			});

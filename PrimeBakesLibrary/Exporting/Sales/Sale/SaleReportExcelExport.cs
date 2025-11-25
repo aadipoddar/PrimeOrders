@@ -23,7 +23,8 @@ public static class SaleReportExcelExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         bool showLocation = false,
-        string locationName = null)
+        string locationName = null,
+        string partyName = null)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
@@ -74,7 +75,7 @@ public static class SaleReportExcelExport
             ["DiscountAmount"] = new() { DisplayName = "Discount Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
             ["TotalAfterDiscount"] = new() { DisplayName = "After Discount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
             ["RoundOffAmount"] = new() { DisplayName = "Round Off", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["TotalAmount"] = new() { DisplayName = "Total Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            ["TotalAmount"] = new() { DisplayName = "Total Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, IsRequired = true, IsGrandTotal = true },
             ["Cash"] = new() { DisplayName = "Cash", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
             ["Card"] = new() { DisplayName = "Card", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
             ["UPI"] = new() { DisplayName = "UPI", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
@@ -131,10 +132,21 @@ public static class SaleReportExcelExport
             columnOrder =
             [
                 "TransactionNo", "OrderTransactionNo", "TransactionDateTime",
-                "LocationName",
-                "PartyName", "CustomerName",
-                "TotalQuantity", "TotalAfterTax", "DiscountPercent", "TotalAmount", "PaymentModes"
+                "TotalQuantity", "TotalAfterTax", "DiscountPercent", "DiscountAmount", "TotalAmount", "PaymentModes"
             ];
+
+            // Add location column only if not showing location in header
+            if (!showLocation)
+            {
+                columnOrder.Insert(3, "LocationName");
+            }
+
+            // Add party column only if not showing party in header
+            if (string.IsNullOrEmpty(partyName))
+            {
+                int insertIndex = showLocation ? 3 : 4;
+                columnOrder.Insert(insertIndex, "PartyName");
+            }
         }
 
         // Call the generic Excel export utility
@@ -146,7 +158,8 @@ public static class SaleReportExcelExport
             dateRangeEnd,
             columnSettings,
             columnOrder,
-            locationName: locationName
+            locationName: locationName,
+            partyName: partyName
         );
     }
 }

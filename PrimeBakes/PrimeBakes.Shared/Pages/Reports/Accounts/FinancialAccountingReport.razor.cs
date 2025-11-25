@@ -5,14 +5,11 @@ using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Accounts;
-using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -503,6 +500,14 @@ public partial class FinancialAccountingReport
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportAccountingLedger, "_blank");
 		else
 			NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger);
+	}
+
+	private async Task NavigateToTrialBalance()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportTrialBalance, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance);
 	}
 
 	private async Task ShowToast(string title, string message, string type)

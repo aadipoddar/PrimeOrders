@@ -384,7 +384,8 @@ public partial class SaleReport
 					dateRangeEnd,
 					_showAllColumns,
 					_user.LocationId == 1,
-					_selectedLocation?.Name
+					_selectedLocation?.Name,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
 				)
 			);
 
@@ -432,7 +433,8 @@ public partial class SaleReport
 					dateRangeEnd,
 					_showAllColumns,
 					_user.LocationId == 1,
-					_selectedLocation?.Name
+					_selectedLocation?.Name,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
 				)
 			);
 

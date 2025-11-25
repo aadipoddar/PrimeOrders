@@ -1,15 +1,8 @@
-﻿using PrimeBakesLibrary.Data.Accounts.Masters;
-using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory.Stock;
-using PrimeBakesLibrary.Data.Sales.Order;
+﻿using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Exporting.Accounts;
-using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Inventory.Stock;
-using PrimeBakesLibrary.Models.Sales.Order;
-using PrimeBakesLibrary.Models.Sales.Sale;
 
 namespace PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 
@@ -32,6 +25,9 @@ public static class AccountingData
 
 	public static async Task<List<AccountingLedgerOverviewModel>> LoadAccountingLedgerOverviewByDate(DateTime StartDate, DateTime EndDate) =>
 		await SqlDataAccess.LoadData<AccountingLedgerOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingLedgerOverviewByDate, new { StartDate, EndDate });
+
+	public static async Task<List<TrialBalanceModel>> LoadTrialBalanceByDate(DateTime StartDate, DateTime EndDate) =>
+		await SqlDataAccess.LoadData<TrialBalanceModel, dynamic>(StoredProcedureNames.LoadTrialBalanceByDate, new { StartDate, EndDate });
 
 	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int accountingId)
 	{

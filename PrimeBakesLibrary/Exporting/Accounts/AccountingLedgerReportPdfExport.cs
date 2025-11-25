@@ -10,7 +10,8 @@ public static class AccountingLedgerReportPdfExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         string companyName = null,
-        string ledgerName = null)
+        string ledgerName = null,
+        TrialBalanceModel trialBalance = null)
     {
         // Define column order based on view type
         List<string> columnOrder;
@@ -18,8 +19,8 @@ public static class AccountingLedgerReportPdfExport
         if (showAllColumns)
         {
             // Detailed view - all columns
-            columnOrder = new()
-            {
+            columnOrder =
+            [
                 "LedgerName",
                 "LedgerCode",
                 "AccountTypeName",
@@ -35,85 +36,89 @@ public static class AccountingLedgerReportPdfExport
                 "Credit",
                 "AccountingRemarks",
                 "Remarks"
-            };
+            ];
         }
         else
         {
             // Summary view - essential columns only
-            columnOrder = new()
-            {
+            columnOrder =
+            [
                 "LedgerName",
                 "TransactionNo",
                 "TransactionDateTime",
-                "CompanyName",
                 "ReferenceNo",
                 "Debit",
                 "Credit"
-            };
+            ];
         }
 
         // Define column settings with proper formatting
-        var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
-
-        // Text fields
-        columnSettings["LedgerName"] = new() { DisplayName = "Ledger Name", IncludeInTotal = false };
-        columnSettings["LedgerCode"] = new() { DisplayName = "Code", IncludeInTotal = false };
-        columnSettings["AccountTypeName"] = new() { DisplayName = "Account Type", IncludeInTotal = false };
-        columnSettings["GroupName"] = new() { DisplayName = "Group", IncludeInTotal = false };
-        columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-        columnSettings["CompanyName"] = new() { DisplayName = "Company", IncludeInTotal = false };
-        columnSettings["ReferenceType"] = new() { DisplayName = "Ref Type", IncludeInTotal = false };
-        columnSettings["ReferenceNo"] = new() { DisplayName = "Reference No", IncludeInTotal = false };
-        columnSettings["AccountingRemarks"] = new() { DisplayName = "Accounting Remarks", IncludeInTotal = false };
-        columnSettings["Remarks"] = new() { DisplayName = "Ledger Remarks", IncludeInTotal = false };
-
-        // Date fields with formatting
-        columnSettings["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy", IncludeInTotal = false };
-        columnSettings["ReferenceDateTime"] = new() { DisplayName = "Ref Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false };
-
-        // Numeric fields - Right aligned with totals
-        columnSettings["Debit"] = new()
+        var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            DisplayName = "Debit",
-            Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            // Text fields
+            ["LedgerName"] = new() { DisplayName = "Ledger Name", IncludeInTotal = false },
+            ["LedgerCode"] = new() { DisplayName = "Code", IncludeInTotal = false },
+            ["AccountTypeName"] = new() { DisplayName = "Account Type", IncludeInTotal = false },
+            ["GroupName"] = new() { DisplayName = "Group", IncludeInTotal = false },
+            ["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false },
+            ["CompanyName"] = new() { DisplayName = "Company", IncludeInTotal = false },
+            ["ReferenceType"] = new() { DisplayName = "Ref Type", IncludeInTotal = false },
+            ["ReferenceNo"] = new() { DisplayName = "Reference No", IncludeInTotal = false },
+            ["AccountingRemarks"] = new() { DisplayName = "Accounting Remarks", IncludeInTotal = false },
+            ["Remarks"] = new() { DisplayName = "Ledger Remarks", IncludeInTotal = false },
+
+            // Date fields with formatting
+            ["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy", IncludeInTotal = false },
+            ["ReferenceDateTime"] = new() { DisplayName = "Ref Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false },
+
+            // Numeric fields - Right aligned with totals
+            ["Debit"] = new()
             {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+                DisplayName = "Debit",
+                Format = "#,##0.00",
+                StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+                {
+                    Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                    LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+                },
+                IncludeInTotal = true
             },
-            IncludeInTotal = true
+
+            ["Credit"] = new()
+            {
+                DisplayName = "Credit",
+                Format = "#,##0.00",
+                StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+                {
+                    Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                    LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+                },
+                IncludeInTotal = true
+            },
+
+            ["ReferenceAmount"] = new()
+            {
+                DisplayName = "Ref Amount",
+                Format = "#,##0.00",
+                StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+                {
+                    Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                    LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+                },
+                IncludeInTotal = true
+            }
         };
 
-        columnSettings["Credit"] = new()
+        // Prepare custom summary fields if trial balance is provided
+        Dictionary<string, string> customSummaryFields = null;
+        if (trialBalance != null)
         {
-            DisplayName = "Credit",
-            Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            customSummaryFields = new Dictionary<string, string>
             {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            },
-            IncludeInTotal = true
-        };
-
-        columnSettings["ReferenceAmount"] = new()
-        {
-            DisplayName = "Ref Amount",
-            Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            },
-            IncludeInTotal = true
-        };
-
-        // Build report location text
-        string reportLocation = "FINANCIAL LEDGER REPORT";
-        if (!string.IsNullOrWhiteSpace(companyName))
-            reportLocation += $" - {companyName}";
-        if (!string.IsNullOrWhiteSpace(ledgerName))
-            reportLocation += $" - {ledgerName}";
+                ["Opening Balance"] = $"₹ {trialBalance.OpeningBalance:N2}",
+                ["Closing Balance"] = $"₹ {trialBalance.ClosingBalance:N2}"
+            };
+        }
 
         // Call the generic PDF export utility
         // Use landscape only when showing all columns, portrait for summary view
@@ -128,7 +133,9 @@ public static class AccountingLedgerReportPdfExport
             autoAdjustColumnWidth: true,
             logoPath: null,
             useLandscape: showAllColumns,
-            locationName: reportLocation
+            locationName: null,
+            partyName: ledgerName,
+            customSummaryFields: customSummaryFields
         );
     }
 }

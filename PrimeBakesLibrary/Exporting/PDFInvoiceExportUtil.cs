@@ -628,7 +628,7 @@ public static class PDFInvoiceExportUtil
 				row.Cells[i].Value = cellValue;
 
 				// Apply styling
-				row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 7.5f);
+				row.Cells[i].Style.Font = new PdfStandardFont(PdfFontFamily.Helvetica, 8.5f);
 				row.Cells[i].Style.Borders.All = new PdfPen(new PdfColor(220, 220, 220), 0.5f);
 				row.Cells[i].Style.CellPadding = new PdfPaddings(1.5f, 1.5f, 1.5f, 1.5f);
 				row.Cells[i].Style.StringFormat = new PdfStringFormat

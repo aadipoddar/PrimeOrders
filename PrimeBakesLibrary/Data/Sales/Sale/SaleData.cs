@@ -1,7 +1,4 @@
-﻿using System.Security.AccessControl;
-
-using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
-using PrimeBakesLibrary.Data.Accounts.Masters;
+﻿using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.Data.Inventory.Stock;
@@ -380,7 +377,7 @@ public static class SaleData
 
 		if (saleOverview.Cash + saleOverview.UPI + saleOverview.Card > 0)
 		{
-			var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashLedgerId);
+			var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashSalesLedgerId);
 			accountingCart.Add(new()
 			{
 				ReferenceId = saleOverview.Id,
@@ -405,7 +402,10 @@ public static class SaleData
 				Remarks = $"Party Account Posting For Sale Bill {saleOverview.TransactionNo}",
 			});
 
-		if (saleOverview.TotalAmount - saleOverview.TotalTaxAmount > 0)
+		var saleDetails = await LoadSaleDetailBySale(saleOverview.Id);
+		var extraTaxAmount = saleDetails.Where(x => !x.InclusiveTax).Sum(x => x.TotalTaxAmount);
+
+		if (saleOverview.TotalAmount - extraTaxAmount > 0)
 		{
 			var saleLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId);
 			accountingCart.Add(new()
@@ -415,12 +415,12 @@ public static class SaleData
 				ReferenceNo = saleOverview.TransactionNo,
 				LedgerId = int.Parse(saleLedger.Value),
 				Debit = null,
-				Credit = saleOverview.TotalAmount - saleOverview.TotalTaxAmount,
+				Credit = saleOverview.TotalAmount - extraTaxAmount,
 				Remarks = $"Sale Account Posting For Sale Bill {saleOverview.TransactionNo}",
 			});
 		}
 
-		if (saleOverview.TotalTaxAmount > 0)
+		if (extraTaxAmount > 0)
 		{
 			var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
 			accountingCart.Add(new()
@@ -430,7 +430,7 @@ public static class SaleData
 				ReferenceNo = saleOverview.TransactionNo,
 				LedgerId = int.Parse(gstLedger.Value),
 				Debit = null,
-				Credit = saleOverview.TotalTaxAmount,
+				Credit = extraTaxAmount,
 				Remarks = $"GST Account Posting For Sale Bill {saleOverview.TransactionNo}",
 			});
 		}

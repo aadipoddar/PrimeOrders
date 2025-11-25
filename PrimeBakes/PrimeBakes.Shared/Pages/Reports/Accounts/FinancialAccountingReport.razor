@@ -62,7 +62,19 @@ else
 					<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick="NavigateToFinancialAccountingPage" title="Create Accounting Entry" disabled="@_isProcessing">
+			<button class="btn-icon" @onclick="NavigateToTrialBalance" title="Trial Balance" disabled="@_isProcessing">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+					<line x1="8" y1="21" x2="16" y2="21" />
+					<line x1="12" y1="17" x2="12" y2="21" />
+					<line x1="7" y1="7" x2="7" y2="11" />
+					<line x1="12" y1="7" x2="12" y2="11" />
+					<line x1="17" y1="7" x2="17" y2="11" />
+				</svg>
+			</button>
+			<button class="btn-icon" @onclick="NavigateToFinancialAccountingPage" title="Create Accounting Entry"
+				disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="12" y1="5" x2="12" y2="19" />
@@ -131,7 +143,8 @@ else
 							<SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedVoucher" TValue="VoucherModel"
 								TItem="VoucherModel" DataSource="@_vouchers" Placeholder="All Vouchers"
 								AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-								<AutoCompleteEvents TItem="VoucherModel" TValue="VoucherModel" ValueChange="OnPartyChanged" />
+								<AutoCompleteEvents TItem="VoucherModel" TValue="VoucherModel"
+									ValueChange="OnPartyChanged" />
 								<AutoCompleteFieldSettings Value="Name" />
 							</SfAutoComplete>
 						</div>
@@ -243,8 +256,8 @@ else
 										</div>
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalLedgers)" Type="AggregateType.Sum"
-									Format="N0">
+								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalLedgers)"
+									Type="AggregateType.Sum" Format="N0">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -270,8 +283,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalDebitAmount)" Type="AggregateType.Sum"
-									Format="N2">
+								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalDebitAmount)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -279,8 +292,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalCreditAmount)" Type="AggregateType.Sum"
-									Format="N2">
+								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalCreditAmount)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -288,8 +301,8 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalAmount)" Type="AggregateType.Sum"
-									Format="N2">
+								<GridAggregateColumn Field="@nameof(AccountingOverviewModel.TotalAmount)"
+									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
 											var aggregate = (context as AggregateTemplateContext);
@@ -310,8 +323,9 @@ else
 								<div class="grid-actions">
 									@if (accounting.Status == false)
 									{
-										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(accounting.Id)"
-											title="Download Voucher" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-invoice"
+											@onclick="() => DownloadInvoice(accounting.Id)" title="Download Voucher"
+											disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -346,8 +360,9 @@ else
 												<circle cx="12" cy="12" r="3" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(accounting.Id)"
-											title="Download Voucher" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-invoice"
+											@onclick="() => DownloadInvoice(accounting.Id)" title="Download Voucher"
+											disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -379,22 +394,23 @@ else
 						</GridColumn>
 						<GridColumn Field="@nameof(AccountingOverviewModel.TransactionNo)" HeaderText="Transaction No"
 							Width="170" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150"
-							Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.TransactionDateTime)" HeaderText="Date"
+							Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
 						<GridColumn Field="@nameof(AccountingOverviewModel.CompanyName)" HeaderText="Company" Width="180" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.VoucherName)" HeaderText="Voucher Type" Width="150" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.VoucherName)" HeaderText="Voucher Type"
+							Width="150" />
 						<GridColumn Field="@nameof(AccountingOverviewModel.ReferenceNo)" HeaderText="Reference No"
 							Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="130"
-							Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.FinancialYear)" HeaderText="Financial Year"
+							Width="130" Visible="_showAllColumns" />
 						<GridColumn Field="@nameof(AccountingOverviewModel.TotalLedgers)" HeaderText="Ledgers" Width="100"
 							TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.TotalDebitLedgers)" HeaderText="Debit Ledgers" Width="130"
-							TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.TotalCreditLedgers)" HeaderText="Credit Ledgers" Width="130"
-							TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.TotalDebitAmount)" HeaderText="Total Debit" Width="150"
-							TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(AccountingOverviewModel.TotalDebitLedgers)" HeaderText="Debit Ledgers"
+							Width="130" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.TotalCreditLedgers)" HeaderText="Credit Ledgers"
+							Width="130" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.TotalDebitAmount)" HeaderText="Total Debit"
+							Width="150" TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var item = (context as AccountingOverviewModel);
@@ -402,8 +418,8 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(AccountingOverviewModel.TotalCreditAmount)" HeaderText="Total Credit" Width="150"
-							TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(AccountingOverviewModel.TotalCreditAmount)" HeaderText="Total Credit"
+							Width="150" TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var item = (context as AccountingOverviewModel);
@@ -422,16 +438,16 @@ else
 						</GridColumn>
 						<GridColumn Field="@nameof(AccountingOverviewModel.Remarks)" HeaderText="Remarks" Width="200"
 							Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.CreatedByName)" HeaderText="Created By" Width="150"
-							Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.CreatedByName)" HeaderText="Created By"
+							Width="150" Visible="_showAllColumns" />
 						<GridColumn Field="@nameof(AccountingOverviewModel.CreatedAt)" HeaderText="Created At" Width="160"
 							Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform"
-							Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.CreatedFromPlatform)"
+							HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
 						<GridColumn Field="@nameof(AccountingOverviewModel.LastModifiedByUserName)" HeaderText="Modified By"
 							Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(AccountingOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160"
-							Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(AccountingOverviewModel.LastModifiedAt)" HeaderText="Modified At"
+							Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
 						<GridColumn Field="@nameof(AccountingOverviewModel.LastModifiedFromPlatform)"
 							HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
 					</GridColumns>
@@ -1271,4 +1287,3 @@ else
 		}
 	}
 </style>
-

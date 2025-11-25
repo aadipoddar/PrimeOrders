@@ -23,7 +23,8 @@ public static class SaleReportPdfExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         bool showLocation = false,
-        string locationName = null)
+        string locationName = null,
+        string partyName = null)
     {
         // Define custom column settings matching Excel export
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -98,15 +99,26 @@ public static class SaleReportPdfExport
                 "TransactionNo",
                 "OrderTransactionNo",
                 "TransactionDateTime",
-                "LocationName",
-                "PartyName",
-                "CustomerName",
                 "TotalQuantity",
                 "TotalAfterTax",
                 "DiscountPercent",
+                "DiscountAmount",
                 "TotalAmount",
                 "PaymentModes"
             ];
+
+            // Add location column only if not showing location in header
+            if (!showLocation)
+            {
+                columnOrder.Insert(3, "LocationName");
+            }
+
+            // Add party column only if not showing party in header
+            if (string.IsNullOrEmpty(partyName))
+            {
+                int insertIndex = showLocation ? 3 : 4;
+                columnOrder.Insert(insertIndex, "PartyName");
+            }
         }
 
         // Customize specific columns for PDF display (matching Excel column names)
@@ -367,6 +379,8 @@ public static class SaleReportPdfExport
         {
             DisplayName = "Total Amount",
             Format = "#,##0.00",
+            IsRequired = true,
+            IsGrandTotal = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -433,7 +447,8 @@ public static class SaleReportPdfExport
             columnSettings,
             columnOrder,
             useLandscape: showAllColumns,  // Use landscape when showing all columns
-            locationName: locationName
+            locationName: locationName,
+            partyName: partyName
         );
     }
 }

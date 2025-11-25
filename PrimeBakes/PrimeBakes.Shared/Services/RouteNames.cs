@@ -45,6 +45,7 @@ internal static class PageRouteNames
 
 	public static string ReportFinancialAccounting => "/report/financial-accounting";
 	public static string ReportAccountingLedger => "/report/accounting-ledger";
+	public static string ReportTrialBalance => "/report/trial-balance";
 
 	public static string AdminLocation => "/admin/location";
 	public static string AdminRawMaterial => "/admin/raw-material";

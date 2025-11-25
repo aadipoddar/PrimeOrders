@@ -25,6 +25,8 @@ public static class ExcelExportUtil
 	/// <param name="columnSettings">Optional custom column settings</param>
 	/// <param name="columnOrder">Optional custom column display order</param>
 	/// <param name="locationName">Optional location name to display in header</param>
+	/// <param name="partyName">Optional party/ledger name to display in header</param>
+	/// <param name="customSummaryFields">Optional: Custom fields to display in summary section (key=label, value=formatted value)</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
 	public static MemoryStream ExportToExcel<T>(
 		IEnumerable<T> data,
@@ -34,7 +36,9 @@ public static class ExcelExportUtil
 		DateOnly? dateRangeEnd = null,
 		Dictionary<string, ColumnSetting> columnSettings = null,
 		List<string> columnOrder = null,
-		string locationName = null)
+		string locationName = null,
+		string partyName = null,
+		Dictionary<string, string> customSummaryFields = null)
 	{
 		MemoryStream ms = new();
 
@@ -61,11 +65,14 @@ public static class ExcelExportUtil
 				// Determine column order
 				List<string> effectiveColumnOrder = DetermineColumnOrder<T>(columnSettings, columnOrder);
 
+				// Filter out columns that have no data (all null or zero)
+				effectiveColumnOrder = FilterEmptyColumns(data, effectiveColumnOrder, columnSettings);
+
 				// Setup the worksheet
-				int currentRow = SetupHeader(worksheet, reportTitle, effectiveColumnOrder.Count, dateRangeStart, dateRangeEnd, locationName);
+				int currentRow = SetupHeader(worksheet, reportTitle, effectiveColumnOrder.Count, dateRangeStart, dateRangeEnd, locationName, partyName);
 
 				// Add data to worksheet
-				currentRow = AddDataSection(worksheet, data, effectiveColumnOrder, columnSettings, currentRow);
+				currentRow = AddDataSection(worksheet, data, effectiveColumnOrder, columnSettings, currentRow, customSummaryFields);
 
 				// Add branding footer
 				AddBrandingFooter(worksheet, currentRow, effectiveColumnOrder.Count);
@@ -125,6 +132,16 @@ public static class ExcelExportUtil
 		/// Whether the column should be included in totals
 		/// </summary>
 		public bool IncludeInTotal { get; set; }
+
+		/// <summary>
+		/// Whether the column is required and should never be filtered out (even if all values are null/zero)
+		/// </summary>
+		public bool IsRequired { get; set; }
+
+		/// <summary>
+		/// Whether this column's total should be used as the grand total in summaries (only one column should have this set to true)
+		/// </summary>
+		public bool IsGrandTotal { get; set; }
 
 		/// <summary>
 		/// Custom validation function
@@ -261,6 +278,103 @@ public static class ExcelExportUtil
 	}
 
 	/// <summary>
+	/// Filter out columns that have all null or zero values
+	/// </summary>
+	private static List<string> FilterEmptyColumns<T>(
+		IEnumerable<T> data,
+		List<string> columnOrder,
+		Dictionary<string, ColumnSetting> columnSettings = null)
+	{
+		if (data == null || !data.Any())
+			return columnOrder;
+
+		var filteredColumns = new List<string>();
+
+		foreach (var columnName in columnOrder)
+		{
+			var propInfo = typeof(T).GetProperty(columnName);
+			if (propInfo == null)
+			{
+				// Keep column if property not found (shouldn't happen)
+				filteredColumns.Add(columnName);
+				continue;
+			}
+
+			// Check if column is marked as required in columnSettings
+			if (columnSettings != null && columnSettings.TryGetValue(columnName, out var setting) && setting.IsRequired)
+			{
+				filteredColumns.Add(columnName);
+				continue;
+			}
+
+			bool hasNonEmptyValue = false;
+
+			foreach (var item in data)
+			{
+				var value = propInfo.GetValue(item);
+
+				// Check if value is not null and not zero
+				if (value != null)
+				{
+					// For numeric types, check if not zero
+					if (value is decimal decValue && decValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is double dblValue && dblValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is float fltValue && fltValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is int intValue && intValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					else if (value is long lngValue && lngValue != 0)
+					{
+						hasNonEmptyValue = true;
+						break;
+					}
+					// For non-numeric types, if it's not null, it has a value
+					else if (!(value is decimal || value is double || value is float || value is int || value is long))
+					{
+						// For strings, check if not empty
+						if (value is string strValue)
+						{
+							if (!string.IsNullOrWhiteSpace(strValue))
+							{
+								hasNonEmptyValue = true;
+								break;
+							}
+						}
+						else
+						{
+							// Other types - if not null, consider it has a value
+							hasNonEmptyValue = true;
+							break;
+						}
+					}
+				}
+			}
+
+			// Only add column if it has at least one non-empty/non-zero value
+			if (hasNonEmptyValue)
+			{
+				filteredColumns.Add(columnName);
+			}
+		}
+
+		return filteredColumns;
+	}
+
+	/// <summary>
 	/// Set up the header section of the worksheet
 	/// </summary>
 	private static int SetupHeader(
@@ -269,7 +383,8 @@ public static class ExcelExportUtil
 		int columnCount,
 		DateOnly? dateRangeStart,
 		DateOnly? dateRangeEnd,
-		string locationName = null)
+		string locationName = null,
+		string partyName = null)
 	{
 		// Set column range based on data width
 		string colLetter = GetExcelColumnName(columnCount);
@@ -305,7 +420,7 @@ public static class ExcelExportUtil
 			currentRow++;
 		}
 
-		// Location if available
+		// Additional info if available (location, ledger, etc.)
 		if (!string.IsNullOrEmpty(locationName))
 		{
 			IRange locationRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
@@ -316,6 +431,19 @@ public static class ExcelExportUtil
 			locationRange.CellStyle.Font.Bold = true;
 			locationRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
 			locationRange.CellStyle.Font.RGBColor = Color.FromArgb(100, 116, 139); // Slate gray
+			currentRow++;
+		}
+
+		if (!string.IsNullOrEmpty(partyName))
+		{
+			IRange partyRange = worksheet.Range[$"A{currentRow}:{colLetter}{currentRow}"];
+			partyRange.Merge();
+			partyRange.Text = $"Party: {partyName}";
+			partyRange.CellStyle.Font.Size = 11;
+			partyRange.CellStyle.Font.FontName = "Calibri";
+			partyRange.CellStyle.Font.Bold = true;
+			partyRange.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignCenter;
+			partyRange.CellStyle.Font.RGBColor = Color.FromArgb(100, 116, 139); // Slate gray
 			currentRow++;
 		}
 
@@ -353,7 +481,8 @@ public static class ExcelExportUtil
 		IEnumerable<T> data,
 		List<string> columnOrder,
 		Dictionary<string, ColumnSetting> columnSettings,
-		int startRow)
+		int startRow,
+		Dictionary<string, string> customSummaryFields = null)
 	{
 		if (data == null || !data.Any())
 			return startRow + 1;
@@ -588,6 +717,42 @@ public static class ExcelExportUtil
 			worksheet.SetRowHeight(rowIndex, 25);
 
 			rowIndex++;
+		}
+
+		// Add custom summary fields if provided
+		if (customSummaryFields != null && customSummaryFields.Count > 0)
+		{
+			rowIndex += 1; // Add spacing
+
+			foreach (var field in customSummaryFields)
+			{
+				// Determine where to place the summary (right side of the sheet)
+				int labelColumn = Math.Max(1, columnOrder.Count - 1); // Second to last column
+				int valueColumn = columnOrder.Count; // Last column
+
+				string labelColLetter = GetExcelColumnName(labelColumn);
+				string valueColLetter = GetExcelColumnName(valueColumn);
+
+				// Label cell
+				IRange labelCell = worksheet.Range[$"{labelColLetter}{rowIndex}"];
+				labelCell.Text = $"{field.Key}:";
+				labelCell.CellStyle.Font.Bold = true;
+				labelCell.CellStyle.Font.Size = 11;
+				labelCell.CellStyle.Font.RGBColor = Color.FromArgb(59, 130, 246); // Blue
+				labelCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignRight;
+
+				// Value cell
+				IRange valueCell = worksheet.Range[$"{valueColLetter}{rowIndex}"];
+				valueCell.Text = field.Value;
+				valueCell.CellStyle.Font.Bold = true;
+				valueCell.CellStyle.Font.Size = 11;
+				valueCell.CellStyle.Font.RGBColor = Color.FromArgb(59, 130, 246); // Blue
+				valueCell.CellStyle.HorizontalAlignment = ExcelHAlign.HAlignRight;
+
+				rowIndex++;
+			}
+
+			rowIndex++; // Add spacing after custom fields
 		}
 
 		return rowIndex + 1;
