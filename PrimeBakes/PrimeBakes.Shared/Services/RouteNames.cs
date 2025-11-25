@@ -47,10 +47,15 @@ internal static class PageRouteNames
 	public static string ReportAccountingLedger => "/report/accounting-ledger";
 	public static string ReportTrialBalance => "/report/trial-balance";
 
+	public static string AdminDashboard => "/admin";
 	public static string AdminLocation => "/admin/location";
 	public static string AdminRawMaterial => "/admin/raw-material";
+	public static string AdminRawMaterialCategory => "/admin/raw-material-category";
 	public static string AdminKitchen => "/admin/kitchen";
 	public static string AdminProduct => "/admin/product";
+	public static string AdminProductCategory => "/admin/product-category";
+	public static string AdminUser => "/admin/user";
+	public static string AdminTax => "/admin/tax";
 	public static string AdminCompany => "/admin/company";
 	public static string AdminLedger => "/admin/ledger";
 	public static string AdminVoucher => "/admin/voucher";

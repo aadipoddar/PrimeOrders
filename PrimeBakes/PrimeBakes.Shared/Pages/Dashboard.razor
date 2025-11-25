@@ -177,7 +177,8 @@ else
 
 			@if (_user.Admin && _user.LocationId == 1)
 			{
-				<div class="dashboard-card admin-card" @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")'>
+				<div class="dashboard-card admin-card"
+					@onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard)'>
 					<div class="card-icon admin-icon">👑</div>
 					<h3>Admin Panel</h3>
 					<p>Access advanced management tools and system administration</p>
