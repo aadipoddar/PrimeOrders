@@ -2,5 +2,5 @@
 
 public interface ISoundService
 {
-	public Task PlaySound(string soundFileName);
+    public Task PlaySound(string soundFileName);
 }

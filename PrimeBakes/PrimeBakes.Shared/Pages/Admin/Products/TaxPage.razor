@@ -1,0 +1,592 @@
+@page "/Admin/Tax"
+@using PrimeBakes.Shared.Services
+@using PrimeBakesLibrary.Models.Sales.Product
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Notifications
+
+<PageTitle>Tax Management - Prime Bakes</PageTitle>
+
+@if (_isLoading)
+{
+    <div class="loader-container">
+        <div class="circular-dots-loader">
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+        </div>
+        <p class="loading-text">Loading taxes...</p>
+    </div>
+}
+else
+{
+    <div class="tax-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="title-section">
+                    <h1 class="page-title">📊 Tax Management</h1>
+                    <p class="page-subtitle">Manage GST tax configurations with validation rules</p>
+                </div>
+                <button @onclick='() => NavigationManager.NavigateTo("/Admin-Dashboard")' class="back-button">
+                    <span class="back-icon">←</span>
+                    <span class="back-text">Back to Admin</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content-layout">
+            <!-- Tax Form Card -->
+            <div class="form-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        @(_taxModel.Id == 0 ? "Add New Tax" : "Edit Tax")
+                    </h2>
+                    <p class="card-subtitle">
+                        @(_taxModel.Id == 0 ? "Create a new GST tax configuration" : "Update tax information and percentages")
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Tax Code *</label>
+                            <SfTextBox @bind-Value="_taxModel.Code" 
+                                       Placeholder="Enter tax code (e.g., GST18)" 
+                                       CssClass="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CGST (%)</label>
+                            <SfNumericTextBox TValue="decimal" 
+                                              Value="_taxModel.CGST"
+                                              ValueChanged="OnCGSTChanged"
+                                              Min="0" Max="100" Step="0.25m"
+                                              Format="N2" Placeholder="0.00" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">SGST (%)</label>
+                            <SfNumericTextBox TValue="decimal" 
+                                              Value="_taxModel.SGST"
+                                              ValueChanged="OnSGSTChanged"
+                                              Min="0" Max="100" Step="0.25m"
+                                              Format="N2" Placeholder="0.00" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">IGST (%)</label>
+                            <SfNumericTextBox TValue="decimal" 
+                                              Value="_taxModel.IGST"
+                                              ValueChanged="OnIGSTChanged"
+                                              Min="0" Max="100" Step="0.25m"
+                                              Format="N2" Placeholder="0.00" />
+                        </div>
+
+                        <div class="form-group">
+                            <SfCheckBox Checked="_taxModel.Inclusive"
+                                        ValueChanged="OnInclusiveChanged"
+                                        Label="Inclusive Tax" />
+                        </div>
+
+                        <div class="form-group">
+                            <SfCheckBox Checked="_taxModel.Extra"
+                                        ValueChanged="OnExtraChanged"
+                                        Label="Extra Tax" />
+                        </div>
+
+                        <div class="form-group">
+                            <SfCheckBox @bind-Checked="_taxModel.Status"
+                                        Label="Active" />
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <SfButton CssClass="btn-primary" OnClick="SaveTax">
+                            @(_taxModel.Id == 0 ? "Save Tax" : "Update Tax")
+                        </SfButton>
+                        @if (_taxModel.Id > 0)
+                        {
+                            <SfButton CssClass="btn-secondary" OnClick="CancelEdit">
+                                Cancel
+                            </SfButton>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tax Grid -->
+            <div class="data-card">
+                <div class="card-header">
+                    <h2 class="card-title">All Tax Configurations</h2>
+                    <p class="card-subtitle">Click edit to modify tax details or toggle status</p>
+                </div>
+                <div class="card-body">
+                    <SfGrid @ref="_sfGrid" 
+                            DataSource="_taxes" 
+                            AllowSorting="true"
+                            AllowFiltering="true"
+                            AllowPaging="true"
+                            AllowResizing="true"
+                            CssClass="custom-grid">
+                        
+                        <GridPageSettings PageSize="15" />
+                        <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar" />
+                        <GridEvents TValue="TaxModel" />
+
+                        <GridColumns>
+                            <GridColumn Field="@nameof(TaxModel.Code)" 
+                                       HeaderText="Tax Code" 
+                                       Width="150" />
+                            <GridColumn Field="@nameof(TaxModel.CGST)" 
+                                       HeaderText="CGST (%)" 
+                                       Width="100" 
+                                       Format="N2" 
+                                       TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(TaxModel.SGST)" 
+                                       HeaderText="SGST (%)" 
+                                       Width="100" 
+                                       Format="N2" 
+                                       TextAlign="TextAlign.Right" />
+                            <GridColumn Field="@nameof(TaxModel.IGST)" 
+                                       HeaderText="IGST (%)" 
+                                       Width="100" 
+                                       Format="N2" 
+                                       TextAlign="TextAlign.Right" />
+                            <GridColumn HeaderText="Total (%)" 
+                                       Width="110" 
+                                       TextAlign="TextAlign.Right">
+                                <Template>
+                                    @{
+                                        var tax = (context as TaxModel);
+                                        var total = tax!.CGST + tax.SGST + tax.IGST;
+                                    }
+                                    <span class="total-percentage">@total.ToString("N2")%</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Type" 
+                                       Width="120" 
+                                       TextAlign="TextAlign.Center">
+                                <Template>
+                                    @{
+                                        var tax = (context as TaxModel);
+                                    }
+                                    <span class="type-badge @(tax!.Inclusive ? "type-inclusive" : "type-extra")">
+                                        @(tax.Inclusive ? "Inclusive" : "Extra")
+                                    </span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Status" Width="100" TextAlign="TextAlign.Center">
+                                <Template>
+                                    @{
+                                        var tax = (context as TaxModel);
+                                    }
+                                    <div class="status-badge @(tax.Status ? "status-active" : "status-inactive")">
+                                        @(tax.Status ? "Active" : "Inactive")
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center">
+                                <Template>
+                                    @{
+                                        var tax = (context as TaxModel);
+                                    }
+                                    <div class="action-buttons">
+                                        <button @onclick="() => OnEditTax(tax)" 
+                                                class="btn-action btn-edit" 
+                                                title="Edit Tax">
+                                            <span>✏️</span>
+                                        </button>
+                                        <button @onclick="() => ToggleTaxStatus(tax)" 
+                                                class="btn-action btn-toggle @(tax.Status ? "btn-deactivate" : "btn-activate")" 
+                                                title="@(tax.Status ? "Deactivate" : "Activate")">
+                                            <span>@(tax.Status ? "🔴" : "🟢")</span>
+                                        </button>
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Toast Notifications -->
+<SfToast @ref="_sfToast"
+         ID="toast_success"
+         Timeout="3000"
+         ShowCloseButton="true">
+    <ToastPosition X="Right" Y="Top" />
+    <ToastAnimationSettings>
+        <ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+        <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+    </ToastAnimationSettings>
+</SfToast>
+
+<SfToast @ref="_sfErrorToast"
+         ID="toast_error"
+         Timeout="4000"
+         ShowCloseButton="true">
+    <ToastPosition X="Right" Y="Top" />
+    <ToastAnimationSettings>
+        <ToastShowAnimationSettings Effect="ToastEffect.SlideRightIn" Duration="600" />
+        <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" Duration="600" />
+    </ToastAnimationSettings>
+</SfToast>
+
+<style>
+    :root {
+        --primary-color: #e2137b;
+        --primary-dark: #c10e69;
+        --secondary-color: #2c3e50;
+        --success-color: #4caf50;
+        --warning-color: #ff9800;
+        --danger-color: #f44336;
+        --info-color: #2196f3;
+        --light-bg: #f8f9ff;
+        --card-bg: #ffffff;
+        --border-color: #e1e5e9;
+        --text-primary: #2c3e50;
+        --text-secondary: #666;
+        --text-muted: #999;
+    }
+
+    /* Loading Styles */
+    .loader-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 50vh;
+        gap: 20px;
+    }
+
+    .circular-dots-loader {
+        display: flex;
+        gap: 8px;
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        animation: bounce 1.4s ease-in-out infinite both;
+    }
+
+    .dot-1 { animation-delay: -0.32s; }
+    .dot-2 { animation-delay: -0.16s; }
+    .dot-3 { animation-delay: 0s; }
+
+    @@keyframes bounce {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .loading-text {
+        color: var(--text-secondary);
+        font-size: 16px;
+        margin: 0;
+    }
+
+    /* Main Container */
+    .tax-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.03) 0%, rgba(193, 14, 105, 0.03) 100%);
+        padding: 0;
+    }
+
+    /* Header */
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 30px 20px;
+        box-shadow: 0 4px 20px rgba(226, 19, 123, 0.2);
+    }
+
+    .header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .title-section h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .title-section p {
+        font-size: 14px;
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .back-button {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .back-icon {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    /* Content Layout */
+    .content-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        display: grid;
+        gap: 30px;
+        grid-template-columns: 1fr;
+    }
+
+    /* Cards */
+    .form-card, .data-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(193, 14, 105, 0.05) 100%);
+        padding: 20px 25px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 5px 0;
+    }
+
+    .card-subtitle {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin: 0;
+        opacity: 0.8;
+    }
+
+    .card-body {
+        padding: 25px;
+    }
+
+    /* Form Styles */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 14px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        padding-top: 25px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(226, 19, 123, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--text-secondary);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: var(--text-primary);
+    }
+
+    /* Status Badge */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: rgba(76, 175, 80, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+
+    .status-inactive {
+        background: rgba(244, 67, 54, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(244, 67, 54, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .btn-edit {
+        background: rgba(33, 150, 243, 0.1);
+        color: var(--info-color);
+    }
+
+    .btn-edit:hover {
+        background: rgba(33, 150, 243, 0.2);
+        transform: scale(1.1);
+    }
+
+    .btn-toggle {
+        background: rgba(255, 152, 0, 0.1);
+        color: var(--warning-color);
+    }
+
+    .btn-toggle:hover {
+        background: rgba(255, 152, 0, 0.2);
+        transform: scale(1.1);
+    }
+
+    .btn-activate {
+        background: rgba(76, 175, 80, 0.1) !important;
+        color: var(--success-color) !important;
+    }
+
+    .btn-deactivate {
+        background: rgba(244, 67, 54, 0.1) !important;
+        color: var(--danger-color) !important;
+    }
+
+    /* Type Badge */
+    .type-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .type-inclusive {
+        background: rgba(33, 150, 243, 0.1);
+        color: var(--info-color);
+        border: 1px solid rgba(33, 150, 243, 0.3);
+    }
+
+    .type-extra {
+        background: rgba(255, 152, 0, 0.1);
+        color: var(--warning-color);
+        border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+
+    /* Total Percentage */
+    .total-percentage {
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1024px) {
+        .content-layout {
+            gap: 20px;
+        }
+
+        .header-content {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            padding: 20px 15px;
+        }
+
+        .content-layout {
+            padding: 20px 15px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>

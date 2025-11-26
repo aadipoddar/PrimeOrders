@@ -2,10 +2,10 @@
 
 public partial class App : Application
 {
-	public App()
-	{
-		InitializeComponent();
-	}
+    public App()
+    {
+        InitializeComponent();
+    }
 
-	protected override Window CreateWindow(IActivationState? activationState) => new Window(new MainPage()) { Title = "PrimeBakes" };
+    protected override Window CreateWindow(IActivationState? activationState) => new Window(new MainPage()) { Title = "PrimeBakes" };
 }

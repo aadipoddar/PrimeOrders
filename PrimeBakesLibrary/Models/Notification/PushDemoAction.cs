@@ -2,6 +2,6 @@
 
 public enum PushDemoAction
 {
-	ActionA,
-	ActionB
+    ActionA,
+    ActionB
 }

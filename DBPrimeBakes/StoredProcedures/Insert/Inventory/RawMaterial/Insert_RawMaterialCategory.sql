@@ -1,18 +1,24 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_RawMaterialCategory]
-	@Id INT,
-	@Name VARCHAR(50),
+	@Id INT OUTPUT,
+	@Name VARCHAR(500),
+	@Remarks VARCHAR(MAX) = NULL,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[RawMaterialCategory] ([Name], [Status])
-		VALUES (@Name, @Status);
+		INSERT INTO [dbo].[RawMaterialCategory] (Name, Remarks, Status)
+		VALUES (@Name, @Remarks, @Status);
+		
+		SET @Id = SCOPE_IDENTITY();
 	END
+
 	ELSE
 	BEGIN
 		UPDATE [dbo].[RawMaterialCategory]
-		SET [Name] = @Name, [Status] = @Status
-		WHERE [Id] = @Id;
+		SET Name = @Name, Remarks = @Remarks, Status = @Status
+		WHERE Id = @Id;
 	END
-END
+
+	SELECT @Id AS Id;
+END;

@@ -10,34 +10,34 @@ namespace PrimeBakes.Platforms.Android;
 [IntentFilter(["com.google.firebase.MESSAGING_EVENT"])]
 public class PushNotificationFirebaseMessagingService : FirebaseMessagingService
 {
-	IPushDemoNotificationActionService _notificationActionService;
-	INotificationRegistrationService _notificationRegistrationService;
-	IDeviceInstallationService _deviceInstallationService;
-	int _messageId;
+    IPushDemoNotificationActionService _notificationActionService;
+    INotificationRegistrationService _notificationRegistrationService;
+    IDeviceInstallationService _deviceInstallationService;
+    int _messageId;
 
-	IPushDemoNotificationActionService NotificationActionService => _notificationActionService ??= IPlatformApplication.Current.Services.GetService<IPushDemoNotificationActionService>();
+    IPushDemoNotificationActionService NotificationActionService => _notificationActionService ??= IPlatformApplication.Current.Services.GetService<IPushDemoNotificationActionService>();
 
-	INotificationRegistrationService NotificationRegistrationService => _notificationRegistrationService ??= IPlatformApplication.Current.Services.GetService<INotificationRegistrationService>();
+    INotificationRegistrationService NotificationRegistrationService => _notificationRegistrationService ??= IPlatformApplication.Current.Services.GetService<INotificationRegistrationService>();
 
-	IDeviceInstallationService DeviceInstallationService => _deviceInstallationService ??= IPlatformApplication.Current.Services.GetService<IDeviceInstallationService>();
+    IDeviceInstallationService DeviceInstallationService => _deviceInstallationService ??= IPlatformApplication.Current.Services.GetService<IDeviceInstallationService>();
 
-	public override void OnNewToken(string token)
-	{
-		DeviceInstallationService.Token = token;
+    public override void OnNewToken(string token)
+    {
+        DeviceInstallationService.Token = token;
 
-		NotificationRegistrationService.RefreshRegistrationAsync()
-			.ContinueWith((task) =>
-			{
-				if (task.IsFaulted)
-					throw task.Exception;
-			});
-	}
+        NotificationRegistrationService.RefreshRegistrationAsync()
+            .ContinueWith((task) =>
+            {
+                if (task.IsFaulted)
+                    throw task.Exception;
+            });
+    }
 
-	public override void OnMessageReceived(RemoteMessage message)
-	{
-		base.OnMessageReceived(message);
+    public override void OnMessageReceived(RemoteMessage message)
+    {
+        base.OnMessageReceived(message);
 
-		if (message.Data.TryGetValue("action", out var messageAction))
-			NotificationActionService.TriggerAction(messageAction);
-	}
+        if (message.Data.TryGetValue("action", out var messageAction))
+            NotificationActionService.TriggerAction(messageAction);
+    }
 }

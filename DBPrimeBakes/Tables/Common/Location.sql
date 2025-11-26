@@ -1,8 +1,9 @@
 ﻿CREATE TABLE [dbo].[Location]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [Name] VARCHAR(500) NOT NULL, 
+    [Name] VARCHAR(500) NOT NULL UNIQUE, 
     [PrefixCode] VARCHAR(10) NOT NULL UNIQUE,
     [Discount] DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    [Remarks] VARCHAR(MAX) NULL, 
     [Status] BIT NOT NULL DEFAULT 1, 
 )

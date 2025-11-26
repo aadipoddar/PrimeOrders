@@ -9,44 +9,44 @@ namespace PrimeBakesLibrary.DataAccess;
 
 public static class SqlDataAccess
 {
-	private static readonly string _databaseConnection = ConnectionStrings.Azure;
+    private static readonly string _databaseConnection = ConnectionStrings.Local;
 
-	public static async Task<List<T>> LoadData<T, U>(string storedProcedure, U parameters)
-	{
-		using IDbConnection connection = new SqlConnection(_databaseConnection);
+    public static async Task<List<T>> LoadData<T, U>(string storedProcedure, U parameters)
+    {
+        using IDbConnection connection = new SqlConnection(_databaseConnection);
 
-		List<T> rows = [.. await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure)];
+        List<T> rows = [.. await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure)];
 
-		return rows;
-	}
+        return rows;
+    }
 
-	public static async Task SaveData<T>(string storedProcedure, T parameters)
-	{
-		using IDbConnection connection = new SqlConnection(_databaseConnection);
+    public static async Task SaveData<T>(string storedProcedure, T parameters)
+    {
+        using IDbConnection connection = new SqlConnection(_databaseConnection);
 
-		await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
-	}
+        await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+    }
 
-	public static async Task ExecuteProcedure(string storedProcedure)
-	{
-		using IDbConnection connection = new SqlConnection(_databaseConnection);
+    public static async Task ExecuteProcedure(string storedProcedure)
+    {
+        using IDbConnection connection = new SqlConnection(_databaseConnection);
 
-		await connection.ExecuteAsync(storedProcedure, commandType: CommandType.StoredProcedure);
-	}
+        await connection.ExecuteAsync(storedProcedure, commandType: CommandType.StoredProcedure);
+    }
 }
 
 public class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
 {
-	public override DateOnly Parse(object value)
-	{
-		return value is DateOnly dateOnly
-			? dateOnly
-			: DateOnly.FromDateTime((DateTime)value);
-	}
+    public override DateOnly Parse(object value)
+    {
+        return value is DateOnly dateOnly
+            ? dateOnly
+            : DateOnly.FromDateTime((DateTime)value);
+    }
 
-	public override void SetValue([DisallowNull] IDbDataParameter parameter, DateOnly value)
-	{
-		parameter.Value = value.ToDateTime(TimeOnly.MinValue);
-		parameter.DbType = DbType.Date;
-	}
+    public override void SetValue([DisallowNull] IDbDataParameter parameter, DateOnly value)
+    {
+        parameter.Value = value.ToDateTime(TimeOnly.MinValue);
+        parameter.DbType = DbType.Date;
+    }
 }

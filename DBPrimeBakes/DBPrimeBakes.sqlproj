@@ -81,7 +81,6 @@
     <Folder Include="Tables\Accounts\Masters" />
     <Folder Include="Tables\Common" />
     <Folder Include="Tables\Inventory" />
-    <Folder Include="Tables\Products" />
     <Folder Include="Tables\Sales" />
     <Folder Include="Views" />
     <Folder Include="PublishLocations" />
@@ -113,6 +112,7 @@
     <Folder Include="Views\Accounts" />
     <Folder Include="StoredProcedures\LoadData\Accounts\FinancialAccounting" />
     <Folder Include="StoredProcedures\LoadData\Accounts\Masters" />
+    <Folder Include="Tables\Sales\Product" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Type_TransactionId_LocationId.sql" />
@@ -154,15 +154,9 @@
     <Build Include="Tables\Common\Settings.sql" />
     <Build Include="Tables\Common\StateUT.sql" />
     <Build Include="Tables\Common\User.sql" />
-    <Build Include="Tables\Products\Product.sql" />
-    <Build Include="Tables\Products\ProductCategory.sql" />
-    <Build Include="Tables\Products\ProductLocation.sql" />
-    <Build Include="Tables\Products\Tax.sql" />
-    <Build Include="StoredProcedures\Insert\Common\Insert_StateUT.sql" />
     <Build Include="Tables\Common\Company.sql" />
     <Build Include="StoredProcedures\Insert\Common\Reset_Settings.sql" />
     <Build Include="StoredProcedures\Insert\Common\Update_Settings.sql" />
-    <Build Include="StoredProcedures\Insert\Common\Insert_Company.sql" />
     <Build Include="Tables\Inventory\Purchase\PurchaseReturnDetail.sql" />
     <Build Include="Tables\Inventory\Purchase\Purchase.sql" />
     <Build Include="Tables\Inventory\Purchase\PurchaseDetail.sql" />
@@ -266,6 +260,14 @@
     <Build Include="Views\Accounts\Accounting_Ledger_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Ledger_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_TrialBalance_By_Date.sql" />
+    <Build Include="Tables\Sales\Sale\StockTransfer.sql" />
+    <Build Include="Tables\Sales\Sale\StockTransferDetail.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_StateUT.sql" />
+    <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Company.sql" />
+    <Build Include="Tables\Sales\Product\Product.sql" />
+    <Build Include="Tables\Sales\Product\ProductCategory.sql" />
+    <Build Include="Tables\Sales\Product\ProductLocation.sql" />
+    <Build Include="Tables\Sales\Product\Tax.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

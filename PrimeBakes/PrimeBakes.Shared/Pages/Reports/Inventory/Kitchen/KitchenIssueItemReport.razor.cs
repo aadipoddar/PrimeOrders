@@ -343,7 +343,7 @@ public partial class KitchenIssueItemReport
 
             var (pdfStream, fileName) = await KitchenIssueData.GenerateAndDownloadInvoice(kitchenIssueId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
-		}
+        }
         catch (Exception ex)
         {
             await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");

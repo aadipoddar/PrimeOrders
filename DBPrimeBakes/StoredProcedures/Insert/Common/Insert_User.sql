@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_User]
-	@Id INT,
-	@Name VARCHAR(50),
+	@Id INT OUTPUT,
+	@Name VARCHAR(500),
 	@Passcode SMALLINT,
 	@LocationId INT,
 	@Sales BIT,
@@ -8,13 +8,16 @@
 	@Inventory BIT,
 	@Accounts BIT,
 	@Admin BIT,
+	@Remarks VARCHAR(MAX),
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[User] (Name, Passcode, LocationId, [Order], Inventory, Accounts, Admin, Sales, Status)
-		VALUES (@Name, @Passcode, @LocationId, @Order, @Inventory, @Accounts, @Admin, @Sales, @Status);
+		INSERT INTO [dbo].[User] (Name, Passcode, LocationId, [Order], Inventory, Accounts, Admin, Sales, Remarks, Status)
+		VALUES (@Name, @Passcode, @LocationId, @Order, @Inventory, @Accounts, @Admin, @Sales, @Remarks, @Status);
+
+		SET @Id = SCOPE_IDENTITY();
 	END
 
 	ELSE
@@ -28,7 +31,10 @@ BEGIN
 			Accounts = @Accounts,
 			Admin = @Admin,
 			Sales = @Sales,
+			Remarks = @Remarks,
 			Status = @Status
 		WHERE Id = @Id;
 	END
+
+	SELECT @Id AS Id;
 END;

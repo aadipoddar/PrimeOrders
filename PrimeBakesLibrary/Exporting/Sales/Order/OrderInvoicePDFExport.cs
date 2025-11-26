@@ -1,8 +1,8 @@
 ﻿using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
-using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sales.Order;
+using PrimeBakesLibrary.Models.Sales.Product;
 
 namespace PrimeBakesLibrary.Exporting.Sales.Order;
 

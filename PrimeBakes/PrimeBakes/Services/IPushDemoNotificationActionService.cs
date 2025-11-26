@@ -4,5 +4,5 @@ namespace PrimeBakes.Services;
 
 public interface IPushDemoNotificationActionService : INotificationActionService
 {
-	event EventHandler<PushDemoAction> ActionTriggered;
+    event EventHandler<PushDemoAction> ActionTriggered;
 }

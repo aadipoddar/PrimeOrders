@@ -4,34 +4,34 @@ namespace PrimeBakes.Services;
 
 public class PushDemoNotificationActionService : IPushDemoNotificationActionService
 {
-	readonly Dictionary<string, PushDemoAction> _actionMappings = new()
-	{
-		{ "action_a", PushDemoAction.ActionA },
-		{ "action_b", PushDemoAction.ActionB }
-	};
+    readonly Dictionary<string, PushDemoAction> _actionMappings = new()
+    {
+        { "action_a", PushDemoAction.ActionA },
+        { "action_b", PushDemoAction.ActionB }
+    };
 
-	public event EventHandler<PushDemoAction> ActionTriggered = delegate { };
+    public event EventHandler<PushDemoAction> ActionTriggered = delegate { };
 
-	public void TriggerAction(string action)
-	{
-		if (!_actionMappings.TryGetValue(action, out var pushDemoAction))
-			return;
+    public void TriggerAction(string action)
+    {
+        if (!_actionMappings.TryGetValue(action, out var pushDemoAction))
+            return;
 
-		List<Exception> exceptions = [];
+        List<Exception> exceptions = [];
 
-		foreach (var handler in ActionTriggered?.GetInvocationList())
-		{
-			try
-			{
-				handler.DynamicInvoke(this, pushDemoAction);
-			}
-			catch (Exception ex)
-			{
-				exceptions.Add(ex);
-			}
-		}
+        foreach (var handler in ActionTriggered?.GetInvocationList())
+        {
+            try
+            {
+                handler.DynamicInvoke(this, pushDemoAction);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
+        }
 
-		if (exceptions.Count != 0)
-			throw new AggregateException(exceptions);
-	}
+        if (exceptions.Count != 0)
+            throw new AggregateException(exceptions);
+    }
 }
