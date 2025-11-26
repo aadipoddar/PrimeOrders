@@ -1,5 +1,6 @@
 using PrimeBakes.Shared.Services;
 
+using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.DataAccess;
@@ -68,10 +69,6 @@ public partial class RawMaterialPage
         _rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
         _categories = await CommonData.LoadTableData<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
         _taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
-
-        // Filter taxes to only show active ones
-        _taxes = [.. _taxes.Where(t => t.Status)];
-        _categories = [.. _categories.Where(c => c.Status)];
 
         if (!_showDeleted)
             _rawMaterials = [.. _rawMaterials.Where(rm => rm.Status)];
@@ -260,11 +257,7 @@ public partial class RawMaterialPage
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(_rawMaterial.Code))
-        {
-            await ShowToast("Error", "Raw material code is required. Please enter a valid code.", "error");
-            return false;
-        }
+        // Code is auto-generated, no need to validate
 
         if (_rawMaterial.RawMaterialCategoryId <= 0)
         {
@@ -302,12 +295,7 @@ public partial class RawMaterialPage
                 return false;
             }
 
-            var existingByCode = _rawMaterials.FirstOrDefault(rm => rm.Id != _rawMaterial.Id && rm.Code.Equals(_rawMaterial.Code, StringComparison.OrdinalIgnoreCase));
-            if (existingByCode is not null)
-            {
-                await ShowToast("Error", $"Raw material code '{_rawMaterial.Code}' already exists. Please choose a different code.", "error");
-                return false;
-            }
+            // Code is preserved when editing, no need to check for duplicates
         }
         else
         {
@@ -318,12 +306,7 @@ public partial class RawMaterialPage
                 return false;
             }
 
-            var existingByCode = _rawMaterials.FirstOrDefault(rm => rm.Code.Equals(_rawMaterial.Code, StringComparison.OrdinalIgnoreCase));
-            if (existingByCode is not null)
-            {
-                await ShowToast("Error", $"Raw material code '{_rawMaterial.Code}' already exists. Please choose a different code.", "error");
-                return false;
-            }
+            // Code is auto-generated and unique, no need to check for duplicates
         }
 
         return true;
@@ -343,6 +326,9 @@ public partial class RawMaterialPage
                 _isProcessing = false;
                 return;
             }
+
+            if (_rawMaterial.Id == 0)
+                _rawMaterial.Code = await GenerateCodes.GenerateRawMaterialCode();
 
             await RawMaterialData.InsertRawMaterial(_rawMaterial);
 

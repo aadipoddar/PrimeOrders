@@ -4,400 +4,456 @@ using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Exporting.Sales.Product;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Product;
 
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
 
 public partial class ProductPage
 {
     private bool _isLoading = true;
-    private bool _isSubmitting = false;
-    private string _successMessage = "";
-    private string _errorMessage = "";
+    private bool _isProcessing = false;
+    private bool _showDeleted = false;
 
-    private ProductModel _productModel = new()
-    {
-        Name = "",
-        Code = "",
-        Rate = 0,
-        TaxId = 0,
-        ProductCategoryId = 0,
-        Status = true
-    };
+    private ProductModel _product = new();
 
     private List<ProductModel> _products = [];
-    private List<ProductCategoryModel> _productCategories = [];
-    private List<LocationModel> _locations = [];
-    private List<TaxModel> _taxTypes = [];
+    private List<ProductCategoryModel> _categories = [];
+    private List<TaxModel> _taxes = [];
 
-    private List<ProductLocationOverviewModel> _productLocations = [];
-    private int _selectedProductId = 0;
-    private string _selectedProductName = "";
-    private int _newLocationRateId = 0;
-    private decimal _newLocationRate = 0;
-    private List<LocationModel> _availableLocationsForRates = [];
+    private string _selectedCategoryName = string.Empty;
+    private string _selectedTaxCode = string.Empty;
 
     private SfGrid<ProductModel> _sfGrid;
-    private SfGrid<ProductLocationOverviewModel> _sfRatesGrid;
-    private SfToast _sfToast;
-    private SfToast _sfUpdateToast;
+    private SfDialog _deleteConfirmationDialog;
+    private SfDialog _recoverConfirmationDialog;
+
+    private int _deleteProductId = 0;
+    private string _deleteProductName = string.Empty;
+    private bool _isDeleteDialogVisible = false;
+
+    private int _recoverProductId = 0;
+    private string _recoverProductName = string.Empty;
+    private bool _isRecoverDialogVisible = false;
+
+    private string _errorTitle = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    private string _successTitle = string.Empty;
+    private string _successMessage = string.Empty;
+
+    private SfToast _sfSuccessToast;
     private SfToast _sfErrorToast;
 
-    protected override async Task OnInitializedAsync()
+    #region Load Data
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender)
+            return;
+
         await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
         await LoadData();
         _isLoading = false;
+        StateHasChanged();
     }
 
     private async Task LoadData()
     {
         _products = await CommonData.LoadTableData<ProductModel>(TableNames.Product);
-        _productCategories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.ProductCategory);
-        _locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
-        _taxTypes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
+        _categories = await CommonData.LoadTableData<ProductCategoryModel>(TableNames.ProductCategory);
+        _taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
-        // Auto-generate product code
-        _productModel.Code = await GenerateCodes.GenerateProductCode();
+        if (!_showDeleted)
+            _products = [.. _products.Where(p => p.Status)];
 
-        // Set default values
-        if (_productCategories.Count > 0)
-            _productModel.ProductCategoryId = _productCategories[0].Id;
+        if (_sfGrid is not null)
+            await _sfGrid.Refresh();
+    }
+    #endregion
 
-        if (_taxTypes.Count > 0)
-            _productModel.TaxId = _taxTypes[0].Id;
+    #region Autocomplete Events
+    private void OnCategoryChange(ChangeEventArgs<string, ProductCategoryModel> args)
+    {
+        if (args.ItemData != null)
+        {
+            _product.ProductCategoryId = args.ItemData.Id;
+            _selectedCategoryName = args.ItemData.Name;
+        }
+        else
+        {
+            _product.ProductCategoryId = 0;
+            _selectedCategoryName = string.Empty;
+        }
+    }
+
+    private void OnTaxChange(ChangeEventArgs<string, TaxModel> args)
+    {
+        if (args.ItemData != null)
+        {
+            _product.TaxId = args.ItemData.Id;
+            _selectedTaxCode = args.ItemData.Code;
+        }
+        else
+        {
+            _product.TaxId = 0;
+            _selectedTaxCode = string.Empty;
+        }
+    }
+    #endregion
+
+    #region Actions
+    private void OnEditProduct(ProductModel product)
+    {
+        _product = new()
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Code = product.Code,
+            ProductCategoryId = product.ProductCategoryId,
+            Rate = product.Rate,
+            TaxId = product.TaxId,
+            Remarks = product.Remarks,
+            Status = product.Status
+        };
+
+        // Set autocomplete values
+        var category = _categories.FirstOrDefault(c => c.Id == product.ProductCategoryId);
+        _selectedCategoryName = category?.Name ?? string.Empty;
+
+        var tax = _taxes.FirstOrDefault(t => t.Id == product.TaxId);
+        _selectedTaxCode = tax?.Code ?? string.Empty;
 
         StateHasChanged();
     }
 
-    private async Task OnProductFormSubmit()
+    private void ShowDeleteConfirmation(int id, string name)
     {
-        if (!await ValidateProductForm())
-            return;
-
-        _isSubmitting = true;
+        _deleteProductId = id;
+        _deleteProductName = name;
+        _isDeleteDialogVisible = true;
         StateHasChanged();
+    }
 
+    private void CancelDelete()
+    {
+        _deleteProductId = 0;
+        _deleteProductName = string.Empty;
+        _isDeleteDialogVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete()
+    {
         try
         {
-            bool update = _productModel.Id != 0;
+            _isProcessing = true;
+            _isDeleteDialogVisible = false;
 
-            _productModel.Id = await ProductData.InsertProduct(_productModel);
-
-            if (!update)
+            var product = _products.FirstOrDefault(p => p.Id == _deleteProductId);
+            if (product == null)
             {
-                if (_productModel.Status)
-                {
-                    var locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-                    foreach (var location in locations)
-                        await ProductData.InsertProductLocation(new()
-                        {
-                            Id = 0,
-                            ProductId = _productModel.Id,
-                            LocationId = location.Id,
-                            Rate = _productModel.Rate,
-                            Status = true
-                        });
-                }
-
-                _successMessage = "Product added successfully!";
-            }
-            else
-            {
-                if (!_productModel.Status)
-                {
-                    var productLocations = await ProductData.LoadProductRateByProduct(_productModel.Id);
-                    foreach (var productLocation in productLocations)
-                        await ProductData.InsertProductLocation(new()
-                        {
-                            Id = productLocation.Id,
-                            ProductId = productLocation.ProductId,
-                            LocationId = productLocation.LocationId,
-                            Rate = productLocation.Rate,
-                            Status = false
-                        });
-                }
-
-                _successMessage = "Product updated successfully!";
+                await ShowToast("Error", "Product not found.", "error");
+                return;
             }
 
-            await _sfToast.ShowAsync();
-            await LoadData();
-            ResetProductForm();
+            product.Status = false;
+            await ProductData.InsertProduct(product);
+
+            await ShowToast("Success", $"Product '{product.Name}' has been deleted successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminProduct, true);
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Error saving product: {ex.Message}";
-            await _sfErrorToast.ShowAsync();
-            Console.WriteLine(ex.Message);
+            await ShowToast("Error", $"Failed to delete product: {ex.Message}", "error");
         }
         finally
         {
-            _isSubmitting = false;
-            StateHasChanged();
+            _isProcessing = false;
+            _deleteProductId = 0;
+            _deleteProductName = string.Empty;
         }
     }
 
-    private async Task<bool> ValidateProductForm()
+    private void ShowRecoverConfirmation(int id, string name)
     {
-        if (string.IsNullOrWhiteSpace(_productModel.Code))
+        _recoverProductId = id;
+        _recoverProductName = name;
+        _isRecoverDialogVisible = true;
+        StateHasChanged();
+    }
+
+    private void CancelRecover()
+    {
+        _recoverProductId = 0;
+        _recoverProductName = string.Empty;
+        _isRecoverDialogVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ToggleDeleted()
+    {
+        _showDeleted = !_showDeleted;
+        await LoadData();
+        StateHasChanged();
+    }
+
+    private async Task ConfirmRecover()
+    {
+        try
         {
-            await ShowErrorToast("Product code is required.");
+            _isProcessing = true;
+            _isRecoverDialogVisible = false;
+
+            var product = _products.FirstOrDefault(p => p.Id == _recoverProductId);
+            if (product == null)
+            {
+                await ShowToast("Error", "Product not found.", "error");
+                return;
+            }
+
+            product.Status = true;
+            await ProductData.InsertProduct(product);
+
+            await ShowToast("Success", $"Product '{product.Name}' has been recovered successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminProduct, true);
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"Failed to recover product: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            _recoverProductId = 0;
+            _recoverProductName = string.Empty;
+        }
+    }
+    #endregion
+
+    #region Saving
+    private async Task<bool> ValidateForm()
+    {
+        _product.Name = _product.Name?.Trim() ?? "";
+        _product.Code = _product.Code?.Trim() ?? "";
+        _product.Remarks = _product.Remarks?.Trim() ?? "";
+
+        _product.Code = _product.Code?.ToUpper() ?? "";
+
+        _product.Status = true;
+
+        if (string.IsNullOrWhiteSpace(_product.Name))
+        {
+            await ShowToast("Error", "Product name is required. Please enter a valid name.", "error");
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(_productModel.Name))
+        // Code is auto-generated, no need to validate
+
+        if (_product.ProductCategoryId <= 0)
         {
-            await ShowErrorToast("Product name is required.");
+            await ShowToast("Error", "Category is required. Please select a category.", "error");
             return false;
         }
 
-        if (_productModel.Rate <= 0)
+        if (_product.Rate < 0)
         {
-            await ShowErrorToast("Product rate must be greater than zero.");
+            await ShowToast("Error", "Rate must be greater than or equal to 0.", "error");
             return false;
         }
 
-        if (_productModel.ProductCategoryId <= 0)
+        if (_product.TaxId <= 0)
         {
-            await ShowErrorToast("Please select a product category.");
+            await ShowToast("Error", "Tax is required. Please select a tax.", "error");
             return false;
         }
 
-        if (_productModel.TaxId <= 0)
-        {
-            await ShowErrorToast("Please select a tax type.");
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(_product.Remarks))
+            _product.Remarks = null;
 
-        // Check for duplicate code
-        if (_products.Any(p => p.Code.Equals(_productModel.Code, StringComparison.OrdinalIgnoreCase) && p.Id != _productModel.Id))
+        if (_product.Id > 0)
         {
-            await ShowErrorToast("Product code already exists.");
-            return false;
+            var existingByName = _products.FirstOrDefault(p => p.Id != _product.Id && p.Name.Equals(_product.Name, StringComparison.OrdinalIgnoreCase));
+            if (existingByName is not null)
+            {
+                await ShowToast("Error", $"Product name '{_product.Name}' already exists. Please choose a different name.", "error");
+                return false;
+            }
+
+            // Code is preserved when editing, no need to check for duplicates
+        }
+        else
+        {
+            var existingByName = _products.FirstOrDefault(p => p.Name.Equals(_product.Name, StringComparison.OrdinalIgnoreCase));
+            if (existingByName is not null)
+            {
+                await ShowToast("Error", $"Product name '{_product.Name}' already exists. Please choose a different name.", "error");
+                return false;
+            }
+
+            // Code is auto-generated and unique, no need to check for duplicates
         }
 
         return true;
     }
 
-    private async Task ResetProductForm()
+    private async Task SaveProduct()
     {
-        _productModel = new()
-        {
-            Id = 0,
-            Name = "",
-            Code = await GenerateCodes.GenerateProductCode(),
-            Rate = 0,
-            TaxId = _taxTypes.Count > 0 ? _taxTypes[0].Id : 0,
-            ProductCategoryId = _productCategories.Count > 0 ? _productCategories[0].Id : 0,
-            Status = true
-        };
+        if (_isProcessing)
+            return;
 
-        // Clear location rates data
-        _selectedProductId = 0;
-        _selectedProductName = "";
-        _productLocations.Clear();
-        _availableLocationsForRates.Clear();
-        _newLocationRateId = 0;
-        _newLocationRate = 0;
-    }
-
-    // Product Rate Management
-    private async Task LoadProductRates(int productId, string productName)
-    {
         try
         {
-            _selectedProductId = productId;
-            _selectedProductName = productName;
-            _productLocations = await ProductData.LoadProductRateByProduct(productId);
+            _isProcessing = true;
 
-            // Update available locations for rates dropdown
-            UpdateAvailableLocationsForRates();
+            if (!await ValidateForm())
+            {
+                _isProcessing = false;
+                return;
+            }
 
+            if (_product.Id == 0)
+                _product.Code = await GenerateCodes.GenerateProductCode();
+
+            await ProductData.InsertProduct(_product);
+
+            await ShowToast("Success", $"Product '{_product.Name}' has been saved successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminProduct, true);
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"Failed to save product: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+    #endregion
+
+    #region Exporting
+    private async Task ExportExcel()
+    {
+        if (_isProcessing)
+            return;
+
+        try
+        {
+            _isProcessing = true;
+            StateHasChanged();
+
+            // Enrich data with category and tax names
+            var enrichedData = _products.Select(p => new
+            {
+                p.Id,
+                p.Name,
+                p.Code,
+                Category = _categories.FirstOrDefault(c => c.Id == p.ProductCategoryId)?.Name ?? "N/A",
+                p.Rate,
+                Tax = _taxes.FirstOrDefault(t => t.Id == p.TaxId)?.Code ?? "N/A",
+                p.Remarks,
+                p.Status
+            }).ToList();
+
+            // Call the Excel export utility
+            var stream = await Task.Run(() => ProductExcelExport.ExportProduct(enrichedData));
+
+            // Generate file name
+            string fileName = "PRODUCT_MASTER.xlsx";
+
+            // Save and view the Excel file
+            await SaveAndViewService.SaveAndView(fileName, stream);
+
+            await ShowToast("Success", "Product data exported to Excel successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
             StateHasChanged();
         }
-        catch (Exception ex)
-        {
-            await _sfErrorToast.ShowAsync();
-            Console.WriteLine(ex.Message);
-        }
     }
 
-    private void UpdateAvailableLocationsForRates()
+    private async Task ExportPdf()
     {
-        // Get locations that don't already have rates for the selected product
-        var existingLocationIds = _productLocations.Select(r => r.LocationId).ToHashSet();
-
-        _availableLocationsForRates = [.. _locations.Where(location => !existingLocationIds.Contains(location.Id))];
-
-        // Reset the selected location if it's no longer available
-        if (_newLocationRateId > 0 && !_availableLocationsForRates.Any(l => l.Id == _newLocationRateId))
-            _newLocationRateId = 0;
-    }
-
-    private async Task AddLocationRate()
-    {
-        if (_newLocationRateId <= 0)
-        {
-            await ShowErrorToast("Please select a location.");
+        if (_isProcessing)
             return;
-        }
-
-        if (_newLocationRate <= 0)
-        {
-            await ShowErrorToast("Rate must be greater than zero.");
-            return;
-        }
-
-        // Check if rate already exists for this location (safety check)
-        if (_productLocations.Any(r => r.LocationId == _newLocationRateId))
-        {
-            await ShowErrorToast("Rate already exists for this location.");
-            return;
-        }
 
         try
         {
-            await ProductData.InsertProductLocation(new()
+            _isProcessing = true;
+            StateHasChanged();
+
+            // Enrich data with category and tax names
+            var enrichedData = _products.Select(p => new
             {
-                Id = 0,
-                ProductId = _selectedProductId,
-                LocationId = _newLocationRateId,
-                Rate = _newLocationRate,
-                Status = true
+                p.Id,
+                p.Name,
+                p.Code,
+                Category = _categories.FirstOrDefault(c => c.Id == p.ProductCategoryId)?.Name ?? "N/A",
+                p.Rate,
+                Tax = _taxes.FirstOrDefault(t => t.Id == p.TaxId)?.Code ?? "N/A",
+                p.Remarks,
+                p.Status
+            }).ToList();
+
+            // Call the PDF export utility
+            var stream = await Task.Run(() => ProductPDFExport.ExportProduct(enrichedData));
+
+            // Generate file name
+            string fileName = "PRODUCT_MASTER.pdf";
+
+            // Save and view the PDF file
+            await SaveAndViewService.SaveAndView(fileName, stream);
+
+            await ShowToast("Success", "Product data exported to PDF successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+    #endregion
+
+    #region Utilities
+    private async Task ShowToast(string title, string message, string type)
+    {
+        VibrationService.VibrateWithTime(200);
+
+        if (type == "error")
+        {
+            _errorTitle = title;
+            _errorMessage = message;
+            await _sfErrorToast.ShowAsync(new()
+            {
+                Title = _errorTitle,
+                Content = _errorMessage
             });
-            _successMessage = "Location rate added successfully!";
-            await _sfToast.ShowAsync();
-
-            // Reload rates
-            await LoadProductRates(_selectedProductId, _selectedProductName);
-
-            // Reset form
-            _newLocationRateId = 0;
-            _newLocationRate = 0;
         }
-        catch (Exception ex)
+
+        else if (type == "success")
         {
-            _errorMessage = $"Error adding location rate: {ex.Message}";
-            await _sfErrorToast.ShowAsync();
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    // Grid Event Handlers
-    private async Task OnProductRowSelected(RowSelectEventArgs<ProductModel> args)
-    {
-        var selectedProduct = args.Data;
-        _productModel = new()
-        {
-            Id = selectedProduct.Id,
-            Code = selectedProduct.Code,
-            Name = selectedProduct.Name,
-            Rate = selectedProduct.Rate,
-            ProductCategoryId = selectedProduct.ProductCategoryId,
-            TaxId = selectedProduct.TaxId,
-            Status = selectedProduct.Status
-        };
-
-        // Load product rates only for primary location products
-        await LoadProductRates(selectedProduct.Id, selectedProduct.Name);
-
-        StateHasChanged();
-    }
-
-    private void OnGridActionBegin(ActionEventArgs<ProductModel> args)
-    {
-        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save)
-        {
-            // Validate the data
-            if (string.IsNullOrWhiteSpace(args.Data.Code))
+            _successTitle = title;
+            _successMessage = message;
+            await _sfSuccessToast.ShowAsync(new()
             {
-                args.Cancel = true;
-                _ = ShowErrorToast("Product code is required.");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(args.Data.Name))
-            {
-                args.Cancel = true;
-                _ = ShowErrorToast("Product name is required.");
-                return;
-            }
-
-            if (args.Data.Rate <= 0)
-            {
-                args.Cancel = true;
-                _ = ShowErrorToast("Product rate must be greater than zero.");
-                return;
-            }
-
-            // Check for duplicate code
-            if (_products.Any(p => p.Code.Equals(args.Data.Code, StringComparison.OrdinalIgnoreCase) && p.Id != args.Data.Id))
-            {
-                args.Cancel = true;
-                _ = ShowErrorToast("Product code already exists.");
-                return;
-            }
+                Title = _successTitle,
+                Content = _successMessage
+            });
         }
     }
-
-    private void OnGridActionComplete(ActionEventArgs<ProductModel> args)
-    {
-        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save ||
-            args.RequestType == Syncfusion.Blazor.Grids.Action.Delete)
-        {
-            _successMessage = args.RequestType == Syncfusion.Blazor.Grids.Action.Save ? "Product saved successfully!" : "Product deleted successfully!";
-            _ = _sfToast.ShowAsync();
-        }
-    }
-
-    private async Task RemoveLocationRate(int rateId)
-    {
-        try
-        {
-            var productRate = await CommonData.LoadTableDataById<ProductLocationModel>(TableNames.ProductLocation, rateId);
-            productRate.Status = false;
-            await ProductData.InsertProductLocation(productRate);
-            _successMessage = "Location rate removed successfully!";
-            await _sfToast.ShowAsync();
-
-            // Reload rates (this will also update available locations)
-            await LoadProductRates(_selectedProductId, _selectedProductName);
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Error removing rate: {ex.Message}";
-            await _sfErrorToast.ShowAsync();
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    // Helper Methods
-    private async Task ShowErrorToast(string message)
-    {
-        _errorMessage = message;
-        await _sfErrorToast.ShowAsync();
-    }
-
-    private string GetLocationName(int locationId)
-    {
-        var location = _locations.FirstOrDefault(l => l.Id == locationId);
-        return location?.Name ?? "Unknown";
-    }
-
-    private string GetCategoryName(int categoryId)
-    {
-        var category = _productCategories.FirstOrDefault(c => c.Id == categoryId);
-        return category?.Name ?? "Unknown";
-    }
-
-    private string GetTaxCode(int taxId)
-    {
-        var tax = _taxTypes.FirstOrDefault(t => t.Id == taxId);
-        return tax?.Code ?? "Unknown";
-    }
+    #endregion
 }
