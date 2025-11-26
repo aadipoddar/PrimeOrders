@@ -224,6 +224,13 @@ public partial class TaxPage
             return false;
         }
 
+        // Tax must be either Inclusive or Extra, not both, and not both false
+        if (_tax.Inclusive == _tax.Extra)
+        {
+            await ShowToast("Error", "Tax must be either Inclusive or Extra, but not both and not neither.", "error");
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(_tax.Remarks))
             _tax.Remarks = null;
 

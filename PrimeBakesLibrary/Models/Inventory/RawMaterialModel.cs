@@ -9,7 +9,8 @@ public class RawMaterialModel
     public decimal Rate { get; set; }
     public string UnitOfMeasurement { get; set; }
     public int TaxId { get; set; }
-    public bool Status { get; set; }
+    public string? Remarks { get; set; }
+	public bool Status { get; set; }
 }
 
 public class RawMaterialCategoryModel

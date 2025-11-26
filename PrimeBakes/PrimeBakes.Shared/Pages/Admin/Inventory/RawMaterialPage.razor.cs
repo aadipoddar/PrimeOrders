@@ -1,210 +1,327 @@
 using PrimeBakes.Shared.Services;
 
-using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Exporting.Inventory.RawMaterial;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Sales.Product;
 
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
 
 public partial class RawMaterialPage
 {
     private bool _isLoading = true;
-    private bool _isSubmitting = false;
+    private bool _isProcessing = false;
+    private bool _showDeleted = false;
 
-    private RawMaterialModel _rawMaterialModel = new()
-    {
-        Id = 0,
-        Name = "",
-        Code = "",
-        RawMaterialCategoryId = 0,
-        UnitOfMeasurement = "KG",
-        Rate = 0,
-        TaxId = 0,
-        Status = true
-    };
+    private RawMaterialModel _rawMaterial = new();
 
     private List<RawMaterialModel> _rawMaterials = [];
-    private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
-    private List<TaxModel> _taxTypes = [];
+    private List<RawMaterialCategoryModel> _categories = [];
+    private List<TaxModel> _taxes = [];
+
+    private string _selectedCategoryName = string.Empty;
+    private string _selectedTaxCode = string.Empty;
 
     private SfGrid<RawMaterialModel> _sfGrid;
-    private SfToast _sfToast;
+    private SfDialog _deleteConfirmationDialog;
+    private SfDialog _recoverConfirmationDialog;
+
+    private int _deleteRawMaterialId = 0;
+    private string _deleteRawMaterialName = string.Empty;
+    private bool _isDeleteDialogVisible = false;
+
+    private int _recoverRawMaterialId = 0;
+    private string _recoverRawMaterialName = string.Empty;
+    private bool _isRecoverDialogVisible = false;
+
+    private string _errorTitle = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    private string _successTitle = string.Empty;
+    private string _successMessage = string.Empty;
+
+    private SfToast _sfSuccessToast;
     private SfToast _sfErrorToast;
 
-    // Toast message properties
-    private string _successMessage = "Operation completed successfully!";
-    private string _errorMessage = "An error occurred. Please try again.";
-
-    protected override async Task OnInitializedAsync()
+    #region Load Data
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
-        await LoadRawMaterials();
+        if (!firstRender)
+            return;
 
+        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
+        await LoadData();
         _isLoading = false;
         StateHasChanged();
     }
 
-    private async Task LoadRawMaterials()
+    private async Task LoadData()
     {
-        try
+        _rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
+        _categories = await CommonData.LoadTableData<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
+        _taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
+
+        // Filter taxes to only show active ones
+        _taxes = [.. _taxes.Where(t => t.Status)];
+        _categories = [.. _categories.Where(c => c.Status)];
+
+        if (!_showDeleted)
+            _rawMaterials = [.. _rawMaterials.Where(rm => rm.Status)];
+
+        if (_sfGrid is not null)
+            await _sfGrid.Refresh();
+    }
+    #endregion
+
+    #region Autocomplete Events
+    private void OnCategoryChange(ChangeEventArgs<string, RawMaterialCategoryModel> args)
+    {
+        if (args.ItemData != null)
         {
-            _rawMaterialCategories = await CommonData.LoadTableData<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
-            _rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
-            _taxTypes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
-
-            _rawMaterialModel.Code = await GenerateCodes.GenerateRawMaterialCode();
-
-            if (_sfGrid is not null)
-                await _sfGrid.Refresh();
-            StateHasChanged();
+            _rawMaterial.RawMaterialCategoryId = args.ItemData.Id;
+            _selectedCategoryName = args.ItemData.Name;
         }
-        catch (Exception ex)
+        else
         {
-            _errorMessage = $"Failed to load raw materials data: {ex.Message}";
-            await ShowErrorToast();
+            _rawMaterial.RawMaterialCategoryId = 0;
+            _selectedCategoryName = string.Empty;
         }
     }
 
-    private async Task OnAddRawMaterial()
+    private void OnTaxChange(ChangeEventArgs<string, TaxModel> args)
     {
-        _rawMaterialModel = new()
+        if (args.ItemData != null)
         {
-            Id = 0,
-            Name = "",
-            Code = await GenerateCodes.GenerateRawMaterialCode(),
-            RawMaterialCategoryId = 0,
-            UnitOfMeasurement = "KG",
-            Rate = 0,
-            TaxId = 0,
-            Status = true
-        };
-        StateHasChanged();
+            _rawMaterial.TaxId = args.ItemData.Id;
+            _selectedTaxCode = args.ItemData.Code;
+        }
+        else
+        {
+            _rawMaterial.TaxId = 0;
+            _selectedTaxCode = string.Empty;
+        }
     }
+    #endregion
 
+    #region Actions
     private void OnEditRawMaterial(RawMaterialModel rawMaterial)
     {
-        _rawMaterialModel = new()
+        _rawMaterial = new()
         {
             Id = rawMaterial.Id,
             Name = rawMaterial.Name,
             Code = rawMaterial.Code,
             RawMaterialCategoryId = rawMaterial.RawMaterialCategoryId,
-            UnitOfMeasurement = rawMaterial.UnitOfMeasurement,
             Rate = rawMaterial.Rate,
+            UnitOfMeasurement = rawMaterial.UnitOfMeasurement,
             TaxId = rawMaterial.TaxId,
+            Remarks = rawMaterial.Remarks,
             Status = rawMaterial.Status
         };
+
+        // Set autocomplete values
+        var category = _categories.FirstOrDefault(c => c.Id == rawMaterial.RawMaterialCategoryId);
+        _selectedCategoryName = category?.Name ?? string.Empty;
+
+        var tax = _taxes.FirstOrDefault(t => t.Id == rawMaterial.TaxId);
+        _selectedTaxCode = tax?.Code ?? string.Empty;
+
         StateHasChanged();
     }
 
-    private async Task ToggleRawMaterialStatus(RawMaterialModel rawMaterial)
+    private void ShowDeleteConfirmation(int id, string name)
+    {
+        _deleteRawMaterialId = id;
+        _deleteRawMaterialName = name;
+        _isDeleteDialogVisible = true;
+        StateHasChanged();
+    }
+
+    private void CancelDelete()
+    {
+        _deleteRawMaterialId = 0;
+        _deleteRawMaterialName = string.Empty;
+        _isDeleteDialogVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete()
     {
         try
         {
-            rawMaterial.Status = !rawMaterial.Status;
+            _isProcessing = true;
+            _isDeleteDialogVisible = false;
+
+            var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == _deleteRawMaterialId);
+            if (rawMaterial == null)
+            {
+                await ShowToast("Error", "Raw material not found.", "error");
+                return;
+            }
+
+            rawMaterial.Status = false;
             await RawMaterialData.InsertRawMaterial(rawMaterial);
-            await LoadRawMaterials();
 
-            _successMessage = $"Raw material '{rawMaterial.Name}' has been {(rawMaterial.Status ? "activated" : "deactivated")} successfully.";
-            await ShowSuccessToast();
-
-            OnAddRawMaterial();
+            await ShowToast("Success", $"Raw material '{rawMaterial.Name}' has been deleted successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Failed to update raw material status: {ex.Message}";
-            await ShowErrorToast();
+            await ShowToast("Error", $"Failed to delete raw material: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            _deleteRawMaterialId = 0;
+            _deleteRawMaterialName = string.Empty;
         }
     }
 
+    private void ShowRecoverConfirmation(int id, string name)
+    {
+        _recoverRawMaterialId = id;
+        _recoverRawMaterialName = name;
+        _isRecoverDialogVisible = true;
+        StateHasChanged();
+    }
+
+    private void CancelRecover()
+    {
+        _recoverRawMaterialId = 0;
+        _recoverRawMaterialName = string.Empty;
+        _isRecoverDialogVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ToggleDeleted()
+    {
+        _showDeleted = !_showDeleted;
+        await LoadData();
+        StateHasChanged();
+    }
+
+    private async Task ConfirmRecover()
+    {
+        try
+        {
+            _isProcessing = true;
+            _isRecoverDialogVisible = false;
+
+            var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == _recoverRawMaterialId);
+            if (rawMaterial == null)
+            {
+                await ShowToast("Error", "Raw material not found.", "error");
+                return;
+            }
+
+            rawMaterial.Status = true;
+            await RawMaterialData.InsertRawMaterial(rawMaterial);
+
+            await ShowToast("Success", $"Raw material '{rawMaterial.Name}' has been recovered successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"Failed to recover raw material: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            _recoverRawMaterialId = 0;
+            _recoverRawMaterialName = string.Empty;
+        }
+    }
+    #endregion
+
+    #region Saving
     private async Task<bool> ValidateForm()
     {
-        // Ensure measurement unit is always uppercase
-        _rawMaterialModel.UnitOfMeasurement = _rawMaterialModel.UnitOfMeasurement?.ToUpper() ?? "";
+        _rawMaterial.Name = _rawMaterial.Name?.Trim() ?? "";
+        _rawMaterial.Code = _rawMaterial.Code?.Trim() ?? "";
+        _rawMaterial.UnitOfMeasurement = _rawMaterial.UnitOfMeasurement?.Trim() ?? "";
+        _rawMaterial.Remarks = _rawMaterial.Remarks?.Trim() ?? "";
 
-        if (string.IsNullOrWhiteSpace(_rawMaterialModel.Name))
+        _rawMaterial.Code = _rawMaterial.Code?.ToUpper() ?? "";
+        _rawMaterial.UnitOfMeasurement = _rawMaterial.UnitOfMeasurement?.ToUpper() ?? "";
+
+        _rawMaterial.Status = true;
+
+        if (string.IsNullOrWhiteSpace(_rawMaterial.Name))
         {
-            _errorMessage = "Raw material name is required. Please enter a valid name.";
-            await ShowErrorToast();
+            await ShowToast("Error", "Raw material name is required. Please enter a valid name.", "error");
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(_rawMaterialModel.Code))
+        if (string.IsNullOrWhiteSpace(_rawMaterial.Code))
         {
-            _errorMessage = "Raw material code is required. Please enter a valid code.";
-            await ShowErrorToast();
+            await ShowToast("Error", "Raw material code is required. Please enter a valid code.", "error");
             return false;
         }
 
-        if (_rawMaterialModel.RawMaterialCategoryId <= 0)
+        if (_rawMaterial.RawMaterialCategoryId <= 0)
         {
-            _errorMessage = "Category selection is required. Please select a valid category.";
-            await ShowErrorToast();
+            await ShowToast("Error", "Category is required. Please select a category.", "error");
             return false;
         }
 
-        if (_rawMaterialModel.TaxId <= 0)
+        if (_rawMaterial.Rate < 0)
         {
-            _errorMessage = "Tax selection is required. Please select a valid tax rate.";
-            await ShowErrorToast();
+            await ShowToast("Error", "Rate must be greater than or equal to 0.", "error");
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(_rawMaterialModel.UnitOfMeasurement))
+        if (string.IsNullOrWhiteSpace(_rawMaterial.UnitOfMeasurement))
         {
-            _errorMessage = "Measurement unit is required. Please enter a valid unit.";
-            await ShowErrorToast();
+            await ShowToast("Error", "Unit of measurement is required. Please enter a valid unit.", "error");
             return false;
         }
 
-        if (_rawMaterialModel.Rate < 0)
+        if (_rawMaterial.TaxId <= 0)
         {
-            _errorMessage = $"MRP must be greater than 0. Current value: {_rawMaterialModel.Rate:C}";
-            await ShowErrorToast();
+            await ShowToast("Error", "Tax is required. Please select a tax.", "error");
             return false;
         }
 
-        // Check for duplicate names and codes
-        if (_rawMaterialModel.Id > 0)
+        if (string.IsNullOrWhiteSpace(_rawMaterial.Remarks))
+            _rawMaterial.Remarks = null;
+
+        if (_rawMaterial.Id > 0)
         {
-            var existingRawMaterial = _rawMaterials.FirstOrDefault(_ => _.Id != _rawMaterialModel.Id && _.Name.Equals(_rawMaterialModel.Name, StringComparison.OrdinalIgnoreCase));
-            if (existingRawMaterial is not null)
+            var existingByName = _rawMaterials.FirstOrDefault(rm => rm.Id != _rawMaterial.Id && rm.Name.Equals(_rawMaterial.Name, StringComparison.OrdinalIgnoreCase));
+            if (existingByName is not null)
             {
-                _errorMessage = $"Raw material name '{_rawMaterialModel.Name}' already exists. Please choose a different name.";
-                await ShowErrorToast();
+                await ShowToast("Error", $"Raw material name '{_rawMaterial.Name}' already exists. Please choose a different name.", "error");
                 return false;
             }
 
-            existingRawMaterial = _rawMaterials.FirstOrDefault(_ => _.Id != _rawMaterialModel.Id && _.Code.Equals(_rawMaterialModel.Code, StringComparison.OrdinalIgnoreCase));
-            if (existingRawMaterial is not null)
+            var existingByCode = _rawMaterials.FirstOrDefault(rm => rm.Id != _rawMaterial.Id && rm.Code.Equals(_rawMaterial.Code, StringComparison.OrdinalIgnoreCase));
+            if (existingByCode is not null)
             {
-                _errorMessage = $"Raw material code '{_rawMaterialModel.Code}' is already used by '{existingRawMaterial.Name}'. Please choose a different code.";
-                await ShowErrorToast();
+                await ShowToast("Error", $"Raw material code '{_rawMaterial.Code}' already exists. Please choose a different code.", "error");
                 return false;
             }
         }
         else
         {
-            var existingRawMaterial = _rawMaterials.FirstOrDefault(_ => _.Name.Equals(_rawMaterialModel.Name, StringComparison.OrdinalIgnoreCase));
-            if (existingRawMaterial is not null)
+            var existingByName = _rawMaterials.FirstOrDefault(rm => rm.Name.Equals(_rawMaterial.Name, StringComparison.OrdinalIgnoreCase));
+            if (existingByName is not null)
             {
-                _errorMessage = $"Raw material name '{_rawMaterialModel.Name}' already exists. Please choose a different name.";
-                await ShowErrorToast();
+                await ShowToast("Error", $"Raw material name '{_rawMaterial.Name}' already exists. Please choose a different name.", "error");
                 return false;
             }
 
-            existingRawMaterial = _rawMaterials.FirstOrDefault(_ => _.Code.Equals(_rawMaterialModel.Code, StringComparison.OrdinalIgnoreCase));
-            if (existingRawMaterial is not null)
+            var existingByCode = _rawMaterials.FirstOrDefault(rm => rm.Code.Equals(_rawMaterial.Code, StringComparison.OrdinalIgnoreCase));
+            if (existingByCode is not null)
             {
-                _errorMessage = $"Raw material code '{_rawMaterialModel.Code}' is already used by '{existingRawMaterial.Name}'. Please choose a different code.";
-                await ShowErrorToast();
+                await ShowToast("Error", $"Raw material code '{_rawMaterial.Code}' already exists. Please choose a different code.", "error");
                 return false;
             }
         }
@@ -214,84 +331,155 @@ public partial class RawMaterialPage
 
     private async Task SaveRawMaterial()
     {
+        if (_isProcessing)
+            return;
+
         try
         {
-            if (_isSubmitting || !await ValidateForm())
+            _isProcessing = true;
+
+            if (!await ValidateForm())
+            {
+                _isProcessing = false;
                 return;
+            }
 
-            _isSubmitting = true;
-            StateHasChanged();
+            await RawMaterialData.InsertRawMaterial(_rawMaterial);
 
-            var isNewRawMaterial = _rawMaterialModel.Id == 0;
-            var rawMaterialName = _rawMaterialModel.Name;
-
-            await RawMaterialData.InsertRawMaterial(_rawMaterialModel);
-            await LoadRawMaterials();
-
-            // Reset form
-            OnAddRawMaterial();
-
-            _successMessage = isNewRawMaterial
-                ? $"Raw material '{rawMaterialName}' has been created successfully!"
-                : $"Raw material '{rawMaterialName}' has been updated successfully!";
-            await ShowSuccessToast();
+            await ShowToast("Success", $"Raw material '{_rawMaterial.Name}' has been saved successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Failed to save raw material: {ex.Message}";
-            await ShowErrorToast();
+            await ShowToast("Error", $"Failed to save raw material: {ex.Message}", "error");
         }
         finally
         {
-            _isSubmitting = false;
+            _isProcessing = false;
+        }
+    }
+    #endregion
+
+    #region Exporting
+    private async Task ExportExcel()
+    {
+        if (_isProcessing)
+            return;
+
+        try
+        {
+            _isProcessing = true;
+            StateHasChanged();
+
+            // Enrich data with category and tax names
+            var enrichedData = _rawMaterials.Select(rm => new
+            {
+                rm.Id,
+                rm.Name,
+                rm.Code,
+                Category = _categories.FirstOrDefault(c => c.Id == rm.RawMaterialCategoryId)?.Name ?? "N/A",
+                rm.Rate,
+                rm.UnitOfMeasurement,
+                Tax = _taxes.FirstOrDefault(t => t.Id == rm.TaxId)?.Code ?? "N/A",
+                rm.Remarks,
+                rm.Status
+            }).ToList();
+
+            // Call the Excel export utility
+            var stream = await Task.Run(() => RawMaterialExcelExport.ExportRawMaterial(enrichedData));
+
+            // Generate file name
+            string fileName = "RAW_MATERIAL_MASTER.xlsx";
+
+            // Save and view the Excel file
+            await SaveAndViewService.SaveAndView(fileName, stream);
+
+            await ShowToast("Success", "Raw material data exported to Excel successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
             StateHasChanged();
         }
     }
 
-    public void RowSelectHandler(RowSelectEventArgs<RawMaterialModel> args) =>
-        OnEditRawMaterial(args.Data);
-
-    // Helper methods for showing toasts with dynamic content
-    private async Task ShowSuccessToast()
+    private async Task ExportPdf()
     {
-        if (_sfToast != null)
+        if (_isProcessing)
+            return;
+
+        try
         {
-            var toastModel = new ToastModel
+            _isProcessing = true;
+            StateHasChanged();
+
+            // Enrich data with category and tax names
+            var enrichedData = _rawMaterials.Select(rm => new
             {
-                Title = "Success",
-                Content = _successMessage,
-                CssClass = "e-toast-success",
-                Icon = "e-success toast-icons"
-            };
-            await _sfToast.ShowAsync(toastModel);
+                rm.Id,
+                rm.Name,
+                rm.Code,
+                Category = _categories.FirstOrDefault(c => c.Id == rm.RawMaterialCategoryId)?.Name ?? "N/A",
+                rm.Rate,
+                rm.UnitOfMeasurement,
+                Tax = _taxes.FirstOrDefault(t => t.Id == rm.TaxId)?.Code ?? "N/A",
+                rm.Remarks,
+                rm.Status
+            }).ToList();
+
+            // Call the PDF export utility
+            var stream = await Task.Run(() => RawMaterialPDFExport.ExportRawMaterial(enrichedData));
+
+            // Generate file name
+            string fileName = "RAW_MATERIAL_MASTER.pdf";
+
+            // Save and view the PDF file
+            await SaveAndViewService.SaveAndView(fileName, stream);
+
+            await ShowToast("Success", "Raw material data exported to PDF successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
         }
     }
+    #endregion
 
-    private async Task ShowErrorToast()
+    #region Utilities
+    private async Task ShowToast(string title, string message, string type)
     {
-        if (_sfErrorToast != null)
+        VibrationService.VibrateWithTime(200);
+
+        if (type == "error")
         {
-            var toastModel = new ToastModel
+            _errorTitle = title;
+            _errorMessage = message;
+            await _sfErrorToast.ShowAsync(new()
             {
-                Title = "Error",
-                Content = _errorMessage,
-                CssClass = "e-toast-danger",
-                Icon = "e-error toast-icons"
-            };
-            await _sfErrorToast.ShowAsync(toastModel);
+                Title = _errorTitle,
+                Content = _errorMessage
+            });
+        }
+
+        else if (type == "success")
+        {
+            _successTitle = title;
+            _successMessage = message;
+            await _sfSuccessToast.ShowAsync(new()
+            {
+                Title = _successTitle,
+                Content = _successMessage
+            });
         }
     }
-
-    // Helper methods to get display names
-    private string GetCategoryName(int categoryId)
-    {
-        return _rawMaterialCategories.FirstOrDefault(c => c.Id == categoryId)?.Name ?? "Unknown";
-    }
-
-    private string GetTaxName(int taxId)
-    {
-        return _taxTypes.FirstOrDefault(t => t.Id == taxId)?.Code ?? "Unknown";
-    }
-
-
+    #endregion
 }

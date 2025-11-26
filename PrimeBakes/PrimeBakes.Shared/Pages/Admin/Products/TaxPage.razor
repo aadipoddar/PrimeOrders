@@ -25,9 +25,9 @@ else
         </div>
         <div class="header-right">
             <button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
-                    title="Export to Excel">
+                title="Export to Excel">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
                     <line x1="16" y1="13" x2="8" y2="13" />
@@ -37,7 +37,7 @@ else
             </button>
             <button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
                     <line x1="16" y1="13" x2="8" y2="13" />
@@ -47,31 +47,32 @@ else
             </button>
             <button class="btn-icon btn-icon-save" @onclick="SaveTax" disabled="@_isProcessing" title="Save Tax">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                     <polyline points="17 21 17 13 7 13 7 21" />
                     <polyline points="7 3 7 8 15 8" />
                 </svg>
             </button>
-            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminTax, true)' title="New Tax" disabled="@_isProcessing">
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminTax, true)'
+                title="New Tax" disabled="@_isProcessing">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
             </button>
             <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home"
-                    disabled="@_isProcessing">
+                disabled="@_isProcessing">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
             </button>
             <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard)'
-                    title="Back" disabled="@_isProcessing">
+                title="Back" disabled="@_isProcessing">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
             </button>
@@ -86,7 +87,7 @@ else
             <div class="section-header">
                 <div class="section-title-wrapper">
                     <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5" />
                     </svg>
                     <h2 class="section-title">Tax Details</h2>
@@ -98,45 +99,43 @@ else
                     <div class="form-field">
                         <label class="field-label">Tax Code <span class="required">*</span></label>
                         <SfTextBox @bind-Value="_tax.Code" Placeholder="Enter tax code"
-                                   FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- CGST -->
                     <div class="form-field">
                         <label class="field-label">CGST % <span class="required">*</span></label>
                         <SfNumericTextBox @bind-Value="_tax.CGST" Placeholder="Enter CGST %"
-                                          FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" 
-                                          Format="N2" Decimals="2" Min="0" Max="100" />
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" Format="N2" Decimals="2" Min="0"
+                            Max="100" />
                     </div>
 
                     <!-- SGST -->
                     <div class="form-field">
                         <label class="field-label">SGST % <span class="required">*</span></label>
                         <SfNumericTextBox @bind-Value="_tax.SGST" Placeholder="Enter SGST %"
-                                          FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" 
-                                          Format="N2" Decimals="2" Min="0" Max="100" />
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" Format="N2" Decimals="2" Min="0"
+                            Max="100" />
                     </div>
 
                     <!-- IGST -->
                     <div class="form-field">
                         <label class="field-label">IGST % <span class="required">*</span></label>
                         <SfNumericTextBox @bind-Value="_tax.IGST" Placeholder="Enter IGST %"
-                                          FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" 
-                                          Format="N2" Decimals="2" Min="0" Max="100" />
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" Format="N2" Decimals="2" Min="0"
+                            Max="100" />
                     </div>
 
                     <!-- Inclusive Checkbox -->
                     <div class="form-field">
                         <label class="field-label">Inclusive</label>
-                        <SfCheckBox @bind-Checked="_tax.Inclusive" Label="Tax Inclusive"
-                                    CssClass="custom-checkbox" />
+                        <SfCheckBox @bind-Checked="_tax.Inclusive" Label="Tax Inclusive" CssClass="custom-checkbox" />
                     </div>
 
                     <!-- Extra Checkbox -->
                     <div class="form-field">
                         <label class="field-label">Extra</label>
-                        <SfCheckBox @bind-Checked="_tax.Extra" Label="Extra Tax"
-                                    CssClass="custom-checkbox" />
+                        <SfCheckBox @bind-Checked="_tax.Extra" Label="Extra Tax" CssClass="custom-checkbox" />
                     </div>
                 </div>
                 <div class="form-grid-single">
@@ -144,7 +143,7 @@ else
                     <div class="form-field">
                         <label class="field-label">Remarks</label>
                         <SfTextBox @bind-Value="_tax.Remarks" Placeholder="Enter remarks (optional)" Multiline="true"
-                                   FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
                 </div>
             </div>
@@ -155,7 +154,7 @@ else
             <div class="section-header">
                 <div class="section-title-wrapper">
                     <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 11l3 3L22 4" />
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                     </svg>
@@ -163,10 +162,9 @@ else
                 </div>
                 <div class="header-actions">
                     <button class="btn-toggle-deleted @(_showDeleted ? "active" : "")" @onclick="ToggleDeleted"
-                            title="@(_showDeleted ? "Hide Deleted Taxes" : "Show Deleted Taxes")"
-                            disabled="@_isProcessing">
+                        title="@(_showDeleted ? "Hide Deleted Taxes" : "Show Deleted Taxes")" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6" />
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             <line x1="10" y1="11" x2="10" y2="17" />
@@ -178,7 +176,7 @@ else
             </div>
             <div class="section-body grid-body">
                 <SfGrid @ref="_sfGrid" DataSource="@_taxes" AllowPaging="true" AllowSorting="true" AllowFiltering="true"
-                        AllowResizing="true" CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
+                    AllowResizing="true" CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
                     <GridPageSettings PageSize="20" PageSizes="@(new int[] { 20, 50, 100, 200 })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
                     <GridColumns>
@@ -190,23 +188,23 @@ else
                                     <div class="grid-actions">
                                         @if (tax.Status)
                                         {
-                                            <button class="btn-grid-action btn-edit" @onclick="() => OnEditTax(tax)"
-                                                    title="Edit">
+                                            <button class="btn-grid-action btn-edit" @onclick="() => OnEditTax(tax)" title="Edit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                     stroke-linejoin="round">
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                                 </svg>
                                             </button>
 
                                             <button class="btn-grid-action btn-delete"
-                                                    @onclick="() => ShowDeleteConfirmation(tax.Id, tax.Code)" title="Delete">
+                                                @onclick="() => ShowDeleteConfirmation(tax.Id, tax.Code)" title="Delete">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                     stroke-linejoin="round">
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <polyline points="3 6 5 6 21 6" />
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                    <path
+                                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                                     <line x1="10" y1="11" x2="10" y2="17" />
                                                     <line x1="14" y1="11" x2="14" y2="17" />
                                                 </svg>
@@ -215,10 +213,10 @@ else
                                         else
                                         {
                                             <button class="btn-grid-action btn-recover"
-                                                    @onclick="() => ShowRecoverConfirmation(tax.Id, tax.Code)" title="Recover">
+                                                @onclick="() => ShowRecoverConfirmation(tax.Id, tax.Code)" title="Recover">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                     stroke-linejoin="round">
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <polyline points="23 4 23 10 17 10"></polyline>
                                                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                                                 </svg>
@@ -228,34 +226,33 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(TaxModel.Id)" HeaderText="ID" Width="80"
-                                    TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(TaxModel.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center" />
                         <GridColumn Field="@nameof(TaxModel.Code)" HeaderText="Tax Code" Width="150" />
                         <GridColumn Field="@nameof(TaxModel.CGST)" HeaderText="CGST %" Width="100"
-                                    TextAlign="TextAlign.Right" Format="N2" />
+                            TextAlign="TextAlign.Right" Format="N2" />
                         <GridColumn Field="@nameof(TaxModel.SGST)" HeaderText="SGST %" Width="100"
-                                    TextAlign="TextAlign.Right" Format="N2" />
+                            TextAlign="TextAlign.Right" Format="N2" />
                         <GridColumn Field="@nameof(TaxModel.IGST)" HeaderText="IGST %" Width="100"
-                                    TextAlign="TextAlign.Right" Format="N2" />
+                            TextAlign="TextAlign.Right" Format="N2" />
                         <GridColumn Field="@nameof(TaxModel.Inclusive)" HeaderText="Inclusive" Width="120"
-                                    TextAlign="TextAlign.Center">
+                            TextAlign="TextAlign.Center">
                             <Template>
                                 @{
                                     var tax = (context as TaxModel);
                                     <div class="grid-checkbox"
-                                         style="@(tax.Inclusive ? "color: #10b981; background: #d1fae5;" : "color: #64748b; background: #f1f5f9;")">
+                                        style="@(tax.Inclusive ? "color: #10b981; background: #d1fae5;" : "color: #64748b; background: #f1f5f9;")">
                                         @(tax.Inclusive ? "✓" : "✗")
                                     </div>
                                 }
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(TaxModel.Extra)" HeaderText="Extra" Width="100"
-                                    TextAlign="TextAlign.Center">
+                            TextAlign="TextAlign.Center">
                             <Template>
                                 @{
                                     var tax = (context as TaxModel);
                                     <div class="grid-checkbox"
-                                         style="@(tax.Extra ? "color: #10b981; background: #d1fae5;" : "color: #64748b; background: #f1f5f9;")">
+                                        style="@(tax.Extra ? "color: #10b981; background: #d1fae5;" : "color: #64748b; background: #f1f5f9;")">
                                         @(tax.Extra ? "✓" : "✗")
                                     </div>
                                 }
@@ -263,12 +260,12 @@ else
                         </GridColumn>
                         <GridColumn Field="@nameof(TaxModel.Remarks)" HeaderText="Remarks" Width="250" />
                         <GridColumn Field="@nameof(TaxModel.Status)" HeaderText="Status" Width="100"
-                                    TextAlign="TextAlign.Center">
+                            TextAlign="TextAlign.Center">
                             <Template>
                                 @{
                                     var tax = (context as TaxModel);
                                     <div class="grid-checkbox"
-                                         style="@(tax.Status ? "color: #10b981; background: #d1fae5;" : "color: #dc2626; background: #fee2e2;")">
+                                        style="@(tax.Status ? "color: #10b981; background: #d1fae5;" : "color: #dc2626; background: #fee2e2;")">
                                         @(tax.Status ? "✓" : "✗")
                                     </div>
                                 }
@@ -284,13 +281,13 @@ else
 
 <!-- Delete Confirmation Dialog -->
 <SfDialog @ref="_deleteConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-          @bind-Visible="_isDeleteDialogVisible">
+    @bind-Visible="_isDeleteDialogVisible">
     <DialogTemplates>
         <Header>
             <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     style="color: #ef4444;">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="color: #ef4444;">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
                     <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -303,7 +300,8 @@ else
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
                     Are you sure you want to delete this tax?
                 </p>
-                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <div
+                    style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                     <p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">
                         Tax Details:
                     </p>
@@ -311,7 +309,8 @@ else
                         <strong>Tax Code:</strong> @_deleteTaxCode
                     </p>
                 </div>
-                <div style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                <div
+                    style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
                         <strong>Note:</strong> This tax will be marked as deleted. You can recover it later.
                     </p>
@@ -319,7 +318,7 @@ else
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <button class="dialog-btn dialog-btn-cancel" @onclick="CancelDelete" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
@@ -327,7 +326,7 @@ else
                     </button>
                     <button class="dialog-btn dialog-btn-delete" @onclick="ConfirmDelete" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6" />
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             <line x1="10" y1="11" x2="10" y2="17" />
@@ -343,13 +342,13 @@ else
 
 <!-- Recover Confirmation Dialog -->
 <SfDialog @ref="_recoverConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-          @bind-Visible="_isRecoverDialogVisible">
+    @bind-Visible="_isRecoverDialogVisible">
     <DialogTemplates>
         <Header>
             <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     style="color: #10b981;">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="color: #10b981;">
                     <polyline points="23 4 23 10 17 10"></polyline>
                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                 </svg>
@@ -361,7 +360,8 @@ else
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
                     Are you sure you want to recover this tax?
                 </p>
-                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <div
+                    style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                     <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46; font-weight: 600;">
                         Tax Details:
                     </p>
@@ -369,7 +369,8 @@ else
                         <strong>Tax Code:</strong> @_recoverTaxCode
                     </p>
                 </div>
-                <div style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                <div
+                    style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
                         <strong>Note:</strong> This will recover the tax and make it available again.
                     </p>
@@ -377,7 +378,7 @@ else
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <button class="dialog-btn dialog-btn-cancel" @onclick="CancelRecover" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
@@ -385,7 +386,7 @@ else
                     </button>
                     <button class="dialog-btn dialog-btn-recover" @onclick="ConfirmRecover" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="23 4 23 10 17 10"></polyline>
                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                         </svg>
@@ -496,63 +497,63 @@ else
         color: #64748b;
     }
 
-        .btn-icon:hover {
-            background: #f8fafc;
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
+    .btn-icon:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
 
-        .btn-icon:active {
-            transform: scale(0.95);
-        }
+    .btn-icon:active {
+        transform: scale(0.95);
+    }
 
     .btn-icon-excel {
         color: #10b981;
         border-color: #10b981;
     }
 
-        .btn-icon-excel:hover {
-            background: #ecfdf5;
-            border-color: #059669;
-            color: #059669;
-        }
+    .btn-icon-excel:hover {
+        background: #ecfdf5;
+        border-color: #059669;
+        color: #059669;
+    }
 
-        .btn-icon-excel:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .btn-icon-excel:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     .btn-icon-pdf {
         color: #ef4444;
         border-color: #ef4444;
     }
 
-        .btn-icon-pdf:hover {
-            background: #fef2f2;
-            border-color: #dc2626;
-            color: #dc2626;
-        }
+    .btn-icon-pdf:hover {
+        background: #fef2f2;
+        border-color: #dc2626;
+        color: #dc2626;
+    }
 
-        .btn-icon-pdf:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .btn-icon-pdf:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     .btn-icon-save {
         color: #10b981;
         border-color: #10b981;
     }
 
-        .btn-icon-save:hover {
-            background: #ecfdf5;
-            border-color: #059669;
-            color: #059669;
-        }
+    .btn-icon-save:hover {
+        background: #ecfdf5;
+        border-color: #059669;
+        color: #059669;
+    }
 
-        .btn-icon-save:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .btn-icon-save:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     /* Main Container */
     .purchase-container {
@@ -677,47 +678,47 @@ else
         transition: all 0.2s ease;
     }
 
-        .btn-grid-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    .btn-grid-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-        .btn-grid-action:active {
-            transform: translateY(0);
-        }
+    .btn-grid-action:active {
+        transform: translateY(0);
+    }
 
     .btn-edit {
         color: #3b82f6;
         border-color: #3b82f6;
     }
 
-        .btn-edit:hover {
-            background: #dbeafe;
-            border-color: #2563eb;
-            color: #2563eb;
-        }
+    .btn-edit:hover {
+        background: #dbeafe;
+        border-color: #2563eb;
+        color: #2563eb;
+    }
 
     .btn-delete {
         color: #ef4444;
         border-color: #ef4444;
     }
 
-        .btn-delete:hover {
-            background: #fee2e2;
-            border-color: #dc2626;
-            color: #dc2626;
-        }
+    .btn-delete:hover {
+        background: #fee2e2;
+        border-color: #dc2626;
+        color: #dc2626;
+    }
 
     .btn-recover {
         color: #10b981;
         border-color: #10b981;
     }
 
-        .btn-recover:hover {
-            background: #d1fae5;
-            border-color: #059669;
-            color: #059669;
-        }
+    .btn-recover:hover {
+        background: #d1fae5;
+        border-color: #059669;
+        color: #059669;
+    }
 
     .grid-checkbox {
         display: inline-flex;
@@ -747,19 +748,19 @@ else
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     }
 
-        .dialog-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-        }
+    .dialog-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
 
-        .dialog-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-        }
+    .dialog-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
 
-        .dialog-btn svg {
-            flex-shrink: 0;
-        }
+    .dialog-btn svg {
+        flex-shrink: 0;
+    }
 
     .dialog-btn-cancel {
         background: #ffffff;
@@ -767,29 +768,29 @@ else
         border: 2px solid #e2e8f0;
     }
 
-        .dialog-btn-cancel:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            color: #475569;
-        }
+    .dialog-btn-cancel:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
 
     .dialog-btn-delete {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
     }
 
-        .dialog-btn-delete:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-        }
+    .dialog-btn-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
 
     .dialog-btn-recover {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
     }
 
-        .dialog-btn-recover:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
+    .dialog-btn-recover:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
 
     /* Toggle Deleted Button */
     .btn-toggle-deleted {
@@ -810,34 +811,34 @@ else
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-        .btn-toggle-deleted:hover {
-            background: #fef2f2;
-            border-color: #f97316;
-            color: #f97316;
-            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
-            transform: translateY(-1px);
-        }
+    .btn-toggle-deleted:hover {
+        background: #fef2f2;
+        border-color: #f97316;
+        color: #f97316;
+        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
+        transform: translateY(-1px);
+    }
 
-        .btn-toggle-deleted.active {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            border-color: #ea580c;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
-        }
+    .btn-toggle-deleted.active {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        border-color: #ea580c;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+    }
 
-            .btn-toggle-deleted.active:hover {
-                background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-                box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
-            }
+    .btn-toggle-deleted.active:hover {
+        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+    }
 
-        .btn-toggle-deleted:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+    .btn-toggle-deleted:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .btn-toggle-deleted svg {
-            flex-shrink: 0;
-        }
+    .btn-toggle-deleted svg {
+        flex-shrink: 0;
+    }
 
     /* Responsive Design */
     @@media (max-width: 1400px) {
