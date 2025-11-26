@@ -1,14 +1,15 @@
 CREATE PROCEDURE [dbo].[Insert_StateUT]
 	@Id INT OUTPUT,
-	@Name VARCHAR(250),
+	@Name VARCHAR(500),
 	@UnionTerritory BIT,
+	@Remarks VARCHAR(MAX) = NULL,
 	@Status BIT
 AS
 BEGIN
 	IF @Id = 0
 	BEGIN
-		INSERT INTO [dbo].[StateUT] ([Name], [UnionTerritory] ,[Status])
-		VALUES (@Name, @UnionTerritory, @Status);
+		INSERT INTO [dbo].[StateUT] ([Name], [UnionTerritory], [Remarks], [Status])
+		VALUES (@Name, @UnionTerritory, @Remarks, @Status);
 		SET @Id = SCOPE_IDENTITY();
 	END
 
@@ -17,6 +18,7 @@ BEGIN
 		UPDATE [dbo].[StateUT]
 		SET [Name] = @Name, 
 			[UnionTerritory] = @UnionTerritory,
+			[Remarks] = @Remarks,
 			[Status] = @Status
 		WHERE [Id] = @Id;
 	END

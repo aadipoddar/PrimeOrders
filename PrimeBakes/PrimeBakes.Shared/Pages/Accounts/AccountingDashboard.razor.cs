@@ -97,9 +97,9 @@ public partial class AccountingDashboard
     private async Task NavigateToState()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminState, "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminStateUT, "_blank");
         else
-            NavigationManager.NavigateTo(PageRouteNames.AdminState, true);
+            NavigationManager.NavigateTo(PageRouteNames.AdminStateUT, true);
     }
 
     private async Task NavigateToCompany()

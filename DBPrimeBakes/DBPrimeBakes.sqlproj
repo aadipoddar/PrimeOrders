@@ -151,10 +151,7 @@
     <Build Include="Tables\Accounts\Masters\Voucher.sql" />
     <Build Include="Tables\Common\Customer.sql" />
     <Build Include="Tables\Common\Location.sql" />
-    <Build Include="Tables\Common\Settings.sql" />
-    <Build Include="Tables\Common\StateUT.sql" />
     <Build Include="Tables\Common\User.sql" />
-    <Build Include="Tables\Common\Company.sql" />
     <Build Include="StoredProcedures\Insert\Common\Reset_Settings.sql" />
     <Build Include="StoredProcedures\Insert\Common\Update_Settings.sql" />
     <Build Include="Tables\Inventory\Purchase\PurchaseReturnDetail.sql" />
@@ -268,6 +265,9 @@
     <Build Include="Tables\Sales\Product\ProductCategory.sql" />
     <Build Include="Tables\Sales\Product\ProductLocation.sql" />
     <Build Include="Tables\Sales\Product\Tax.sql" />
+    <Build Include="Tables\Accounts\Masters\StateUT.sql" />
+    <Build Include="Tables\Accounts\Masters\Company.sql" />
+    <Build Include="Tables\Accounts\Masters\Settings.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

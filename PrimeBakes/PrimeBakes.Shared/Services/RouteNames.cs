@@ -62,5 +62,5 @@ internal static class PageRouteNames
     public static string AdminGroup => "/admin/group";
     public static string AdminAccountType => "/admin/account-type";
     public static string AdminFinancialYear => "/admin/financial-year";
-    public static string AdminState => "/admin/state";
+    public static string AdminStateUT => "/admin/state-ut";
 }
