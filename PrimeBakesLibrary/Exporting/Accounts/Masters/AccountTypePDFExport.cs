@@ -3,24 +3,24 @@
 namespace PrimeBakesLibrary.Exporting.Accounts.Masters;
 
 /// <summary>
-/// PDF export functionality for Group
+/// PDF export functionality for Account Type
 /// </summary>
-public static class GroupPDFExport
+public static class AccountTypePDFExport
 {
 	/// <summary>
-	/// Export group data to PDF with custom column order and formatting
+	/// Export account type data to PDF with custom column order and formatting
 	/// </summary>
-	/// <param name="groupData">Collection of group records</param>
+	/// <param name="accountTypeData">Collection of account type records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportGroup(IEnumerable<GroupModel> groupData)
+	public static MemoryStream ExportAccountType(IEnumerable<AccountTypeModel> accountTypeData)
 	{
 		// Create enriched data with status formatting
-		var enrichedData = groupData.Select(group => new
+		var enrichedData = accountTypeData.Select(accountType => new
 		{
-			group.Id,
-			group.Name,
-			group.Remarks,
-			Status = group.Status ? "Active" : "Deleted"
+			accountType.Id,
+			accountType.Name,
+			accountType.Remarks,
+			Status = accountType.Status ? "Active" : "Deleted"
 		});
 
 		// Define custom column settings
@@ -37,7 +37,7 @@ public static class GroupPDFExport
 				IncludeInTotal = false
 			},
 
-			["Name"] = new() { DisplayName = "Group Name", IncludeInTotal = false },
+			["Name"] = new() { DisplayName = "Account Type Name", IncludeInTotal = false },
 			["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
 			["Status"] = new()
@@ -61,7 +61,7 @@ public static class GroupPDFExport
 		// Call the generic PDF export utility
 		return PDFReportExportUtil.ExportToPdf(
 			enrichedData,
-			"GROUP MASTER",
+			"ACCOUNT TYPE MASTER",
 			null,
 			null,
 			columnSettings,
