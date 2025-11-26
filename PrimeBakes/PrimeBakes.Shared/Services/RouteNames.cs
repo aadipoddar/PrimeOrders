@@ -54,6 +54,7 @@ internal static class PageRouteNames
     public static string AdminKitchen => "/admin/kitchen";
     public static string AdminProduct => "/admin/product";
     public static string AdminProductCategory => "/admin/product-category";
+    public static string AdminProductLocation => "/admin/product-location";
     public static string AdminUser => "/admin/user";
     public static string AdminTax => "/admin/tax";
     public static string AdminCompany => "/admin/company";

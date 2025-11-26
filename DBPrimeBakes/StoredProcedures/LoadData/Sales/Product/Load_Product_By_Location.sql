@@ -2,9 +2,7 @@
 	@LocationId INT
 AS
 BEGIN
-	SELECT
-		*
-	FROM
-	ProductLocation_Overview
+	SELECT *
+	FROM ProductLocation_Overview
 	WHERE LocationId = @LocationId
 END

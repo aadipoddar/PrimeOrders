@@ -44,6 +44,14 @@ public partial class AdminDashboard
             NavigationManager.NavigateTo(PageRouteNames.AdminProduct, true);
     }
 
+    private async Task NavigateToProductLocation()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminProductLocation, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminProductLocation, true);
+    }
+
     private async Task NavigateToProductCategory()
     {
         if (FormFactor.GetFormFactor() == "Web")
