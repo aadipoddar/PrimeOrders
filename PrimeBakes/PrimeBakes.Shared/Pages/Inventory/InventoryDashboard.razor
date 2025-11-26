@@ -372,6 +372,79 @@ else
 			</div>
 		</div>
 
+		<!-- Master Data Section -->
+		<div class="section-card">
+			<div class="section-header">
+				<div class="section-title-wrapper">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path
+							d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+						<polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+						<line x1="12" y1="22.08" x2="12" y2="12" />
+					</svg>
+					<h2 class="section-title">Master Data</h2>
+				</div>
+				<p class="section-subtitle">Manage raw materials, categories, and kitchen</p>
+			</div>
+			<div class="section-body">
+				<div class="dashboard-grid">
+					<!-- Raw Material -->
+					<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToRawMaterial">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<path
+										d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+									<polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+									<line x1="12" y1="22.08" x2="12" y2="12" />
+								</svg>
+							</div>
+							<h3 class="button-title">Raw Material</h3>
+							<p class="button-description">Manage raw materials inventory</p>
+						</div>
+					</SfButton>
+
+					<!-- Raw Material Category -->
+					<SfButton CssClass="dashboard-button btn-cyan" OnClick="NavigateToRawMaterialCategory">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<rect x="3" y="3" width="7" height="7" />
+									<rect x="14" y="3" width="7" height="7" />
+									<rect x="14" y="14" width="7" height="7" />
+									<rect x="3" y="14" width="7" height="7" />
+								</svg>
+							</div>
+							<h3 class="button-title">Raw Material Category</h3>
+							<p class="button-description">Manage raw material categories</p>
+						</div>
+					</SfButton>
+
+					<!-- Kitchen -->
+					<SfButton CssClass="dashboard-button btn-orange" OnClick="NavigateToKitchen">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+									<path d="M7 2v20" />
+									<path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+								</svg>
+							</div>
+							<h3 class="button-title">Kitchen</h3>
+							<p class="button-description">Manage kitchen locations</p>
+						</div>
+					</SfButton>
+				</div>
+			</div>
+		</div>
+
 	</div>
 }
 

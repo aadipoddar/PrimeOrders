@@ -1,20 +1,12 @@
-﻿using System.Security.AccessControl;
-
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
-using PrimeBakesLibrary.Data.Inventory;
-using PrimeBakesLibrary.Data.Inventory.Purchase;
-using PrimeBakesLibrary.Data.Product;
 using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
-using PrimeBakesLibrary.Models.Inventory;
-using PrimeBakesLibrary.Models.Inventory.Purchase;
-using PrimeBakesLibrary.Models.Product;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
@@ -65,7 +57,9 @@ using PrimeBakesLibrary.Models.Sales.Sale;
 
 // await InsertOrder(worksheet1, worksheet2);
 
-await FixMasterNames();
+// await FixMasterNames();
+
+await FixLedgers();
 
 // await UpdateAccounts();
 
@@ -1461,6 +1455,39 @@ static async Task FixMasterNames()
 	}
 }
 
+static async Task FixLedgers()
+{
+	var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+
+	foreach (var ledger in ledgers)
+	{
+		if (string.IsNullOrWhiteSpace(ledger.GSTNo?.Trim()))
+			ledger.GSTNo = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.PANNo?.Trim()))
+			ledger.PANNo = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.Phone?.Trim()))
+			ledger.Phone = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.Email?.Trim()))
+			ledger.Email = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.Address?.Trim()))
+			ledger.Address = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.Remarks?.Trim()))
+			ledger.Remarks = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.Alias?.Trim()))
+			ledger.Alias = null;
+
+		if (string.IsNullOrWhiteSpace(ledger.CINNo?.Trim()))
+			ledger.CINNo = null;
+
+		await LedgerData.InsertLedger(ledger);
+	}
+}
 
 class PurchaseModelOld
 {

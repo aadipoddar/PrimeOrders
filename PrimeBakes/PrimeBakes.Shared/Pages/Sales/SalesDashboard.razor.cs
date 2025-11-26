@@ -43,6 +43,40 @@ public partial class SalesDashboard
     }
     #endregion
 
+    #region Master Data Navigation
+    private async Task NavigateToProduct()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminProduct, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminProduct, true);
+    }
+
+    private async Task NavigateToProductLocation()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminProductLocation, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminProductLocation, true);
+    }
+
+    private async Task NavigateToProductCategory()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminProductCategory, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminProductCategory, true);
+    }
+
+    private async Task NavigateToTax()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminTax, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
+    }
+    #endregion
+
     #region Sales Reports Navigation
     private async Task NavigateToOrderReport()
     {

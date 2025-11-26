@@ -109,6 +109,14 @@ public partial class AccountingDashboard
         else
             NavigationManager.NavigateTo(PageRouteNames.AdminCompany, true);
     }
+
+    private async Task NavigateToSettings()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminSettings, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminSettings, true);
+    }
     #endregion
 
     private async Task Logout() =>

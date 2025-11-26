@@ -153,6 +153,32 @@ public partial class InventoryDashboard
             NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem, true);
     }
 
+    #region Master Data Navigation
+    private async Task NavigateToRawMaterial()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminRawMaterial, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
+    }
+
+    private async Task NavigateToRawMaterialCategory()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminRawMaterialCategory, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterialCategory, true);
+    }
+
+    private async Task NavigateToKitchen()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminKitchen, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminKitchen, true);
+    }
+    #endregion
+
     private async Task Logout() =>
         await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }
