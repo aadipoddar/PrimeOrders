@@ -4,6 +4,7 @@ using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Sales.Sale;
@@ -259,10 +260,10 @@ public partial class ProductStockReport
         {
             var url = type?.ToLower() switch
             {
-                "purchase" => $"{PageRouteNames.Purchase}/{transactionId}",
-                "purchasereturn" => $"{PageRouteNames.PurchaseReturn}/{transactionId}",
-                "sale" => $"/sale/sale/{transactionId}",
-                "salereturn" => $"{PageRouteNames.SaleReturn}/{transactionId}",
+                "purchase" => $"{PageRouteNames.Sale}/{transactionId}",
+                "purchasereturn" => $"{PageRouteNames.SaleReturn}/{transactionId}",
+                "sale" => $"{PageRouteNames.Sale}/{transactionId}",
+				"salereturn" => $"{PageRouteNames.SaleReturn}/{transactionId}",
                 "kitchenissue" => $"{PageRouteNames.KitchenIssue}/{transactionId}",
                 "kitchenproduction" => $"{PageRouteNames.KitchenProduction}/{transactionId}",
                 _ => null
@@ -295,33 +296,50 @@ public partial class ProductStockReport
             _isProcessing = true;
             StateHasChanged();
 
-            if (type.ToLower() == "purchase")
+            if (type.Equals("purchase", StringComparison.CurrentCultureIgnoreCase))
             {
-                var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(transactionId);
+                var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(transactionId);
                 await SaveAndViewService.SaveAndView(fileName, pdfStream);
                 await ShowToast("Success", "Invoice downloaded successfully.", "success");
                 return;
             }
-            else if (type.ToLower() == "purchasereturn")
-            {
-                var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
-                await SaveAndViewService.SaveAndView(fileName, pdfStream);
-                await ShowToast("Success", "Invoice downloaded successfully.", "success");
-                return;
-            }
-            else if (type.ToLower() == "sale")
-            {
-                return;
-            }
-            else if (type.ToLower() == "salereturn")
+            else if (type.Equals("purchasereturn", StringComparison.CurrentCultureIgnoreCase))
             {
                 var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(transactionId);
                 await SaveAndViewService.SaveAndView(fileName, pdfStream);
                 await ShowToast("Success", "Invoice downloaded successfully.", "success");
                 return;
             }
+            else if (type.Equals("sale", StringComparison.CurrentCultureIgnoreCase))
+            {
+                var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(transactionId);
+                await SaveAndViewService.SaveAndView(fileName, pdfStream);
+                await ShowToast("Success", "Invoice downloaded successfully.", "success");
+                return;
+			}
+            else if (type.Equals("salereturn", StringComparison.CurrentCultureIgnoreCase))
+            {
+                var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(transactionId);
+                await SaveAndViewService.SaveAndView(fileName, pdfStream);
+                await ShowToast("Success", "Invoice downloaded successfully.", "success");
+                return;
+            }
+            else if (type.Equals("kitchenissue", StringComparison.CurrentCultureIgnoreCase))
+            {
+                var (pdfStream, fileName) = await KitchenIssueData.GenerateAndDownloadInvoice(transactionId);
+                await SaveAndViewService.SaveAndView(fileName, pdfStream);
+                await ShowToast("Success", "Invoice downloaded successfully.", "success");
+                return;
+			}
+            else if (type.Equals("kitchenproduction", StringComparison.CurrentCultureIgnoreCase))
+            {
+                var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
+                await SaveAndViewService.SaveAndView(fileName, pdfStream);
+                await ShowToast("Success", "Invoice downloaded successfully.", "success");
+                return;
+			}
 
-            await ShowToast("Info", "Invoice download functionality to be implemented.", "error");
+			await ShowToast("Info", "Invoice download functionality to be implemented.", "error");
         }
         catch (Exception ex)
         {

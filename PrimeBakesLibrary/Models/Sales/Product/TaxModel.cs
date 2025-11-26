@@ -9,5 +9,6 @@ public class TaxModel
     public decimal IGST { get; set; }
     public bool Inclusive { get; set; }
     public bool Extra { get; set; }
+    public string? Remarks { get; set; }
     public bool Status { get; set; }
 }

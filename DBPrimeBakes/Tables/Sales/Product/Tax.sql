@@ -7,5 +7,6 @@
     [IGST] DECIMAL(5, 2) NOT NULL DEFAULT 0, 
     [Inclusive] BIT NOT NULL DEFAULT 0, 
     [Extra] BIT NOT NULL DEFAULT 0,
+    [Remarks] VARCHAR(MAX) NULL,
     [Status] BIT NOT NULL DEFAULT 1
 )

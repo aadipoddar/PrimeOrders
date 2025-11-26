@@ -64,7 +64,6 @@
     <Folder Include="StoredProcedures\Insert\Accounts\Masters" />
     <Folder Include="StoredProcedures\Insert\Common" />
     <Folder Include="StoredProcedures\Insert\Inventory" />
-    <Folder Include="StoredProcedures\Insert\Products" />
     <Folder Include="StoredProcedures\Insert\Sales" />
     <Folder Include="StoredProcedures\LoadData" />
     <Folder Include="StoredProcedures\LoadData\Accounts" />
@@ -113,6 +112,7 @@
     <Folder Include="StoredProcedures\LoadData\Accounts\FinancialAccounting" />
     <Folder Include="StoredProcedures\LoadData\Accounts\Masters" />
     <Folder Include="Tables\Sales\Product" />
+    <Folder Include="StoredProcedures\Insert\Sales\Product" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Type_TransactionId_LocationId.sql" />
@@ -127,10 +127,6 @@
     <Build Include="StoredProcedures\Insert\Common\Insert_Customer.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_Location.sql" />
     <Build Include="StoredProcedures\Insert\Common\Insert_User.sql" />
-    <Build Include="StoredProcedures\Insert\Products\Insert_Product.sql" />
-    <Build Include="StoredProcedures\Insert\Products\Insert_ProductCategory.sql" />
-    <Build Include="StoredProcedures\Insert\Products\Insert_ProductLocation.sql" />
-    <Build Include="StoredProcedures\Insert\Products\Insert_Tax.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_Customer_By_Number.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
@@ -268,6 +264,10 @@
     <Build Include="Tables\Accounts\Masters\StateUT.sql" />
     <Build Include="Tables\Accounts\Masters\Company.sql" />
     <Build Include="Tables\Accounts\Masters\Settings.sql" />
+    <Build Include="StoredProcedures\Insert\Sales\Product\Insert_Product.sql" />
+    <Build Include="StoredProcedures\Insert\Sales\Product\Insert_ProductCategory.sql" />
+    <Build Include="StoredProcedures\Insert\Sales\Product\Insert_ProductLocation.sql" />
+    <Build Include="StoredProcedures\Insert\Sales\Product\Insert_Tax.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

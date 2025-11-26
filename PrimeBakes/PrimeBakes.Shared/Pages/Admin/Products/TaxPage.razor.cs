@@ -3,326 +3,75 @@ using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Exporting.Sales.Product;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
 
 public partial class TaxPage
 {
     private bool _isLoading = true;
-    private bool _isEdit;
-    private bool _isSaving;
+    private bool _isProcessing = false;
+    private bool _showDeleted = false;
 
-    private TaxModel _taxModel = new()
-    {
-        Id = 0,
-        Code = "",
-        CGST = 0,
-        SGST = 0,
-        IGST = 0,
-        Extra = false,
-        Inclusive = true,
-        Status = true
-    };
+    private TaxModel _tax = new();
 
     private List<TaxModel> _taxes = [];
 
     private SfGrid<TaxModel> _sfGrid;
-    private SfToast _sfToast;
+    private SfDialog _deleteConfirmationDialog;
+    private SfDialog _recoverConfirmationDialog;
+
+    private int _deleteTaxId = 0;
+    private string _deleteTaxCode = string.Empty;
+    private bool _isDeleteDialogVisible = false;
+
+    private int _recoverTaxId = 0;
+    private string _recoverTaxCode = string.Empty;
+    private bool _isRecoverDialogVisible = false;
+
+    private string _errorTitle = string.Empty;
+    private string _errorMessage = string.Empty;
+
+    private string _successTitle = string.Empty;
+    private string _successMessage = string.Empty;
+
+    private SfToast _sfSuccessToast;
     private SfToast _sfErrorToast;
 
-    private string _successMessage = "";
-    private string _errorMessage = "";
-
-    protected override async Task OnInitializedAsync()
+    #region Load Data
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
-        await LoadTaxes();
+        if (!firstRender)
+            return;
 
+        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
+        await LoadData();
         _isLoading = false;
         StateHasChanged();
     }
 
-    private async Task LoadTaxes()
+    private async Task LoadData()
     {
-        try
-        {
-            _taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
+        _taxes = await CommonData.LoadTableData<TaxModel>(TableNames.Tax);
 
-            if (_sfGrid is not null)
-                await _sfGrid.Refresh();
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Failed to load taxes: {ex.Message}";
-            await ShowErrorToast();
-        }
+        if (!_showDeleted)
+            _taxes = [.. _taxes.Where(t => t.Status)];
+
+        if (_sfGrid is not null)
+            await _sfGrid.Refresh();
     }
+    #endregion
 
-    private async Task OnToolbarClickAsync(Syncfusion.Blazor.Navigations.ClickEventArgs args)
-    {
-        if (args.Item.Id == "add")
-        {
-            _taxModel = new TaxModel
-            {
-                Status = true,
-                Inclusive = true,
-                Extra = false
-            };
-            _isEdit = false;
-        }
-        else if (args.Item.Id == "edit")
-        {
-            var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
-            if (selectedRecords.Count > 0)
-            {
-                _taxModel = new TaxModel
-                {
-                    Id = selectedRecords[0].Id,
-                    Code = selectedRecords[0].Code,
-                    CGST = selectedRecords[0].CGST,
-                    SGST = selectedRecords[0].SGST,
-                    IGST = selectedRecords[0].IGST,
-                    Inclusive = selectedRecords[0].Inclusive,
-                    Extra = selectedRecords[0].Extra,
-                    Status = selectedRecords[0].Status
-                };
-                _isEdit = true;
-            }
-            else
-            {
-                _errorMessage = "Please select a tax to edit.";
-                await ShowErrorToast();
-            }
-        }
-        else if (args.Item.Id == "delete")
-        {
-            var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
-            if (selectedRecords.Count > 0)
-            {
-                await DeleteTax(selectedRecords[0]);
-            }
-            else
-            {
-                _errorMessage = "Please select a tax to delete.";
-                await ShowErrorToast();
-            }
-        }
-    }
-
-    private async Task DeleteTax(TaxModel tax)
-    {
-        try
-        {
-            _isSaving = true;
-            tax.Status = false;
-            await TaxData.InsertTax(tax);
-            await LoadTaxes();
-
-            _successMessage = "Tax deleted successfully.";
-            await ShowSuccessToast();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Failed to delete tax: {ex.Message}";
-            await ShowErrorToast();
-        }
-        finally
-        {
-            _isSaving = false;
-        }
-    }
-
-    private async Task SaveTax()
-    {
-        if (!ValidateTax())
-            return;
-
-        try
-        {
-            _isSaving = true;
-            await TaxData.InsertTax(_taxModel);
-            await LoadTaxes();
-
-            _successMessage = _isEdit ? "Tax updated successfully." : "Tax created successfully.";
-            await ShowSuccessToast();
-
-            _taxModel = new TaxModel
-            {
-                Status = true,
-                Inclusive = true,
-                Extra = false
-            };
-            _isEdit = false;
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Failed to save tax: {ex.Message}";
-            await ShowErrorToast();
-        }
-        finally
-        {
-            _isSaving = false;
-        }
-    }
-
-    private bool ValidateTax()
-    {
-        // Check if code is provided
-        if (string.IsNullOrWhiteSpace(_taxModel.Code))
-        {
-            ShowValidationError("Tax code is required.");
-            return false;
-        }
-
-        // Check for duplicate code (excluding current record if editing)
-        var duplicateCode = _taxes.Any(t => t.Code.Equals(_taxModel.Code, StringComparison.OrdinalIgnoreCase) && t.Id != _taxModel.Id);
-        if (duplicateCode)
-        {
-            ShowValidationError("Tax code already exists.");
-            return false;
-        }
-
-        // Check that all three percentages cannot be more than 0
-        var allPercentagesGreaterThanZero = _taxModel.CGST > 0 && _taxModel.SGST > 0 && _taxModel.IGST > 0;
-        if (allPercentagesGreaterThanZero)
-        {
-            ShowValidationError("All three tax percentages cannot be greater than 0. Use either (CGST + SGST) OR IGST.");
-            return false;
-        }
-
-        // Check that either (SGST + CGST) OR IGST is used, not both
-        var hasCGSTSGST = _taxModel.CGST > 0 || _taxModel.SGST > 0;
-        var hasIGST = _taxModel.IGST > 0;
-
-        if (hasCGSTSGST && hasIGST)
-        {
-            ShowValidationError("Cannot use both (CGST/SGST) and IGST together. Use either (CGST + SGST) OR IGST.");
-            return false;
-        }
-
-        // At least one tax percentage should be provided
-        if (!hasCGSTSGST && !hasIGST)
-        {
-            ShowValidationError("At least one tax percentage (CGST, SGST, or IGST) must be greater than 0.");
-            return false;
-        }
-
-        // If using CGST or SGST, typically both should be used together for domestic transactions
-        if ((_taxModel.CGST > 0 && _taxModel.SGST == 0 || _taxModel.CGST == 0 && _taxModel.SGST > 0) && _taxModel.IGST == 0)
-        {
-            ShowValidationError("For domestic transactions, both CGST and SGST should be used together.");
-            return false;
-        }
-
-        // Tax should be either inclusive or exclusive (both cannot be true)
-        if (_taxModel.Inclusive && _taxModel.Extra)
-        {
-            ShowValidationError("Tax cannot be both Inclusive and Extra. Please select either Inclusive or Extra.");
-            return false;
-        }
-
-        // At least one of Inclusive or Extra should be selected
-        if (!_taxModel.Inclusive && !_taxModel.Extra)
-        {
-            ShowValidationError("Tax must be either Inclusive or Extra. Please select one option.");
-            return false;
-        }
-
-        // Validate percentage ranges (0-100)
-        if (_taxModel.CGST < 0 || _taxModel.CGST > 100)
-        {
-            ShowValidationError("CGST percentage must be between 0 and 100.");
-            return false;
-        }
-
-        if (_taxModel.SGST < 0 || _taxModel.SGST > 100)
-        {
-            ShowValidationError("SGST percentage must be between 0 and 100.");
-            return false;
-        }
-
-        if (_taxModel.IGST < 0 || _taxModel.IGST > 100)
-        {
-            ShowValidationError("IGST percentage must be between 0 and 100.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private async void ShowValidationError(string message)
-    {
-        _errorMessage = message;
-        await ShowErrorToast();
-    }
-
-    private void OnCGSTChanged(decimal value)
-    {
-        _taxModel.CGST = value;
-        ValidateTaxPercentages();
-    }
-
-    private void OnSGSTChanged(decimal value)
-    {
-        _taxModel.SGST = value;
-        ValidateTaxPercentages();
-    }
-
-    private void OnIGSTChanged(decimal value)
-    {
-        _taxModel.IGST = value;
-        ValidateTaxPercentages();
-    }
-
-    private void ValidateTaxPercentages()
-    {
-        // Auto-correct conflicting combinations during input
-        if (_taxModel.IGST > 0)
-        {
-            // If IGST is entered, clear CGST and SGST
-            if (_taxModel.CGST > 0 || _taxModel.SGST > 0)
-            {
-                _taxModel.CGST = 0;
-                _taxModel.SGST = 0;
-            }
-        }
-        else if (_taxModel.CGST > 0 || _taxModel.SGST > 0)
-        {
-            // If CGST or SGST is entered, clear IGST
-            if (_taxModel.IGST > 0)
-            {
-                _taxModel.IGST = 0;
-            }
-        }
-    }
-
-    private void OnInclusiveChanged(bool value)
-    {
-        _taxModel.Inclusive = value;
-        if (value)
-        {
-            _taxModel.Extra = false; // Ensure only one is selected
-        }
-    }
-
-    private void OnExtraChanged(bool value)
-    {
-        _taxModel.Extra = value;
-        if (value)
-        {
-            _taxModel.Inclusive = false; // Ensure only one is selected
-        }
-    }
-
+    #region Actions
     private void OnEditTax(TaxModel tax)
     {
-        _taxModel = new TaxModel
+        _tax = new()
         {
             Id = tax.Id,
             Code = tax.Code,
@@ -331,74 +80,298 @@ public partial class TaxPage
             IGST = tax.IGST,
             Inclusive = tax.Inclusive,
             Extra = tax.Extra,
+            Remarks = tax.Remarks,
             Status = tax.Status
         };
-        _isEdit = true;
+
         StateHasChanged();
     }
 
-    private async Task ToggleTaxStatus(TaxModel tax)
+    private void ShowDeleteConfirmation(int id, string code)
+    {
+        _deleteTaxId = id;
+        _deleteTaxCode = code;
+        _isDeleteDialogVisible = true;
+        StateHasChanged();
+    }
+
+    private void CancelDelete()
+    {
+        _deleteTaxId = 0;
+        _deleteTaxCode = string.Empty;
+        _isDeleteDialogVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task ConfirmDelete()
     {
         try
         {
-            // Toggle the status locally first
-            var originalStatus = tax.Status;
-            tax.Status = !tax.Status;
+            _isProcessing = true;
+            _isDeleteDialogVisible = false;
 
-            // Update in database using the existing Insert_Tax procedure
+            var tax = _taxes.FirstOrDefault(t => t.Id == _deleteTaxId);
+            if (tax == null)
+            {
+                await ShowToast("Error", "Tax not found.", "error");
+                return;
+            }
+
+            tax.Status = false;
             await TaxData.InsertTax(tax);
 
-            _successMessage = $"Tax '{tax.Code}' {(tax.Status ? "activated" : "deactivated")} successfully!";
-            await ShowSuccessToast();
-            await LoadTaxes(); // Refresh the grid
+            await ShowToast("Success", $"Tax '{tax.Code}' has been deleted successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
         }
         catch (Exception ex)
         {
-            // Revert the change if exception occurred
-            tax.Status = !tax.Status;
-            _errorMessage = $"Error updating tax status: {ex.Message}";
-            await ShowErrorToast();
+            await ShowToast("Error", $"Failed to delete tax: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            _deleteTaxId = 0;
+            _deleteTaxCode = string.Empty;
         }
     }
 
-    private void CancelEdit()
+    private void ShowRecoverConfirmation(int id, string code)
     {
-        _taxModel = new TaxModel
-        {
-            Status = true,
-            Inclusive = true,
-            Extra = false
-        };
-        _isEdit = false;
+        _recoverTaxId = id;
+        _recoverTaxCode = code;
+        _isRecoverDialogVisible = true;
+        StateHasChanged();
     }
 
-    private async Task ShowSuccessToast()
+    private void CancelRecover()
     {
-        var toastModel = new ToastModel
-        {
-            Title = "Success!",
-            Content = _successMessage,
-            CssClass = "e-toast-success",
-            Icon = "e-success toast-icons",
-            ShowCloseButton = true,
-            ShowProgressBar = true
-        };
-
-        await _sfToast.ShowAsync(toastModel);
+        _recoverTaxId = 0;
+        _recoverTaxCode = string.Empty;
+        _isRecoverDialogVisible = false;
+        StateHasChanged();
     }
 
-    private async Task ShowErrorToast()
+    private async Task ToggleDeleted()
     {
-        var toastModel = new ToastModel
-        {
-            Title = "Error!",
-            Content = _errorMessage,
-            CssClass = "e-toast-danger",
-            Icon = "e-error toast-icons",
-            ShowCloseButton = true,
-            ShowProgressBar = true
-        };
-
-        await _sfErrorToast.ShowAsync(toastModel);
+        _showDeleted = !_showDeleted;
+        await LoadData();
+        StateHasChanged();
     }
+
+    private async Task ConfirmRecover()
+    {
+        try
+        {
+            _isProcessing = true;
+            _isRecoverDialogVisible = false;
+
+            var tax = _taxes.FirstOrDefault(t => t.Id == _recoverTaxId);
+            if (tax == null)
+            {
+                await ShowToast("Error", "Tax not found.", "error");
+                return;
+            }
+
+            tax.Status = true;
+            await TaxData.InsertTax(tax);
+
+            await ShowToast("Success", $"Tax '{tax.Code}' has been recovered successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"Failed to recover tax: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            _recoverTaxId = 0;
+            _recoverTaxCode = string.Empty;
+        }
+    }
+    #endregion
+
+    #region Saving
+    private async Task<bool> ValidateForm()
+    {
+        _tax.Code = _tax.Code?.Trim() ?? "";
+        _tax.Code = _tax.Code?.ToUpper() ?? "";
+
+        _tax.Remarks = _tax.Remarks?.Trim() ?? "";
+        _tax.Status = true;
+
+        if (string.IsNullOrWhiteSpace(_tax.Code))
+        {
+            await ShowToast("Error", "Tax code is required. Please enter a valid tax code.", "error");
+            return false;
+        }
+
+        if (_tax.CGST < 0 || _tax.CGST > 100)
+        {
+            await ShowToast("Error", "CGST must be between 0 and 100.", "error");
+            return false;
+        }
+
+        if (_tax.SGST < 0 || _tax.SGST > 100)
+        {
+            await ShowToast("Error", "SGST must be between 0 and 100.", "error");
+            return false;
+        }
+
+        if (_tax.IGST < 0 || _tax.IGST > 100)
+        {
+            await ShowToast("Error", "IGST must be between 0 and 100.", "error");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(_tax.Remarks))
+            _tax.Remarks = null;
+
+        if (_tax.Id > 0)
+        {
+            var existingTax = _taxes.FirstOrDefault(t => t.Id != _tax.Id && t.Code.Equals(_tax.Code, StringComparison.OrdinalIgnoreCase));
+            if (existingTax is not null)
+            {
+                await ShowToast("Error", $"Tax code '{_tax.Code}' already exists. Please choose a different code.", "error");
+                return false;
+            }
+        }
+        else
+        {
+            var existingTax = _taxes.FirstOrDefault(t => t.Code.Equals(_tax.Code, StringComparison.OrdinalIgnoreCase));
+            if (existingTax is not null)
+            {
+                await ShowToast("Error", $"Tax code '{_tax.Code}' already exists. Please choose a different code.", "error");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private async Task SaveTax()
+    {
+        if (_isProcessing)
+            return;
+
+        try
+        {
+            _isProcessing = true;
+
+            if (!await ValidateForm())
+            {
+                _isProcessing = false;
+                return;
+            }
+
+            await TaxData.InsertTax(_tax);
+
+            await ShowToast("Success", $"Tax '{_tax.Code}' has been saved successfully.", "success");
+            NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"Failed to save tax: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+    #endregion
+
+    #region Exporting
+    private async Task ExportExcel()
+    {
+        if (_isProcessing)
+            return;
+
+        try
+        {
+            _isProcessing = true;
+            StateHasChanged();
+
+            // Call the Excel export utility
+            var stream = await Task.Run(() => TaxExcelExport.ExportTax(_taxes));
+
+            // Generate file name
+            string fileName = "TAX_MASTER.xlsx";
+
+            // Save and view the Excel file
+            await SaveAndViewService.SaveAndView(fileName, stream);
+
+            await ShowToast("Success", "Tax data exported to Excel successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ExportPdf()
+    {
+        if (_isProcessing)
+            return;
+
+        try
+        {
+            _isProcessing = true;
+            StateHasChanged();
+
+            // Call the PDF export utility
+            var stream = await Task.Run(() => TaxPDFExport.ExportTax(_taxes));
+
+            // Generate file name
+            string fileName = "TAX_MASTER.pdf";
+
+            // Save and view the PDF file
+            await SaveAndViewService.SaveAndView(fileName, stream);
+
+            await ShowToast("Success", "Tax data exported to PDF successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+    #endregion
+
+    #region Utilities
+    private async Task ShowToast(string title, string message, string type)
+    {
+        VibrationService.VibrateWithTime(200);
+
+        if (type == "error")
+        {
+            _errorTitle = title;
+            _errorMessage = message;
+            await _sfErrorToast.ShowAsync(new()
+            {
+                Title = _errorTitle,
+                Content = _errorMessage
+            });
+        }
+
+        else if (type == "success")
+        {
+            _successTitle = title;
+            _successMessage = message;
+            await _sfSuccessToast.ShowAsync(new()
+            {
+                Title = _successTitle,
+                Content = _successMessage
+            });
+        }
+    }
+    #endregion
 }
