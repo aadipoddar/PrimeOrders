@@ -114,7 +114,7 @@ public static class SaleData
                 await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Purchase.ToString(), sale.Id, party.LocationId.Value);
         }
 
-        var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId);
+        var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
         var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(saleVoucher.Value), sale.Id, sale.TransactionNo);
         if (existingAccounting is not null && existingAccounting.Id > 0)
         {
@@ -340,7 +340,7 @@ public static class SaleData
 
         if (update)
         {
-            var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId);
+            var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
             var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(saleVoucher.Value), sale.Id, sale.TransactionNo);
             if (existingAccounting is not null && existingAccounting.Id > 0)
             {
@@ -356,7 +356,7 @@ public static class SaleData
         if (saleOverview.TotalAmount <= 0 && saleOverview.TotalTaxAmount <= 0)
             return;
 
-        var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId);
+        var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
         var accounting = new AccountingModel
         {
             Id = 0,

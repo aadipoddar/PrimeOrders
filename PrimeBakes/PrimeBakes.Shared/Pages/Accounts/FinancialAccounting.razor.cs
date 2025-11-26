@@ -769,7 +769,7 @@ public partial class FinancialAccounting
 
         try
         {
-            var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId);
+            var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
             var saleReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
             var purchaseVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
             var purchaseReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
@@ -832,7 +832,7 @@ public partial class FinancialAccounting
 
         try
         {
-            var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SalesVoucherId);
+            var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
             var saleReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
             var purchaseVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
             var purchaseReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);

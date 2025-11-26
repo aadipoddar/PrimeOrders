@@ -9,8 +9,6 @@ public class SettingsModel
 
 public static class SettingsKeys
 {
-    public static string PrimaryCompanyLinkingId => "PrimaryCompanyLinkingId";
-
     public static string RawMaterialCodePrefix => "RawMaterialCodePrefix";
     public static string FinishedProductCodePrefix => "FinishedProductCodePrefix";
     public static string LedgerCodePrefix => "LedgerCodePrefix";
@@ -30,7 +28,9 @@ public static class SettingsKeys
     public static string UpdateItemMasterRateOnPurchase => "UpdateRawMaterialMasterRateOnPurchase";
     public static string UpdateItemMasterUOMOnPurchase => "UpdateRawMaterialMasterUOMOnPurchase";
 
-    public static string SalesVoucherId => "SalesVoucherId";
+    public static string PrimaryCompanyLinkingId => "PrimaryCompanyLinkingId";
+
+    public static string SaleVoucherId => "SaleVoucherId";
     public static string SaleReturnVoucherId => "SaleReturnVoucherId";
     public static string PurchaseVoucherId => "PurchaseVoucherId";
     public static string PurchaseReturnVoucherId => "PurchaseReturnVoucherId";

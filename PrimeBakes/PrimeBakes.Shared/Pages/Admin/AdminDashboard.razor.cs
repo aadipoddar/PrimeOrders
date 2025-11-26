@@ -78,6 +78,14 @@ public partial class AdminDashboard
             NavigationManager.NavigateTo(PageRouteNames.AdminUser, true);
     }
 
+    private async Task NavigateToSettings()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminSettings, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.AdminSettings, true);
+    }
+
     private async Task NavigateToKitchen()
     {
         if (FormFactor.GetFormFactor() == "Web")

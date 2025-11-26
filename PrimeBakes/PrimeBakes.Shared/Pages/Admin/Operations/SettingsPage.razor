@@ -1,3 +1,947 @@
-﻿<h3>SettingsPage</h3>
+﻿@page "/admin/settings"
 
+@using PrimeBakesLibrary.Models.Accounts.Masters
 
+<PageTitle>Settings - PrimeBakes</PageTitle>
+
+@if (_isLoading)
+{
+    <SfSpinner @bind-Visible="_isLoading" Label="Page is Loading, Please Wait" />
+}
+else
+{
+    <!-- Professional Header Section -->
+    <div class="page-header">
+        <div class="header-left">
+            <img src="images/logo.png" alt="PrimeBakes" class="header-logo" />
+            <div class="header-divider"></div>
+            <div class="header-text">
+                <span class="app-name">PrimeBakes</span>
+            </div>
+        </div>
+        <div class="header-center">
+            <h1 class="page-title">System Settings</h1>
+            <p class="page-subtitle">Configure system-wide parameters and defaults</p>
+        </div>
+        <div class="header-right">
+            <button class="btn-icon btn-icon-save" @onclick="SaveSettings" disabled="@_isProcessing" title="Save Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                </svg>
+            </button>
+            <button class="btn-icon btn-icon-reset" @onclick="ShowResetConfirmation" disabled="@_isProcessing"
+                title="Reset to Defaults">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home"
+                disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+            </button>
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard)'
+                title="Back" disabled="@_isProcessing">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="purchase-container">
+
+        <!-- Primary Configuration Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    <h2 class="section-title">Primary Configuration</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Primary Company -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Primary Company <span class="required">*</span>
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedCompanyName" TValue="string" TItem="CompanyModel"
+                            DataSource="@_companies" Placeholder="Select primary company"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="CompanyModel" ValueChange="OnCompanyChange" />
+                        </SfAutoComplete>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Prefixes Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6" />
+                        <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                    <h2 class="section-title">Master Data Code Prefixes</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Raw Material Code Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Raw Material Code Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_rawMaterialCodePrefix" Placeholder="e.g., RM"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Finished Product Code Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Finished Product Code Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_finishedProductCodePrefix" Placeholder="e.g., FP"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Ledger Code Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Ledger Code Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_ledgerCodePrefix" Placeholder="e.g., LD"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Prefixes Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                    <h2 class="section-title">Transaction Prefixes</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Purchase Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Purchase Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_purchaseTransactionPrefix" Placeholder="e.g., PUR"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Purchase Return Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Purchase Return Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_purchaseReturnTransactionPrefix" Placeholder="e.g., PURR"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Kitchen Issue Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Kitchen Issue Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_kitchenIssueTransactionPrefix" Placeholder="e.g., KI"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Kitchen Production Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Kitchen Production Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_kitchenProductionTransactionPrefix" Placeholder="e.g., KP"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Raw Material Stock Adjustment Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Raw Material Stock Adjustment Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_rawMaterialStockAdjustmentTransactionPrefix" Placeholder="e.g., RMSA"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Product Stock Adjustment Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Product Stock Adjustment Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_productStockAdjustmentTransactionPrefix" Placeholder="e.g., PSA"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Sale Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Sale Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_saleTransactionPrefix" Placeholder="e.g., SAL"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Sale Return Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Sale Return Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_saleReturnTransactionPrefix" Placeholder="e.g., SALR"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Order Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Order Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_orderTransactionPrefix" Placeholder="e.g., ORD"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
+                    <!-- Accounting Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Accounting Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_accountingTransactionPrefix" Placeholder="e.g., ACC"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vouchers Configuration Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="12" y1="18" x2="12" y2="12" />
+                        <line x1="9" y1="15" x2="15" y2="15" />
+                    </svg>
+                    <h2 class="section-title">Voucher Linking</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Sale Voucher -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Sale Voucher
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedSaleVoucherName" TValue="string" TItem="VoucherModel"
+                            DataSource="@_vouchers" Placeholder="Select sale voucher" FloatLabelType="FloatLabelType.Never"
+                            AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                            CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="VoucherModel" ValueChange="OnSaleVoucherChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Sale Return Voucher -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Sale Return Voucher
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedSaleReturnVoucherName" TValue="string" TItem="VoucherModel"
+                            DataSource="@_vouchers" Placeholder="Select sale return voucher"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="VoucherModel"
+                                ValueChange="OnSaleReturnVoucherChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Purchase Voucher -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Purchase Voucher
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedPurchaseVoucherName" TValue="string" TItem="VoucherModel"
+                            DataSource="@_vouchers" Placeholder="Select purchase voucher"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="VoucherModel"
+                                ValueChange="OnPurchaseVoucherChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Purchase Return Voucher -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Purchase Return Voucher
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedPurchaseReturnVoucherName" TValue="string"
+                            TItem="VoucherModel" DataSource="@_vouchers" Placeholder="Select purchase return voucher"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="VoucherModel"
+                                ValueChange="OnPurchaseReturnVoucherChange" />
+                        </SfAutoComplete>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledgers Configuration Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <line x1="10" y1="9" x2="8" y2="9" />
+                    </svg>
+                    <h2 class="section-title">Ledger Linking</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Sale Ledger -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Sale Ledger
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedSaleLedgerName" TValue="string" TItem="LedgerModel"
+                            DataSource="@_ledgers" Placeholder="Select sale ledger" FloatLabelType="FloatLabelType.Never"
+                            AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                            CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnSaleLedgerChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Purchase Ledger -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Purchase Ledger
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedPurchaseLedgerName" TValue="string" TItem="LedgerModel"
+                            DataSource="@_ledgers" Placeholder="Select purchase ledger"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnPurchaseLedgerChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Cash Ledger -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Cash Ledger
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedCashLedgerName" TValue="string" TItem="LedgerModel"
+                            DataSource="@_ledgers" Placeholder="Select cash ledger" FloatLabelType="FloatLabelType.Never"
+                            AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                            CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnCashLedgerChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Cash Sales Ledger -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Cash Sales Ledger
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedCashSalesLedgerName" TValue="string" TItem="LedgerModel"
+                            DataSource="@_ledgers" Placeholder="Select cash sales ledger"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnCashSalesLedgerChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- GST Ledger -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            GST Ledger
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedGSTLedgerName" TValue="string" TItem="LedgerModel"
+                            DataSource="@_ledgers" Placeholder="Select GST ledger" FloatLabelType="FloatLabelType.Never"
+                            AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                            CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnGSTLedgerChange" />
+                        </SfAutoComplete>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Behavior Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    <h2 class="section-title">Purchase Behavior</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Update Item Master Rate on Purchase -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            <SfCheckBox @bind-Checked="_updateItemMasterRateOnPurchase" CssClass="custom-checkbox" />
+                            Update Raw Material Rate on Purchase
+                        </label>
+                        <p class="field-description">Automatically update raw material master rate when purchasing</p>
+                    </div>
+
+                    <!-- Update Item Master UOM on Purchase -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            <SfCheckBox @bind-Checked="_updateItemMasterUOMOnPurchase" CssClass="custom-checkbox" />
+                            Update Raw Material UOM on Purchase
+                        </label>
+                        <p class="field-description">Automatically update raw material unit of measure when purchasing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Reset Confirmation Dialog -->
+    <SfDialog @ref="_resetConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
+        @bind-Visible="_isResetDialogVisible">
+        <DialogTemplates>
+            <Header>
+                <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="color: #f97316;">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span style="font-size: 18px; font-weight: 600; color: #0f172a;">Confirm Reset</span>
+                </div>
+            </Header>
+            <Content>
+                <div style="padding: 24px;">
+                    <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
+                        Are you sure you want to reset all settings to their default values?
+                    </p>
+                    <div
+                        style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                        <p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">
+                            Warning:
+                        </p>
+                        <p style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.5;">
+                            This will reset all system configuration to default values including company linking, code
+                            prefixes,
+                            transaction prefixes, voucher and ledger associations, and purchase behavior settings.
+                        </p>
+                    </div>
+                    <div
+                        style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                        <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
+                            <strong>Note:</strong> This action cannot be undone. You will need to reconfigure all settings
+                            manually.
+                        </p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <button class="dialog-btn dialog-btn-cancel" @onclick="CancelReset" disabled="@_isProcessing">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                            <span>Cancel</span>
+                        </button>
+                        <button class="dialog-btn dialog-btn-reset" @onclick="ConfirmReset" disabled="@_isProcessing">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="1 4 1 10 7 10" />
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                            </svg>
+                            <span>Reset Settings</span>
+                        </button>
+                    </div>
+                </div>
+            </Content>
+        </DialogTemplates>
+    </SfDialog>
+
+    <!-- Success Toast -->
+    <SfToast @ref="_sfSuccessToast" CssClass="e-toast-success" NewestOnTop="true" ShowCloseButton="true" Target="body"
+        TimeOut="3000">
+        <ToastPosition X="Right" Y="Top" />
+    </SfToast>
+
+    <!-- Error Toast -->
+    <SfToast @ref="_sfErrorToast" CssClass="e-toast-danger" NewestOnTop="true" ShowCloseButton="true" Target="body"
+        TimeOut="5000">
+        <ToastPosition X="Right" Y="Top" />
+    </SfToast>
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    /* Professional Header Section */
+    .page-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: #ffffff;
+        border-bottom: 2px solid #e2e8f0;
+        padding: 16px 32px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        min-height: 72px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .header-logo {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+
+    .header-divider {
+        width: 1px;
+        height: 32px;
+        background: #e2e8f0;
+        flex-shrink: 0;
+    }
+
+    .header-text {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .app-name {
+        color: #0f172a;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .header-center {
+        text-align: center;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin: 4px 0 0 0;
+        font-weight: 500;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .btn-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #64748b;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-icon:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .btn-icon:active {
+        transform: scale(0.95);
+    }
+
+    .btn-icon:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-icon-save {
+        color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-icon-save:hover {
+        background: #ecfdf5;
+        border-color: #059669;
+        color: #059669;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-icon-reset {
+        color: #f97316;
+        border-color: #f97316;
+    }
+
+    .btn-icon-reset:hover {
+        background: #fff7ed;
+        border-color: #ea580c;
+        color: #ea580c;
+        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
+    }
+
+    /* Main Container */
+    .purchase-container {
+        padding: 24px 32px;
+        max-width: 1920px;
+        margin: 0 auto;
+        background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+        min-height: calc(100vh - 72px);
+    }
+
+    /* Section Card */
+    .section-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+
+    .section-card:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 2px solid #e2e8f0;
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .section-icon {
+        color: #3b82f6;
+        flex-shrink: 0;
+        filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0;
+        letter-spacing: -0.3px;
+    }
+
+    .section-body {
+        padding: 24px;
+    }
+
+    /* Form Grid */
+    .form-grid-quad {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        align-items: start;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-field-span-2 {
+        grid-column: span 2;
+    }
+
+    .form-field-span-3 {
+        grid-column: span 3;
+    }
+
+    .field-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .required {
+        color: #dc2626;
+        margin-left: 2px;
+        font-size: 14px;
+    }
+
+    .field-description {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 4px;
+        font-style: italic;
+    }
+
+    /* Custom TextBox Styling */
+    ::deep .custom-textbox .e-input-group,
+    ::deep .custom-autocomplete .e-input-group {
+        height: 38px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    ::deep .custom-textbox .e-input-group:hover,
+    ::deep .custom-autocomplete .e-input-group:hover {
+        border-color: #94a3b8;
+    }
+
+    ::deep .custom-textbox .e-input-group:focus-within,
+    ::deep .custom-autocomplete .e-input-group:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    ::deep .custom-textbox .e-input-group input,
+    ::deep .custom-autocomplete .e-input-group input {
+        font-size: 13px;
+        color: #1e293b;
+        font-weight: 500;
+        padding: 8px 12px;
+    }
+
+    ::deep .custom-textbox .e-input-group input::placeholder,
+    ::deep .custom-autocomplete .e-input-group input::placeholder {
+        color: #94a3b8;
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    /* Custom Checkbox Styling */
+    ::deep .custom-checkbox {
+        margin-right: 8px;
+    }
+
+    ::deep .custom-checkbox .e-frame {
+        border: 2px solid #cbd5e1;
+        border-radius: 4px;
+        width: 20px;
+        height: 20px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    ::deep .custom-checkbox:hover .e-frame {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    ::deep .custom-checkbox .e-check {
+        color: #ffffff;
+        font-size: 12px;
+    }
+
+    ::deep .custom-checkbox.e-checkbox-wrapper .e-frame.e-check {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border-color: #2563eb;
+    }
+
+    /* Dialog Styles */
+    .dialog-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .dialog-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .dialog-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .dialog-btn svg {
+        flex-shrink: 0;
+    }
+
+    .dialog-btn-cancel {
+        background: #ffffff;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+    }
+
+    .dialog-btn-cancel:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
+
+    .dialog-btn-reset {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: white;
+    }
+
+    .dialog-btn-reset:hover {
+        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 1400px) {
+        .form-grid-quad {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 1024px) {
+        .form-grid-quad {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 12px 16px;
+        }
+
+        .header-left,
+        .header-right {
+            justify-content: center;
+        }
+
+        .header-center {
+            order: -1;
+        }
+
+        .purchase-container {
+            padding: 16px;
+        }
+
+        .section-body {
+            padding: 16px;
+        }
+
+        .form-grid-quad {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .page-title {
+            font-size: 18px;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+        }
+
+        .section-title {
+            font-size: 16px;
+        }
+    }
+</style>
