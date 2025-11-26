@@ -1,331 +1,445 @@
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Data;
-using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.DataAccess;
-using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Exporting.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
+using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
 public partial class LedgerPage
 {
-    private bool _isLoading = true;
-    private bool _isSubmitting = false;
+	private bool _isLoading = true;
+	private bool _isProcessing = false;
+	private bool _showDeleted = false;
 
-    private LedgerModel _ledgerModel = new()
-    {
-        Id = 0,
-        Name = "",
-        Alias = "",
-        Code = "",
-        GroupId = 0,
-        AccountTypeId = 0,
-        Phone = "",
-        Email = "",
-        Address = "",
-        GSTNo = "",
-        Remarks = "",
-        StateUTId = 0,
-        LocationId = null,
-        Status = true
-    };
+	private LedgerModel _ledger = new();
 
-    private List<LedgerModel> _ledgers = [];
-    private List<GroupModel> _groups = [];
-    private List<AccountTypeModel> _accountTypes = [];
-    private List<StateUTModel> _states = [];
-    private List<LocationModel> _locations = [];
+	private List<LedgerModel> _ledgers = [];
+	private List<GroupModel> _groups = [];
+	private List<AccountTypeModel> _accountTypes = [];
+	private List<StateUTModel> _stateUTs = [];
+	private List<LocationModel> _locations = [];
 
-    private SfGrid<LedgerModel> _sfGrid;
-    private SfToast _sfToast;
-    private SfToast _sfErrorToast;
+	private SfGrid<LedgerModel> _sfGrid;
+	private SfDialog _deleteConfirmationDialog;
+	private SfDialog _recoverConfirmationDialog;
 
-    // Toast message properties
-    private string _successMessage = "Operation completed successfully!";
-    private string _errorMessage = "An error occurred. Please try again.";
+	private int _deleteLedgerId = 0;
+	private string _deleteLedgerName = string.Empty;
+	private bool _isDeleteDialogVisible = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
-        await LoadLedgers();
+	private int _recoverLedgerId = 0;
+	private string _recoverLedgerName = string.Empty;
+	private bool _isRecoverDialogVisible = false;
 
-        _isLoading = false;
-        StateHasChanged();
-    }
+	private string _errorTitle = string.Empty;
+	private string _errorMessage = string.Empty;
 
-    private async Task LoadLedgers()
-    {
-        try
-        {
-            _ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
-            _groups = await CommonData.LoadTableData<GroupModel>(TableNames.Group);
-            _accountTypes = await CommonData.LoadTableData<AccountTypeModel>(TableNames.AccountType);
-            _states = await CommonData.LoadTableData<StateUTModel>(TableNames.StateUT);
-            _locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
+	private string _successTitle = string.Empty;
+	private string _successMessage = string.Empty;
 
-            _ledgerModel.Code = await GenerateCodes.GenerateLedgerCode();
+	private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
 
-            if (_sfGrid is not null)
-                await _sfGrid.Refresh();
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Failed to load ledger data: {ex.Message}";
-            await ShowErrorToast();
-        }
-    }
+	#region Load Data
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
 
-    private async Task OnAddLedger()
-    {
-        _ledgerModel = new()
-        {
-            Id = 0,
-            Name = "",
-            Alias = "",
-            Code = await GenerateCodes.GenerateLedgerCode(),
-            GroupId = 0,
-            AccountTypeId = 0,
-            Phone = "",
-            Email = "",
-            Address = "",
-            GSTNo = "",
-            Remarks = "",
-            StateUTId = 0,
-            LocationId = null,
-            Status = true
-        };
-        StateHasChanged();
-    }
+		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
+		await LoadData();
+		_isLoading = false;
+		StateHasChanged();
+	}
 
-    private void OnEditLedger(LedgerModel ledger)
-    {
-        _ledgerModel = new()
-        {
-            Id = ledger.Id,
-            Name = ledger.Name,
-            Alias = ledger.Alias,
-            Code = ledger.Code,
-            GroupId = ledger.GroupId,
-            AccountTypeId = ledger.AccountTypeId,
-            Phone = ledger.Phone,
-            Email = ledger.Email,
-            Address = ledger.Address,
-            GSTNo = ledger.GSTNo,
-            Remarks = ledger.Remarks,
-            StateUTId = ledger.StateUTId,
-            LocationId = ledger.LocationId,
-            Status = ledger.Status
-        };
-        StateHasChanged();
-    }
+	private async Task LoadData()
+	{
+		_ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+		_groups = await CommonData.LoadTableData<GroupModel>(TableNames.Group);
+		_accountTypes = await CommonData.LoadTableData<AccountTypeModel>(TableNames.AccountType);
+		_stateUTs = await CommonData.LoadTableData<StateUTModel>(TableNames.StateUT);
+		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
-    private async Task ToggleLedgerStatus(LedgerModel ledger)
-    {
-        try
-        {
-            ledger.Status = !ledger.Status;
-            await LedgerData.InsertLedger(ledger);
-            await LoadLedgers();
+		if (!_showDeleted)
+			_ledgers = [.. _ledgers.Where(l => l.Status)];
 
-            _successMessage = $"Ledger '{ledger.Name}' has been {(ledger.Status ? "activated" : "deactivated")} successfully.";
-            await ShowSuccessToast();
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+	}
+	#endregion
 
-            OnAddLedger();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Failed to update ledger status: {ex.Message}";
-            await ShowErrorToast();
-        }
-    }
+	#region Actions
+	private void OnEditLedger(LedgerModel ledger)
+	{
+		_ledger = new()
+		{
+			Id = ledger.Id,
+			Name = ledger.Name,
+			Code = ledger.Code,
+			GroupId = ledger.GroupId,
+			AccountTypeId = ledger.AccountTypeId,
+			StateUTId = ledger.StateUTId,
+			LocationId = ledger.LocationId,
+			GSTNo = ledger.GSTNo,
+			PANNo = ledger.PANNo,
+			CINNo = ledger.CINNo,
+			Alias = ledger.Alias,
+			Phone = ledger.Phone,
+			Email = ledger.Email,
+			Address = ledger.Address,
+			Remarks = ledger.Remarks,
+			Status = ledger.Status
+		};
 
-    private async Task<bool> ValidateForm()
-    {
-        if (string.IsNullOrWhiteSpace(_ledgerModel.Name))
-        {
-            _errorMessage = "Ledger name is required. Please enter a valid name.";
-            await ShowErrorToast();
-            return false;
-        }
+		StateHasChanged();
+	}
 
-        if (string.IsNullOrWhiteSpace(_ledgerModel.Code))
-        {
-            _errorMessage = "Ledger code is required. Please enter a valid code.";
-            await ShowErrorToast();
-            return false;
-        }
+	private void ShowDeleteConfirmation(int id, string name)
+	{
+		_deleteLedgerId = id;
+		_deleteLedgerName = name;
+		_isDeleteDialogVisible = true;
+		StateHasChanged();
+	}
 
-        if (_ledgerModel.GroupId <= 0)
-        {
-            _errorMessage = "Group selection is required. Please select a valid group.";
-            await ShowErrorToast();
-            return false;
-        }
+	private void CancelDelete()
+	{
+		_deleteLedgerId = 0;
+		_deleteLedgerName = string.Empty;
+		_isDeleteDialogVisible = false;
+		StateHasChanged();
+	}
 
-        if (_ledgerModel.AccountTypeId <= 0)
-        {
-            _errorMessage = "Account type selection is required. Please select a valid account type.";
-            await ShowErrorToast();
-            return false;
-        }
+	private async Task ConfirmDelete()
+	{
+		try
+		{
+			_isProcessing = true;
+			_isDeleteDialogVisible = false;
 
-        if (_ledgerModel.StateUTId <= 0)
-        {
-            _errorMessage = "State selection is required. Please select a valid state.";
-            await ShowErrorToast();
-            return false;
-        }
+			var ledger = _ledgers.FirstOrDefault(l => l.Id == _deleteLedgerId);
+			if (ledger == null)
+			{
+				await ShowToast("Error", "Ledger not found.", "error");
+				return;
+			}
 
-        // Check for duplicate names and codes
-        if (_ledgerModel.Id > 0)
-        {
-            var existingLedger = _ledgers.FirstOrDefault(_ => _.Id != _ledgerModel.Id && _.Name.Equals(_ledgerModel.Name, StringComparison.OrdinalIgnoreCase));
-            if (existingLedger is not null)
-            {
-                _errorMessage = $"Ledger name '{_ledgerModel.Name}' already exists. Please choose a different name.";
-                await ShowErrorToast();
-                return false;
-            }
+			ledger.Status = false;
+			await LedgerData.InsertLedger(ledger);
 
-            existingLedger = _ledgers.FirstOrDefault(_ => _.Id != _ledgerModel.Id && _.Code.Equals(_ledgerModel.Code, StringComparison.OrdinalIgnoreCase));
-            if (existingLedger is not null)
-            {
-                _errorMessage = $"Ledger code '{_ledgerModel.Code}' is already used by '{existingLedger.Name}'. Please choose a different code.";
-                await ShowErrorToast();
-                return false;
-            }
-        }
-        else
-        {
-            var existingLedger = _ledgers.FirstOrDefault(_ => _.Name.Equals(_ledgerModel.Name, StringComparison.OrdinalIgnoreCase));
-            if (existingLedger is not null)
-            {
-                _errorMessage = $"Ledger name '{_ledgerModel.Name}' already exists. Please choose a different name.";
-                await ShowErrorToast();
-                return false;
-            }
+			await ShowToast("Success", $"Ledger '{ledger.Name}' has been deleted successfully.", "success");
+			NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"Failed to delete Ledger: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			_deleteLedgerId = 0;
+			_deleteLedgerName = string.Empty;
+		}
+	}
 
-            existingLedger = _ledgers.FirstOrDefault(_ => _.Code.Equals(_ledgerModel.Code, StringComparison.OrdinalIgnoreCase));
-            if (existingLedger is not null)
-            {
-                _errorMessage = $"Ledger code '{_ledgerModel.Code}' is already used by '{existingLedger.Name}'. Please choose a different code.";
-                await ShowErrorToast();
-                return false;
-            }
-        }
+	private void ShowRecoverConfirmation(int id, string name)
+	{
+		_recoverLedgerId = id;
+		_recoverLedgerName = name;
+		_isRecoverDialogVisible = true;
+		StateHasChanged();
+	}
 
-        // Validate location business rule: not more than one ledger can be connected to the same location
-        if (_ledgerModel.LocationId.HasValue && _ledgerModel.LocationId > 0)
-        {
-            var existingLedger = _ledgers.FirstOrDefault(_ => _.Id != _ledgerModel.Id && _.LocationId == _ledgerModel.LocationId);
-            if (existingLedger is not null)
-            {
-                var locationName = _locations.FirstOrDefault(l => l.Id == _ledgerModel.LocationId)?.Name ?? "Unknown";
-                _errorMessage = $"Location '{locationName}' is already connected to ledger '{existingLedger.Name}'. Only one ledger can be connected to each location.";
-                await ShowErrorToast();
-                return false;
-            }
-        }
+	private void CancelRecover()
+	{
+		_recoverLedgerId = 0;
+		_recoverLedgerName = string.Empty;
+		_isRecoverDialogVisible = false;
+		StateHasChanged();
+	}
 
-        return true;
-    }
+	private async Task ToggleDeleted()
+	{
+		_showDeleted = !_showDeleted;
+		await LoadData();
+		StateHasChanged();
+	}
 
-    private async Task SaveLedger()
-    {
-        try
-        {
-            if (_isSubmitting || !await ValidateForm())
-                return;
+	private async Task ConfirmRecover()
+	{
+		try
+		{
+			_isProcessing = true;
+			_isRecoverDialogVisible = false;
 
-            _isSubmitting = true;
-            StateHasChanged();
+			var ledger = _ledgers.FirstOrDefault(l => l.Id == _recoverLedgerId);
+			if (ledger == null)
+			{
+				await ShowToast("Error", "Ledger not found.", "error");
+				return;
+			}
 
-            var isNewLedger = _ledgerModel.Id == 0;
-            var ledgerName = _ledgerModel.Name;
+			ledger.Status = true;
+			await LedgerData.InsertLedger(ledger);
 
-            await LedgerData.InsertLedger(_ledgerModel);
-            await LoadLedgers();
+			await ShowToast("Success", $"Ledger '{ledger.Name}' has been recovered successfully.", "success");
+			NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"Failed to recover Ledger: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			_recoverLedgerId = 0;
+			_recoverLedgerName = string.Empty;
+		}
+	}
+	#endregion
 
-            // Reset form
-            OnAddLedger();
+	#region Saving
+	private async Task<bool> ValidateForm()
+	{
+		_ledger.Name = _ledger.Name?.Trim() ?? "";
+		_ledger.Name = _ledger.Name?.ToUpper() ?? "";
 
-            _successMessage = isNewLedger
-                ? $"Ledger '{ledgerName}' has been created successfully!"
-                : $"Ledger '{ledgerName}' has been updated successfully!";
-            await ShowSuccessToast();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = $"Failed to save ledger: {ex.Message}";
-            await ShowErrorToast();
-        }
-        finally
-        {
-            _isSubmitting = false;
-            StateHasChanged();
-        }
-    }
+		_ledger.GSTNo = _ledger.GSTNo?.Trim() ?? "";
+		_ledger.GSTNo = _ledger.GSTNo?.ToUpper() ?? "";
 
-    public void RowSelectHandler(RowSelectEventArgs<LedgerModel> args) =>
-        OnEditLedger(args.Data);
+		_ledger.PANNo = _ledger.PANNo?.Trim() ?? "";
+		_ledger.PANNo = _ledger.PANNo?.ToUpper() ?? "";
 
-    // Helper methods for showing toasts with dynamic content
-    private async Task ShowSuccessToast()
-    {
-        if (_sfToast != null)
-        {
-            var toastModel = new ToastModel
-            {
-                Title = "Success",
-                Content = _successMessage,
-                CssClass = "e-toast-success",
-                Icon = "e-success toast-icons"
-            };
-            await _sfToast.ShowAsync(toastModel);
-        }
-    }
+		_ledger.CINNo = _ledger.CINNo?.Trim() ?? "";
+		_ledger.CINNo = _ledger.CINNo?.ToUpper() ?? "";
 
-    private async Task ShowErrorToast()
-    {
-        if (_sfErrorToast != null)
-        {
-            var toastModel = new ToastModel
-            {
-                Title = "Error",
-                Content = _errorMessage,
-                CssClass = "e-toast-danger",
-                Icon = "e-error toast-icons"
-            };
-            await _sfErrorToast.ShowAsync(toastModel);
-        }
-    }
+		_ledger.Alias = _ledger.Alias?.Trim() ?? "";
+		_ledger.Alias = _ledger.Alias?.ToUpper() ?? "";
 
-    // Helper methods to get display names
-    private string GetGroupName(int groupId)
-    {
-        return _groups.FirstOrDefault(g => g.Id == groupId)?.Name ?? "Unknown";
-    }
+		_ledger.Phone = _ledger.Phone?.Trim() ?? "";
+		_ledger.Email = _ledger.Email?.Trim() ?? "";
+		_ledger.Address = _ledger.Address?.Trim() ?? "";
 
-    private string GetAccountTypeName(int accountTypeId)
-    {
-        return _accountTypes.FirstOrDefault(at => at.Id == accountTypeId)?.Name ?? "Unknown";
-    }
+		_ledger.Remarks = _ledger.Remarks?.Trim() ?? "";
+		_ledger.Status = true;
 
-    private string GetStateName(int stateId)
-    {
-        return _states.FirstOrDefault(s => s.Id == stateId)?.Name ?? "Unknown";
-    }
+		if (string.IsNullOrWhiteSpace(_ledger.Name))
+		{
+			await ShowToast("Error", "Ledger name is required. Please enter a valid ledger name.", "error");
+			return false;
+		}
 
-    private string GetLocationName(int? locationId)
-    {
-        if (!locationId.HasValue || locationId == 0)
-            return "Not Assigned";
-        return _locations.FirstOrDefault(l => l.Id == locationId)?.Name ?? "Unknown";
-    }
+		if (_ledger.GroupId <= 0)
+		{
+			await ShowToast("Error", "Group is required. Please select a valid group.", "error");
+			return false;
+		}
+
+		if (_ledger.AccountTypeId <= 0)
+		{
+			await ShowToast("Error", "Account Type is required. Please select a valid account type.", "error");
+			return false;
+		}
+
+		if (_ledger.StateUTId <= 0)
+		{
+			await ShowToast("Error", "State/UT is required. Please select a valid State/UT.", "error");
+			return false;
+		}
+
+		if (string.IsNullOrWhiteSpace(_ledger.GSTNo)) _ledger.GSTNo = null;
+		if (string.IsNullOrWhiteSpace(_ledger.PANNo)) _ledger.PANNo = null;
+		if (string.IsNullOrWhiteSpace(_ledger.CINNo)) _ledger.CINNo = null;
+		if (string.IsNullOrWhiteSpace(_ledger.Alias)) _ledger.Alias = null;
+		if (string.IsNullOrWhiteSpace(_ledger.Phone)) _ledger.Phone = null;
+		if (string.IsNullOrWhiteSpace(_ledger.Email)) _ledger.Email = null;
+		if (string.IsNullOrWhiteSpace(_ledger.Address)) _ledger.Address = null;
+		if (string.IsNullOrWhiteSpace(_ledger.Remarks)) _ledger.Remarks = null;
+
+		// Validate location uniqueness if location is selected
+		if (_ledger.LocationId.HasValue && _ledger.LocationId.Value > 0)
+		{
+			if (_ledger.Id > 0)
+			{
+				// Editing existing ledger - check if another ledger has this location
+				var existingLedgerWithLocation = _ledgers.FirstOrDefault(_ => _.Id != _ledger.Id && _.LocationId == _ledger.LocationId);
+				if (existingLedgerWithLocation is not null)
+				{
+					var locationName = _locations.FirstOrDefault(l => l.Id == _ledger.LocationId)?.Name ?? "Unknown";
+					await ShowToast("Error", $"Location '{locationName}' is already tagged to another ledger '{existingLedgerWithLocation.Name}'. Each location can only be tagged to one ledger.", "error");
+					return false;
+				}
+			}
+			else
+			{
+				// Creating new ledger - check if any ledger has this location
+				var existingLedgerWithLocation = _ledgers.FirstOrDefault(_ => _.LocationId == _ledger.LocationId);
+				if (existingLedgerWithLocation is not null)
+				{
+					var locationName = _locations.FirstOrDefault(l => l.Id == _ledger.LocationId)?.Name ?? "Unknown";
+					await ShowToast("Error", $"Location '{locationName}' is already tagged to ledger '{existingLedgerWithLocation.Name}'. Each location can only be tagged to one ledger.", "error");
+					return false;
+				}
+			}
+		}
+
+		if (_ledger.Id > 0)
+		{
+			var existingLedger = _ledgers.FirstOrDefault(_ => _.Id != _ledger.Id && _.Name.Equals(_ledger.Name, StringComparison.OrdinalIgnoreCase));
+			if (existingLedger is not null)
+			{
+				await ShowToast("Error", $"Ledger name '{_ledger.Name}' already exists. Please choose a different name.", "error");
+				return false;
+			}
+		}
+		else
+		{
+			var existingLedger = _ledgers.FirstOrDefault(_ => _.Name.Equals(_ledger.Name, StringComparison.OrdinalIgnoreCase));
+			if (existingLedger is not null)
+			{
+				await ShowToast("Error", $"Ledger name '{_ledger.Name}' already exists. Please choose a different name.", "error");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private async Task SaveLedger()
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+
+			if (!await ValidateForm())
+			{
+				_isProcessing = false;
+				return;
+			}
+
+			if (_ledger.Id == 0)
+				_ledger.Code = await GenerateCodes.GenerateLedgerCode();
+
+			await LedgerData.InsertLedger(_ledger);
+
+			await ShowToast("Success", $"Ledger '{_ledger.Name}' has been saved successfully.", "success");
+			NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"Failed to save Ledger: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+		}
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportExcel()
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			// Call the Excel export utility
+			var stream = await Task.Run(() => LedgerExcelExport.ExportLedger(_ledgers));
+
+			// Generate file name
+			string fileName = "LEDGER_MASTER.xlsx";
+
+			// Save and view the Excel file
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await ShowToast("Success", "Ledger data exported to Excel successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportPdf()
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			// Call the PDF export utility
+			var stream = await Task.Run(() => LedgerPDFExport.ExportLedger(_ledgers));
+
+			// Generate file name
+			string fileName = "LEDGER_MASTER.pdf";
+
+			// Save and view the PDF file
+			await SaveAndViewService.SaveAndView(fileName, stream);
+
+			await ShowToast("Success", "Ledger data exported to PDF successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Utilities
+	private async Task ShowToast(string title, string message, string type)
+	{
+		VibrationService.VibrateWithTime(200);
+
+		if (type == "error")
+		{
+			_errorTitle = title;
+			_errorMessage = message;
+			await _sfErrorToast.ShowAsync(new()
+			{
+				Title = _errorTitle,
+				Content = _errorMessage
+			});
+		}
+
+		else if (type == "success")
+		{
+			_successTitle = title;
+			_successMessage = message;
+			await _sfSuccessToast.ShowAsync(new()
+			{
+				Title = _successTitle,
+				Content = _successMessage
+			});
+		}
+	}
+	#endregion
 }

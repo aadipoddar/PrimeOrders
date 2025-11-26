@@ -5,7 +5,7 @@ public class CompanyModel
     public int Id { get; set; }
     public string Name { get; set; }
     public string Code { get; set; }
-    public int? StateUTId { get; set; }
+    public int StateUTId { get; set; }
     public string? GSTNo { get; set; }
     public string? PANNo { get; set; }
     public string? CINNo { get; set; }

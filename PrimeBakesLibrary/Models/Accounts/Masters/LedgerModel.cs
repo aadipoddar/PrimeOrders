@@ -7,7 +7,7 @@ public class LedgerModel
     public int GroupId { get; set; }
     public int AccountTypeId { get; set; }
     public string Code { get; set; }
-    public int? StateUTId { get; set; }
+    public int StateUTId { get; set; }
     public string? GSTNo { get; set; }
     public string? PANNo { get; set; }
     public string? CINNo { get; set; }

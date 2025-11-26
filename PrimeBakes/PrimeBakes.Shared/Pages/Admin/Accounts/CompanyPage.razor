@@ -1,9 +1,8 @@
-﻿@page "/admin/ledger"
+﻿@page "/admin/company"
 
 @using PrimeBakesLibrary.Models.Accounts.Masters
-@using PrimeBakesLibrary.Models.Common
 
-<PageTitle>Ledger Management - Prime Bakes</PageTitle>
+<PageTitle>Company Management - Prime Bakes</PageTitle>
 
 @if (_isLoading)
 {
@@ -21,8 +20,8 @@ else
             </div>
         </div>
         <div class="header-center">
-            <h1 class="page-title">Ledger Management</h1>
-            <p class="page-subtitle">Manage ledger accounts</p>
+            <h1 class="page-title">Company Management</h1>
+            <p class="page-subtitle">Manage company details</p>
         </div>
         <div class="header-right">
             <button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
@@ -46,7 +45,7 @@ else
                     <line x1="10" y1="9" x2="8" y2="9" />
                 </svg>
             </button>
-            <button class="btn-icon btn-icon-save" @onclick="SaveLedger" disabled="@_isProcessing" title="Save Ledger">
+            <button class="btn-icon btn-icon-save" @onclick="SaveCompany" disabled="@_isProcessing" title="Save Company">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -54,7 +53,7 @@ else
                     <polyline points="7 3 7 8 15 8" />
                 </svg>
             </button>
-            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true)' title="New Ledger" disabled="@_isProcessing">
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminCompany, true)' title="New Company" disabled="@_isProcessing">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -82,7 +81,7 @@ else
     <!-- Main Content Container -->
     <div class="purchase-container">
 
-        <!-- Ledger Entry Section -->
+        <!-- Company Entry Section -->
         <div class="section-card">
             <div class="section-header">
                 <div class="section-title-wrapper">
@@ -90,51 +89,27 @@ else
                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5" />
                     </svg>
-                    <h2 class="section-title">Ledger Details</h2>
+                    <h2 class="section-title">Company Details</h2>
                 </div>
             </div>
             <div class="section-body">
                 <div class="form-grid-quad">
-                    <!-- Ledger Name -->
+                    <!-- Company Name -->
                     <div class="form-field">
                         <label class="field-label">
-                            Ledger Name <span class="required">*</span>
+                            Company Name <span class="required">*</span>
                         </label>
-                        <SfTextBox @bind-Value="_ledger.Name" Placeholder="Enter ledger name"
+                        <SfTextBox @bind-Value="_company.Name" Placeholder="Enter company name"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
-                    <!-- Code (Auto-generated) -->
+                    <!-- Code -->
                     <div class="form-field">
                         <label class="field-label">
                             Code <span class="required">*</span>
                         </label>
-                        <SfTextBox @bind-Value="_ledger.Code" Placeholder="Auto-generated"
-                                   FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" Readonly="true" />
-                    </div>
-
-                    <!-- Group -->
-                    <div class="form-field">
-                        <label class="field-label">
-                            Group <span class="required">*</span>
-                        </label>
-                        <SfDropDownList TValue="int" TItem="GroupModel" Placeholder="Select Group"
-                                        DataSource="@_groups" @bind-Value="_ledger.GroupId"
-                                        FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox">
-                            <DropDownListFieldSettings Text="Name" Value="Id" />
-                        </SfDropDownList>
-                    </div>
-
-                    <!-- Account Type -->
-                    <div class="form-field">
-                        <label class="field-label">
-                            Account Type <span class="required">*</span>
-                        </label>
-                        <SfDropDownList TValue="int" TItem="AccountTypeModel" Placeholder="Select Account Type"
-                                        DataSource="@_accountTypes" @bind-Value="_ledger.AccountTypeId"
-                                        FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox">
-                            <DropDownListFieldSettings Text="Name" Value="Id" />
-                        </SfDropDownList>
+                        <SfTextBox @bind-Value="_company.Code" Placeholder="Enter code"
+                                   FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                      <!-- State/UT -->
@@ -143,82 +118,72 @@ else
                             State/UT <span class="required">*</span>
                         </label>
                         <SfDropDownList TValue="int" TItem="StateUTModel" Placeholder="Select State/UT"
-                                        DataSource="@_stateUTs" @bind-Value="_ledger.StateUTId"
+                                        DataSource="@_stateUTs" @bind-Value="_company.StateUTId"
                                         FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox">
                             <DropDownListFieldSettings Text="Name" Value="Id" />
                         </SfDropDownList>
                     </div>
 
-                    <!-- Location (Autocomplete) -->
-                    <div class="form-field">
-                        <label class="field-label">Location</label>
-                        <SfAutoComplete TValue="int?" TItem="LocationModel" Placeholder="Search location (optional)"
-                                        DataSource="@_locations" @bind-Value="_ledger.LocationId"
-                                        FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox">
-                            <AutoCompleteFieldSettings Value="Id" Text="Name" />
-                        </SfAutoComplete>
-                    </div>
-
                     <!-- GST No -->
                     <div class="form-field">
                         <label class="field-label">GST No</label>
-                        <SfTextBox @bind-Value="_ledger.GSTNo" Placeholder="Enter GST No"
+                        <SfTextBox @bind-Value="_company.GSTNo" Placeholder="Enter GST No"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- PAN No -->
                     <div class="form-field">
                         <label class="field-label">PAN No</label>
-                        <SfTextBox @bind-Value="_ledger.PANNo" Placeholder="Enter PAN No"
+                        <SfTextBox @bind-Value="_company.PANNo" Placeholder="Enter PAN No"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- CIN No -->
                     <div class="form-field">
                         <label class="field-label">CIN No</label>
-                        <SfTextBox @bind-Value="_ledger.CINNo" Placeholder="Enter CIN No"
+                        <SfTextBox @bind-Value="_company.CINNo" Placeholder="Enter CIN No"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- Alias -->
                     <div class="form-field">
                         <label class="field-label">Alias</label>
-                        <SfTextBox @bind-Value="_ledger.Alias" Placeholder="Enter Alias"
+                        <SfTextBox @bind-Value="_company.Alias" Placeholder="Enter Alias"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- Phone -->
                     <div class="form-field">
                         <label class="field-label">Phone</label>
-                        <SfTextBox @bind-Value="_ledger.Phone" Placeholder="Enter Phone"
+                        <SfTextBox @bind-Value="_company.Phone" Placeholder="Enter Phone"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- Email -->
                     <div class="form-field">
                         <label class="field-label">Email</label>
-                        <SfTextBox @bind-Value="_ledger.Email" Placeholder="Enter Email"
+                        <SfTextBox @bind-Value="_company.Email" Placeholder="Enter Email"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- Address -->
                     <div class="form-field form-field-span-4">
                         <label class="field-label">Address</label>
-                        <SfTextBox @bind-Value="_ledger.Address" Placeholder="Enter Address" Multiline="true"
+                        <SfTextBox @bind-Value="_company.Address" Placeholder="Enter Address" Multiline="true"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
                     <!-- Remarks -->
                     <div class="form-field form-field-span-4">
                         <label class="field-label">Remarks</label>
-                        <SfTextBox @bind-Value="_ledger.Remarks" Placeholder="Enter remarks (optional)" Multiline="true"
+                        <SfTextBox @bind-Value="_company.Remarks" Placeholder="Enter remarks (optional)" Multiline="true"
                                    FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Ledgers List Section -->
+        <!-- Companies List Section -->
         <div class="section-card">
             <div class="section-header">
                 <div class="section-title-wrapper">
@@ -227,11 +192,11 @@ else
                         <path d="M9 11l3 3L22 4" />
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                     </svg>
-                    <h2 class="section-title">Ledgers List</h2>
+                    <h2 class="section-title">Companies List</h2>
                 </div>
                 <div class="header-actions">
                     <button class="btn-toggle-deleted @(_showDeleted ? "active" : "")" @onclick="ToggleDeleted"
-                            title="@(_showDeleted ? "Hide Deleted Ledgers" : "Show Deleted Ledgers")"
+                            title="@(_showDeleted ? "Hide Deleted Companies" : "Show Deleted Companies")"
                             disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -245,7 +210,7 @@ else
                 </div>
             </div>
             <div class="section-body grid-body">
-                <SfGrid @ref="_sfGrid" DataSource="@_ledgers" AllowPaging="true" AllowSorting="true" AllowFiltering="true"
+                <SfGrid @ref="_sfGrid" DataSource="@_companies" AllowPaging="true" AllowSorting="true" AllowFiltering="true"
                         AllowResizing="true" CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
                     <GridPageSettings PageSize="20" PageSizes="@(new int[] { 20, 50, 100, 200 })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
@@ -253,12 +218,12 @@ else
                         <GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center" AllowFiltering="false">
                             <Template>
                                 @{
-                                    var ledger = (context as LedgerModel);
+                                    var company = (context as CompanyModel);
 
                                     <div class="grid-actions">
-                                        @if (ledger.Status)
+                                        @if (company.Status)
                                         {
-                                            <button class="btn-grid-action btn-edit" @onclick="() => OnEditLedger(ledger)"
+                                            <button class="btn-grid-action btn-edit" @onclick="() => OnEditCompany(company)"
                                                     title="Edit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -269,7 +234,7 @@ else
                                             </button>
 
                                             <button class="btn-grid-action btn-delete"
-                                                    @onclick="() => ShowDeleteConfirmation(ledger.Id, ledger.Name)" title="Delete">
+                                                    @onclick="() => ShowDeleteConfirmation(company.Id, company.Name)" title="Delete">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                      stroke-linejoin="round">
@@ -283,7 +248,7 @@ else
                                         else
                                         {
                                             <button class="btn-grid-action btn-recover"
-                                                    @onclick="() => ShowRecoverConfirmation(ledger.Id, ledger.Name)" title="Recover">
+                                                    @onclick="() => ShowRecoverConfirmation(company.Id, company.Name)" title="Recover">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                      stroke-linejoin="round">
@@ -296,20 +261,20 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(LedgerModel.Id)" HeaderText="ID" Width="80"
+                        <GridColumn Field="@nameof(CompanyModel.Id)" HeaderText="ID" Width="80"
                                     TextAlign="TextAlign.Center" />
-                        <GridColumn Field="@nameof(LedgerModel.Name)" HeaderText="Ledger Name" Width="250" />
-                        <GridColumn Field="@nameof(LedgerModel.Code)" HeaderText="Code" Width="120" />
-                        <GridColumn Field="@nameof(LedgerModel.GSTNo)" HeaderText="GST No" Width="150" />
-                        <GridColumn Field="@nameof(LedgerModel.Phone)" HeaderText="Phone" Width="150" />
-                        <GridColumn Field="@nameof(LedgerModel.Status)" HeaderText="Status" Width="100"
+                        <GridColumn Field="@nameof(CompanyModel.Name)" HeaderText="Company Name" Width="250" />
+                        <GridColumn Field="@nameof(CompanyModel.Code)" HeaderText="Code" Width="120" />
+                        <GridColumn Field="@nameof(CompanyModel.GSTNo)" HeaderText="GST No" Width="150" />
+                        <GridColumn Field="@nameof(CompanyModel.Phone)" HeaderText="Phone" Width="150" />
+                        <GridColumn Field="@nameof(CompanyModel.Status)" HeaderText="Status" Width="100"
                                     TextAlign="TextAlign.Center">
                             <Template>
                                 @{
-                                    var ledger = (context as LedgerModel);
+                                    var company = (context as CompanyModel);
                                     <div class="grid-checkbox"
-                                         style="@(ledger.Status ? "color: #10b981; background: #d1fae5;" : "color: #dc2626; background: #fee2e2;")">
-                                        @(ledger.Status ? "✓" : "✗")
+                                         style="@(company.Status ? "color: #10b981; background: #d1fae5;" : "color: #dc2626; background: #fee2e2;")">
+                                        @(company.Status ? "✓" : "✗")
                                     </div>
                                 }
                             </Template>
@@ -341,19 +306,19 @@ else
         <Content>
             <div style="padding: 24px;">
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
-                    Are you sure you want to delete this Ledger?
+                    Are you sure you want to delete this Company?
                 </p>
                 <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                     <p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">
-                        Ledger Details:
+                        Company Details:
                     </p>
                     <p style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.5;">
-                        <strong>Ledger Name:</strong> @_deleteLedgerName
+                        <strong>Company Name:</strong> @_deleteCompanyName
                     </p>
                 </div>
                 <div style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
-                        <strong>Note:</strong> This ledger will be marked as deleted. You can recover it later.
+                        <strong>Note:</strong> This company will be marked as deleted. You can recover it later.
                     </p>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -399,19 +364,19 @@ else
         <Content>
             <div style="padding: 24px;">
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
-                    Are you sure you want to recover this ledger?
+                    Are you sure you want to recover this company?
                 </p>
                 <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                     <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46; font-weight: 600;">
-                        Ledger Details:
+                        Company Details:
                     </p>
                     <p style="margin: 0; font-size: 13px; color: #047857; line-height: 1.5;">
-                        <strong>Ledger Name:</strong> @_recoverLedgerName
+                        <strong>Company Name:</strong> @_recoverCompanyName
                     </p>
                 </div>
                 <div style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
-                        <strong>Note:</strong> This will recover the ledger and make it available again.
+                        <strong>Note:</strong> This will recover the company and make it available again.
                     </p>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
