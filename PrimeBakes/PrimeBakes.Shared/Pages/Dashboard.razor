@@ -1,915 +1,825 @@
 ﻿@page "/"
 
+@using PrimeBakesLibrary.Models.Common
+
 <PageTitle>Dashboard - Prime Bakes</PageTitle>
 
-@if (_isLoading || _user is null)
+@if (_isLoading)
 {
-	@if (_isUpdating || _isLoadingText.Contains("Updating application"))
-	{
-		<!-- Beautiful Update UI -->
+	<SfSpinner @bind-Visible="_isLoading" Label="Page is Loading, Please Wait" />
+}
+else if (_isUpdating)
+{
+	<!-- Update Progress Overlay -->
+	<div class="update-overlay">
 		<div class="update-container">
-			<div class="update-card">
-				<div class="update-header">
-					<div class="update-icon-container">
-						<div class="update-icon">
-							<span class="download-arrow">⬇</span>
-						</div>
-					</div>
-					<h2 class="update-title">Updating Prime Bakes</h2>
-					<p class="update-subtitle">Please wait while we download the latest version</p>
-				</div>
+			<div class="update-header">
+				<svg class="update-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+					fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+				</svg>
+				<h2 class="update-title">Updating Prime Bakes</h2>
+				<p class="update-subtitle">Please wait while we update your app</p>
+			</div>
 
-				<div class="update-body">
-					<!-- Progress Ring -->
-					<div class="progress-ring-container">
-						<svg class="progress-ring" width="140" height="140">
-							<defs>
-								<linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-									<stop offset="0%" style="stop-color:#e2137b;stop-opacity:1" />
-									<stop offset="100%" style="stop-color:#c10e69;stop-opacity:1" />
-								</linearGradient>
-							</defs>
-							<circle class="progress-ring__circle-bg" cx="70" cy="70" r="60" />
-							<circle class="progress-ring__circle" cx="70" cy="70" r="60"
-								style="stroke-dasharray: @GetCircumference(); stroke-dashoffset: @GetStrokeOffset();" />
+			<div class="update-progress-section">
+				<div class="progress-info">
+					<span class="progress-label">Progress</span>
+					<span class="progress-percentage">@_updateProgress%</span>
+				</div>
+				<div class="progress-bar-container">
+					<div class="progress-bar-fill" style="width: @(_updateProgress)%"></div>
+				</div>
+				<div class="time-remaining">
+					@if (_timeRemaining > 0)
+					{
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="10" />
+							<polyline points="12 6 12 12 16 14" />
 						</svg>
-						<div class="progress-content">
-							<span class="progress-percentage">@_progressPercentage%</span>
-							<span class="progress-label">Downloaded</span>
-						</div>
-					</div>
-
-					<!-- Progress Bar -->
-					<div class="progress-bar-container">
-						<div class="progress-bar">
-							<div class="progress-fill" style="width: @(_progressPercentage)%"></div>
-							<div class="progress-glow" style="left: @(_progressPercentage)%"></div>
-						</div>
-						<div class="progress-text">
-							<span>@_isLoadingText</span>
-							<span class="eta">@_estimatedTime</span>
-						</div>
-					</div>
-
-					<!-- Fun Facts -->
-					<div class="fun-facts">
-						<div class="fact-container">
-							<div class="fact-icon">💡</div>
-							<p class="fun-fact">@_currentFunFact</p>
-						</div>
-					</div>
-
-					<!-- Animated Elements -->
-					<div class="update-animation">
-						<div class="floating-dots">
-							<span class="floating-dot" style="animation-delay: 0s;"></span>
-							<span class="floating-dot" style="animation-delay: 0.5s;"></span>
-							<span class="floating-dot" style="animation-delay: 1s;"></span>
-							<span class="floating-dot" style="animation-delay: 1.5s;"></span>
-						</div>
-					</div>
-				</div>
-
-				<div class="update-footer">
-					<div class="update-steps">
-						<div class="step @(_progressPercentage >= 10 ? "completed" : "active")">
-							<div class="step-icon">📦</div>
-							<span>Downloading</span>
-						</div>
-						<div
-							class="step @(_progressPercentage >= 100 ? "completed" : _progressPercentage >= 10 ? "active" : "")">
-							<div class="step-icon">⚙️</div>
-							<span>Installing</span>
-						</div>
-						<div class="step @(_progressPercentage >= 100 ? "active" : "")">
-							<div class="step-icon">🚀</div>
-							<span>Launch</span>
-						</div>
-					</div>
+						<span>Estimated time: @_timeRemaining seconds</span>
+					}
+					else
+					{
+						<span>Calculating...</span>
+					}
 				</div>
 			</div>
 
-			<!-- Background Animation -->
-			<div class="update-background-animation">
-				<div class="wave wave1"></div>
-				<div class="wave wave2"></div>
-				<div class="wave wave3"></div>
+			<div class="update-status">
+				<div class="status-dot"></div>
+				<span>@_updateStatus</span>
 			</div>
 		</div>
-	}
-	else
-	{
-		<!-- Regular Loading UI -->
-		<div class="loader-container">
-			<div class="circular-dots-loader">
-				<span class="dot dot-1"></span>
-				<span class="dot dot-2"></span>
-				<span class="dot dot-3"></span>
-			</div>
-			<p class="loading-text">@_isLoadingText</p>
-		</div>
-	}
+	</div>
 }
 else
 {
-	<!-- Dashboard Content -->
+	<!-- Professional Header Section -->
+	<div class="page-header">
+		<div class="header-left">
+			<img src="images/logo.png" alt="PrimeBakes" class="header-logo" />
+			<div class="header-divider"></div>
+			<div class="header-text">
+				<span class="app-name">Prime Bakes</span>
+			</div>
+		</div>
+		<div class="header-center">
+			<h1 class="page-title">Main Dashboard</h1>
+			<p class="page-subtitle">Quick access to all modules and operations</p>
+		</div>
+		<div class="header-right">
+			<span class="user-name">@_user?.Name</span>
+			<button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout">
+				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+					<line x1="12" y1="2" x2="12" y2="12" />
+				</svg>
+			</button>
+		</div>
+	</div>
+
+	<!-- Main Content Container -->
 	<div class="dashboard-container">
-		<div class="dashboard-header">
-			<div class="logo-section">
-				<img src="images/logo.png" alt="Prime Bakes Logo" class="dashboard-logo" />
-				<h1 class="dashboard-title">Prime Bakes</h1>
+
+		<!-- Mobile Section -->
+		<div class="section-card">
+			<div class="section-header">
+				<div class="section-title-wrapper">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+						<line x1="12" y1="18" x2="12.01" y2="18" />
+					</svg>
+					<h2 class="section-title">Mobile</h2>
+				</div>
+				<p class="section-subtitle">Mobile optimized ordering interface</p>
 			</div>
-			<div class="user-info">
-				<span class="user-name">Welcome, @(_user?.Name ?? "User")!</span>
-				<button @onclick="Logout" class="logout-button">
-					<span class="logout-icon">⟲</span> Logout
-				</button>
-			</div>
-		</div>
-
-		<div class="welcome-section">
-			<h2>Dashboard</h2>
-			<p>Select an option below to continue with your bakery management</p>
-		</div>
-
-		<div class="dashboard-cards">
-			@if (_user.Order)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.OrderMobile)'>
-					<div class="card-icon order-icon">📋</div>
-					<h3>Orders</h3>
-					<p>Manage customer orders and track order fulfillment</p>
-				</div>
-			}
-
-			@if (_user.Sales)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.SalesDashboard)'>
-					<div class="card-icon sales-icon">📈</div>
-					<h3>Sales & Orders</h3>
-					<p>Track sales performance and revenue analytics</p>
-				</div>
-			}
-
-			@if (_user.Inventory)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard)'>
-					<div class="card-icon inventory-icon">📦</div>
-					<h3>Inventory</h3>
-					<p>Manage stock levels and inventory control</p>
-				</div>
-			}
-
-			@if (_user.Accounts && _user.LocationId == 1)
-			{
-				<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard)'>
-					<div class="card-icon accounts-icon">💰</div>
-					<h3>Accounts</h3>
-					<p>Manage financial accounts and accounting operations</p>
-				</div>
-			}
-
-			<div class="dashboard-card" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportDashboard)'>
-				<div class="card-icon reports-icon">📊</div>
-				<h3>Reports</h3>
-				<p>View and generate comprehensive business reports</p>
-			</div>
-
-			@if (_user.Admin && _user.LocationId == 1)
-			{
-				<div class="dashboard-card admin-card"
-					@onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard)'>
-					<div class="card-icon admin-icon">👑</div>
-					<h3>Admin Panel</h3>
-					<p>Access advanced management tools and system administration</p>
-				</div>
-			}
-		</div>
-
-		<!-- Device Information Card -->
-		<div class="device-info-card">
-			<div class="device-info-header">
-				<div class="device-icon">@DeviceType</div>
-				<h3>Device Information</h3>
-			</div>
-			<div class="device-info-grid">
-				<div class="info-item">
-					<span class="info-label">Platform</span>
-					<span class="info-value">@Platform</span>
-				</div>
-				<div class="info-item">
-					<span class="info-label">Form Factor</span>
-					<span class="info-value">@Factor</span>
-				</div>
-				<div class="info-item">
-					<span class="info-label">App Version</span>
-					<span class="info-value">@AppVersion</span>
+			<div class="section-body">
+				<div class="dashboard-grid">
+					<!-- Order Mobile -->
+					<SfButton CssClass="dashboard-button btn-blue"
+						OnClick="() => NavigationManager.NavigateTo(PageRouteNames.OrderMobile, true)">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+									<rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+								</svg>
+							</div>
+							<h3 class="button-title">Order</h3>
+							<p class="button-description">Create orders on mobile</p>
+						</div>
+					</SfButton>
 				</div>
 			</div>
 		</div>
 
-		<div class="dashboard-footer">
-			<p>&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app" target="_blank"
-					class="footer-link">AadiSoft</a>. All rights reserved.</p>
+		<!-- Desktop / Web Section -->
+		<div class="section-card">
+			<div class="section-header">
+				<div class="section-title-wrapper">
+					<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+						fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+						<line x1="8" y1="21" x2="16" y2="21" />
+						<line x1="12" y1="17" x2="12" y2="21" />
+					</svg>
+					<h2 class="section-title">Desktop / Web</h2>
+				</div>
+				<p class="section-subtitle">Access all modules and dashboards</p>
+			</div>
+			<div class="section-body">
+				<div class="dashboard-grid">
+					<!-- Sales -->
+					<SfButton CssClass="dashboard-button btn-green" OnClick="NavigateToSales">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<circle cx="9" cy="21" r="1" />
+									<circle cx="20" cy="21" r="1" />
+									<path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+								</svg>
+							</div>
+							<h3 class="button-title">Sales</h3>
+							<p class="button-description">Access sales dashboard</p>
+						</div>
+					</SfButton>
+
+					<!-- Inventory -->
+					<SfButton CssClass="dashboard-button btn-orange" OnClick="NavigateToInventory">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<path
+										d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+									<polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+									<line x1="12" y1="22.08" x2="12" y2="12" />
+								</svg>
+							</div>
+							<h3 class="button-title">Inventory</h3>
+							<p class="button-description">Access inventory dashboard</p>
+						</div>
+					</SfButton>
+
+					<!-- Accounts -->
+					<SfButton CssClass="dashboard-button btn-purple" OnClick="NavigateToAccounts">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<line x1="12" y1="1" x2="12" y2="23" />
+									<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+								</svg>
+							</div>
+							<h3 class="button-title">Accounts</h3>
+							<p class="button-description">Access accounting dashboard</p>
+						</div>
+					</SfButton>
+
+					<!-- Admin -->
+					<SfButton CssClass="dashboard-button btn-indigo" OnClick="NavigateToAdmin">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									stroke-linejoin="round">
+									<circle cx="12" cy="12" r="3" />
+									<path
+										d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+								</svg>
+							</div>
+							<h3 class="button-title">Admin</h3>
+							<p class="button-description">Access admin dashboard</p>
+						</div>
+					</SfButton>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<!-- Footer Section -->
+	<div class="footer-section">
+		<div class="footer-content">
+			<div class="device-info">
+				<span class="info-item version-info">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10" />
+						<line x1="12" y1="16" x2="12" y2="12" />
+						<line x1="12" y1="8" x2="12.01" y2="8" />
+					</svg>
+					Version @AppVersion
+				</span>
+				<span class="info-item platform-info">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+						<line x1="8" y1="21" x2="16" y2="21" />
+						<line x1="12" y1="17" x2="12" y2="21" />
+					</svg>
+					@Platform
+				</span>
+				<span class="info-item factor-info">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+						<line x1="12" y1="18" x2="12.01" y2="18" />
+					</svg>
+					@Factor
+				</span>
+			</div>
+			<p class="copyright">&copy; @DateTime.Now.Year A Product By <a href="https://aadisoft.vercel.app"
+					target="_blank" class="footer-link">AadiSoft</a>. All rights reserved.</p>
 		</div>
 	</div>
 }
 
 <style>
-	:root {
-		--primary-color: #e2137b;
-		--primary-dark: #c10e69;
-		--primary-light: #ff4d9f;
-		--secondary-color: #2c3e50;
-		--accent-color: #ffb3d1;
-		--light-bg: #fff5f9;
-		--dark-text: #2c3e50;
-		--success-color: #28a745;
-		--warning-color: #ffc107;
-		--danger-color: #dc3545;
-		--info-color: #17a2b8;
-		--gradient-error: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-		--gradient-device: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+	* {
+		box-sizing: border-box;
 	}
 
-	/* General Layout */
-	body {
-		margin: 0;
-		padding: 0;
-		background-color: var(--light-bg);
-		color: var(--dark-text);
-		overflow-x: hidden;
-	}
-
-	.dashboard-container {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-		padding: 20px;
-		background: linear-gradient(135deg, rgba(226, 19, 123, 0.05) 0%, rgba(193, 14, 105, 0.05) 100%);
-	}
-
-	/* Header Styles */
-	.dashboard-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 15px 25px;
-		background-color: white;
-		border-radius: 15px;
-		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-		margin-bottom: 30px;
-		border-left: 5px solid var(--primary-color);
-	}
-
-	.logo-section {
-		display: flex;
-		align-items: center;
-	}
-
-	.dashboard-logo {
-		width: 55px;
-		height: 55px;
-		border-radius: 50%;
-		margin-right: 15px;
-		border: 3px solid var(--accent-color);
-	}
-
-	.dashboard-title {
-		color: var(--primary-color);
-		font-size: 28px;
-		font-weight: 700;
-		margin: 0;
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-	}
-
-	.user-info {
-		display: flex;
-		align-items: center;
-		gap: 15px;
-	}
-
-	.user-name {
-		font-weight: 600;
-		color: var(--primary-dark);
-		font-size: 16px;
-	}
-
-	.logout-button {
-		background-color: transparent;
-		border: 2px solid var(--primary-color);
-		color: var(--primary-color);
-		padding: 10px 18px;
-		border-radius: 10px;
-		cursor: pointer;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		transition: all 0.3s ease;
-		font-size: 14px;
-	}
-
-	.logout-button:hover {
-		background-color: var(--primary-color);
-		color: white;
-		transform: translateY(-1px);
-	}
-
-	.logout-icon {
-		font-size: 16px;
-	}
-
-	/* Welcome Section */
-	.welcome-section {
-		text-align: center;
-		margin-bottom: 40px;
-		padding: 20px;
-		background-color: white;
-		border-radius: 15px;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-	}
-
-	.welcome-section h2 {
-		color: var(--primary-color);
-		margin-bottom: 10px;
-		font-size: 24px;
-		font-weight: 600;
-	}
-
-	.welcome-section p {
-		color: var(--dark-text);
-		opacity: 0.8;
-		font-size: 16px;
-		margin: 0;
-	}
-
-	/* Dashboard cards */
-	.dashboard-cards {
+	/* Professional Header Section */
+	.page-header {
+		position: sticky;
+		top: 0;
+		z-index: 1000;
+		background: #ffffff;
+		border-bottom: 2px solid #e2e8f0;
+		padding: 16px 32px;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 25px;
-		margin-bottom: 40px;
-	}
-
-	.dashboard-card {
-		background-color: white;
-		border-radius: 18px;
-		padding: 30px;
-		text-align: center;
-		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-		cursor: pointer;
-		transition: all 0.3s ease;
-		display: flex;
-		flex-direction: column;
+		grid-template-columns: 1fr auto 1fr;
 		align-items: center;
-		justify-content: center;
-		min-height: 220px;
-		border-left: 5px solid var(--accent-color);
-		position: relative;
-		overflow: hidden;
+		gap: 24px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+		min-height: 72px;
 	}
 
-	.dashboard-card::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 3px;
-		background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
-		transform: translateX(-100%);
-		transition: transform 0.3s ease;
-	}
-
-	.dashboard-card:hover::before {
-		transform: translateX(0);
-	}
-
-	.dashboard-card:hover {
-		transform: translateY(-8px);
-		box-shadow: 0 15px 35px rgba(226, 19, 123, 0.3);
-	}
-
-	.card-icon {
-		font-size: 45px;
-		margin-bottom: 20px;
-		width: 90px;
-		height: 90px;
+	.header-left {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-		margin: 0 auto 20px auto;
+		gap: 16px;
 	}
 
-	/* Custom icons with red theme */
-	.order-icon {
-		background-color: rgba(226, 19, 123, 0.1);
-		color: var(--primary-color);
-	}
-
-	.sales-icon {
-		background-color: rgba(193, 14, 105, 0.1);
-		color: var(--primary-dark);
-	}
-
-	.sale-return-icon {
-		background-color: rgba(220, 53, 69, 0.1);
-		color: #dc3545;
-	}
-
-	.inventory-icon {
-		background-color: rgba(255, 77, 159, 0.1);
-		color: var(--primary-light);
-	}
-
-	.accounts-icon {
-		background-color: rgba(40, 167, 69, 0.1);
-		color: var(--success-color);
-	}
-
-	.reports-icon {
-		background-color: rgba(23, 162, 184, 0.1);
-		color: var(--info-color);
-	}
-
-	.admin-icon {
-		background-color: rgba(255, 193, 7, 0.1);
-		color: #ff9800;
-	}
-
-	.admin-card {
-		background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
-		border-left: 5px solid #ff9800;
-	}
-
-	.admin-card:hover {
-		background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
-		box-shadow: 0 15px 35px rgba(255, 152, 0, 0.3);
-	}
-
-	.dashboard-card h3 {
-		color: var(--dark-text);
-		margin-bottom: 15px;
-		font-size: 20px;
-		font-weight: 600;
-	}
-
-	.dashboard-card p {
-		color: #666;
-		font-size: 14px;
-		margin: 0;
-		line-height: 1.4;
-	}
-
-	/* Device Information Card */
-	.device-info-card {
-		background-color: white;
-		border-radius: 15px;
-		padding: 25px;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-		margin-bottom: 20px;
-		position: relative;
-		overflow: hidden;
-		border-left: 5px solid var(--info-color);
-	}
-
-	.device-info-card::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 4px;
-		background: var(--gradient-device);
-	}
-
-	.device-info-header {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		margin-bottom: 20px;
-	}
-
-	.device-icon {
+	.header-logo {
 		width: 40px;
 		height: 40px;
-		background: var(--gradient-device);
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 20px;
-		color: white;
 		flex-shrink: 0;
 	}
 
-	.device-info-header h3 {
-		color: var(--dark-text);
+	.header-divider {
+		width: 1px;
+		height: 32px;
+		background: #e2e8f0;
+		flex-shrink: 0;
+	}
+
+	.header-text {
+		display: flex;
+		align-items: center;
+		font-size: 16px;
+		color: #0f172a;
+		font-weight: 600;
+	}
+
+	.app-name {
+		color: #0f172a;
+		font-weight: 600;
+		letter-spacing: 0.5px;
+	}
+
+	.header-center {
+		text-align: center;
+	}
+
+	.page-title {
 		font-size: 20px;
-		font-weight: 700;
+		font-weight: 600;
+		color: #0f172a;
 		margin: 0;
 		letter-spacing: -0.3px;
 	}
 
-	.device-info-grid {
+	.page-subtitle {
+		font-size: 13px;
+		color: #64748b;
+		margin: 4px 0 0 0;
+		font-weight: 400;
+	}
+
+	.header-right {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 12px;
+	}
+
+	.user-name {
+		font-size: 14px;
+		font-weight: 500;
+		color: #0f172a;
+		padding: 8px 12px;
+		background: #f8fafc;
+		border-radius: 8px;
+		border: 1px solid #e2e8f0;
+	}
+
+	.btn-icon {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid #e2e8f0;
+		background: #ffffff;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		color: #64748b;
+	}
+
+	.btn-icon:hover {
+		background: #f8fafc;
+		border-color: #3b82f6;
+		color: #3b82f6;
+	}
+
+	.btn-icon:active {
+		transform: scale(0.95);
+	}
+
+	.btn-icon-logout {
+		color: #ef4444;
+		border-color: #ef4444;
+	}
+
+	.btn-icon-logout:hover {
+		background: #fef2f2;
+		border-color: #dc2626;
+		color: #dc2626;
+	}
+
+	/* Dashboard Container */
+	.dashboard-container {
+		padding: 24px 32px;
+		max-width: 1920px;
+		margin: 0 auto;
+		background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+		min-height: calc(100vh - 72px);
+	}
+
+	/* Section Card */
+	.section-card {
+		background: #ffffff;
+		border-radius: 12px;
+		border: 1px solid #e2e8f0;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+		margin-bottom: 24px;
+		overflow: hidden;
+		transition: all 0.3s ease;
+	}
+
+	.section-card:hover {
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+	}
+
+	.section-header {
+		padding: 20px 24px;
+		border-bottom: 2px solid #e2e8f0;
+		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+	}
+
+	.section-title-wrapper {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 8px;
+	}
+
+	.section-icon {
+		color: #3b82f6;
+		flex-shrink: 0;
+	}
+
+	.section-title {
+		font-size: 18px;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0;
+		letter-spacing: -0.3px;
+	}
+
+	.section-subtitle {
+		font-size: 13px;
+		color: #64748b;
+		margin: 0;
+		padding-left: 34px;
+		font-weight: 400;
+	}
+
+	.section-body {
+		padding: 24px;
+	}
+
+	/* Dashboard Grid */
+	.dashboard-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 15px;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 16px;
+	}
+
+	/* Dashboard Button (SfButton) */
+	.dashboard-button {
+		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%) !important;
+		border: 2px solid #e2e8f0 !important;
+		border-radius: 10px !important;
+		padding: 16px !important;
+		cursor: pointer !important;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+		position: relative !important;
+		overflow: visible !important;
+		height: auto !important;
+		min-height: 120px !important;
+		text-align: left !important;
+	}
+
+	.dashboard-button::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+		transform: scaleX(0);
+		transition: transform 0.3s ease;
+		border-radius: 12px 12px 0 0;
+	}
+
+	.dashboard-button:hover {
+		transform: translateY(-4px) !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+		border-color: #3b82f6 !important;
+		background: #f8fafc !important;
+	}
+
+	.dashboard-button:hover::before {
+		transform: scaleX(1);
+	}
+
+	.dashboard-button:active {
+		transform: translateY(-2px) !important;
+		box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2) !important;
+	}
+
+	.dashboard-button:focus {
+		outline: 2px solid #3b82f6 !important;
+		outline-offset: 2px !important;
+	}
+
+	/* Button Content Structure */
+	.button-content {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		width: 100%;
+		height: 100%;
+	}
+
+	.button-icon-wrapper {
+		width: 48px;
+		height: 48px;
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 12px;
+		transition: all 0.3s ease;
+	}
+
+	.dashboard-button:hover .button-icon-wrapper {
+		transform: scale(1.1) rotate(5deg);
+	}
+
+	.button-icon-wrapper svg {
+		width: 28px;
+		height: 28px;
+	}
+
+	.button-title {
+		font-size: 14px;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0 0 6px 0;
+		letter-spacing: -0.3px;
+	}
+
+	.button-description {
+		font-size: 11px;
+		color: #64748b;
+		margin: 0;
+		line-height: 1.3;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		word-wrap: break-word;
+	}
+
+	/* Button Color Variations */
+	.btn-blue::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-blue .button-icon-wrapper {
+		background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+		color: #2563eb;
+	}
+
+	.btn-blue:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	.btn-green::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-green .button-icon-wrapper {
+		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+		color: #059669;
+	}
+
+	.btn-green:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	.btn-orange::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-orange .button-icon-wrapper {
+		background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+		color: #ea580c;
+	}
+
+	.btn-orange:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	.btn-purple::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-purple .button-icon-wrapper {
+		background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+		color: #9333ea;
+	}
+
+	.btn-purple:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	.btn-indigo::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-indigo .button-icon-wrapper {
+		background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+		color: #4f46e5;
+	}
+
+	.btn-indigo:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	/* Footer Section */
+	.footer-section {
+		background: #ffffff;
+		border-top: 2px solid #e2e8f0;
+		padding: 24px 32px;
+		text-align: center;
+		margin-top: auto;
+		box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.04);
+	}
+
+	.footer-content {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		align-items: center;
+	}
+
+	.device-info {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.info-item {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		padding: 15px;
-		background: linear-gradient(135deg, rgba(79, 172, 254, 0.05) 0%, rgba(0, 242, 254, 0.05) 100%);
-		border-radius: 10px;
-		border-left: 3px solid var(--accent-color);
-	}
-
-	.info-label {
-		font-size: 12px;
-		color: #666;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.info-value {
-		font-size: 16px;
-		color: var(--dark-text);
-		font-weight: 600;
-	}
-
-	/* Footer */
-	.dashboard-footer {
-		margin-top: auto;
-		text-align: center;
-		padding: 25px;
-		color: var(--primary-dark);
-		font-size: 14px;
-		background-color: white;
-		border-radius: 15px;
-		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-	}
-
-	.footer-link {
-		color: var(--primary-color);
-		text-decoration: none;
-		font-weight: 600;
-		transition: color 0.2s ease;
-	}
-
-	.footer-link:hover {
-		color: var(--primary-dark);
-		text-decoration: underline;
-	}
-
-	/* Loading Animation */
-	.loader-container {
-		display: flex;
-		flex-direction: column;
+		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		height: 100vh;
-		background-color: var(--light-bg);
-	}
-
-	.circular-dots-loader {
-		position: relative;
-		width: 70px;
-		height: 70px;
-		margin-bottom: 20px;
-	}
-
-	.circular-dots-loader .dot {
-		position: absolute;
-		width: 14px;
-		height: 14px;
-		border-radius: 50%;
-		animation: rotate 1.8s infinite linear;
-	}
-
-	.circular-dots-loader .dot-1 {
-		background-color: var(--primary-color);
-		animation-delay: 0s;
-	}
-
-	.circular-dots-loader .dot-2 {
-		background-color: var(--primary-dark);
-		animation-delay: -0.6s;
-	}
-
-	.circular-dots-loader .dot-3 {
-		background-color: var(--accent-color);
-		animation-delay: -1.2s;
-	}
-
-	.loading-text {
-		color: var(--dark-text);
-		font-size: 16px;
-		margin-top: 10px;
+		gap: 6px;
+		font-size: 13px;
+		color: #475569;
+		padding: 6px 12px;
+		background: #f8fafc;
+		border-radius: 6px;
+		border: 1px solid #e2e8f0;
 		font-weight: 500;
 	}
 
-	/* Error UI Styles - Compact version */
-	.error-container {
+	.info-item svg {
+		color: #64748b;
+		flex-shrink: 0;
+	}
+
+	.version-info {
+		background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+		color: #1e40af;
+		border-color: #93c5fd;
+	}
+
+	.version-info svg {
+		color: #2563eb;
+	}
+
+	.copyright {
+		margin: 0;
+		font-size: 14px;
+		color: #64748b;
+		font-weight: 400;
+	}
+
+	.footer-link {
+		color: #3b82f6;
+		text-decoration: none;
+		font-weight: 600;
+		transition: all 0.2s ease;
+	}
+
+	.footer-link:hover {
+		color: #2563eb;
+		text-decoration: underline;
+	}
+
+	/* Update Progress Overlay */
+	.update-overlay {
 		position: fixed;
 		top: 0;
 		left: 0;
-		width: 100vw;
-		height: 100vh;
-		background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(99, 102, 241, 0.95) 100%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		overflow: hidden;
-		z-index: 1000;
+		z-index: 10000;
+		animation: fadeIn 0.3s ease;
 	}
 
-	.error-card {
-		background: white;
-		border-radius: 24px;
+	.update-container {
+		background: #ffffff;
+		border-radius: 20px;
 		padding: 40px;
 		max-width: 500px;
 		width: 90%;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-		position: relative;
-		z-index: 1001;
-		animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-		text-align: center;
-	}
-
-	.error-header {
-		margin-bottom: 30px;
-	}
-
-	.error-icon-container {
-		display: flex;
-		justify-content: center;
-		margin-bottom: 20px;
-		position: relative;
-	}
-
-	.error-icon {
-		width: 80px;
-		height: 80px;
-		background: var(--gradient-error);
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 32px;
-		color: white;
-		animation: errorPulse 2s infinite;
-		position: relative;
-	}
-
-	.error-title {
-		font-size: 28px;
-		font-weight: 700;
-		color: var(--dark-text);
-		margin-bottom: 8px;
-		letter-spacing: -0.5px;
-	}
-
-	.error-subtitle {
-		color: #666;
-		font-size: 16px;
-		margin: 0;
-	}
-
-	.error-body {
-		margin-bottom: 30px;
-	}
-
-	.error-message {
-		background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, rgba(192, 57, 43, 0.05) 100%);
-		border-radius: 12px;
-		padding: 20px;
-		margin-bottom: 25px;
-		border-left: 4px solid #e74c3c;
-	}
-
-	.message-icon {
-		font-size: 24px;
-		margin-bottom: 10px;
-	}
-
-	.error-message h3 {
-		color: var(--dark-text);
-		font-size: 18px;
-		margin-bottom: 8px;
-		font-weight: 600;
-	}
-
-	.error-message p {
-		color: #666;
-		font-size: 14px;
-		line-height: 1.5;
-		margin: 0;
-	}
-
-	.retry-button {
-		background: var(--gradient-error);
-		color: white;
-		border: none;
-		padding: 14px 28px;
-		border-radius: 12px;
-		cursor: pointer;
-		font-weight: 600;
-		display: inline-flex;
-		align-items: center;
-		gap: 10px;
-		font-size: 16px;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-	}
-
-	.retry-button:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-	}
-
-	/* Update UI Styles - Compact version */
-	.update-container {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100vw;
-		height: 100vh;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		overflow: hidden;
-		z-index: 1000;
-	}
-
-	.update-card {
-		background: white;
-		border-radius: 24px;
-		padding: 40px;
-		max-width: 480px;
-		width: 90%;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-		position: relative;
-		z-index: 1001;
-		animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		animation: slideUp 0.4s ease;
 	}
 
 	.update-header {
 		text-align: center;
-		margin-bottom: 30px;
-	}
-
-	.update-icon-container {
-		display: flex;
-		justify-content: center;
-		margin-bottom: 20px;
+		margin-bottom: 32px;
 	}
 
 	.update-icon {
-		width: 80px;
-		height: 80px;
-		background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-		border-radius: 50%;
+		color: #3b82f6;
+		margin-bottom: 16px;
+		animation: rotate 2s linear infinite;
+	}
+
+	.update-title {
+		font-size: 24px;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0 0 8px 0;
+		letter-spacing: -0.5px;
+	}
+
+	.update-subtitle {
+		font-size: 14px;
+		color: #64748b;
+		margin: 0;
+		font-weight: 400;
+	}
+
+	.update-progress-section {
+		margin-bottom: 24px;
+	}
+
+	.progress-info {
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
-		justify-content: center;
-		font-size: 32px;
-		color: white;
-		animation: pulse 2s infinite;
+		margin-bottom: 12px;
+	}
+
+	.progress-label {
+		font-size: 14px;
+		color: #475569;
+		font-weight: 500;
+	}
+
+	.progress-percentage {
+		font-size: 20px;
+		font-weight: 700;
+		color: #3b82f6;
+		letter-spacing: -0.5px;
+	}
+
+	.progress-bar-container {
+		height: 12px;
+		background: #e2e8f0;
+		border-radius: 12px;
+		overflow: hidden;
+		margin-bottom: 12px;
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+	}
+
+	.progress-bar-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+		border-radius: 12px;
+		transition: width 0.3s ease;
 		position: relative;
 		overflow: hidden;
 	}
 
-	.progress-ring-container {
-		position: relative;
-		display: flex;
-		justify-content: center;
-		margin-bottom: 30px;
-	}
-
-	.progress-content {
+	.progress-bar-fill::after {
+		content: '';
 		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		text-align: center;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+		animation: shimmer 1.5s infinite;
 	}
 
-	.progress-percentage {
-		display: block;
-		font-size: 32px;
-		font-weight: 700;
-		color: var(--primary-color);
-		line-height: 1;
+	.time-remaining {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: #64748b;
+		justify-content: center;
 	}
 
-	/* Animations */
-	@@keyframes rotate {
-		0% {
-			transform: rotate(0deg) translate(-28px) rotate(0deg);
-		}
-
-		100% {
-			transform: rotate(360deg) translate(-28px) rotate(-360deg);
-		}
+	.time-remaining svg {
+		color: #94a3b8;
 	}
 
-	@@keyframes slideInUp {
-		from {
-			opacity: 0;
-			transform: translateY(30px);
-		}
-
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
+	.update-status {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		justify-content: center;
+		padding: 16px;
+		background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+		border-radius: 12px;
+		border: 1px solid #bae6fd;
 	}
 
-	@@keyframes pulse {
-
-		0%,
-		100% {
-			transform: scale(1);
-		}
-
-		50% {
-			transform: scale(1.05);
-		}
+	.status-dot {
+		width: 8px;
+		height: 8px;
+		background: #3b82f6;
+		border-radius: 50%;
+		animation: pulse 1.5s ease-in-out infinite;
 	}
 
-	@@keyframes errorPulse {
-
-		0%,
-		100% {
-			transform: scale(1);
-			box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
-		}
-
-		50% {
-			transform: scale(1.05);
-			box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
-		}
-	}
-
-	/* Responsive Design */
-	@@media (max-width: 768px) {
-		.dashboard-header {
-			flex-direction: column;
-			gap: 15px;
-			padding: 20px;
-		}
-
-		.dashboard-title {
-			font-size: 24px;
-		}
-
-		.dashboard-cards {
-			grid-template-columns: 1fr;
-			gap: 20px;
-		}
-
-		.dashboard-card {
-			min-height: 200px;
-			padding: 25px;
-		}
-
-		.card-icon {
-			font-size: 40px;
-			width: 80px;
-			height: 80px;
-		}
-
-		.device-info-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.dashboard-card h3 {
-			font-size: 18px;
-		}
-	}
-
-	@@media (max-width: 480px) {
-		.dashboard-container {
-			padding: 15px;
-		}
-
-		.dashboard-header {
-			padding: 15px;
-		}
-
-		.dashboard-title {
-			font-size: 20px;
-		}
-
-		.dashboard-card {
-			padding: 20px;
-		}
+	.update-status span {
+		font-size: 14px;
+		color: #0c4a6e;
+		font-weight: 500;
 	}
 </style>

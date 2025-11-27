@@ -1,0 +1,626 @@
+/* ============================================ */
+/* RESPONSIVE DESIGN - MOBILE FIRST */
+/* ============================================ */
+
+/* Extra Small Devices (Portrait Phones, < 576px) */
+@media (max-width: 575.98px) {
+  ::deep .page-header {
+    padding: 12px 16px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    min-height: auto;
+  }
+
+  ::deep .header-left {
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  ::deep .header-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  ::deep .header-divider {
+    display: none;
+  }
+
+  ::deep .header-text {
+    font-size: 14px;
+  }
+
+  ::deep .header-center {
+    display: none;
+  }
+
+  ::deep .header-right {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    gap: 8px;
+  }
+
+  ::deep .user-name {
+    display: none;
+  }
+
+  ::deep .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  ::deep .dashboard-container {
+    padding: 12px;
+    min-height: calc(100vh - 56px);
+  }
+
+  ::deep .section-card {
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
+  ::deep .section-header {
+    padding: 12px 16px;
+  }
+
+  ::deep .section-title-wrapper {
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  ::deep .section-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  ::deep .section-title {
+    font-size: 16px;
+  }
+
+  ::deep .section-subtitle {
+    font-size: 12px;
+    padding-left: 26px;
+  }
+
+  ::deep .section-body {
+    padding: 12px;
+  }
+
+  /* 2 buttons side by side on mobile */
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  ::deep .dashboard-button {
+    min-height: 110px !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+  }
+
+  ::deep .button-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+  }
+
+  ::deep .button-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  ::deep .button-title {
+    font-size: 13px;
+    margin: 0 0 4px 0;
+  }
+
+  ::deep .button-description {
+    font-size: 10px;
+  }
+
+  ::deep .footer-section {
+    padding: 16px 12px;
+  }
+
+  ::deep .copyright {
+    font-size: 11px;
+  }
+
+  /* Hide platform and factor on very small screens, show only version */
+  ::deep .platform-info,
+  ::deep .factor-info {
+    display: none;
+  }
+
+  ::deep .version-info {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  ::deep .footer-content {
+    gap: 12px;
+  }
+
+  ::deep .device-info {
+    gap: 8px;
+  }
+}
+
+/* Small Devices (Landscape Phones, 576px - 767.98px) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  ::deep .page-header {
+    padding: 14px 20px;
+    gap: 16px;
+  }
+
+  ::deep .header-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  ::deep .header-text {
+    font-size: 15px;
+  }
+
+  ::deep .page-title {
+    font-size: 18px;
+  }
+
+  ::deep .page-subtitle {
+    font-size: 12px;
+  }
+
+  ::deep .user-name {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  ::deep .dashboard-container {
+    padding: 16px;
+  }
+
+  ::deep .section-card {
+    margin-bottom: 18px;
+  }
+
+  ::deep .section-header {
+    padding: 16px 20px;
+  }
+
+  ::deep .section-body {
+    padding: 16px;
+  }
+
+  /* 2-3 buttons per row on small tablets */
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+  }
+
+  ::deep .dashboard-button {
+    min-height: 115px !important;
+    padding: 14px !important;
+  }
+
+  ::deep .footer-section {
+    padding: 20px 16px;
+  }
+
+  ::deep .copyright {
+    font-size: 13px;
+  }
+
+  /* Show version and platform, hide factor */
+  ::deep .platform-info {
+    display: inline-flex;
+  }
+
+  ::deep .factor-info {
+    display: none;
+  }
+
+  ::deep .info-item {
+    font-size: 12px;
+    padding: 5px 11px;
+  }
+
+  /* Update overlay adjustments */
+  ::deep .update-container {
+    padding: 28px;
+  }
+
+  ::deep .update-icon {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Medium Devices (Tablets, 768px - 991.98px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  ::deep .page-header {
+    padding: 16px 24px;
+  }
+
+  ::deep .user-name {
+    font-size: 13px;
+    padding: 7px 11px;
+  }
+
+  ::deep .dashboard-container {
+    padding: 20px;
+  }
+
+  ::deep .section-card {
+    margin-bottom: 20px;
+  }
+
+  /* 3-4 buttons per row on tablets */
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  ::deep .dashboard-button {
+    min-height: 118px !important;
+  }
+
+  ::deep .footer-section {
+    padding: 22px 20px;
+  }
+
+  /* Show all device info on tablets and above */
+  ::deep .platform-info,
+  ::deep .factor-info {
+    display: inline-flex;
+  }
+}
+
+/* Large Devices (Desktops, 992px - 1199.98px) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  ::deep .dashboard-container {
+    padding: 24px 28px;
+  }
+
+  /* 4-5 buttons per row on small desktops */
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+}
+
+/* Extra Large Devices (Large Desktops, 1200px - 1399.98px) */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  ::deep .dashboard-container {
+    padding: 24px 32px;
+  }
+
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* XXL Devices (Extra Large Desktops, >= 1400px) */
+@media (min-width: 1400px) {
+  ::deep .dashboard-container {
+    padding: 32px 40px;
+  }
+
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+  }
+}
+
+/* Landscape Orientation for Mobile Devices */
+@media (max-width: 767.98px) and (orientation: landscape) {
+  ::deep .page-header {
+    padding: 8px 16px;
+    min-height: 50px;
+  }
+
+  ::deep .header-center {
+    display: block;
+  }
+
+  ::deep .page-title {
+    font-size: 16px;
+  }
+
+  ::deep .page-subtitle {
+    display: none;
+  }
+
+  ::deep .dashboard-container {
+    padding: 12px;
+    min-height: calc(100vh - 50px);
+  }
+
+  /* 3-4 buttons per row in landscape */
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  ::deep .dashboard-button {
+    min-height: 100px !important;
+    padding: 10px !important;
+  }
+
+  ::deep .button-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 6px;
+  }
+
+  ::deep .button-icon-wrapper svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  ::deep .button-title {
+    font-size: 12px;
+  }
+
+  ::deep .button-description {
+    font-size: 9px;
+  }
+
+  /* Version only in landscape */
+  ::deep .platform-info,
+  ::deep .factor-info {
+    display: none;
+  }
+
+  ::deep .version-info {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  /* Update overlay in landscape */
+  ::deep .update-container {
+    padding: 20px;
+    max-width: 400px;
+  }
+
+  ::deep .update-title {
+    font-size: 18px;
+  }
+
+  ::deep .update-subtitle {
+    font-size: 12px;
+  }
+
+  ::deep .progress-percentage {
+    font-size: 16px;
+  }
+}
+
+/* Very Small Screens (< 360px) */
+@media (max-width: 359.98px) {
+  ::deep .page-header {
+    padding: 10px 12px;
+  }
+
+  ::deep .header-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  ::deep .header-text {
+    font-size: 13px;
+  }
+
+  ::deep .app-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  ::deep .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  ::deep .btn-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  ::deep .dashboard-container {
+    padding: 10px;
+  }
+
+  ::deep .section-card {
+    margin-bottom: 12px;
+  }
+
+  ::deep .section-header {
+    padding: 10px 12px;
+  }
+
+  ::deep .section-body {
+    padding: 10px;
+  }
+
+  ::deep .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  ::deep .dashboard-button {
+    min-height: 100px !important;
+    padding: 10px !important;
+  }
+
+  ::deep .button-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  ::deep .button-icon-wrapper svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  ::deep .button-title {
+    font-size: 12px;
+  }
+
+  ::deep .button-description {
+    font-size: 9px;
+  }
+
+  ::deep .footer-section {
+    padding: 12px 10px;
+  }
+
+  ::deep .copyright {
+    font-size: 10px;
+  }
+
+  /* Version only on very small screens */
+  ::deep .platform-info,
+  ::deep .factor-info {
+    display: none;
+  }
+
+  ::deep .version-info {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  ::deep .info-item svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Update overlay responsive */
+  ::deep .update-container {
+    padding: 24px;
+    width: 95%;
+  }
+
+  ::deep .update-title {
+    font-size: 20px;
+  }
+
+  ::deep .update-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  ::deep .progress-percentage {
+    font-size: 18px;
+  }
+}
+
+/* High DPI / Retina Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  ::deep .dashboard-button {
+    border-width: 1.5px !important;
+  }
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  ::deep .dashboard-button:hover {
+    transform: none !important;
+  }
+
+  ::deep .dashboard-button:hover .button-icon-wrapper {
+    transform: none !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  ::deep .page-header {
+    position: relative;
+    box-shadow: none;
+    border-bottom: 1px solid #000;
+  }
+
+  ::deep .header-right {
+    display: none;
+  }
+
+  ::deep .dashboard-container {
+    background: white;
+    padding: 0;
+  }
+
+  ::deep .section-card {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+
+  ::deep .dashboard-button {
+    box-shadow: none !important;
+  }
+
+  ::deep .dashboard-button:hover {
+    transform: none !important;
+  }
+
+  ::deep .footer-section {
+    box-shadow: none;
+  }
+}
+
+/* Animations for Update Progress */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
