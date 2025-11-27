@@ -17,6 +17,7 @@ public partial class SalesDashboard
 
 		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales, true);
         _isLoading = false;
+        StateHasChanged();
     }
 
     #region Sales Operations Navigation

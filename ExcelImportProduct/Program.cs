@@ -1486,6 +1486,8 @@ static async Task FixLedgers()
 			ledger.CINNo = null;
 
 		await LedgerData.InsertLedger(ledger);
+
+		Console.WriteLine("Fixed Ledger Id: " + ledger.Id);
 	}
 }
 

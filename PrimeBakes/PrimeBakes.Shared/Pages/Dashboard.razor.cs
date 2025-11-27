@@ -20,8 +20,11 @@ public partial class Dashboard : IDisposable
     private DateTime _updateStartTime;
 
     #region Device Info
-    private string Factor => FormFactor.GetFormFactor();
-    private string Platform => FormFactor.GetPlatform();
+    private string Factor =>
+        FormFactor.GetFormFactor();
+
+    private string Platform =>
+        FormFactor.GetPlatform();
 
     private static string AppVersion =>
         Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
@@ -60,16 +63,14 @@ public partial class Dashboard : IDisposable
             InvokeAsync(StateHasChanged);
         });
 
-        await UpdateService.UpdateAppAsync("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes", progress);
+        // await UpdateService.UpdateAppAsync("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes", progress);
 
         _isUpdating = false;
         StateHasChanged();
     }
 
-    public void Dispose()
-    {
+    public void Dispose() =>
         _progressTimer?.Dispose();
-    }
     #endregion
 
     #region Load Data
