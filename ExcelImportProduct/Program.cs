@@ -3,10 +3,12 @@
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
@@ -59,7 +61,9 @@ using PrimeBakesLibrary.Models.Sales.Sale;
 
 // await FixMasterNames();
 
-await FixLedgers();
+// await FixLedgers();
+
+await RecalculateTransactions();
 
 // await UpdateAccounts();
 
@@ -961,703 +965,717 @@ Console.ReadLine();
 //}
 //}
 
+//static async Task InsertReturns(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+//{
+//	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+//	var row = 2;
+
+//	List<SaleReturnOldModel> saleReturn = [];
+//	List<SaleReturnDetailOldModel> saleReturnDetails = [];
+
+//	while (worksheet1.Cells[row, 1].Value != null)
+//	{
+//		var id = worksheet1.Cells[row, 1].Value.ToString();
+//		var billNo = worksheet1.Cells[row, 2].Value.ToString();
+//		var discPercent = worksheet1.Cells[row, 3].Value.ToString();
+//		var rounfOff = worksheet1.Cells[row, 5].Value.ToString();
+//		var userId = worksheet1.Cells[row, 7].Value.ToString();
+//		var billDateTime = worksheet1.Cells[row, 9].Value.ToString();
+//		var partyId = worksheet1.Cells[row, 10].Value.ToString();
+//		var cash = worksheet1.Cells[row, 11].Value.ToString();
+//		var card = worksheet1.Cells[row, 12].Value.ToString();
+//		var upi = worksheet1.Cells[row, 13].Value.ToString();
+//		var credit = worksheet1.Cells[row, 14].Value.ToString();
+//		var status = worksheet1.Cells[row, 17].Value.ToString();
+
+//		saleReturn.Add(new()
+//		{
+//			Id = int.Parse(id),
+//			BillNo = billNo,
+//			PartyId = partyId == "NULL" ? null : int.Parse(partyId),
+//			SaleReturnDateTime = DateTime.Parse(billDateTime),
+//			Card = decimal.Parse(card),
+//			Cash = decimal.Parse(cash),
+//			Credit = decimal.Parse(credit),
+//			CustomerId = null,
+//			DiscPercent = decimal.Parse(discPercent),
+//			DiscReason = null,
+//			LocationId = 1,
+//			RoundOff = decimal.Parse(rounfOff),
+//			UPI = decimal.Parse(upi),
+//			Remarks = null,
+//			UserId = int.Parse(userId),
+//			CreatedAt = DateTime.Now,
+//			Status = status.ToLower() == "1",
+//		});
+
+//		row++;
+//	}
+
+//	saleReturn.RemoveAll(_ => _.Status == false);
+
+//	row = 2;
+//	while (worksheet2.Cells[row, 1].Value != null)
+//	{
+//		var id = worksheet2.Cells[row, 1].Value.ToString();
+//		var saleReturnId = worksheet2.Cells[row, 2].Value.ToString();
+//		var productId = worksheet2.Cells[row, 3].Value.ToString();
+//		var quantity = worksheet2.Cells[row, 4].Value.ToString();
+//		var rate = worksheet2.Cells[row, 5].Value.ToString();
+//		var baseTotal = worksheet2.Cells[row, 6].Value.ToString();
+//		var discPercent = worksheet2.Cells[row, 7].Value.ToString();
+//		var discAmount = worksheet2.Cells[row, 8].Value.ToString();
+//		var afterDiscount = worksheet2.Cells[row, 9].Value.ToString();
+//		var cgstPercent = worksheet2.Cells[row, 10].Value.ToString();
+//		var cgstAmount = worksheet2.Cells[row, 11].Value.ToString();
+//		var sgstPercent = worksheet2.Cells[row, 12].Value.ToString();
+//		var sgstAmount = worksheet2.Cells[row, 13].Value.ToString();
+//		var igstPercent = worksheet2.Cells[row, 14].Value.ToString();
+//		var igstAmount = worksheet2.Cells[row, 15].Value.ToString();
+//		var total = worksheet2.Cells[row, 16].Value.ToString();
+//		var netRate = worksheet2.Cells[row, 17].Value.ToString();
+//		var status = worksheet2.Cells[row, 18].Value.ToString();
+
+//		saleReturnDetails.Add(new()
+//		{
+//			Id = int.Parse(id),
+//			SaleReturnId = int.Parse(saleReturnId),
+//			ProductId = int.Parse(productId),
+//			Quantity = decimal.Parse(quantity),
+//			Rate = decimal.Parse(rate),
+//			BaseTotal = decimal.Parse(baseTotal),
+//			DiscPercent = decimal.Parse(discPercent),
+//			DiscAmount = decimal.Parse(discAmount),
+//			AfterDiscount = decimal.Parse(afterDiscount),
+//			CGSTPercent = decimal.Parse(cgstPercent),
+//			CGSTAmount = decimal.Parse(cgstAmount),
+//			SGSTPercent = decimal.Parse(sgstPercent),
+//			SGSTAmount = decimal.Parse(sgstAmount),
+//			IGSTPercent = decimal.Parse(igstPercent),
+//			IGSTAmount = decimal.Parse(igstAmount),
+//			NetRate = decimal.Parse(netRate),
+//			Total = decimal.Parse(total),
+//			Status = status.ToLower() == "1",
+//		});
+
+//		row++;
+//	}
+
+//	saleReturnDetails.RemoveAll(_ => _.Status == false);
+
+//	Console.WriteLine("Loaded " + saleReturn.Count + " kitchen issues.");
+//	Console.WriteLine("Loaded " + saleReturnDetails.Count + " kitchen issue details.");
+
+//	foreach (var issue in saleReturn)
+//	{
+//		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
+
+//		var kitchenIssueDetail = saleReturnDetails.Where(pd => pd.SaleReturnId == issue.Id).ToList();
+//		if (kitchenIssueDetail.Count == 0)
+//		{
+//			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
+//			continue;
+//		}
+//		List<SaleReturnItemCartModel> returnCart = [];
+
+//		foreach (var detail in kitchenIssueDetail)
+//			returnCart.Add(new()
+//			{
+//				ItemId = detail.ProductId,
+//				ItemName = "",
+//				Remarks = null,
+//				Quantity = detail.Quantity,
+//				Rate = detail.Rate,
+//				BaseTotal = detail.BaseTotal,
+//				DiscountPercent = detail.DiscPercent,
+//				DiscountAmount = detail.DiscAmount,
+//				CGSTPercent = detail.CGSTPercent,
+//				CGSTAmount = detail.CGSTAmount,
+//				SGSTPercent = detail.SGSTPercent,
+//				SGSTAmount = detail.SGSTAmount,
+//				IGSTPercent = detail.IGSTPercent,
+//				IGSTAmount = detail.IGSTAmount,
+//				AfterDiscount = detail.AfterDiscount,
+//				TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
+//				InclusiveTax = false,
+//				Total = detail.Total,
+//				NetRate = detail.NetRate,
+//			});
+
+
+//		SaleReturnModel finalIssue = new()
+//		{
+//			Id = 0,
+//			TransactionNo = issue.BillNo,
+//			CustomerId = null,
+//			ItemsTotalAmount = returnCart.Sum(x => x.Total),
+//			OtherChargesPercent = 0,
+//			OtherChargesAmount = 0,
+//			LocationId = 1,
+//			PartyId = issue.PartyId,
+//			RoundOffAmount = issue.RoundOff,
+//			DiscountPercent = issue.DiscPercent,
+//			DiscountAmount = returnCart.Sum(x => x.Total) * (issue.DiscPercent / 100),
+//			TransactionDateTime = issue.SaleReturnDateTime,
+//			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
+//			CreatedBy = issue.UserId,
+//			TotalAmount = issue.Cash + issue.Card + issue.Credit + issue.UPI,
+//			Card = issue.Card,
+//			Cash = issue.Cash,
+//			Credit = issue.Credit,
+//			UPI = issue.UPI,
+//			CompanyId = 1,
+//			FinancialYearId = 1,
+//			CreatedFromPlatform = "ImportScript",
+//			CreatedAt = issue.CreatedAt,
+//			Status = true,
+//		};
+
+//		if (finalIssue.Credit > 0 && finalIssue.PartyId is null)
+//		{
+//			finalIssue.Cash += finalIssue.Credit;
+//			finalIssue.Credit = 0;
+//		}
+//		await SaleReturnData.SaveSaleReturnTransaction(finalIssue, returnCart);
+//		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+//	}
+//}
+
+//static async Task InsertSales(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+//{
+//	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+//	var row = 2;
+
+//	List<SaleOldModel> sale = [];
+//	List<SaleDetailOldModel> saleDetails = [];
+
+//	while (worksheet1.Cells[row, 1].Value != null)
+//	{
+//		var id = worksheet1.Cells[row, 1].Value.ToString();
+//		var billNo = worksheet1.Cells[row, 2].Value.ToString();
+//		var discPercent = worksheet1.Cells[row, 3].Value.ToString();
+//		var rounfOff = worksheet1.Cells[row, 5].Value.ToString();
+//		var userId = worksheet1.Cells[row, 7].Value.ToString();
+//		var locationId = worksheet1.Cells[row, 8].Value.ToString();
+//		var billDateTime = worksheet1.Cells[row, 9].Value.ToString();
+//		var partyId = worksheet1.Cells[row, 10].Value.ToString();
+//		var orderId = worksheet1.Cells[row, 11].Value.ToString();
+//		var cash = worksheet1.Cells[row, 12].Value.ToString();
+//		var card = worksheet1.Cells[row, 13].Value.ToString();
+//		var upi = worksheet1.Cells[row, 14].Value.ToString();
+//		var credit = worksheet1.Cells[row, 15].Value.ToString();
+//		var customerId = worksheet1.Cells[row, 16].Value.ToString();
+//		var status = worksheet1.Cells[row, 18].Value.ToString();
+
+//		sale.Add(new()
+//		{
+//			Id = int.Parse(id),
+//			BillNo = billNo,
+//			PartyId = partyId == "NULL" ? null : int.Parse(partyId),
+//			OrderId = orderId == "NULL" ? null : int.Parse(orderId),
+//			SaleDateTime = DateTime.Parse(billDateTime),
+//			Card = decimal.Parse(card),
+//			Cash = decimal.Parse(cash),
+//			Credit = decimal.Parse(credit),
+//			CustomerId = customerId == "NULL" ? null : int.Parse(customerId),
+//			DiscPercent = decimal.Parse(discPercent),
+//			DiscReason = null,
+//			LocationId = int.Parse(locationId),
+//			RoundOff = decimal.Parse(rounfOff),
+//			UPI = decimal.Parse(upi),
+//			Remarks = null,
+//			UserId = int.Parse(userId),
+//			CreatedAt = DateTime.Now,
+//			Status = status.ToLower() == "1",
+//		});
+
+//		row++;
+//	}
+
+//	sale.RemoveAll(_ => _.Status == false);
+
+//	row = 2;
+//	while (worksheet2.Cells[row, 1].Value != null)
+//	{
+//		var id = worksheet2.Cells[row, 1].Value.ToString();
+//		var saleId = worksheet2.Cells[row, 2].Value.ToString();
+//		var productId = worksheet2.Cells[row, 3].Value.ToString();
+//		var quantity = worksheet2.Cells[row, 4].Value.ToString();
+//		var rate = worksheet2.Cells[row, 5].Value.ToString();
+//		var baseTotal = worksheet2.Cells[row, 6].Value.ToString();
+//		var discPercent = worksheet2.Cells[row, 7].Value.ToString();
+//		var discAmount = worksheet2.Cells[row, 8].Value.ToString();
+//		var afterDiscount = worksheet2.Cells[row, 9].Value.ToString();
+//		var cgstPercent = worksheet2.Cells[row, 10].Value.ToString();
+//		var cgstAmount = worksheet2.Cells[row, 11].Value.ToString();
+//		var sgstPercent = worksheet2.Cells[row, 12].Value.ToString();
+//		var sgstAmount = worksheet2.Cells[row, 13].Value.ToString();
+//		var igstPercent = worksheet2.Cells[row, 14].Value.ToString();
+//		var igstAmount = worksheet2.Cells[row, 15].Value.ToString();
+//		var total = worksheet2.Cells[row, 16].Value.ToString();
+//		var netRate = worksheet2.Cells[row, 17].Value.ToString();
+//		var status = worksheet2.Cells[row, 18].Value.ToString();
+
+//		saleDetails.Add(new()
+//		{
+//			Id = int.Parse(id),
+//			SaleId = int.Parse(saleId),
+//			ProductId = int.Parse(productId),
+//			Quantity = decimal.Parse(quantity),
+//			Rate = decimal.Parse(rate),
+//			BaseTotal = decimal.Parse(baseTotal),
+//			DiscPercent = decimal.Parse(discPercent),
+//			DiscAmount = decimal.Parse(discAmount),
+//			AfterDiscount = decimal.Parse(afterDiscount),
+//			CGSTPercent = decimal.Parse(cgstPercent),
+//			CGSTAmount = decimal.Parse(cgstAmount),
+//			SGSTPercent = decimal.Parse(sgstPercent),
+//			SGSTAmount = decimal.Parse(sgstAmount),
+//			IGSTPercent = decimal.Parse(igstPercent),
+//			IGSTAmount = decimal.Parse(igstAmount),
+//			NetRate = decimal.Parse(netRate),
+//			Total = decimal.Parse(total),
+//			Status = status.ToLower() == "1",
+//		});
+
+//		row++;
+//	}
+
+//	saleDetails.RemoveAll(_ => _.Status == false);
+
+//	Console.WriteLine("Loaded " + sale.Count + " kitchen issues.");
+//	Console.WriteLine("Loaded " + saleDetails.Count + " kitchen issue details.");
+
+//	foreach (var issue in sale)
+//	{
+//		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
+
+//		var kitchenIssueDetail = saleDetails.Where(pd => pd.SaleId == issue.Id).ToList();
+//		if (kitchenIssueDetail.Count == 0)
+//		{
+//			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
+//			continue;
+//		}
+//		List<SaleItemCartModel> returnCart = [];
+
+//		foreach (var detail in kitchenIssueDetail)
+//			returnCart.Add(new()
+//			{
+//				ItemId = detail.ProductId,
+//				ItemName = "",
+//				Remarks = null,
+//				Quantity = detail.Quantity,
+//				Rate = detail.Rate,
+//				BaseTotal = detail.BaseTotal,
+//				DiscountPercent = detail.DiscPercent,
+//				DiscountAmount = detail.DiscAmount,
+//				CGSTPercent = detail.CGSTPercent,
+//				CGSTAmount = detail.CGSTAmount,
+//				SGSTPercent = detail.SGSTPercent,
+//				SGSTAmount = detail.SGSTAmount,
+//				IGSTPercent = detail.IGSTPercent,
+//				IGSTAmount = detail.IGSTAmount,
+//				AfterDiscount = detail.AfterDiscount,
+//				TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
+//				InclusiveTax = false,
+//				Total = detail.Total,
+//				NetRate = detail.NetRate,
+//			});
+
+
+//		SaleModel finalIssue = new()
+//		{
+//			Id = 0,
+//			TransactionNo = issue.BillNo,
+//			CustomerId = issue.CustomerId,
+//			ItemsTotalAmount = returnCart.Sum(x => x.Total),
+//			OtherChargesPercent = 0,
+//			OtherChargesAmount = 0,
+//			OrderId = issue.OrderId,
+//			LocationId = issue.LocationId,
+//			PartyId = issue.PartyId,
+//			RoundOffAmount = issue.RoundOff,
+//			DiscountPercent = issue.DiscPercent,
+//			DiscountAmount = returnCart.Sum(x => x.Total) * (issue.DiscPercent / 100),
+//			TransactionDateTime = issue.SaleDateTime,
+//			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
+//			CreatedBy = issue.UserId,
+//			TotalAmount = issue.Cash + issue.Card + issue.Credit + issue.UPI,
+//			Card = issue.Card,
+//			Cash = issue.Cash,
+//			Credit = issue.Credit,
+//			UPI = issue.UPI,
+//			CompanyId = 1,
+//			FinancialYearId = 1,
+//			CreatedFromPlatform = "ImportScript",
+//			CreatedAt = issue.CreatedAt,
+//			Status = true,
+//		};
+
+//		finalIssue.TransactionNo = await GenerateCodes.GenerateSaleTransactionNo(finalIssue);
+
+//		if (finalIssue.Credit > 0 && finalIssue.PartyId is null)
+//		{
+//			finalIssue.Cash += finalIssue.Credit;
+//			finalIssue.Credit = 0;
+//		}
+//		await SaleData.SaveSaleTransaction(finalIssue, returnCart);
+//		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+//	}
+//}
+
+//static async Task InsertOrder(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+//{
+//	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+//	var row = 2;
+
+//	List<OrderModelOld> orders = [];
+//	List<OrderDetailModelOld> orderDetails = [];
+
+//	while (worksheet1.Cells[row, 1].Value != null)
+//	{
+//		var id = worksheet1.Cells[row, 1].Value.ToString();
+//		var billNo = worksheet1.Cells[row, 2].Value.ToString();
+//		var billDateTime = worksheet1.Cells[row, 3].Value.ToString();
+//		var locationId = worksheet1.Cells[row, 4].Value.ToString();
+//		var userId = worksheet1.Cells[row, 5].Value.ToString();
+//		var saleId = worksheet1.Cells[row, 7].Value.ToString();
+//		var status = worksheet1.Cells[row, 9].Value.ToString();
+
+
+//		orders.Add(new()
+//		{
+//			Id = int.Parse(id),
+//			OrderNo = billNo,
+//			OrderDateTime = DateTime.Parse(billDateTime),
+//			LocationId = int.Parse(locationId),
+//			UserId = int.Parse(userId),
+//			Remarks = "",
+//			SaleId = saleId == "NULL" ? null : int.Parse(saleId),
+//			CreatedAt = DateTime.Now,
+//			Status = status.ToLower() == "1",
+//		});
+
+//		row++;
+//	}
+
+//	orders.RemoveAll(_ => _.Status == false);
+
+//	row = 2;
+//	while (worksheet2.Cells[row, 1].Value != null)
+//	{
+//		var id = worksheet2.Cells[row, 1].Value.ToString();
+//		var orderId = worksheet2.Cells[row, 2].Value.ToString();
+//		var productId = worksheet2.Cells[row, 3].Value.ToString();
+//		var quantity = worksheet2.Cells[row, 4].Value.ToString();
+//		var status = worksheet2.Cells[row, 5].Value.ToString();
+
+//		orderDetails.Add(new()
+//		{
+//			Id = int.Parse(id),
+//			OrderId = int.Parse(orderId),
+//			ProductId = int.Parse(productId),
+//			Quantity = decimal.Parse(quantity),
+//			Status = status.ToLower() == "1",
+//		});
+
+//		row++;
+//	}
+
+//	orderDetails.RemoveAll(_ => _.Status == false);
+
+//	Console.WriteLine("Loaded " + orders.Count + " kitchen issues.");
+//	Console.WriteLine("Loaded " + orderDetails.Count + " kitchen issue details.");
+
+//	foreach (var issue in orders)
+//	{
+//		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
+
+//		var kitchenIssueDetail = orderDetails.Where(pd => pd.OrderId == issue.Id).ToList();
+//		if (kitchenIssueDetail.Count == 0)
+//		{
+//			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
+//			continue;
+//		}
+//		List<OrderItemCartModel> returnCart = [];
+
+//		foreach (var detail in kitchenIssueDetail)
+//			returnCart.Add(new()
+//			{
+//				ItemId = detail.ProductId,
+//				ItemName = "",
+//				Remarks = null,
+//				Quantity = detail.Quantity,
+//			});
+
+
+//		OrderModel finalIssue = new()
+//		{
+//			Id = 0,
+//			SaleId = issue.SaleId,
+//			TransactionNo = issue.OrderNo,
+//			LocationId = issue.LocationId,
+//			TransactionDateTime = issue.OrderDateTime,
+//			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
+//			CreatedBy = issue.UserId,
+//			CompanyId = 1,
+//			FinancialYearId = 1,
+//			CreatedFromPlatform = "ImportScript",
+//			CreatedAt = issue.CreatedAt,
+//			Status = true,
+//		};
+
+//		finalIssue.TransactionNo = await GenerateCodes.GenerateOrderTransactionNo(finalIssue);
+
+//		finalIssue.Id = await OrderData.SaveOrderTransaction(finalIssue, returnCart);
+
+//		if (finalIssue.SaleId is not null && finalIssue.SaleId > 0)
+//		{
+//			var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, finalIssue.SaleId.Value);
+//			if (sale is not null)
+//			{
+//				sale.OrderId = finalIssue.Id;
+//				await SaleData.InsertSale(sale);
+//			}
+//		}
+
+//		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
+//	}
+//}
+
+//static async Task FixMasterNames()
+//{
+//	var products = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+
+//	products = products.Where(p => p.Name.EndsWith("&#X20;")).ToList();
+
+//	foreach (var product in products)
+//	{
+//		product.Name = product.Name.Replace("&#X20;", " ").TrimEnd();
+//		await LedgerData.InsertLedger(product);
+//	}
+//}
+
+//static async Task FixLedgers()
+//{
+//	var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
+
+//	foreach (var ledger in ledgers)
+//	{
+//		if (string.IsNullOrWhiteSpace(ledger.GSTNo?.Trim()))
+//			ledger.GSTNo = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.PANNo?.Trim()))
+//			ledger.PANNo = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.Phone?.Trim()))
+//			ledger.Phone = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.Email?.Trim()))
+//			ledger.Email = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.Address?.Trim()))
+//			ledger.Address = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.Remarks?.Trim()))
+//			ledger.Remarks = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.Alias?.Trim()))
+//			ledger.Alias = null;
+
+//		if (string.IsNullOrWhiteSpace(ledger.CINNo?.Trim()))
+//			ledger.CINNo = null;
+
+//		await LedgerData.InsertLedger(ledger);
+
+//		Console.WriteLine("Fixed Ledger Id: " + ledger.Id);
+//	}
+//}
+
+//class PurchaseModelOld
+//{
+//	public int Id { get; set; }
+//	public string BillNo { get; set; }
+//	public int SupplierId { get; set; }
+//	public DateTime BillDateTime { get; set; }
+//	public decimal CDPercent { get; set; }
+//	public decimal RoundOff { get; set; }
+//	public string Remarks { get; set; }
+//	public int UserId { get; set; }
+//	public DateTime CreatedAt { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class PurchaseDetailModelOld
+//{
+//	public int Id { get; set; }
+//	public int PurchaseId { get; set; }
+//	public int RawMaterialId { get; set; }
+//	public decimal Quantity { get; set; }
+//	public string MeasurementUnit { get; set; }
+//	public decimal Rate { get; set; }
+//	public decimal BaseTotal { get; set; }
+//	public decimal DiscPercent { get; set; }
+//	public decimal DiscAmount { get; set; }
+//	public decimal AfterDiscount { get; set; }
+//	public decimal CGSTPercent { get; set; }
+//	public decimal CGSTAmount { get; set; }
+//	public decimal SGSTPercent { get; set; }
+//	public decimal SGSTAmount { get; set; }
+//	public decimal IGSTPercent { get; set; }
+//	public decimal IGSTAmount { get; set; }
+//	public decimal Total { get; set; }
+//	public decimal NetRate { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class KitchenIssueOldModel
+//{
+//	public int Id { get; set; }
+//	public int KitchenId { get; set; }
+//	public int LocationId { get; set; }
+//	public int UserId { get; set; }
+//	public string TransactionNo { get; set; }
+//	public DateTime IssueDate { get; set; }
+//	public string Remarks { get; set; }
+//	public DateTime CreatedAt { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class KitchenIssueDetailOldModel
+//{
+//	public int Id { get; set; }
+//	public int KitchenIssueId { get; set; }
+//	public int RawMaterialId { get; set; }
+//	public string MeasurementUnit { get; set; }
+//	public decimal Quantity { get; set; }
+//	public decimal Rate { get; set; }
+//	public decimal Total { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class SaleReturnOldModel
+//{
+//	public int Id { get; set; }
+//	public string BillNo { get; set; }
+//	public decimal DiscPercent { get; set; }
+//	public string DiscReason { get; set; }
+//	public decimal RoundOff { get; set; }
+//	public string Remarks { get; set; }
+//	public int UserId { get; set; }
+//	public int LocationId { get; set; }
+//	public DateTime SaleReturnDateTime { get; set; }
+//	public int? PartyId { get; set; }
+//	public decimal Cash { get; set; }
+//	public decimal Card { get; set; }
+//	public decimal UPI { get; set; }
+//	public decimal Credit { get; set; }
+//	public int? CustomerId { get; set; }
+//	public DateTime CreatedAt { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class SaleReturnDetailOldModel
+//{
+//	public int Id { get; set; }
+//	public int SaleReturnId { get; set; }
+//	public int ProductId { get; set; }
+//	public decimal Quantity { get; set; }
+//	public decimal Rate { get; set; }
+//	public decimal BaseTotal { get; set; }
+//	public decimal DiscPercent { get; set; }
+//	public decimal DiscAmount { get; set; }
+//	public decimal AfterDiscount { get; set; }
+//	public decimal CGSTPercent { get; set; }
+//	public decimal CGSTAmount { get; set; }
+//	public decimal SGSTPercent { get; set; }
+//	public decimal SGSTAmount { get; set; }
+//	public decimal IGSTPercent { get; set; }
+//	public decimal IGSTAmount { get; set; }
+//	public decimal Total { get; set; }
+//	public decimal NetRate { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class SaleOldModel
+//{
+//	public int Id { get; set; }
+//	public string BillNo { get; set; }
+//	public decimal DiscPercent { get; set; }
+//	public string DiscReason { get; set; }
+//	public decimal RoundOff { get; set; }
+//	public string Remarks { get; set; }
+//	public int UserId { get; set; }
+//	public int LocationId { get; set; }
+//	public DateTime SaleDateTime { get; set; }
+//	public int? PartyId { get; set; }
+//	public int? OrderId { get; set; }
+//	public decimal Cash { get; set; }
+//	public decimal Card { get; set; }
+//	public decimal UPI { get; set; }
+//	public decimal Credit { get; set; }
+//	public int? CustomerId { get; set; }
+//	public DateTime CreatedAt { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//class SaleDetailOldModel
+//{
+//	public int Id { get; set; }
+//	public int SaleId { get; set; }
+//	public int ProductId { get; set; }
+//	public decimal Quantity { get; set; }
+//	public decimal Rate { get; set; }
+//	public decimal BaseTotal { get; set; }
+//	public decimal DiscPercent { get; set; }
+//	public decimal DiscAmount { get; set; }
+//	public decimal AfterDiscount { get; set; }
+//	public decimal CGSTPercent { get; set; }
+//	public decimal CGSTAmount { get; set; }
+//	public decimal SGSTPercent { get; set; }
+//	public decimal SGSTAmount { get; set; }
+//	public decimal IGSTPercent { get; set; }
+//	public decimal IGSTAmount { get; set; }
+//	public decimal Total { get; set; }
+//	public decimal NetRate { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//public class OrderModelOld
+//{
+//	public int Id { get; set; }
+//	public string OrderNo { get; set; }
+//	public DateTime OrderDateTime { get; set; }
+//	public int LocationId { get; set; }
+//	public int UserId { get; set; }
+//	public string Remarks { get; set; }
+//	public int? SaleId { get; set; }
+//	public DateTime CreatedAt { get; set; }
+//	public bool Status { get; set; }
+//}
+
+//public class OrderDetailModelOld
+//{
+//	public int Id { get; set; }
+//	public int OrderId { get; set; }
+//	public int ProductId { get; set; }
+//	public decimal Quantity { get; set; }
+//	public bool Status { get; set; }
+//}
 #endregion
 
-static async Task InsertReturns(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
+static async Task RecalculateTransactions()
 {
 	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
-	var row = 2;
-
-	List<SaleReturnOldModel> saleReturn = [];
-	List<SaleReturnDetailOldModel> saleReturnDetails = [];
-
-	while (worksheet1.Cells[row, 1].Value != null)
+	var kitchenIssues = await CommonData.LoadTableData<KitchenIssueModel>(TableNames.KitchenIssue);
+	foreach (var ki in kitchenIssues)
 	{
-		var id = worksheet1.Cells[row, 1].Value.ToString();
-		var billNo = worksheet1.Cells[row, 2].Value.ToString();
-		var discPercent = worksheet1.Cells[row, 3].Value.ToString();
-		var rounfOff = worksheet1.Cells[row, 5].Value.ToString();
-		var userId = worksheet1.Cells[row, 7].Value.ToString();
-		var billDateTime = worksheet1.Cells[row, 9].Value.ToString();
-		var partyId = worksheet1.Cells[row, 10].Value.ToString();
-		var cash = worksheet1.Cells[row, 11].Value.ToString();
-		var card = worksheet1.Cells[row, 12].Value.ToString();
-		var upi = worksheet1.Cells[row, 13].Value.ToString();
-		var credit = worksheet1.Cells[row, 14].Value.ToString();
-		var status = worksheet1.Cells[row, 17].Value.ToString();
-
-		saleReturn.Add(new()
-		{
-			Id = int.Parse(id),
-			BillNo = billNo,
-			PartyId = partyId == "NULL" ? null : int.Parse(partyId),
-			SaleReturnDateTime = DateTime.Parse(billDateTime),
-			Card = decimal.Parse(card),
-			Cash = decimal.Parse(cash),
-			Credit = decimal.Parse(credit),
-			CustomerId = null,
-			DiscPercent = decimal.Parse(discPercent),
-			DiscReason = null,
-			LocationId = 1,
-			RoundOff = decimal.Parse(rounfOff),
-			UPI = decimal.Parse(upi),
-			Remarks = null,
-			UserId = int.Parse(userId),
-			CreatedAt = DateTime.Now,
-			Status = status.ToLower() == "1",
-		});
-
-		row++;
+		Console.WriteLine("Recalculating Kitchen Issue Id: " + ki.Id);
+		var details = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, ki.Id);
+		ki.TotalItems = details.Count;
+		ki.TotalQuantity = details.Sum(d => d.Quantity);
+		ki.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(ki);
+		await KitchenIssueData.InsertKitchenIssue(ki);
 	}
-
-	saleReturn.RemoveAll(_ => _.Status == false);
-
-	row = 2;
-	while (worksheet2.Cells[row, 1].Value != null)
-	{
-		var id = worksheet2.Cells[row, 1].Value.ToString();
-		var saleReturnId = worksheet2.Cells[row, 2].Value.ToString();
-		var productId = worksheet2.Cells[row, 3].Value.ToString();
-		var quantity = worksheet2.Cells[row, 4].Value.ToString();
-		var rate = worksheet2.Cells[row, 5].Value.ToString();
-		var baseTotal = worksheet2.Cells[row, 6].Value.ToString();
-		var discPercent = worksheet2.Cells[row, 7].Value.ToString();
-		var discAmount = worksheet2.Cells[row, 8].Value.ToString();
-		var afterDiscount = worksheet2.Cells[row, 9].Value.ToString();
-		var cgstPercent = worksheet2.Cells[row, 10].Value.ToString();
-		var cgstAmount = worksheet2.Cells[row, 11].Value.ToString();
-		var sgstPercent = worksheet2.Cells[row, 12].Value.ToString();
-		var sgstAmount = worksheet2.Cells[row, 13].Value.ToString();
-		var igstPercent = worksheet2.Cells[row, 14].Value.ToString();
-		var igstAmount = worksheet2.Cells[row, 15].Value.ToString();
-		var total = worksheet2.Cells[row, 16].Value.ToString();
-		var netRate = worksheet2.Cells[row, 17].Value.ToString();
-		var status = worksheet2.Cells[row, 18].Value.ToString();
-
-		saleReturnDetails.Add(new()
-		{
-			Id = int.Parse(id),
-			SaleReturnId = int.Parse(saleReturnId),
-			ProductId = int.Parse(productId),
-			Quantity = decimal.Parse(quantity),
-			Rate = decimal.Parse(rate),
-			BaseTotal = decimal.Parse(baseTotal),
-			DiscPercent = decimal.Parse(discPercent),
-			DiscAmount = decimal.Parse(discAmount),
-			AfterDiscount = decimal.Parse(afterDiscount),
-			CGSTPercent = decimal.Parse(cgstPercent),
-			CGSTAmount = decimal.Parse(cgstAmount),
-			SGSTPercent = decimal.Parse(sgstPercent),
-			SGSTAmount = decimal.Parse(sgstAmount),
-			IGSTPercent = decimal.Parse(igstPercent),
-			IGSTAmount = decimal.Parse(igstAmount),
-			NetRate = decimal.Parse(netRate),
-			Total = decimal.Parse(total),
-			Status = status.ToLower() == "1",
-		});
-
-		row++;
-	}
-
-	saleReturnDetails.RemoveAll(_ => _.Status == false);
-
-	Console.WriteLine("Loaded " + saleReturn.Count + " kitchen issues.");
-	Console.WriteLine("Loaded " + saleReturnDetails.Count + " kitchen issue details.");
-
-	foreach (var issue in saleReturn)
-	{
-		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
-
-		var kitchenIssueDetail = saleReturnDetails.Where(pd => pd.SaleReturnId == issue.Id).ToList();
-		if (kitchenIssueDetail.Count == 0)
-		{
-			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
-			continue;
-		}
-		List<SaleReturnItemCartModel> returnCart = [];
-
-		foreach (var detail in kitchenIssueDetail)
-			returnCart.Add(new()
-			{
-				ItemId = detail.ProductId,
-				ItemName = "",
-				Remarks = null,
-				Quantity = detail.Quantity,
-				Rate = detail.Rate,
-				BaseTotal = detail.BaseTotal,
-				DiscountPercent = detail.DiscPercent,
-				DiscountAmount = detail.DiscAmount,
-				CGSTPercent = detail.CGSTPercent,
-				CGSTAmount = detail.CGSTAmount,
-				SGSTPercent = detail.SGSTPercent,
-				SGSTAmount = detail.SGSTAmount,
-				IGSTPercent = detail.IGSTPercent,
-				IGSTAmount = detail.IGSTAmount,
-				AfterDiscount = detail.AfterDiscount,
-				TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
-				InclusiveTax = false,
-				Total = detail.Total,
-				NetRate = detail.NetRate,
-			});
-
-
-		SaleReturnModel finalIssue = new()
-		{
-			Id = 0,
-			TransactionNo = issue.BillNo,
-			CustomerId = null,
-			ItemsTotalAmount = returnCart.Sum(x => x.Total),
-			OtherChargesPercent = 0,
-			OtherChargesAmount = 0,
-			LocationId = 1,
-			PartyId = issue.PartyId,
-			RoundOffAmount = issue.RoundOff,
-			DiscountPercent = issue.DiscPercent,
-			DiscountAmount = returnCart.Sum(x => x.Total) * (issue.DiscPercent / 100),
-			TransactionDateTime = issue.SaleReturnDateTime,
-			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
-			CreatedBy = issue.UserId,
-			TotalAmount = issue.Cash + issue.Card + issue.Credit + issue.UPI,
-			Card = issue.Card,
-			Cash = issue.Cash,
-			Credit = issue.Credit,
-			UPI = issue.UPI,
-			CompanyId = 1,
-			FinancialYearId = 1,
-			CreatedFromPlatform = "ImportScript",
-			CreatedAt = issue.CreatedAt,
-			Status = true,
-		};
-
-		if (finalIssue.Credit > 0 && finalIssue.PartyId is null)
-		{
-			finalIssue.Cash += finalIssue.Credit;
-			finalIssue.Credit = 0;
-		}
-		await SaleReturnData.SaveSaleReturnTransaction(finalIssue, returnCart);
-		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
-	}
-}
-
-static async Task InsertSales(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
-{
-	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-	var row = 2;
-
-	List<SaleOldModel> sale = [];
-	List<SaleDetailOldModel> saleDetails = [];
-
-	while (worksheet1.Cells[row, 1].Value != null)
-	{
-		var id = worksheet1.Cells[row, 1].Value.ToString();
-		var billNo = worksheet1.Cells[row, 2].Value.ToString();
-		var discPercent = worksheet1.Cells[row, 3].Value.ToString();
-		var rounfOff = worksheet1.Cells[row, 5].Value.ToString();
-		var userId = worksheet1.Cells[row, 7].Value.ToString();
-		var locationId = worksheet1.Cells[row, 8].Value.ToString();
-		var billDateTime = worksheet1.Cells[row, 9].Value.ToString();
-		var partyId = worksheet1.Cells[row, 10].Value.ToString();
-		var orderId = worksheet1.Cells[row, 11].Value.ToString();
-		var cash = worksheet1.Cells[row, 12].Value.ToString();
-		var card = worksheet1.Cells[row, 13].Value.ToString();
-		var upi = worksheet1.Cells[row, 14].Value.ToString();
-		var credit = worksheet1.Cells[row, 15].Value.ToString();
-		var customerId = worksheet1.Cells[row, 16].Value.ToString();
-		var status = worksheet1.Cells[row, 18].Value.ToString();
-
-		sale.Add(new()
-		{
-			Id = int.Parse(id),
-			BillNo = billNo,
-			PartyId = partyId == "NULL" ? null : int.Parse(partyId),
-			OrderId = orderId == "NULL" ? null : int.Parse(orderId),
-			SaleDateTime = DateTime.Parse(billDateTime),
-			Card = decimal.Parse(card),
-			Cash = decimal.Parse(cash),
-			Credit = decimal.Parse(credit),
-			CustomerId = customerId == "NULL" ? null : int.Parse(customerId),
-			DiscPercent = decimal.Parse(discPercent),
-			DiscReason = null,
-			LocationId = int.Parse(locationId),
-			RoundOff = decimal.Parse(rounfOff),
-			UPI = decimal.Parse(upi),
-			Remarks = null,
-			UserId = int.Parse(userId),
-			CreatedAt = DateTime.Now,
-			Status = status.ToLower() == "1",
-		});
-
-		row++;
-	}
-
-	sale.RemoveAll(_ => _.Status == false);
-
-	row = 2;
-	while (worksheet2.Cells[row, 1].Value != null)
-	{
-		var id = worksheet2.Cells[row, 1].Value.ToString();
-		var saleId = worksheet2.Cells[row, 2].Value.ToString();
-		var productId = worksheet2.Cells[row, 3].Value.ToString();
-		var quantity = worksheet2.Cells[row, 4].Value.ToString();
-		var rate = worksheet2.Cells[row, 5].Value.ToString();
-		var baseTotal = worksheet2.Cells[row, 6].Value.ToString();
-		var discPercent = worksheet2.Cells[row, 7].Value.ToString();
-		var discAmount = worksheet2.Cells[row, 8].Value.ToString();
-		var afterDiscount = worksheet2.Cells[row, 9].Value.ToString();
-		var cgstPercent = worksheet2.Cells[row, 10].Value.ToString();
-		var cgstAmount = worksheet2.Cells[row, 11].Value.ToString();
-		var sgstPercent = worksheet2.Cells[row, 12].Value.ToString();
-		var sgstAmount = worksheet2.Cells[row, 13].Value.ToString();
-		var igstPercent = worksheet2.Cells[row, 14].Value.ToString();
-		var igstAmount = worksheet2.Cells[row, 15].Value.ToString();
-		var total = worksheet2.Cells[row, 16].Value.ToString();
-		var netRate = worksheet2.Cells[row, 17].Value.ToString();
-		var status = worksheet2.Cells[row, 18].Value.ToString();
-
-		saleDetails.Add(new()
-		{
-			Id = int.Parse(id),
-			SaleId = int.Parse(saleId),
-			ProductId = int.Parse(productId),
-			Quantity = decimal.Parse(quantity),
-			Rate = decimal.Parse(rate),
-			BaseTotal = decimal.Parse(baseTotal),
-			DiscPercent = decimal.Parse(discPercent),
-			DiscAmount = decimal.Parse(discAmount),
-			AfterDiscount = decimal.Parse(afterDiscount),
-			CGSTPercent = decimal.Parse(cgstPercent),
-			CGSTAmount = decimal.Parse(cgstAmount),
-			SGSTPercent = decimal.Parse(sgstPercent),
-			SGSTAmount = decimal.Parse(sgstAmount),
-			IGSTPercent = decimal.Parse(igstPercent),
-			IGSTAmount = decimal.Parse(igstAmount),
-			NetRate = decimal.Parse(netRate),
-			Total = decimal.Parse(total),
-			Status = status.ToLower() == "1",
-		});
-
-		row++;
-	}
-
-	saleDetails.RemoveAll(_ => _.Status == false);
-
-	Console.WriteLine("Loaded " + sale.Count + " kitchen issues.");
-	Console.WriteLine("Loaded " + saleDetails.Count + " kitchen issue details.");
-
-	foreach (var issue in sale)
-	{
-		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
-
-		var kitchenIssueDetail = saleDetails.Where(pd => pd.SaleId == issue.Id).ToList();
-		if (kitchenIssueDetail.Count == 0)
-		{
-			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
-			continue;
-		}
-		List<SaleItemCartModel> returnCart = [];
-
-		foreach (var detail in kitchenIssueDetail)
-			returnCart.Add(new()
-			{
-				ItemId = detail.ProductId,
-				ItemName = "",
-				Remarks = null,
-				Quantity = detail.Quantity,
-				Rate = detail.Rate,
-				BaseTotal = detail.BaseTotal,
-				DiscountPercent = detail.DiscPercent,
-				DiscountAmount = detail.DiscAmount,
-				CGSTPercent = detail.CGSTPercent,
-				CGSTAmount = detail.CGSTAmount,
-				SGSTPercent = detail.SGSTPercent,
-				SGSTAmount = detail.SGSTAmount,
-				IGSTPercent = detail.IGSTPercent,
-				IGSTAmount = detail.IGSTAmount,
-				AfterDiscount = detail.AfterDiscount,
-				TotalTaxAmount = detail.CGSTAmount + detail.SGSTAmount + detail.IGSTAmount,
-				InclusiveTax = false,
-				Total = detail.Total,
-				NetRate = detail.NetRate,
-			});
-
-
-		SaleModel finalIssue = new()
-		{
-			Id = 0,
-			TransactionNo = issue.BillNo,
-			CustomerId = issue.CustomerId,
-			ItemsTotalAmount = returnCart.Sum(x => x.Total),
-			OtherChargesPercent = 0,
-			OtherChargesAmount = 0,
-			OrderId = issue.OrderId,
-			LocationId = issue.LocationId,
-			PartyId = issue.PartyId,
-			RoundOffAmount = issue.RoundOff,
-			DiscountPercent = issue.DiscPercent,
-			DiscountAmount = returnCart.Sum(x => x.Total) * (issue.DiscPercent / 100),
-			TransactionDateTime = issue.SaleDateTime,
-			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
-			CreatedBy = issue.UserId,
-			TotalAmount = issue.Cash + issue.Card + issue.Credit + issue.UPI,
-			Card = issue.Card,
-			Cash = issue.Cash,
-			Credit = issue.Credit,
-			UPI = issue.UPI,
-			CompanyId = 1,
-			FinancialYearId = 1,
-			CreatedFromPlatform = "ImportScript",
-			CreatedAt = issue.CreatedAt,
-			Status = true,
-		};
-
-		finalIssue.TransactionNo = await GenerateCodes.GenerateSaleTransactionNo(finalIssue);
-
-		if (finalIssue.Credit > 0 && finalIssue.PartyId is null)
-		{
-			finalIssue.Cash += finalIssue.Credit;
-			finalIssue.Credit = 0;
-		}
-		await SaleData.SaveSaleTransaction(finalIssue, returnCart);
-		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
-	}
-}
-
-static async Task InsertOrder(ExcelWorksheet worksheet1, ExcelWorksheet worksheet2)
-{
-	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-	var row = 2;
-
-	List<OrderModelOld> orders = [];
-	List<OrderDetailModelOld> orderDetails = [];
-
-	while (worksheet1.Cells[row, 1].Value != null)
-	{
-		var id = worksheet1.Cells[row, 1].Value.ToString();
-		var billNo = worksheet1.Cells[row, 2].Value.ToString();
-		var billDateTime = worksheet1.Cells[row, 3].Value.ToString();
-		var locationId = worksheet1.Cells[row, 4].Value.ToString();
-		var userId = worksheet1.Cells[row, 5].Value.ToString();
-		var saleId = worksheet1.Cells[row, 7].Value.ToString();
-		var status = worksheet1.Cells[row, 9].Value.ToString();
-
-
-		orders.Add(new()
-		{
-			Id = int.Parse(id),
-			OrderNo = billNo,
-			OrderDateTime = DateTime.Parse(billDateTime),
-			LocationId = int.Parse(locationId),
-			UserId = int.Parse(userId),
-			Remarks = "",
-			SaleId = saleId == "NULL" ? null : int.Parse(saleId),
-			CreatedAt = DateTime.Now,
-			Status = status.ToLower() == "1",
-		});
-
-		row++;
-	}
-
-	orders.RemoveAll(_ => _.Status == false);
-
-	row = 2;
-	while (worksheet2.Cells[row, 1].Value != null)
-	{
-		var id = worksheet2.Cells[row, 1].Value.ToString();
-		var orderId = worksheet2.Cells[row, 2].Value.ToString();
-		var productId = worksheet2.Cells[row, 3].Value.ToString();
-		var quantity = worksheet2.Cells[row, 4].Value.ToString();
-		var status = worksheet2.Cells[row, 5].Value.ToString();
-
-		orderDetails.Add(new()
-		{
-			Id = int.Parse(id),
-			OrderId = int.Parse(orderId),
-			ProductId = int.Parse(productId),
-			Quantity = decimal.Parse(quantity),
-			Status = status.ToLower() == "1",
-		});
-
-		row++;
-	}
-
-	orderDetails.RemoveAll(_ => _.Status == false);
-
-	Console.WriteLine("Loaded " + orders.Count + " kitchen issues.");
-	Console.WriteLine("Loaded " + orderDetails.Count + " kitchen issue details.");
-
-	foreach (var issue in orders)
-	{
-		Console.WriteLine("Inserting Kitchen Issue Id: " + issue.Id);
-
-		var kitchenIssueDetail = orderDetails.Where(pd => pd.OrderId == issue.Id).ToList();
-		if (kitchenIssueDetail.Count == 0)
-		{
-			Console.WriteLine("No Kitchen Issue Details Found for Kitchen Issue Id: " + issue.Id);
-			continue;
-		}
-		List<OrderItemCartModel> returnCart = [];
-
-		foreach (var detail in kitchenIssueDetail)
-			returnCart.Add(new()
-			{
-				ItemId = detail.ProductId,
-				ItemName = "",
-				Remarks = null,
-				Quantity = detail.Quantity,
-			});
-
-
-		OrderModel finalIssue = new()
-		{
-			Id = 0,
-			SaleId = issue.SaleId,
-			TransactionNo = issue.OrderNo,
-			LocationId = issue.LocationId,
-			TransactionDateTime = issue.OrderDateTime,
-			Remarks = string.IsNullOrWhiteSpace(issue.Remarks) ? null : issue.Remarks,
-			CreatedBy = issue.UserId,
-			CompanyId = 1,
-			FinancialYearId = 1,
-			CreatedFromPlatform = "ImportScript",
-			CreatedAt = issue.CreatedAt,
-			Status = true,
-		};
-
-		finalIssue.TransactionNo = await GenerateCodes.GenerateOrderTransactionNo(finalIssue);
-
-		finalIssue.Id = await OrderData.SaveOrderTransaction(finalIssue, returnCart);
-
-		if (finalIssue.SaleId is not null && finalIssue.SaleId > 0)
-		{
-			var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, finalIssue.SaleId.Value);
-			if (sale is not null)
-			{
-				sale.OrderId = finalIssue.Id;
-				await SaleData.InsertSale(sale);
-			}
-		}
-
-		Console.WriteLine("Inserted Kitchen Issue Id: " + issue.Id);
-	}
-}
-
-static async Task FixMasterNames()
-{
-	var products = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
-
-	products = products.Where(p => p.Name.EndsWith("&#X20;")).ToList();
-
-	foreach (var product in products)
-	{
-		product.Name = product.Name.Replace("&#X20;", " ").TrimEnd();
-		await LedgerData.InsertLedger(product);
-	}
-}
-
-static async Task FixLedgers()
-{
-	var ledgers = await CommonData.LoadTableData<LedgerModel>(TableNames.Ledger);
-
-	foreach (var ledger in ledgers)
-	{
-		if (string.IsNullOrWhiteSpace(ledger.GSTNo?.Trim()))
-			ledger.GSTNo = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.PANNo?.Trim()))
-			ledger.PANNo = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.Phone?.Trim()))
-			ledger.Phone = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.Email?.Trim()))
-			ledger.Email = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.Address?.Trim()))
-			ledger.Address = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.Remarks?.Trim()))
-			ledger.Remarks = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.Alias?.Trim()))
-			ledger.Alias = null;
-
-		if (string.IsNullOrWhiteSpace(ledger.CINNo?.Trim()))
-			ledger.CINNo = null;
-
-		await LedgerData.InsertLedger(ledger);
-
-		Console.WriteLine("Fixed Ledger Id: " + ledger.Id);
-	}
-}
-
-class PurchaseModelOld
-{
-	public int Id { get; set; }
-	public string BillNo { get; set; }
-	public int SupplierId { get; set; }
-	public DateTime BillDateTime { get; set; }
-	public decimal CDPercent { get; set; }
-	public decimal RoundOff { get; set; }
-	public string Remarks { get; set; }
-	public int UserId { get; set; }
-	public DateTime CreatedAt { get; set; }
-	public bool Status { get; set; }
-}
-
-class PurchaseDetailModelOld
-{
-	public int Id { get; set; }
-	public int PurchaseId { get; set; }
-	public int RawMaterialId { get; set; }
-	public decimal Quantity { get; set; }
-	public string MeasurementUnit { get; set; }
-	public decimal Rate { get; set; }
-	public decimal BaseTotal { get; set; }
-	public decimal DiscPercent { get; set; }
-	public decimal DiscAmount { get; set; }
-	public decimal AfterDiscount { get; set; }
-	public decimal CGSTPercent { get; set; }
-	public decimal CGSTAmount { get; set; }
-	public decimal SGSTPercent { get; set; }
-	public decimal SGSTAmount { get; set; }
-	public decimal IGSTPercent { get; set; }
-	public decimal IGSTAmount { get; set; }
-	public decimal Total { get; set; }
-	public decimal NetRate { get; set; }
-	public bool Status { get; set; }
-}
-
-class KitchenIssueOldModel
-{
-	public int Id { get; set; }
-	public int KitchenId { get; set; }
-	public int LocationId { get; set; }
-	public int UserId { get; set; }
-	public string TransactionNo { get; set; }
-	public DateTime IssueDate { get; set; }
-	public string Remarks { get; set; }
-	public DateTime CreatedAt { get; set; }
-	public bool Status { get; set; }
-}
-
-class KitchenIssueDetailOldModel
-{
-	public int Id { get; set; }
-	public int KitchenIssueId { get; set; }
-	public int RawMaterialId { get; set; }
-	public string MeasurementUnit { get; set; }
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal Total { get; set; }
-	public bool Status { get; set; }
-}
-
-class SaleReturnOldModel
-{
-	public int Id { get; set; }
-	public string BillNo { get; set; }
-	public decimal DiscPercent { get; set; }
-	public string DiscReason { get; set; }
-	public decimal RoundOff { get; set; }
-	public string Remarks { get; set; }
-	public int UserId { get; set; }
-	public int LocationId { get; set; }
-	public DateTime SaleReturnDateTime { get; set; }
-	public int? PartyId { get; set; }
-	public decimal Cash { get; set; }
-	public decimal Card { get; set; }
-	public decimal UPI { get; set; }
-	public decimal Credit { get; set; }
-	public int? CustomerId { get; set; }
-	public DateTime CreatedAt { get; set; }
-	public bool Status { get; set; }
-}
-
-class SaleReturnDetailOldModel
-{
-	public int Id { get; set; }
-	public int SaleReturnId { get; set; }
-	public int ProductId { get; set; }
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal BaseTotal { get; set; }
-	public decimal DiscPercent { get; set; }
-	public decimal DiscAmount { get; set; }
-	public decimal AfterDiscount { get; set; }
-	public decimal CGSTPercent { get; set; }
-	public decimal CGSTAmount { get; set; }
-	public decimal SGSTPercent { get; set; }
-	public decimal SGSTAmount { get; set; }
-	public decimal IGSTPercent { get; set; }
-	public decimal IGSTAmount { get; set; }
-	public decimal Total { get; set; }
-	public decimal NetRate { get; set; }
-	public bool Status { get; set; }
-}
-
-class SaleOldModel
-{
-	public int Id { get; set; }
-	public string BillNo { get; set; }
-	public decimal DiscPercent { get; set; }
-	public string DiscReason { get; set; }
-	public decimal RoundOff { get; set; }
-	public string Remarks { get; set; }
-	public int UserId { get; set; }
-	public int LocationId { get; set; }
-	public DateTime SaleDateTime { get; set; }
-	public int? PartyId { get; set; }
-	public int? OrderId { get; set; }
-	public decimal Cash { get; set; }
-	public decimal Card { get; set; }
-	public decimal UPI { get; set; }
-	public decimal Credit { get; set; }
-	public int? CustomerId { get; set; }
-	public DateTime CreatedAt { get; set; }
-	public bool Status { get; set; }
-}
-
-class SaleDetailOldModel
-{
-	public int Id { get; set; }
-	public int SaleId { get; set; }
-	public int ProductId { get; set; }
-	public decimal Quantity { get; set; }
-	public decimal Rate { get; set; }
-	public decimal BaseTotal { get; set; }
-	public decimal DiscPercent { get; set; }
-	public decimal DiscAmount { get; set; }
-	public decimal AfterDiscount { get; set; }
-	public decimal CGSTPercent { get; set; }
-	public decimal CGSTAmount { get; set; }
-	public decimal SGSTPercent { get; set; }
-	public decimal SGSTAmount { get; set; }
-	public decimal IGSTPercent { get; set; }
-	public decimal IGSTAmount { get; set; }
-	public decimal Total { get; set; }
-	public decimal NetRate { get; set; }
-	public bool Status { get; set; }
-}
-
-public class OrderModelOld
-{
-	public int Id { get; set; }
-	public string OrderNo { get; set; }
-	public DateTime OrderDateTime { get; set; }
-	public int LocationId { get; set; }
-	public int UserId { get; set; }
-	public string Remarks { get; set; }
-	public int? SaleId { get; set; }
-	public DateTime CreatedAt { get; set; }
-	public bool Status { get; set; }
-}
-
-public class OrderDetailModelOld
-{
-	public int Id { get; set; }
-	public int OrderId { get; set; }
-	public int ProductId { get; set; }
-	public decimal Quantity { get; set; }
-	public bool Status { get; set; }
 }

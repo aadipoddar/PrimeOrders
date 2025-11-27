@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_KitchenIssueDetail]
 	@Id INT OUTPUT,
-	@KitchenIssueId INT,
+	@MasterId INT,
 	@RawMaterialId INT,
 	@Quantity MONEY,
 	@UnitOfMeasurement VARCHAR(20),
@@ -14,7 +14,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[KitchenIssueDetail]
 		(
-			KitchenIssueId,
+			MasterId,
 			RawMaterialId,
 			Quantity,
 			UnitOfMeasurement,
@@ -25,7 +25,7 @@ BEGIN
 		)
 		VALUES
 		(
-			@KitchenIssueId,
+			@MasterId,
 			@RawMaterialId,
 			@Quantity,
 			@UnitOfMeasurement,
@@ -40,7 +40,7 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE [dbo].[KitchenIssueDetail]
-		SET KitchenIssueId = @KitchenIssueId,
+		SET MasterId = @MasterId,
 			RawMaterialId = @RawMaterialId,
 			Quantity = @Quantity,
 			UnitOfMeasurement = @UnitOfMeasurement,

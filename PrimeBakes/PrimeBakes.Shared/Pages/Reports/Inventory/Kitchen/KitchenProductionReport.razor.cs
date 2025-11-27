@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -15,11 +16,16 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Kitchen;
 
 public partial class KitchenProductionReport
 {
-    private UserModel _user;
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
+
+	private UserModel _user;
 
     private bool _isLoading = true;
     private bool _isProcessing = false;
@@ -36,9 +42,9 @@ public partial class KitchenProductionReport
 
     private List<CompanyModel> _companies = [];
     private List<LocationModel> _kitchens = [];
-    private List<KitchenProductionOverviewModel> _kitchenProductionOverviews = [];
+    private List<KitchenProductionOverviewModel> _transactionOverviews = [];
 
-    private SfGrid<KitchenProductionOverviewModel> _sfKitchenProductionGrid;
+    private SfGrid<KitchenProductionOverviewModel> _sfGrid;
 
     private string _errorTitle = string.Empty;
     private string _errorMessage = string.Empty;
@@ -60,7 +66,7 @@ public partial class KitchenProductionReport
         if (!firstRender)
             return;
 
-		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -68,10 +74,23 @@ public partial class KitchenProductionReport
 
     private async Task LoadData()
     {
-        await LoadDates();
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.R, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(Code.F5, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.I, NavigateToItemReport, "Open item report", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None)
+			.Add(Code.Delete, DeleteSelectedCartItem, "Delete Selected Transaction", Exclude.None);
+
+		await LoadDates();
         await LoadCompanies();
         await LoadKitchens();
-        await LoadKitchenProductionOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task LoadDates()
@@ -104,7 +123,7 @@ public partial class KitchenProductionReport
         _selectedKitchen = _kitchens.FirstOrDefault(_ => _.Id == 0);
     }
 
-    private async Task LoadKitchenProductionOverviews()
+    private async Task LoadTransactionOverviews()
     {
         if (_isProcessing)
             return;
@@ -113,27 +132,27 @@ public partial class KitchenProductionReport
         {
             _isProcessing = true;
 
-            _kitchenProductionOverviews = await KitchenProductionData.LoadKitchenProductionOverviewByDate(
+            _transactionOverviews = await KitchenProductionData.LoadKitchenProductionOverviewByDate(
             DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
             DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
             !_showDeleted);
 
             if (_selectedCompany?.Id > 0)
-                _kitchenProductionOverviews = [.. _kitchenProductionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+                _transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
             if (_selectedKitchen?.Id > 0)
-                _kitchenProductionOverviews = [.. _kitchenProductionOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
+                _transactionOverviews = [.. _transactionOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
 
-            _kitchenProductionOverviews = [.. _kitchenProductionOverviews.OrderBy(_ => _.TransactionDateTime)];
+            _transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while loading kitchen production overviews: {ex.Message}", "error");
+            await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
         }
         finally
         {
-            if (_sfKitchenProductionGrid is not null)
-                await _sfKitchenProductionGrid.Refresh();
+            if (_sfGrid is not null)
+                await _sfGrid.Refresh();
             _isProcessing = false;
             StateHasChanged();
         }
@@ -145,19 +164,19 @@ public partial class KitchenProductionReport
     {
         _fromDate = args.StartDate;
         _toDate = args.EndDate;
-        await LoadKitchenProductionOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
     {
         _selectedCompany = args.Value;
-        await LoadKitchenProductionOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
     {
         _selectedKitchen = args.Value;
-        await LoadKitchenProductionOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task SetDateRange(DateRangeType rangeType)
@@ -233,14 +252,14 @@ public partial class KitchenProductionReport
         finally
         {
             _isProcessing = false;
-            await LoadKitchenProductionOverviews();
+            await LoadTransactionOverviews();
             StateHasChanged();
         }
     }
     #endregion
 
     #region Exporting
-    private async Task ExportExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportExcel()
     {
         if (_isProcessing)
             return;
@@ -255,7 +274,7 @@ public partial class KitchenProductionReport
 
             var stream = await Task.Run(() =>
             KitchenProductionReportExcelExport.ExportKitchenProductionReport(
-                    _kitchenProductionOverviews,
+                    _transactionOverviews,
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns
@@ -269,7 +288,7 @@ public partial class KitchenProductionReport
 
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Kitchen production report exported to Excel successfully.", "success");
+            await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
         }
         catch (Exception ex)
         {
@@ -282,7 +301,7 @@ public partial class KitchenProductionReport
         }
     }
 
-    private async Task ExportPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportPdf()
     {
         if (_isProcessing)
             return;
@@ -297,7 +316,7 @@ public partial class KitchenProductionReport
 
             var stream = await Task.Run(() =>
             KitchenProductionReportPDFExport.ExportKitchenProductionReport(
-            _kitchenProductionOverviews,
+            _transactionOverviews,
             dateRangeStart,
             dateRangeEnd,
             _showAllColumns
@@ -311,7 +330,7 @@ public partial class KitchenProductionReport
 
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Kitchen production report exported to PDF successfully.", "success");
+            await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
         }
         catch (Exception ex)
         {
@@ -323,25 +342,43 @@ public partial class KitchenProductionReport
             StateHasChanged();
         }
     }
-    #endregion
+	#endregion
 
-    #region Actions
-    private async Task ViewKitchenProduction(int kitchenProductionId)
+	#region Actions
+	private async Task ViewSelectedCartItem()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await ViewTransaction(selectedCartItem.Id);
+	}
+
+	private async Task ViewTransaction(int transactionId)
     {
         try
         {
             if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.KitchenProduction}/{kitchenProductionId}", "_blank");
+                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.KitchenProduction}/{transactionId}", "_blank");
             else
-                NavigationManager.NavigateTo($"{PageRouteNames.KitchenProduction}/{kitchenProductionId}");
+                NavigationManager.NavigateTo($"{PageRouteNames.KitchenProduction}/{transactionId}");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while opening kitchen production: {ex.Message}", "error");
+            await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
         }
     }
 
-    private async Task DownloadInvoice(int kitchenProductionId)
+	private async Task DownloadSelectedCartItemInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadInvoice(selectedCartItem.Id);
+	}
+
+	private async Task DownloadInvoice(int transactionId)
     {
         if (_isProcessing)
             return;
@@ -351,7 +388,7 @@ public partial class KitchenProductionReport
             _isProcessing = true;
             StateHasChanged();
 
-            var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(kitchenProductionId);
+            var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
         }
         catch (Exception ex)
@@ -365,7 +402,20 @@ public partial class KitchenProductionReport
         }
     }
 
-    private async Task ConfirmDelete()
+	private async Task DeleteSelectedCartItem()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+
+		if (!selectedCartItem.Status)
+			ShowRecoverConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
+		else
+			ShowDeleteConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
+	}
+
+	private async Task ConfirmDelete()
     {
         if (_isProcessing)
             return;
@@ -381,20 +431,20 @@ public partial class KitchenProductionReport
 
             await KitchenProductionData.DeleteKitchenProduction(_deleteTransactionId);
 
-            await ShowToast("Success", $"Kitchen production transaction {_deleteTransactionNo} has been deleted successfully.", "success");
+            await ShowToast("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", "success");
 
             _deleteTransactionId = 0;
             _deleteTransactionNo = string.Empty;
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while deleting kitchen production transaction: {ex.Message}", "error");
+            await ShowToast("Error", $"An error occurred while deleting transaction: {ex.Message}", "error");
         }
         finally
         {
             _isProcessing = false;
             StateHasChanged();
-            await LoadKitchenProductionOverviews();
+            await LoadTransactionOverviews();
         }
     }
 
@@ -403,14 +453,14 @@ public partial class KitchenProductionReport
         _showAllColumns = !_showAllColumns;
         StateHasChanged();
 
-        if (_sfKitchenProductionGrid is not null)
-            await _sfKitchenProductionGrid.Refresh();
+        if (_sfGrid is not null)
+            await _sfGrid.Refresh();
     }
 
     private async Task ToggleDeleted()
     {
         _showDeleted = !_showDeleted;
-        await LoadKitchenProductionOverviews();
+        await LoadTransactionOverviews();
         StateHasChanged();
     }
 
@@ -426,15 +476,15 @@ public partial class KitchenProductionReport
             StateHasChanged();
 
             if (!_user.Admin)
-                throw new UnauthorizedAccessException("You do not have permission to recover this kitchen production transaction.");
+                throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
 
             if (_recoverTransactionId == 0)
             {
-                await ShowToast("Error", "Invalid kitchen production transaction selected for recovery.", "error");
+                await ShowToast("Error", "Invalid transaction selected for recovery.", "error");
                 return;
             }
 
-            await RecoverKitchenProductionTransaction(_recoverTransactionId);
+            await RecoverTransaction(_recoverTransactionId);
 
             await ShowToast("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", "success");
 
@@ -443,22 +493,22 @@ public partial class KitchenProductionReport
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while recovering kitchen production transaction: {ex.Message}", "error");
+            await ShowToast("Error", $"An error occurred while recovering transaction: {ex.Message}", "error");
         }
         finally
         {
             _isProcessing = false;
             StateHasChanged();
-            await LoadKitchenProductionOverviews();
+            await LoadTransactionOverviews();
         }
     }
 
-    private async Task RecoverKitchenProductionTransaction(int recoverTransactionId)
+    private async Task RecoverTransaction(int recoverTransactionId)
     {
         var kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, recoverTransactionId);
         if (kitchenProduction is null)
         {
-            await ShowToast("Error", "Kitchen production transaction not found.", "error");
+            await ShowToast("Error", "Transaction not found.", "error");
             return;
         }
 
@@ -473,7 +523,7 @@ public partial class KitchenProductionReport
     #endregion
 
     #region Utilities
-    private async Task NavigateToKitchenProductionPage()
+    private async Task NavigateToTransactionPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenProduction, "_blank");
@@ -481,7 +531,7 @@ public partial class KitchenProductionReport
             NavigationManager.NavigateTo(PageRouteNames.KitchenProduction);
     }
 
-    private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task NavigateToItemReport()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProductionItem, "_blank");
@@ -489,7 +539,13 @@ public partial class KitchenProductionReport
             NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem);
     }
 
-    private async Task ShowToast(string title, string message, string type)
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
     {
         VibrationService.VibrateWithTime(200);
 

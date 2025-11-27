@@ -17,9 +17,6 @@ public static class KitchenProductionData
     public static async Task<int> InsertKitchenProductionDetail(KitchenProductionDetailModel kitchenProductionDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertKitchenProductionDetail, kitchenProductionDetail)).FirstOrDefault();
 
-    public static async Task<List<KitchenProductionDetailModel>> LoadKitchenProductionDetailByKitchenProduction(int KitchenProductionId) =>
-        await SqlDataAccess.LoadData<KitchenProductionDetailModel, dynamic>(StoredProcedureNames.LoadKitchenProductionDetailByKitchenProduction, new { KitchenProductionId });
-
     public static async Task<List<KitchenProductionOverviewModel>> LoadKitchenProductionOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
         await SqlDataAccess.LoadData<KitchenProductionOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenProductionOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
@@ -30,14 +27,14 @@ public static class KitchenProductionData
     {
         try
         {
-            // Load saved kitchen production details
+            // Load saved transaction details
             var savedKitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, kitchenProductionId) ??
-                throw new InvalidOperationException("Kitchen production transaction not found.");
+                throw new InvalidOperationException("Transaction not found.");
 
-            // Load kitchen production details from database
-            var kitchenProductionDetails = await LoadKitchenProductionDetailByKitchenProduction(savedKitchenProduction.Id);
+            // Load transaction details from database
+            var kitchenProductionDetails = await CommonData.LoadTableDataByMasterId<KitchenProductionDetailModel>(TableNames.KitchenProductionDetail, savedKitchenProduction.Id);
             if (kitchenProductionDetails is null || kitchenProductionDetails.Count == 0)
-                throw new InvalidOperationException("No kitchen production details found for the transaction.");
+                throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company and kitchen
             var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedKitchenProduction.CompanyId);
@@ -90,7 +87,7 @@ public static class KitchenProductionData
         var kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, kitchenProductionId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenProduction.FinancialYearId);
         if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete kitchen production transaction as the financial year is locked.");
+            throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (kitchenProduction is not null)
         {
@@ -102,7 +99,7 @@ public static class KitchenProductionData
 
     public static async Task RecoverKitchenProductionTransaction(KitchenProductionModel kitchenProduction)
     {
-        var kitchenProductionDetails = await LoadKitchenProductionDetailByKitchenProduction(kitchenProduction.Id);
+        var kitchenProductionDetails = await CommonData.LoadTableDataByMasterId<KitchenProductionDetailModel>(TableNames.KitchenProductionDetail, kitchenProduction.Id);
         List<KitchenProductionProductCartModel> kitchenProductionProductCarts = [];
 
         foreach (var item in kitchenProductionDetails)
@@ -142,7 +139,6 @@ public static class KitchenProductionData
         kitchenProduction.Id = await InsertKitchenProduction(kitchenProduction);
         await SaveKitchenProductionDetail(kitchenProduction, kitchenProductionDetails, update);
         await SaveProductStock(kitchenProduction, kitchenProductionDetails, update);
-        // await SendNotification.SendKitchenProductionNotificationMainLocationAdminInventory(kitchenProduction.Id);
 
         return kitchenProduction.Id;
     }
@@ -151,7 +147,7 @@ public static class KitchenProductionData
     {
         if (update)
         {
-            var existingKitchenProductionDetails = await LoadKitchenProductionDetailByKitchenProduction(kitchenProduction.Id);
+            var existingKitchenProductionDetails = await CommonData.LoadTableDataByMasterId<KitchenProductionDetailModel>(TableNames.KitchenProductionDetail, kitchenProduction.Id);
             foreach (var item in existingKitchenProductionDetails)
             {
                 item.Status = false;

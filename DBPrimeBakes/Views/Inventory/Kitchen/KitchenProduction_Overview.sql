@@ -12,9 +12,8 @@
 		[kp].[KitchenId],
 		[k].[Name] AS KitchenName,
 
-		COUNT(DISTINCT kpd.Id) AS TotalItems,
-		SUM(kpd.Quantity) AS TotalQuantity,
-		
+		[kp].[TotalItems],
+		[kp].[TotalQuantity],
 		[kp].[TotalAmount],
 		
 		[kp].[Remarks],
@@ -41,31 +40,3 @@
 		[dbo].[User] AS u ON kp.[CreatedBy] = u.Id
 	LEFT JOIN
 		[dbo].[User] AS lm ON kp.LastModifiedBy = lm.Id
-	INNER JOIN
-		dbo.KitchenProductionDetail kpd ON kp.Id = kpd.KitchenProductionId
-
-	WHERE
-		kpd.Status = 1
-
-	GROUP BY
-		[kp].[Id],
-		[kp].[TransactionNo],
-		[kp].[CompanyId],
-		[c].[Name],
-		[kp].[TransactionDateTime],
-		[kp].[FinancialYearId],
-		[fy].StartDate,
-		[fy].EndDate,
-		[kp].[KitchenId],
-		[k].[Name],
-		[kp].[TotalAmount],
-		[kp].[Remarks],
-		[kp].[CreatedBy],
-		[u].[Name],
-		[kp].[CreatedAt],
-		[kp].[CreatedFromPlatform],
-		[kp].[LastModifiedBy],
-		[lm].[Name],
-		[kp].[LastModifiedAt],
-		[kp].[LastModifiedFromPlatform],
-		[kp].[Status]

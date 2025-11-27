@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -14,397 +15,442 @@ using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Kitchen;
 
-public partial class KitchenProductionItemReport
+public partial class KitchenProductionItemReport : IAsyncDisposable
 {
-    private UserModel _user;
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
 
-    private bool _isLoading = true;
-    private bool _isProcessing = false;
-    private bool _showAllColumns = false;
+	private bool _isLoading = true;
+	private bool _isProcessing = false;
+	private bool _showAllColumns = false;
 
-    private DateTime _fromDate = DateTime.Now.Date;
-    private DateTime _toDate = DateTime.Now.Date;
+	private DateTime _fromDate = DateTime.Now.Date;
+	private DateTime _toDate = DateTime.Now.Date;
 
-    private CompanyModel _selectedCompany = new();
-    private LocationModel _selectedKitchen = new();
+	private CompanyModel _selectedCompany = new();
+	private LocationModel _selectedKitchen = new();
 
-    private List<CompanyModel> _companies = [];
-    private List<LocationModel> _kitchens = [];
-    private List<KitchenProductionItemOverviewModel> _kitchenProductionItemOverviews = [];
+	private List<CompanyModel> _companies = [];
+	private List<LocationModel> _kitchens = [];
+	private List<KitchenProductionItemOverviewModel> _transactionOverviews = [];
 
-    private SfGrid<KitchenProductionItemOverviewModel> _sfKitchenProductionItemGrid;
+	private SfGrid<KitchenProductionItemOverviewModel> _sfGrid;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
+	private string _errorTitle = string.Empty;
+	private string _errorMessage = string.Empty;
+	private string _successTitle = string.Empty;
+	private string _successMessage = string.Empty;
 
-    private SfToast _sfErrorToast;
-    private SfToast _sfSuccessToast;
+	private SfToast _sfErrorToast;
+	private SfToast _sfSuccessToast;
 
-    #region Load Data
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
+	#region Load Data
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
 
-		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
-        await LoadData();
-        _isLoading = false;
-        StateHasChanged();
-    }
+		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+		await LoadData();
+		_isLoading = false;
+		StateHasChanged();
+	}
 
-    private async Task LoadData()
-    {
-        await LoadDates();
-        await LoadCompanies();
-        await LoadKitchens();
-        await LoadKitchenProductionItemOverviews();
-    }
+	private async Task LoadData()
+	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.R, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(Code.F5, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistory, "Open transaction history", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None);
 
-    private async Task LoadDates()
-    {
-        _fromDate = await CommonData.LoadCurrentDateTime();
-        _toDate = _fromDate;
-    }
+		await LoadDates();
+		await LoadCompanies();
+		await LoadKitchens();
+		await LoadTransactionOverviews();
+	}
 
-    private async Task LoadCompanies()
-    {
-        _companies = await CommonData.LoadTableDataByStatus<CompanyModel>(TableNames.Company);
-        _companies.Add(new()
-        {
-            Id = 0,
-            Name = "All Companies"
-        });
-        _companies = [.. _companies.OrderBy(s => s.Name)];
-        _selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
-    }
+	private async Task LoadDates()
+	{
+		_fromDate = await CommonData.LoadCurrentDateTime();
+		_toDate = _fromDate;
+	}
 
-    private async Task LoadKitchens()
-    {
-        _kitchens = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
-        _kitchens.Add(new()
-        {
-            Id = 0,
-            Name = "All Kitchens"
-        });
-        _kitchens = [.. _kitchens.OrderBy(s => s.Name)];
-        _selectedKitchen = _kitchens.FirstOrDefault(_ => _.Id == 0);
-    }
+	private async Task LoadCompanies()
+	{
+		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(TableNames.Company);
+		_companies.Add(new()
+		{
+			Id = 0,
+			Name = "All Companies"
+		});
+		_companies = [.. _companies.OrderBy(s => s.Name)];
+		_selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
+	}
 
-    private async Task LoadKitchenProductionItemOverviews()
-    {
-        if (_isProcessing)
-            return;
+	private async Task LoadKitchens()
+	{
+		_kitchens = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		_kitchens.Add(new()
+		{
+			Id = 0,
+			Name = "All Kitchens"
+		});
+		_kitchens = [.. _kitchens.OrderBy(s => s.Name)];
+		_selectedKitchen = _kitchens.FirstOrDefault(_ => _.Id == 0);
+	}
 
-        try
-        {
-            _isProcessing = true;
+	private async Task LoadTransactionOverviews()
+	{
+		if (_isProcessing)
+			return;
 
-            _kitchenProductionItemOverviews = await KitchenProductionData.LoadKitchenProductionItemOverviewByDate(
-            DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-            DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+		try
+		{
+			_isProcessing = true;
 
-            if (_selectedCompany?.Id > 0)
-                _kitchenProductionItemOverviews = [.. _kitchenProductionItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+			_transactionOverviews = await KitchenProductionData.LoadKitchenProductionItemOverviewByDate(
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
-            if (_selectedKitchen?.Id > 0)
-                _kitchenProductionItemOverviews = [.. _kitchenProductionItemOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
+			if (_selectedCompany?.Id > 0)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
-            _kitchenProductionItemOverviews = [.. _kitchenProductionItemOverviews.OrderBy(_ => _.TransactionDateTime)];
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while loading kitchen production item overviews: {ex.Message}", "error");
-        }
-        finally
-        {
-            if (_sfKitchenProductionItemGrid is not null)
-                await _sfKitchenProductionItemGrid.Refresh();
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-    #endregion
+			if (_selectedKitchen?.Id > 0)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
 
-    #region Change Events
-    private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
-    {
-        _fromDate = args.StartDate;
-        _toDate = args.EndDate;
-        await LoadKitchenProductionItemOverviews();
-    }
+			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
+		}
+		finally
+		{
+			if (_sfGrid is not null)
+				await _sfGrid.Refresh();
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
 
-    private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
-    {
-        _selectedCompany = args.Value;
-        await LoadKitchenProductionItemOverviews();
-    }
+	#region Change Events
+	private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
+	{
+		_fromDate = args.StartDate;
+		_toDate = args.EndDate;
+		await LoadTransactionOverviews();
+	}
 
-    private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
-    {
-        _selectedKitchen = args.Value;
-        await LoadKitchenProductionItemOverviews();
-    }
+	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
+	{
+		_selectedCompany = args.Value;
+		await LoadTransactionOverviews();
+	}
 
-    private async Task SetDateRange(DateRangeType rangeType)
-    {
-        if (_isProcessing)
-            return;
+	private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
+	{
+		_selectedKitchen = args.Value;
+		await LoadTransactionOverviews();
+	}
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	private async Task SetDateRange(DateRangeType rangeType)
+	{
+		if (_isProcessing)
+			return;
 
-            var today = await CommonData.LoadCurrentDateTime();
-            var currentYear = today.Year;
-            var currentMonth = today.Month;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-            switch (rangeType)
-            {
-                case DateRangeType.Today:
-                    _fromDate = today;
-                    _toDate = today;
-                    break;
+			var today = await CommonData.LoadCurrentDateTime();
+			var currentYear = today.Year;
+			var currentMonth = today.Month;
 
-                case DateRangeType.Yesterday:
-                    _fromDate = today.AddDays(-1);
-                    _toDate = today.AddDays(-1);
-                    break;
+			switch (rangeType)
+			{
+				case DateRangeType.Today:
+					_fromDate = today;
+					_toDate = today;
+					break;
 
-                case DateRangeType.CurrentMonth:
-                    _fromDate = new DateTime(currentYear, currentMonth, 1);
-                    _toDate = _fromDate.AddMonths(1).AddDays(-1);
-                    break;
+				case DateRangeType.Yesterday:
+					_fromDate = today.AddDays(-1);
+					_toDate = today.AddDays(-1);
+					break;
 
-                case DateRangeType.PreviousMonth:
-                    _fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
-                    _toDate = _fromDate.AddMonths(1).AddDays(-1);
-                    break;
+				case DateRangeType.CurrentMonth:
+					_fromDate = new DateTime(currentYear, currentMonth, 1);
+					_toDate = _fromDate.AddMonths(1).AddDays(-1);
+					break;
 
-                case DateRangeType.CurrentFinancialYear:
-                    var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
-                    _fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
-                    _toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-                    break;
+				case DateRangeType.PreviousMonth:
+					_fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
+					_toDate = _fromDate.AddMonths(1).AddDays(-1);
+					break;
 
-                case DateRangeType.PreviousFinancialYear:
-                    currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
-                    var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
-                    var previousFY = financialYears
-                    .Where(fy => fy.Id != currentFY.Id)
-                    .OrderByDescending(fy => fy.StartDate)
-                    .FirstOrDefault();
+				case DateRangeType.CurrentFinancialYear:
+					var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
+					_fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
+					_toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
+					break;
 
-                    if (previousFY == null)
-                    {
-                        await ShowToast("Warning", "No previous financial year found.", "error");
-                        return;
-                    }
+				case DateRangeType.PreviousFinancialYear:
+					currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
+					var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
+					var previousFY = financialYears
+					.Where(fy => fy.Id != currentFY.Id)
+					.OrderByDescending(fy => fy.StartDate)
+					.FirstOrDefault();
 
-                    _fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
-                    _toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-                    break;
+					if (previousFY == null)
+					{
+						await ShowToast("Warning", "No previous financial year found.", "error");
+						return;
+					}
 
-                case DateRangeType.AllTime:
-                    _fromDate = new DateTime(2000, 1, 1);
-                    _toDate = today;
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            await LoadKitchenProductionItemOverviews();
-            StateHasChanged();
-        }
-    }
-    #endregion
+					_fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
+					_toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
+					break;
 
-    #region Exporting
-    private async Task ExportExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        if (_isProcessing)
-            return;
+				case DateRangeType.AllTime:
+					_fromDate = new DateTime(2000, 1, 1);
+					_toDate = today;
+					break;
+			}
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			await LoadTransactionOverviews();
+			StateHasChanged();
+		}
+	}
+	#endregion
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	#region Exporting
+	private async Task ExportExcel()
+	{
+		if (_isProcessing)
+			return;
 
-            DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
-            DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-            var stream = await Task.Run(() =>
-            KitchenProductionItemReportExcelExport.ExportKitchenProductionItemReport(
-                    _kitchenProductionItemOverviews,
-                    dateRangeStart,
-                    dateRangeEnd,
-                    _showAllColumns
-                )
-            );
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
-            if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-                fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            fileName += ".xlsx";
+			var stream = await Task.Run(() =>
+			KitchenProductionItemReportExcelExport.ExportKitchenProductionItemReport(
+					_transactionOverviews,
+					dateRangeStart,
+					dateRangeEnd,
+					_showAllColumns
+				)
+			);
 
-            await SaveAndViewService.SaveAndView(fileName, stream);
+			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".xlsx";
 
-            await ShowToast("Success", "Kitchen production item report exported to Excel successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
-    private async Task ExportPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        if (_isProcessing)
-            return;
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	private async Task ExportPdf()
+	{
+		if (_isProcessing)
+			return;
 
-            DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
-            DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-            var stream = await Task.Run(() =>
-            KitchenProductionItemReportPDFExport.ExportKitchenProductionItemReport(
-            _kitchenProductionItemOverviews,
-            dateRangeStart,
-            dateRangeEnd,
-            _showAllColumns
-            )
-            );
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
-            if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-                fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            fileName += ".pdf";
+			var stream = await Task.Run(() =>
+				KitchenProductionItemReportPDFExport.ExportKitchenProductionItemReport(
+					_transactionOverviews,
+					dateRangeStart,
+					dateRangeEnd,
+					_showAllColumns
+				)
+			);
 
-            await SaveAndViewService.SaveAndView(fileName, stream);
+			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".pdf";
 
-            await ShowToast("Success", "Kitchen production item report exported to PDF successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-    #endregion
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
-    #region Actions
-    private async Task ViewKitchenProduction(int kitchenProductionId)
-    {
-        try
-        {
-            if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.KitchenProduction}/{kitchenProductionId}", "_blank");
-            else
-                NavigationManager.NavigateTo($"{PageRouteNames.KitchenProduction}/{kitchenProductionId}");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while opening kitchen production: {ex.Message}", "error");
-        }
-    }
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
 
-    private async Task DownloadInvoice(int kitchenProductionId)
-    {
-        if (_isProcessing)
-            return;
+	#region Actions
+	private async Task ViewSelectedCartItem()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await ViewTransaction(selectedCartItem.Id);
+	}
 
-            var (fileName, pdfStream) = await KitchenProductionData.GenerateAndDownloadInvoice(kitchenProductionId);
-            await SaveAndViewService.SaveAndView(pdfStream, fileName);
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
+	private async Task ViewTransaction(int transactionId)
+	{
+		try
+		{
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.KitchenProduction}/{transactionId}", "_blank");
+			else
+				NavigationManager.NavigateTo($"{PageRouteNames.KitchenProduction}/{transactionId}");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
+		}
+	}
 
-    private async Task ToggleDetailsView()
-    {
-        _showAllColumns = !_showAllColumns;
-        StateHasChanged();
+	private async Task DownloadSelectedCartItemInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
 
-        if (_sfKitchenProductionItemGrid is not null)
-            await _sfKitchenProductionItemGrid.Refresh();
-    }
-    #endregion
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadInvoice(selectedCartItem.Id);
+	}
 
-    #region Utilities
-    private async Task NavigateToKitchenProductionPage()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenProduction, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.KitchenProduction);
-    }
+	private async Task DownloadInvoice(int transactionId)
+	{
+		if (_isProcessing)
+			return;
 
-    private async Task NavigateToKitchenProductionReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProduction, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction);
-    }
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
+			var (fileName, pdfStream) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
+			await SaveAndViewService.SaveAndView(pdfStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
 
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
-    }
-    #endregion
+	private async Task ToggleDetailsView()
+	{
+		_showAllColumns = !_showAllColumns;
+		StateHasChanged();
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+	}
+	#endregion
+
+	#region Utilities
+	private async Task NavigateToTransactionPage()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenProduction, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.KitchenProduction);
+	}
+
+	private async Task NavigateToTransactionHistory()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProduction, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction);
+	}
+
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
+	{
+		VibrationService.VibrateWithTime(200);
+
+		if (type == "error")
+		{
+			_errorTitle = title;
+			_errorMessage = message;
+			await _sfErrorToast.ShowAsync(new()
+			{
+				Title = _errorTitle,
+				Content = _errorMessage
+			});
+		}
+		else if (type == "success")
+		{
+			_successTitle = title;
+			_successMessage = message;
+			await _sfSuccessToast.ShowAsync(new()
+			{
+				Title = _successTitle,
+				Content = _successMessage
+			});
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

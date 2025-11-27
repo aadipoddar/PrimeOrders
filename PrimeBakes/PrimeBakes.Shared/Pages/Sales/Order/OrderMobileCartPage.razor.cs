@@ -131,7 +131,7 @@ public partial class OrderMobileCartPage
         if (_user.LocationId <= 1)
             _validationErrors.Add(("Location", "Please select a valid location for the order."));
 
-        if (_validationErrors.Any())
+        if (_validationErrors.Count != 0)
         {
             _showValidationDialog = true;
             StateHasChanged();

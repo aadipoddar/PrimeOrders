@@ -20,7 +20,6 @@ public partial class SalesDashboard
         StateHasChanged();
     }
 
-    #region Sales Operations Navigation
     private async Task NavigateToOrder()
     {
         if (FormFactor.GetFormFactor() == "Web")
@@ -44,9 +43,15 @@ public partial class SalesDashboard
         else
             NavigationManager.NavigateTo(PageRouteNames.SaleReturn, true);
     }
-    #endregion
 
-    #region Master Data Navigation
+	private async Task NavigateToProductAdjustment()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ProductStockAdjustment, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment, true);
+	}
+	
     private async Task NavigateToProduct()
     {
         if (FormFactor.GetFormFactor() == "Web")
@@ -78,9 +83,7 @@ public partial class SalesDashboard
         else
             NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
     }
-    #endregion
-
-    #region Sales Reports Navigation
+    
     private async Task NavigateToOrderReport()
     {
         if (FormFactor.GetFormFactor() == "Web")
@@ -128,8 +131,15 @@ public partial class SalesDashboard
         else
             NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem, true);
     }
-    #endregion
 
-    private async Task Logout() =>
+	private async Task NavigateToProductStockReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportProductStock, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportProductStock, true);
+	}
+
+	private async Task Logout() =>
         await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }

@@ -17,9 +17,6 @@ public static class KitchenIssueData
     public static async Task<int> InsertKitchenIssueDetail(KitchenIssueDetailModel kitchenIssueDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertKitchenIssueDetail, kitchenIssueDetail)).FirstOrDefault();
 
-    public static async Task<List<KitchenIssueDetailModel>> LoadKitchenIssueDetailByKitchenIssue(int KitchenIssueId) =>
-        await SqlDataAccess.LoadData<KitchenIssueDetailModel, dynamic>(StoredProcedureNames.LoadKitchenIssueDetailByKitchenIssue, new { KitchenIssueId });
-
     public static async Task<List<KitchenIssueOverviewModel>> LoadKitchenIssueOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
         await SqlDataAccess.LoadData<KitchenIssueOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenIssueOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
@@ -30,14 +27,14 @@ public static class KitchenIssueData
     {
         try
         {
-            // Load saved kitchen issue details (since _kitchenIssue now has the Id)
-            var savedKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId) ??
-                throw new InvalidOperationException("Kitchen issue transaction not found.");
+			// Load saved transaction details
+			var savedKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId) ??
+                throw new InvalidOperationException("Transaction not found.");
 
-            // Load kitchen issue details from database
-            var kitchenIssueDetails = await LoadKitchenIssueDetailByKitchenIssue(savedKitchenIssue.Id);
+            // Load transaction details from database
+            var kitchenIssueDetails = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, savedKitchenIssue.Id);
             if (kitchenIssueDetails is null || kitchenIssueDetails.Count == 0)
-                throw new InvalidOperationException("No kitchen issue details found for the transaction.");
+                throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company and kitchen
             var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedKitchenIssue.CompanyId);
@@ -91,7 +88,7 @@ public static class KitchenIssueData
         var kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenIssue.FinancialYearId);
         if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete kitchen issue transaction as the financial year is locked.");
+            throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (kitchenIssue is not null)
         {
@@ -103,7 +100,7 @@ public static class KitchenIssueData
 
     public static async Task RecoverKitchenIssueTransaction(KitchenIssueModel kitchenIssue)
     {
-        var kitchenIssueDetails = await LoadKitchenIssueDetailByKitchenIssue(kitchenIssue.Id);
+        var kitchenIssueDetails = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, kitchenIssue.Id);
         List<KitchenIssueItemCartModel> kitchenIssueItemCarts = [];
 
         foreach (var item in kitchenIssueDetails)
@@ -152,7 +149,7 @@ public static class KitchenIssueData
     {
         if (update)
         {
-            var existingKitchenIssueDetails = await LoadKitchenIssueDetailByKitchenIssue(kitchenIssue.Id);
+            var existingKitchenIssueDetails = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, kitchenIssue.Id);
             foreach (var item in existingKitchenIssueDetails)
             {
                 item.Status = false;
@@ -164,7 +161,7 @@ public static class KitchenIssueData
             await InsertKitchenIssueDetail(new()
             {
                 Id = 0,
-                KitchenIssueId = kitchenIssue.Id,
+                MasterId = kitchenIssue.Id,
                 RawMaterialId = item.ItemId,
                 Quantity = item.Quantity,
                 UnitOfMeasurement = item.UnitOfMeasurement,

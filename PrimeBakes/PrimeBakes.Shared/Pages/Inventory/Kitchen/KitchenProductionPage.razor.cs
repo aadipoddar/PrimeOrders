@@ -18,10 +18,15 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Inventory.Kitchen;
 
-public partial class KitchenProductionPage
+public partial class KitchenProductionPage : IAsyncDisposable
 {
+    [Inject] private HotKeys HotKeys { get; set; }
+    private HotKeysContext _hotKeysContext;
+
     [Parameter] public int? Id { get; set; }
 
     private UserModel _user;
@@ -61,7 +66,7 @@ public partial class KitchenProductionPage
         if (!firstRender)
             return;
 
-		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+        _user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -69,9 +74,22 @@ public partial class KitchenProductionPage
 
     private async Task LoadData()
     {
-        await LoadCompanies();
+        _hotKeysContext = HotKeys.CreateContext()
+            .Add(ModCode.Ctrl, Code.A, AddItemToCart, "Add item to cart", Exclude.None)
+            .Add(ModCode.Ctrl, Code.E, () => _sfItemAutoComplete.FocusAsync(), "Focus on item input", Exclude.None)
+            .Add(ModCode.Ctrl, Code.S, SaveTransaction, "Save the transaction", Exclude.None)
+            .Add(ModCode.Ctrl, Code.P, DownloadInvoice, "Download invoice", Exclude.None)
+            .Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistoryPage, "Open transaction history", Exclude.None)
+            .Add(ModCode.Ctrl, Code.I, NavigateToItemReport, "Open item report", Exclude.None)
+            .Add(ModCode.Ctrl, Code.N, ResetPage, "Reset the page", Exclude.None)
+            .Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+            .Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(Code.Delete, RemoveSelectedCartItem, "Delete selected cart item", Exclude.None)
+			.Add(Code.Insert, EditSelectedCartItem, "Edit selected cart item", Exclude.None);
+
+		await LoadCompanies();
         await LoadKitchens();
-        await LoadExistingKitchenProduction();
+        await LoadExistingTransaction();
         await LoadItems();
         await LoadExistingCart();
         await SaveTransactionFile();
@@ -118,7 +136,7 @@ public partial class KitchenProductionPage
         }
     }
 
-    private async Task LoadExistingKitchenProduction()
+    private async Task LoadExistingTransaction()
     {
         try
         {
@@ -127,7 +145,7 @@ public partial class KitchenProductionPage
                 _kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, Id.Value);
                 if (_kitchenProduction is null)
                 {
-                    await ShowToast("Kitchen Production Not Found", "The requested kitchen production could not be found.", "error");
+                    await ShowToast("Transaction Not Found", "The requested transaction could not be found.", "error");
                     NavigationManager.NavigateTo(PageRouteNames.KitchenProduction, true);
                 }
             }
@@ -146,6 +164,8 @@ public partial class KitchenProductionPage
                     TransactionDateTime = await CommonData.LoadCurrentDateTime(),
                     FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(await CommonData.LoadCurrentDateTime())).Id,
                     CreatedBy = _user.Id,
+                    TotalItems = 0,
+                    TotalQuantity = 0,
                     TotalAmount = 0,
                     Remarks = "",
                     CreatedAt = DateTime.Now,
@@ -178,7 +198,7 @@ public partial class KitchenProductionPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Kitchen Production Data", ex.Message, "error");
+            await ShowToast("An Error Occurred While Loading Transaction Data", ex.Message, "error");
             await DeleteLocalFiles();
         }
         finally
@@ -213,13 +233,15 @@ public partial class KitchenProductionPage
 
             if (_kitchenProduction.Id > 0)
             {
-                var existingCart = await KitchenProductionData.LoadKitchenProductionDetailByKitchenProduction(_kitchenProduction.Id);
+                var existingCart = await CommonData.LoadTableDataByMasterId<KitchenProductionProductCartModel>(TableNames.KitchenProductionDetail, _kitchenProduction.Id);
 
                 foreach (var item in existingCart)
                 {
                     if (_products.FirstOrDefault(s => s.Id == item.ProductId) is null)
                     {
-                        await ShowToast("Product Not Found", $"The product with ID {item.ProductId} in the existing kitchen production cart was not found in the available products list. It may have been deleted or is inaccessible.", "error");
+                        var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+
+                        await ShowToast("Product Not Found", $"The product {product?.Name} (ID: {item.ProductId}) in the existing transaction cart was not found in the available products list. It may have been deleted or is inaccessible.", "error");
                         continue;
                     }
 
@@ -400,7 +422,16 @@ public partial class KitchenProductionPage
         await SaveTransactionFile();
     }
 
-    private async Task EditCartItem(KitchenProductionProductCartModel cartItem)
+	private async Task EditSelectedCartItem()
+	{
+		if (_sfCartGrid is null || _sfCartGrid.SelectedRecords is null || _sfCartGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfCartGrid.SelectedRecords.First();
+		await EditCartItem(selectedCartItem);
+	}
+
+	private async Task EditCartItem(KitchenProductionProductCartModel cartItem)
     {
         _selectedProduct = _products.FirstOrDefault(s => s.Id == cartItem.ProductId);
 
@@ -421,7 +452,16 @@ public partial class KitchenProductionPage
         await RemoveItemFromCart(cartItem);
     }
 
-    private async Task RemoveItemFromCart(KitchenProductionProductCartModel cartItem)
+	private async Task RemoveSelectedCartItem()
+	{
+		if (_sfCartGrid is null || _sfCartGrid.SelectedRecords is null || _sfCartGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfCartGrid.SelectedRecords.First();
+		await RemoveItemFromCart(selectedCartItem);
+	}
+
+	private async Task RemoveItemFromCart(KitchenProductionProductCartModel cartItem)
     {
         _cart.Remove(cartItem);
         await SaveTransactionFile();
@@ -443,6 +483,8 @@ public partial class KitchenProductionPage
                 item.Remarks = null;
         }
 
+        _kitchenProduction.TotalItems = _cart.Count;
+        _kitchenProduction.TotalQuantity = _cart.Sum(x => x.Quantity);
         _kitchenProduction.TotalAmount = _cart.Sum(x => x.Total);
         _itemAfterTaxTotal = _cart.Sum(x => x.Total);
 
@@ -497,33 +539,27 @@ public partial class KitchenProductionPage
 
     private async Task<bool> ValidateForm()
     {
-        if (_cart.Count == 0)
-        {
-            await ShowToast("Cart is Empty", "Please add at least one product to the cart before saving the transaction.", "error");
-            return false;
-        }
-
         if (_selectedCompany is null || _kitchenProduction.CompanyId <= 0)
         {
-            await ShowToast("Company Not Selected", "Please select a company for the kitchen production transaction.", "error");
+            await ShowToast("Company Not Selected", "Please select a company for the transaction.", "error");
             return false;
         }
 
         if (_selectedKitchen is null || _kitchenProduction.KitchenId <= 0)
         {
-            await ShowToast("Kitchen Not Selected", "Please select a kitchen for the kitchen production transaction.", "error");
+            await ShowToast("Kitchen Not Selected", "Please select a kitchen for the transaction.", "error");
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(_kitchenProduction.TransactionNo))
         {
-            await ShowToast("Transaction Number Missing", "Please enter a transaction number for the kitchen production.", "error");
+            await ShowToast("Transaction Number Missing", "Please enter a transaction number for the transaction.", "error");
             return false;
         }
 
         if (_kitchenProduction.TransactionDateTime == default)
         {
-            await ShowToast("Transaction Date Missing", "Please select a valid transaction date for the kitchen production.", "error");
+            await ShowToast("Transaction Date Missing", "Please select a valid transaction date for the transaction.", "error");
             return false;
         }
 
@@ -545,9 +581,21 @@ public partial class KitchenProductionPage
             return false;
         }
 
+        if (_kitchenProduction.TotalItems <= 0)
+        {
+            await ShowToast("No Items in Cart", "The transaction must contain at least one item in the cart.", "error");
+            return false;
+        }
+
+        if (_kitchenProduction.TotalQuantity <= 0)
+        {
+            await ShowToast("Invalid Total Quantity", "The total quantity of the transaction must be greater than zero.", "error");
+            return false;
+        }
+
         if (_kitchenProduction.TotalAmount < 0)
         {
-            await ShowToast("Invalid Total Amount", "The total amount of the kitchen production transaction must be greater than zero.", "error");
+            await ShowToast("Invalid Total Amount", "The total amount of the transaction must be greater than zero.", "error");
             return false;
         }
 
@@ -589,6 +637,7 @@ public partial class KitchenProductionPage
         try
         {
             _isProcessing = true;
+            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             await SaveTransactionFile();
 
@@ -633,7 +682,7 @@ public partial class KitchenProductionPage
     #endregion
 
     #region Utilities
-    private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ResetPage()
     {
         await DeleteLocalFiles();
         NavigationManager.NavigateTo(PageRouteNames.KitchenProduction, true);
@@ -646,6 +695,48 @@ public partial class KitchenProductionPage
         else
             NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction);
     }
+
+    private async Task NavigateToItemReport()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProductionItem, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem);
+    }
+
+    private async Task DownloadInvoice()
+    {
+        if (!Id.HasValue || Id.Value <= 0)
+        {
+            await ShowToast("No Transaction Selected", "Please save the transaction first before downloading the invoice.", "error");
+            return;
+        }
+
+        if (_isProcessing)
+            return;
+
+        try
+        {
+            _isProcessing = true;
+            var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(Id.Value);
+            await SaveAndViewService.SaveAndView(fileName, pdfStream);
+            await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+        }
+        catch (Exception ex)
+        {
+            await ShowToast("An Error Occurred While Downloading Invoice", ex.Message, "error");
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task NavigateToDashboard() =>
+        NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+    private async Task NavigateBack() =>
+        NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
 
     private async Task ShowToast(string title, string message, string type)
     {
@@ -672,6 +763,12 @@ public partial class KitchenProductionPage
                 Content = _successMessage
             });
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hotKeysContext is not null)
+            await _hotKeysContext.DisposeAsync();
     }
     #endregion
 }

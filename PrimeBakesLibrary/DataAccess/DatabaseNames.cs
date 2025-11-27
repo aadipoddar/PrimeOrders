@@ -47,6 +47,7 @@ public static class StoredProcedureNames
     public static string LoadTableData => "Load_TableData";
     public static string LoadTableDataById => "Load_TableData_By_Id";
     public static string LoadTableDataByStatus => "Load_TableData_By_Status";
+    public static string LoadTableDataByMasterId => "Load_TableData_By_MasterId";
     public static string LoadTableDataByCode => "Load_TableData_By_Code";
     public static string LoadTableDataByTransactionNo => "Load_TableData_By_TransactionNo";
     public static string LoadLastTableDataByFinancialYear => "Load_LastTableData_By_FinancialYear";
@@ -70,10 +71,8 @@ public static class StoredProcedureNames
     public static string LoadPurchaseReturnOverviewByDate => "Load_PurchaseReturn_Overview_By_Date";
     public static string LoadPurchaseReturnItemOverviewByDate => "Load_PurchaseReturn_Item_Overview_By_Date";
 
-    public static string LoadKitchenIssueDetailByKitchenIssue => "Load_KitchenIssueDetail_By_KitchenIssue";
     public static string LoadKitchenIssueOverviewByDate => "Load_KitchenIssueOverview_By_Date";
     public static string LoadKitchenIssueItemOverviewByDate => "Load_KitchenIssue_Item_Overview_By_Date";
-    public static string LoadKitchenProductionDetailByKitchenProduction => "Load_KitchenProductionDetail_By_KitchenProduction";
     public static string LoadKitchenProductionOverviewByDate => "Load_KitchenProductionOverview_By_Date";
     public static string LoadKitchenProductionItemOverviewByDate => "Load_KitchenProduction_Item_Overview_By_Date";
 

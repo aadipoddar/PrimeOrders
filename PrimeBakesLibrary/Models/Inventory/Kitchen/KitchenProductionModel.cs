@@ -8,7 +8,9 @@ public class KitchenProductionModel
     public DateTime TransactionDateTime { get; set; }
     public int FinancialYearId { get; set; }
     public int KitchenId { get; set; }
-    public decimal TotalAmount { get; set; }
+    public int TotalItems { get; set; }
+    public decimal TotalQuantity { get; set; }
+	public decimal TotalAmount { get; set; }
     public string? Remarks { get; set; }
     public int CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -75,7 +77,7 @@ public class KitchenProductionItemOverviewModel
     public int ItemCategoryId { get; set; }
     public string ItemCategoryName { get; set; }
 
-    public int KitchenProductionId { get; set; }
+    public int MasterId { get; set; }
     public string TransactionNo { get; set; }
     public DateTime TransactionDateTime { get; set; }
     public int CompanyId { get; set; }

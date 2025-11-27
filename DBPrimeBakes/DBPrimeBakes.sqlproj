@@ -202,11 +202,9 @@
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Id.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenIssue_Overview.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenIssue_Item_Overview.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssueDetail_By_KitchenIssue.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssue_Item_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssueOverview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionDetail_By_KitchenProduction.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionOverview_By_Date.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenProduction_Overview.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenProduction_Item_Overview.sql" />
@@ -268,6 +266,7 @@
     <Build Include="StoredProcedures\LoadData\Sales\Product\Load_Product_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Product\Load_Product_By_ProductCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Product\Load_ProductRate_By_Product.sql" />
+    <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_MasterId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

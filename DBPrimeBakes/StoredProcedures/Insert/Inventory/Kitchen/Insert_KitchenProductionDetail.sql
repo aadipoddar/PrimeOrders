@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_KitchenProductionDetail]
 	@Id INT OUTPUT,
-	@KitchenProductionId INT,
+	@MasterId INT,
 	@ProductId INT,
 	@Quantity MONEY,
 	@Rate MONEY,
@@ -13,7 +13,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[KitchenProductionDetail]
 		(
-			KitchenProductionId,
+			MasterId,
 			ProductId,
 			Quantity,
 			Rate,
@@ -23,7 +23,7 @@ BEGIN
 		)
 		VALUES
 		(
-			@KitchenProductionId,
+			@MasterId,
 			@ProductId,
 			@Quantity,
 			@Rate,
@@ -37,7 +37,7 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE [dbo].[KitchenProductionDetail]
-		SET KitchenProductionId = @KitchenProductionId,
+		SET [MasterId] = @MasterId,
 			ProductId = @ProductId,
 			Quantity = @Quantity,
 			Rate = @Rate,

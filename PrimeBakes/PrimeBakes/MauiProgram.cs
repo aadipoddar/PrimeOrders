@@ -9,6 +9,8 @@ using PrimeBakesLibrary.DataAccess;
 
 using Syncfusion.Blazor;
 
+using Toolbelt.Blazor.Extensions.DependencyInjection;
+
 namespace PrimeBakes;
 
 public static class MauiProgram
@@ -42,9 +44,10 @@ public static class MauiProgram
 
         builder.Services.AddMauiBlazorWebView();
         builder.Services.AddSyncfusionBlazor();
+		builder.Services.AddHotKeys2();
 
 #if DEBUG
-        builder.Services.AddBlazorWebViewDeveloperTools();
+		builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
 #endif
 

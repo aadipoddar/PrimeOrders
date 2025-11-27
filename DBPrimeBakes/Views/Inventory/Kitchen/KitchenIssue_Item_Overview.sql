@@ -7,7 +7,7 @@ SELECT
 	[rc].[Id] AS ItemCategoryId,
 	[rc].[Name] AS ItemCategoryName,
 
-	[ki].[Id] AS KitchenIssueId,
+	[ki].[Id] AS MasterId,
 	[ki].[TransactionNo],
 	[ki].[TransactionDateTime],
 	[c].[Id] AS CompanyId,
@@ -26,7 +26,7 @@ FROM
 	[dbo].[KitchenIssueDetail] kid
 
 INNER JOIN
-	[dbo].[KitchenIssue] ki ON kid.KitchenIssueId = ki.Id
+	[dbo].[KitchenIssue] ki ON kid.[MasterId] = ki.Id
 INNER JOIN
 	[dbo].[RawMaterial] r ON kid.RawMaterialId = r.Id
 INNER JOIN
