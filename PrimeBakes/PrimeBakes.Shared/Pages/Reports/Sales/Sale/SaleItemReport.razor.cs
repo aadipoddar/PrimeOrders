@@ -54,8 +54,7 @@ public partial class SaleItemReport
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales);
         await LoadData();
         _isLoading = false;
         StateHasChanged();

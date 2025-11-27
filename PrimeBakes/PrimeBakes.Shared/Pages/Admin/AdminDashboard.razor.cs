@@ -10,12 +10,15 @@ public partial class AdminDashboard
 {
     private bool _isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _isLoading = true;
-        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
         _isLoading = false;
-    }
+		StateHasChanged();
+	}
 
     #region Raw Materials Navigation
     private async Task NavigateToRawMaterial()
@@ -162,5 +165,5 @@ public partial class AdminDashboard
     #endregion
 
     private async Task Logout() =>
-        await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }

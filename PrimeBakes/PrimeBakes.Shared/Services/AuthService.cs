@@ -4,9 +4,9 @@ using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakes.Shared.Services;
 
-public static class AuthService
+public static class AuthenticationService
 {
-    public static async Task<AuthenticationResult> ValidateUser(IDataStorageService dataStorageService, NavigationManager navigationManager, INotificationService notificationService, IVibrationService vibrationService, Enum userRoles = null, bool primaryLocationRequirement = false)
+    public static async Task<UserModel> ValidateUser(IDataStorageService dataStorageService, NavigationManager navigationManager, INotificationService notificationService, IVibrationService vibrationService, Enum userRoles = null, bool primaryLocationRequirement = false)
     {
         var userData = await dataStorageService.SecureGetAsync(StorageFileNames.UserDataFileName);
         if (string.IsNullOrEmpty(userData))
@@ -23,7 +23,7 @@ public static class AuthService
             await Logout(dataStorageService, navigationManager, notificationService, vibrationService);
 
         if (userRoles is null)
-            return new AuthenticationResult(true, user, null);
+            return user;
 
         var hasPermission = userRoles switch
         {
@@ -38,7 +38,7 @@ public static class AuthService
         if (!hasPermission)
             await Logout(dataStorageService, navigationManager, notificationService, vibrationService);
 
-        return new AuthenticationResult(true, user, null);
+        return user;
     }
 
     public static async Task Logout(IDataStorageService dataStorageService, NavigationManager navigationManager, INotificationService notificationService, IVibrationService vibrationService)
@@ -46,6 +46,6 @@ public static class AuthService
         await dataStorageService.SecureRemoveAll();
         await notificationService.DeregisterDevicePushNotification();
         vibrationService.VibrateWithTime(500);
-        navigationManager.NavigateTo("/Login", forceLoad: true);
+        navigationManager.NavigateTo(PageRouteNames.Login, forceLoad: true);
     }
 }

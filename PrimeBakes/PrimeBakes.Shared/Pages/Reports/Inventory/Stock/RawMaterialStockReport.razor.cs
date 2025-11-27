@@ -55,7 +55,7 @@ public partial class RawMaterialStockReport
         if (!firstRender)
             return;
 
-        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+        await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -478,9 +478,9 @@ public partial class RawMaterialStockReport
     private async Task NavigateToStockAdjustmentPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/inventory/raw-material-stock-adjustment", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.RawMaterialStockAdjustment, "_blank");
         else
-            NavigationManager.NavigateTo("/inventory/raw-material-stock-adjustment");
+            NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment);
     }
 
     private async Task ShowToast(string title, string message, string type)

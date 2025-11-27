@@ -10,12 +10,15 @@ public partial class InventoryDashboard
 {
     private bool _isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _isLoading = true;
-        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         _isLoading = false;
-    }
+        StateHasChanged();
+	}
 
     private async Task NavigateToPurchase()
     {
@@ -180,5 +183,5 @@ public partial class InventoryDashboard
     #endregion
 
     private async Task Logout() =>
-        await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }

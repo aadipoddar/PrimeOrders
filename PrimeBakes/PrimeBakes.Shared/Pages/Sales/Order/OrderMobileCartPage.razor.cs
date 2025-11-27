@@ -40,14 +40,17 @@ public partial class OrderMobileCartPage
     private SfToast _sfSuccessToast;
     private SfToast _sfErrorToast;
 
-    #region Load Data
-    protected override async Task OnInitializedAsync()
-    {
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Order);
-        _user = authResult.User;
+	#region Load Data
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Order);
         await LoadData();
         _isLoading = false;
-    }
+        StateHasChanged();
+	}
 
     private async Task LoadData()
     {

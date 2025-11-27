@@ -10,10 +10,12 @@ public partial class SalesDashboard
 {
     private bool _isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _isLoading = true;
-        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales, true);
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Sales, true);
         _isLoading = false;
     }
 
@@ -128,5 +130,5 @@ public partial class SalesDashboard
     #endregion
 
     private async Task Logout() =>
-        await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }

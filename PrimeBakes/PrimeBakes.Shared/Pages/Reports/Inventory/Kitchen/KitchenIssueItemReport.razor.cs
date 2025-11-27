@@ -50,8 +50,7 @@ public partial class KitchenIssueItemReport
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -321,9 +320,9 @@ public partial class KitchenIssueItemReport
         try
         {
             if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", $"/inventory/kitchen-issue/{kitchenIssueId}", "_blank");
+                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.KitchenIssue}/{kitchenIssueId}", "_blank");
             else
-                NavigationManager.NavigateTo($"/inventory/kitchen-issue/{kitchenIssueId}");
+                NavigationManager.NavigateTo($"{PageRouteNames.KitchenIssue}/{kitchenIssueId}");
         }
         catch (Exception ex)
         {
@@ -369,17 +368,17 @@ public partial class KitchenIssueItemReport
     private async Task NavigateToKitchenIssuePage()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/inventory/kitchen-issue", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenIssue, "_blank");
         else
-            NavigationManager.NavigateTo("/inventory/kitchen-issue");
+            NavigationManager.NavigateTo(PageRouteNames.KitchenIssue);
     }
 
     private async Task NavigateToKitchenIssueReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/report/kitchen-issue", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenIssue, "_blank");
         else
-            NavigationManager.NavigateTo("/report/kitchen-issue");
+            NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue);
     }
 
     private async Task ShowToast(string title, string message, string type)

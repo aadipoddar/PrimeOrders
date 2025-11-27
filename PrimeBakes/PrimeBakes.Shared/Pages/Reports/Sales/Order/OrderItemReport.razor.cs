@@ -51,8 +51,7 @@ public partial class OrderItemReport
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Order);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Order);
         await LoadData();
         _isLoading = false;
         StateHasChanged();

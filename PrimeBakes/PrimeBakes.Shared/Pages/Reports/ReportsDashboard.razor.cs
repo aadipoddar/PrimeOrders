@@ -11,13 +11,15 @@ public partial class ReportsDashboard
     private bool _isLoading = true;
     private UserModel _user;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _isLoading = true;
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
-        _user = authResult.User;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
         _isLoading = false;
-    }
+        StateHasChanged();
+	}
 
     #region Sales Reports Navigation
     private async Task NavigateToSaleReport()
@@ -178,5 +180,5 @@ public partial class ReportsDashboard
     #endregion
 
     private async Task Logout() =>
-        await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }

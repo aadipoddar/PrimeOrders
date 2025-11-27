@@ -62,8 +62,7 @@ public partial class PurchaseReport
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -418,17 +417,17 @@ public partial class PurchaseReport
                 // Navigate to Purchase Return Page
                 int actualId = Math.Abs(purchaseId);
                 if (FormFactor.GetFormFactor() == "Web")
-                    await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{actualId}", "_blank");
+                    await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{actualId}", "_blank");
                 else
-                    NavigationManager.NavigateTo($"/inventory/purchase-return/{actualId}");
+                    NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{actualId}");
             }
             else
             {
                 // Navigate to Purchase Page
                 if (FormFactor.GetFormFactor() == "Web")
-                    await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase/{purchaseId}", "_blank");
+                    await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Purchase}/{purchaseId}", "_blank");
                 else
-                    NavigationManager.NavigateTo($"/inventory/purchase/{purchaseId}");
+                    NavigationManager.NavigateTo($"{PageRouteNames.Purchase}/{purchaseId}");
             }
         }
         catch (Exception ex)
@@ -645,17 +644,17 @@ public partial class PurchaseReport
     private async Task NavigateToPurchasePage()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/inventory/purchase", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.Purchase, "_blank");
         else
-            NavigationManager.NavigateTo("/inventory/purchase");
+            NavigationManager.NavigateTo(PageRouteNames.Purchase);
     }
 
     private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/report/purchase-item", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseItem, "_blank");
         else
-            NavigationManager.NavigateTo("/report/purchase-item");
+            NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem);
     }
 
     private async Task ShowToast(string title, string message, string type)

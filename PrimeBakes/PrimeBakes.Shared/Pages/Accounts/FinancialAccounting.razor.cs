@@ -65,8 +65,7 @@ public partial class FinancialAccounting
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Accounts, true);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Accounts, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();

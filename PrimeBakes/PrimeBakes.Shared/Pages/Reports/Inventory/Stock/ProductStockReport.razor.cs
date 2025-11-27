@@ -57,7 +57,7 @@ public partial class ProductStockReport
         if (!firstRender)
             return;
 
-        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+        await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -520,9 +520,9 @@ public partial class ProductStockReport
     private async Task NavigateToStockAdjustmentPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/inventory/product-stock-adjustment", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ProductStockAdjustment, "_blank");
         else
-            NavigationManager.NavigateTo("/inventory/product-stock-adjustment");
+            NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment);
     }
 
     private async Task ShowToast(string title, string message, string type)

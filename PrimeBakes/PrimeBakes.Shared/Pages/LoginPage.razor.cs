@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-
+using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Models.Common;
 
@@ -22,9 +22,6 @@ public partial class LoginPage
         await DataStorageService.SecureRemoveAll();
     }
 
-    protected override async Task OnInitializedAsync() =>
-        await DataStorageService.SecureRemoveAll();
-
     private async Task CheckPasscode(OtpInputEventArgs e)
     {
         _passcode = e.Value?.ToString() ?? string.Empty;
@@ -45,6 +42,6 @@ public partial class LoginPage
 
         await DataStorageService.SecureSaveAsync(StorageFileNames.UserDataFileName, System.Text.Json.JsonSerializer.Serialize(user));
         VibrationService.VibrateWithTime(500);
-        NavManager.NavigateTo("/");
+        NavManager.NavigateTo(PageRouteNames.Dashboard);
     }
 }

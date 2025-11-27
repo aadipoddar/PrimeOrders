@@ -60,8 +60,7 @@ public partial class KitchenProductionReport
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -332,9 +331,9 @@ public partial class KitchenProductionReport
         try
         {
             if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", $"/inventory/kitchen-production/{kitchenProductionId}", "_blank");
+                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.KitchenProduction}/{kitchenProductionId}", "_blank");
             else
-                NavigationManager.NavigateTo($"/inventory/kitchen-production/{kitchenProductionId}");
+                NavigationManager.NavigateTo($"{PageRouteNames.KitchenProduction}/{kitchenProductionId}");
         }
         catch (Exception ex)
         {
@@ -477,17 +476,17 @@ public partial class KitchenProductionReport
     private async Task NavigateToKitchenProductionPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/inventory/kitchen-production", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.KitchenProduction, "_blank");
         else
-            NavigationManager.NavigateTo("/inventory/kitchen-production");
+            NavigationManager.NavigateTo(PageRouteNames.KitchenProduction);
     }
 
     private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/report/kitchen-production-item", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportKitchenProductionItem, "_blank");
         else
-            NavigationManager.NavigateTo("/report/kitchen-production-item");
+            NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem);
     }
 
     private async Task ShowToast(string title, string message, string type)

@@ -10,12 +10,15 @@ public partial class AccountingDashboard
 {
     private bool _isLoading = true;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _isLoading = true;
-        await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Accounts, true);
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Accounts, true);
         _isLoading = false;
-    }
+		StateHasChanged();
+	}
 
     #region Entry Pages Navigation
     private async Task NavigateToFinancialAccounting()
@@ -120,5 +123,5 @@ public partial class AccountingDashboard
     #endregion
 
     private async Task Logout() =>
-        await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
 }

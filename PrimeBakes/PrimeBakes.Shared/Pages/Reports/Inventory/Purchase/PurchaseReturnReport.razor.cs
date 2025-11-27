@@ -63,8 +63,7 @@ public partial class PurchaseReturnReport
         if (!firstRender)
             return;
 
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
-        _user = authResult.User;
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
         await LoadData();
         _isLoading = false;
         StateHasChanged();
@@ -343,9 +342,9 @@ public partial class PurchaseReturnReport
         try
         {
             if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", $"/inventory/purchase-return/{purchaseId}", "_blank");
+                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{purchaseId}", "_blank");
             else
-                NavigationManager.NavigateTo($"/inventory/purchase-return/{purchaseId}");
+                NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{purchaseId}");
         }
         catch (Exception ex)
         {
@@ -504,17 +503,17 @@ public partial class PurchaseReturnReport
     private async Task NavigateToPurchaseReturnPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/inventory/purchase-return", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.PurchaseReturn, "_blank");
         else
-            NavigationManager.NavigateTo("/inventory/purchase-return");
+            NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn);
     }
 
     private async Task NavigateToItemReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
         if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", "/report/purchase-return-item", "_blank");
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturnItem, "_blank");
         else
-            NavigationManager.NavigateTo("/report/purchase-return-item");
+            NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem);
     }
 
     private async Task ShowToast(string title, string message, string type)

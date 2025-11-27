@@ -102,18 +102,17 @@ public partial class Dashboard : IDisposable
 
     private async Task LoadData()
     {
-        var authResult = await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
-        _user = authResult.User;
+        _user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
 
         if (Factor == "Phone" && Platform.Contains("Android"))
             await NotificationService.RegisterDevicePushNotification(_user.Id.ToString());
     }
-
-    private async Task Logout() =>
-        await AuthService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
     #endregion
 
     #region Navigation
+    private async Task Logout() =>
+        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+
     private async Task NavigateToSales()
     {
         if (FormFactor.GetFormFactor() == "Web")

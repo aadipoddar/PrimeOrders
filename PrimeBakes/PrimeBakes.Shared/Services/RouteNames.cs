@@ -3,8 +3,9 @@
 internal static class PageRouteNames
 {
     public static string Dashboard => "/";
+    public static string Login => "/login";
 
-    public static string InventoryDashboard => "/inventory";
+	public static string InventoryDashboard => "/inventory";
     public static string Purchase => "/inventory/purchase";
     public static string PurchaseReturn => "/inventory/purchase-return";
     public static string KitchenIssue => "/inventory/kitchen-issue";

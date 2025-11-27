@@ -12,7 +12,7 @@ public class UserModel
     public bool Accounts { get; set; }
     public bool Admin { get; set; }
     public string? Remarks { get; set; }
-	public bool Status { get; set; }
+    public bool Status { get; set; }
 }
 
 public enum UserRoles
@@ -23,8 +23,3 @@ public enum UserRoles
     Inventory,
     Accounts
 }
-
-public record AuthenticationResult(
-    bool IsAuthenticated,
-    UserModel User = null,
-    string ErrorMessage = null);

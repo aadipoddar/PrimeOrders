@@ -54,7 +54,7 @@ public partial class LocationPage
 		if (!firstRender)
 			return;
 
-		await AuthService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
+		await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Admin, true);
 		await LoadData();
 		_isLoading = false;
 		StateHasChanged();
