@@ -277,12 +277,12 @@ else
 						<GridColumn HeaderText="Actions" Width="160" TextAlign="TextAlign.Center">
 							<Template>
 								@{
-									var kitchenIssue = (context as KitchenProductionOverviewModel);
+									var item = (context as KitchenProductionOverviewModel);
 								}
 								<div class="grid-actions">
-									@if (kitchenIssue.Status == false)
+									@if (item.Status == false)
 									{
-										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(kitchenIssue.Id)" title="Download Invoice (Alt + P)" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id)" title="Download Invoice (Alt + P)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -291,7 +291,7 @@ else
 												<line x1="12" y1="15" x2="12" y2="3" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-recover" @onclick="() => ShowRecoverConfirmation(kitchenIssue.Id, kitchenIssue.TransactionNo)" title="Recover Transaction (Delete)" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-recover" @onclick="() => ShowRecoverConfirmation(item.Id, item.TransactionNo)" title="Recover Transaction (Delete)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -302,7 +302,7 @@ else
 									}
 									else
 									{
-										<button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(kitchenIssue.Id)" title="View Transaction (Ctrl + O)" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(item.Id)" title="View Transaction (Ctrl + O)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -310,7 +310,7 @@ else
 												<circle cx="12" cy="12" r="3" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(kitchenIssue.Id)" title="Download Invoice" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id)" title="Download Invoice" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -319,7 +319,7 @@ else
 												<line x1="12" y1="15" x2="12" y2="3" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-delete" @onclick="() => ShowDeleteConfirmation(kitchenIssue.Id, kitchenIssue.TransactionNo)" title="Delete Transaction (Delete)" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-delete" @onclick="() => ShowDeleteConfirmation(item.Id, item.TransactionNo)" title="Delete Transaction (Delete)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -334,22 +334,14 @@ else
 								</div>
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TransactionNo)"
-							HeaderText="Transaction No" Width="170" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TransactionDateTime)" HeaderText="Date"
-							Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CompanyName)" HeaderText="Company"
-							Width="180" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.KitchenName)" HeaderText="Kitchen"
-							Width="200" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.FinancialYear)"
-							HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalItems)" HeaderText="Items"
-							Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalQuantity)" HeaderText="Quantity"
-							Width="120" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalAmount)" HeaderText="Total"
-							Width="150" TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.KitchenName)" HeaderText="Kitchen" Width="200" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.TotalAmount)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var item = (context as KitchenProductionOverviewModel);
@@ -357,20 +349,13 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.Remarks)" HeaderText="Remarks" Width="200"
-							Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CreatedByName)" HeaderText="Created By"
-							Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CreatedAt)" HeaderText="Created At"
-							Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CreatedFromPlatform)"
-							HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.LastModifiedByUserName)"
-							HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.LastModifiedAt)" HeaderText="Modified At"
-							Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenProductionOverviewModel.LastModifiedFromPlatform)"
-							HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenProductionOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
 					</GridColumns>
 				</SfGrid>
 			</div>

@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[PurchaseReturnDetail]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [PurchaseReturnId] INT NOT NULL,
+    [MasterId] INT NOT NULL,
 	[RawMaterialId] INT NOT NULL,
 	[Quantity] MONEY NOT NULL DEFAULT 1,
 	[UnitOfMeasurement] VARCHAR(20) NOT NULL,
@@ -22,6 +22,6 @@
 	[NetRate] MONEY NOT NULL DEFAULT 0,
 	[Remarks] VARCHAR(MAX) NULL,
 	[Status] BIT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_PurchaseReturnDetail_ToPurchaseReturn] FOREIGN KEY ([PurchaseReturnId]) REFERENCES [PurchaseReturn]([Id]),
+    CONSTRAINT [FK_PurchaseReturnDetail_ToPurchaseReturn] FOREIGN KEY ([MasterId]) REFERENCES [PurchaseReturn]([Id]),
 	CONSTRAINT [FK_PurchaseReturnDetail_ToRawMaterial] FOREIGN KEY ([RawMaterialId]) REFERENCES [RawMaterial]([Id])
 )

@@ -25,48 +25,49 @@ public static class PurchaseItemReportExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
-            ["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["PurchaseId"] = new() { DisplayName = "Purchase ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["ItemCategoryId"] = new() { DisplayName = "Category ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["CompanyId"] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["PartyId"] = new() { DisplayName = "Party ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.MasterId)] = new() { DisplayName = "Master ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.ItemCategoryId)] = new() { DisplayName = "Category ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.CompanyId)] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.PartyId)] = new() { DisplayName = "Party ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Text fields
-            ["ItemName"] = new() { DisplayName = "Item Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["ItemCode"] = new() { DisplayName = "Item Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["ItemCategoryName"] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["TransactionNo"] = new() { DisplayName = "Transaction No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["CompanyName"] = new() { DisplayName = "Company", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["PartyName"] = new() { DisplayName = "Party", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["PurchaseRemarks"] = new() { DisplayName = "Purchase Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["Remarks"] = new() { DisplayName = "Item Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.ItemName)] = new() { DisplayName = "Item", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.ItemCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.ItemCategoryName)] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.CompanyName)] = new() { DisplayName = "Company", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.PartyName)] = new() { DisplayName = "Party", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.PurchaseRemarks)] = new() { DisplayName = "Purchase Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(PurchaseItemOverviewModel.Remarks)] = new() { DisplayName = "Item Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
             // Date fields
-            ["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
+            [nameof(PurchaseItemOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
 
             // Numeric fields - Quantity
-            ["Quantity"] = new() { DisplayName = "Quantity", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["Rate"] = new() { DisplayName = "Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
-            ["NetRate"] = new() { DisplayName = "Net Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.Quantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.Rate)] = new() { DisplayName = "Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.NetRate)] = new() { DisplayName = "Net Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
 
             // Amount fields - All with N2 format and totals
-            ["BaseTotal"] = new() { DisplayName = "Base Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["DiscountAmount"] = new() { DisplayName = "Discount Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["AfterDiscount"] = new() { DisplayName = "After Discount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["SGSTAmount"] = new() { DisplayName = "SGST Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["CGSTAmount"] = new() { DisplayName = "CGST Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["IGSTAmount"] = new() { DisplayName = "IGST Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["TotalTaxAmount"] = new() { DisplayName = "Total Tax Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
-            ["Total"] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.BaseTotal)] = new() { DisplayName = "Base Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.DiscountAmount)] = new() { DisplayName = "Disc Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.AfterDiscount)] = new() { DisplayName = "After Disc", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.SGSTAmount)] = new() { DisplayName = "SGST Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.CGSTAmount)] = new() { DisplayName = "CGST Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.IGSTAmount)] = new() { DisplayName = "IGST Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.TotalTaxAmount)] = new() { DisplayName = "Tax Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.Total)] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(PurchaseItemOverviewModel.NetTotal)] = new() { DisplayName = "Net Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
 
-            // Percentage fields - Center aligned
-            ["DiscountPercent"] = new() { DisplayName = "Discount %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["SGSTPercent"] = new() { DisplayName = "SGST %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["CGSTPercent"] = new() { DisplayName = "CGST %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["IGSTPercent"] = new() { DisplayName = "IGST %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+			// Percentage fields - Center aligned
+			[nameof(PurchaseItemOverviewModel.DiscountPercent)] = new() { DisplayName = "Disc %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.SGSTPercent)] = new() { DisplayName = "SGST %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.CGSTPercent)] = new() { DisplayName = "CGST %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(PurchaseItemOverviewModel.IGSTPercent)] = new() { DisplayName = "IGST %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Boolean fields
-            ["InclusiveTax"] = new() { DisplayName = "Inclusive Tax", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+            [nameof(PurchaseItemOverviewModel.InclusiveTax)] = new() { DisplayName = "Incl Tax", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
         };
 
         // Define column order based on showAllColumns flag
@@ -76,46 +77,47 @@ public static class PurchaseItemReportExcelExport
         if (showAllColumns)
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "ItemCategoryName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "PartyName",
-                "Quantity",
-                "Rate",
-                "BaseTotal",
-                "DiscountPercent",
-                "DiscountAmount",
-                "AfterDiscount",
-                "SGSTPercent",
-                "SGSTAmount",
-                "CGSTPercent",
-                "CGSTAmount",
-                "IGSTPercent",
-                "IGSTAmount",
-                "TotalTaxAmount",
-                "InclusiveTax",
-                "Total",
-                "NetRate",
-                "PurchaseRemarks",
-                "Remarks"
-            ];
+				nameof(PurchaseItemOverviewModel.ItemName),
+				nameof(PurchaseItemOverviewModel.ItemCode),
+				nameof(PurchaseItemOverviewModel.ItemCategoryName),
+				nameof(PurchaseItemOverviewModel.TransactionNo),
+				nameof(PurchaseItemOverviewModel.TransactionDateTime),
+				nameof(PurchaseItemOverviewModel.CompanyName),
+				nameof(PurchaseItemOverviewModel.PartyName),
+				nameof(PurchaseItemOverviewModel.Quantity),
+				nameof(PurchaseItemOverviewModel.Rate),
+				nameof(PurchaseItemOverviewModel.BaseTotal),
+				nameof(PurchaseItemOverviewModel.DiscountPercent),
+				nameof(PurchaseItemOverviewModel.DiscountAmount),
+				nameof(PurchaseItemOverviewModel.AfterDiscount),
+				nameof(PurchaseItemOverviewModel.SGSTPercent),
+				nameof(PurchaseItemOverviewModel.SGSTAmount),
+				nameof(PurchaseItemOverviewModel.CGSTPercent),
+				nameof(PurchaseItemOverviewModel.CGSTAmount),
+				nameof(PurchaseItemOverviewModel.IGSTPercent),
+				nameof(PurchaseItemOverviewModel.IGSTAmount),
+				nameof(PurchaseItemOverviewModel.TotalTaxAmount),
+				nameof(PurchaseItemOverviewModel.InclusiveTax),
+				nameof(PurchaseItemOverviewModel.Total),
+				nameof(PurchaseItemOverviewModel.NetRate),
+				nameof(PurchaseItemOverviewModel.NetTotal),
+				nameof(PurchaseItemOverviewModel.PurchaseRemarks),
+				nameof(PurchaseItemOverviewModel.Remarks)
+			];
 
         // Summary columns only
         else
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "TransactionNo",
-                "TransactionDateTime",
-                "PartyName",
-                "Quantity",
-                "Rate",
-                "Total"
-            ];
+				nameof(PurchaseItemOverviewModel.ItemName),
+				nameof(PurchaseItemOverviewModel.ItemCode),
+				nameof(PurchaseItemOverviewModel.TransactionNo),
+				nameof(PurchaseItemOverviewModel.TransactionDateTime),
+				nameof(PurchaseItemOverviewModel.PartyName),
+				nameof(PurchaseItemOverviewModel.Quantity),
+				nameof(PurchaseItemOverviewModel.NetRate),
+				nameof(PurchaseItemOverviewModel.NetTotal)
+			];
 
         // Export using the generic utility
         return ExcelExportUtil.ExportToExcel(

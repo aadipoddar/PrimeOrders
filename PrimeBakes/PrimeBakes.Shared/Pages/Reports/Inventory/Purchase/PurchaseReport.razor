@@ -27,8 +27,7 @@ else
 			<p class="page-subtitle">View and analyze purchase transactions</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
-				title="Export to Excel">
+			<button class="btn-icon btn-icon-excel" @onclick="ExportExcel" title="Export to Excel (Ctrl + E)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -38,7 +37,7 @@ else
 					<polyline points="10 9 9 9 8 9" />
 				</svg>
 			</button>
-			<button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
+			<button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" title="Export to PDF (Ctrl + P)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -48,7 +47,7 @@ else
 					<line x1="10" y1="9" x2="8" y2="9" />
 				</svg>
 			</button>
-			<button class="btn-icon" title="Refresh Data" @onclick="LoadPurchaseOverviews" disabled="@_isProcessing">
+			<button class="btn-icon" @onclick="LoadTransactionOverviews" title="Refresh Data (Ctrl + R)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<polyline points="23 4 23 10 17 10" />
@@ -56,30 +55,28 @@ else
 					<path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick="NavigateToItemReport" title="Item Report" disabled="@_isProcessing">
+			<button class="btn-icon" @onclick="NavigateToItemReport" title="Item Report (Ctrl + I)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
 					<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick="NavigateToPurchasePage" title="Create Purchase" disabled="@_isProcessing">
+			<button class="btn-icon" @onclick="NavigateToTransactionPage" title="New Transaction (Ctrl + N)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="12" y1="5" x2="12" y2="19" />
 					<line x1="5" y1="12" x2="19" y2="12" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home"
-				disabled="@_isProcessing">
+			<button class="btn-icon" @onclick="NavigateToDashboard" title="Home (Ctrl + D)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
 					<polyline points="9 22 9 12 15 12 15 22" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.ReportDashboard)' title="Back"
-				disabled="@_isProcessing">
+			<button class="btn-icon" @onclick="NavigateBack" title="Back (Ctrl + B)" disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M19 12H5M12 19l-7-7 7-7" />
@@ -200,16 +197,16 @@ else
 						</svg>
 						@(_showDeleted ? "Hide Deleted" : "Show Deleted")
 					</button>
-					<button class="btn-toggle-returns @(_showPurchaseReturns ? "active" : "")"
-						@onclick="TogglePurchaseReturns"
-						title="@(_showPurchaseReturns ? "Hide Purchase Returns" : "Show Purchase Returns")"
+					<button class="btn-toggle-returns @(_showTransactionReturns ? "active" : "")"
+						@onclick="ToggleTransactionReturns"
+						title="@(_showTransactionReturns ? "Hide Purchase Returns" : "Show Purchase Returns")"
 						disabled="@_isProcessing">
 						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
 							stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<polyline points="9 14 4 9 9 4" />
 							<path d="M20 20v-7a4 4 0 0 0-4-4H4" />
 						</svg>
-						@(_showPurchaseReturns ? "Hide Returns" : "Show Returns")
+						@(_showTransactionReturns ? "Hide Returns" : "Show Returns")
 					</button>
 					<button class="btn-toggle-details" @onclick="ToggleDetailsView"
 						title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
@@ -233,8 +230,8 @@ else
 				</div>
 			</div>
 			<div class="section-body grid-body">
-				<SfGrid ID="_sfPurchaseGrid" @ref="_sfPurchaseGrid" TValue="PurchaseOverviewModel"
-					DataSource="_purchaseOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
+				<SfGrid ID="_sfGrid" @ref="_sfGrid" TValue="PurchaseOverviewModel"
+					DataSource="_transactionOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
 					AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
 					GridLines="GridLine.Horizontal" CssClass="professional-grid"
 					Toolbar="@(new List<string>() { "Search" })">
@@ -283,7 +280,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.DiscountAmount)"
+								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.ItemDiscountAmount)"
 									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -293,7 +290,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.AfterDiscount)"
+								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalAfterItemDiscount)"
 									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -302,7 +299,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.SGSTAmount)"
+								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalInclusiveTaxAmount)"
 									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -311,25 +308,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.CGSTAmount)"
-									Type="AggregateType.Sum" Format="N2">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-											<div><strong>@aggregate.Sum</strong></div>
-										}
-									</FooterTemplate>
-								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.IGSTAmount)"
-									Type="AggregateType.Sum" Format="N2">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-											<div><strong>@aggregate.Sum</strong></div>
-										}
-									</FooterTemplate>
-								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalTaxAmount)"
+								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalExtraTaxAmount)"
 									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -356,7 +335,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalAfterOtherCharges)"
+								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.OtherChargesAmount)"
 									Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -372,15 +351,6 @@ else
 											var aggregate = (context as AggregateTemplateContext);
 											<div class="aggregate-value aggregate-discount"><strong>@aggregate.Sum</strong>
 											</div>
-										}
-									</FooterTemplate>
-								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalAfterCashDiscount)"
-									Type="AggregateType.Sum" Format="N2">
-									<FooterTemplate>
-										@{
-											var aggregate = (context as AggregateTemplateContext);
-											<div><strong>@aggregate.Sum</strong></div>
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
@@ -410,14 +380,12 @@ else
 						<GridColumn HeaderText="Actions" Width="200" TextAlign="TextAlign.Center">
 							<Template>
 								@{
-									var purchase = (context as PurchaseOverviewModel);
+									var item = (context as PurchaseOverviewModel);
 								}
 								<div class="grid-actions">
-									@if (purchase.Status == false)
+									@if (item.Status == false)
 									{
-										<button class="btn-grid-action btn-invoice"
-											@onclick="() => DownloadInvoice(purchase.Id)" title="Download Invoice"
-											disabled="@_isProcessing">
+										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id)" title="Download Invoice (Alt + P)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -426,9 +394,7 @@ else
 												<line x1="12" y1="15" x2="12" y2="3" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-recover"
-											@onclick="() => ShowRecoverConfirmation(purchase.Id, purchase.TransactionNo)"
-											title="Recover Purchase" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-recover" @onclick="() => ShowRecoverConfirmation(item.Id, item.TransactionNo)" title="Recover Transaction (Delete)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -439,8 +405,7 @@ else
 									}
 									else
 									{
-										<button class="btn-grid-action btn-view" @onclick="() => ViewPurchase(purchase.Id)"
-											title="View Purchase" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(item.Id)" title="View Transaction (Ctrl + O)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -448,9 +413,7 @@ else
 												<circle cx="12" cy="12" r="3" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-invoice"
-											@onclick="() => DownloadInvoice(purchase.Id)" title="Download Invoice"
-											disabled="@_isProcessing">
+										<button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id)" title="Download Invoice" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -460,8 +423,8 @@ else
 											</svg>
 										</button>
 										<button class="btn-grid-action btn-original"
-											@onclick="() => DownloadOriginalInvoice(purchase.DocumentUrl)"
-											disabled="@(string.IsNullOrEmpty(purchase.DocumentUrl) || _isProcessing)"
+											@onclick="() => DownloadOriginalInvoice(item.DocumentUrl)"
+											disabled="@(string.IsNullOrEmpty(item.DocumentUrl) || _isProcessing)"
 											title="Download Original">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -473,9 +436,7 @@ else
 												<polyline points="10 9 9 9 8 9" />
 											</svg>
 										</button>
-										<button class="btn-grid-action btn-delete"
-											@onclick="() => ShowDeleteConfirmation(purchase.Id, purchase.TransactionNo)"
-											title="Delete Purchase" disabled="@_isProcessing">
+										<button class="btn-grid-action btn-delete" @onclick="() => ShowDeleteConfirmation(item.Id, item.TransactionNo)" title="Delete Transaction (Delete)" disabled="@_isProcessing">
 											<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
 												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
 												stroke-linejoin="round">
@@ -490,61 +451,30 @@ else
 								</div>
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TransactionNo)" HeaderText="Transaction No"
-							Width="170" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150"
-							Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CompanyName)" HeaderText="Company" Width="180"
-							Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
 						<GridColumn Field="@nameof(PurchaseOverviewModel.PartyName)" HeaderText="Party" Width="200" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.FinancialYear)" HeaderText="Financial Year"
-							Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalItems)" HeaderText="Items" Width="100"
-							TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalQuantity)" HeaderText="Quantity" Width="120"
-							Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="120"
-							Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.DiscountAmount)" HeaderText="Disc" Width="130"
-							TextAlign="TextAlign.Right" Visible="_showAllColumns">
+						<GridColumn Field="@nameof(PurchaseOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalQuantity)" HeaderText="Quantity" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.ItemDiscountAmount)" HeaderText="Disc" Width="130" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 							<Template>
 								@{
 									var item = (context as PurchaseOverviewModel);
-									<span class="grid-discount">@item.DiscountAmount.ToString("N2")</span>
+									<span class="grid-discount">@item.ItemDiscountAmount.ToString("N2")</span>
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(PurchaseOverviewModel.AfterDiscount)" HeaderText="After Disc" Width="140"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.SGSTPercent)" HeaderText="SGST %" Width="120"
-							Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.SGSTAmount)" HeaderText="SGST" Width="120"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CGSTPercent)" HeaderText="CGST %" Width="120"
-							Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CGSTAmount)" HeaderText="CGST" Width="120"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.IGSTPercent)" HeaderText="IGST %" Width="120"
-							Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.IGSTAmount)" HeaderText="IGST" Width="120"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalTaxAmount)" HeaderText="Tax Amt" Width="130"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="150"
-							Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %"
-							Width="150" Format="N2" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.OtherChargesAmount)" HeaderText="Other Charges"
-							Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAfterOtherCharges)"
-							HeaderText="After Other Charges" Width="170" Format="N2" TextAlign="TextAlign.Right"
-							Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CashDiscountPercent)" HeaderText="Cash Disc %"
-							Width="150" Format="N2" TextAlign="TextAlign.Center" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CashDiscountAmount)" HeaderText="Cash Disc"
-							Width="140" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAfterItemDiscount)" HeaderText="After Disc" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl. Tax" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalExtraTaxAmount)" HeaderText="Extra Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="150" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.OtherChargesAmount)" HeaderText="Other Charges" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.CashDiscountPercent)" HeaderText="Cash Disc %" Width="150" Format="N2" TextAlign="TextAlign.Center" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.CashDiscountAmount)" HeaderText="Cash Disc" Width="140" TextAlign="TextAlign.Right" Visible="_showAllColumns">
 							<Template>
 								@{
 									var item = (context as PurchaseOverviewModel);
@@ -552,13 +482,8 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAfterCashDiscount)"
-							HeaderText="After Cash Discount" Width="170" Format="N2" TextAlign="TextAlign.Right"
-							Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.RoundOffAmount)" HeaderText="Round Off" Width="120"
-							Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAmount)" HeaderText="Total" Width="150"
-							TextAlign="TextAlign.Right">
+						<GridColumn Field="@nameof(PurchaseOverviewModel.RoundOffAmount)" HeaderText="Round Off" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.TotalAmount)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
 							<Template>
 								@{
 									var item = (context as PurchaseOverviewModel);
@@ -566,20 +491,13 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(PurchaseOverviewModel.Remarks)" HeaderText="Remarks" Width="200"
-							Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CreatedByName)" HeaderText="Created By" Width="150"
-							Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CreatedAt)" HeaderText="Created At" Width="160"
-							Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform"
-							Width="200" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.LastModifiedByUserName)" HeaderText="Modified By"
-							Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.LastModifiedAt)" HeaderText="Modified At"
-							Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(PurchaseOverviewModel.LastModifiedFromPlatform)"
-							HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(PurchaseOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
 					</GridColumns>
 				</SfGrid>
 			</div>

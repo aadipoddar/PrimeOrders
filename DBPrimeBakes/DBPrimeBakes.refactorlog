@@ -84,4 +84,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[MasterId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="dc6fea73-077f-4233-93df-a4d5023039c0" ChangeDateTime="11/27/2025 20:41:39">
+    <Property Name="ElementName" Value="[dbo].[PurchaseDetail].[PurchaseId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[PurchaseDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[MasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="31d0a027-047f-4672-89d7-2506724c07c8" ChangeDateTime="11/29/2025 07:20:12">
+    <Property Name="ElementName" Value="[dbo].[PurchaseReturnDetail].[PurchaseReturnId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[PurchaseReturnDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[MasterId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1636ab4f-8e1a-4e81-b1bc-23b09dd83cf0" ChangeDateTime="11/29/2025 09:36:28">
+    <Property Name="ElementName" Value="[dbo].[Purchase].[ItemsTotalAmount]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Purchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[TotalAfterTax]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8b8af357-1bdb-4720-827b-d3560c7d2ff1" ChangeDateTime="11/29/2025 09:37:38">
+    <Property Name="ElementName" Value="[dbo].[Purchase].[ItemsTotalAmount]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Purchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[TotalAfterTax]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="84af4773-4574-47c1-a509-47d7a3f1d171" ChangeDateTime="11/29/2025 09:38:14">
+    <Property Name="ElementName" Value="[dbo].[PurchaseReturn].[ItemsTotalAmount]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[PurchaseReturn]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[TotalAfterTax]" />
+  </Operation>
 </Operations>

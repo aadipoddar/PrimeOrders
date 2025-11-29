@@ -279,26 +279,16 @@ else
                                 </div>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.ItemName)" HeaderText="Item Name"
-                            Width="200" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.ItemCode)" HeaderText="Item Code"
-                            Width="130" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.ItemCategoryName)"
-                            HeaderText="Category" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.TransactionNo)"
-                            HeaderText="Transaction No" Width="170" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.TransactionDateTime)"
-                            HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.CompanyName)" HeaderText="Company"
-                            Width="180" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.KitchenName)" HeaderText="Kitchen"
-                            Width="200" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Quantity)" HeaderText="Quantity"
-                            Width="120" Format="N2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Rate)" HeaderText="Rate" Width="120"
-                            Format="N2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Total)" HeaderText="Total" Width="150"
-                            TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.ItemName)" HeaderText="Item" Width="200" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.ItemCode)" HeaderText="Code" Width="130" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.ItemCategoryName)" HeaderText="Category" Width="150" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.TransactionNo)" HeaderText="Transaction No" Width="170" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.KitchenName)" HeaderText="Kitchen" Width="200" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Quantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Total)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
                             <Template>
                                 @{
                                     var detailItem = (context as KitchenProductionItemOverviewModel);
@@ -306,10 +296,8 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.KitchenProductionRemarks)"
-                            HeaderText="Issue Remarks" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Remarks)" HeaderText="Item Remarks"
-                            Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.KitchenProductionRemarks)" HeaderText="Issue Remarks" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenProductionItemOverviewModel.Remarks)" HeaderText="Item Remarks" Width="200" Visible="_showAllColumns" />
                     </GridColumns>
                 </SfGrid>
             </div>

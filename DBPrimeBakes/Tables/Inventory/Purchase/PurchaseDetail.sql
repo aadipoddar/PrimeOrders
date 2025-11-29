@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[PurchaseDetail]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [PurchaseId] INT NOT NULL,
+    [MasterId] INT NOT NULL,
 	[RawMaterialId] INT NOT NULL,
 	[Quantity] MONEY NOT NULL DEFAULT 1,
 	[UnitOfMeasurement] VARCHAR(20) NOT NULL,
@@ -22,6 +22,6 @@
 	[NetRate] MONEY NOT NULL DEFAULT 0,
 	[Remarks] VARCHAR(MAX) NULL,
 	[Status] BIT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_PurchaseDetail_ToPurchase] FOREIGN KEY ([PurchaseId]) REFERENCES [Purchase]([Id]),
+    CONSTRAINT [FK_PurchaseDetail_ToPurchase] FOREIGN KEY ([MasterId]) REFERENCES [Purchase]([Id]),
 	CONSTRAINT [FK_PurchaseDetail_ToRawMaterial] FOREIGN KEY ([RawMaterialId]) REFERENCES [RawMaterial]([Id])
 )

@@ -64,10 +64,8 @@ public static class StoredProcedureNames
     public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
 
     public static string LoadRawMaterialByPartyPurchaseDateTime => "Load_RawMaterial_By_Party_PurchaseDateTime";
-    public static string LoadPurchaseDetailByPurchase => "Load_PurchaseDetail_By_Purchase";
     public static string LoadPurchaseOverviewByDate => "Load_PurchaseOverview_By_Date";
     public static string LoadPurchaseItemOverviewByDate => "Load_Purchase_Item_Overview_By_Date";
-    public static string LoadPurchaseReturnDetailByPurchaseReturn => "Load_PurchaseReturnDetail_By_PurchaseReturn";
     public static string LoadPurchaseReturnOverviewByDate => "Load_PurchaseReturn_Overview_By_Date";
     public static string LoadPurchaseReturnItemOverviewByDate => "Load_PurchaseReturn_Item_Overview_By_Date";
 

@@ -28,24 +28,24 @@ public static class KitchenIssueData
         try
         {
 			// Load saved transaction details
-			var savedKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId) ??
+			var transaction = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId) ??
                 throw new InvalidOperationException("Transaction not found.");
 
             // Load transaction details from database
-            var kitchenIssueDetails = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, savedKitchenIssue.Id);
-            if (kitchenIssueDetails is null || kitchenIssueDetails.Count == 0)
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, transaction.Id);
+            if (transactionDetails is null || transactionDetails.Count == 0)
                 throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company and kitchen
-            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedKitchenIssue.CompanyId);
-            var kitchen = await CommonData.LoadTableDataById<LocationModel>(TableNames.Kitchen, savedKitchenIssue.KitchenId);
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var kitchen = await CommonData.LoadTableDataById<LocationModel>(TableNames.Kitchen, transaction.KitchenId);
             if (company is null || kitchen is null)
                 throw new InvalidOperationException("Company or kitchen details not found.");
 
             // Convert kitchen issue details to cart items with item names
             var rawMaterials = await CommonData.LoadTableData<RawMaterialModel>(TableNames.RawMaterial);
             var cartItems = new List<KitchenIssueItemCartModel>();
-            foreach (var detail in kitchenIssueDetails)
+            foreach (var detail in transactionDetails)
             {
                 var rawMaterial = rawMaterials.FirstOrDefault(rm => rm.Id == detail.RawMaterialId);
                 cartItems.Add(new KitchenIssueItemCartModel
@@ -63,7 +63,7 @@ public static class KitchenIssueData
             // Generate invoice PDF
             var pdfStream = await Task.Run(() =>
                 KitchenIssueInvoicePDFExport.ExportKitchenIssueInvoiceWithItems(
-                    savedKitchenIssue,
+                    transaction,
                     cartItems,
                     company,
                     kitchen,
@@ -74,7 +74,7 @@ public static class KitchenIssueData
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();
-            string fileName = $"KITCHEN_ISSUE_INVOICE_{savedKitchenIssue.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+            string fileName = $"KITCHEN_ISSUE_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
             return (pdfStream, fileName);
         }
         catch (Exception ex)

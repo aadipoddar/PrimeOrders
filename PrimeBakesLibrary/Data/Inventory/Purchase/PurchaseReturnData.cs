@@ -18,9 +18,6 @@ public static class PurchaseReturnData
     public static async Task<int> InsertPurchaseReturnDetail(PurchaseReturnDetailModel purchaseReturnDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertPurchaseReturnDetail, purchaseReturnDetail)).FirstOrDefault();
 
-    public static async Task<List<PurchaseReturnDetailModel>> LoadPurchaseReturnDetailByPurchaseReturn(int PurchaseReturnId) =>
-        await SqlDataAccess.LoadData<PurchaseReturnDetailModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnDetailByPurchaseReturn, new { PurchaseReturnId });
-
     public static async Task<List<PurchaseReturnOverviewModel>> LoadPurchaseReturnOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
         await SqlDataAccess.LoadData<PurchaseReturnOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseReturnOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
@@ -32,25 +29,25 @@ public static class PurchaseReturnData
         try
         {
             // Load saved purchase return details (since _purchaseReturn now has the Id)
-            var savedPurchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId) ??
-                throw new InvalidOperationException("Saved purchase return transaction not found.");
+            var transaction = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId) ??
+                throw new InvalidOperationException("Transaction not found.");
 
             // Load purchase return details from database
-            var purchaseReturnDetails = await LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturnId);
-            if (purchaseReturnDetails is null || purchaseReturnDetails.Count == 0)
-                throw new InvalidOperationException("No purchase return details found for invoice generation.");
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<PurchaseReturnDetailModel>(TableNames.PurchaseReturnDetail, purchaseReturnId);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+                throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company and party
-            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedPurchaseReturn.CompanyId);
-            var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedPurchaseReturn.PartyId);
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId);
             if (company is null || party is null)
                 throw new InvalidOperationException("Invoice generation skipped - company or party not found.");
 
             // Generate invoice PDF
             var pdfStream = await Task.Run(() =>
                 PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
-                    savedPurchaseReturn,
-                    purchaseReturnDetails,
+                    transaction,
+                    transactionDetails,
                     company,
                     party,
                     null, // logo path - uses default
@@ -60,7 +57,7 @@ public static class PurchaseReturnData
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();
-            string fileName = $"PURCHASE_RETURN_INVOICE_{savedPurchaseReturn.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+            string fileName = $"PURCHASE_RETURN_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
             return (pdfStream, fileName);
         }
         catch (Exception ex)
@@ -74,7 +71,7 @@ public static class PurchaseReturnData
         var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchaseReturn.FinancialYearId);
         if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete purchase return transaction as the financial year is locked.");
+            throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (purchaseReturn is not null)
         {
@@ -94,10 +91,10 @@ public static class PurchaseReturnData
 
     public static async Task RecoverPurchaseReturnTransaction(PurchaseReturnModel purchaseReturn)
     {
-        var purchaseDetails = await LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturn.Id);
+        var transactionDetails = await CommonData.LoadTableDataByMasterId<PurchaseReturnDetailModel>(TableNames.PurchaseReturnDetail, purchaseReturn.Id);
         List<PurchaseReturnItemCartModel> purchaseItemCarts = [];
 
-        foreach (var item in purchaseDetails)
+        foreach (var item in transactionDetails)
             purchaseItemCarts.Add(new()
             {
                 ItemId = item.RawMaterialId,
@@ -153,7 +150,7 @@ public static class PurchaseReturnData
     {
         if (update)
         {
-            var existingPurchaseDetails = await LoadPurchaseReturnDetailByPurchaseReturn(purchaseReturn.Id);
+            var existingPurchaseDetails = await CommonData.LoadTableDataByMasterId<PurchaseReturnDetailModel>(TableNames.PurchaseReturnDetail, purchaseReturn.Id);
             foreach (var item in existingPurchaseDetails)
             {
                 item.Status = false;
@@ -165,7 +162,7 @@ public static class PurchaseReturnData
             await InsertPurchaseReturnDetail(new()
             {
                 Id = 0,
-                PurchaseReturnId = purchaseReturn.Id,
+                MasterId = purchaseReturn.Id,
                 RawMaterialId = item.ItemId,
                 Quantity = item.Quantity,
                 UnitOfMeasurement = item.UnitOfMeasurement,
@@ -225,7 +222,7 @@ public static class PurchaseReturnData
         if (purchaseReturnOverview is null)
             return;
 
-        if (purchaseReturnOverview.TotalAmount <= 0 && purchaseReturnOverview.TotalTaxAmount <= 0)
+        if (purchaseReturnOverview.TotalAmount <= 0)
             return;
 
         var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
@@ -260,7 +257,7 @@ public static class PurchaseReturnData
                 Remarks = $"Party Account Posting For Purchase Return Bill {purchaseReturnOverview.TransactionNo}",
             });
 
-        if (purchaseReturnOverview.TotalAmount - purchaseReturnOverview.TotalTaxAmount > 0)
+        if (purchaseReturnOverview.TotalAmount - purchaseReturnOverview.TotalExtraTaxAmount > 0)
         {
             var purchaseLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId);
             accountingCart.Add(new()
@@ -270,12 +267,12 @@ public static class PurchaseReturnData
                 ReferenceNo = purchaseReturnOverview.TransactionNo,
                 LedgerId = int.Parse(purchaseLedger.Value),
                 Debit = null,
-                Credit = purchaseReturnOverview.TotalAmount - purchaseReturnOverview.TotalTaxAmount,
+                Credit = purchaseReturnOverview.TotalAmount - purchaseReturnOverview.TotalExtraTaxAmount,
                 Remarks = $"Purchase Account Posting For Purchase Return Bill {purchaseReturnOverview.TransactionNo}",
             });
         }
 
-        if (purchaseReturnOverview.TotalTaxAmount > 0)
+        if (purchaseReturnOverview.TotalExtraTaxAmount > 0)
         {
             var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
             accountingCart.Add(new()
@@ -285,7 +282,7 @@ public static class PurchaseReturnData
                 ReferenceNo = purchaseReturnOverview.TransactionNo,
                 LedgerId = int.Parse(gstLedger.Value),
                 Debit = null,
-                Credit = purchaseReturnOverview.TotalTaxAmount,
+                Credit = purchaseReturnOverview.TotalExtraTaxAmount,
                 Remarks = $"GST Account Posting For Purchase Return Bill {purchaseReturnOverview.TransactionNo}",
             });
         }

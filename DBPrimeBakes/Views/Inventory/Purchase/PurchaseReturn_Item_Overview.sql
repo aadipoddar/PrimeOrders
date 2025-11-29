@@ -7,7 +7,7 @@ SELECT
 	[rc].[Id] AS ItemCategoryId,
 	[rc].[Name] AS ItemCategoryName,
 
-	[p].[Id] AS PurchaseReturnId,
+	[p].[Id] AS MasterId,
 	[p].[TransactionNo],
 	[p].[TransactionDateTime],
 	[c].[Id] AS CompanyId,
@@ -35,6 +35,7 @@ SELECT
 
 	[pd].[Total],
 	[pd].[NetRate],
+	[pd].[NetRate] * [pd].[Quantity] AS NetTotal,
 
 	[pd].[Remarks] AS Remarks
 
@@ -42,7 +43,7 @@ FROM
 	[dbo].[PurchaseReturnDetail] pd
 
 INNER JOIN
-	[dbo].[PurchaseReturn] p ON pd.PurchaseReturnId = p.Id
+	[dbo].[PurchaseReturn] p ON pd.[MasterId] = p.Id
 INNER JOIN
 	[dbo].[RawMaterial] r ON pd.RawMaterialId = r.Id
 INNER JOIN

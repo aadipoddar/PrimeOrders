@@ -25,31 +25,29 @@ public static class KitchenProductionItemReportExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
-            ["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["KitchenProductionId"] = new() { DisplayName = "Kitchen Production ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["ItemCategoryId"] = new() { DisplayName = "Category ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["CompanyId"] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["KitchenId"] = new() { DisplayName = "Kitchen ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-
+            [nameof(KitchenProductionItemOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(KitchenProductionItemOverviewModel.MasterId)] = new() { DisplayName = "Master ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(KitchenProductionItemOverviewModel.ItemCategoryId)] = new() { DisplayName = "Category ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(KitchenProductionItemOverviewModel.CompanyId)] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(KitchenProductionItemOverviewModel.KitchenId)] = new() { DisplayName = "Kitchen ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
             // Text fields
-            ["ItemName"] = new() { DisplayName = "Item Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["ItemCode"] = new() { DisplayName = "Item Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["ItemCategoryName"] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["TransactionNo"] = new() { DisplayName = "Transaction No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["CompanyName"] = new() { DisplayName = "Company", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["KitchenName"] = new() { DisplayName = "Kitchen", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["KitchenProductionRemarks"] = new() { DisplayName = "Kitchen Production Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["Remarks"] = new() { DisplayName = "Item Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-
+            [nameof(KitchenProductionItemOverviewModel.ItemName)] = new() { DisplayName = "Item", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.ItemCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.ItemCategoryName)] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.CompanyName)] = new() { DisplayName = "Company", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.KitchenName)] = new() { DisplayName = "Kitchen", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.KitchenProductionRemarks)] = new() { DisplayName = "Kitchen Production Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(KitchenProductionItemOverviewModel.Remarks)] = new() { DisplayName = "Item Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
             // Date fields
-            ["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
+            [nameof(KitchenProductionItemOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
 
             // Numeric fields - Quantity
-            ["Quantity"] = new() { DisplayName = "Quantity", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["Rate"] = new() { DisplayName = "Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
+            [nameof(KitchenProductionItemOverviewModel.Quantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(KitchenProductionItemOverviewModel.Rate)] = new() { DisplayName = "Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
 
             // Amount fields - All with N2 format and totals
-            ["Total"] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
+            [nameof(KitchenProductionItemOverviewModel.Total)] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
         };
 
         // Define column order based on showAllColumns flag
@@ -59,32 +57,32 @@ public static class KitchenProductionItemReportExcelExport
         if (showAllColumns)
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "ItemCategoryName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "KitchenName",
-                "Quantity",
-                "Rate",
-                "Total",
-                "KitchenProductionRemarks",
-                "Remarks"
+                nameof(KitchenProductionItemOverviewModel.ItemName),
+                nameof(KitchenProductionItemOverviewModel.ItemCode),
+                nameof(KitchenProductionItemOverviewModel.ItemCategoryName),
+                nameof(KitchenProductionItemOverviewModel.TransactionNo),
+                nameof(KitchenProductionItemOverviewModel.TransactionDateTime),
+                nameof(KitchenProductionItemOverviewModel.CompanyName),
+                nameof(KitchenProductionItemOverviewModel.KitchenName),
+                nameof(KitchenProductionItemOverviewModel.Quantity),
+                nameof(KitchenProductionItemOverviewModel.Rate),
+                nameof(KitchenProductionItemOverviewModel.Total),
+                nameof(KitchenProductionItemOverviewModel.KitchenProductionRemarks),
+                nameof(KitchenProductionItemOverviewModel.Remarks)
             ];
 
         // Summary columns only
         else
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "TransactionNo",
-                "TransactionDateTime",
-                "KitchenName",
-                "Quantity",
-                "Rate",
-                "Total"
+                nameof(KitchenProductionItemOverviewModel.ItemName),
+                nameof(KitchenProductionItemOverviewModel.ItemCode),
+                nameof(KitchenProductionItemOverviewModel.TransactionNo),
+                nameof(KitchenProductionItemOverviewModel.TransactionDateTime),
+                nameof(KitchenProductionItemOverviewModel.KitchenName),
+                nameof(KitchenProductionItemOverviewModel.Quantity),
+                nameof(KitchenProductionItemOverviewModel.Rate),
+                nameof(KitchenProductionItemOverviewModel.Total)
             ];
 
         // Export using the generic utility

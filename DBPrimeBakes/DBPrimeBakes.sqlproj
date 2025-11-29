@@ -132,7 +132,6 @@
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Id.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Status.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_User_By_Passcode.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseDetail_By_Purchase.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\RawMaterial\Load_RawMaterial_By_RawMaterialCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Recipe\Load_Recipe_By_Product.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Recipe\Load_RecipeDetail_By_Recipe.sql" />
@@ -164,7 +163,6 @@
     <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseOverview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseReturn_Item_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseReturn_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseReturnDetail_By_PurchaseReturn.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_CurrentDateTime.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_LastTableData_By_Location_FinancialYear.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_Settings_By_Key.sql" />

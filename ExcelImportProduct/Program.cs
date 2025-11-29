@@ -4,11 +4,13 @@ using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
+using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
+using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
@@ -1668,14 +1670,20 @@ Console.ReadLine();
 static async Task RecalculateTransactions()
 {
 	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-	var kitchenIssues = await CommonData.LoadTableData<KitchenIssueModel>(TableNames.KitchenIssue);
-	foreach (var ki in kitchenIssues)
+
+	var purchase = await CommonData.LoadTableData<PurchaseModel>(TableNames.Purchase);
+	foreach (var p in purchase)
 	{
-		Console.WriteLine("Recalculating Kitchen Issue Id: " + ki.Id);
-		var details = await CommonData.LoadTableDataByMasterId<KitchenIssueDetailModel>(TableNames.KitchenIssueDetail, ki.Id);
-		ki.TotalItems = details.Count;
-		ki.TotalQuantity = details.Sum(d => d.Quantity);
-		ki.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(ki);
-		await KitchenIssueData.InsertKitchenIssue(ki);
+		Console.WriteLine("Recalculating Transaction: " + p.Id);
+		var details = await CommonData.LoadTableDataByMasterId<PurchaseDetailModel>(TableNames.PurchaseDetail, p.Id);
+		p.TotalItems = details.Count;
+		p.TotalQuantity = details.Sum(d => d.Quantity);
+		p.BaseTotal = details.Sum(d => d.BaseTotal);
+		p.ItemDiscountAmount = details.Sum(d => d.DiscountAmount);
+		p.TotalAfterItemDiscount = details.Sum(d => d.AfterDiscount);
+		p.TotalExtraTaxAmount = details.Where(d => d.InclusiveTax == false).Sum(d => d.TotalTaxAmount);
+		p.TotalInclusiveTaxAmount = details.Where(d => d.InclusiveTax == true).Sum(d => d.TotalTaxAmount);
+		p.TotalAfterTax = details.Sum(d => d.Total);
+		await PurchaseData.InsertPurchase(p);
 	}
 }

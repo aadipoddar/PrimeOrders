@@ -27,55 +27,51 @@ public static class KitchenProductionItemReportPDFExport
         // Define column order based on visibility setting (matching Excel export)
         List<string> columnOrder;
 
+        // All columns - detailed view (matching Excel export)
         if (showAllColumns)
-        {
-            // All columns - detailed view (matching Excel export)
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "ItemCategoryName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "KitchenName",
-                "Quantity",
-                "Rate",
-                "Total",
-                "KitchenProductionRemarks",
-                "Remarks"
+                nameof(KitchenProductionItemOverviewModel.ItemName),
+                nameof(KitchenProductionItemOverviewModel.ItemCode),
+                nameof(KitchenProductionItemOverviewModel.ItemCategoryName),
+                nameof(KitchenProductionItemOverviewModel.TransactionNo),
+                nameof(KitchenProductionItemOverviewModel.TransactionDateTime),
+                nameof(KitchenProductionItemOverviewModel.CompanyName),
+                nameof(KitchenProductionItemOverviewModel.KitchenName),
+                nameof(KitchenProductionItemOverviewModel.Quantity),
+                nameof(KitchenProductionItemOverviewModel.Rate),
+                nameof(KitchenProductionItemOverviewModel.Total),
+                nameof(KitchenProductionItemOverviewModel.KitchenProductionRemarks),
+                nameof(KitchenProductionItemOverviewModel.Remarks)
             ];
-        }
+        // Summary columns - key fields only (matching Excel export)
         else
-        {
-            // Summary columns - key fields only (matching Excel export)
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "TransactionNo",
-                "TransactionDateTime",
-                "KitchenName",
-                "Quantity",
-                "Rate",
-                "Total"
+                nameof(KitchenProductionItemOverviewModel.ItemName),
+                nameof(KitchenProductionItemOverviewModel.ItemCode),
+                nameof(KitchenProductionItemOverviewModel.TransactionNo),
+                nameof(KitchenProductionItemOverviewModel.TransactionDateTime),
+                nameof(KitchenProductionItemOverviewModel.KitchenName),
+                nameof(KitchenProductionItemOverviewModel.Quantity),
+                nameof(KitchenProductionItemOverviewModel.Rate),
+                nameof(KitchenProductionItemOverviewModel.Total)
             ];
-        }
 
         // Customize specific columns for PDF display (matching Excel column names)
-        columnSettings["ItemName"] = new() { DisplayName = "Product Name", IncludeInTotal = false };
-        columnSettings["ItemCode"] = new() { DisplayName = "Product Code", IncludeInTotal = false };
-        columnSettings["ItemCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
-        columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-        columnSettings["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["CompanyName"] = new() { DisplayName = "Company", IncludeInTotal = false };
-        columnSettings["KitchenName"] = new() { DisplayName = "Kitchen", IncludeInTotal = false };
-        columnSettings["KitchenProductionRemarks"] = new() { DisplayName = "Kitchen Production Remarks", IncludeInTotal = false };
-        columnSettings["Remarks"] = new() { DisplayName = "Product Remarks", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.ItemName)] = new() { DisplayName = "Product", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.ItemCode)] = new() { DisplayName = "Code", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.ItemCategoryName)] = new() { DisplayName = "Category", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.CompanyName)] = new() { DisplayName = "Company", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.KitchenName)] = new() { DisplayName = "Kitchen", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.KitchenProductionRemarks)] = new() { DisplayName = "Kitchen Production Remarks", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionItemOverviewModel.Remarks)] = new() { DisplayName = "Product Remarks", IncludeInTotal = false };
 
-        columnSettings["Quantity"] = new()
+        columnSettings[nameof(KitchenProductionItemOverviewModel.Quantity)] = new()
         {
-            DisplayName = "Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -84,7 +80,7 @@ public static class KitchenProductionItemReportPDFExport
             }
         };
 
-        columnSettings["Rate"] = new()
+        columnSettings[nameof(KitchenProductionItemOverviewModel.Rate)] = new()
         {
             DisplayName = "Rate",
             Format = "#,##0.00",
@@ -96,7 +92,7 @@ public static class KitchenProductionItemReportPDFExport
             IncludeInTotal = false
         };
 
-        columnSettings["Total"] = new()
+        columnSettings[nameof(KitchenProductionItemOverviewModel.Total)] = new()
         {
             DisplayName = "Total",
             Format = "#,##0.00",

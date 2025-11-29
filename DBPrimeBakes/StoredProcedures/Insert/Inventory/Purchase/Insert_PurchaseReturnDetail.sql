@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_PurchaseReturnDetail]
 	@Id INT OUTPUT,
-	@PurchaseReturnId INT,
+	@MasterId INT,
 	@RawMaterialId INT,
 	@Quantity MONEY,
 	@UnitOfMeasurement VARCHAR(20),
@@ -27,7 +27,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[PurchaseReturnDetail]
 		(
-			[PurchaseReturnId],
+			[MasterId],
 			[RawMaterialId],
 			[Quantity],
 			[UnitOfMeasurement],
@@ -51,7 +51,7 @@ BEGIN
 		)
 		VALUES
 		(
-			@PurchaseReturnId,
+			@MasterId,
 			@RawMaterialId,
 			@Quantity,
 			@UnitOfMeasurement,
@@ -80,7 +80,7 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[PurchaseReturnDetail]
 		SET
-			[PurchaseReturnId] = @PurchaseReturnId,
+			[MasterId] = @MasterId,
 			[RawMaterialId] = @RawMaterialId,
 			[Quantity] = @Quantity,
 			[UnitOfMeasurement] = @UnitOfMeasurement,

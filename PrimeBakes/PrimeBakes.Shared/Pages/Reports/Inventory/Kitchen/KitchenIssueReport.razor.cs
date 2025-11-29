@@ -133,9 +133,9 @@ public partial class KitchenIssueReport : IAsyncDisposable
 			_isProcessing = true;
 
 			_transactionOverviews = await KitchenIssueData.LoadKitchenIssueOverviewByDate(
-			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-			!_showDeleted);
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
+				!_showDeleted);
 
 			if (_selectedCompany?.Id > 0)
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];

@@ -27,55 +27,51 @@ public static class KitchenIssueItemReportPDFExport
         // Define column order based on visibility setting (matching Excel export)
         List<string> columnOrder;
 
+        // All columns - detailed view (matching Excel export)
         if (showAllColumns)
-        {
-            // All columns - detailed view (matching Excel export)
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "ItemCategoryName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "KitchenName",
-                "Quantity",
-                "Rate",
-                "Total",
-                "KitchenIssueRemarks",
-                "Remarks"
+                nameof(KitchenIssueItemOverviewModel.ItemName),
+                nameof(KitchenIssueItemOverviewModel.ItemCode),
+                nameof(KitchenIssueItemOverviewModel.ItemCategoryName),
+                nameof(KitchenIssueItemOverviewModel.TransactionNo),
+                nameof(KitchenIssueItemOverviewModel.TransactionDateTime),
+                nameof(KitchenIssueItemOverviewModel.CompanyName),
+                nameof(KitchenIssueItemOverviewModel.KitchenName),
+                nameof(KitchenIssueItemOverviewModel.Quantity),
+                nameof(KitchenIssueItemOverviewModel.Rate),
+                nameof(KitchenIssueItemOverviewModel.Total),
+                nameof(KitchenIssueItemOverviewModel.KitchenIssueRemarks),
+                nameof(KitchenIssueItemOverviewModel.Remarks)
             ];
-        }
+        // Summary columns - key fields only (matching Excel export)
         else
-        {
-            // Summary columns - key fields only (matching Excel export)
             columnOrder =
             [
-                "ItemName",
-                "ItemCode",
-                "TransactionNo",
-                "TransactionDateTime",
-                "KitchenName",
-                "Quantity",
-                "Rate",
-                "Total"
+                nameof(KitchenIssueItemOverviewModel.ItemName),
+                nameof(KitchenIssueItemOverviewModel.ItemCode),
+                nameof(KitchenIssueItemOverviewModel.TransactionNo),
+                nameof(KitchenIssueItemOverviewModel.TransactionDateTime),
+                nameof(KitchenIssueItemOverviewModel.KitchenName),
+                nameof(KitchenIssueItemOverviewModel.Quantity),
+                nameof(KitchenIssueItemOverviewModel.Rate),
+                nameof(KitchenIssueItemOverviewModel.Total)
             ];
-        }
 
         // Customize specific columns for PDF display (matching Excel column names)
-        columnSettings["ItemName"] = new() { DisplayName = "Item Name", IncludeInTotal = false };
-        columnSettings["ItemCode"] = new() { DisplayName = "Item Code", IncludeInTotal = false };
-        columnSettings["ItemCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
-        columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-        columnSettings["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["CompanyName"] = new() { DisplayName = "Company", IncludeInTotal = false };
-        columnSettings["KitchenName"] = new() { DisplayName = "Kitchen", IncludeInTotal = false };
-        columnSettings["KitchenIssueRemarks"] = new() { DisplayName = "Kitchen Issue Remarks", IncludeInTotal = false };
-        columnSettings["Remarks"] = new() { DisplayName = "Item Remarks", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.ItemName)] = new() { DisplayName = "Item", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.ItemCode)] = new() { DisplayName = "Code", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.ItemCategoryName)] = new() { DisplayName = "Category", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.CompanyName)] = new() { DisplayName = "Company", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.KitchenName)] = new() { DisplayName = "Kitchen", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.KitchenIssueRemarks)] = new() { DisplayName = "Kitchen Issue Remarks", IncludeInTotal = false };
+        columnSettings[nameof(KitchenIssueItemOverviewModel.Remarks)] = new() { DisplayName = "Item Remarks", IncludeInTotal = false };
 
-        columnSettings["Quantity"] = new()
+        columnSettings[nameof(KitchenIssueItemOverviewModel.Quantity)] = new()
         {
-            DisplayName = "Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -84,7 +80,7 @@ public static class KitchenIssueItemReportPDFExport
             }
         };
 
-        columnSettings["Rate"] = new()
+        columnSettings[nameof(KitchenIssueItemOverviewModel.Rate)] = new()
         {
             DisplayName = "Rate",
             Format = "#,##0.00",
@@ -96,7 +92,7 @@ public static class KitchenIssueItemReportPDFExport
             IncludeInTotal = false
         };
 
-        columnSettings["Total"] = new()
+        columnSettings[nameof(KitchenIssueItemOverviewModel.Total)] = new()
         {
             DisplayName = "Total",
             Format = "#,##0.00",

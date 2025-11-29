@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -14,409 +15,445 @@ using PrimeBakesLibrary.Models.Inventory.Purchase;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Purchase;
 
-public partial class PurchaseReturnItemReport
+public partial class PurchaseReturnItemReport : IAsyncDisposable
 {
-    private UserModel _user;
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
 
-    private bool _isLoading = true;
-    private bool _isProcessing = false;
-    private bool _showAllColumns = false;
+	private UserModel _user;
 
-    private DateTime _fromDate = DateTime.Now.Date;
-    private DateTime _toDate = DateTime.Now.Date;
+	private bool _isLoading = true;
+	private bool _isProcessing = false;
+	private bool _showAllColumns = false;
 
-    private CompanyModel _selectedCompany = new();
-    private LedgerModel _selectedParty = new();
+	private DateTime _fromDate = DateTime.Now.Date;
+	private DateTime _toDate = DateTime.Now.Date;
 
-    private List<CompanyModel> _companies = [];
-    private List<LedgerModel> _parties = [];
-    private List<PurchaseReturnItemOverviewModel> _purchaseReturnItemOverviews = [];
-    private List<PurchaseItemOverviewModel> _purchaseItemOverviews = [];
+	private CompanyModel _selectedCompany = new();
+	private LedgerModel _selectedParty = new();
 
-    private SfGrid<PurchaseReturnItemOverviewModel> _sfPurchaseReturnItemGrid;
+	private List<CompanyModel> _companies = [];
+	private List<LedgerModel> _parties = [];
+	private List<PurchaseReturnItemOverviewModel> _transactionOverviews = [];
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
+	private SfGrid<PurchaseReturnItemOverviewModel> _sfGrid;
 
-    private SfToast _sfErrorToast;
-    private SfToast _sfSuccessToast;
+	private string _errorTitle = string.Empty;
+	private string _errorMessage = string.Empty;
+	private string _successTitle = string.Empty;
+	private string _successMessage = string.Empty;
 
-    #region Load Data
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
+	private SfToast _sfErrorToast;
+	private SfToast _sfSuccessToast;
+
+	#region Load Data
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
 
 		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
-        await LoadData();
-        _isLoading = false;
-        StateHasChanged();
-    }
+		await LoadData();
+		_isLoading = false;
+		StateHasChanged();
+	}
 
-    private async Task LoadData()
-    {
-        await LoadDates();
-        await LoadCompanies();
-        await LoadParties();
-        await LoadPurchaseReturnItemOverviews();
-    }
+	private async Task LoadData()
+	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.R, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(Code.F5, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistory, "Open transaction history", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None);
 
-    private async Task LoadDates()
-    {
-        _fromDate = await CommonData.LoadCurrentDateTime();
-        _toDate = _fromDate;
-    }
+		await LoadDates();
+		await LoadCompanies();
+		await LoadParties();
+		await LoadTransactionOverviews();
+	}
 
-    private async Task LoadCompanies()
-    {
-        _companies = await CommonData.LoadTableDataByStatus<CompanyModel>(TableNames.Company);
-        _companies.Add(new()
-        {
-            Id = 0,
-            Name = "All Companies"
-        });
-        _companies = [.. _companies.OrderBy(s => s.Name)];
-        _selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
-    }
+	private async Task LoadDates()
+	{
+		_fromDate = await CommonData.LoadCurrentDateTime();
+		_toDate = _fromDate;
+	}
 
-    private async Task LoadParties()
-    {
-        _parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
-        _parties.Add(new()
-        {
-            Id = 0,
-            Name = "All Parties"
-        });
-        _parties = [.. _parties.OrderBy(s => s.Name)];
-        _selectedParty = _parties.FirstOrDefault(_ => _.Id == 0);
-    }
+	private async Task LoadCompanies()
+	{
+		_companies = await CommonData.LoadTableDataByStatus<CompanyModel>(TableNames.Company);
+		_companies.Add(new()
+		{
+			Id = 0,
+			Name = "All Companies"
+		});
+		_companies = [.. _companies.OrderBy(s => s.Name)];
+		_selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
+	}
 
-    private async Task LoadPurchaseReturnItemOverviews()
-    {
-        if (_isProcessing)
-            return;
+	private async Task LoadParties()
+	{
+		_parties = await CommonData.LoadTableDataByStatus<LedgerModel>(TableNames.Ledger);
+		_parties.Add(new()
+		{
+			Id = 0,
+			Name = "All Parties"
+		});
+		_parties = [.. _parties.OrderBy(s => s.Name)];
+		_selectedParty = _parties.FirstOrDefault(_ => _.Id == 0);
+	}
 
-        try
-        {
-            _isProcessing = true;
+	private async Task LoadTransactionOverviews()
+	{
+		if (_isProcessing)
+			return;
 
-            _purchaseReturnItemOverviews = await PurchaseReturnData.LoadPurchaseReturnItemOverviewByDate(
-            DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-            DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+		try
+		{
+			_isProcessing = true;
 
-            if (_selectedCompany?.Id > 0)
-                _purchaseReturnItemOverviews = [.. _purchaseReturnItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+			_transactionOverviews = await PurchaseReturnData.LoadPurchaseReturnItemOverviewByDate(
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
-            if (_selectedParty?.Id > 0)
-                _purchaseReturnItemOverviews = [.. _purchaseReturnItemOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
+			if (_selectedCompany?.Id > 0)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
-            _purchaseReturnItemOverviews = [.. _purchaseReturnItemOverviews.OrderBy(_ => _.TransactionDateTime)];
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while loading purchase return item overviews: {ex.Message}", "error");
-        }
-        finally
-        {
-            if (_sfPurchaseReturnItemGrid is not null)
-                await _sfPurchaseReturnItemGrid.Refresh();
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-    #endregion
+			if (_selectedParty?.Id > 0)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
 
-    #region Change Events
-    private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
-    {
-        _fromDate = args.StartDate;
-        _toDate = args.EndDate;
-        await LoadPurchaseReturnItemOverviews();
-    }
+			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
+		}
+		finally
+		{
+			if (_sfGrid is not null)
+				await _sfGrid.Refresh();
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
 
-    private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
-    {
-        _selectedCompany = args.Value;
-        await LoadPurchaseReturnItemOverviews();
-    }
+	#region Change Events
+	private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
+	{
+		_fromDate = args.StartDate;
+		_toDate = args.EndDate;
+		await LoadTransactionOverviews();
+	}
 
-    private async Task OnPartyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
-    {
-        _selectedParty = args.Value;
-        await LoadPurchaseReturnItemOverviews();
-    }
+	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
+	{
+		_selectedCompany = args.Value;
+		await LoadTransactionOverviews();
+	}
 
-    private async Task SetDateRange(DateRangeType rangeType)
-    {
-        if (_isProcessing)
-            return;
+	private async Task OnPartyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
+	{
+		_selectedParty = args.Value;
+		await LoadTransactionOverviews();
+	}
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	private async Task SetDateRange(DateRangeType rangeType)
+	{
+		if (_isProcessing)
+			return;
 
-            var today = await CommonData.LoadCurrentDateTime();
-            var currentYear = today.Year;
-            var currentMonth = today.Month;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-            switch (rangeType)
-            {
-                case DateRangeType.Today:
-                    _fromDate = today;
-                    _toDate = today;
-                    break;
+			var today = await CommonData.LoadCurrentDateTime();
+			var currentYear = today.Year;
+			var currentMonth = today.Month;
 
-                case DateRangeType.Yesterday:
-                    _fromDate = today.AddDays(-1);
-                    _toDate = today.AddDays(-1);
-                    break;
+			switch (rangeType)
+			{
+				case DateRangeType.Today:
+					_fromDate = today;
+					_toDate = today;
+					break;
 
-                case DateRangeType.CurrentMonth:
-                    _fromDate = new DateTime(currentYear, currentMonth, 1);
-                    _toDate = _fromDate.AddMonths(1).AddDays(-1);
-                    break;
+				case DateRangeType.Yesterday:
+					_fromDate = today.AddDays(-1);
+					_toDate = today.AddDays(-1);
+					break;
 
-                case DateRangeType.PreviousMonth:
-                    _fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
-                    _toDate = _fromDate.AddMonths(1).AddDays(-1);
-                    break;
+				case DateRangeType.CurrentMonth:
+					_fromDate = new DateTime(currentYear, currentMonth, 1);
+					_toDate = _fromDate.AddMonths(1).AddDays(-1);
+					break;
 
-                case DateRangeType.CurrentFinancialYear:
-                    var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
-                    _fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
-                    _toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-                    break;
+				case DateRangeType.PreviousMonth:
+					_fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
+					_toDate = _fromDate.AddMonths(1).AddDays(-1);
+					break;
 
-                case DateRangeType.PreviousFinancialYear:
-                    currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
-                    var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
-                    var previousFY = financialYears
-                    .Where(fy => fy.Id != currentFY.Id)
-                    .OrderByDescending(fy => fy.StartDate)
-                    .FirstOrDefault();
+				case DateRangeType.CurrentFinancialYear:
+					var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
+					_fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
+					_toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
+					break;
 
-                    if (previousFY == null)
-                    {
-                        await ShowToast("Warning", "No previous financial year found.", "error");
-                        return;
-                    }
+				case DateRangeType.PreviousFinancialYear:
+					currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
+					var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
+					var previousFY = financialYears
+					.Where(fy => fy.Id != currentFY.Id)
+					.OrderByDescending(fy => fy.StartDate)
+					.FirstOrDefault();
 
-                    _fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
-                    _toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-                    break;
+					if (previousFY == null)
+					{
+						await ShowToast("Warning", "No previous financial year found.", "error");
+						return;
+					}
 
-                case DateRangeType.AllTime:
-                    _fromDate = new DateTime(2000, 1, 1);
-                    _toDate = today;
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            await LoadPurchaseReturnItemOverviews();
-            StateHasChanged();
-        }
-    }
-    #endregion
+					_fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
+					_toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
+					break;
 
-    #region Exporting
-    private async Task ExportExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        if (_isProcessing)
-            return;
+				case DateRangeType.AllTime:
+					_fromDate = new DateTime(2000, 1, 1);
+					_toDate = today;
+					break;
+			}
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			await LoadTransactionOverviews();
+			StateHasChanged();
+		}
+	}
+	#endregion
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	#region Exporting
+	private async Task ExportExcel()
+	{
+		if (_isProcessing)
+			return;
 
-            DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
-            DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-            var stream = await Task.Run(() =>
-            PurchaseReturnItemReportExcelExport.ExportPurchaseReturnItemReport(
-            _purchaseReturnItemOverviews,
-            dateRangeStart,
-            dateRangeEnd,
-            _showAllColumns
-            )
-            );
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
-            if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-                fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            fileName += ".xlsx";
+			var stream = await Task.Run(() =>
+				PurchaseReturnItemReportExcelExport.ExportPurchaseReturnItemReport(
+					_transactionOverviews,
+					dateRangeStart,
+					dateRangeEnd,
+					_showAllColumns
+				)
+			);
 
-            await SaveAndViewService.SaveAndView(fileName, stream);
+			string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".xlsx";
 
-            await ShowToast("Success", "Purchase return item report exported to Excel successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
-    private async Task ExportPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        if (_isProcessing)
-            return;
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	private async Task ExportPdf()
+	{
+		if (_isProcessing)
+			return;
 
-            DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
-            DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-            var stream = await Task.Run(() =>
-            PurchaseReturnItemReportPDFExport.ExportPurchaseReturnItemReport(
-            _purchaseReturnItemOverviews,
-            dateRangeStart,
-            dateRangeEnd,
-            _showAllColumns
-            )
-            );
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
-            if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-                fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            fileName += ".pdf";
+			var stream = await Task.Run(() =>
+				PurchaseReturnItemReportPDFExport.ExportPurchaseReturnItemReport(
+					_transactionOverviews,
+					dateRangeStart,
+					dateRangeEnd,
+					_showAllColumns
+				)
+			);
 
-            await SaveAndViewService.SaveAndView(fileName, stream);
+			string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".pdf";
 
-            await ShowToast("Success", "Purchase return item report exported to PDF successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-    #endregion
+			await SaveAndViewService.SaveAndView(fileName, stream);
 
-    #region Actions
-    private async Task ViewPurchaseReturn(int purchaseReturnId)
-    {
-        try
-        {
-            if (purchaseReturnId < 0)
-            {
-                int actualId = Math.Abs(purchaseReturnId);
-                if (FormFactor.GetFormFactor() == "Web")
-                    await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{actualId}", "_blank");
-                else
-                    NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{actualId}");
-            }
-            else
-            {
-                if (FormFactor.GetFormFactor() == "Web")
-                    await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{purchaseReturnId}", "_blank");
-                else
-                    NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{purchaseReturnId}");
-            }
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while opening purchase return: {ex.Message}", "error");
-        }
-    }
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
 
-    private async Task DownloadInvoice(int purchaseReturnId)
-    {
-        if (_isProcessing)
-            return;
+	#region Actions
+	private async Task ViewSelectedCartItem()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await ViewTransaction(selectedCartItem.Id);
+	}
 
-            var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(purchaseReturnId);
-            await SaveAndViewService.SaveAndView(fileName, pdfStream);
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
 
-    private async Task ToggleDetailsView()
-    {
-        _showAllColumns = !_showAllColumns;
-        StateHasChanged();
+	private async Task ViewTransaction(int transactionId)
+	{
+		try
+		{
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{transactionId}", "_blank");
+			else
+				NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{transactionId}");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
+		}
+	}
 
-        if (_sfPurchaseReturnItemGrid is not null)
-            await _sfPurchaseReturnItemGrid.Refresh();
-    }
-    #endregion
+	private async Task DownloadSelectedCartItemInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
 
-    #region Utilities
-    private async Task NavigateToPurchaseReturnPage()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.PurchaseReturn, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn);
-    }
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadInvoice(selectedCartItem.Id);
+	}
 
-    private async Task NavigateToPurchaseReturnReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturn, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn);
-    }
+	private async Task DownloadInvoice(int transactionId)
+	{
+		if (_isProcessing)
+			return;
 
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
-    }
-    #endregion
+			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ToggleDetailsView()
+	{
+		_showAllColumns = !_showAllColumns;
+		StateHasChanged();
+
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
+	}
+	#endregion
+
+	#region Utilities
+	private async Task NavigateToTransactionPage()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.PurchaseReturn, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn);
+	}
+
+	private async Task NavigateToTransactionHistory()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportPurchaseReturn, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn);
+	}
+
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
+	{
+		VibrationService.VibrateWithTime(200);
+
+		if (type == "error")
+		{
+			_errorTitle = title;
+			_errorMessage = message;
+			await _sfErrorToast.ShowAsync(new()
+			{
+				Title = _errorTitle,
+				Content = _errorMessage
+			});
+		}
+		else if (type == "success")
+		{
+			_successTitle = title;
+			_successMessage = message;
+			await _sfSuccessToast.ShowAsync(new()
+			{
+				Title = _successTitle,
+				Content = _successMessage
+			});
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

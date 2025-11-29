@@ -59,62 +59,7 @@ public static class PurchaseReturnInvoicePDFExport
         {
             TransactionNo = purchaseReturnHeader.TransactionNo,
             TransactionDateTime = purchaseReturnHeader.TransactionDateTime,
-            ItemsTotalAmount = purchaseReturnHeader.ItemsTotalAmount,
-            OtherChargesAmount = purchaseReturnHeader.OtherChargesAmount,
-            OtherChargesPercent = purchaseReturnHeader.OtherChargesPercent,
-            CashDiscountAmount = purchaseReturnHeader.CashDiscountAmount,
-            CashDiscountPercent = purchaseReturnHeader.CashDiscountPercent,
-            RoundOffAmount = purchaseReturnHeader.RoundOffAmount,
-            TotalAmount = purchaseReturnHeader.TotalAmount,
-            Remarks = purchaseReturnHeader.Remarks,
-            Status = purchaseReturnHeader.Status
-        };
-
-        // Generate invoice PDF with generic models
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
-            invoiceData,
-            lineItems,
-            company,
-            party,
-            logoPath,
-            invoiceType
-        );
-    }
-
-    /// <summary>
-    /// Export Purchase Return with item names (requires additional data)
-    /// </summary>
-    public static MemoryStream ExportPurchaseReturnInvoiceWithItems(
-        PurchaseReturnModel purchaseReturnHeader,
-        List<PurchaseReturnItemCartModel> purchaseReturnItems,
-        CompanyModel company,
-        LedgerModel party,
-        string logoPath = null,
-        string invoiceType = "PURCHASE RETURN")
-    {
-        // Map line items to generic model
-        var lineItems = purchaseReturnItems.Select(item => new PDFInvoiceExportUtil.InvoiceLineItem
-        {
-            ItemId = item.ItemId,
-            ItemName = item.ItemName,
-            Quantity = item.Quantity,
-            UnitOfMeasurement = item.UnitOfMeasurement,
-            Rate = item.Rate,
-            DiscountPercent = item.DiscountPercent,
-            AfterDiscount = item.AfterDiscount,
-            CGSTPercent = item.InclusiveTax ? 0 : item.CGSTPercent,
-            SGSTPercent = item.InclusiveTax ? 0 : item.SGSTPercent,
-            IGSTPercent = item.InclusiveTax ? 0 : item.IGSTPercent,
-            TotalTaxAmount = item.InclusiveTax ? 0 : item.TotalTaxAmount,
-            Total = item.Total
-        }).ToList();
-
-        // Map invoice header data
-        var invoiceData = new PDFInvoiceExportUtil.InvoiceData
-        {
-            TransactionNo = purchaseReturnHeader.TransactionNo,
-            TransactionDateTime = purchaseReturnHeader.TransactionDateTime,
-            ItemsTotalAmount = purchaseReturnHeader.ItemsTotalAmount,
+            ItemsTotalAmount = purchaseReturnHeader.TotalAfterTax,
             OtherChargesAmount = purchaseReturnHeader.OtherChargesAmount,
             OtherChargesPercent = purchaseReturnHeader.OtherChargesPercent,
             CashDiscountAmount = purchaseReturnHeader.CashDiscountAmount,

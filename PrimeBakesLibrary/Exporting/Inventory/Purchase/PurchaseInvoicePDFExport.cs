@@ -59,62 +59,7 @@ public static class PurchaseInvoicePDFExport
         {
             TransactionNo = purchaseHeader.TransactionNo,
             TransactionDateTime = purchaseHeader.TransactionDateTime,
-            ItemsTotalAmount = purchaseHeader.ItemsTotalAmount,
-            OtherChargesAmount = purchaseHeader.OtherChargesAmount,
-            OtherChargesPercent = purchaseHeader.OtherChargesPercent,
-            CashDiscountAmount = purchaseHeader.CashDiscountAmount,
-            CashDiscountPercent = purchaseHeader.CashDiscountPercent,
-            RoundOffAmount = purchaseHeader.RoundOffAmount,
-            TotalAmount = purchaseHeader.TotalAmount,
-            Remarks = purchaseHeader.Remarks,
-            Status = purchaseHeader.Status
-        };
-
-        // Generate invoice PDF with generic models
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
-            invoiceData,
-            lineItems,
-            company,
-            party,
-            logoPath,
-            invoiceType
-        );
-    }
-
-    /// <summary>
-    /// Export Purchase with item names (requires additional data)
-    /// </summary>
-    public static MemoryStream ExportPurchaseInvoiceWithItems(
-        PurchaseModel purchaseHeader,
-        List<PurchaseItemCartModel> purchaseItems,
-        CompanyModel company,
-        LedgerModel party,
-        string logoPath = null,
-        string invoiceType = "PURCHASE INVOICE")
-    {
-        // Map line items to generic model
-        var lineItems = purchaseItems.Select(item => new PDFInvoiceExportUtil.InvoiceLineItem
-        {
-            ItemId = item.ItemId,
-            ItemName = item.ItemName,
-            Quantity = item.Quantity,
-            UnitOfMeasurement = item.UnitOfMeasurement,
-            Rate = item.Rate,
-            DiscountPercent = item.DiscountPercent,
-            AfterDiscount = item.AfterDiscount,
-            CGSTPercent = item.InclusiveTax ? 0 : item.CGSTPercent,
-            SGSTPercent = item.InclusiveTax ? 0 : item.SGSTPercent,
-            IGSTPercent = item.InclusiveTax ? 0 : item.IGSTPercent,
-            TotalTaxAmount = item.InclusiveTax ? 0 : item.TotalTaxAmount,
-            Total = item.Total
-        }).ToList();
-
-        // Map invoice header data
-        var invoiceData = new PDFInvoiceExportUtil.InvoiceData
-        {
-            TransactionNo = purchaseHeader.TransactionNo,
-            TransactionDateTime = purchaseHeader.TransactionDateTime,
-            ItemsTotalAmount = purchaseHeader.ItemsTotalAmount,
+            ItemsTotalAmount = purchaseHeader.TotalAfterTax,
             OtherChargesAmount = purchaseHeader.OtherChargesAmount,
             OtherChargesPercent = purchaseHeader.OtherChargesPercent,
             CashDiscountAmount = purchaseHeader.CashDiscountAmount,

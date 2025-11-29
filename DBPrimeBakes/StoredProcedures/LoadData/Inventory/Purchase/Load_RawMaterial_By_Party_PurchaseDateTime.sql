@@ -14,7 +14,7 @@ BEGIN
 			CASE 
 				WHEN @PartyId > 0 THEN
 					(SELECT TOP 1 Rate FROM PurchaseDetail pd
-					 INNER JOIN Purchase p ON pd.PurchaseId = p.Id
+					 INNER JOIN Purchase p ON pd.[MasterId] = p.Id
 					 WHERE pd.RawMaterialId = r.[Id]
 					   AND p.PartyId = @PartyId
 					   AND p.Status = 1
@@ -23,7 +23,7 @@ BEGIN
 					 ORDER BY pd.Id DESC)
 				ELSE
 					(SELECT TOP 1 Rate FROM PurchaseDetail pd
-					 INNER JOIN Purchase p ON pd.PurchaseId = p.Id
+					 INNER JOIN Purchase p ON pd.[MasterId] = p.Id
 					 WHERE pd.RawMaterialId = r.[Id]
 					   AND p.Status = 1
 					   AND pd.Status = 1
@@ -35,7 +35,7 @@ BEGIN
 			CASE 
 				WHEN @PartyId > 0 THEN
 					(SELECT TOP 1 UnitOfMeasurement FROM PurchaseDetail pd
-					 INNER JOIN Purchase p ON pd.PurchaseId = p.Id
+					 INNER JOIN Purchase p ON pd.[MasterId] = p.Id
 					 WHERE pd.RawMaterialId = r.[Id]
 					   AND p.PartyId = @PartyId
 					   AND p.Status = 1
@@ -44,7 +44,7 @@ BEGIN
 					   ORDER BY pd.Id DESC)
 				ELSE
 					(SELECT TOP 1 UnitOfMeasurement FROM PurchaseDetail pd
-					 INNER JOIN Purchase p ON pd.PurchaseId = p.Id
+					 INNER JOIN Purchase p ON pd.[MasterId] = p.Id
 					 WHERE pd.RawMaterialId= r.[Id]
 					   AND p.Status = 1
 					   AND pd.Status = 1

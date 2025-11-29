@@ -27,58 +27,54 @@ public static class KitchenProductionReportPDFExport
         // Define column order based on visibility setting (matching Excel export)
         List<string> columnOrder;
 
+        // All columns - detailed view (matching Excel export)
         if (showAllColumns)
-        {
-            // All columns - detailed view (matching Excel export)
             columnOrder =
             [
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "KitchenName",
-                "FinancialYear",
-                "TotalItems",
-                "TotalQuantity",
-                "TotalAmount",
-                "Remarks",
-                "CreatedByName",
-                "CreatedAt",
-                "CreatedFromPlatform",
-                "LastModifiedByUserName",
-                "LastModifiedAt",
-                "LastModifiedFromPlatform"
+                nameof(KitchenProductionOverviewModel.TransactionNo),
+                nameof(KitchenProductionOverviewModel.TransactionDateTime),
+                nameof(KitchenProductionOverviewModel.CompanyName),
+                nameof(KitchenProductionOverviewModel.KitchenName),
+                nameof(KitchenProductionOverviewModel.FinancialYear),
+                nameof(KitchenProductionOverviewModel.TotalItems),
+                nameof(KitchenProductionOverviewModel.TotalQuantity),
+                nameof(KitchenProductionOverviewModel.TotalAmount),
+                nameof(KitchenProductionOverviewModel.Remarks),
+                nameof(KitchenProductionOverviewModel.CreatedByName),
+                nameof(KitchenProductionOverviewModel.CreatedAt),
+                nameof(KitchenProductionOverviewModel.CreatedFromPlatform),
+                nameof(KitchenProductionOverviewModel.LastModifiedByUserName),
+                nameof(KitchenProductionOverviewModel.LastModifiedAt),
+                nameof(KitchenProductionOverviewModel.LastModifiedFromPlatform)
             ];
-        }
+        // Summary columns - key fields only (matching Excel export)
         else
-        {
-            // Summary columns - key fields only (matching Excel export)
             columnOrder =
             [
-                "TransactionNo",
-                "TransactionDateTime",
-                "KitchenName",
-                "TotalQuantity",
-                "TotalAmount"
+                nameof(KitchenProductionOverviewModel.TransactionNo),
+                nameof(KitchenProductionOverviewModel.TransactionDateTime),
+                nameof(KitchenProductionOverviewModel.KitchenName),
+                nameof(KitchenProductionOverviewModel.TotalQuantity),
+                nameof(KitchenProductionOverviewModel.TotalAmount)
             ];
-        }
 
         // Customize specific columns for PDF display (matching Excel column names)
-        columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-        columnSettings["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false };
-        columnSettings["CompanyName"] = new() { DisplayName = "Company", IncludeInTotal = false };
-        columnSettings["KitchenName"] = new() { DisplayName = "Kitchen", IncludeInTotal = false };
-        columnSettings["FinancialYear"] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
-        columnSettings["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false };
-        columnSettings["CreatedByName"] = new() { DisplayName = "Created By", IncludeInTotal = false };
-        columnSettings["CreatedAt"] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["CreatedFromPlatform"] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
-        columnSettings["LastModifiedByUserName"] = new() { DisplayName = "Modified By", IncludeInTotal = false };
-        columnSettings["LastModifiedAt"] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["LastModifiedFromPlatform"] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.CompanyName)] = new() { DisplayName = "Company", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.KitchenName)] = new() { DisplayName = "Kitchen", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.FinancialYear)] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.CreatedByName)] = new() { DisplayName = "Created By", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.CreatedAt)] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.CreatedFromPlatform)] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.LastModifiedByUserName)] = new() { DisplayName = "Modified By", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.LastModifiedAt)] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(KitchenProductionOverviewModel.LastModifiedFromPlatform)] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };
 
-        columnSettings["TotalItems"] = new()
+        columnSettings[nameof(KitchenProductionOverviewModel.TotalItems)] = new()
         {
-            DisplayName = "Total Items",
+            DisplayName = "Items",
             Format = "#,##0",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -87,9 +83,9 @@ public static class KitchenProductionReportPDFExport
             }
         };
 
-        columnSettings["TotalQuantity"] = new()
+        columnSettings[nameof(KitchenProductionOverviewModel.TotalQuantity)] = new()
         {
-            DisplayName = "Total Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -98,9 +94,9 @@ public static class KitchenProductionReportPDFExport
             }
         };
 
-        columnSettings["TotalAmount"] = new()
+        columnSettings[nameof(KitchenProductionOverviewModel.TotalAmount)] = new()
         {
-            DisplayName = "Total Amount",
+            DisplayName = "Total",
             Format = "#,##0.00",
             HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
