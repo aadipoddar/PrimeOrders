@@ -236,20 +236,23 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 			_isProcessing = true;
 			StateHasChanged();
 
-			if (_showDetails && (_stockDetails is null || _stockDetails.Count == 0))
-				await LoadStockDetails();
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await Task.Run(() =>
 				RawMaterialStockReportExcelExport.ExportRawMaterialStockReport(
 					_stockSummary,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
+					dateRangeStart,
+					dateRangeEnd,
 					_showAllColumns,
 					_showDetails ? _stockDetails : null
 				)
 			);
 
-			string fileName = $"RAW_MATERIAL_STOCK_REPORT_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+			string fileName = $"RAW_MATERIAL_STOCK_REPORT";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			fileName += ".xlsx";
 			await SaveAndViewService.SaveAndView(fileName, stream);
 			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
 		}
@@ -274,18 +277,22 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 			_isProcessing = true;
 			StateHasChanged();
 
-			string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
+			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var summaryStream = await Task.Run(() =>
 				RawMaterialStockSummaryReportPDFExport.ExportRawMaterialStockReport(
 					_stockSummary,
-					DateOnly.FromDateTime(_fromDate),
-					DateOnly.FromDateTime(_toDate),
+					dateRangeStart,
+					dateRangeEnd,
 					_showAllColumns
 				)
 			);
 
-			string summaryFileName = $"RAW_MATERIAL_STOCK_SUMMARY_{timestamp}.pdf";
+			string summaryFileName = $"RAW_MATERIAL_STOCK_SUMMARY";
+			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+				summaryFileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+			summaryFileName += ".pdf";
 			await SaveAndViewService.SaveAndView(summaryFileName, summaryStream);
 
 			if (_showDetails && _stockDetails is not null && _stockDetails.Count > 0)
@@ -293,12 +300,15 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 				var detailsStream = await Task.Run(() =>
 					RawMaterialStockDetailsReportPDFExport.ExportRawMaterialStockDetailsReport(
 						_stockDetails,
-						DateOnly.FromDateTime(_fromDate),
-						DateOnly.FromDateTime(_toDate)
+						dateRangeStart,
+						dateRangeEnd
 					)
 				);
 
-				string detailsFileName = $"RAW_MATERIAL_STOCK_DETAILS_{timestamp}.pdf";
+				string detailsFileName = $"RAW_MATERIAL_STOCK_DETAILS";
+				if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
+					detailsFileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
+				detailsFileName += ".pdf";
 				await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
 			}
 

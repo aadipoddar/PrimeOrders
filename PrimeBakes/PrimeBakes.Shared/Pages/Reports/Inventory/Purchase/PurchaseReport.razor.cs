@@ -353,7 +353,6 @@ public partial class PurchaseReport : IAsyncDisposable
             fileName += ".xlsx";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
 			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
 		}
         catch (Exception ex)
