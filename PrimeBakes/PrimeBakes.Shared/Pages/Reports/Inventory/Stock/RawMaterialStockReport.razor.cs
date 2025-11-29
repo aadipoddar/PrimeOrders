@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -18,214 +19,334 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Stock;
 
-public partial class RawMaterialStockReport
+public partial class RawMaterialStockReport : IAsyncDisposable
 {
-    private bool _isLoading = true;
-    private bool _isProcessing = false;
-    private bool _showDetails = false;
-    private bool _showAllColumns = false;
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
 
-    private DateTime _fromDate = DateTime.Now;
-    private DateTime _toDate = DateTime.Now;
+	private UserModel _user;
 
-    private List<RawMaterialStockSummaryModel> _stockSummary = [];
-    private List<RawMaterialStockDetailsModel> _stockDetails = [];
+	private bool _isLoading = true;
+	private bool _isProcessing = false;
+	private bool _showDetails = false;
+	private bool _showAllColumns = false;
 
-    private SfGrid<RawMaterialStockSummaryModel> _sfStockGrid;
-    private SfGrid<RawMaterialStockDetailsModel> _sfStockDetailsGrid;
+	private DateTime _fromDate = DateTime.Now;
+	private DateTime _toDate = DateTime.Now;
 
-    private bool _isDeleteDialogVisible = false;
-    private int _deleteAdjustmentId = 0;
-    private string _deleteTransactionNo = string.Empty;
-    private SfDialog _deleteConfirmationDialog;
+	private List<RawMaterialStockSummaryModel> _stockSummary = [];
+	private List<RawMaterialStockDetailsModel> _stockDetails = [];
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
+	private SfGrid<RawMaterialStockSummaryModel> _sfStockGrid;
+	private SfGrid<RawMaterialStockDetailsModel> _sfStockDetailsGrid;
 
-    private SfToast _sfErrorToast;
-    private SfToast _sfSuccessToast;
+	private bool _isDeleteDialogVisible = false;
+	private int _deleteAdjustmentId = 0;
+	private string _deleteTransactionNo = string.Empty;
+	private SfDialog _deleteConfirmationDialog;
 
-    #region Load Data
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
+	private string _errorTitle = string.Empty;
+	private string _errorMessage = string.Empty;
+	private string _successTitle = string.Empty;
+	private string _successMessage = string.Empty;
 
-        await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
-        await LoadData();
-        _isLoading = false;
-        StateHasChanged();
-    }
+	private SfToast _sfErrorToast;
+	private SfToast _sfSuccessToast;
 
-    private async Task LoadData()
-    {
-        await LoadDates();
-        await LoadStockData();
-    }
+	#region Load Data
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (!firstRender)
+			return;
 
-    private async Task LoadDates()
-    {
-        _fromDate = await CommonData.LoadCurrentDateTime();
-        _toDate = _fromDate;
-    }
+		_user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService, UserRoles.Inventory, true);
+		await LoadData();
+		_isLoading = false;
+		StateHasChanged();
+	}
 
-    private async Task LoadStockData()
-    {
-        if (_isProcessing)
-            return;
+	private async Task LoadData()
+	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.R, LoadStockData, "Refresh Data", Exclude.None)
+			.Add(Code.F5, LoadStockData, "Refresh Data", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None)
+			.Add(Code.Delete, DeleteSelectedCartItem, "Delete Selected Transaction", Exclude.None);
 
-        try
-        {
-            _isProcessing = true;
 
-            _stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDate(_fromDate, _toDate);
+		await LoadDates();
+		await LoadStockData();
+	}
 
-            _stockSummary = [.. _stockSummary.Where(_ => _.OpeningStock != 0 ||
-                                                  _.PurchaseStock != 0 ||
-                                                  _.SaleStock != 0 ||
-                                                  _.ClosingStock != 0)];
-            _stockSummary = [.. _stockSummary.OrderBy(_ => _.RawMaterialName)];
+	private async Task LoadDates()
+	{
+		_fromDate = await CommonData.LoadCurrentDateTime();
+		_toDate = _fromDate;
+	}
 
-            if (_showDetails)
-                await LoadStockDetails();
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while loading stock data : {ex.Message}", "error");
-        }
-        finally
-        {
-            if (_sfStockGrid is not null)
-                await _sfStockGrid.Refresh();
+	private async Task LoadStockData()
+	{
+		if (_isProcessing)
+			return;
 
-            if (_sfStockDetailsGrid is not null)
-                await _sfStockDetailsGrid.Refresh();
+		try
+		{
+			_isProcessing = true;
 
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
+			_stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDate(_fromDate, _toDate);
 
-    private async Task LoadStockDetails()
-    {
-        _stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDate(_fromDate, _toDate);
-        _stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDate).ThenBy(_ => _.RawMaterialName)];
-    }
-    #endregion
+			_stockSummary = [.. _stockSummary.Where(_ => _.OpeningStock != 0 ||
+												  _.PurchaseStock != 0 ||
+												  _.SaleStock != 0 ||
+												  _.ClosingStock != 0)];
+			_stockSummary = [.. _stockSummary.OrderBy(_ => _.RawMaterialName)];
 
-    #region Changed Events
-    private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
-    {
-        _fromDate = args.StartDate;
-        _toDate = args.EndDate;
-        await LoadStockData();
-    }
+			if (_showDetails)
+				await LoadStockDetails();
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while loading stock data : {ex.Message}", "error");
+		}
+		finally
+		{
+			if (_sfStockGrid is not null)
+				await _sfStockGrid.Refresh();
 
-    private async Task SetDateRange(DateRangeType rangeType)
-    {
-        if (_isProcessing)
-            return;
+			if (_sfStockDetailsGrid is not null)
+				await _sfStockDetailsGrid.Refresh();
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
 
-            var today = await CommonData.LoadCurrentDateTime();
-            var currentYear = today.Year;
-            var currentMonth = today.Month;
+	private async Task LoadStockDetails()
+	{
+		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDate(_fromDate, _toDate);
+		_stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDate).ThenBy(_ => _.RawMaterialName)];
+	}
+	#endregion
 
-            switch (rangeType)
-            {
-                case DateRangeType.Today:
-                    _fromDate = today;
-                    _toDate = today;
-                    break;
+	#region Changed Events
+	private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
+	{
+		_fromDate = args.StartDate;
+		_toDate = args.EndDate;
+		await LoadStockData();
+	}
 
-                case DateRangeType.Yesterday:
-                    _fromDate = today.AddDays(-1);
-                    _toDate = today.AddDays(-1);
-                    break;
+	private async Task SetDateRange(DateRangeType rangeType)
+	{
+		if (_isProcessing)
+			return;
 
-                case DateRangeType.CurrentMonth:
-                    _fromDate = new DateTime(currentYear, currentMonth, 1);
-                    _toDate = _fromDate.AddMonths(1).AddDays(-1);
-                    break;
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
-                case DateRangeType.PreviousMonth:
-                    _fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
-                    _toDate = _fromDate.AddMonths(1).AddDays(-1);
-                    break;
+			var today = await CommonData.LoadCurrentDateTime();
+			var currentYear = today.Year;
+			var currentMonth = today.Month;
 
-                case DateRangeType.CurrentFinancialYear:
-                    var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
-                    _fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
-                    _toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-                    break;
+			switch (rangeType)
+			{
+				case DateRangeType.Today:
+					_fromDate = today;
+					_toDate = today;
+					break;
 
-                case DateRangeType.PreviousFinancialYear:
-                    currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
-                    var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
-                    var previousFY = financialYears
-                        .Where(fy => fy.Id != currentFY.Id)
-                        .OrderByDescending(fy => fy.StartDate)
-                        .FirstOrDefault();
+				case DateRangeType.Yesterday:
+					_fromDate = today.AddDays(-1);
+					_toDate = today.AddDays(-1);
+					break;
 
-                    if (previousFY == null)
-                    {
-                        await ShowToast("Warning", "No previous financial year found.", "error");
-                        return;
-                    }
+				case DateRangeType.CurrentMonth:
+					_fromDate = new DateTime(currentYear, currentMonth, 1);
+					_toDate = _fromDate.AddMonths(1).AddDays(-1);
+					break;
 
-                    _fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
-                    _toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-                    break;
+				case DateRangeType.PreviousMonth:
+					_fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
+					_toDate = _fromDate.AddMonths(1).AddDays(-1);
+					break;
 
-                case DateRangeType.AllTime:
-                    _fromDate = new DateTime(2000, 1, 1);
-                    _toDate = today;
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            await LoadStockData();
-            StateHasChanged();
-        }
-    }
-    #endregion
+				case DateRangeType.CurrentFinancialYear:
+					var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
+					_fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
+					_toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
+					break;
 
-    #region Actions
-    private async Task ToggleDetailsView()
-    {
-        _showDetails = !_showDetails;
-        await LoadStockData();
-    }
+				case DateRangeType.PreviousFinancialYear:
+					currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
+					var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
+					var previousFY = financialYears
+						.Where(fy => fy.Id != currentFY.Id)
+						.OrderByDescending(fy => fy.StartDate)
+						.FirstOrDefault();
 
-    private void ToggleColumnsView()
-    {
-        _showAllColumns = !_showAllColumns;
-        StateHasChanged();
-    }
+					if (previousFY == null)
+					{
+						await ShowToast("Warning", "No previous financial year found.", "error");
+						return;
+					}
 
-    private async Task ViewTransaction(string type, int transactionId)
-    {
-        if (_isProcessing)
-            return;
+					_fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
+					_toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
+					break;
 
-        try
-        {
-            var url = type?.ToLower() switch
-            {
+				case DateRangeType.AllTime:
+					_fromDate = new DateTime(2000, 1, 1);
+					_toDate = today;
+					break;
+			}
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			await LoadStockData();
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Exporting
+	private async Task ExportExcel()
+	{
+		if (_isProcessing || _stockSummary is null || _stockSummary.Count == 0)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			if (_showDetails && (_stockDetails is null || _stockDetails.Count == 0))
+				await LoadStockDetails();
+
+			var stream = await Task.Run(() =>
+				RawMaterialStockReportExcelExport.ExportRawMaterialStockReport(
+					_stockSummary,
+					DateOnly.FromDateTime(_fromDate),
+					DateOnly.FromDateTime(_toDate),
+					_showAllColumns,
+					_showDetails ? _stockDetails : null
+				)
+			);
+
+			string fileName = $"RAW_MATERIAL_STOCK_REPORT_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+			await SaveAndViewService.SaveAndView(fileName, stream);
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExportPdf()
+	{
+		if (_isProcessing || _stockSummary is null || _stockSummary.Count == 0)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+
+			string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+			var summaryStream = await Task.Run(() =>
+				RawMaterialStockSummaryReportPDFExport.ExportRawMaterialStockReport(
+					_stockSummary,
+					DateOnly.FromDateTime(_fromDate),
+					DateOnly.FromDateTime(_toDate),
+					_showAllColumns
+				)
+			);
+
+			string summaryFileName = $"RAW_MATERIAL_STOCK_SUMMARY_{timestamp}.pdf";
+			await SaveAndViewService.SaveAndView(summaryFileName, summaryStream);
+
+			if (_showDetails && _stockDetails is not null && _stockDetails.Count > 0)
+			{
+				var detailsStream = await Task.Run(() =>
+					RawMaterialStockDetailsReportPDFExport.ExportRawMaterialStockDetailsReport(
+						_stockDetails,
+						DateOnly.FromDateTime(_fromDate),
+						DateOnly.FromDateTime(_toDate)
+					)
+				);
+
+				string detailsFileName = $"RAW_MATERIAL_STOCK_DETAILS_{timestamp}.pdf";
+				await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
+			}
+
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+	#endregion
+
+	#region Actions
+	private async Task ToggleDetailsView()
+	{
+		_showDetails = !_showDetails;
+		await LoadStockData();
+	}
+
+	private void ToggleColumnsView()
+	{
+		_showAllColumns = !_showAllColumns;
+		StateHasChanged();
+	}
+
+	private async Task ViewSelectedCartItem()
+	{
+		if (_sfStockDetailsGrid is null || _sfStockDetailsGrid.SelectedRecords is null || _sfStockDetailsGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
+		await ViewTransaction(selectedCartItem.Type, selectedCartItem.Id);
+	}
+
+	private async Task ViewTransaction(string type, int transactionId)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			var url = type?.ToLower() switch
+			{
 				"purchase" => $"{PageRouteNames.Purchase}/{transactionId}",
 				"purchasereturn" => $"{PageRouteNames.PurchaseReturn}/{transactionId}",
 				"sale" => $"{PageRouteNames.Sale}/{transactionId}",
@@ -233,280 +354,196 @@ public partial class RawMaterialStockReport
 				"kitchenissue" => $"{PageRouteNames.KitchenIssue}/{transactionId}",
 				"kitchenproduction" => $"{PageRouteNames.KitchenProduction}/{transactionId}",
 				_ => null
-            };
+			};
 
-            if (string.IsNullOrEmpty(url))
-            {
-                await ShowToast("Error", "Unknown transaction type.", "error");
-                return;
-            }
+			if (string.IsNullOrEmpty(url))
+			{
+				await ShowToast("Error", "Unknown transaction type.", "error");
+				return;
+			}
 
-            if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", url, "_blank");
-            else
-                NavigationManager.NavigateTo(url);
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
-        }
-    }
+			if (FormFactor.GetFormFactor() == "Web")
+				await JSRuntime.InvokeVoidAsync("open", url, "_blank");
+			else
+				NavigationManager.NavigateTo(url);
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
+		}
+	}
 
-    private async Task DownloadInvoice(string type, int transactionId)
-    {
-        if (_isProcessing)
-            return;
+	private async Task DownloadSelectedCartItemInvoice()
+	{
+		if (_sfStockDetailsGrid is null || _sfStockDetailsGrid.SelectedRecords is null || _sfStockDetailsGrid.SelectedRecords.Count == 0)
+			return;
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
+		await DownloadInvoice(selectedCartItem.Type, selectedCartItem.Id);
+	}
+
+	private async Task DownloadInvoice(string type, int transactionId)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
 
 			if (type.Equals("purchase", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-				await ShowToast("Success", "Invoice downloaded successfully.", "success");
-				return;
 			}
 			else if (type.Equals("purchasereturn", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-				await ShowToast("Success", "Invoice downloaded successfully.", "success");
-				return;
 			}
 			else if (type.Equals("sale", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-				await ShowToast("Success", "Invoice downloaded successfully.", "success");
-				return;
 			}
 			else if (type.Equals("salereturn", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-				await ShowToast("Success", "Invoice downloaded successfully.", "success");
-				return;
 			}
 			else if (type.Equals("kitchenissue", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await KitchenIssueData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-				await ShowToast("Success", "Invoice downloaded successfully.", "success");
-				return;
 			}
 			else if (type.Equals("kitchenproduction", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
-				await ShowToast("Success", "Invoice downloaded successfully.", "success");
-				return;
 			}
 
-			await ShowToast("Info", "Invoice download functionality to be implemented.", "error");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while downloading invoice: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while downloading invoice: {ex.Message}", "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
 
-    private void DeleteAdjustment(int adjustmentId)
-    {
-        if (_isProcessing)
-            return;
+	private async Task DeleteSelectedCartItem()
+	{
+		if (_sfStockDetailsGrid is null || _sfStockDetailsGrid.SelectedRecords is null || _sfStockDetailsGrid.SelectedRecords.Count == 0)
+			return;
 
-        // Find the adjustment in the details list to get the transaction number
-        var adjustment = _stockDetails.FirstOrDefault(x => x.Id == adjustmentId);
-        if (adjustment is null)
-            return;
+		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
 
-        _deleteAdjustmentId = adjustmentId;
-        _deleteTransactionNo = adjustment.TransactionNo ?? "N/A";
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
-    }
+		if (selectedCartItem.Type.Equals("adjustment", StringComparison.CurrentCultureIgnoreCase))
+			ShowDeleteConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
+	}
 
-    private void CancelDelete()
-    {
-        _deleteAdjustmentId = 0;
-        _deleteTransactionNo = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
-    }
+	private async Task ConfirmDelete()
+	{
+		if (_isProcessing || _deleteAdjustmentId == 0)
+			return;
 
-    private async Task ConfirmDelete()
-    {
-        if (_isProcessing || _deleteAdjustmentId == 0)
-            return;
+		try
+		{
+			_isProcessing = true;
+			_isDeleteDialogVisible = false;
+			StateHasChanged();
 
-        try
-        {
-            _isProcessing = true;
-            _isDeleteDialogVisible = false;
-            StateHasChanged();
+			if (!_user.Admin)
+				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-            await RawMaterialStockData.DeleteRawMaterialStockById(_deleteAdjustmentId);
-            await ShowToast("Success", "Stock adjustment deleted successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while deleting adjustment: {ex.Message}", "error");
-        }
-        finally
-        {
-            _deleteAdjustmentId = 0;
-            _deleteTransactionNo = string.Empty;
-            _isProcessing = false;
-            StateHasChanged();
-            await LoadStockData();
-        }
-    }
-    #endregion
+			var adjustment = _stockDetails.FirstOrDefault(x => x.Id == _deleteAdjustmentId);
+			if (adjustment is null && !adjustment.Type.Equals("adjustment", StringComparison.CurrentCultureIgnoreCase))
+				return;
 
-    #region Exporting
-    private async Task ExportExcel()
-    {
-        if (_isProcessing || _stockSummary is null || _stockSummary.Count == 0)
-            return;
+			await RawMaterialStockData.DeleteRawMaterialStockById(_deleteAdjustmentId);
+			await ShowToast("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("Error", $"An error occurred while deleting transaction: {ex.Message}", "error");
+		}
+		finally
+		{
+			_deleteAdjustmentId = 0;
+			_deleteTransactionNo = string.Empty;
+			_isProcessing = false;
+			StateHasChanged();
+			await LoadStockData();
+		}
+	}
+	#endregion
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	#region Utilities
+	private async Task NavigateToTransactionPage()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.RawMaterialStockAdjustment, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment);
+	}
 
-            // Load details data if _showDetails is true and not already loaded
-            if (_showDetails && (_stockDetails is null || _stockDetails.Count == 0))
-                await LoadStockDetails();
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
 
-            // Generate the Excel file using the custom export utility
-            var stream = await Task.Run(() =>
-                RawMaterialStockReportExcelExport.ExportRawMaterialStockReport(
-                    _stockSummary,
-                    DateOnly.FromDateTime(_fromDate),
-                    DateOnly.FromDateTime(_toDate),
-                    _showAllColumns,
-                    _showDetails ? _stockDetails : null
-                )
-            );
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
 
-            // Generate file name
-            string fileName = $"RAW_MATERIAL_STOCK_REPORT_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-            await SaveAndViewService.SaveAndView(fileName, stream);
-            await ShowToast("Success", "Stock report exported to Excel successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
+	private async Task ShowToast(string title, string message, string type)
+	{
+		VibrationService.VibrateWithTime(200);
 
-    private async Task ExportPdf()
-    {
-        if (_isProcessing || _stockSummary is null || _stockSummary.Count == 0)
-            return;
+		if (type == "error")
+		{
+			_errorTitle = title;
+			_errorMessage = message;
+			await _sfErrorToast.ShowAsync(new()
+			{
+				Title = _errorTitle,
+				Content = _errorMessage
+			});
+		}
+		else if (type == "success")
+		{
+			_successTitle = title;
+			_successMessage = message;
+			await _sfSuccessToast.ShowAsync(new()
+			{
+				Title = _successTitle,
+				Content = _successMessage
+			});
+		}
+	}
 
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
+	private void ShowDeleteConfirmation(int id, string transactionNo)
+	{
+		_deleteAdjustmentId = id;
+		_deleteTransactionNo = transactionNo ?? "N/A";
+		_isDeleteDialogVisible = true;
+		StateHasChanged();
+	}
 
-            // Generate timestamp for file naming
-            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+	private void CancelDelete()
+	{
+		_deleteAdjustmentId = 0;
+		_deleteTransactionNo = string.Empty;
+		_isDeleteDialogVisible = false;
+		StateHasChanged();
+	}
 
-            // Generate the summary PDF file using the custom export utility
-            var summaryStream = await Task.Run(() =>
-                RawMaterialStockSummaryReportPDFExport.ExportRawMaterialStockReport(
-                    _stockSummary,
-                    DateOnly.FromDateTime(_fromDate),
-                    DateOnly.FromDateTime(_toDate),
-                    _showAllColumns
-                )
-            );
-
-            // Generate summary file name
-            string summaryFileName = $"RAW_MATERIAL_STOCK_SUMMARY_{timestamp}.pdf";
-            await SaveAndViewService.SaveAndView(summaryFileName, summaryStream);
-            await ShowToast("Success", "Stock summary exported to PDF successfully.", "success");
-
-            // If details are shown, generate and export the details PDF as well
-            if (!_showDetails)
-                return;
-
-            // Generate the details PDF file
-            if (_stockDetails is null || _stockDetails.Count == 0)
-                return;
-
-            var detailsStream = await Task.Run(() =>
-                RawMaterialStockDetailsReportPDFExport.ExportRawMaterialStockDetailsReport(
-                    _stockDetails,
-                    DateOnly.FromDateTime(_fromDate),
-                    DateOnly.FromDateTime(_toDate)
-                )
-            );
-
-            // Generate details file name
-            string detailsFileName = $"RAW_MATERIAL_STOCK_DETAILS_{timestamp}.pdf";
-            await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
-            await ShowToast("Success", "Stock details exported to PDF successfully.", "success");
-        }
-        catch (Exception ex)
-        {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-    #endregion
-
-    #region Utilities
-    private async Task NavigateToStockAdjustmentPage()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.RawMaterialStockAdjustment, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment);
-    }
-
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
-    }
-    #endregion
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

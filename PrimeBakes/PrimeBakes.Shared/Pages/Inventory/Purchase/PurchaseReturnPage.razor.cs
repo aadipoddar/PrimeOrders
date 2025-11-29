@@ -828,8 +828,9 @@ public partial class PurchaseReturnPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
+			await ShowToast("Saving Transaction", "Please wait while the transaction is being saved...", "success");
 
-            await SaveTransactionFile(true);
+			await SaveTransactionFile(true);
 
             if (!await ValidateForm())
             {

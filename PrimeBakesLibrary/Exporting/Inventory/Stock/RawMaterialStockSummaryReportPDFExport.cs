@@ -27,51 +27,47 @@ public static class RawMaterialStockSummaryReportPDFExport
         // Define column order based on visibility setting (matching Excel export)
         List<string> columnOrder;
 
+        // All columns - detailed view (matching Excel export)
         if (showAllColumns)
-        {
-            // All columns - detailed view (matching Excel export)
             columnOrder =
             [
-                "RawMaterialName",
-                "RawMaterialCode",
-                "RawMaterialCategoryName",
-                "UnitOfMeasurement",
-                "OpeningStock",
-                "PurchaseStock",
-                "SaleStock",
-                "MonthlyStock",
-                "ClosingStock",
-                "Rate",
-                "ClosingValue",
-                "AveragePrice",
-                "WeightedAverageValue",
-                "LastPurchasePrice",
-                "LastPurchaseValue"
+                nameof(RawMaterialStockSummaryModel.RawMaterialName),
+                nameof(RawMaterialStockSummaryModel.RawMaterialCode),
+                nameof(RawMaterialStockSummaryModel.RawMaterialCategoryName),
+                nameof(RawMaterialStockSummaryModel.UnitOfMeasurement),
+                nameof(RawMaterialStockSummaryModel.OpeningStock),
+                nameof(RawMaterialStockSummaryModel.PurchaseStock),
+                nameof(RawMaterialStockSummaryModel.SaleStock),
+                nameof(RawMaterialStockSummaryModel.MonthlyStock),
+                nameof(RawMaterialStockSummaryModel.ClosingStock),
+                nameof(RawMaterialStockSummaryModel.Rate),
+                nameof(RawMaterialStockSummaryModel.ClosingValue),
+                nameof(RawMaterialStockSummaryModel.AveragePrice),
+                nameof(RawMaterialStockSummaryModel.WeightedAverageValue),
+                nameof(RawMaterialStockSummaryModel.LastPurchasePrice),
+                nameof(RawMaterialStockSummaryModel.LastPurchaseValue)
             ];
-        }
+        // Summary columns - key fields only (matching Excel export)
         else
-        {
-            // Summary columns - key fields only (matching Excel export)
             columnOrder =
             [
-                "RawMaterialName",
-                "UnitOfMeasurement",
-                "OpeningStock",
-                "PurchaseStock",
-                "SaleStock",
-                "ClosingStock",
-                "Rate",
-                "ClosingValue"
+                nameof(RawMaterialStockSummaryModel.RawMaterialName),
+                nameof(RawMaterialStockSummaryModel.UnitOfMeasurement),
+                nameof(RawMaterialStockSummaryModel.OpeningStock),
+                nameof(RawMaterialStockSummaryModel.PurchaseStock),
+                nameof(RawMaterialStockSummaryModel.SaleStock),
+                nameof(RawMaterialStockSummaryModel.ClosingStock),
+                nameof(RawMaterialStockSummaryModel.Rate),
+                nameof(RawMaterialStockSummaryModel.ClosingValue)
             ];
-        }
 
         // Customize specific columns for PDF display (matching Excel column names)
-        columnSettings["RawMaterialName"] = new() { DisplayName = "Raw Material Name", IncludeInTotal = false };
-        columnSettings["RawMaterialCode"] = new() { DisplayName = "Material Code", IncludeInTotal = false };
-        columnSettings["RawMaterialCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
-        columnSettings["UnitOfMeasurement"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.RawMaterialName)] = new() { DisplayName = "Raw Material", IncludeInTotal = false };
+        columnSettings[nameof(RawMaterialStockSummaryModel.RawMaterialCode)] = new() { DisplayName = "Code", IncludeInTotal = false };
+        columnSettings[nameof(RawMaterialStockSummaryModel.RawMaterialCategoryName)] = new() { DisplayName = "Category", IncludeInTotal = false };
+        columnSettings[nameof(RawMaterialStockSummaryModel.UnitOfMeasurement)] = new()
         {
-            DisplayName = "Unit",
+            DisplayName = "UOM",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -81,7 +77,7 @@ public static class RawMaterialStockSummaryReportPDFExport
         };
 
         // Stock quantity fields - All with totals
-        columnSettings["OpeningStock"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.OpeningStock)] = new()
         {
             DisplayName = "Opening Stock",
             Format = "#,##0.00",
@@ -93,7 +89,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["PurchaseStock"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.PurchaseStock)] = new()
         {
             DisplayName = "Purchase Stock",
             Format = "#,##0.00",
@@ -105,7 +101,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["SaleStock"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.SaleStock)] = new()
         {
             DisplayName = "Sale Stock",
             Format = "#,##0.00",
@@ -117,7 +113,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["MonthlyStock"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.MonthlyStock)] = new()
         {
             DisplayName = "Monthly Stock",
             Format = "#,##0.00",
@@ -129,7 +125,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["ClosingStock"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.ClosingStock)] = new()
         {
             DisplayName = "Closing Stock",
             Format = "#,##0.00",
@@ -142,7 +138,7 @@ public static class RawMaterialStockSummaryReportPDFExport
         };
 
         // Rate/Price fields - Right aligned, no totals
-        columnSettings["Rate"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.Rate)] = new()
         {
             DisplayName = "Rate",
             Format = "#,##0.00",
@@ -154,7 +150,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["AveragePrice"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.AveragePrice)] = new()
         {
             DisplayName = "Average Price",
             Format = "#,##0.00",
@@ -166,7 +162,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["LastPurchasePrice"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.LastPurchasePrice)] = new()
         {
             DisplayName = "Last Purchase Price",
             Format = "#,##0.00",
@@ -179,7 +175,7 @@ public static class RawMaterialStockSummaryReportPDFExport
         };
 
         // Value fields - All with totals
-        columnSettings["ClosingValue"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.ClosingValue)] = new()
         {
             DisplayName = "Closing Value",
             Format = "#,##0.00",
@@ -191,7 +187,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["WeightedAverageValue"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.WeightedAverageValue)] = new()
         {
             DisplayName = "Weighted Avg Value",
             Format = "#,##0.00",
@@ -203,7 +199,7 @@ public static class RawMaterialStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["LastPurchaseValue"] = new()
+        columnSettings[nameof(RawMaterialStockSummaryModel.LastPurchaseValue)] = new()
         {
             DisplayName = "Last Purchase Value",
             Format = "#,##0.00",

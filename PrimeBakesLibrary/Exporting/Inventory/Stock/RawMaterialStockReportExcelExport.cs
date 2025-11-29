@@ -27,30 +27,30 @@ public static class RawMaterialStockReportExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
-            ["RawMaterialId"] = new() { DisplayName = "Material ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
-            ["RawMaterialCategoryId"] = new() { DisplayName = "Category ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
+            [ nameof(RawMaterialStockSummaryModel.RawMaterialId)] = new() { DisplayName = "Material ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
+            [nameof(RawMaterialStockSummaryModel.RawMaterialCategoryId)] = new() { DisplayName = "Category ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
 
             // Text fields
-            ["RawMaterialName"] = new() { DisplayName = "Raw Material Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 25 },
-            ["RawMaterialCode"] = new() { DisplayName = "Material Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
-            ["RawMaterialCategoryName"] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 20 },
-            ["UnitOfMeasurement"] = new() { DisplayName = "Unit", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 10 },
+            [nameof(RawMaterialStockSummaryModel.RawMaterialName)] = new() { DisplayName = "Raw Material", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 25 },
+            [nameof(RawMaterialStockSummaryModel.RawMaterialCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.RawMaterialCategoryName)] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 20 },
+            [nameof(RawMaterialStockSummaryModel.UnitOfMeasurement)] = new() { DisplayName = "UOM", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 10 },
 
             // Stock quantity fields - All with totals
-            ["OpeningStock"] = new() { DisplayName = "Opening Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
-            ["PurchaseStock"] = new() { DisplayName = "Purchase Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
-            ["SaleStock"] = new() { DisplayName = "Sale Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
-            ["MonthlyStock"] = new() { DisplayName = "Monthly Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
-            ["ClosingStock"] = new() { DisplayName = "Closing Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.OpeningStock)] = new() { DisplayName = "Opening Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.PurchaseStock)] = new() { DisplayName = "Purchase Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.SaleStock)] = new() { DisplayName = "Sale Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.MonthlyStock)] = new() { DisplayName = "Monthly Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.ClosingStock)] = new() { DisplayName = "Closing Stock", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
 
-            ["Rate"] = new() { DisplayName = "Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 12 },
-            ["ClosingValue"] = new() { DisplayName = "Closing Value", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.Rate)] = new() { DisplayName = "Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 12 },
+            [nameof(RawMaterialStockSummaryModel.ClosingValue)] = new() { DisplayName = "Closing Value", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
 
-            ["AveragePrice"] = new() { DisplayName = "Average Price", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 15 },
-            ["WeightedAverageValue"] = new() { DisplayName = "Weighted Avg Value", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 18 },
+            [nameof(RawMaterialStockSummaryModel.AveragePrice)] = new() { DisplayName = "Average Price", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 15 },
+            [nameof(RawMaterialStockSummaryModel.WeightedAverageValue)] = new() { DisplayName = "Weighted Avg Value", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 18 },
 
-            ["LastPurchasePrice"] = new() { DisplayName = "Last Purchase Price", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 18 },
-            ["LastPurchaseValue"] = new() { DisplayName = "Last Purchase Value", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 18 }
+            [nameof(RawMaterialStockSummaryModel.LastPurchasePrice)] = new() { DisplayName = "Last Purchase Price", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 18 },
+            [nameof(RawMaterialStockSummaryModel.LastPurchaseValue)] = new() { DisplayName = "Last Purchase Value", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 18 }
         };
 
         // Define column order based on showAllColumns flag
@@ -60,40 +60,39 @@ public static class RawMaterialStockReportExcelExport
         if (showAllColumns)
             columnOrder =
             [
-                "RawMaterialName",
-                "RawMaterialCode",
-                "RawMaterialCategoryName",
-                "UnitOfMeasurement",
-                "OpeningStock",
-                "PurchaseStock",
-                "SaleStock",
-                "MonthlyStock",
-                "ClosingStock",
-                "Rate",
-                "ClosingValue",
-                "AveragePrice",
-                "WeightedAverageValue",
-                "LastPurchasePrice",
-                "LastPurchaseValue"
+                nameof(RawMaterialStockSummaryModel.RawMaterialName),
+                nameof(RawMaterialStockSummaryModel.RawMaterialCode),
+                nameof(RawMaterialStockSummaryModel.RawMaterialCategoryName),
+                nameof(RawMaterialStockSummaryModel.UnitOfMeasurement),
+                nameof(RawMaterialStockSummaryModel.OpeningStock),
+                nameof(RawMaterialStockSummaryModel.PurchaseStock),
+                nameof(RawMaterialStockSummaryModel.SaleStock),
+                nameof(RawMaterialStockSummaryModel.MonthlyStock),
+                nameof(RawMaterialStockSummaryModel.ClosingStock),
+                nameof(RawMaterialStockSummaryModel.Rate),
+                nameof(RawMaterialStockSummaryModel.ClosingValue),
+                nameof(RawMaterialStockSummaryModel.AveragePrice),
+                nameof(RawMaterialStockSummaryModel.WeightedAverageValue),
+                nameof(RawMaterialStockSummaryModel.LastPurchasePrice),
+                nameof(RawMaterialStockSummaryModel.LastPurchaseValue)
             ];
 
         // Summary columns only (key information)
         else
             columnOrder =
             [
-                "RawMaterialName",
-                "UnitOfMeasurement",
-                "OpeningStock",
-                "PurchaseStock",
-                "SaleStock",
-                "ClosingStock",
-                "Rate",
-                "ClosingValue"
+                nameof(RawMaterialStockSummaryModel.RawMaterialName),
+                nameof(RawMaterialStockSummaryModel.UnitOfMeasurement),
+                nameof(RawMaterialStockSummaryModel.OpeningStock),
+                nameof(RawMaterialStockSummaryModel.PurchaseStock),
+                nameof(RawMaterialStockSummaryModel.SaleStock),
+                nameof(RawMaterialStockSummaryModel.ClosingStock),
+                nameof(RawMaterialStockSummaryModel.Rate),
+                nameof(RawMaterialStockSummaryModel.ClosingValue)
             ];
 
         // If no details data provided, use the simple single-worksheet export
         if (stockDetailsData == null || !stockDetailsData.Any())
-        {
             return ExcelExportUtil.ExportToExcel(
                 stockData,
                 "RAW MATERIAL STOCK REPORT",
@@ -103,7 +102,6 @@ public static class RawMaterialStockReportExcelExport
                 columnSettings,
                 columnOrder
             );
-        }
 
         // Multi-worksheet export
         return ExportWithDetails(
@@ -142,34 +140,33 @@ public static class RawMaterialStockReportExcelExport
         var detailsColumnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
-            ["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 10 },
-            ["RawMaterialId"] = new() { DisplayName = "Material ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
-            ["TransactionId"] = new() { DisplayName = "Transaction ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 15 },
+            [nameof(RawMaterialStockDetailsModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 10 },
+            [nameof(RawMaterialStockDetailsModel.RawMaterialId)] = new() { DisplayName = "Material ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
+            [nameof(RawMaterialStockDetailsModel.TransactionId)] = new() { DisplayName = "Trans ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 15 },
 
             // Text fields
-            ["RawMaterialName"] = new() { DisplayName = "Raw Material Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 25 },
-            ["RawMaterialCode"] = new() { DisplayName = "Material Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
-            ["TransactionNo"] = new() { DisplayName = "Transaction No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 18 },
-            ["Type"] = new() { DisplayName = "Transaction Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 18 },
+            [nameof(RawMaterialStockDetailsModel.RawMaterialName)] = new() { DisplayName = "Raw Material", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 25 },
+            [nameof(RawMaterialStockDetailsModel.RawMaterialCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
+            [nameof(RawMaterialStockDetailsModel.TransactionNo)] = new() { DisplayName = "Trans No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, Width = 18 },
+            [nameof(RawMaterialStockDetailsModel.Type)] = new() { DisplayName = "Trans Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 18 },
 
             // Date fields
-            ["TransactionDate"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
-
+            [nameof(RawMaterialStockDetailsModel.TransactionDate)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
             // Numeric fields
-            ["Quantity"] = new() { DisplayName = "Quantity", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
-            ["NetRate"] = new() { DisplayName = "Net Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 12 }
+            [nameof(RawMaterialStockDetailsModel.Quantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
+            [nameof(RawMaterialStockDetailsModel.NetRate)] = new() { DisplayName = "Net Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 12 }
         };
 
         // Define column order for details
         var detailsColumnOrder = new List<string>
         {
-            "TransactionDate",
-            "TransactionNo",
-            "Type",
-            "RawMaterialName",
-            "RawMaterialCode",
-            "Quantity",
-            "NetRate"
+            nameof(RawMaterialStockDetailsModel.TransactionDate),
+            nameof(RawMaterialStockDetailsModel.TransactionNo),
+            nameof(RawMaterialStockDetailsModel.Type),
+            nameof(RawMaterialStockDetailsModel.RawMaterialName),
+            nameof(RawMaterialStockDetailsModel.RawMaterialCode),
+            nameof(RawMaterialStockDetailsModel.Quantity),
+            nameof(RawMaterialStockDetailsModel.NetRate)
         };
 
         // Create the details worksheet

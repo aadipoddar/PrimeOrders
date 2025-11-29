@@ -401,6 +401,8 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 
 			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -431,6 +433,8 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 			var (fileStream, contentType) = await BlobStorageAccess.DownloadFileFromBlobStorage(documentUrl, BlobStorageContainers.purchasereturn);
 			var fileName = documentUrl.Split('/').Last();
 			await SaveAndViewService.SaveAndView(fileName, fileStream);
+
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
 		}
 		catch (Exception ex)
 		{

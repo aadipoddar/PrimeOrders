@@ -434,7 +434,6 @@ public partial class PurchaseReport : IAsyncDisposable
             }
             else
             {
-                // Navigate to Purchase Page
                 if (FormFactor.GetFormFactor() == "Web")
                     await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Purchase}/{transactionId}", "_blank");
                 else
@@ -479,7 +478,9 @@ public partial class PurchaseReport : IAsyncDisposable
                 var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(actualId);
                 await SaveAndViewService.SaveAndView(fileName, pdfStream);
             }
-        }
+
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+		}
         catch (Exception ex)
         {
             await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");

@@ -390,7 +390,8 @@ public partial class KitchenProductionReport
 
             var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
-        }
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+		}
         catch (Exception ex)
         {
             await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");

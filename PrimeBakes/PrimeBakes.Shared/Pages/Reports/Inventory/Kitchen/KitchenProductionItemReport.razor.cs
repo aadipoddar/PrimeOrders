@@ -376,6 +376,7 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 
 			var (fileName, pdfStream) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(pdfStream, fileName);
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
 		}
 		catch (Exception ex)
 		{

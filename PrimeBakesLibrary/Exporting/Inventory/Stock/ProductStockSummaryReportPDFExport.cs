@@ -29,49 +29,45 @@ public static class ProductStockSummaryReportPDFExport
         // Define column order based on visibility setting (matching Excel export)
         List<string> columnOrder;
 
-        if (showAllColumns)
-        {
             // All columns - detailed view (matching Excel export)
+        if (showAllColumns)
             columnOrder =
             [
-                "ProductName",
-                "ProductCode",
-                "ProductCategoryName",
-                "OpeningStock",
-                "PurchaseStock",
-                "SaleStock",
-                "MonthlyStock",
-                "ClosingStock",
-                "Rate",
-                "ClosingValue",
-                "AveragePrice",
-                "WeightedAverageValue",
-                "LastSalePrice",
-                "LastSaleValue"
+                nameof(ProductStockSummaryModel.ProductName),
+                nameof(ProductStockSummaryModel.ProductCode),
+                nameof(ProductStockSummaryModel.ProductCategoryName),
+                nameof(ProductStockSummaryModel.OpeningStock),
+                nameof(ProductStockSummaryModel.PurchaseStock),
+                nameof(ProductStockSummaryModel.SaleStock),
+                nameof(ProductStockSummaryModel.MonthlyStock),
+                nameof(ProductStockSummaryModel.ClosingStock),
+                nameof(ProductStockSummaryModel.Rate),
+                nameof(ProductStockSummaryModel.ClosingValue),
+                nameof(ProductStockSummaryModel.AveragePrice),
+                nameof(ProductStockSummaryModel.WeightedAverageValue),
+                nameof(ProductStockSummaryModel.LastSalePrice),
+                nameof(ProductStockSummaryModel.LastSaleValue)
             ];
-        }
-        else
-        {
             // Summary columns - key fields only (matching Excel export)
+        else
             columnOrder =
             [
-                "ProductName",
-                "OpeningStock",
-                "PurchaseStock",
-                "SaleStock",
-                "ClosingStock",
-                "Rate",
-                "ClosingValue"
+                nameof(ProductStockSummaryModel.ProductName),
+                nameof(ProductStockSummaryModel.OpeningStock),
+                nameof(ProductStockSummaryModel.PurchaseStock),
+                nameof(ProductStockSummaryModel.SaleStock),
+                nameof(ProductStockSummaryModel.ClosingStock),
+                nameof(ProductStockSummaryModel.Rate),
+                nameof(ProductStockSummaryModel.ClosingValue)
             ];
-        }
 
         // Customize specific columns for PDF display (matching Excel column names)
-        columnSettings["ProductName"] = new() { DisplayName = "Product Name", IncludeInTotal = false };
-        columnSettings["ProductCode"] = new() { DisplayName = "Product Code", IncludeInTotal = false };
-        columnSettings["ProductCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
+        columnSettings[nameof(ProductStockSummaryModel.ProductName)] = new() { DisplayName = "Product", IncludeInTotal = false };
+        columnSettings[nameof(ProductStockSummaryModel.ProductCode)] = new() { DisplayName = "Code", IncludeInTotal = false };
+        columnSettings[nameof(ProductStockSummaryModel.ProductCategoryName)] = new() { DisplayName = "Category", IncludeInTotal = false };
 
         // Stock quantity fields - All with totals
-        columnSettings["OpeningStock"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.OpeningStock)] = new()
         {
             DisplayName = "Opening Stock",
             Format = "#,##0.00",
@@ -83,7 +79,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["PurchaseStock"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.PurchaseStock)] = new()
         {
             DisplayName = "Purchase Stock",
             Format = "#,##0.00",
@@ -95,7 +91,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["SaleStock"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.SaleStock)] = new()
         {
             DisplayName = "Sale Stock",
             Format = "#,##0.00",
@@ -107,7 +103,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["MonthlyStock"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.MonthlyStock)] = new()
         {
             DisplayName = "Monthly Stock",
             Format = "#,##0.00",
@@ -119,7 +115,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["ClosingStock"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.ClosingStock)] = new()
         {
             DisplayName = "Closing Stock",
             Format = "#,##0.00",
@@ -132,7 +128,7 @@ public static class ProductStockSummaryReportPDFExport
         };
 
         // Rate/Price fields - Right aligned, no totals
-        columnSettings["Rate"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.Rate)] = new()
         {
             DisplayName = "Rate",
             Format = "#,##0.00",
@@ -144,7 +140,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["AveragePrice"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.AveragePrice)] = new()
         {
             DisplayName = "Average Price",
             Format = "#,##0.00",
@@ -156,7 +152,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["LastSalePrice"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.LastSalePrice)] = new()
         {
             DisplayName = "Last Sale Price",
             Format = "#,##0.00",
@@ -169,7 +165,7 @@ public static class ProductStockSummaryReportPDFExport
         };
 
         // Value fields - All with totals
-        columnSettings["ClosingValue"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.ClosingValue)] = new()
         {
             DisplayName = "Closing Value",
             Format = "#,##0.00",
@@ -181,7 +177,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["WeightedAverageValue"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.WeightedAverageValue)] = new()
         {
             DisplayName = "Weighted Avg Value",
             Format = "#,##0.00",
@@ -193,7 +189,7 @@ public static class ProductStockSummaryReportPDFExport
             }
         };
 
-        columnSettings["LastSaleValue"] = new()
+        columnSettings[nameof(ProductStockSummaryModel.LastSaleValue)] = new()
         {
             DisplayName = "Last Sale Value",
             Format = "#,##0.00",

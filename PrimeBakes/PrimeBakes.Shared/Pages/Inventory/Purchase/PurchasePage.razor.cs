@@ -829,6 +829,7 @@ public partial class PurchasePage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await SaveTransactionFile(true);
 

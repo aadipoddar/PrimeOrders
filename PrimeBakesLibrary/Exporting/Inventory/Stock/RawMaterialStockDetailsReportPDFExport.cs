@@ -25,19 +25,19 @@ public static class RawMaterialStockDetailsReportPDFExport
         // Define column order for details (no toggle - always same columns)
         var columnOrder = new List<string>
         {
-            "TransactionDate",
-            "TransactionNo",
-            "Type",
-            "RawMaterialName",
-            "RawMaterialCode",
-            "Quantity",
-            "NetRate"
+            nameof(RawMaterialStockDetailsModel.TransactionDate),
+            nameof(RawMaterialStockDetailsModel.TransactionNo),
+            nameof(RawMaterialStockDetailsModel.Type),
+            nameof(RawMaterialStockDetailsModel.RawMaterialName),
+            nameof(RawMaterialStockDetailsModel.RawMaterialCode),
+            nameof(RawMaterialStockDetailsModel.Quantity),
+            nameof(RawMaterialStockDetailsModel.NetRate)
         };
 
         // Customize specific columns for PDF display
-        columnSettings["TransactionDate"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.TransactionDate)] = new()
         {
-            DisplayName = "Transaction Date",
+            DisplayName = "Trans Date",
             Format = "dd-MMM-yyyy",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -47,15 +47,15 @@ public static class RawMaterialStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["TransactionNo"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.TransactionNo)] = new()
         {
-            DisplayName = "Transaction No",
+            DisplayName = "Trans No",
             IncludeInTotal = false
         };
 
-        columnSettings["Type"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.Type)] = new()
         {
-            DisplayName = "Transaction Type",
+            DisplayName = "Trans Type",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -64,15 +64,15 @@ public static class RawMaterialStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["RawMaterialName"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.RawMaterialName)] = new()
         {
-            DisplayName = "Raw Material Name",
+            DisplayName = "Raw Material",
             IncludeInTotal = false
         };
 
-        columnSettings["RawMaterialCode"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.RawMaterialCode)] = new()
         {
-            DisplayName = "Material Code",
+            DisplayName = "Code",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -81,9 +81,9 @@ public static class RawMaterialStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["Quantity"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.Quantity)] = new()
         {
-            DisplayName = "Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -93,7 +93,7 @@ public static class RawMaterialStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["NetRate"] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.NetRate)] = new()
         {
             DisplayName = "Net Rate",
             Format = "#,##0.00",

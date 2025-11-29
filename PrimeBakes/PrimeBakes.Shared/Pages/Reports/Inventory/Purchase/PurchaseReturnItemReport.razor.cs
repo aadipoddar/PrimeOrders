@@ -379,6 +379,8 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 
 			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
 		}
 		catch (Exception ex)
 		{

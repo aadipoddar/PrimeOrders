@@ -27,19 +27,19 @@ public static class ProductStockDetailsReportPDFExport
         // Define column order for details (no toggle - always same columns)
         var columnOrder = new List<string>
         {
-            "TransactionDate",
-            "TransactionNo",
-            "Type",
-            "ProductName",
-            "ProductCode",
-            "Quantity",
-            "NetRate"
+            nameof(ProductStockDetailsModel.TransactionDate),
+            nameof(ProductStockDetailsModel.TransactionNo),
+            nameof(ProductStockDetailsModel.Type),
+            nameof(ProductStockDetailsModel.ProductName),
+            nameof(ProductStockDetailsModel.ProductCode),
+            nameof(ProductStockDetailsModel.Quantity),
+            nameof(ProductStockDetailsModel.NetRate)
         };
 
         // Customize specific columns for PDF display
-        columnSettings["TransactionDate"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.TransactionDate)] = new()
         {
-            DisplayName = "Transaction Date",
+            DisplayName = "Trans Date",
             Format = "dd-MMM-yyyy",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -49,15 +49,15 @@ public static class ProductStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["TransactionNo"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.TransactionNo)] = new()
         {
-            DisplayName = "Transaction No",
+            DisplayName = "Trans No",
             IncludeInTotal = false
         };
 
-        columnSettings["Type"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.Type)] = new()
         {
-            DisplayName = "Transaction Type",
+            DisplayName = "Trans Type",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -66,15 +66,15 @@ public static class ProductStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["ProductName"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.ProductName)] = new()
         {
-            DisplayName = "Product Name",
+            DisplayName = "Product",
             IncludeInTotal = false
         };
 
-        columnSettings["ProductCode"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.ProductCode)] = new()
         {
-            DisplayName = "Product Code",
+            DisplayName = "Code",
             IncludeInTotal = false,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -83,9 +83,9 @@ public static class ProductStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["Quantity"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.Quantity)] = new()
         {
-            DisplayName = "Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -95,7 +95,7 @@ public static class ProductStockDetailsReportPDFExport
             }
         };
 
-        columnSettings["NetRate"] = new()
+        columnSettings[nameof(ProductStockDetailsModel.NetRate)] = new()
         {
             DisplayName = "Net Rate",
             Format = "#,##0.00",
