@@ -11,8 +11,15 @@ public class SaleModel
     public int? OrderId { get; set; }
     public DateTime TransactionDateTime { get; set; }
     public int FinancialYearId { get; set; }
-    public decimal ItemsTotalAmount { get; set; }
-    public decimal OtherChargesPercent { get; set; }
+	public int TotalItems { get; set; }
+	public decimal TotalQuantity { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal ItemDiscountAmount { get; set; }
+	public decimal TotalAfterItemDiscount { get; set; }
+	public decimal TotalInclusiveTaxAmount { get; set; }
+	public decimal TotalExtraTaxAmount { get; set; }
+	public decimal TotalAfterTax { get; set; }
+	public decimal OtherChargesPercent { get; set; }
     public decimal OtherChargesAmount { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -35,7 +42,7 @@ public class SaleModel
 public class SaleDetailModel
 {
     public int Id { get; set; }
-    public int SaleId { get; set; }
+    public int MasterId { get; set; }
     public int ProductId { get; set; }
     public decimal Quantity { get; set; }
     public decimal Rate { get; set; }
@@ -102,35 +109,20 @@ public class SaleOverviewModel
     public int FinancialYearId { get; set; }
     public string FinancialYear { get; set; }
 
-    public decimal OtherChargesPercent { get; set; }
+	public int TotalItems { get; set; }
+	public decimal TotalQuantity { get; set; }
+	public decimal BaseTotal { get; set; }
+	public decimal ItemDiscountAmount { get; set; }
+	public decimal TotalAfterItemDiscount { get; set; }
+	public decimal TotalInclusiveTaxAmount { get; set; }
+	public decimal TotalExtraTaxAmount { get; set; }
+	public decimal TotalAfterTax { get; set; }
+
+	public decimal OtherChargesPercent { get; set; }
     public decimal OtherChargesAmount { get; set; }
     public decimal DiscountPercent { get; set; }
     public decimal DiscountAmount { get; set; }
 
-    public int TotalItems { get; set; }
-    public decimal TotalQuantity { get; set; }
-
-    public decimal BaseTotal { get; set; }
-
-    public decimal ItemDiscountPercent { get; set; }
-    public decimal ItemDiscountAmount { get; set; }
-
-    public decimal AfterDiscount { get; set; }
-
-    public decimal SGSTPercent { get; set; }
-    public decimal CGSTPercent { get; set; }
-    public decimal IGSTPercent { get; set; }
-
-    public decimal SGSTAmount { get; set; }
-    public decimal CGSTAmount { get; set; }
-    public decimal IGSTAmount { get; set; }
-
-    public decimal TotalTaxAmount { get; set; }
-
-    public decimal TotalAfterTax { get; set; }
-
-    public decimal TotalAfterOtherCharges { get; set; }
-    public decimal TotalAfterDiscount { get; set; }
     public decimal RoundOffAmount { get; set; }
     public decimal TotalAmount { get; set; }
 
@@ -161,7 +153,7 @@ public class SaleItemOverviewModel
     public int ItemCategoryId { get; set; }
     public string ItemCategoryName { get; set; }
 
-    public int SaleId { get; set; }
+    public int MasterId { get; set; }
     public string TransactionNo { get; set; }
     public DateTime TransactionDateTime { get; set; }
     public int CompanyId { get; set; }

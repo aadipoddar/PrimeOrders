@@ -19,22 +19,21 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Sales.Sale;
 
-public partial class SaleReturnPage
+public partial class SaleReturnPage : IAsyncDisposable
 {
-    [Parameter] public int? Id { get; set; }
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
+
+	[Parameter] public int? Id { get; set; }
 
     private UserModel _user;
 
     private bool _isLoading = true;
     private bool _isProcessing = false;
-
-    private decimal _itemBaseTotal = 0;
-    private decimal _itemDiscountTotal = 0;
-    private decimal _itemAfterDiscountTotal = 0;
-    private decimal _itemTaxTotal = 0;
-    private decimal _itemAfterTaxTotal = 0;
 
     private CompanyModel _selectedCompany = new();
     private LocationModel _selectedLocation = new();
@@ -78,13 +77,26 @@ public partial class SaleReturnPage
 
     private async Task LoadData()
     {
-        await LoadLocations();
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.A, AddItemToCart, "Add item to cart", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, () => _sfItemAutoComplete.FocusAsync(), "Focus on item input", Exclude.None)
+			.Add(ModCode.Ctrl, Code.S, SaveTransaction, "Save the transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, DownloadInvoice, "Download invoice", Exclude.None)
+			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistoryPage, "Open transaction history", Exclude.None)
+			.Add(ModCode.Ctrl, Code.I, NavigateToItemReport, "Open item report", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, ResetPage, "Reset the page", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(Code.Delete, RemoveSelectedCartItem, "Delete selected cart item", Exclude.None)
+			.Add(Code.Insert, EditSelectedCartItem, "Edit selected cart item", Exclude.None);
+
+		await LoadLocations();
         await LoadCompanies();
         await LoadLedgers();
-        await LoadExistingSaleReturn();
+        await LoadExistingTransaction();
         await LoadItems();
         await LoadExistingCart();
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task LoadLocations()
@@ -148,7 +160,7 @@ public partial class SaleReturnPage
         }
     }
 
-    private async Task LoadExistingSaleReturn()
+    private async Task LoadExistingTransaction()
     {
         try
         {
@@ -157,8 +169,8 @@ public partial class SaleReturnPage
                 _saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, Id.Value);
                 if (_saleReturn is null || _saleReturn.Id == 0 || _user.LocationId > 1)
                 {
-                    await ShowToast("Sale Return Not Found", "The requested sale return could not be found.", "error");
-                    NavigationManager.NavigateTo(PageRouteNames.SaleReturn, true);
+					await ShowToast("Transaction Not Found", "The requested transaction could not be found.", "error");
+					NavigationManager.NavigateTo(PageRouteNames.SaleReturn, true);
                 }
             }
 
@@ -178,8 +190,13 @@ public partial class SaleReturnPage
                     TransactionDateTime = await CommonData.LoadCurrentDateTime(),
                     FinancialYearId = (await FinancialYearData.LoadFinancialYearByDateTime(await CommonData.LoadCurrentDateTime())).Id,
                     CreatedBy = _user.Id,
-                    ItemsTotalAmount = 0,
-                    DiscountPercent = 0,
+					TotalItems = 0,
+					ItemDiscountAmount = 0,
+					TotalAfterItemDiscount = 0,
+					TotalInclusiveTaxAmount = 0,
+					TotalExtraTaxAmount = 0,
+					TotalAfterTax = 0,
+					DiscountPercent = 0,
                     DiscountAmount = 0,
                     OtherChargesPercent = 0,
                     OtherChargesAmount = 0,
@@ -239,12 +256,12 @@ public partial class SaleReturnPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Sale Return Data", ex.Message, "error");
-            await DeleteLocalFiles();
+			await ShowToast("An Error Occurred While Loading Transaction Data", ex.Message, "error");
+			await DeleteLocalFiles();
         }
         finally
         {
-            await SaveSaleReturnFile();
+            await SaveTransactionFile();
         }
     }
 
@@ -278,14 +295,15 @@ public partial class SaleReturnPage
 
             if (_saleReturn.Id > 0)
             {
-                var existingCart = await SaleReturnData.LoadSaleReturnDetailBySaleReturn(_saleReturn.Id);
+                var existingCart = await CommonData.LoadTableDataByMasterId<SaleReturnDetailModel>(TableNames.SaleReturnDetail, _saleReturn.Id);
 
                 foreach (var item in existingCart)
                 {
                     if (_products.FirstOrDefault(s => s.ProductId == item.ProductId) is null)
                     {
-                        await ShowToast("Item Not Found", $"The item with ID {item.ProductId} in the existing sale return cart was not found in the available items list. It may have been deleted or is inaccessible.", "error");
-                        continue;
+						var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+						await ShowToast("Item Not Found", $"The item {product?.Name} (ID: {item.ProductId}) in the existing transaction cart was not found in the available items list. It may have been deleted or is inaccessible.", "error");
+						continue;
                     }
 
                     _cart.Add(new()
@@ -323,7 +341,7 @@ public partial class SaleReturnPage
         }
         finally
         {
-            await SaveSaleReturnFile();
+            await SaveTransactionFile();
         }
     }
     #endregion
@@ -363,7 +381,7 @@ public partial class SaleReturnPage
         }
 
         await LoadItems();
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnCompanyChanged(ChangeEventArgs<CompanyModel, CompanyModel> args)
@@ -393,7 +411,7 @@ public partial class SaleReturnPage
         _selectedCompany = args.Value;
         _saleReturn.CompanyId = _selectedCompany.Id;
 
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnPartyChanged(ChangeEventArgs<LedgerModel?, LedgerModel?> args)
@@ -410,7 +428,7 @@ public partial class SaleReturnPage
         {
             _selectedParty = null;
             _saleReturn.PartyId = null;
-            await SaveSaleReturnFile();
+            await SaveTransactionFile();
             return;
         }
 
@@ -428,7 +446,7 @@ public partial class SaleReturnPage
         _saleReturn.PartyId = _selectedParty.Id;
 
         await LoadItems();
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnTransactionDateChanged(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime> args)
@@ -442,7 +460,7 @@ public partial class SaleReturnPage
 
         _saleReturn.TransactionDateTime = args.Value;
         await LoadItems();
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnCustomerNumberChanged(string args)
@@ -451,7 +469,7 @@ public partial class SaleReturnPage
         {
             _selectedCustomer = new();
             _saleReturn.CustomerId = null;
-            await SaveSaleReturnFile();
+            await SaveTransactionFile();
             return;
         }
 
@@ -465,25 +483,25 @@ public partial class SaleReturnPage
         };
 
         _saleReturn.CustomerId = _selectedCustomer.Id;
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnDiscountPercentChanged(ChangeEventArgs<decimal> args)
     {
         _saleReturn.DiscountPercent = args.Value;
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnOtherDiscountPercentChanged(ChangeEventArgs<decimal> args)
     {
         _saleReturn.OtherChargesPercent = args.Value;
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
     private async Task OnRoundOffAmountChanged(ChangeEventArgs<decimal> args)
     {
         _saleReturn.RoundOffAmount = args.Value;
-        await SaveSaleReturnFile(true);
+        await SaveTransactionFile(true);
     }
     #endregion
 
@@ -663,10 +681,19 @@ public partial class SaleReturnPage
         _selectedCart = new();
 
         await _sfItemAutoComplete.FocusAsync();
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
 
-    private async Task EditCartItem(SaleReturnItemCartModel cartItem)
+	private async Task EditSelectedCartItem()
+	{
+		if (_sfCartGrid is null || _sfCartGrid.SelectedRecords is null || _sfCartGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfCartGrid.SelectedRecords.First();
+		await EditCartItem(selectedCartItem);
+	}
+
+	private async Task EditCartItem(SaleReturnItemCartModel cartItem)
     {
         _selectedProduct = _products.FirstOrDefault(s => s.ProductId == cartItem.ItemId);
 
@@ -692,10 +719,19 @@ public partial class SaleReturnPage
         await RemoveItemFromCart(cartItem);
     }
 
-    private async Task RemoveItemFromCart(SaleReturnItemCartModel cartItem)
+	private async Task RemoveSelectedCartItem()
+	{
+		if (_sfCartGrid is null || _sfCartGrid.SelectedRecords is null || _sfCartGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfCartGrid.SelectedRecords.First();
+		await RemoveItemFromCart(selectedCartItem);
+	}
+
+	private async Task RemoveItemFromCart(SaleReturnItemCartModel cartItem)
     {
         _cart.Remove(cartItem);
-        await SaveSaleReturnFile();
+        await SaveTransactionFile();
     }
     #endregion
 
@@ -737,16 +773,17 @@ public partial class SaleReturnPage
                 item.Remarks = null;
         }
 
-        _saleReturn.ItemsTotalAmount = _cart.Sum(x => x.Total);
+		_saleReturn.TotalItems = _cart.Count;
+		_saleReturn.TotalQuantity = _cart.Sum(x => x.Quantity);
+		_saleReturn.BaseTotal = _cart.Sum(x => x.BaseTotal);
+		_saleReturn.ItemDiscountAmount = _cart.Sum(x => x.DiscountAmount);
+		_saleReturn.TotalAfterItemDiscount = _cart.Sum(x => x.AfterDiscount);
+		_saleReturn.TotalInclusiveTaxAmount = _cart.Where(x => x.InclusiveTax).Sum(x => x.TotalTaxAmount);
+		_saleReturn.TotalExtraTaxAmount = _cart.Where(x => !x.InclusiveTax).Sum(x => x.TotalTaxAmount);
+		_saleReturn.TotalAfterTax = _cart.Sum(x => x.Total);
 
-        _itemBaseTotal = _cart.Sum(x => x.BaseTotal);
-        _itemDiscountTotal = _cart.Sum(x => x.DiscountAmount);
-        _itemAfterDiscountTotal = _cart.Sum(x => x.AfterDiscount);
-        _itemTaxTotal = _cart.Sum(x => x.TotalTaxAmount);
-        _itemAfterTaxTotal = _cart.Sum(x => x.Total);
-
-        _saleReturn.OtherChargesAmount = _itemAfterTaxTotal * _saleReturn.OtherChargesPercent / 100;
-        var totalAfterOtherCharges = _itemAfterTaxTotal + _saleReturn.OtherChargesAmount;
+        _saleReturn.OtherChargesAmount = _saleReturn.TotalAfterTax * _saleReturn.OtherChargesPercent / 100;
+        var totalAfterOtherCharges = _saleReturn.TotalAfterTax + _saleReturn.OtherChargesAmount;
 
         _saleReturn.DiscountAmount = totalAfterOtherCharges * _saleReturn.DiscountPercent / 100;
         var totalAfterDiscount = totalAfterOtherCharges - _saleReturn.DiscountAmount;
@@ -781,7 +818,7 @@ public partial class SaleReturnPage
             _saleReturn.TransactionNo = await GenerateCodes.GenerateSaleReturnTransactionNo(_saleReturn);
     }
 
-    private async Task SaveSaleReturnFile(bool customRoundOff = false)
+    private async Task SaveTransactionFile(bool customRoundOff = false)
     {
         if (_isProcessing || _isLoading)
             return;
@@ -797,8 +834,8 @@ public partial class SaleReturnPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Sale Return Data", ex.Message, "error");
-        }
+			await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
+		}
         finally
         {
             if (_sfCartGrid is not null)
@@ -871,13 +908,25 @@ public partial class SaleReturnPage
             return false;
         }
 
-        if (_saleReturn.TotalAmount < 0)
-        {
-            await ShowToast("Invalid Total Amount", "The total amount of the sale return transaction must be greater than zero.", "error");
-            return false;
-        }
+		if (_saleReturn.TotalItems <= 0)
+		{
+			await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
+			return false;
+		}
 
-        if (_cart.Any(item => item.Quantity <= 0))
+		if (_saleReturn.TotalQuantity <= 0)
+		{
+			await ShowToast("Invalid Total Quantity", "The total quantity of items in the cart must be greater than zero.", "error");
+			return false;
+		}
+
+		if (_saleReturn.TotalAmount < 0)
+		{
+			await ShowToast("Invalid Total Amount", "The total amount of the transaction must be greater than zero.", "error");
+			return false;
+		}
+
+		if (_cart.Any(item => item.Quantity <= 0))
         {
             await ShowToast("Invalid Item Quantity", "One or more items in the cart have a quantity less than or equal to zero. Please correct the quantities before saving.", "error");
             return false;
@@ -957,8 +1006,9 @@ public partial class SaleReturnPage
         try
         {
             _isProcessing = true;
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
-            await SaveSaleReturnFile(true);
+			await SaveTransactionFile(true);
 
             if (!await ValidateForm())
             {
@@ -998,10 +1048,38 @@ public partial class SaleReturnPage
         await DataStorageService.LocalRemove(StorageFileNames.SaleReturnDataFileName);
         await DataStorageService.LocalRemove(StorageFileNames.SaleReturnCartDataFileName);
     }
-    #endregion
+	#endregion
 
-    #region Utilities
-    private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	#region Utilities
+	private async Task DownloadInvoice()
+	{
+		if (!Id.HasValue || Id.Value <= 0)
+		{
+			await ShowToast("No Transaction Selected", "Please save the transaction first before downloading the invoice.", "error");
+			return;
+		}
+
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(Id.Value);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Downloading Invoice", ex.Message, "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+		}
+	}
+
+	private async Task ResetPage()
     {
         await DeleteLocalFiles();
         NavigationManager.NavigateTo(PageRouteNames.SaleReturn, true);
@@ -1015,7 +1093,21 @@ public partial class SaleReturnPage
             NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturn);
     }
 
-    private async Task ShowToast(string title, string message, string type)
+	private async Task NavigateToItemReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportSaleItem, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem);
+	}
+
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
     {
         VibrationService.VibrateWithTime(200);
 
@@ -1041,5 +1133,11 @@ public partial class SaleReturnPage
             });
         }
     }
-    #endregion
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

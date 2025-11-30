@@ -20,36 +20,21 @@ SELECT
 	[s].[TransactionDateTime],
 	[s].[FinancialYearId],
 	CONVERT(VARCHAR(10), fy.StartDate, 103) + ' to ' + CONVERT(VARCHAR(10), fy.EndDate, 103) AS FinancialYear,
+
+	[s].[TotalItems],
+	[s].[TotalQuantity],
+	[s].[BaseTotal],
+	[s].[ItemDiscountAmount],
+	[s].[TotalAfterItemDiscount],
+	[s].[TotalInclusiveTaxAmount],
+	[s].[TotalExtraTaxAmount],
+	[s].[TotalAfterTax],
 	
 	[s].[OtherChargesPercent],
 	[s].[OtherChargesAmount],
 	[s].[DiscountPercent],
 	[s].[DiscountAmount],
 
-	COUNT(DISTINCT sd.Id) AS TotalItems,
-	SUM(sd.Quantity) AS TotalQuantity,
-
-	SUM(sd.BaseTotal) AS BaseTotal,
-
-	AVG(sd.DiscountPercent) AS ItemDiscountPercent,
-	SUM(sd.DiscountAmount) AS ItemDiscountAmount,
-
-	SUM(sd.AfterDiscount) AS AfterDiscount,
-
-	AVG(sd.SGSTPercent) AS SGSTPercent,
-	AVG(sd.CGSTPercent) AS CGSTPercent,
-	AVG(sd.IGSTPercent) AS IGSTPercent,
-
-	SUM(sd.SGSTAmount) AS SGSTAmount,
-	SUM(sd.CGSTAmount) AS CGSTAmount,
-	SUM(sd.IGSTAmount) AS IGSTAmount,
-
-	SUM(sd.TotalTaxAmount) AS TotalTaxAmount,
-	
-	SUM(sd.Total) AS TotalAfterTax,
-
-	SUM(sd.Total) + [s].[OtherChargesAmount] AS TotalAfterOtherCharges,
-	SUM(sd.Total) + [s].[OtherChargesAmount] - [s].[DiscountAmount] AS TotalAfterDiscount,
 	[s].[RoundOffAmount],
 	[s].[TotalAmount],
 
@@ -97,47 +82,3 @@ INNER JOIN
 	[dbo].[User] AS u ON s.CreatedBy = u.Id
 LEFT JOIN
 	[dbo].[User] AS lm ON s.LastModifiedBy = lm.Id
-INNER JOIN
-	[dbo].[SaleDetail] AS sd ON s.Id = sd.SaleId
-
-WHERE
-	sd.Status = 1
-
-GROUP BY
-	[s].[Id],
-	[s].[TransactionNo],
-	[s].[CompanyId],
-	[c].[Name],
-	[s].[LocationId],
-	[l].[Name],
-	[s].[PartyId],
-	[p].[Name],
-	[s].[CustomerId],
-	[cust].[Name],
-	[s].[OrderId],
-	[o].[TransactionNo],
-	[o].[TransactionDateTime],
-	[s].[TransactionDateTime],
-	[s].[FinancialYearId],
-	[fy].StartDate,
-	[fy].EndDate,
-	[s].[OtherChargesPercent],
-	[s].[OtherChargesAmount],
-	[s].[DiscountPercent],
-	[s].[DiscountAmount],
-	[s].[RoundOffAmount],
-	[s].[TotalAmount],
-	[s].[Cash],
-	[s].[Card],
-	[s].[UPI],
-	[s].[Credit],
-	[s].[Remarks],
-	[s].[CreatedBy],
-	[u].[Name],
-	[s].[CreatedAt],
-	[s].[CreatedFromPlatform],
-	[s].[LastModifiedBy],
-	[lm].[Name],
-	[s].[LastModifiedAt],
-	[s].[LastModifiedFromPlatform],
-	[s].[Status]

@@ -222,7 +222,7 @@ public static class PurchaseReturnData
         if (purchaseReturnOverview is null)
             return;
 
-        if (purchaseReturnOverview.TotalAmount <= 0)
+        if (purchaseReturnOverview.TotalAmount == 0)
             return;
 
         var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);

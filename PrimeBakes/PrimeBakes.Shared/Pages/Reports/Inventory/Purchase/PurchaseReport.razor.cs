@@ -394,7 +394,6 @@ public partial class PurchaseReport : IAsyncDisposable
             fileName += ".pdf";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
 			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
 		}
         catch (Exception ex)
@@ -623,7 +622,7 @@ public partial class PurchaseReport : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while recovering purchase transaction: {ex.Message}", "error");
+            await ShowToast("Error", $"An error occurred while recovering transaction: {ex.Message}", "error");
         }
         finally
         {

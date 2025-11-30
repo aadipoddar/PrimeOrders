@@ -138,6 +138,14 @@ public partial class Dashboard : IDisposable
             NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard, true);
     }
 
+    private async Task NavigateToReport()
+    {
+        if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportDashboard, "_blank");
+        else
+            NavigationManager.NavigateTo(PageRouteNames.ReportDashboard, true);
+    }
+
     private async Task NavigateToAdmin()
     {
         if (FormFactor.GetFormFactor() == "Web")

@@ -227,7 +227,7 @@ public static class PurchaseData
 		if (purchaseOverview is null)
 			return;
 
-		if (purchaseOverview.TotalAmount <= 0)
+		if (purchaseOverview.TotalAmount == 0)
 			return;
 
 		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);

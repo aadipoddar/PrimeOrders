@@ -7,7 +7,7 @@ SELECT
 	[pc].[Id] AS ItemCategoryId,
 	[pc].[Name] AS ItemCategoryName,
 
-	[sr].[Id] AS SaleReturnId,
+	[sr].[Id] AS MasterId,
 	[sr].[TransactionNo],
 	[sr].[TransactionDateTime],
 	[c].[Id] AS CompanyId,
@@ -40,6 +40,7 @@ SELECT
 
 	[sd].[Total],
 	[sd].[NetRate],
+	[sd].[NetRate] * [sd].[Quantity] AS NetTotal,
 
 	[sd].[Remarks] AS Remarks
 
@@ -47,7 +48,7 @@ FROM
 	[dbo].[SaleReturnDetail] sd
 
 INNER JOIN
-	[dbo].[SaleReturn] sr ON sd.SaleReturnId = sr.Id
+	[dbo].[SaleReturn] sr ON sd.[MasterId] = sr.Id
 INNER JOIN
 	[dbo].[Product] pr ON sd.ProductId = pr.Id
 INNER JOIN

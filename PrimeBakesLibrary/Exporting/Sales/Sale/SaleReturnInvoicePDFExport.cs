@@ -63,7 +63,7 @@ public static class SaleReturnInvoicePDFExport
         {
             TransactionNo = saleReturnHeader.TransactionNo,
             TransactionDateTime = saleReturnHeader.TransactionDateTime,
-            ItemsTotalAmount = saleReturnHeader.ItemsTotalAmount,
+            ItemsTotalAmount = saleReturnHeader.TotalAfterTax,
             OtherChargesAmount = saleReturnHeader.OtherChargesAmount,
             OtherChargesPercent = saleReturnHeader.OtherChargesPercent,
             CashDiscountAmount = saleReturnHeader.DiscountAmount,
@@ -125,7 +125,7 @@ public static class SaleReturnInvoicePDFExport
         {
             TransactionNo = saleReturnHeader.TransactionNo,
             TransactionDateTime = saleReturnHeader.TransactionDateTime,
-            ItemsTotalAmount = saleReturnHeader.ItemsTotalAmount,
+            ItemsTotalAmount = saleReturnHeader.TotalAfterTax,
             OtherChargesAmount = saleReturnHeader.OtherChargesAmount,
             OtherChargesPercent = saleReturnHeader.OtherChargesPercent,
             CashDiscountAmount = saleReturnHeader.DiscountAmount,

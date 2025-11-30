@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[SaleReturnDetail]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [SaleReturnId] INT NOT NULL, 
+    [MasterId] INT NOT NULL, 
     [ProductId] INT NOT NULL, 
     [Quantity] MONEY NOT NULL DEFAULT 1, 
     [Rate] MONEY NOT NULL,
@@ -21,6 +21,6 @@
     [NetRate] MONEY NOT NULL DEFAULT 0, 
     [Remarks] VARCHAR(MAX) NULL,
     [Status] BIT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_SaleReturnDetail_ToSaleReturn] FOREIGN KEY (SaleReturnId) REFERENCES [SaleReturn](Id), 
+    CONSTRAINT [FK_SaleReturnDetail_ToSaleReturn] FOREIGN KEY ([MasterId]) REFERENCES [SaleReturn](Id), 
     CONSTRAINT [FK_SaleReturnDetail_ToProduct] FOREIGN KEY (ProductId) REFERENCES [Product](Id)
 )

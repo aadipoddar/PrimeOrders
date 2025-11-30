@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_SaleReturnDetail]
 	@Id INT OUTPUT,
-	@SaleReturnId INT,
+	@MasterId INT,
 	@ProductId INT,
 	@Quantity MONEY,
 	@Rate MONEY,
@@ -26,7 +26,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[SaleReturnDetail]
 		(
-			[SaleReturnId],
+			[MasterId],
 			[ProductId],
 			[Quantity],
 			[Rate],
@@ -49,7 +49,7 @@ BEGIN
 		)
 		VALUES
 		(
-			@SaleReturnId,
+			@MasterId,
 			@ProductId,
 			@Quantity,
 			@Rate,
@@ -77,7 +77,7 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[SaleReturnDetail]
 		SET
-			[SaleReturnId] = @SaleReturnId,
+			[MasterId] = @MasterId,
 			[ProductId] = @ProductId,
 			[Quantity] = @Quantity,
 			[Rate] = @Rate,

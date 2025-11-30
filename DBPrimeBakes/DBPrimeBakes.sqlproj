@@ -210,7 +210,6 @@
     <Build Include="Views\Sales\Sale\SaleReturn_Overview.sql" />
     <Build Include="Tables\Sales\Sale\SaleReturn.sql" />
     <Build Include="Tables\Sales\Sale\SaleReturnDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_SaleReturnDetail_By_SaleReturn.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_SaleReturn_Item_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_LastTableData_By_FinancialYear.sql" />
     <Build Include="Tables\Sales\Sale\Sale.sql" />
@@ -218,7 +217,6 @@
     <Build Include="Views\Sales\Sale\Sale_Overview.sql" />
     <Build Include="Views\Sales\Sale\Sale_Item_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_Sale_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_SaleDetail_By_Sale.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Sale\Insert_Sale.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Sale\Insert_SaleDetail.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Sale\Insert_SaleReturn.sql" />
@@ -246,8 +244,6 @@
     <Build Include="Views\Accounts\Accounting_Ledger_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Ledger_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_TrialBalance_By_Date.sql" />
-    <Build Include="Tables\Sales\Sale\StockTransfer.sql" />
-    <Build Include="Tables\Sales\Sale\StockTransferDetail.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_StateUT.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Company.sql" />
     <Build Include="Tables\Sales\Product\Product.sql" />
@@ -272,8 +268,5 @@
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="DBPrimeBakes.refactorlog" />
-  </ItemGroup>
-  <ItemGroup>
-    <PostDeploy Include="PerformanceIndexes.sql" />
   </ItemGroup>
 </Project>

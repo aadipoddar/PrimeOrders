@@ -20,9 +20,6 @@ public static class SaleReturnData
     public static async Task<int> InsertSaleReturnDetail(SaleReturnDetailModel saleReturnDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertSaleReturnDetail, saleReturnDetail)).FirstOrDefault();
 
-    public static async Task<List<SaleReturnDetailModel>> LoadSaleReturnDetailBySaleReturn(int SaleReturnId) =>
-        await SqlDataAccess.LoadData<SaleReturnDetailModel, dynamic>(StoredProcedureNames.LoadSaleReturnDetailBySaleReturn, new { SaleReturnId });
-
     public static async Task<List<SaleReturnOverviewModel>> LoadSaleReturnOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
         await SqlDataAccess.LoadData<SaleReturnOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
@@ -34,35 +31,35 @@ public static class SaleReturnData
         try
         {
             // Load saved sale return details
-            var savedSaleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturnId) ??
-                throw new InvalidOperationException("Saved sale return transaction not found.");
+            var transaction = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturnId) ??
+                throw new InvalidOperationException("Transaction not found.");
 
             // Load sale return details from database
-            var saleReturnDetails = await LoadSaleReturnDetailBySaleReturn(saleReturnId);
-            if (saleReturnDetails is null || saleReturnDetails.Count == 0)
-                throw new InvalidOperationException("No sale return details found for invoice generation.");
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<SaleReturnDetailModel>(TableNames.SaleReturnDetail, saleReturnId);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+                throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company, location, and party
-            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedSaleReturn.CompanyId);
-            var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, savedSaleReturn.LocationId);
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, transaction.LocationId);
 
             // Try to load party (party can be null for cash sales)
             LedgerModel party = null;
-            if (savedSaleReturn.PartyId.HasValue && savedSaleReturn.PartyId.Value > 0)
-                party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedSaleReturn.PartyId.Value);
+            if (transaction.PartyId.HasValue && transaction.PartyId.Value > 0)
+                party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId.Value);
 
             // Try to load customer (customer can be null)
             CustomerModel customer = null;
-            if (savedSaleReturn.CustomerId.HasValue && savedSaleReturn.CustomerId.Value > 0)
-                customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, savedSaleReturn.CustomerId.Value);
+            if (transaction.CustomerId.HasValue && transaction.CustomerId.Value > 0)
+                customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, transaction.CustomerId.Value);
 
             if (company is null)
-                throw new InvalidOperationException("Invoice generation skipped - company not found.");
+                throw new InvalidOperationException("Company information is missing.");
 
             // Generate invoice PDF
             var pdfStream = await SaleReturnInvoicePDFExport.ExportSaleReturnInvoice(
-                savedSaleReturn,
-                saleReturnDetails,
+                transaction,
+                transactionDetails,
                 company,
                 party,
                 customer,
@@ -73,12 +70,12 @@ public static class SaleReturnData
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();
-            string fileName = $"SALE_RETURN_INVOICE_{savedSaleReturn.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+            string fileName = $"SALE_RETURN_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
             return (pdfStream, fileName);
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
+            throw new InvalidOperationException("Failed to generate and download invoice.", ex);
         }
     }
 
@@ -87,7 +84,7 @@ public static class SaleReturnData
         var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, saleReturnId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, saleReturn.FinancialYearId);
         if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete sale return transaction as the financial year is locked.");
+            throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (saleReturn is not null)
         {
@@ -116,11 +113,11 @@ public static class SaleReturnData
 
     public static async Task RecoverSaleReturnTransaction(SaleReturnModel saleReturn)
     {
-        var saleDetails = await LoadSaleReturnDetailBySaleReturn(saleReturn.Id);
-        List<SaleReturnItemCartModel> saleItemCarts = [];
+        var transactionDetails = await CommonData.LoadTableDataByMasterId<SaleReturnDetailModel>(TableNames.SaleReturnDetail, saleReturn.Id);
+        List<SaleReturnItemCartModel> transactionItemCarts = [];
 
-        foreach (var item in saleDetails)
-            saleItemCarts.Add(new()
+        foreach (var item in transactionDetails)
+            transactionItemCarts.Add(new()
             {
                 ItemId = item.ProductId,
                 ItemName = "",
@@ -143,7 +140,7 @@ public static class SaleReturnData
                 Remarks = item.Remarks
             });
 
-        await SaveSaleReturnTransaction(saleReturn, saleItemCarts);
+        await SaveSaleReturnTransaction(saleReturn, transactionItemCarts);
     }
 
     public static async Task<int> SaveSaleReturnTransaction(SaleReturnModel saleReturn, List<SaleReturnItemCartModel> saleReturnDetails)
@@ -179,8 +176,8 @@ public static class SaleReturnData
     {
         if (update)
         {
-            var existingSaleDetails = await LoadSaleReturnDetailBySaleReturn(saleReturn.Id);
-            foreach (var item in existingSaleDetails)
+            var existingTransactionDetails = await CommonData.LoadTableDataByMasterId<SaleReturnDetailModel>(TableNames.SaleReturnDetail, saleReturn.Id);
+            foreach (var item in existingTransactionDetails)
             {
                 item.Status = false;
                 await InsertSaleReturnDetail(item);
@@ -191,7 +188,7 @@ public static class SaleReturnData
             await InsertSaleReturnDetail(new()
             {
                 Id = 0,
-                SaleReturnId = saleReturn.Id,
+                MasterId = saleReturn.Id,
                 ProductId = item.ItemId,
                 Quantity = item.Quantity,
                 Rate = item.Rate,
@@ -312,7 +309,7 @@ public static class SaleReturnData
         if (saleReturnOverview is null)
             return;
 
-        if (saleReturnOverview.TotalAmount <= 0)
+        if (saleReturnOverview.TotalAmount == 0)
             return;
 
         var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
@@ -362,10 +359,7 @@ public static class SaleReturnData
                 Remarks = $"Party Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
             });
 
-        var saleReturnDetails = await LoadSaleReturnDetailBySaleReturn(saleReturnOverview.Id);
-        var extraTaxAmount = saleReturnDetails.Where(x => !x.InclusiveTax).Sum(x => x.TotalTaxAmount);
-
-        if (saleReturnOverview.TotalAmount - extraTaxAmount > 0)
+        if (saleReturnOverview.TotalAmount - saleReturnOverview.TotalExtraTaxAmount > 0)
         {
             var saleLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId);
             accountingCart.Add(new()
@@ -374,13 +368,13 @@ public static class SaleReturnData
                 ReferenceType = ReferenceTypes.SaleReturn.ToString(),
                 ReferenceNo = saleReturnOverview.TransactionNo,
                 LedgerId = int.Parse(saleLedger.Value),
-                Debit = saleReturnOverview.TotalAmount - extraTaxAmount,
+                Debit = saleReturnOverview.TotalAmount - saleReturnOverview.TotalExtraTaxAmount,
                 Credit = null,
                 Remarks = $"Sale Return Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
             });
         }
 
-        if (extraTaxAmount > 0)
+        if (saleReturnOverview.TotalExtraTaxAmount > 0)
         {
             var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
             accountingCart.Add(new()
@@ -389,7 +383,7 @@ public static class SaleReturnData
                 ReferenceType = ReferenceTypes.SaleReturn.ToString(),
                 ReferenceNo = saleReturnOverview.TransactionNo,
                 LedgerId = int.Parse(gstLedger.Value),
-                Debit = extraTaxAmount,
+                Debit = saleReturnOverview.TotalExtraTaxAmount,
                 Credit = null,
                 Remarks = $"GST Account Posting For Sale Return Bill {saleReturnOverview.TransactionNo}",
             });

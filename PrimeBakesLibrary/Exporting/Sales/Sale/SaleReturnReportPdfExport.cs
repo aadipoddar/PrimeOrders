@@ -23,7 +23,8 @@ public static class SaleReturnReportPdfExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         bool showLocation = false,
-        string locationName = null)
+        string locationName = null,
+        string partyName = null)
     {
         // Define custom column settings matching Excel export
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -36,57 +37,47 @@ public static class SaleReturnReportPdfExport
             // All columns - detailed view (matching Excel export)
             columnOrder =
             [
-                "TransactionNo",
-                "CompanyName"
+                nameof(SaleReturnOverviewModel.TransactionNo),
+                nameof(SaleReturnOverviewModel.CompanyName)
             ];
 
             // Add location columns if showLocation is true
             if (showLocation)
-            {
-                columnOrder.Add("LocationName");
-            }
+                columnOrder.Add(nameof(SaleReturnOverviewModel.LocationName));
 
             // Continue with remaining columns
             columnOrder.AddRange(
             [
-                "PartyName",
-                "CustomerName",
-                "TransactionDateTime",
-                "FinancialYear",
-                "TotalItems",
-                "TotalQuantity",
-                "BaseTotal",
-                "ItemDiscountPercent",
-                "ItemDiscountAmount",
-                "AfterDiscount",
-                "SGSTPercent",
-                "CGSTPercent",
-                "IGSTPercent",
-                "SGSTAmount",
-                "CGSTAmount",
-                "IGSTAmount",
-                "TotalTaxAmount",
-                "TotalAfterTax",
-                "OtherChargesPercent",
-                "OtherChargesAmount",
-                "TotalAfterOtherCharges",
-                "DiscountPercent",
-                "DiscountAmount",
-                "TotalAfterDiscount",
-                "RoundOffAmount",
-                "TotalAmount",
-                "Cash",
-                "Card",
-                "UPI",
-                "Credit",
-                "PaymentModes",
-                "Remarks",
-                "CreatedByName",
-                "CreatedAt",
-                "CreatedFromPlatform",
-                "LastModifiedByUserName",
-                "LastModifiedAt",
-                "LastModifiedFromPlatform"
+                nameof(SaleReturnOverviewModel.PartyName),
+                nameof(SaleReturnOverviewModel.CustomerName),
+                nameof(SaleReturnOverviewModel.TransactionDateTime),
+                nameof(SaleReturnOverviewModel.FinancialYear),
+                nameof(SaleReturnOverviewModel.TotalItems),
+                nameof(SaleReturnOverviewModel.TotalQuantity),
+                nameof(SaleReturnOverviewModel.BaseTotal),
+                nameof(SaleReturnOverviewModel.ItemDiscountAmount),
+                nameof(SaleReturnOverviewModel.TotalAfterItemDiscount),
+                nameof(SaleReturnOverviewModel.TotalInclusiveTaxAmount),
+                nameof(SaleReturnOverviewModel.TotalExtraTaxAmount),
+                nameof(SaleReturnOverviewModel.TotalAfterTax),
+                nameof(SaleReturnOverviewModel.OtherChargesPercent),
+                nameof(SaleReturnOverviewModel.OtherChargesAmount),
+                nameof(SaleReturnOverviewModel.DiscountPercent),
+                nameof(SaleReturnOverviewModel.DiscountAmount),
+                nameof(SaleReturnOverviewModel.RoundOffAmount),
+                nameof(SaleReturnOverviewModel.TotalAmount),
+                nameof(SaleReturnOverviewModel.Cash),
+                nameof(SaleReturnOverviewModel.Card),
+                nameof(SaleReturnOverviewModel.UPI),
+                nameof(SaleReturnOverviewModel.Credit),
+                nameof(SaleReturnOverviewModel.PaymentModes),
+                nameof(SaleReturnOverviewModel.Remarks),
+                nameof(SaleReturnOverviewModel.CreatedByName),
+                nameof(SaleReturnOverviewModel.CreatedAt),
+                nameof(SaleReturnOverviewModel.CreatedFromPlatform),
+                nameof(SaleReturnOverviewModel.LastModifiedByUserName),
+                nameof(SaleReturnOverviewModel.LastModifiedAt),
+                nameof(SaleReturnOverviewModel.LastModifiedFromPlatform)
             ]);
         }
         else
@@ -94,46 +85,46 @@ public static class SaleReturnReportPdfExport
             // Summary columns - key fields only (matching Excel export)
             columnOrder =
             [
-                "TransactionNo",
-                "TransactionDateTime"
+                nameof(SaleReturnOverviewModel.TransactionNo),
+                nameof(SaleReturnOverviewModel.TransactionDateTime),
+                nameof(SaleReturnOverviewModel.TotalQuantity),
+                nameof(SaleReturnOverviewModel.TotalAfterTax),
+                nameof(SaleReturnOverviewModel.DiscountPercent),
+                nameof(SaleReturnOverviewModel.DiscountAmount),
+                nameof(SaleReturnOverviewModel.TotalAmount),
+                nameof(SaleReturnOverviewModel.PaymentModes)
             ];
 
-            // Add location name if showLocation is true
-            if (showLocation)
-            {
-                columnOrder.Add("LocationName");
-            }
+            // Add location column only if not showing location in header
+            if (!showLocation)
+                columnOrder.Insert(3, nameof(SaleReturnOverviewModel.LocationName));
 
-            // Continue with remaining summary columns
-            columnOrder.AddRange(
-            [
-                "PartyName",
-                "CustomerName",
-                "TotalQuantity",
-                "TotalAfterTax",
-                "DiscountPercent",
-                "TotalAmount",
-                "PaymentModes"
-            ]);
+            // Add party column only if not showing party in header
+            if (string.IsNullOrEmpty(partyName))
+            {
+                int insertIndex = showLocation ? 3 : 4;
+                columnOrder.Insert(insertIndex, nameof(SaleReturnOverviewModel.PartyName));
+            }
         }
 
         // Customize specific columns for PDF display (matching Excel column names)
-        columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-        columnSettings["CompanyName"] = new() { DisplayName = "Company Name", IncludeInTotal = false };
-        columnSettings["LocationName"] = new() { DisplayName = "Location Name", IncludeInTotal = false };
-        columnSettings["PartyName"] = new() { DisplayName = "Party Name", IncludeInTotal = false };
-        columnSettings["CustomerName"] = new() { DisplayName = "Customer Name", IncludeInTotal = false };
-        columnSettings["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false };
-        columnSettings["FinancialYear"] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
-        columnSettings["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false };
-        columnSettings["CreatedByName"] = new() { DisplayName = "Created By", IncludeInTotal = false };
-        columnSettings["CreatedAt"] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["CreatedFromPlatform"] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
-        columnSettings["LastModifiedByUserName"] = new() { DisplayName = "Modified By", IncludeInTotal = false };
-        columnSettings["LastModifiedAt"] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["LastModifiedFromPlatform"] = new() { DisplayName = "Modified Platform", IncludeInTotal = false }; columnSettings["TotalItems"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.CompanyName)] = new() { DisplayName = "Company", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.LocationName)] = new() { DisplayName = "Location", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.PartyName)] = new() { DisplayName = "Party", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.CustomerName)] = new() { DisplayName = "Customer", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.FinancialYear)] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.CreatedByName)] = new() { DisplayName = "Created By", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.CreatedAt)] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.CreatedFromPlatform)] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.LastModifiedByUserName)] = new() { DisplayName = "Modified By", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.LastModifiedAt)] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.LastModifiedFromPlatform)] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };
+        columnSettings[nameof(SaleReturnOverviewModel.TotalItems)] = new()
         {
-            DisplayName = "Total Items",
+            DisplayName = "Items",
             Format = "#,##0",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -142,9 +133,9 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["TotalQuantity"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TotalQuantity)] = new()
         {
-            DisplayName = "Total Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -153,11 +144,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["BaseTotal"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.BaseTotal)] = new()
         {
             DisplayName = "Base Total",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -165,23 +155,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["ItemDiscountPercent"] = new()
-        {
-            DisplayName = "Item Discount %",
-            Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Center,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            },
-            IncludeInTotal = false
-        };
-
-        columnSettings["ItemDiscountAmount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.ItemDiscountAmount)] = new()
         {
             DisplayName = "Item Discount Amount",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -189,11 +166,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["AfterDiscount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TotalAfterItemDiscount)] = new()
         {
-            DisplayName = "After Discount",
+            DisplayName = "After Disc",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -201,47 +177,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["SGSTPercent"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TotalInclusiveTaxAmount)] = new()
         {
-            DisplayName = "SGST %",
+            DisplayName = "Incl Tax",
             Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Center,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            },
-            IncludeInTotal = false
-        };
-
-        columnSettings["CGSTPercent"] = new()
-        {
-            DisplayName = "CGST %",
-            Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Center,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            },
-            IncludeInTotal = false
-        };
-
-        columnSettings["IGSTPercent"] = new()
-        {
-            DisplayName = "IGST %",
-            Format = "#,##0.00",
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Center,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            },
-            IncludeInTotal = false
-        };
-
-        columnSettings["SGSTAmount"] = new()
-        {
-            DisplayName = "SGST Amount",
-            Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -249,11 +188,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["CGSTAmount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TotalExtraTaxAmount)] = new()
         {
-            DisplayName = "CGST Amount",
+            DisplayName = "Extra Tax",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -261,35 +199,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["IGSTAmount"] = new()
-        {
-            DisplayName = "IGST Amount",
-            Format = "#,##0.00",
-            HighlightNegative = true,
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            }
-        };
-
-        columnSettings["TotalTaxAmount"] = new()
-        {
-            DisplayName = "Total Tax",
-            Format = "#,##0.00",
-            HighlightNegative = true,
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            }
-        };
-
-        columnSettings["TotalAfterTax"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TotalAfterTax)] = new()
         {
             DisplayName = "Sub Total",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -297,7 +210,7 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["OtherChargesPercent"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.OtherChargesPercent)] = new()
         {
             DisplayName = "Other Charges %",
             Format = "#,##0.00",
@@ -309,11 +222,10 @@ public static class SaleReturnReportPdfExport
             IncludeInTotal = false
         };
 
-        columnSettings["OtherChargesAmount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.OtherChargesAmount)] = new()
         {
             DisplayName = "Other Charges",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -321,21 +233,9 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["TotalAfterOtherCharges"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.DiscountPercent)] = new()
         {
-            DisplayName = "After Other Charges",
-            Format = "#,##0.00",
-            HighlightNegative = true,
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            }
-        };
-
-        columnSettings["DiscountPercent"] = new()
-        {
-            DisplayName = "Discount %",
+            DisplayName = "Disc %",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -345,11 +245,10 @@ public static class SaleReturnReportPdfExport
             IncludeInTotal = false
         };
 
-        columnSettings["DiscountAmount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.DiscountAmount)] = new()
         {
-            DisplayName = "Discount Amount",
+            DisplayName = "Disc Amt",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -357,23 +256,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["TotalAfterDiscount"] = new()
-        {
-            DisplayName = "After Discount",
-            Format = "#,##0.00",
-            HighlightNegative = true,
-            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
-            {
-                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
-                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
-            }
-        };
-
-        columnSettings["RoundOffAmount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.RoundOffAmount)] = new()
         {
             DisplayName = "Round Off",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -381,11 +267,12 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["TotalAmount"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.TotalAmount)] = new()
         {
-            DisplayName = "Total Amount",
+            DisplayName = "Total",
             Format = "#,##0.00",
-            HighlightNegative = true,
+            IsRequired = true,
+            IsGrandTotal = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -393,11 +280,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["Cash"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.Cash)] = new()
         {
             DisplayName = "Cash",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -405,11 +291,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["Card"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.Card)] = new()
         {
             DisplayName = "Card",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -417,11 +302,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["UPI"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.UPI)] = new()
         {
             DisplayName = "UPI",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -429,11 +313,10 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["Credit"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.Credit)] = new()
         {
             DisplayName = "Credit",
             Format = "#,##0.00",
-            HighlightNegative = true,
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
                 Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
@@ -441,7 +324,7 @@ public static class SaleReturnReportPdfExport
             }
         };
 
-        columnSettings["PaymentModes"] = new()
+        columnSettings[nameof(SaleReturnOverviewModel.PaymentModes)] = new()
         {
             DisplayName = "Payment Modes",
             IncludeInTotal = false

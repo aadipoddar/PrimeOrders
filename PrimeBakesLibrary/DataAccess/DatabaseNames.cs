@@ -82,10 +82,8 @@ public static class StoredProcedureNames
     public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
     public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
 
-    public static string LoadSaleDetailBySale => "Load_SaleDetail_By_Sale";
     public static string LoadSaleOverviewByDate => "Load_Sale_Overview_By_Date";
     public static string LoadSaleItemOverviewByDate => "Load_Sale_Item_Overview_By_Date";
-    public static string LoadSaleReturnDetailBySaleReturn => "Load_SaleReturnDetail_By_SaleReturn";
     public static string LoadSaleReturnOverviewByDate => "Load_SaleReturn_Overview_By_Date";
     public static string LoadSaleReturnItemOverviewByDate => "Load_SaleReturn_Item_Overview_By_Date";
 

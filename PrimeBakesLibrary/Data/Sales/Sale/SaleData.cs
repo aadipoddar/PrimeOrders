@@ -22,9 +22,6 @@ public static class SaleData
     public static async Task<int> InsertSaleDetail(SaleDetailModel saleDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertSaleDetail, saleDetail)).FirstOrDefault();
 
-    public static async Task<List<SaleDetailModel>> LoadSaleDetailBySale(int SaleId) =>
-        await SqlDataAccess.LoadData<SaleDetailModel, dynamic>(StoredProcedureNames.LoadSaleDetailBySale, new { SaleId });
-
     public static async Task<List<SaleOverviewModel>> LoadSaleOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
         await SqlDataAccess.LoadData<SaleOverviewModel, dynamic>(StoredProcedureNames.LoadSaleOverviewByDate, new { StartDate, EndDate, OnlyActive });
 
@@ -36,40 +33,40 @@ public static class SaleData
         try
         {
             // Load saved sale details
-            var savedSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId) ??
-                throw new InvalidOperationException("Saved sale transaction not found.");
+            var transaction = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId) ??
+                throw new InvalidOperationException("Transaction not found.");
 
             // Load sale details from database
-            var saleDetails = await LoadSaleDetailBySale(saleId);
-            if (saleDetails is null || saleDetails.Count == 0)
-                throw new InvalidOperationException("No sale details found for invoice generation.");
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<SaleDetailModel>(TableNames.SaleDetail, saleId);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+                throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company, location, and party
-            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedSale.CompanyId);
-            var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, savedSale.LocationId);
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, transaction.LocationId);
 
             // Try to load party (party can be null for cash sales)
             LedgerModel party = null;
-            if (savedSale.PartyId.HasValue && savedSale.PartyId.Value > 0)
-                party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, savedSale.PartyId.Value);
+            if (transaction.PartyId.HasValue && transaction.PartyId.Value > 0)
+                party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId.Value);
 
             // Try to load customer (customer can be null)
             CustomerModel customer = null;
-            if (savedSale.CustomerId.HasValue && savedSale.CustomerId.Value > 0)
-                customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, savedSale.CustomerId.Value);
+            if (transaction.CustomerId.HasValue && transaction.CustomerId.Value > 0)
+                customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, transaction.CustomerId.Value);
 
             // Try to load order information if OrderId is present
             OrderModel order = null;
-            if (savedSale.OrderId.HasValue && savedSale.OrderId.Value > 0)
-                order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, savedSale.OrderId.Value);
+            if (transaction.OrderId.HasValue && transaction.OrderId.Value > 0)
+                order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, transaction.OrderId.Value);
 
             if (company is null)
-                throw new InvalidOperationException("Invoice generation skipped - company not found.");
+                throw new InvalidOperationException("Company information is missing.");
 
             // Generate invoice PDF
             var pdfStream = await SaleInvoicePDFExport.ExportSaleInvoice(
-                savedSale,
-                saleDetails,
+                transaction,
+                transactionDetails,
                 company,
                 party,
                 customer,
@@ -82,12 +79,12 @@ public static class SaleData
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();
-            string fileName = $"SALE_INVOICE_{savedSale.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+            string fileName = $"SALE_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
             return (pdfStream, fileName);
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
+            throw new InvalidOperationException("Failed to generate and download invoice.", ex);
         }
     }
 
@@ -96,12 +93,13 @@ public static class SaleData
         var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, sale.FinancialYearId);
         if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete sale transaction as the financial year is locked.");
+            throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (sale.OrderId is not null && sale.OrderId > 0)
             await UnlinkOrderFromSale(sale.Id);
 
-        sale.Status = false;
+        sale.OrderId = null;
+		sale.Status = false;
         await InsertSale(sale);
 
         await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Sale.ToString(), sale.Id, sale.LocationId);
@@ -125,11 +123,11 @@ public static class SaleData
 
     public static async Task RecoverSaleTransaction(SaleModel sale)
     {
-        var saleDetails = await LoadSaleDetailBySale(sale.Id);
-        List<SaleItemCartModel> saleItemCarts = [];
+        var transactionDetails = await CommonData.LoadTableDataByMasterId<SaleDetailModel>(TableNames.SaleDetail, sale.Id);
+        List<SaleItemCartModel> transactionItemCarts = [];
 
-        foreach (var item in saleDetails)
-            saleItemCarts.Add(new()
+        foreach (var item in transactionDetails)
+            transactionItemCarts.Add(new()
             {
                 ItemId = item.ProductId,
                 ItemName = "",
@@ -152,7 +150,7 @@ public static class SaleData
                 Remarks = item.Remarks
             });
 
-        await SaveSaleTransaction(sale, saleItemCarts);
+        await SaveSaleTransaction(sale, transactionItemCarts);
     }
 
     public static async Task UnlinkOrderFromSale(int saleId)
@@ -204,7 +202,7 @@ public static class SaleData
     {
         if (update)
         {
-            var existingSaleDetails = await LoadSaleDetailBySale(sale.Id);
+            var existingSaleDetails = await CommonData.LoadTableDataByMasterId<SaleDetailModel>(TableNames.SaleDetail, sale.Id);
             foreach (var item in existingSaleDetails)
             {
                 item.Status = false;
@@ -216,7 +214,7 @@ public static class SaleData
             await InsertSaleDetail(new()
             {
                 Id = 0,
-                SaleId = sale.Id,
+                MasterId = sale.Id,
                 ProductId = item.ItemId,
                 Quantity = item.Quantity,
                 Rate = item.Rate,
@@ -353,7 +351,7 @@ public static class SaleData
         if (saleOverview is null)
             return;
 
-        if (saleOverview.TotalAmount <= 0 && saleOverview.TotalTaxAmount <= 0)
+        if (saleOverview.TotalAmount == 0)
             return;
 
         var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
@@ -403,10 +401,7 @@ public static class SaleData
                 Remarks = $"Party Account Posting For Sale Bill {saleOverview.TransactionNo}",
             });
 
-        var saleDetails = await LoadSaleDetailBySale(saleOverview.Id);
-        var extraTaxAmount = saleDetails.Where(x => !x.InclusiveTax).Sum(x => x.TotalTaxAmount);
-
-        if (saleOverview.TotalAmount - extraTaxAmount > 0)
+        if (saleOverview.TotalAmount - saleOverview.TotalExtraTaxAmount > 0)
         {
             var saleLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId);
             accountingCart.Add(new()
@@ -416,12 +411,12 @@ public static class SaleData
                 ReferenceNo = saleOverview.TransactionNo,
                 LedgerId = int.Parse(saleLedger.Value),
                 Debit = null,
-                Credit = saleOverview.TotalAmount - extraTaxAmount,
+                Credit = saleOverview.TotalAmount - saleOverview.TotalExtraTaxAmount,
                 Remarks = $"Sale Account Posting For Sale Bill {saleOverview.TransactionNo}",
             });
         }
 
-        if (extraTaxAmount > 0)
+        if (saleOverview.TotalExtraTaxAmount > 0)
         {
             var gstLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.GSTLedgerId);
             accountingCart.Add(new()
@@ -431,7 +426,7 @@ public static class SaleData
                 ReferenceNo = saleOverview.TransactionNo,
                 LedgerId = int.Parse(gstLedger.Value),
                 Debit = null,
-                Credit = extraTaxAmount,
+                Credit = saleOverview.TotalExtraTaxAmount,
                 Remarks = $"GST Account Posting For Sale Bill {saleOverview.TransactionNo}",
             });
         }
