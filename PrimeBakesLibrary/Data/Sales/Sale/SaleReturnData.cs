@@ -291,9 +291,6 @@ public static class SaleReturnData
 
     private static async Task SaveAccounting(SaleReturnModel saleReturn, bool update)
     {
-        if (saleReturn.LocationId != 1)
-            return;
-
         if (update)
         {
             var saleReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
@@ -305,7 +302,10 @@ public static class SaleReturnData
             }
         }
 
-        var saleReturnOverview = await CommonData.LoadTableDataById<SaleReturnOverviewModel>(ViewNames.SaleReturnOverview, saleReturn.Id);
+		if (saleReturn.LocationId != 1)
+			return;
+
+		var saleReturnOverview = await CommonData.LoadTableDataById<SaleReturnOverviewModel>(ViewNames.SaleReturnOverview, saleReturn.Id);
         if (saleReturnOverview is null)
             return;
 

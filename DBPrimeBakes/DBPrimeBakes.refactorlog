@@ -147,4 +147,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[MasterId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f5dd5c65-600c-4d2b-9d07-53fccddfda14" ChangeDateTime="12/01/2025 13:32:16">
+    <Property Name="ElementName" Value="[dbo].[StockTransfer].[FromLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[StockTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[LocationId]" />
+  </Operation>
 </Operations>

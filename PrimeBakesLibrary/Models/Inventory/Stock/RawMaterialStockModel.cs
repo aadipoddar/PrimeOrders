@@ -16,11 +16,12 @@ public enum StockType
 {
     Purchase,
     PurchaseReturn,
-    Sale,
+	KitchenIssue,
+	KitchenProduction,
+	Sale,
     SaleReturn,
-    Adjustment,
-    KitchenIssue,
-    KitchenProduction,
+	StockTransfer,
+	Adjustment
 }
 
 public class RawMaterialStockDetailsModel

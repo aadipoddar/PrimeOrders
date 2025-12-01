@@ -28,7 +28,9 @@ public static class TableNames
     public static string SaleDetail => "SaleDetail";
     public static string SaleReturn => "SaleReturn";
     public static string SaleReturnDetail => "SaleReturnDetail";
-    public static string Kitchen => "Kitchen";
+    public static string StockTransfer => "StockTransfer";
+    public static string StockTransferDetail => "StockTransferDetail";
+	public static string Kitchen => "Kitchen";
     public static string KitchenIssue => "KitchenIssue";
     public static string KitchenIssueDetail => "KitchenIssueDetail";
     public static string KitchenProduction => "KitchenProduction";
@@ -87,7 +89,10 @@ public static class StoredProcedureNames
     public static string LoadSaleReturnOverviewByDate => "Load_SaleReturn_Overview_By_Date";
     public static string LoadSaleReturnItemOverviewByDate => "Load_SaleReturn_Item_Overview_By_Date";
 
-    public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
+	public static string LoadStockTransferOverviewByDate => "Load_StockTransfer_Overview_By_Date";
+	public static string LoadStockTransferItemOverviewByDate => "Load_StockTransfer_Item_Overview_By_Date";
+
+	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
     public static string LoadOrderByLocationPending => "Load_Order_By_Location_Pending";
     public static string LoadOrderOverviewByDate => "Load_Order_Overview_By_Date";
     public static string LoadOrderItemOverviewByDate => "Load_Order_Item_Overview_By_Date";
@@ -140,7 +145,10 @@ public static class StoredProcedureNames
     public static string InsertSaleReturn => "Insert_SaleReturn";
     public static string InsertSaleReturnDetail => "Insert_SaleReturnDetail";
 
-    public static string InsertOrder => "Insert_Order";
+    public static string InsertStockTransfer => "Insert_StockTransfer";
+    public static string InsertStockTransferDetail => "Insert_StockTransferDetail";
+
+	public static string InsertOrder => "Insert_Order";
     public static string InsertOrderDetail => "Insert_OrderDetail";
 
     public static string InsertLedger => "Insert_Ledger";
@@ -178,7 +186,10 @@ public static class ViewNames
     public static string SaleReturnOverview => "SaleReturn_Overview";
     public static string SaleReturnItemOverview => "SaleReturn_Item_Overview";
 
-    public static string OrderOverview => "Order_Overview";
+	public static string StockTransferOverview => "StockTransfer_Overview";
+	public static string StockTransferItemOverview => "StockTransfer_Item_Overview";
+
+	public static string OrderOverview => "Order_Overview";
     public static string OrderItemOverview => "Order_Item_Overview";
 
     public static string ProductLocationOverview => "ProductLocation_Overview";

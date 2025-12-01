@@ -109,6 +109,24 @@ else
 						</div>
 					</SfButton>
 
+					<!-- Stock Transfer -->
+					<SfButton CssClass="dashboard-button btn-amber" OnClick="NavigateToStockTransfer">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="17 1 21 5 17 9" />
+									<path d="M3 11V9a4 4 0 0 1 4-4h14" />
+									<polyline points="7 23 3 19 7 15" />
+									<path d="M21 13v2a4 4 0 0 1-4 4H3" />
+								</svg>
+							</div>
+							<h3 class="button-title">Stock Transfer</h3>
+							<p class="button-description">Transfer stock between locations</p>
+						</div>
+					</SfButton>
+
 					<!-- Product Stock Adjustment -->
 					<SfButton CssClass="dashboard-button btn-indigo" OnClick="NavigateToProductAdjustment">
 						<div class="button-content">
@@ -248,6 +266,42 @@ else
 							</div>
 							<h3 class="button-title">Sale Return Item Report</h3>
 							<p class="button-description">View detailed sale return items</p>
+						</div>
+					</SfButton>
+
+					<!-- Stock Transfer Report -->
+					<SfButton CssClass="dashboard-button btn-orange" OnClick="NavigateToStockTransferReport">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="17 1 21 5 17 9" />
+									<path d="M3 11V9a4 4 0 0 1 4-4h14" />
+									<polyline points="7 23 3 19 7 15" />
+									<path d="M21 13v2a4 4 0 0 1-4 4H3" />
+								</svg>
+							</div>
+							<h3 class="button-title">Stock Transfer Report</h3>
+							<p class="button-description">View stock transfer records</p>
+						</div>
+					</SfButton>
+
+					<!-- Stock Transfer Item Report -->
+					<SfButton CssClass="dashboard-button btn-violet" OnClick="NavigateToStockTransferItemReport">
+						<div class="button-content">
+							<div class="button-icon-wrapper">
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+									<polyline points="9 17 14 12 19 17" />
+									<line x1="14" y1="12" x2="14" y2="21" />
+								</svg>
+							</div>
+							<h3 class="button-title">Stock Transfer Item Report</h3>
+							<p class="button-description">View detailed transfer items</p>
 						</div>
 					</SfButton>
 
@@ -785,6 +839,34 @@ else
 	}
 
 	.btn-teal:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	.btn-orange::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-orange .button-icon-wrapper {
+		background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+		color: #ea580c;
+	}
+
+	.btn-orange:hover {
+		border-color: #3b82f6 !important;
+		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	}
+
+	.btn-violet::before {
+		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+	}
+
+	.btn-violet .button-icon-wrapper {
+		background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+		color: #7c3aed;
+	}
+
+	.btn-violet:hover {
 		border-color: #3b82f6 !important;
 		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
 	}

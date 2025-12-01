@@ -374,7 +374,7 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await ViewTransaction(selectedCartItem.Id);
+		await ViewTransaction(selectedCartItem.MasterId);
 	}
 
 	private async Task ViewTransaction(int transactionId)
@@ -408,7 +408,7 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.Id);
+		await DownloadInvoice(selectedCartItem.MasterId);
 	}
 
 	private async Task DownloadInvoice(int transactionId)
@@ -467,7 +467,7 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
 
 	private async Task NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
+		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
 
 	private async Task ShowToast(string title, string message, string type)
     {

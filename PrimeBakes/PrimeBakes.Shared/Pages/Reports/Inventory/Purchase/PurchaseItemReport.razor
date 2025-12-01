@@ -392,14 +392,7 @@ else
                         <GridColumn Field="@nameof(PurchaseItemOverviewModel.IGSTPercent)" HeaderText="IGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(PurchaseItemOverviewModel.IGSTAmount)" HeaderText="IGST" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(PurchaseItemOverviewModel.TotalTaxAmount)" HeaderText="Tax Amt" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(PurchaseItemOverviewModel.Total)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns">
-                            <Template>
-                                @{
-                                    var detailItem = (context as PurchaseItemOverviewModel);
-                                    <span class="grid-total">@detailItem.Total.ToString("N2")</span>
-                                }
-                            </Template>
-                        </GridColumn>
+                        <GridColumn Field="@nameof(PurchaseItemOverviewModel.Total)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(PurchaseItemOverviewModel.NetRate)" HeaderText="Net Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
                         <GridColumn Field="@nameof(PurchaseItemOverviewModel.NetTotal)" HeaderText="Net Total" Width="150" TextAlign="TextAlign.Right">
                             <Template>

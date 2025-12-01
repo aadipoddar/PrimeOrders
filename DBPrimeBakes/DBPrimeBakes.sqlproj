@@ -113,6 +113,10 @@
     <Folder Include="Tables\Sales\Product" />
     <Folder Include="StoredProcedures\Insert\Sales\Product" />
     <Folder Include="StoredProcedures\LoadData\Sales\Product" />
+    <Folder Include="Tables\Sales\StockTransfer" />
+    <Folder Include="Views\Sales\StockTransfer" />
+    <Folder Include="StoredProcedures\Insert\Sales\StockTransfer" />
+    <Folder Include="StoredProcedures\LoadData\Sales\StockTransfer" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Type_TransactionId_LocationId.sql" />
@@ -261,6 +265,14 @@
     <Build Include="StoredProcedures\LoadData\Sales\Product\Load_Product_By_ProductCategory.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Product\Load_ProductRate_By_Product.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_MasterId.sql" />
+    <Build Include="Tables\Sales\StockTransfer\StockTransfer.sql" />
+    <Build Include="Tables\Sales\StockTransfer\StockTransferDetail.sql" />
+    <Build Include="Views\Sales\StockTransfer\StockTransfer_Overview.sql" />
+    <Build Include="Views\Sales\StockTransfer\StockTransfer_Item_Overview.sql" />
+    <Build Include="StoredProcedures\Insert\Sales\StockTransfer\Insert_StockTransfer.sql" />
+    <Build Include="StoredProcedures\Insert\Sales\StockTransfer\Insert_StockTransferDetail.sql" />
+    <Build Include="StoredProcedures\LoadData\Sales\StockTransfer\Load_StockTransfer_Item_Overview_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Sales\StockTransfer\Load_StockTransfer_Overview_By_Date.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

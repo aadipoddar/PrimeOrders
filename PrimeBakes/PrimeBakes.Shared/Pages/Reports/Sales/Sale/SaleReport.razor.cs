@@ -6,11 +6,13 @@ using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Sale;
+using PrimeBakesLibrary.Data.Sales.StockTransfer;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Sale;
+using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -31,6 +33,7 @@ public partial class SaleReport : IAsyncDisposable
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
 	private bool _showSaleReturns = false;
+	private bool _showStockTransfers = false;
 	private bool _showDeleted = false;
 	private bool _isDeleteDialogVisible = false;
 	private bool _isRecoverDialogVisible = false;
@@ -47,6 +50,7 @@ public partial class SaleReport : IAsyncDisposable
 	private List<LedgerModel> _parties = [];
 	private List<SaleOverviewModel> _transactionOverviews = [];
 	private List<SaleReturnOverviewModel> _transactionReturnOverviews = [];
+	private List<StockTransferOverviewModel> _transactionTransferOverviews = [];
 
 	private SfGrid<SaleOverviewModel> _sfGrid;
 
@@ -167,6 +171,9 @@ public partial class SaleReport : IAsyncDisposable
 
 			if (_showSaleReturns)
 				await LoadTransactionReturnOverviews();
+
+			if (_showStockTransfers)
+				await LoadTransactionTransferOverviews();
 		}
 		catch (Exception ex)
 		{
@@ -217,7 +224,7 @@ public partial class SaleReport : IAsyncDisposable
 			TotalAmount = -pr.TotalAmount,
 			TotalAfterItemDiscount = -pr.TotalAfterItemDiscount,
 			TotalExtraTaxAmount = -pr.TotalExtraTaxAmount,
-			TotalInclusiveTaxAmount	= -pr.TotalInclusiveTaxAmount,
+			TotalInclusiveTaxAmount = -pr.TotalInclusiveTaxAmount,
 			BaseTotal = -pr.BaseTotal,
 			CreatedAt = pr.CreatedAt,
 			CreatedBy = pr.CreatedBy,
@@ -247,6 +254,81 @@ public partial class SaleReport : IAsyncDisposable
 			TotalAfterTax = -pr.TotalAfterTax,
 			TotalItems = pr.TotalItems,
 			TotalQuantity = -pr.TotalQuantity,
+			TransactionNo = pr.TransactionNo,
+			PaymentModes = pr.PaymentModes,
+			OtherChargesPercent = pr.OtherChargesPercent,
+			Status = pr.Status
+		}));
+
+		_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+	}
+
+	private async Task LoadTransactionTransferOverviews()
+	{
+		_transactionTransferOverviews = await StockTransferData.LoadStockTransferOverviewByDate(
+			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
+			 !_showDeleted);
+
+		if (_selectedLocation?.Id > 0)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
+
+		if (_selectedCompany?.Id > 0)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+
+		if (_selectedParty?.Id > 0 && _selectedParty?.LocationId > 0)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.ToLocationId == _selectedParty.LocationId)];
+
+		_transactionReturnOverviews = [.. _transactionReturnOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+		MergeTransactionAndTransfers();
+	}
+
+	private void MergeTransactionAndTransfers()
+	{
+		_transactionOverviews.AddRange(_transactionTransferOverviews.Select(pr => new SaleOverviewModel
+		{
+			Id = 0, // Stock transfers do not have a sale ID
+			CompanyId = pr.CompanyId,
+			CompanyName = pr.CompanyName,
+			PartyId = _parties.FirstOrDefault(p => p.LocationId == pr.ToLocationId)?.Id,
+			PartyName = _parties.FirstOrDefault(p => p.LocationId == pr.ToLocationId)?.Name,
+			TransactionDateTime = pr.TransactionDateTime,
+			OtherChargesAmount = pr.OtherChargesAmount,
+			RoundOffAmount = pr.RoundOffAmount,
+			TotalAmount = pr.TotalAmount,
+			TotalAfterItemDiscount = pr.TotalAfterItemDiscount,
+			TotalExtraTaxAmount = pr.TotalExtraTaxAmount,
+			TotalInclusiveTaxAmount = pr.TotalInclusiveTaxAmount,
+			BaseTotal = pr.BaseTotal,
+			CreatedAt = pr.CreatedAt,
+			CreatedBy = pr.CreatedBy,
+			CreatedByName = pr.CreatedByName,
+			CreatedFromPlatform = pr.CreatedFromPlatform,
+			DiscountAmount = pr.DiscountAmount,
+			DiscountPercent = pr.DiscountPercent,
+			FinancialYear = pr.FinancialYear,
+			FinancialYearId = pr.FinancialYearId,
+			Remarks = pr.Remarks,
+			LastModifiedAt = pr.LastModifiedAt,
+			LastModifiedBy = pr.LastModifiedBy,
+			LastModifiedByUserName = pr.LastModifiedByUserName,
+			LastModifiedFromPlatform = pr.LastModifiedFromPlatform,
+			Card = pr.Card,
+			Credit = pr.Credit,
+			Cash = pr.Cash,
+			UPI = pr.UPI,
+			LocationId = pr.LocationId,
+			LocationName = pr.LocationName,
+			ItemDiscountAmount = pr.ItemDiscountAmount,
+			OrderDateTime = null,
+			OrderId = null,
+			OrderTransactionNo = null,
+			CustomerId = null,
+			CustomerName = null,
+			TotalAfterTax = pr.TotalAfterTax,
+			TotalItems = pr.TotalItems,
+			TotalQuantity = pr.TotalQuantity,
 			TransactionNo = pr.TransactionNo,
 			PaymentModes = pr.PaymentModes,
 			OtherChargesPercent = pr.OtherChargesPercent,
@@ -468,20 +550,27 @@ public partial class SaleReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await ViewTransaction(selectedCartItem.Id);
+		await ViewTransaction(selectedCartItem.Id, selectedCartItem.TransactionNo);
 	}
 
-	private async Task ViewTransaction(int transactionId)
+	private async Task ViewTransaction(int transactionId, string transactionNo)
 	{
 		try
 		{
-			if (transactionId < 0)
+			if (transactionId == 0 && !string.IsNullOrEmpty(transactionNo))
 			{
-				int actualId = Math.Abs(transactionId);
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{actualId}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.StockTransfer}/{stockTransfer.Id}", "_blank");
 				else
-					NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{actualId}");
+					NavigationManager.NavigateTo($"{PageRouteNames.StockTransfer}/{stockTransfer.Id}");
+			}
+			else if (transactionId < 0)
+			{
+				if (FormFactor.GetFormFactor() == "Web")
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{Math.Abs(transactionId)}", "_blank");
+				else
+					NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{Math.Abs(transactionId)}");
 			}
 			else
 			{
@@ -503,10 +592,10 @@ public partial class SaleReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.Id);
+		await DownloadInvoice(selectedCartItem.Id, selectedCartItem.TransactionNo);
 	}
 
-	private async Task DownloadInvoice(int transactionId)
+	private async Task DownloadInvoice(int transactionId, string transactionNo)
 	{
 		if (_isProcessing)
 			return;
@@ -516,17 +605,20 @@ public partial class SaleReport : IAsyncDisposable
 			_isProcessing = true;
 			StateHasChanged();
 
-			bool isPurchaseReturn = transactionId < 0;
-			int actualId = Math.Abs(transactionId);
-
-			if (isPurchaseReturn)
+			if (transactionId == 0 && !string.IsNullOrWhiteSpace(transactionNo))
 			{
-				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(actualId);
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
+				var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(stockTransfer.Id);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
+			else if (transactionId < 0)
+			{
+				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(Math.Abs(transactionId));
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 			else
 			{
-				var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(actualId);
+				var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
@@ -570,7 +662,12 @@ public partial class SaleReport : IAsyncDisposable
 			if (!_user.Admin || _user.LocationId > 1)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-			if (_deleteTransactionId < 0)
+			if (_deleteTransactionId == 0 && !string.IsNullOrWhiteSpace(_deleteTransactionNo))
+			{
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == _deleteTransactionNo);
+				await StockTransferData.DeleteStockTransfer(stockTransfer.Id);
+			}
+			else if (_deleteTransactionId < 0)
 				await SaleReturnData.DeleteSaleReturn(Math.Abs(_deleteTransactionId));
 			else
 				await SaleData.DeleteSale(_deleteTransactionId);
@@ -607,6 +704,12 @@ public partial class SaleReport : IAsyncDisposable
 		await LoadTransactionOverviews();
 	}
 
+	private async Task ToggleStockTransfers()
+	{
+		_showStockTransfers = !_showStockTransfers;
+		await LoadTransactionOverviews();
+	}
+
 	private async Task ToggleDeleted()
 	{
 		if (_user.LocationId > 1)
@@ -629,8 +732,13 @@ public partial class SaleReport : IAsyncDisposable
 
 			if (!_user.Admin || _user.LocationId > 1)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
-			
-			if (_recoverTransactionId < 0)
+
+			if (_recoverTransactionId == 0 && !string.IsNullOrWhiteSpace(_recoverTransactionNo))
+			{
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == _recoverTransactionNo);
+				await RecoverStockTransferTransaction(stockTransfer.Id);
+			}
+			else if (_recoverTransactionId < 0)
 				await RecoverSaleReturnTransaction(Math.Abs(_recoverTransactionId));
 			else
 				await RecoverSaleTransaction(_recoverTransactionId);
@@ -686,6 +794,24 @@ public partial class SaleReport : IAsyncDisposable
 		saleReturn.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
 
 		await SaleReturnData.RecoverSaleReturnTransaction(saleReturn);
+	}
+
+	private async Task RecoverStockTransferTransaction(int recoverTransactionId)
+	{
+		var stockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, recoverTransactionId);
+		if (stockTransfer is null)
+		{
+			await ShowToast("Error", "Stock transfer transaction not found.", "error");
+			return;
+		}
+
+		// Update the Status to true (active)
+		stockTransfer.Status = true;
+		stockTransfer.LastModifiedBy = _user.Id;
+		stockTransfer.LastModifiedAt = await CommonData.LoadCurrentDateTime();
+		stockTransfer.LastModifiedFromPlatform = FormFactor.GetFormFactor() + FormFactor.GetPlatform();
+
+		await StockTransferData.RecoverStockTransferTransaction(stockTransfer);
 	}
 	#endregion
 

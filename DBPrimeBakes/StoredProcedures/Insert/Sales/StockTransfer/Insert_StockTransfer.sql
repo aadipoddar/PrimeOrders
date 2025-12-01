@@ -1,0 +1,141 @@
+﻿CREATE PROCEDURE [dbo].[Insert_StockTransfer]
+	@Id INT OUTPUT,
+	@TransactionNo VARCHAR(100),
+	@CompanyId INT,
+	@LocationId INT,
+	@ToLocationId INT,
+	@TransactionDateTime DATETIME,
+	@FinancialYearId INT,
+	@TotalItems INT,
+	@TotalQuantity MONEY,
+	@BaseTotal MONEY,
+	@ItemDiscountAmount MONEY,
+	@TotalAfterItemDiscount MONEY,
+	@TotalInclusiveTaxAmount MONEY,
+	@TotalExtraTaxAmount MONEY,
+	@TotalAfterTax MONEY,
+	@OtherChargesPercent DECIMAL(5, 2),
+	@OtherChargesAmount MONEY,
+	@DiscountPercent DECIMAL(5, 2),
+	@DiscountAmount MONEY,
+	@RoundOffAmount MONEY,
+	@TotalAmount MONEY,
+	@Cash MONEY,
+	@Card MONEY,
+	@UPI MONEY,
+	@Credit MONEY,
+	@Remarks VARCHAR(MAX),
+	@CreatedBy INT,
+	@CreatedAt DATETIME,
+	@CreatedFromPlatform VARCHAR(MAX),
+	@Status BIT,
+	@LastModifiedBy INT,
+	@LastModifiedAt DATETIME,
+	@LastModifiedFromPlatform VARCHAR(MAX)
+AS
+BEGIN
+	IF @Id = 0
+	BEGIN
+		INSERT INTO [dbo].[StockTransfer]
+		(
+			[TransactionNo],
+			[CompanyId],
+			[LocationId],
+			[ToLocationId],
+			[TransactionDateTime],
+			[FinancialYearId],
+			[TotalItems],
+			[TotalQuantity],
+			[BaseTotal],
+			[ItemDiscountAmount],
+			[TotalAfterItemDiscount],
+			[TotalInclusiveTaxAmount],
+			[TotalExtraTaxAmount],
+			[TotalAfterTax],
+			[OtherChargesPercent],
+			[OtherChargesAmount],
+			[DiscountPercent],
+			[DiscountAmount],
+			[RoundOffAmount],
+			[TotalAmount],
+			[Cash],
+			[Card],
+			[UPI],
+			[Credit],
+			[Remarks],
+			[CreatedBy],
+			[CreatedFromPlatform],
+			[Status]
+		)
+		VALUES
+		(
+			@TransactionNo,
+			@CompanyId,
+			@LocationId,
+			@ToLocationId,
+			@TransactionDateTime,
+			@FinancialYearId,
+			@TotalItems,
+			@TotalQuantity,
+			@BaseTotal,
+			@ItemDiscountAmount,
+			@TotalAfterItemDiscount,
+			@TotalInclusiveTaxAmount,
+			@TotalExtraTaxAmount,
+			@TotalAfterTax,
+			@OtherChargesPercent,
+			@OtherChargesAmount,
+			@DiscountPercent,
+			@DiscountAmount,
+			@RoundOffAmount,
+			@TotalAmount,
+			@Cash,
+			@Card,
+			@UPI,
+			@Credit,
+			@Remarks,
+			@CreatedBy,
+			@CreatedFromPlatform,
+			@Status
+		)
+		SET @Id = SCOPE_IDENTITY()
+	END
+
+	ELSE
+	BEGIN
+		UPDATE [dbo].[StockTransfer]
+		SET 
+			[TransactionNo] = @TransactionNo,
+			[CompanyId] = @CompanyId,
+			[LocationId] = @LocationId,
+			[ToLocationId] = @ToLocationId,
+			[TransactionDateTime] = @TransactionDateTime,
+			[FinancialYearId] = @FinancialYearId,
+			[TotalItems] = @TotalItems,
+			[TotalQuantity] = @TotalQuantity,
+			[BaseTotal] = @BaseTotal,
+			[ItemDiscountAmount] = @ItemDiscountAmount,
+			[TotalAfterItemDiscount] = @TotalAfterItemDiscount,
+			[TotalInclusiveTaxAmount] = @TotalInclusiveTaxAmount,
+			[TotalExtraTaxAmount] = @TotalExtraTaxAmount,
+			[TotalAfterTax] = @TotalAfterTax,
+			[OtherChargesPercent] = @OtherChargesPercent,
+			[OtherChargesAmount] = @OtherChargesAmount,
+			[DiscountPercent] = @DiscountPercent,
+			[DiscountAmount] = @DiscountAmount,
+			[RoundOffAmount] = @RoundOffAmount,
+			[TotalAmount] = @TotalAmount,
+			[Cash] = @Cash,
+			[Card] = @Card,
+			[UPI] = @UPI,
+			[Credit] = @Credit,
+			[Remarks] = @Remarks,
+			[Status] = @Status,
+			[LastModifiedBy] = @LastModifiedBy,
+			[LastModifiedAt] = @LastModifiedAt,
+			[LastModifiedFromPlatform] = @LastModifiedFromPlatform
+		WHERE [Id] = @Id
+	END
+
+	SELECT @Id AS Id
+END

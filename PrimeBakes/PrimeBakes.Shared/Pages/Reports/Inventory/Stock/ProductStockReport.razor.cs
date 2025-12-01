@@ -8,6 +8,7 @@ using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.Data.Inventory.Stock;
 using PrimeBakesLibrary.Data.Sales.Sale;
+using PrimeBakesLibrary.Data.Sales.StockTransfer;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.Masters;
@@ -384,7 +385,7 @@ public partial class ProductStockReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
-		await ViewTransaction(selectedCartItem.Type, selectedCartItem.Id);
+		await ViewTransaction(selectedCartItem.Type, selectedCartItem.TransactionId.Value);
 	}
 
 	private async Task ViewTransaction(string type, int transactionId)
@@ -402,6 +403,7 @@ public partial class ProductStockReport : IAsyncDisposable
 				"salereturn" => $"{PageRouteNames.SaleReturn}/{transactionId}",
 				"kitchenissue" => $"{PageRouteNames.KitchenIssue}/{transactionId}",
 				"kitchenproduction" => $"{PageRouteNames.KitchenProduction}/{transactionId}",
+				"stocktransfer" => $"{PageRouteNames.StockTransfer}/{transactionId}",
 				_ => null
 			};
 
@@ -428,7 +430,7 @@ public partial class ProductStockReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.Type, selectedCartItem.Id);
+		await DownloadInvoice(selectedCartItem.Type, selectedCartItem.TransactionId.Value);
 	}
 
 	private async Task DownloadInvoice(string type, int transactionId)
@@ -469,6 +471,11 @@ public partial class ProductStockReport : IAsyncDisposable
 			else if (type.Equals("kitchenproduction", StringComparison.CurrentCultureIgnoreCase))
 			{
 				var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
+			else if (type.Equals("stocktransfer", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(transactionId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 

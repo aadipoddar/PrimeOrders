@@ -220,6 +220,17 @@ else
                         </svg>
                         @(_showSaleReturns ? "Hide Returns" : "Show Returns")
                     </button>
+                    <button class="btn-toggle-transfers @(_showStockTransfers ? "active" : "")" @onclick="ToggleStockTransfers"
+                            title="@(_showStockTransfers ? "Hide Stock Transfers" : "Show Stock Transfers")" disabled="@_isProcessing">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="17 2 21 6 17 10" />
+                            <path d="M3 14v-2a4 4 0 0 1 4-4h14" />
+                            <polyline points="7 22 3 18 7 14" />
+                            <path d="M21 10v2a4 4 0 0 1-4 4H3" />
+                        </svg>
+                        @(_showStockTransfers ? "Hide Transfers" : "Show Transfers")
+                    </button>
                     <button class="btn-toggle-details" @onclick="ToggleDetailsView"
                             title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -421,7 +432,7 @@ else
                                 <div class="grid-actions">
                                     @if (item.Status == false)
                                     {
-                                        <button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id)" title="Download Invoice (Alt + P)" disabled="@_isProcessing">
+                                        <button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id, item.TransactionNo)" title="Download Invoice (Alt + P)" disabled="@_isProcessing">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                  stroke-linejoin="round">
@@ -445,7 +456,7 @@ else
                                     }
                                     else
                                     {
-                                        <button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(item.Id)" title="View Transaction (Ctrl + O)" disabled="@_isProcessing">
+                                        <button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(item.Id, item.TransactionNo)" title="View Transaction (Ctrl + O)" disabled="@_isProcessing">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                  stroke-linejoin="round">
@@ -453,7 +464,7 @@ else
                                                 <circle cx="12" cy="12" r="3" />
                                             </svg>
                                         </button>
-                                        <button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id)" title="Download Invoice" disabled="@_isProcessing">
+                                        <button class="btn-grid-action btn-invoice" @onclick="() => DownloadInvoice(item.Id, item.TransactionNo)" title="Download Invoice" disabled="@_isProcessing">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                  stroke-linejoin="round">
@@ -937,6 +948,54 @@ else
         }
 
         .btn-toggle-returns svg {
+            flex-shrink: 0;
+        }
+
+        /* Toggle Transfers Button */
+        .btn-toggle-transfers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 38px;
+            padding: 0 20px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-toggle-transfers:hover {
+            background: #f0f9ff;
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-toggle-transfers.active {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border-color: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-toggle-transfers.active:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+        }
+
+        .btn-toggle-transfers:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-toggle-transfers svg {
             flex-shrink: 0;
         }
 

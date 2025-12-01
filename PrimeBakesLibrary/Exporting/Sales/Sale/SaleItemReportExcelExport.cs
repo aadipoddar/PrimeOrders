@@ -62,6 +62,7 @@ public static class SaleItemReportExcelExport
             [nameof(SaleItemOverviewModel.IGSTAmount)] = new() { DisplayName = "IGST Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
             [nameof(SaleItemOverviewModel.TotalTaxAmount)] = new() { DisplayName = "Tax", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
             [nameof(SaleItemOverviewModel.Total)] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(SaleItemOverviewModel.NetTotal)] = new() { DisplayName = "Net Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
 
             // Percentage fields - Center aligned
             [nameof(SaleItemOverviewModel.DiscountPercent)] = new() { DisplayName = "Disc %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -110,6 +111,7 @@ public static class SaleItemReportExcelExport
                 nameof(SaleItemOverviewModel.InclusiveTax),
                 nameof(SaleItemOverviewModel.Total),
                 nameof(SaleItemOverviewModel.NetRate),
+                nameof(SaleItemOverviewModel.NetTotal),
                 nameof(SaleItemOverviewModel.SaleRemarks),
                 nameof(SaleItemOverviewModel.Remarks)
             ]);
@@ -127,8 +129,8 @@ public static class SaleItemReportExcelExport
                 nameof(SaleItemOverviewModel.LocationName),
                 nameof(SaleItemOverviewModel.PartyName),
                 nameof(SaleItemOverviewModel.Quantity),
-                nameof(SaleItemOverviewModel.Rate),
-                nameof(SaleItemOverviewModel.Total)
+                nameof(SaleItemOverviewModel.NetRate),
+                nameof(SaleItemOverviewModel.NetTotal)
             ];
 
         // Export using the generic utility

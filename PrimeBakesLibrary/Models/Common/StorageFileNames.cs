@@ -31,4 +31,7 @@ public static class StorageFileNames
 
     public static string SaleReturnDataFileName => "sale_return_data.json";
     public static string SaleReturnCartDataFileName => "sale_return_cart_data.json";
+
+	public static string StockTransferDataFileName => "stock_transfer_data.json";
+	public static string StockTransferCartDataFileName => "stock_transfer_cart_data.json";
 }

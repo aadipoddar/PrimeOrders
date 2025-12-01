@@ -6,11 +6,13 @@ using PrimeBakes.Shared.Services;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Sale;
+using PrimeBakesLibrary.Data.Sales.StockTransfer;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Sales.Sale;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Sale;
+using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
@@ -30,8 +32,9 @@ public partial class SaleItemReport : IAsyncDisposable
     private bool _isProcessing = false;
     private bool _showAllColumns = false;
     private bool _showSaleReturns = false;
+	private bool _showStockTransfers = false;
 
-    private DateTime _fromDate = DateTime.Now.Date;
+	private DateTime _fromDate = DateTime.Now.Date;
     private DateTime _toDate = DateTime.Now.Date;
 
     private LocationModel _selectedLocation = new();
@@ -43,8 +46,9 @@ public partial class SaleItemReport : IAsyncDisposable
     private List<LedgerModel> _parties = [];
     private List<SaleItemOverviewModel> _transactionOverviews = [];
     private List<SaleReturnItemOverviewModel> _transactionReturnOverviews = [];
+	private List<StockTransferItemOverviewModel> _transactionTransferOverviews = [];
 
-    private SfGrid<SaleItemOverviewModel> _sfGrid;
+	private SfGrid<SaleItemOverviewModel> _sfGrid;
 
     private string _errorTitle = string.Empty;
     private string _errorMessage = string.Empty;
@@ -155,7 +159,10 @@ public partial class SaleItemReport : IAsyncDisposable
 
             if (_showSaleReturns)
                 await LoadTransactionReturnOverviews();
-        }
+
+			if (_showStockTransfers)
+				await LoadTransactionTransferOverviews();
+		}
         catch (Exception ex)
         {
 			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
@@ -172,8 +179,8 @@ public partial class SaleItemReport : IAsyncDisposable
     private async Task LoadTransactionReturnOverviews()
     {
         _transactionReturnOverviews = await SaleReturnData.LoadSaleReturnItemOverviewByDate(
-        DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-        DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+            DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+            DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
         if (_selectedLocation?.Id > 0)
             _transactionReturnOverviews = [.. _transactionReturnOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
@@ -193,7 +200,7 @@ public partial class SaleItemReport : IAsyncDisposable
     {
         _transactionOverviews.AddRange(_transactionReturnOverviews.Select(pr => new SaleItemOverviewModel
         {
-            Id = pr.Id,
+            Id = -pr.Id,
             MasterId = -pr.MasterId,
             OrderTransactionNo = null,
             CustomerId = pr.CustomerId,
@@ -228,15 +235,82 @@ public partial class SaleItemReport : IAsyncDisposable
             InclusiveTax = pr.InclusiveTax,
             Total = -pr.Total,
             NetRate = pr.NetRate,
-            Remarks = pr.Remarks
+            NetTotal = -pr.NetTotal,
+			Remarks = pr.Remarks
         }));
 
         _transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
     }
-    #endregion
 
-    #region Change Events
-    private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
+	private async Task LoadTransactionTransferOverviews()
+	{
+		_transactionTransferOverviews = await StockTransferData.LoadStockTransferItemOverviewByDate(
+			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+		if (_selectedLocation?.Id > 0)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
+
+		if (_selectedCompany?.Id > 0)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+
+		if (_selectedParty?.Id > 0 && _selectedParty?.LocationId > 0)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.ToLocationId == _selectedParty.LocationId)];
+
+		_transactionReturnOverviews = [.. _transactionReturnOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+		MergeTransactionAndTransfers();
+	}
+
+	private void MergeTransactionAndTransfers()
+	{
+		_transactionOverviews.AddRange(_transactionTransferOverviews.Select(pr => new SaleItemOverviewModel
+		{
+			Id = 0,
+			MasterId = pr.MasterId,
+			OrderTransactionNo = null,
+			CustomerId = null,
+			CustomerName = null,
+			LocationId = pr.LocationId,
+			LocationName = pr.LocationName,
+			OrderId = null,
+			SaleRemarks = pr.StockTransferRemarks,
+			ItemName = pr.ItemName,
+			ItemCode = pr.ItemCode,
+			ItemCategoryId = pr.ItemCategoryId,
+			ItemCategoryName = pr.ItemCategoryName,
+			CompanyId = pr.CompanyId,
+			CompanyName = pr.CompanyName,
+			PartyId = _parties.FirstOrDefault(p => p.LocationId == pr.ToLocationId)?.Id,
+			PartyName = _parties.FirstOrDefault(p => p.LocationId == pr.ToLocationId)?.Name,
+			TransactionNo = pr.TransactionNo,
+			TransactionDateTime = pr.TransactionDateTime,
+			Quantity = pr.Quantity,
+			Rate = pr.Rate,
+			BaseTotal = pr.BaseTotal,
+			DiscountPercent = pr.DiscountPercent,
+			DiscountAmount = pr.DiscountAmount,
+			AfterDiscount = pr.AfterDiscount,
+			CGSTPercent = pr.CGSTPercent,
+			CGSTAmount = pr.CGSTAmount,
+			SGSTPercent = pr.SGSTPercent,
+			SGSTAmount = pr.SGSTAmount,
+			IGSTPercent = pr.IGSTPercent,
+			IGSTAmount = pr.IGSTAmount,
+			TotalTaxAmount = pr.TotalTaxAmount,
+			InclusiveTax = pr.InclusiveTax,
+			Total = pr.Total,
+			NetRate = pr.NetRate,
+			NetTotal = pr.NetTotal,
+			Remarks = pr.Remarks
+		}));
+
+		_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+	}
+	#endregion
+
+	#region Change Events
+	private async Task OnDateRangeChanged(Syncfusion.Blazor.Calendars.RangePickerEventArgs<DateTime> args)
     {
         _fromDate = args.StartDate;
         _toDate = args.EndDate;
@@ -444,28 +518,35 @@ public partial class SaleItemReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await ViewTransaction(selectedCartItem.Id);
+		await ViewTransaction(selectedCartItem.MasterId, selectedCartItem.TransactionNo);
 	}
 
-	private async Task ViewTransaction(int transactionId)
-    {
+	private async Task ViewTransaction(int transactionId, string transactionNo)
+	{
         try
         {
-            if (transactionId < 0)
-            {
-                int actualId = Math.Abs(transactionId);
-                if (FormFactor.GetFormFactor() == "Web")
-                    await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{actualId}", "_blank");
-                else
-                    NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{actualId}");
-            }
-            else
-            {
-                if (FormFactor.GetFormFactor() == "Web")
-                    await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Sale}/{transactionId}", "_blank");
-                else
-                    NavigationManager.NavigateTo($"{PageRouteNames.Sale}/{transactionId}");
-            }
+			if (transactionId == 0 && !string.IsNullOrEmpty(transactionNo))
+			{
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
+				if (FormFactor.GetFormFactor() == "Web")
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.StockTransfer}/{stockTransfer.Id}", "_blank");
+				else
+					NavigationManager.NavigateTo($"{PageRouteNames.StockTransfer}/{stockTransfer.Id}");
+			}
+			else if (transactionId < 0)
+			{
+				if (FormFactor.GetFormFactor() == "Web")
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{Math.Abs(transactionId)}", "_blank");
+				else
+					NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{Math.Abs(transactionId)}");
+			}
+			else
+			{
+				if (FormFactor.GetFormFactor() == "Web")
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Sale}/{transactionId}", "_blank");
+				else
+					NavigationManager.NavigateTo($"{PageRouteNames.Sale}/{transactionId}");
+			}
         }
         catch (Exception ex)
         {
@@ -479,11 +560,11 @@ public partial class SaleItemReport : IAsyncDisposable
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.Id);
+		await DownloadInvoice(selectedCartItem.MasterId, selectedCartItem.TransactionNo);
 	}
 
-	private async Task DownloadInvoice(int transactionId)
-    {
+	private async Task DownloadInvoice(int transactionId, string transactionNo)
+	{
         if (_isProcessing)
             return;
 
@@ -492,19 +573,22 @@ public partial class SaleItemReport : IAsyncDisposable
             _isProcessing = true;
             StateHasChanged();
 
-            bool isPurchaseReturn = transactionId < 0;
-            int actualId = Math.Abs(transactionId);
-
-            if (isPurchaseReturn)
-            {
-                var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(actualId);
-                await SaveAndViewService.SaveAndView(fileName, pdfStream);
-            }
-            else
-            {
-                var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(actualId);
-                await SaveAndViewService.SaveAndView(fileName, pdfStream);
-            }
+			if (transactionId == 0 && !string.IsNullOrWhiteSpace(transactionNo))
+			{
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
+				var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(stockTransfer.Id);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
+			else if (transactionId < 0)
+			{
+				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(Math.Abs(transactionId));
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
+			else
+			{
+				var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			}
 
 			await ShowToast("Success", "Invoice downloaded successfully.", "success");
 		}
@@ -533,10 +617,16 @@ public partial class SaleItemReport : IAsyncDisposable
         _showSaleReturns = !_showSaleReturns;
         await LoadTransactionOverviews();
     }
-    #endregion
 
-    #region Utilities
-    private async Task NavigateToTransactionPage()
+	private async Task ToggleStockTransfers()
+	{
+		_showStockTransfers = !_showStockTransfers;
+		await LoadTransactionOverviews();
+	}
+	#endregion
+
+	#region Utilities
+	private async Task NavigateToTransactionPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.Sale, "_blank");
@@ -556,7 +646,7 @@ public partial class SaleItemReport : IAsyncDisposable
 		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
 
 	private async Task NavigateBack() =>
-		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
+		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
 
 	private async Task ShowToast(string title, string message, string type)
     {

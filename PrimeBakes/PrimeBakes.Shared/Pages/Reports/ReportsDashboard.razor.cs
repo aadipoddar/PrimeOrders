@@ -54,7 +54,23 @@ public partial class ReportsDashboard
             NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem, true);
     }
 
-    private async Task NavigateToOrderReport()
+	private async Task NavigateToStockTransferReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportStockTransfer, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportStockTransfer, true);
+	}
+
+	private async Task NavigateToStockTransferItemReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportStockTransferItem, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportStockTransferItem, true);
+	}
+
+	private async Task NavigateToOrderReport()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportOrder, "_blank");

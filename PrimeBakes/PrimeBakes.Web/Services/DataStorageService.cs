@@ -42,7 +42,9 @@ public class DataStorageService(ProtectedLocalStorage protectedLocalStorage) : I
         await LocalRemove(StorageFileNames.FinancialAccountingCartDataFileName);
         await LocalRemove(StorageFileNames.SaleReturnDataFileName);
         await LocalRemove(StorageFileNames.SaleReturnCartDataFileName);
-    }
+        await LocalRemove(StorageFileNames.StockTransferDataFileName);
+        await LocalRemove(StorageFileNames.StockTransferCartDataFileName);
+	}
 
 
     public async Task<bool> LocalExists(string key) =>

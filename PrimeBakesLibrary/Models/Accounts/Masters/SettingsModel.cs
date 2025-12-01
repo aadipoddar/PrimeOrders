@@ -22,7 +22,8 @@ public static class SettingsKeys
 
     public static string SaleTransactionPrefix => "SaleTransactionPrefix";
     public static string SaleReturnTransactionPrefix => "SaleReturnTransactionPrefix";
-    public static string OrderTransactionPrefix => "OrderTransactionPrefix";
+    public static string StockTransferTransactionPrefix => "StockTransferTransactionPrefix";
+	public static string OrderTransactionPrefix => "OrderTransactionPrefix";
     public static string AccountingTransactionPrefix => "AccountingTransactionPrefix";
 
     public static string UpdateItemMasterRateOnPurchase => "UpdateRawMaterialMasterRateOnPurchase";
@@ -31,11 +32,13 @@ public static class SettingsKeys
     public static string PrimaryCompanyLinkingId => "PrimaryCompanyLinkingId";
 
     public static string SaleVoucherId => "SaleVoucherId";
+    public static string StockTransferVoucherId => "StockTransferVoucherId";
     public static string SaleReturnVoucherId => "SaleReturnVoucherId";
     public static string PurchaseVoucherId => "PurchaseVoucherId";
     public static string PurchaseReturnVoucherId => "PurchaseReturnVoucherId";
     public static string SaleLedgerId => "SaleLedgerId";
-    public static string PurchaseLedgerId => "PurchaseLedgerId";
+    public static string StockTransferLedgerId => "StockTransferLedgerId";
+	public static string PurchaseLedgerId => "PurchaseLedgerId";
     public static string CashLedgerId => "CashLedgerId";
     public static string CashSalesLedgerId => "CashSalesLedgerId";
     public static string GSTLedgerId => "GSTLedgerId";

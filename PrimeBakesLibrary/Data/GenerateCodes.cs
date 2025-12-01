@@ -9,6 +9,7 @@ using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Product;
 using PrimeBakesLibrary.Models.Sales.Sale;
+using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
 namespace PrimeBakesLibrary.Data;
 
@@ -34,7 +35,8 @@ public static class GenerateCodes
         Order,
         Sale,
         SaleReturn,
-        Accounting,
+        StockTransfer,
+		Accounting,
         RawMaterial,
         FinishedProduct,
         Ledger,
@@ -71,7 +73,11 @@ public static class GenerateCodes
                     var saleReturn = await CommonData.LoadTableDataByTransactionNo<SaleReturnModel>(TableNames.SaleReturn, code);
                     isDuplicate = saleReturn is not null;
                     break;
-                case CodeType.Order:
+                case CodeType.StockTransfer:
+                    var stockTransfer = await CommonData.LoadTableDataByTransactionNo<StockTransferModel>(TableNames.StockTransfer, code);
+                    isDuplicate = stockTransfer is not null;
+                    break;
+				case CodeType.Order:
                     var order = await CommonData.LoadTableDataByTransactionNo<OrderModel>(TableNames.Order, code);
                     isDuplicate = order is not null;
                     break;
@@ -273,7 +279,31 @@ public static class GenerateCodes
         return await CheckDuplicateCode($"{locationPrefix}{financialYear.YearNo}{saleReturnPrefix}000001", 6, CodeType.SaleReturn);
     }
 
-    public static async Task<string> GenerateOrderTransactionNo(OrderModel order)
+	public static async Task<string> GenerateStockTransferTransactionNo(StockTransferModel stockTransfer)
+	{
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, stockTransfer.FinancialYearId);
+		var locationPrefix = (await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, stockTransfer.LocationId)).PrefixCode;
+		var stockTransferPrefix = (await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferTransactionPrefix)).Value;
+
+		var lastStockTransfer = await CommonData.LoadLastTableDataByLocationFinancialYear<StockTransferModel>(TableNames.StockTransfer, stockTransfer.LocationId, stockTransfer.FinancialYearId);
+		if (lastStockTransfer is not null)
+		{
+			var lastTransactionNo = lastStockTransfer.TransactionNo;
+			if (lastTransactionNo.StartsWith($"{locationPrefix}{financialYear.YearNo}{stockTransferPrefix}"))
+			{
+				var lastNumberPart = lastTransactionNo[(locationPrefix.Length + financialYear.YearNo.ToString().Length + stockTransferPrefix.Length)..];
+				if (int.TryParse(lastNumberPart, out int lastNumber))
+				{
+					int nextNumber = lastNumber + 1;
+					return await CheckDuplicateCode($"{locationPrefix}{financialYear.YearNo}{stockTransferPrefix}{nextNumber:D6}", 6, CodeType.StockTransfer);
+				}
+			}
+		}
+
+		return await CheckDuplicateCode($"{locationPrefix}{financialYear.YearNo}{stockTransferPrefix}000001", 6, CodeType.StockTransfer);
+	}
+
+	public static async Task<string> GenerateOrderTransactionNo(OrderModel order)
     {
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
         var locationPrefix = (await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, order.LocationId)).PrefixCode;

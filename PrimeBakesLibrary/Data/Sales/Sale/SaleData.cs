@@ -333,9 +333,6 @@ public static class SaleData
 
     private static async Task SaveAccounting(SaleModel sale, bool update)
     {
-        if (sale.LocationId != 1)
-            return;
-
         if (update)
         {
             var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
@@ -347,7 +344,10 @@ public static class SaleData
             }
         }
 
-        var saleOverview = await CommonData.LoadTableDataById<SaleOverviewModel>(ViewNames.SaleOverview, sale.Id);
+		if (sale.LocationId != 1)
+			return;
+
+		var saleOverview = await CommonData.LoadTableDataById<SaleOverviewModel>(ViewNames.SaleOverview, sale.Id);
         if (saleOverview is null)
             return;
 

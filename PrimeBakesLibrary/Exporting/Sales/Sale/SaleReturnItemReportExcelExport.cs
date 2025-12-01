@@ -62,6 +62,7 @@ public static class SaleReturnItemReportExcelExport
             [nameof(SaleReturnItemOverviewModel.IGSTAmount)] = new() { DisplayName = "IGST Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
             [nameof(SaleReturnItemOverviewModel.TotalTaxAmount)] = new() { DisplayName = "Tax", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
             [nameof(SaleReturnItemOverviewModel.Total)] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
+            [nameof(SaleReturnItemOverviewModel.NetTotal)] = new() { DisplayName = "Net Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true },
             
             // Percentage fields - Center aligned
             [nameof(SaleReturnItemOverviewModel.DiscountPercent)] = new() { DisplayName = "Disc %", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -110,7 +111,8 @@ public static class SaleReturnItemReportExcelExport
                 nameof(SaleReturnItemOverviewModel.InclusiveTax),
                 nameof(SaleReturnItemOverviewModel.Total),
                 nameof(SaleReturnItemOverviewModel.NetRate),
-                nameof(SaleReturnItemOverviewModel.SaleReturnRemarks),
+                nameof(SaleReturnItemOverviewModel.NetTotal),
+				nameof(SaleReturnItemOverviewModel.SaleReturnRemarks),
                 nameof(SaleReturnItemOverviewModel.Remarks)
             ]);
 
@@ -127,8 +129,8 @@ public static class SaleReturnItemReportExcelExport
                 nameof(SaleReturnItemOverviewModel.LocationName),
                 nameof(SaleReturnItemOverviewModel.PartyName),
                 nameof(SaleReturnItemOverviewModel.Quantity),
-                nameof(SaleReturnItemOverviewModel.Rate),
-                nameof(SaleReturnItemOverviewModel.Total)
+                nameof(SaleReturnItemOverviewModel.NetRate),
+                nameof(SaleReturnItemOverviewModel.NetTotal)
             ];
 
         // Export using the generic utility

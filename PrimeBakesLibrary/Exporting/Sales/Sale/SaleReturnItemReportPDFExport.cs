@@ -64,7 +64,8 @@ public static class SaleReturnItemReportPDFExport
                 nameof(SaleReturnItemOverviewModel.InclusiveTax),
                 nameof(SaleReturnItemOverviewModel.Total),
                 nameof(SaleReturnItemOverviewModel.NetRate),
-                nameof(SaleReturnItemOverviewModel.SaleReturnRemarks),
+                nameof(SaleReturnItemOverviewModel.NetTotal),
+				nameof(SaleReturnItemOverviewModel.SaleReturnRemarks),
                 nameof(SaleReturnItemOverviewModel.Remarks)
             ]);
 
@@ -81,8 +82,8 @@ public static class SaleReturnItemReportPDFExport
                 nameof(SaleReturnItemOverviewModel.LocationName),
                 nameof(SaleReturnItemOverviewModel.PartyName),
                 nameof(SaleReturnItemOverviewModel.Quantity),
-                nameof(SaleReturnItemOverviewModel.Rate),
-                nameof(SaleReturnItemOverviewModel.Total)
+                nameof(SaleReturnItemOverviewModel.NetRate),
+                nameof(SaleReturnItemOverviewModel.NetTotal)
             ];
 
         // Customize specific columns for PDF display (matching Excel column names)
@@ -277,8 +278,20 @@ public static class SaleReturnItemReportPDFExport
             }
         };
 
-        // Call the generic PDF export utility with landscape mode for all columns
-        return PDFReportExportUtil.ExportToPdf(
+        columnSettings[nameof(SaleReturnItemOverviewModel.NetTotal)] = new()
+        {
+            DisplayName = "Net Total",
+            Format = "#,##0.00",
+            HighlightNegative = true,
+            StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
+            {
+                Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
+                LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
+            }
+        };
+
+		// Call the generic PDF export utility with landscape mode for all columns
+		return PDFReportExportUtil.ExportToPdf(
             saleReturnItemData,
             "SALE RETURN ITEM REPORT",
             dateRangeStart,

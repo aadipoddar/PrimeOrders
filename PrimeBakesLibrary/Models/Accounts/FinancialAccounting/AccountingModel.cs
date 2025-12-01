@@ -52,6 +52,7 @@ public enum ReferenceTypes
     PurchaseReturn,
     Sale,
     SaleReturn,
+    StockTransfer
 }
 
 public class AccountingOverviewModel

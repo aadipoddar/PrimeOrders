@@ -188,6 +188,7 @@ public class SaleItemOverviewModel
 
     public decimal Total { get; set; }
     public decimal NetRate { get; set; }
+    public decimal NetTotal { get; set; }
 
-    public string? Remarks { get; set; }
+	public string? Remarks { get; set; }
 }

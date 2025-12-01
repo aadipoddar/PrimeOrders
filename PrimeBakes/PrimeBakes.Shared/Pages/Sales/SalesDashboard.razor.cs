@@ -44,6 +44,14 @@ public partial class SalesDashboard
             NavigationManager.NavigateTo(PageRouteNames.SaleReturn, true);
     }
 
+	private async Task NavigateToStockTransfer()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.StockTransfer, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.StockTransfer, true);
+	}
+
 	private async Task NavigateToProductAdjustment()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
@@ -131,6 +139,22 @@ public partial class SalesDashboard
         else
             NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem, true);
     }
+
+	private async Task NavigateToStockTransferReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportStockTransfer, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportStockTransfer, true);
+	}
+
+	private async Task NavigateToStockTransferItemReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportStockTransferItem, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportStockTransferItem, true);
+	}
 
 	private async Task NavigateToProductStockReport()
 	{

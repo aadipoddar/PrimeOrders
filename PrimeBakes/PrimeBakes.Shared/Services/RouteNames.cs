@@ -15,9 +15,10 @@ internal static class PageRouteNames
     public static string Recipe => "/inventory/recipe";
 
     public static string SalesDashboard => "/sales";
-    public static string SaleReturn => "/sales/sale-return";
     public static string Sale => "/sales/sale";
-    public static string Order => "/sales/order";
+    public static string SaleReturn => "/sales/sale-return";
+	public static string StockTransfer => "/sales/stock-transfer";
+	public static string Order => "/sales/order";
     public static string OrderMobile => "/sales/order/mobile";
     public static string OrderMobileCart => "/sales/order-cart/mobile";
     public static string OrderMobileConfirmation => "/sales/order-confirmation/mobile";
@@ -37,10 +38,12 @@ internal static class PageRouteNames
     public static string ReportRawMaterialStock => "/report/raw-material-stock";
     public static string ReportProductStock => "/report/product-stock";
 
-    public static string ReportSaleReturn => "/report/sale-return";
-    public static string ReportSaleReturnItem => "/report/sale-return-item";
     public static string ReportSale => "/report/sale";
     public static string ReportSaleItem => "/report/sale-item";
+	public static string ReportSaleReturn => "/report/sale-return";
+	public static string ReportSaleReturnItem => "/report/sale-return-item";
+	public static string ReportStockTransfer => "/report/stock-transfer";
+    public static string ReportStockTransferItem => "/report/stock-transfer-item";
     public static string ReportOrder => "/report/order";
     public static string ReportOrderItem => "/report/order-item";
 
