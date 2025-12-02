@@ -194,7 +194,7 @@ public partial class SaleReport : IAsyncDisposable
 	private async Task LoadTransactionReturnOverviews()
 	{
 		_transactionReturnOverviews = await CommonData.LoadTableDataByDate<SaleReturnOverviewModel>(
-			ViewNames.SaleReturnItemOverview,
+			ViewNames.SaleReturnOverview,
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
