@@ -153,10 +153,13 @@ public partial class SaleReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 
-			_transactionOverviews = await SaleData.LoadSaleOverviewByDate(
+			_transactionOverviews = await CommonData.LoadTableDataByDate<SaleOverviewModel>(
+				ViewNames.SaleOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-				!_showDeleted);
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+			if (!_showDeleted)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.Status)];
 
 			if (_selectedLocation?.Id > 0)
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
@@ -190,10 +193,13 @@ public partial class SaleReport : IAsyncDisposable
 
 	private async Task LoadTransactionReturnOverviews()
 	{
-		_transactionReturnOverviews = await SaleReturnData.LoadSaleReturnOverviewByDate(
+		_transactionReturnOverviews = await CommonData.LoadTableDataByDate<SaleReturnOverviewModel>(
+			ViewNames.SaleReturnItemOverview,
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-			 !_showDeleted);
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+		if (!_showDeleted)
+			_transactionReturnOverviews = [.. _transactionReturnOverviews.Where(_ => _.Status)];
 
 		if (_selectedLocation?.Id > 0)
 			_transactionReturnOverviews = [.. _transactionReturnOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
@@ -265,10 +271,13 @@ public partial class SaleReport : IAsyncDisposable
 
 	private async Task LoadTransactionTransferOverviews()
 	{
-		_transactionTransferOverviews = await StockTransferData.LoadStockTransferOverviewByDate(
+		_transactionTransferOverviews = await CommonData.LoadTableDataByDate<StockTransferOverviewModel>(
+			ViewNames.StockTransferOverview,
 			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-			 !_showDeleted);
+			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+		if (!_showDeleted)
+			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.Status)];
 
 		if (_selectedLocation?.Id > 0)
 			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];

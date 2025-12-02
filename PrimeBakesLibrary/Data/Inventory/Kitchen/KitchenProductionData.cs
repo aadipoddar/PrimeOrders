@@ -17,12 +17,6 @@ public static class KitchenProductionData
     public static async Task<int> InsertKitchenProductionDetail(KitchenProductionDetailModel kitchenProductionDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertKitchenProductionDetail, kitchenProductionDetail)).FirstOrDefault();
 
-    public static async Task<List<KitchenProductionOverviewModel>> LoadKitchenProductionOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-        await SqlDataAccess.LoadData<KitchenProductionOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenProductionOverviewByDate, new { StartDate, EndDate, OnlyActive });
-
-    public static async Task<List<KitchenProductionItemOverviewModel>> LoadKitchenProductionItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-        await SqlDataAccess.LoadData<KitchenProductionItemOverviewModel, dynamic>(StoredProcedureNames.LoadKitchenProductionItemOverviewByDate, new { StartDate, EndDate });
-
     public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int kitchenProductionId)
     {
         try

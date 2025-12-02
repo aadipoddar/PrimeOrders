@@ -20,12 +20,6 @@ public static class StockTransferData
 	public static async Task<int> InsertStockTransferDetail(StockTransferDetailModel stockTransferDetail) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertStockTransferDetail, stockTransferDetail)).FirstOrDefault();
 
-	public static async Task<List<StockTransferOverviewModel>> LoadStockTransferOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-		await SqlDataAccess.LoadData<StockTransferOverviewModel, dynamic>(StoredProcedureNames.LoadStockTransferOverviewByDate, new { StartDate, EndDate, OnlyActive });
-
-	public static async Task<List<StockTransferItemOverviewModel>> LoadStockTransferItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-		await SqlDataAccess.LoadData<StockTransferItemOverviewModel, dynamic>(StoredProcedureNames.LoadStockTransferItemOverviewByDate, new { StartDate, EndDate });
-
 	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int stockTransferId)
 	{
 		try

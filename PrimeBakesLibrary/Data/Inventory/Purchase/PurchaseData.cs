@@ -19,12 +19,6 @@ public static class PurchaseData
 	public static async Task<int> InsertPurchaseDetail(PurchaseDetailModel purchaseDetail) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertPurchaseDetail, purchaseDetail)).FirstOrDefault();
 
-	public static async Task<List<PurchaseOverviewModel>> LoadPurchaseOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-		await SqlDataAccess.LoadData<PurchaseOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseOverviewByDate, new { StartDate, EndDate, OnlyActive });
-
-	public static async Task<List<PurchaseItemOverviewModel>> LoadPurchaseItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-		await SqlDataAccess.LoadData<PurchaseItemOverviewModel, dynamic>(StoredProcedureNames.LoadPurchaseItemOverviewByDate, new { StartDate, EndDate });
-
 	public static async Task<List<RawMaterialModel>> LoadRawMaterialByPartyPurchaseDateTime(int PartyId, DateTime PurchaseDateTime, bool OnlyActive = true) =>
 		await SqlDataAccess.LoadData<RawMaterialModel, dynamic>(StoredProcedureNames.LoadRawMaterialByPartyPurchaseDateTime, new { PartyId, PurchaseDateTime, OnlyActive });
 

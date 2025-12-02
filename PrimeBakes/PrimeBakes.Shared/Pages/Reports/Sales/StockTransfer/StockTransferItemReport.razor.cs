@@ -123,7 +123,8 @@ public partial class StockTransferItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 
-			_transactionOverviews = await StockTransferData.LoadStockTransferItemOverviewByDate(
+			_transactionOverviews = await CommonData.LoadTableDataByDate<StockTransferItemOverviewModel>(
+				ViewNames.StockTransferItemOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 

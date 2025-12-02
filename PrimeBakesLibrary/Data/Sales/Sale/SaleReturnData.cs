@@ -20,12 +20,6 @@ public static class SaleReturnData
     public static async Task<int> InsertSaleReturnDetail(SaleReturnDetailModel saleReturnDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertSaleReturnDetail, saleReturnDetail)).FirstOrDefault();
 
-    public static async Task<List<SaleReturnOverviewModel>> LoadSaleReturnOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-        await SqlDataAccess.LoadData<SaleReturnOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnOverviewByDate, new { StartDate, EndDate, OnlyActive });
-
-    public static async Task<List<SaleReturnItemOverviewModel>> LoadSaleReturnItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-        await SqlDataAccess.LoadData<SaleReturnItemOverviewModel, dynamic>(StoredProcedureNames.LoadSaleReturnItemOverviewByDate, new { StartDate, EndDate });
-
     public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int saleReturnId)
     {
         try

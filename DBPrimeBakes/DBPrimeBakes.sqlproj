@@ -69,7 +69,6 @@
     <Folder Include="StoredProcedures\LoadData\Accounts" />
     <Folder Include="StoredProcedures\LoadData\Common" />
     <Folder Include="StoredProcedures\LoadData\Inventory" />
-    <Folder Include="StoredProcedures\LoadData\Inventory\Kitchen" />
     <Folder Include="StoredProcedures\LoadData\Inventory\Purchase" />
     <Folder Include="StoredProcedures\LoadData\Inventory\RawMaterial" />
     <Folder Include="StoredProcedures\LoadData\Inventory\Recipe" />
@@ -101,7 +100,6 @@
     <Folder Include="Views\Sales\Sale" />
     <Folder Include="Tables\Sales\Sale" />
     <Folder Include="StoredProcedures\LoadData\Sales" />
-    <Folder Include="StoredProcedures\LoadData\Sales\Sale" />
     <Folder Include="StoredProcedures\Insert\Sales\Sale" />
     <Folder Include="Views\Sales\Order" />
     <Folder Include="Tables\Sales\Order" />
@@ -116,7 +114,6 @@
     <Folder Include="Tables\Sales\StockTransfer" />
     <Folder Include="Views\Sales\StockTransfer" />
     <Folder Include="StoredProcedures\Insert\Sales\StockTransfer" />
-    <Folder Include="StoredProcedures\LoadData\Sales\StockTransfer" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Type_TransactionId_LocationId.sql" />
@@ -163,10 +160,6 @@
     <Build Include="Views\Inventory\Purchase\PurchaseReturn_Item_Overview.sql" />
     <Build Include="Views\Inventory\Purchase\PurchaseReturn_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_RawMaterial_By_Party_PurchaseDateTime.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_Purchase_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseOverview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseReturn_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Purchase\Load_PurchaseReturn_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_CurrentDateTime.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_LastTableData_By_Location_FinancialYear.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_Settings_By_Key.sql" />
@@ -204,23 +197,17 @@
     <Build Include="StoredProcedures\Delete\Delete_ProductStock_By_Id.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenIssue_Overview.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenIssue_Item_Overview.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssue_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenIssueOverview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProduction_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Kitchen\Load_KitchenProductionOverview_By_Date.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenProduction_Overview.sql" />
     <Build Include="Views\Inventory\Kitchen\KitchenProduction_Item_Overview.sql" />
     <Build Include="Views\Sales\Sale\SaleReturn_Item_Overview.sql" />
     <Build Include="Views\Sales\Sale\SaleReturn_Overview.sql" />
     <Build Include="Tables\Sales\Sale\SaleReturn.sql" />
     <Build Include="Tables\Sales\Sale\SaleReturnDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_SaleReturn_Item_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Common\Load_LastTableData_By_FinancialYear.sql" />
     <Build Include="Tables\Sales\Sale\Sale.sql" />
     <Build Include="Tables\Sales\Sale\SaleDetail.sql" />
     <Build Include="Views\Sales\Sale\Sale_Overview.sql" />
     <Build Include="Views\Sales\Sale\Sale_Item_Overview.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_Sale_Item_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Sale\Insert_Sale.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Sale\Insert_SaleDetail.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Sale\Insert_SaleReturn.sql" />
@@ -232,8 +219,6 @@
     <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_By_Location_Pending.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Order\Insert_Order.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Order\Insert_OrderDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_Sale_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Sale\Load_SaleReturn_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_Overview_By_Date.sql" />
     <Build Include="Views\Sales\Order\Order_Item_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_Item_Overview_By_Date.sql" />
@@ -271,8 +256,7 @@
     <Build Include="Views\Sales\StockTransfer\StockTransfer_Item_Overview.sql" />
     <Build Include="StoredProcedures\Insert\Sales\StockTransfer\Insert_StockTransfer.sql" />
     <Build Include="StoredProcedures\Insert\Sales\StockTransfer\Insert_StockTransferDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\StockTransfer\Load_StockTransfer_Item_Overview_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\StockTransfer\Load_StockTransfer_Overview_By_Date.sql" />
+    <Build Include="StoredProcedures\LoadData\Common\Load_TableData_By_Date.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />

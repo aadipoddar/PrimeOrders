@@ -52,6 +52,7 @@ public static class StoredProcedureNames
     public static string LoadTableDataByMasterId => "Load_TableData_By_MasterId";
     public static string LoadTableDataByCode => "Load_TableData_By_Code";
     public static string LoadTableDataByTransactionNo => "Load_TableData_By_TransactionNo";
+    public static string LoadTableDataByDate => "Load_TableData_By_Date";
     public static string LoadLastTableDataByFinancialYear => "Load_LastTableData_By_FinancialYear";
     public static string LoadLastTableDataByLocationFinancialYear => "Load_LastTableData_By_Location_FinancialYear";
     public static string LoadCurrentDateTime => "Load_CurrentDateTime";
@@ -66,15 +67,6 @@ public static class StoredProcedureNames
     public static string LoadRawMaterialByRawMaterialCategory => "Load_RawMaterial_By_RawMaterialCategory";
 
     public static string LoadRawMaterialByPartyPurchaseDateTime => "Load_RawMaterial_By_Party_PurchaseDateTime";
-    public static string LoadPurchaseOverviewByDate => "Load_PurchaseOverview_By_Date";
-    public static string LoadPurchaseItemOverviewByDate => "Load_Purchase_Item_Overview_By_Date";
-    public static string LoadPurchaseReturnOverviewByDate => "Load_PurchaseReturn_Overview_By_Date";
-    public static string LoadPurchaseReturnItemOverviewByDate => "Load_PurchaseReturn_Item_Overview_By_Date";
-
-    public static string LoadKitchenIssueOverviewByDate => "Load_KitchenIssueOverview_By_Date";
-    public static string LoadKitchenIssueItemOverviewByDate => "Load_KitchenIssue_Item_Overview_By_Date";
-    public static string LoadKitchenProductionOverviewByDate => "Load_KitchenProductionOverview_By_Date";
-    public static string LoadKitchenProductionItemOverviewByDate => "Load_KitchenProduction_Item_Overview_By_Date";
 
     public static string LoadRawMaterialStockSummaryByDate => "Load_RawMaterialStockSummary_By_Date";
     public static string LoadRawMaterialStockDetailsByDate => "Load_RawMaterialStockDetails_By_Date";
@@ -83,14 +75,6 @@ public static class StoredProcedureNames
 
     public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
     public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
-
-    public static string LoadSaleOverviewByDate => "Load_Sale_Overview_By_Date";
-    public static string LoadSaleItemOverviewByDate => "Load_Sale_Item_Overview_By_Date";
-    public static string LoadSaleReturnOverviewByDate => "Load_SaleReturn_Overview_By_Date";
-    public static string LoadSaleReturnItemOverviewByDate => "Load_SaleReturn_Item_Overview_By_Date";
-
-	public static string LoadStockTransferOverviewByDate => "Load_StockTransfer_Overview_By_Date";
-	public static string LoadStockTransferItemOverviewByDate => "Load_StockTransfer_Item_Overview_By_Date";
 
 	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
     public static string LoadOrderByLocationPending => "Load_Order_By_Location_Pending";

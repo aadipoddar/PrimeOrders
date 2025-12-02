@@ -119,7 +119,8 @@ public partial class KitchenIssueItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 
-			_transactionOverviews = await KitchenIssueData.LoadKitchenIssueItemOverviewByDate(
+			_transactionOverviews = await CommonData.LoadTableDataByDate<KitchenIssueItemOverviewModel>(
+				ViewNames.KitchenIssueItemOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
 				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 

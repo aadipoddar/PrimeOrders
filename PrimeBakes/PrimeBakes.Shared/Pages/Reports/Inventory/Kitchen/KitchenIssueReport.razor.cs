@@ -132,10 +132,13 @@ public partial class KitchenIssueReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 
-			_transactionOverviews = await KitchenIssueData.LoadKitchenIssueOverviewByDate(
+			_transactionOverviews = await CommonData.LoadTableDataByDate<KitchenIssueOverviewModel>(
+				ViewNames.KitchenIssueOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue),
-				!_showDeleted);
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+			if (!_showDeleted)
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.Status)];
 
 			if (_selectedCompany?.Id > 0)
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];

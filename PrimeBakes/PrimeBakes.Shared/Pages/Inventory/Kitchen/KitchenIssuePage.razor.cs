@@ -79,7 +79,7 @@ public partial class KitchenIssuePage : IAsyncDisposable
 	private async Task LoadData()
 	{
 		_hotKeysContext = HotKeys.CreateContext()
-			.Add(ModCode.Ctrl, Code.A, AddItemToCart, "Add item to cart", Exclude.None)
+			.Add(ModCode.Ctrl, Code.Enter, AddItemToCart, "Add item to cart", Exclude.None)
 			.Add(ModCode.Ctrl, Code.E, () => _sfItemAutoComplete.FocusAsync(), "Focus on item input", Exclude.None)
 			.Add(ModCode.Ctrl, Code.S, SaveTransaction, "Save the transaction", Exclude.None)
 			.Add(ModCode.Ctrl, Code.P, DownloadInvoice, "Download invoice", Exclude.None)

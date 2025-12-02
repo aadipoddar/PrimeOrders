@@ -22,12 +22,6 @@ public static class SaleData
     public static async Task<int> InsertSaleDetail(SaleDetailModel saleDetail) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertSaleDetail, saleDetail)).FirstOrDefault();
 
-    public static async Task<List<SaleOverviewModel>> LoadSaleOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-        await SqlDataAccess.LoadData<SaleOverviewModel, dynamic>(StoredProcedureNames.LoadSaleOverviewByDate, new { StartDate, EndDate, OnlyActive });
-
-    public static async Task<List<SaleItemOverviewModel>> LoadSaleItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-        await SqlDataAccess.LoadData<SaleItemOverviewModel, dynamic>(StoredProcedureNames.LoadSaleItemOverviewByDate, new { StartDate, EndDate });
-
     public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int saleId)
     {
         try

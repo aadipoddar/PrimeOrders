@@ -121,9 +121,11 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 
-			_transactionOverviews = await PurchaseReturnData.LoadPurchaseReturnItemOverviewByDate(
+			_transactionOverviews = await CommonData.LoadTableDataByDate<PurchaseReturnItemOverviewModel>(
+				ViewNames.PurchaseReturnItemOverview,
 				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue)
+			);
 
 			if (_selectedCompany?.Id > 0)
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
