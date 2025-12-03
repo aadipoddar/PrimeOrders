@@ -10,7 +10,7 @@ public static class AadiSoftUpdater
 	{
 		var fileContent = await GetLatestVersionFromGithub(githubRepoOwner, githubRepoName);
 		if (!fileContent.Contains("Latest Version = ")) return false;
-		var latestVersion = fileContent.Substring(fileContent.IndexOf("Latest Version = ", StringComparison.Ordinal) + 25, 7);
+		var latestVersion = fileContent.Substring(fileContent.IndexOf("Latest Version = ", StringComparison.Ordinal) + 17, 7);
 		return latestVersion != currentVersion;
 	}
 
