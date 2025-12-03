@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 
 using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
@@ -8,11 +9,14 @@ using PrimeBakesLibrary.Data.Inventory.Purchase;
 using PrimeBakesLibrary.Data.Sales.Order;
 using PrimeBakesLibrary.Data.Sales.Sale;
 using PrimeBakesLibrary.DataAccess;
+using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Sale;
+
+using Syncfusion.XlsIO;
 
 //FileInfo fileInfo = new(@"C:\Others\order.xlsx");
 
@@ -1671,13 +1675,17 @@ static async Task RecalculateTransactions()
 {
 	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
-	var order = await CommonData.LoadTableData<OrderModel>(TableNames.Order);
-	foreach (var p in order)
+	var accounts = await CommonData.LoadTableData<AccountingModel>(TableNames.Accounting);
+	foreach (var p in accounts)
 	{
 		Console.WriteLine("Recalculating Transaction: " + p.Id);
-		var details = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, p.Id);
-		p.TotalItems = details.Count;
-		p.TotalQuantity = details.Sum(d => d.Quantity);
-		await OrderData.InsertOrder(p);
+		var details = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, p.Id);
+
+		p.TotalCreditAmount = details.Sum(x => x.Credit ?? 0);
+		p.TotalDebitAmount = details.Sum(x => x.Debit ?? 0);
+		p.TotalCreditLedgers = details.Count(x => (x.Credit ?? 0) > 0);
+		p.TotalDebitLedgers = details.Count(x => (x.Debit ?? 0) > 0);
+
+		await AccountingData.InsertAccounting(p);
 	}
 }

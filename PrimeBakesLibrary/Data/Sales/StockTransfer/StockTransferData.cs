@@ -33,12 +33,11 @@ public static class StockTransferData
 				throw new InvalidOperationException("No transaction details found for the transaction.");
 
 			// Load company
-			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
-			if (company is null)
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId) ??
 				throw new InvalidOperationException("Company information is missing.");
 
-			// Generate invoice PDF with location information from ledger
-			var pdfStream = await StockTransferInvoicePDFExport.ExportStockTransferInvoice(
+            // Generate invoice PDF with location information from ledger
+            var pdfStream = await StockTransferInvoicePDFExport.ExportStockTransferInvoice(
 				transaction,
 				transactionDetails,
 				company,
@@ -270,24 +269,6 @@ public static class StockTransferData
 		if (stockTransferOverview.TotalAmount == 0)
 			return;
 
-		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferVoucherId);
-		var accounting = new AccountingModel
-		{
-			Id = 0,
-			TransactionNo = "",
-			CompanyId = stockTransferOverview.CompanyId,
-			VoucherId = int.Parse(voucher.Value),
-			ReferenceId = stockTransferOverview.Id,
-			ReferenceNo = stockTransferOverview.TransactionNo,
-			TransactionDateTime = stockTransferOverview.TransactionDateTime,
-			FinancialYearId = stockTransferOverview.FinancialYearId,
-			Remarks = stockTransferOverview.Remarks,
-			CreatedBy = stockTransferOverview.CreatedBy,
-			CreatedAt = stockTransferOverview.CreatedAt,
-			CreatedFromPlatform = stockTransferOverview.CreatedFromPlatform,
-			Status = true
-		};
-
 		var accountingCart = new List<AccountingItemCartModel>();
 
 		if (stockTransferOverview.Cash + stockTransferOverview.UPI + stockTransferOverview.Card > 0)
@@ -349,6 +330,28 @@ public static class StockTransferData
 				Remarks = $"GST Account Posting For Stock Transfer {stockTransferOverview.TransactionNo}",
 			});
 		}
+
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferVoucherId);
+		var accounting = new AccountingModel
+		{
+			Id = 0,
+			TransactionNo = "",
+			CompanyId = stockTransferOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = stockTransferOverview.Id,
+			ReferenceNo = stockTransferOverview.TransactionNo,
+			TransactionDateTime = stockTransferOverview.TransactionDateTime,
+			FinancialYearId = stockTransferOverview.FinancialYearId,
+			TotalDebitLedgers = accountingCart.Count(a => a.Debit.HasValue),
+			TotalCreditLedgers = accountingCart.Count(a => a.Credit.HasValue),
+			TotalDebitAmount = accountingCart.Sum(a => a.Debit ?? 0),
+			TotalCreditAmount = accountingCart.Sum(a => a.Credit ?? 0),
+			Remarks = stockTransferOverview.Remarks,
+			CreatedBy = stockTransferOverview.CreatedBy,
+			CreatedAt = stockTransferOverview.CreatedAt,
+			CreatedFromPlatform = stockTransferOverview.CreatedFromPlatform,
+			Status = true
+		};
 
 		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
 	}

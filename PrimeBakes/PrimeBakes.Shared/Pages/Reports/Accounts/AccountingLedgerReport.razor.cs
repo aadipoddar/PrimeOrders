@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -15,10 +16,15 @@ using PrimeBakesLibrary.Models.Common;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
-public partial class AccountingLedgerReport
+public partial class AccountingLedgerReport : IAsyncDisposable
 {
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
+
 	private UserModel _user;
 
 	private bool _isLoading = true;
@@ -34,9 +40,9 @@ public partial class AccountingLedgerReport
 
 	private List<CompanyModel> _companies = [];
 	private List<LedgerModel> _ledgers = [];
-	private List<AccountingLedgerOverviewModel> _accountingLedgerOverviews = [];
+	private List<AccountingLedgerOverviewModel> _transactionOverviews = [];
 
-	private SfGrid<AccountingLedgerOverviewModel> _sfAccountingLedgerGrid;
+	private SfGrid<AccountingLedgerOverviewModel> _sfGrid;
 
 	private string _errorTitle = string.Empty;
 	private string _errorMessage = string.Empty;
@@ -60,10 +66,23 @@ public partial class AccountingLedgerReport
 
 	private async Task LoadData()
 	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.R, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(Code.F5, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistory, "Open transaction history", Exclude.None)
+			.Add(ModCode.Ctrl, Code.T, NavigateToTrialBalance, "Open trial balance report", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None);
+
 		await LoadDates();
 		await LoadCompanies();
 		await LoadLedgers();
-		await LoadAccountingLedgerOverviews();
+		await LoadTransactionOverviews();
 	}
 
 	private async Task LoadDates()
@@ -97,7 +116,7 @@ public partial class AccountingLedgerReport
 		_selectedLedger = _ledgers.FirstOrDefault(_ => _.Id == 0);
 	}
 
-	private async Task LoadAccountingLedgerOverviews()
+	private async Task LoadTransactionOverviews()
 	{
 		if (_isProcessing)
 			return;
@@ -106,23 +125,24 @@ public partial class AccountingLedgerReport
 		{
 			_isProcessing = true;
 
-			_accountingLedgerOverviews = await AccountingData.LoadAccountingLedgerOverviewByDate(
-			DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-			DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+			_transactionOverviews = await CommonData.LoadTableDataByDate<AccountingLedgerOverviewModel>(
+				ViewNames.AccountingLedgerOverview,
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
 			if (_selectedCompany?.Id > 0)
-				_accountingLedgerOverviews = [.. _accountingLedgerOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
 			// Filter by ledger with contra ledger details
 			if (_selectedLedger?.Id > 0)
 			{
 				List<AccountingLedgerOverviewModel> filteredOverviews = [];
-				var partyLedgers = _accountingLedgerOverviews.Where(l => l.Id == _selectedLedger.Id).ToList();
+				var partyLedgers = _transactionOverviews.Where(l => l.Id == _selectedLedger.Id).ToList();
 
 				foreach (var item in partyLedgers)
 				{
-					var referenceLedgers = _accountingLedgerOverviews
-						.Where(l => l.AccountingId == item.AccountingId && l.Id != _selectedLedger.Id)
+					var referenceLedgers = _transactionOverviews
+						.Where(l => l.MasterId == item.MasterId && l.Id != _selectedLedger.Id)
 						.ToList();
 
 					var referenceLedgerNamesWithAmount = string.Join("\n",
@@ -131,7 +151,7 @@ public partial class AccountingLedgerReport
 					filteredOverviews.Add(item);
 				}
 
-				_accountingLedgerOverviews = filteredOverviews;
+				_transactionOverviews = filteredOverviews;
 
 				var trialBalances = await AccountingData.LoadTrialBalanceByDate(
 					DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
@@ -140,16 +160,16 @@ public partial class AccountingLedgerReport
 				_selectedTrialBalance = trialBalances.FirstOrDefault(tb => tb.LedgerId == _selectedLedger.Id);
 			}
 
-			_accountingLedgerOverviews = [.. _accountingLedgerOverviews.OrderBy(_ => _.TransactionDateTime)];
+			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading accounting ledger overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
 		}
 		finally
 		{
-			if (_sfAccountingLedgerGrid is not null)
-				await _sfAccountingLedgerGrid.Refresh();
+			if (_sfGrid is not null)
+				await _sfGrid.Refresh();
 			_isProcessing = false;
 			StateHasChanged();
 		}
@@ -161,19 +181,19 @@ public partial class AccountingLedgerReport
 	{
 		_fromDate = args.StartDate;
 		_toDate = args.EndDate;
-		await LoadAccountingLedgerOverviews();
+		await LoadTransactionOverviews();
 	}
 
 	private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
 	{
 		_selectedCompany = args.Value;
-		await LoadAccountingLedgerOverviews();
+		await LoadTransactionOverviews();
 	}
 
 	private async Task OnLedgerChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LedgerModel, LedgerModel> args)
 	{
 		_selectedLedger = args.Value;
-		await LoadAccountingLedgerOverviews();
+		await LoadTransactionOverviews();
 	}
 
 	private async Task SetDateRange(DateRangeType rangeType)
@@ -249,14 +269,14 @@ public partial class AccountingLedgerReport
 		finally
 		{
 			_isProcessing = false;
-			await LoadAccountingLedgerOverviews();
+			await LoadTransactionOverviews();
 			StateHasChanged();
 		}
 	}
 	#endregion
 
 	#region Exporting
-	private async Task ExportExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	private async Task ExportExcel()
 	{
 		if (_isProcessing)
 			return;
@@ -270,7 +290,7 @@ public partial class AccountingLedgerReport
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await AccountingLedgerReportExcelExport.ExportAccountingLedgerReport(
-					_accountingLedgerOverviews,
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
@@ -285,8 +305,7 @@ public partial class AccountingLedgerReport
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await ShowToast("Success", "Ledger report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -299,7 +318,7 @@ public partial class AccountingLedgerReport
 		}
 	}
 
-	private async Task ExportPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+	private async Task ExportPdf()
 	{
 		if (_isProcessing)
 			return;
@@ -313,7 +332,7 @@ public partial class AccountingLedgerReport
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await AccountingLedgerReportPdfExport.ExportAccountingLedgerReport(
-					_accountingLedgerOverviews,
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
@@ -328,8 +347,7 @@ public partial class AccountingLedgerReport
 			fileName += ".pdf";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-
-			await ShowToast("Success", "Ledger report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -344,22 +362,40 @@ public partial class AccountingLedgerReport
 	#endregion
 
 	#region Actions
-	private async Task ViewAccounting(int accountingId)
+	private async Task ViewSelectedCartItem()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await ViewTransaction(selectedCartItem.MasterId);
+	}
+
+	private async Task ViewTransaction(int transactionId)
 	{
 		try
 		{
 			if (FormFactor.GetFormFactor() == "Web")
-				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.FinancialAccounting}/{accountingId}", "_blank");
+				await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.FinancialAccounting}/{transactionId}", "_blank");
 			else
-				NavigationManager.NavigateTo($"{PageRouteNames.FinancialAccounting}/{accountingId}");
+				NavigationManager.NavigateTo($"{PageRouteNames.FinancialAccounting}/{transactionId}");
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening accounting: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
 		}
 	}
 
-	private async Task DownloadInvoice(int accountingId)
+	private async Task DownloadSelectedCartItemInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadInvoice(selectedCartItem.MasterId);
+	}
+
+	private async Task DownloadInvoice(int transactionId)
 	{
 		if (_isProcessing)
 			return;
@@ -369,8 +405,9 @@ public partial class AccountingLedgerReport
 			_isProcessing = true;
 			StateHasChanged();
 
-			var (pdfStream, fileName) = await AccountingData.GenerateAndDownloadInvoice(accountingId);
+			var (pdfStream, fileName) = await AccountingData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
 		}
 		catch (Exception ex)
 		{
@@ -388,13 +425,13 @@ public partial class AccountingLedgerReport
 		_showAllColumns = !_showAllColumns;
 		StateHasChanged();
 
-		if (_sfAccountingLedgerGrid is not null)
-			await _sfAccountingLedgerGrid.Refresh();
+		if (_sfGrid is not null)
+			await _sfGrid.Refresh();
 	}
 	#endregion
 
 	#region Utilities
-	private async Task NavigateToAccountingPage()
+	private async Task NavigateToTransactionPage()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.FinancialAccounting, "_blank");
@@ -402,7 +439,7 @@ public partial class AccountingLedgerReport
 			NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting);
 	}
 
-	private async Task NavigateToAccountingReport()
+	private async Task NavigateToTransactionHistory()
 	{
 		if (FormFactor.GetFormFactor() == "Web")
 			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportFinancialAccounting, "_blank");
@@ -412,8 +449,17 @@ public partial class AccountingLedgerReport
 
 	private void NavigateToTrialBalance()
 	{
-		NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance);
+		if (FormFactor.GetFormFactor() == "Web")
+			JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportTrialBalance, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance);
 	}
+
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 
 	private async Task ShowToast(string title, string message, string type)
 	{
@@ -439,6 +485,12 @@ public partial class AccountingLedgerReport
 				Content = _successMessage
 			});
 		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
 	}
 	#endregion
 }

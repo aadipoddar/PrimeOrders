@@ -13,17 +13,8 @@ public static class AccountingData
     public static async Task<int> InsertAccountingDetail(AccountingDetailModel accountingDetails) =>
         (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertAccountingDetail, accountingDetails)).FirstOrDefault();
 
-    public static async Task<List<AccountingDetailModel>> LoadAccountingDetailByAccounting(int AccountingId) =>
-        await SqlDataAccess.LoadData<AccountingDetailModel, dynamic>(StoredProcedureNames.LoadAccountingDetailByAccounting, new { AccountingId });
-
-    public static async Task<List<AccountingOverviewModel>> LoadAccountingOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-        await SqlDataAccess.LoadData<AccountingOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingOverviewByDate, new { StartDate, EndDate, OnlyActive });
-
     public static async Task<AccountingModel> LoadAccountingByVoucherReference(int VoucherId, int ReferenceId, string ReferenceNo) =>
         (await SqlDataAccess.LoadData<AccountingModel, dynamic>(StoredProcedureNames.LoadAccountingByVoucherReference, new { VoucherId, ReferenceId, ReferenceNo })).FirstOrDefault();
-
-    public static async Task<List<AccountingLedgerOverviewModel>> LoadAccountingLedgerOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-        await SqlDataAccess.LoadData<AccountingLedgerOverviewModel, dynamic>(StoredProcedureNames.LoadAccountingLedgerOverviewByDate, new { StartDate, EndDate });
 
     public static async Task<List<TrialBalanceModel>> LoadTrialBalanceByDate(DateTime StartDate, DateTime EndDate) =>
         await SqlDataAccess.LoadData<TrialBalanceModel, dynamic>(StoredProcedureNames.LoadTrialBalanceByDate, new { StartDate, EndDate });
@@ -33,17 +24,17 @@ public static class AccountingData
         try
         {
             // Load saved accounting details
-            var savedAccounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId) ??
-                throw new InvalidOperationException("Saved accounting transaction not found.");
+            var transaction = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId) ??
+				throw new InvalidOperationException("Transaction not found.");
 
             // Load accounting details from database
-            var accountingDetails = await LoadAccountingDetailByAccounting(accountingId);
-            if (accountingDetails is null || accountingDetails.Count == 0)
-                throw new InvalidOperationException("No accounting details found for invoice generation.");
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, accountingId);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+				throw new InvalidOperationException("No transaction details found for the transaction.");
 
             // Load company and voucher
-            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedAccounting.CompanyId);
-            var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, savedAccounting.VoucherId);
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, transaction.VoucherId);
 
             if (company is null)
                 throw new InvalidOperationException("Invoice generation skipped - company not found.");
@@ -53,8 +44,8 @@ public static class AccountingData
 
             // Generate invoice PDF
             var pdfStream = await AccountingInvoicePDFExport.ExportAccountingInvoice(
-                savedAccounting,
-                accountingDetails,
+                transaction,
+                transactionDetails,
                 company,
                 voucher,
                 null, // logo path - uses default
@@ -63,7 +54,7 @@ public static class AccountingData
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();
-            string fileName = $"ACCOUNTING_VOUCHER_{savedAccounting.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+            string fileName = $"ACCOUNTING_VOUCHER_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
             return (pdfStream, fileName);
         }
         catch (Exception ex)
@@ -77,7 +68,7 @@ public static class AccountingData
         var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, accounting.FinancialYearId);
         if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete accounting transaction as the financial year is locked.");
+			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         accounting.Status = false;
         await InsertAccounting(accounting);
@@ -85,7 +76,7 @@ public static class AccountingData
 
     public static async Task RecoverAccountingTransaction(AccountingModel accounting)
     {
-        var accountingDetails = await LoadAccountingDetailByAccounting(accounting.Id);
+        var accountingDetails = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, accounting.Id);
         List<AccountingItemCartModel> accountingItemCarts = [];
 
         foreach (var item in accountingDetails)
@@ -134,7 +125,7 @@ public static class AccountingData
     {
         if (update)
         {
-            var existingAccountingDetails = await LoadAccountingDetailByAccounting(accounting.Id);
+            var existingAccountingDetails = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, accounting.Id);
             foreach (var item in existingAccountingDetails)
             {
                 item.Status = false;
@@ -146,7 +137,7 @@ public static class AccountingData
             await InsertAccountingDetail(new()
             {
                 Id = 0,
-                AccountingId = accounting.Id,
+                MasterId = accounting.Id,
                 LedgerId = item.LedgerId,
                 Credit = item.Credit,
                 Debit = item.Debit,

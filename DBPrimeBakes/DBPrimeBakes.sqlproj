@@ -221,12 +221,9 @@
     <Build Include="Views\Sales\ProductLocation_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Masters\Load_Ledger_By_Location.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Masters\Load_FinancialYear_By_DateTime.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_AccountingDetail_By_Accounting.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_By_Voucher_Reference.sql" />
     <Build Include="Tables\Accounts\FinancialAccounting\AccountingDetail.sql" />
     <Build Include="Views\Accounts\Accounting_Ledger_Overview.sql" />
-    <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_Accounting_Ledger_Overview_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\FinancialAccounting\Load_TrialBalance_By_Date.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_StateUT.sql" />
     <Build Include="StoredProcedures\Insert\Accounts\Masters\Insert_Company.sql" />

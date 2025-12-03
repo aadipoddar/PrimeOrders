@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_AccountingDetail]
 	@Id INT OUTPUT,
-	@AccountingId INT,
+	@MasterId INT,
 	@LedgerId INT,
 	@ReferenceType VARCHAR(MAX),
 	@ReferenceId INT,
@@ -15,7 +15,7 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[AccountingDetail]
 		(
-			AccountingId,
+			[MasterId],
 			LedgerId,
 			ReferenceType,
 			ReferenceId,
@@ -26,7 +26,7 @@ BEGIN
 			Status
 		) VALUES
 		(
-			@AccountingId,
+			@MasterId,
 			@LedgerId,
 			@ReferenceType,
 			@ReferenceId,
@@ -44,7 +44,7 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[AccountingDetail]
 		SET
-			AccountingId = @AccountingId,
+			[MasterId] = @MasterId,
 			LedgerId = @LedgerId,
 			ReferenceType = @ReferenceType,
 			ReferenceId = @ReferenceId,

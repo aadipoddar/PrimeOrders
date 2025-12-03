@@ -16,66 +16,59 @@ public static class TrialBalanceExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // ID fields - Center aligned
-            ["LedgerId"] = new() { DisplayName = "Ledger ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["GroupId"] = new() { DisplayName = "Group ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["AccountTypeId"] = new() { DisplayName = "Account Type ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.LedgerId)] = new() { DisplayName = "Ledger ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.GroupId)] = new() { DisplayName = "Group ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.AccountTypeId)] = new() { DisplayName = "Account Type ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Text fields - Left aligned
-            ["LedgerCode"] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["LedgerName"] = new() { DisplayName = "Ledger Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["GroupName"] = new() { DisplayName = "Group", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["AccountTypeName"] = new() { DisplayName = "Account Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.LedgerCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.LedgerName)] = new() { DisplayName = "Ledger Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.GroupName)] = new() { DisplayName = "Group", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(TrialBalanceModel.AccountTypeName)] = new() { DisplayName = "Account Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
 
             // Numeric fields - Right aligned with totals
-            ["OpeningDebit"] = new() { DisplayName = "Opening Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["OpeningCredit"] = new() { DisplayName = "Opening Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["OpeningBalance"] = new() { DisplayName = "Opening Balance", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false },
-            ["Debit"] = new() { DisplayName = "Period Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["Credit"] = new() { DisplayName = "Period Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["ClosingDebit"] = new() { DisplayName = "Closing Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["ClosingCredit"] = new() { DisplayName = "Closing Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["ClosingBalance"] = new() { DisplayName = "Closing Balance", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false }
+            [nameof(TrialBalanceModel.OpeningDebit)] = new() { DisplayName = "Opening Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.OpeningCredit)] = new() { DisplayName = "Opening Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.OpeningBalance)] = new() { DisplayName = "Opening Balance", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.Debit)] = new() { DisplayName = "Period Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.Credit)] = new() { DisplayName = "Period Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.ClosingDebit)] = new() { DisplayName = "Closing Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.ClosingCredit)] = new() { DisplayName = "Closing Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(TrialBalanceModel.ClosingBalance)] = new() { DisplayName = "Closing Balance", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
         };
 
         // Define column order based on view type
         List<string> columnOrder;
 
+        // Detailed view - all columns
         if (showAllColumns)
-        {
-            // Detailed view - all columns
             columnOrder =
             [
-                "LedgerCode",
-                "LedgerName",
-                "GroupName",
-                "AccountTypeName",
-                "OpeningBalance",
-                "OpeningDebit",
-                "OpeningCredit",
-                "Debit",
-                "Credit",
-                "ClosingBalance",
-                "ClosingDebit",
-                "ClosingCredit",
-                "LedgerId",
-                "GroupId",
-                "AccountTypeId"
+                nameof(TrialBalanceModel.LedgerCode),
+                nameof(TrialBalanceModel.LedgerName),
+                nameof(TrialBalanceModel.GroupName),
+                nameof(TrialBalanceModel.AccountTypeName),
+                nameof(TrialBalanceModel.OpeningBalance),
+                nameof(TrialBalanceModel.OpeningDebit),
+                nameof(TrialBalanceModel.OpeningCredit),
+                nameof(TrialBalanceModel.Debit),
+                nameof(TrialBalanceModel.Credit),
+                nameof(TrialBalanceModel.ClosingBalance),
+                nameof(TrialBalanceModel.ClosingDebit),
+                nameof(TrialBalanceModel.ClosingCredit),
             ];
-        }
+        // Summary view - essential columns only
         else
-        {
-            // Summary view - essential columns only
             columnOrder =
             [
-                "LedgerName",
-                "GroupName",
-                "AccountTypeName",
-                "OpeningBalance",
-                "Debit",
-                "Credit",
-                "ClosingBalance"
+                nameof(TrialBalanceModel.LedgerName),
+                nameof(TrialBalanceModel.GroupName),
+                nameof(TrialBalanceModel.AccountTypeName),
+                nameof(TrialBalanceModel.OpeningBalance),
+                nameof(TrialBalanceModel.Debit),
+                nameof(TrialBalanceModel.Credit),
+                nameof(TrialBalanceModel.ClosingBalance)
             ];
-        }
 
         // Call the generic Excel export utility
         return await ExcelExportUtil.ExportToExcel(

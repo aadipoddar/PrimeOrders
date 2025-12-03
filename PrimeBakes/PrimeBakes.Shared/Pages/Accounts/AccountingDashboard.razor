@@ -24,7 +24,7 @@ else
 			<p class="page-subtitle">Access all accounting modules and reports</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout">
+			<button class="btn-icon btn-icon-logout" @onclick="async () => await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService)" title="Logout">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
@@ -60,7 +60,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Financial Accounting -->
-					<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToFinancialAccounting">
+					<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -97,7 +97,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Financial Accounting Report -->
-					<SfButton CssClass="dashboard-button btn-cyan" OnClick="NavigateToFinancialAccountingReport">
+					<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ else
 					</SfButton>
 
 					<!-- Ledger Report -->
-					<SfButton CssClass="dashboard-button btn-emerald" OnClick="NavigateToLedgerReport">
+					<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -128,7 +128,7 @@ else
 					</SfButton>
 
 					<!-- Trial Balance -->
-					<SfButton CssClass="dashboard-button btn-sky" OnClick="NavigateToTrialBalance">
+					<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -164,7 +164,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Group -->
-					<SfButton CssClass="dashboard-button btn-purple" OnClick="NavigateToGroup">
+					<SfButton CssClass="dashboard-button btn-purple" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminGroup)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ else
 					</SfButton>
 
 					<!-- Account Type -->
-					<SfButton CssClass="dashboard-button btn-indigo" OnClick="NavigateToAccountType">
+					<SfButton CssClass="dashboard-button btn-indigo" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminAccountType)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -198,7 +198,7 @@ else
 					</SfButton>
 
 					<!-- Ledgers -->
-					<SfButton CssClass="dashboard-button btn-teal" OnClick="NavigateToLedger">
+					<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminLedger)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -217,7 +217,7 @@ else
 					</SfButton>
 
 					<!-- Voucher -->
-					<SfButton CssClass="dashboard-button btn-rose" OnClick="NavigateToVoucher">
+					<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminVoucher)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -235,7 +235,7 @@ else
 					</SfButton>
 
 					<!-- Financial Years -->
-					<SfButton CssClass="dashboard-button btn-amber" OnClick="NavigateToFinancialYear">
+					<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -253,7 +253,7 @@ else
 					</SfButton>
 
 					<!-- States -->
-					<SfButton CssClass="dashboard-button btn-violet" OnClick="NavigateToState">
+					<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminStateUT)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -271,7 +271,7 @@ else
 					</SfButton>
 
 					<!-- Company -->
-					<SfButton CssClass="dashboard-button btn-green" OnClick="NavigateToCompany">
+					<SfButton CssClass="dashboard-button btn-green" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminCompany)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -287,7 +287,7 @@ else
 					</SfButton>
 
 					<!-- Settings -->
-					<SfButton CssClass="dashboard-button btn-slate" OnClick="NavigateToSettings">
+					<SfButton CssClass="dashboard-button btn-slate" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminSettings)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"

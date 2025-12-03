@@ -1,13 +1,17 @@
 ﻿CREATE TABLE [dbo].[Accounting]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [TransactionNo] VARCHAR(MAX) NOT NULL, 
+    [TransactionNo] VARCHAR(100) NOT NULL UNIQUE,
     [CompanyId] INT NOT NULL,
     [VoucherId] INT NOT NULL, 
 	[ReferenceId] INT NULL,
 	[ReferenceNo] VARCHAR(MAX) NULL,
     [TransactionDateTime] DATETIME NOT NULL,
 	[FinancialYearId] INT NOT NULL,
+	[TotalDebitLedgers] INT NOT NULL DEFAULT 0,
+	[TotalCreditLedgers] INT NOT NULL DEFAULT 0,
+	[TotalDebitAmount] MONEY NOT NULL DEFAULT 0,
+	[TotalCreditAmount] MONEY NOT NULL DEFAULT 0,
     [Remarks] VARCHAR(MAX) NULL,
 	[CreatedBy] INT NOT NULL,
 	[CreatedAt] DATETIME NOT NULL DEFAULT (((getdate() AT TIME ZONE 'UTC') AT TIME ZONE 'India Standard Time')),

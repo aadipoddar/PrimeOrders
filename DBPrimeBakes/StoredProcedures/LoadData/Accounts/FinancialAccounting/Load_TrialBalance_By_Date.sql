@@ -14,7 +14,7 @@ BEGIN
 		FROM 
 			AccountingDetail ad
 		INNER JOIN 
-			Accounting a ON ad.AccountingId = a.Id
+			Accounting a ON ad.[MasterId] = a.Id
 		WHERE 
 			a.TransactionDateTime < @StartDate
 			AND a.Status = 1
@@ -31,7 +31,7 @@ BEGIN
 		FROM 
 			AccountingDetail ad
 		INNER JOIN 
-			Accounting a ON ad.AccountingId = a.Id
+			Accounting a ON ad.[MasterId] = a.Id
 		WHERE 
 			a.TransactionDateTime >= @StartDate
 			AND a.TransactionDateTime <= @EndDate

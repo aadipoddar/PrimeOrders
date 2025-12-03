@@ -348,24 +348,6 @@ public static class SaleData
 		if (saleOverview.TotalAmount == 0)
 			return;
 
-		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
-		var accounting = new AccountingModel
-		{
-			Id = 0,
-			TransactionNo = "",
-			CompanyId = saleOverview.CompanyId,
-			VoucherId = int.Parse(voucher.Value),
-			ReferenceId = saleOverview.Id,
-			ReferenceNo = saleOverview.TransactionNo,
-			TransactionDateTime = saleOverview.TransactionDateTime,
-			FinancialYearId = saleOverview.FinancialYearId,
-			Remarks = saleOverview.Remarks,
-			CreatedBy = saleOverview.CreatedBy,
-			CreatedAt = saleOverview.CreatedAt,
-			CreatedFromPlatform = saleOverview.CreatedFromPlatform,
-			Status = true
-		};
-
 		var accountingCart = new List<AccountingItemCartModel>();
 
 		if (saleOverview.Cash + saleOverview.UPI + saleOverview.Card > 0)
@@ -424,6 +406,28 @@ public static class SaleData
 				Remarks = $"GST Account Posting For Sale Bill {saleOverview.TransactionNo}",
 			});
 		}
+
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
+		var accounting = new AccountingModel
+		{
+			Id = 0,
+			TransactionNo = "",
+			CompanyId = saleOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = saleOverview.Id,
+			ReferenceNo = saleOverview.TransactionNo,
+			TransactionDateTime = saleOverview.TransactionDateTime,
+			FinancialYearId = saleOverview.FinancialYearId,
+			TotalDebitLedgers = accountingCart.Count(a => a.Debit.HasValue),
+			TotalCreditLedgers = accountingCart.Count(a => a.Credit.HasValue),
+			TotalDebitAmount = accountingCart.Sum(a => a.Debit ?? 0),
+			TotalCreditAmount = accountingCart.Sum(a => a.Credit ?? 0),
+			Remarks = saleOverview.Remarks,
+			CreatedBy = saleOverview.CreatedBy,
+			CreatedAt = saleOverview.CreatedAt,
+			CreatedFromPlatform = saleOverview.CreatedFromPlatform,
+			Status = true
+		};
 
 		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
 	}

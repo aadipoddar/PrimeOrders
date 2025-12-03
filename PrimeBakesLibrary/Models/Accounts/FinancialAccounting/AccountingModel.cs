@@ -10,7 +10,11 @@ public class AccountingModel
     public string? ReferenceNo { get; set; }
     public DateTime TransactionDateTime { get; set; }
     public int FinancialYearId { get; set; }
-    public string? Remarks { get; set; }
+    public int TotalDebitLedgers { get; set; }
+    public int TotalCreditLedgers { get; set; }
+	public decimal TotalDebitAmount { get; set; }
+    public decimal TotalCreditAmount { get; set; }
+	public string? Remarks { get; set; }
     public int CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string CreatedFromPlatform { get; set; }
@@ -23,7 +27,7 @@ public class AccountingModel
 public class AccountingDetailModel
 {
     public int Id { get; set; }
-    public int AccountingId { get; set; }
+    public int MasterId { get; set; }
     public int LedgerId { get; set; }
     public int? ReferenceId { get; set; }
     public string? ReferenceType { get; set; }
@@ -100,7 +104,7 @@ public class AccountingLedgerOverviewModel
     public int GroupId { get; set; }
     public string GroupName { get; set; }
 
-    public int AccountingId { get; set; }
+    public int MasterId { get; set; }
     public string TransactionNo { get; set; }
     public DateOnly TransactionDateTime { get; set; }
     public int CompanyId { get; set; }

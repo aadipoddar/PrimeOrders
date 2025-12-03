@@ -995,12 +995,6 @@ public partial class SalePage : IAsyncDisposable
 			_sale.TransactionDateTime = await CommonData.LoadCurrentDateTime();
 		}
 
-		if (_cart.Count == 0)
-		{
-			await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
-			return false;
-		}
-
 		if (_selectedCompany is null || _sale.CompanyId <= 0)
 		{
 			await ShowToast("Company Not Selected", "Please select a company for the transaction.", "error");

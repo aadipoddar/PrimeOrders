@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -14,11 +15,16 @@ using PrimeBakesLibrary.Models.Common;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
-public partial class TrialBalance
+public partial class TrialBalance : IAsyncDisposable
 {
-    private UserModel _user;
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
+
+	private UserModel _user;
 
     private bool _isLoading = true;
     private bool _isProcessing = false;
@@ -34,7 +40,7 @@ public partial class TrialBalance
     private List<AccountTypeModel> _accountTypes = [];
     private List<TrialBalanceModel> _trialBalance = [];
 
-    private SfGrid<TrialBalanceModel> _sfTrialBalanceGrid;
+    private SfGrid<TrialBalanceModel> _sfGrid;
 
     private string _errorTitle = string.Empty;
     private string _errorMessage = string.Empty;
@@ -58,7 +64,17 @@ public partial class TrialBalance
 
     private async Task LoadData()
     {
-        await LoadDates();
+        _hotKeysContext = HotKeys.CreateContext()
+            .Add(ModCode.Ctrl, Code.R, LoadTrialBalance, "Refresh Data", Exclude.None)
+            .Add(Code.F5, LoadTrialBalance, "Refresh Data", Exclude.None)
+            .Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+            .Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+            .Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+            .Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+            .Add(ModCode.Ctrl, Code.I, NavigateToLedgerReport, "Ledger Report", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None);
+
+		await LoadDates();
         await LoadGroups();
         await LoadAccountTypes();
         await LoadTrialBalance();
@@ -105,8 +121,8 @@ public partial class TrialBalance
             _isProcessing = true;
 
             _trialBalance = await AccountingData.LoadTrialBalanceByDate(
-            DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-            DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+                DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+                DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
             if (_selectedGroup?.Id > 0)
                 _trialBalance = [.. _trialBalance.Where(_ => _.GroupId == _selectedGroup.Id)];
@@ -122,8 +138,8 @@ public partial class TrialBalance
         }
         finally
         {
-            if (_sfTrialBalanceGrid is not null)
-                await _sfTrialBalanceGrid.Refresh();
+            if (_sfGrid is not null)
+                await _sfGrid.Refresh();
             _isProcessing = false;
             StateHasChanged();
         }
@@ -230,7 +246,7 @@ public partial class TrialBalance
     #endregion
 
     #region Exporting
-    private async Task ExportExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportExcel()
     {
         if (_isProcessing)
             return;
@@ -258,8 +274,7 @@ public partial class TrialBalance
             fileName += ".xlsx";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
-            await ShowToast("Success", "Trial balance exported to Excel successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
         }
         catch (Exception ex)
         {
@@ -272,7 +287,7 @@ public partial class TrialBalance
         }
     }
 
-    private async Task ExportPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportPdf()
     {
         if (_isProcessing)
             return;
@@ -300,8 +315,7 @@ public partial class TrialBalance
             fileName += ".pdf";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
-            await ShowToast("Success", "Trial balance exported to PDF successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
         }
         catch (Exception ex)
         {
@@ -321,11 +335,11 @@ public partial class TrialBalance
         _showAllColumns = !_showAllColumns;
         StateHasChanged();
 
-        if (_sfTrialBalanceGrid is not null)
-            await _sfTrialBalanceGrid.Refresh();
+        if (_sfGrid is not null)
+            await _sfGrid.Refresh();
     }
 
-    private async Task NavigateToAccountingPage()
+    private async Task NavigateToTransactionPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.FinancialAccounting, "_blank");
@@ -341,7 +355,13 @@ public partial class TrialBalance
             NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger);
     }
 
-    private async Task ShowToast(string title, string message, string type)
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
     {
         VibrationService.VibrateWithTime(200);
 
@@ -366,5 +386,11 @@ public partial class TrialBalance
             });
         }
     }
-    #endregion
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

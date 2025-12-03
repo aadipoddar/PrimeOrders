@@ -21,21 +21,21 @@ public static class AccountingLedgerReportPdfExport
             // Detailed view - all columns
             columnOrder =
             [
-                "LedgerName",
-                "LedgerCode",
-                "AccountTypeName",
-                "GroupName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "ReferenceType",
-                "ReferenceNo",
-                "ReferenceDateTime",
-                "ReferenceAmount",
-                "Debit",
-                "Credit",
-                "AccountingRemarks",
-                "Remarks"
+                nameof(AccountingLedgerOverviewModel.LedgerName),
+                nameof(AccountingLedgerOverviewModel.LedgerCode),
+                nameof(AccountingLedgerOverviewModel.AccountTypeName),
+                nameof(AccountingLedgerOverviewModel.GroupName),
+                nameof(AccountingLedgerOverviewModel.TransactionNo),
+                nameof(AccountingLedgerOverviewModel.TransactionDateTime),
+                nameof(AccountingLedgerOverviewModel.CompanyName),
+                nameof(AccountingLedgerOverviewModel.ReferenceType),
+                nameof(AccountingLedgerOverviewModel.ReferenceNo),
+                nameof(AccountingLedgerOverviewModel.ReferenceDateTime),
+                nameof(AccountingLedgerOverviewModel.ReferenceAmount),
+                nameof(AccountingLedgerOverviewModel.Debit),
+                nameof(AccountingLedgerOverviewModel.Credit),
+                nameof(AccountingLedgerOverviewModel.AccountingRemarks),
+                nameof(AccountingLedgerOverviewModel.Remarks)
             ];
         }
         else
@@ -43,12 +43,12 @@ public static class AccountingLedgerReportPdfExport
             // Summary view - essential columns only
             columnOrder =
             [
-                "LedgerName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "ReferenceNo",
-                "Debit",
-                "Credit"
+                nameof(AccountingLedgerOverviewModel.LedgerName),
+                nameof(AccountingLedgerOverviewModel.TransactionNo),
+                nameof(AccountingLedgerOverviewModel.TransactionDateTime),
+                nameof(AccountingLedgerOverviewModel.ReferenceNo),
+                nameof(AccountingLedgerOverviewModel.Debit),
+                nameof(AccountingLedgerOverviewModel.Credit)
             ];
         }
 
@@ -56,23 +56,23 @@ public static class AccountingLedgerReportPdfExport
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
             // Text fields
-            ["LedgerName"] = new() { DisplayName = "Ledger Name", IncludeInTotal = false },
-            ["LedgerCode"] = new() { DisplayName = "Code", IncludeInTotal = false },
-            ["AccountTypeName"] = new() { DisplayName = "Account Type", IncludeInTotal = false },
-            ["GroupName"] = new() { DisplayName = "Group", IncludeInTotal = false },
-            ["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false },
-            ["CompanyName"] = new() { DisplayName = "Company", IncludeInTotal = false },
-            ["ReferenceType"] = new() { DisplayName = "Ref Type", IncludeInTotal = false },
-            ["ReferenceNo"] = new() { DisplayName = "Reference No", IncludeInTotal = false },
-            ["AccountingRemarks"] = new() { DisplayName = "Accounting Remarks", IncludeInTotal = false },
-            ["Remarks"] = new() { DisplayName = "Ledger Remarks", IncludeInTotal = false },
-
+            [nameof(AccountingLedgerOverviewModel.LedgerName)] = new() { DisplayName = "Ledger", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.LedgerCode)] = new() { DisplayName = "Code", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.AccountTypeName)] = new() { DisplayName = "Account Type", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.GroupName)] = new() { DisplayName = "Group", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.CompanyName)] = new() { DisplayName = "Company", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceType)] = new() { DisplayName = "Ref Type", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceNo)] = new() { DisplayName = "Ref No", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.AccountingRemarks)] = new() { DisplayName = "Accounting Remarks", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.Remarks)] = new() { DisplayName = "Ledger Remarks", IncludeInTotal = false },
+            
             // Date fields with formatting
-            ["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd-MMM-yyyy", IncludeInTotal = false },
-            ["ReferenceDateTime"] = new() { DisplayName = "Ref Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy", IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceDateTime)] = new() { DisplayName = "Ref Date", Format = "dd-MMM-yyyy hh:mm tt", IncludeInTotal = false },
 
             // Numeric fields - Right aligned with totals
-            ["Debit"] = new()
+            [nameof(AccountingLedgerOverviewModel.Debit)] = new()
             {
                 DisplayName = "Debit",
                 Format = "#,##0.00",
@@ -84,7 +84,7 @@ public static class AccountingLedgerReportPdfExport
                 IncludeInTotal = true
             },
 
-            ["Credit"] = new()
+            [nameof(AccountingLedgerOverviewModel.Credit)] = new()
             {
                 DisplayName = "Credit",
                 Format = "#,##0.00",
@@ -96,7 +96,7 @@ public static class AccountingLedgerReportPdfExport
                 IncludeInTotal = true
             },
 
-            ["ReferenceAmount"] = new()
+            [nameof(AccountingLedgerOverviewModel.ReferenceAmount)] = new()
             {
                 DisplayName = "Ref Amount",
                 Format = "#,##0.00",

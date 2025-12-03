@@ -17,79 +17,69 @@ public static class AccountingLedgerReportExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // ID fields - Center aligned
-            ["Id"] = new() { DisplayName = "Ledger ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["AccountingId"] = new() { DisplayName = "Accounting ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["AccountTypeId"] = new() { DisplayName = "Account Type ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["GroupId"] = new() { DisplayName = "Group ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["CompanyId"] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["ReferenceId"] = new() { DisplayName = "Reference ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.Id)] = new() { DisplayName = "Ledger ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.MasterId)] = new() { DisplayName = "Accounting ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.AccountTypeId)] = new() { DisplayName = "Account Type ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.GroupId)] = new() { DisplayName = "Group ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.CompanyId)] = new() { DisplayName = "Company ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceId)] = new() { DisplayName = "Reference ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Text fields - Left aligned
-            ["LedgerName"] = new() { DisplayName = "Ledger Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["LedgerCode"] = new() { DisplayName = "Ledger Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["AccountTypeName"] = new() { DisplayName = "Account Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["GroupName"] = new() { DisplayName = "Group", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["TransactionNo"] = new() { DisplayName = "Transaction No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["CompanyName"] = new() { DisplayName = "Company", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["ReferenceType"] = new() { DisplayName = "Reference Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["ReferenceNo"] = new() { DisplayName = "Reference No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["AccountingRemarks"] = new() { DisplayName = "Accounting Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
-            ["Remarks"] = new() { DisplayName = "Ledger Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.LedgerName)] = new() { DisplayName = "Ledger", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.LedgerCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.AccountTypeName)] = new() { DisplayName = "Account Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.GroupName)] = new() { DisplayName = "Group", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.CompanyName)] = new() { DisplayName = "Company", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceType)] = new() { DisplayName = "Ref Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceNo)] = new() { DisplayName = "Ref No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.AccountingRemarks)] = new() { DisplayName = "Accounting Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.Remarks)] = new() { DisplayName = "Ledger Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
 
             // Date fields - Center aligned
-            ["TransactionDateTime"] = new() { DisplayName = "Transaction Date", Format = "dd/MM/yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["ReferenceDateTime"] = new() { DisplayName = "Reference Date", Format = "dd/MM/yyyy hh:mm tt", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.TransactionDateTime)] = new() { DisplayName = "Transaction Date", Format = "dd/MM/yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(AccountingLedgerOverviewModel.ReferenceDateTime)] = new() { DisplayName = "Reference Date", Format = "dd/MM/yyyy hh:mm tt", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Numeric fields - Right aligned with totals
-            ["Debit"] = new() { DisplayName = "Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["Credit"] = new() { DisplayName = "Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
-            ["ReferenceAmount"] = new() { DisplayName = "Reference Amount", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
+            [nameof(AccountingLedgerOverviewModel.Debit)] = new() { DisplayName = "Debit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(AccountingLedgerOverviewModel.Credit)] = new() { DisplayName = "Credit", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true },
+            [nameof(AccountingLedgerOverviewModel.ReferenceAmount)] = new() { DisplayName = "Ref Amt", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
         };
 
         // Define column order based on view type
         List<string> columnOrder;
 
+        // Detailed view - all columns
         if (showAllColumns)
-        {
-            // Detailed view - all columns
             columnOrder =
             [
-                "LedgerName",
-                "LedgerCode",
-                "AccountTypeName",
-                "GroupName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "ReferenceType",
-                "ReferenceNo",
-                "ReferenceDateTime",
-                "ReferenceAmount",
-                "Debit",
-                "Credit",
-                "AccountingRemarks",
-                "Remarks",
-                "Id",
-                "AccountingId",
-                "AccountTypeId",
-                "GroupId",
-                "CompanyId",
-                "ReferenceId"
+                nameof(AccountingLedgerOverviewModel.LedgerName),
+                nameof(AccountingLedgerOverviewModel.LedgerCode),
+                nameof(AccountingLedgerOverviewModel.AccountTypeName),
+                nameof(AccountingLedgerOverviewModel.GroupName),
+                nameof(AccountingLedgerOverviewModel.TransactionNo),
+                nameof(AccountingLedgerOverviewModel.TransactionDateTime),
+                nameof(AccountingLedgerOverviewModel.CompanyName),
+                nameof(AccountingLedgerOverviewModel.ReferenceType),
+                nameof(AccountingLedgerOverviewModel.ReferenceNo),
+                nameof(AccountingLedgerOverviewModel.ReferenceDateTime),
+                nameof(AccountingLedgerOverviewModel.ReferenceAmount),
+                nameof(AccountingLedgerOverviewModel.Debit),
+                nameof(AccountingLedgerOverviewModel.Credit),
+                nameof(AccountingLedgerOverviewModel.AccountingRemarks),
+                nameof(AccountingLedgerOverviewModel.Remarks)
             ];
-        }
+        // Summary view - essential columns only
         else
-        {
-            // Summary view - essential columns only
             columnOrder =
             [
-                "LedgerName",
-                "TransactionNo",
-                "TransactionDateTime",
-                "ReferenceNo",
-                "Debit",
-                "Credit"
+                nameof(AccountingLedgerOverviewModel.LedgerName),
+                nameof(AccountingLedgerOverviewModel.TransactionNo),
+                nameof(AccountingLedgerOverviewModel.TransactionDateTime),
+                nameof(AccountingLedgerOverviewModel.ReferenceNo),
+                nameof(AccountingLedgerOverviewModel.Debit),
+                nameof(AccountingLedgerOverviewModel.Credit)
             ];
-        }
 
         // Prepare custom summary fields if trial balance is provided
         Dictionary<string, string> customSummaryFields = null;

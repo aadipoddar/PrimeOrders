@@ -806,7 +806,7 @@ public partial class SaleReport : IAsyncDisposable
 		var stockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, recoverTransactionId);
 		if (stockTransfer is null)
 		{
-			await ShowToast("Error", "Stock transfer transaction not found.", "error");
+			await ShowToast("Error", "Transaction not found.", "error");
 			return;
 		}
 

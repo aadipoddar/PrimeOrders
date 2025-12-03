@@ -15,51 +15,47 @@ public static class TrialBalancePdfExport
         // Define column order based on view type
         List<string> columnOrder;
 
+        // Detailed view - all columns
         if (showAllColumns)
-        {
-            // Detailed view - all columns
             columnOrder =
             [
-                "LedgerCode",
-                "LedgerName",
-                "GroupName",
-                "AccountTypeName",
-                "OpeningBalance",
-                "OpeningDebit",
-                "OpeningCredit",
-                "Debit",
-                "Credit",
-                "ClosingBalance",
-                "ClosingDebit",
-                "ClosingCredit"
+                nameof(TrialBalanceModel.LedgerCode),
+                nameof(TrialBalanceModel.LedgerName),
+                nameof(TrialBalanceModel.GroupName),
+                nameof(TrialBalanceModel.AccountTypeName),
+                nameof(TrialBalanceModel.OpeningBalance),
+                nameof(TrialBalanceModel.OpeningDebit),
+                nameof(TrialBalanceModel.OpeningCredit),
+                nameof(TrialBalanceModel.Debit),
+                nameof(TrialBalanceModel.Credit),
+                nameof(TrialBalanceModel.ClosingBalance),
+                nameof(TrialBalanceModel.ClosingDebit),
+                nameof(TrialBalanceModel.ClosingCredit)
             ];
-        }
+        // Summary view - essential columns only
         else
-        {
-            // Summary view - essential columns only
             columnOrder =
             [
-                "LedgerName",
-                "GroupName",
-                "AccountTypeName",
-                "OpeningBalance",
-                "Debit",
-                "Credit",
-                "ClosingBalance"
+                nameof(TrialBalanceModel.LedgerName),
+                nameof(TrialBalanceModel.GroupName),
+                nameof(TrialBalanceModel.AccountTypeName),
+                nameof(TrialBalanceModel.OpeningBalance),
+                nameof(TrialBalanceModel.Debit),
+                nameof(TrialBalanceModel.Credit),
+                nameof(TrialBalanceModel.ClosingBalance)
             ];
-        }
 
         // Define column settings with proper formatting
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
             // Text fields
-            ["LedgerCode"] = new() { DisplayName = "Code", IncludeInTotal = false },
-            ["LedgerName"] = new() { DisplayName = "Ledger Name", IncludeInTotal = false },
-            ["GroupName"] = new() { DisplayName = "Group", IncludeInTotal = false },
-            ["AccountTypeName"] = new() { DisplayName = "Account Type", IncludeInTotal = false },
+            [nameof(TrialBalanceModel.LedgerCode)] = new() { DisplayName = "Code", IncludeInTotal = false },
+            [nameof(TrialBalanceModel.LedgerName)] = new() { DisplayName = "Name", IncludeInTotal = false },
+            [nameof(TrialBalanceModel.GroupName)] = new() { DisplayName = "Group", IncludeInTotal = false },
+            [nameof(TrialBalanceModel.AccountTypeName)] = new() { DisplayName = "Account Type", IncludeInTotal = false },
 
             // Numeric fields - Right aligned with totals
-            ["OpeningDebit"] = new()
+            [nameof(TrialBalanceModel.OpeningDebit)] = new()
             {
                 DisplayName = "Opening Debit",
                 Format = "#,##0.00",
@@ -71,7 +67,7 @@ public static class TrialBalancePdfExport
                 IncludeInTotal = true
             },
 
-            ["OpeningCredit"] = new()
+            [nameof(TrialBalanceModel.OpeningCredit)] = new()
             {
                 DisplayName = "Opening Credit",
                 Format = "#,##0.00",
@@ -83,7 +79,7 @@ public static class TrialBalancePdfExport
                 IncludeInTotal = true
             },
 
-            ["OpeningBalance"] = new()
+            [nameof(TrialBalanceModel.OpeningBalance)] = new()
             {
                 DisplayName = "Opening Balance",
                 Format = "#,##0.00",
@@ -92,10 +88,10 @@ public static class TrialBalancePdfExport
                     Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
                     LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
                 },
-                IncludeInTotal = false
+                IncludeInTotal = true
             },
 
-            ["Debit"] = new()
+            [nameof(TrialBalanceModel.Debit)] = new()
             {
                 DisplayName = "Period Debit",
                 Format = "#,##0.00",
@@ -107,7 +103,7 @@ public static class TrialBalancePdfExport
                 IncludeInTotal = true
             },
 
-            ["Credit"] = new()
+            [nameof(TrialBalanceModel.Credit)] = new()
             {
                 DisplayName = "Period Credit",
                 Format = "#,##0.00",
@@ -119,7 +115,7 @@ public static class TrialBalancePdfExport
                 IncludeInTotal = true
             },
 
-            ["ClosingDebit"] = new()
+            [nameof(TrialBalanceModel.ClosingDebit)] = new()
             {
                 DisplayName = "Closing Debit",
                 Format = "#,##0.00",
@@ -131,7 +127,7 @@ public static class TrialBalancePdfExport
                 IncludeInTotal = true
             },
 
-            ["ClosingCredit"] = new()
+            [nameof(TrialBalanceModel.ClosingCredit)] = new()
             {
                 DisplayName = "Closing Credit",
                 Format = "#,##0.00",
@@ -143,7 +139,7 @@ public static class TrialBalancePdfExport
                 IncludeInTotal = true
             },
 
-            ["ClosingBalance"] = new()
+            [nameof(TrialBalanceModel.ClosingBalance)] = new()
             {
                 DisplayName = "Closing Balance",
                 Format = "#,##0.00",
@@ -152,7 +148,7 @@ public static class TrialBalancePdfExport
                     Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right,
                     LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle
                 },
-                IncludeInTotal = false
+                IncludeInTotal = true
             }
         };
 

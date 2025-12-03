@@ -217,24 +217,6 @@ public static class PurchaseReturnData
         if (purchaseReturnOverview.TotalAmount == 0)
             return;
 
-        var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
-        var accounting = new AccountingModel
-        {
-            Id = 0,
-            TransactionNo = "",
-            CompanyId = purchaseReturnOverview.CompanyId,
-            VoucherId = int.Parse(voucher.Value),
-            ReferenceId = purchaseReturnOverview.Id,
-            ReferenceNo = purchaseReturnOverview.TransactionNo,
-            TransactionDateTime = purchaseReturnOverview.TransactionDateTime,
-            FinancialYearId = purchaseReturnOverview.FinancialYearId,
-            Remarks = purchaseReturnOverview.Remarks,
-            CreatedBy = purchaseReturnOverview.CreatedBy,
-            CreatedAt = purchaseReturnOverview.CreatedAt,
-            CreatedFromPlatform = purchaseReturnOverview.CreatedFromPlatform,
-            Status = true
-        };
-
         var accountingCart = new List<AccountingItemCartModel>();
 
         if (purchaseReturnOverview.TotalAmount > 0)
@@ -279,6 +261,28 @@ public static class PurchaseReturnData
             });
         }
 
-        await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
+		var accounting = new AccountingModel
+		{
+			Id = 0,
+			TransactionNo = "",
+			CompanyId = purchaseReturnOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = purchaseReturnOverview.Id,
+			ReferenceNo = purchaseReturnOverview.TransactionNo,
+			TransactionDateTime = purchaseReturnOverview.TransactionDateTime,
+			FinancialYearId = purchaseReturnOverview.FinancialYearId,
+			TotalDebitLedgers = accountingCart.Count(a => a.Debit.HasValue),
+			TotalCreditLedgers = accountingCart.Count(a => a.Credit.HasValue),
+			TotalDebitAmount = accountingCart.Sum(a => a.Debit ?? 0),
+			TotalCreditAmount = accountingCart.Sum(a => a.Credit ?? 0),
+			Remarks = purchaseReturnOverview.Remarks,
+			CreatedBy = purchaseReturnOverview.CreatedBy,
+			CreatedAt = purchaseReturnOverview.CreatedAt,
+			CreatedFromPlatform = purchaseReturnOverview.CreatedFromPlatform,
+			Status = true
+		};
+
+		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
     }
 }

@@ -48,23 +48,19 @@ public static class AccountingInvoicePDFExport
             };
         }).ToList();
 
-        // Calculate totals
-        decimal totalDebit = accountingDetails.Sum(d => d.Debit ?? 0);
-        decimal totalCredit = accountingDetails.Sum(d => d.Credit ?? 0);
-
         // Map invoice header data
         var invoiceData = new PDFInvoiceExportUtil.InvoiceData
         {
             TransactionNo = accountingHeader.TransactionNo,
             TransactionDateTime = accountingHeader.TransactionDateTime,
             OrderTransactionNo = accountingHeader.ReferenceNo,
-            ItemsTotalAmount = Math.Max(totalDebit, totalCredit),
+            ItemsTotalAmount = Math.Max(accountingHeader.TotalDebitAmount, accountingHeader.TotalCreditAmount),
             OtherChargesAmount = 0,
             OtherChargesPercent = 0,
             CashDiscountAmount = 0,
             CashDiscountPercent = 0,
             RoundOffAmount = 0,
-            TotalAmount = Math.Max(totalDebit, totalCredit),
+            TotalAmount = Math.Max(accountingHeader.TotalDebitAmount, accountingHeader.TotalCreditAmount),
             Cash = 0,
             Card = 0,
             UPI = 0,
@@ -121,13 +117,13 @@ public static class AccountingInvoicePDFExport
             TransactionNo = accountingHeader.TransactionNo,
             TransactionDateTime = accountingHeader.TransactionDateTime,
             OrderTransactionNo = accountingHeader.ReferenceNo,
-            ItemsTotalAmount = Math.Max(totalDebit, totalCredit),
+            ItemsTotalAmount = Math.Max(accountingHeader.TotalDebitAmount, accountingHeader.TotalCreditAmount),
             OtherChargesAmount = 0,
             OtherChargesPercent = 0,
             CashDiscountAmount = 0,
             CashDiscountPercent = 0,
             RoundOffAmount = 0,
-            TotalAmount = Math.Max(totalDebit, totalCredit),
+            TotalAmount = Math.Max(accountingHeader.TotalDebitAmount, accountingHeader.TotalCreditAmount),
             Cash = 0,
             Card = 0,
             UPI = 0,

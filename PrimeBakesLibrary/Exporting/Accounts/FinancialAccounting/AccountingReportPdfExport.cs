@@ -33,66 +33,64 @@ public static class AccountingReportPdfExport
         // Define column order based on visibility setting
         List<string> columnOrder;
 
+        // All columns - detailed view
         if (showAllColumns)
-        {
-            // All columns - detailed view
             columnOrder =
             [
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "VoucherName",
-                "ReferenceNo",
-                "FinancialYear",
-                "TotalDebitLedgers",
-                "TotalCreditLedgers",
-                "TotalDebitAmount",
-                "TotalCreditAmount",
-                "TotalAmount",
-                "Remarks",
-                "CreatedByName",
-                "CreatedAt",
-                "CreatedFromPlatform",
-                "LastModifiedByUserName",
-                "LastModifiedAt",
-                "LastModifiedFromPlatform"
+                nameof(AccountingOverviewModel.TransactionNo),
+                nameof(AccountingOverviewModel.TransactionDateTime),
+                nameof(AccountingOverviewModel.CompanyName),
+                nameof(AccountingOverviewModel.VoucherName),
+                nameof(AccountingOverviewModel.ReferenceNo),
+                nameof(AccountingOverviewModel.FinancialYear),
+                nameof(AccountingOverviewModel.TotalDebitLedgers),
+                nameof(AccountingOverviewModel.TotalCreditLedgers),
+                nameof(AccountingOverviewModel.TotalDebitAmount),
+                nameof(AccountingOverviewModel.TotalCreditAmount),
+                nameof(AccountingOverviewModel.TotalAmount),
+                nameof(AccountingOverviewModel.Remarks),
+                nameof(AccountingOverviewModel.CreatedByName),
+                nameof(AccountingOverviewModel.CreatedAt),
+                nameof(AccountingOverviewModel.CreatedFromPlatform),
+                nameof(AccountingOverviewModel.LastModifiedByUserName),
+                nameof(AccountingOverviewModel.LastModifiedAt),
+                nameof(AccountingOverviewModel.LastModifiedFromPlatform)
             ];
-        }
+        // Summary columns - key fields only
         else
-        {
-            // Summary columns - key fields only
             columnOrder =
             [
-                "TransactionNo",
-                "TransactionDateTime",
-                "CompanyName",
-                "VoucherName",
-                "TotalDebitAmount",
-                "TotalCreditAmount",
-                "TotalAmount"
+                nameof(AccountingOverviewModel.TransactionNo),
+                nameof(AccountingOverviewModel.TransactionDateTime),
+                nameof(AccountingOverviewModel.CompanyName),
+                nameof(AccountingOverviewModel.VoucherName),
+                nameof(AccountingOverviewModel.TotalDebitAmount),
+                nameof(AccountingOverviewModel.TotalCreditAmount),
+                nameof(AccountingOverviewModel.TotalAmount)
             ];
-        }
 
         // Customize specific columns for PDF display
-        columnSettings["TransactionNo"] = new() { DisplayName = "Transaction No", IncludeInTotal = false };
-        columnSettings["CompanyName"] = new() { DisplayName = "Company Name", IncludeInTotal = false };
-        columnSettings["VoucherName"] = new() { DisplayName = "Voucher Type", IncludeInTotal = false };
-        columnSettings["ReferenceNo"] = new() { DisplayName = "Reference No", IncludeInTotal = false };
-        columnSettings["FinancialYear"] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
-        columnSettings["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false };
-        columnSettings["CreatedByName"] = new() { DisplayName = "Created By", IncludeInTotal = false };
-        columnSettings["CreatedAt"] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["CreatedFromPlatform"] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
-        columnSettings["LastModifiedByUserName"] = new() { DisplayName = "Modified By", IncludeInTotal = false };
-        columnSettings["LastModifiedAt"] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
-        columnSettings["LastModifiedFromPlatform"] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.CompanyName)] = new() { DisplayName = "Company", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.VoucherName)] = new() { DisplayName = "Voucher", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.ReferenceNo)] = new() { DisplayName = "Ref No", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.FinancialYear)] = new() { DisplayName = "Financial Year", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.CreatedByName)] = new() { DisplayName = "Created By", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.CreatedAt)] = new() { DisplayName = "Created At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.CreatedFromPlatform)] = new() { DisplayName = "Created Platform", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.LastModifiedByUserName)] = new() { DisplayName = "Modified By", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.LastModifiedAt)] = new() { DisplayName = "Modified At", Format = "dd-MMM-yyyy hh:mm", IncludeInTotal = false };
+        columnSettings[nameof(AccountingOverviewModel.LastModifiedFromPlatform)] = new() { DisplayName = "Modified Platform", IncludeInTotal = false };
 
-        columnSettings["TransactionDateTime"] = new()
+        columnSettings[nameof(AccountingOverviewModel.TransactionDateTime)] = new()
         {
-            DisplayName = "Transaction Date",
+            DisplayName = "Trans Date",
             Format = "dd-MMM-yyyy hh:mm tt",
             IncludeInTotal = false
-        }; columnSettings["TotalDebitLedgers"] = new()
+        };
+        
+        columnSettings[nameof(AccountingOverviewModel.TotalDebitLedgers)] = new()
         {
             DisplayName = "Debit Ledgers",
             Format = "#,##0",
@@ -103,7 +101,7 @@ public static class AccountingReportPdfExport
             }
         };
 
-        columnSettings["TotalCreditLedgers"] = new()
+        columnSettings[nameof(AccountingOverviewModel.TotalCreditLedgers)] = new()
         {
             DisplayName = "Credit Ledgers",
             Format = "#,##0",
@@ -114,9 +112,9 @@ public static class AccountingReportPdfExport
             }
         };
 
-        columnSettings["TotalDebitAmount"] = new()
+        columnSettings[nameof(AccountingOverviewModel.TotalDebitAmount)] = new()
         {
-            DisplayName = "Total Debit",
+            DisplayName = "Debit",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -125,9 +123,9 @@ public static class AccountingReportPdfExport
             }
         };
 
-        columnSettings["TotalCreditAmount"] = new()
+        columnSettings[nameof(AccountingOverviewModel.TotalCreditAmount)] = new()
         {
-            DisplayName = "Total Credit",
+            DisplayName = "Credit",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -136,9 +134,9 @@ public static class AccountingReportPdfExport
             }
         };
 
-        columnSettings["TotalAmount"] = new()
+        columnSettings[nameof(AccountingOverviewModel.TotalAmount)] = new()
         {
-            DisplayName = "Amount",
+            DisplayName = "Amt",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {

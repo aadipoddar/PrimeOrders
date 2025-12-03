@@ -222,24 +222,6 @@ public static class PurchaseData
 		if (purchaseOverview.TotalAmount == 0)
 			return;
 
-		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
-		var accounting = new AccountingModel
-		{
-			Id = 0,
-			TransactionNo = "",
-			CompanyId = purchaseOverview.CompanyId,
-			VoucherId = int.Parse(voucher.Value),
-			ReferenceId = purchaseOverview.Id,
-			ReferenceNo = purchaseOverview.TransactionNo,
-			TransactionDateTime = purchaseOverview.TransactionDateTime,
-			FinancialYearId = purchaseOverview.FinancialYearId,
-			Remarks = purchaseOverview.Remarks,
-			CreatedBy = purchaseOverview.CreatedBy,
-			CreatedAt = purchaseOverview.CreatedAt,
-			CreatedFromPlatform = purchaseOverview.CreatedFromPlatform,
-			Status = true
-		};
-
 		var accountingCart = new List<AccountingItemCartModel>();
 
 		if (purchaseOverview.TotalAmount > 0)
@@ -283,6 +265,28 @@ public static class PurchaseData
 				Remarks = $"GST Account Posting For Purchase Bill {purchaseOverview.TransactionNo}",
 			});
 		}
+
+		var voucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
+		var accounting = new AccountingModel
+		{
+			Id = 0,
+			TransactionNo = "",
+			CompanyId = purchaseOverview.CompanyId,
+			VoucherId = int.Parse(voucher.Value),
+			ReferenceId = purchaseOverview.Id,
+			ReferenceNo = purchaseOverview.TransactionNo,
+			TransactionDateTime = purchaseOverview.TransactionDateTime,
+			FinancialYearId = purchaseOverview.FinancialYearId,
+			TotalDebitLedgers = accountingCart.Count(a => a.Debit.HasValue),
+			TotalCreditLedgers = accountingCart.Count(a => a.Credit.HasValue),
+			TotalDebitAmount = accountingCart.Sum(a => a.Debit ?? 0),
+			TotalCreditAmount = accountingCart.Sum(a => a.Credit ?? 0),
+			Remarks = purchaseOverview.Remarks,
+			CreatedBy = purchaseOverview.CreatedBy,
+			CreatedAt = purchaseOverview.CreatedAt,
+			CreatedFromPlatform = purchaseOverview.CreatedFromPlatform,
+			Status = true
+		};
 
 		await AccountingData.SaveAccountingTransaction(accounting, accountingCart);
 	}

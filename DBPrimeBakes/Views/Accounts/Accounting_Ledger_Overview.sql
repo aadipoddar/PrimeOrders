@@ -9,7 +9,7 @@ SELECT
 	[l].[GroupId],
 	[g].[Name] AS GroupName,
 
-	[a].[Id] AS AccountingId,
+	[a].[Id] AS MasterId,
 	[a].[TransactionNo],
 	[a].[TransactionDateTime],
 	[a].[CompanyId],
@@ -29,6 +29,8 @@ SELECT
 			(SELECT TransactionDateTime FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'PurchaseReturn' THEN
 			(SELECT TransactionDateTime FROM [dbo].[PurchaseReturn_Overview] WHERE Id = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'StockTransfer' THEN
+			(SELECT TransactionDateTime FROM [dbo].[StockTransfer_Overview] WHERE Id = [ad].[ReferenceId])
 	END) AS ReferenceDateTime,
 
 	(CASE
@@ -40,6 +42,8 @@ SELECT
 			(SELECT TotalAmount FROM [dbo].[Purchase_Overview] WHERE Id = [ad].[ReferenceId])
 		WHEN [ad].[ReferenceType] = 'PurchaseReturn' THEN
 			(SELECT TotalAmount FROM [dbo].[PurchaseReturn_Overview] WHERE Id = [ad].[ReferenceId])
+		WHEN [ad].[ReferenceType] = 'StockTransfer' THEN
+			(SELECT TotalAmount FROM [dbo].[StockTransfer_Overview] WHERE Id = [ad].[ReferenceId])
 	END) AS ReferenceAmount,
 
 	[ad].[Debit] AS Debit,
@@ -51,7 +55,7 @@ FROM
 	[dbo].[AccountingDetail] ad
 
 INNER JOIN
-	[dbo].[Accounting] a ON ad.AccountingId = a.Id
+	[dbo].[Accounting] a ON ad.[MasterId] = a.Id
 INNER JOIN
 	[dbo].[Ledger] l ON ad.LedgerId = l.Id
 INNER JOIN
