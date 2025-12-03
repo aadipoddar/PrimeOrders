@@ -325,7 +325,7 @@ public partial class UserPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => UserExcelExport.ExportUser(_users));
+			var stream = await UserExcelExport.ExportUser(_users);
 
 			// Generate file name
 			string fileName = "USER_MASTER.xlsx";
@@ -357,7 +357,7 @@ public partial class UserPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => UserPDFExport.ExportUser(_users));
+			var stream = await UserPDFExport.ExportUser(_users);
 
 			// Generate file name
 			string fileName = "USER_MASTER.pdf";

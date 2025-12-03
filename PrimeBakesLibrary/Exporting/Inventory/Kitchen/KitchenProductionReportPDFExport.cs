@@ -15,7 +15,7 @@ public static class KitchenProductionReportPDFExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportKitchenProductionReport(
+    public static async Task<MemoryStream> ExportKitchenProductionReport(
         IEnumerable<KitchenProductionOverviewModel> kitchenProductionData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -107,7 +107,7 @@ public static class KitchenProductionReportPDFExport
         };
 
         // Call the generic PDF export utility with landscape mode for all columns
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             kitchenProductionData,
             "KITCHEN PRODUCTION REPORT",
             dateRangeStart,

@@ -12,7 +12,7 @@ public static class AccountTypeExcelExport
 	/// </summary>
 	/// <param name="accountTypeData">Collection of account type records</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportAccountType(IEnumerable<AccountTypeModel> accountTypeData)
+	public static async Task<MemoryStream> ExportAccountType(IEnumerable<AccountTypeModel> accountTypeData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = accountTypeData.Select(accountType => new
@@ -44,7 +44,7 @@ public static class AccountTypeExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			enrichedData,
 			"ACCOUNT TYPE",
 			"Account Type Data",

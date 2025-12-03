@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[Insert_OrderDetail]
 	@Id INT OUTPUT,
-	@OrderId INT, 
+	@MasterId INT, 
 	@ProductId INT, 
 	@Quantity MONEY,
 	@Remarks VARCHAR(MAX),
@@ -11,14 +11,14 @@ BEGIN
 	BEGIN
 		INSERT INTO [dbo].[OrderDetail]
 		(
-			OrderId, 
+			[MasterId], 
 			ProductId, 
 			Quantity, 
 			Remarks,
 			Status
 		) VALUES
 		(
-			@OrderId, 
+			@MasterId, 
 			@ProductId, 
 			@Quantity, 
 			@Remarks,
@@ -31,7 +31,7 @@ BEGIN
 	BEGIN
 		UPDATE [dbo].[OrderDetail]
 		SET 
-			OrderId = @OrderId, 
+			[MasterId] = @MasterId, 
 			ProductId = @ProductId, 
 			Quantity = @Quantity, 
 			Remarks = @Remarks,

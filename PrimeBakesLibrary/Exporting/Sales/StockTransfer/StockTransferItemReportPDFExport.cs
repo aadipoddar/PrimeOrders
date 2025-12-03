@@ -18,7 +18,7 @@ public static class StockTransferItemReportPdfExport
 	/// <param name="locationName">Name of the location for report header</param>
 	/// <param name="toLocationName">Name of the to-location for report header</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportStockTransferItemReport(
+	public static async Task<MemoryStream> ExportStockTransferItemReport(
 		IEnumerable<StockTransferItemOverviewModel> stockTransferItemData,
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
@@ -292,7 +292,7 @@ public static class StockTransferItemReportPdfExport
 		};
 
 		// Call the generic PDF export utility with landscape mode for all columns
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			stockTransferItemData,
 			"STOCK TRANSFER ITEM REPORT",
 			dateRangeStart,

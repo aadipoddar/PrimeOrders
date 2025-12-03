@@ -52,7 +52,7 @@ public static class KitchenIssueInvoicePDFExport
         }).ToList();
 
         // Use the simplified export method
-        return ExportKitchenIssueInvoiceWithItems(
+        return await ExportKitchenIssueInvoiceWithItems(
             kitchenIssueHeader,
             cartItems,
             company,
@@ -66,7 +66,7 @@ public static class KitchenIssueInvoicePDFExport
     /// Export Kitchen Issue with item names already loaded (requires additional data)
     /// Uses generic invoice utility with zero discount/tax for simplified format
     /// </summary>
-    public static MemoryStream ExportKitchenIssueInvoiceWithItems(
+    public static async Task<MemoryStream> ExportKitchenIssueInvoiceWithItems(
         KitchenIssueModel kitchenIssueHeader,
         List<KitchenIssueItemCartModel> kitchenIssueItems,
         CompanyModel company,
@@ -118,7 +118,7 @@ public static class KitchenIssueInvoicePDFExport
         };
 
         // Generate invoice PDF using generic utility
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,

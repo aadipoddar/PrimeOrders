@@ -12,9 +12,6 @@ public static class RawMaterialStockData
     public static async Task<List<RawMaterialStockSummaryModel>> LoadRawMaterialStockSummaryByDate(DateTime FromDate, DateTime ToDate) =>
         await SqlDataAccess.LoadData<RawMaterialStockSummaryModel, dynamic>(StoredProcedureNames.LoadRawMaterialStockSummaryByDate, new { FromDate = DateOnly.FromDateTime(FromDate), ToDate = DateOnly.FromDateTime(ToDate) });
 
-    public static async Task<List<RawMaterialStockDetailsModel>> LoadRawMaterialStockDetailsByDate(DateTime FromDate, DateTime ToDate) =>
-        await SqlDataAccess.LoadData<RawMaterialStockDetailsModel, dynamic>(StoredProcedureNames.LoadRawMaterialStockDetailsByDate, new { FromDate = DateOnly.FromDateTime(FromDate), ToDate = DateOnly.FromDateTime(ToDate) });
-
     public static async Task DeleteRawMaterialStockByTypeTransactionId(string Type, int TransactionId) =>
         await SqlDataAccess.SaveData(StoredProcedureNames.DeleteRawMaterialStockByTypeTransactionId, new { Type, TransactionId });
 

@@ -12,7 +12,7 @@ public static class ProductCategoryPDFExport
 	/// </summary>
 	/// <param name="productCategoryData">Collection of product category records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportProductCategory(IEnumerable<ProductCategoryModel> productCategoryData)
+	public static async Task<MemoryStream> ExportProductCategory(IEnumerable<ProductCategoryModel> productCategoryData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = productCategoryData.Select(productCategory => new
@@ -59,7 +59,7 @@ public static class ProductCategoryPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"PRODUCT CATEGORY MASTER",
 			null,

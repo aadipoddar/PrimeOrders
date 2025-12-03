@@ -10,7 +10,7 @@ public static class ProductExcelExport
 	/// </summary>
 	/// <param name="productData">Collection of product records with enriched category and tax information</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportProduct<T>(IEnumerable<T> productData)
+	public static async Task<MemoryStream> ExportProduct<T>(IEnumerable<T> productData)
 	{
 		// Create enriched data with status formatting
 		var formattedData = productData.Select(product =>
@@ -65,7 +65,7 @@ public static class ProductExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			formattedData,
 			"PRODUCT MASTER",
 			"Product Data",

@@ -16,7 +16,7 @@ public static class SaleReturnItemReportPDFExport
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="showLocation">Whether to include location column (for location ID 1 users)</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportSaleReturnItemReport(
+    public static async Task<MemoryStream> ExportSaleReturnItemReport(
         IEnumerable<SaleReturnItemOverviewModel> saleReturnItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -291,7 +291,7 @@ public static class SaleReturnItemReportPDFExport
         };
 
 		// Call the generic PDF export utility with landscape mode for all columns
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
             saleReturnItemData,
             "SALE RETURN ITEM REPORT",
             dateRangeStart,

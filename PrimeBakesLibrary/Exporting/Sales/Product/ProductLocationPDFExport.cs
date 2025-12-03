@@ -4,7 +4,7 @@ namespace PrimeBakesLibrary.Exporting.Sales.Product;
 
 public static class ProductLocationPDFExport
 {
-    public static MemoryStream ExportProductLocation<T>(IEnumerable<T> productLocationData)
+    public static async Task<MemoryStream> ExportProductLocation<T>(IEnumerable<T> productLocationData)
     {
         var props = typeof(T).GetProperties();
 
@@ -40,7 +40,7 @@ public static class ProductLocationPDFExport
 
         var columnOrder = new List<string> { "Id", "Location", "ProductCode", "ProductName", "Rate", "Status" };
 
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "PRODUCT LOCATION MASTER",
             null,

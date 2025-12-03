@@ -361,7 +361,7 @@ public partial class ProductPage
             }).ToList();
 
             // Call the Excel export utility
-            var stream = await Task.Run(() => ProductExcelExport.ExportProduct(enrichedData));
+            var stream = await ProductExcelExport.ExportProduct(enrichedData);
 
             // Generate file name
             string fileName = "PRODUCT_MASTER.xlsx";
@@ -406,7 +406,7 @@ public partial class ProductPage
             }).ToList();
 
             // Call the PDF export utility
-            var stream = await Task.Run(() => ProductPDFExport.ExportProduct(enrichedData));
+            var stream = await ProductPDFExport.ExportProduct(enrichedData);
 
             // Generate file name
             string fileName = "PRODUCT_MASTER.pdf";

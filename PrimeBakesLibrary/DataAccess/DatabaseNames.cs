@@ -69,17 +69,12 @@ public static class StoredProcedureNames
     public static string LoadRawMaterialByPartyPurchaseDateTime => "Load_RawMaterial_By_Party_PurchaseDateTime";
 
     public static string LoadRawMaterialStockSummaryByDate => "Load_RawMaterialStockSummary_By_Date";
-    public static string LoadRawMaterialStockDetailsByDate => "Load_RawMaterialStockDetails_By_Date";
     public static string LoadProductStockSummaryByDateLocationId => "Load_ProductStockSummary_By_Date_LocationId";
-    public static string LoadProductStockDetailsByDateLocationId => "Load_ProductStockDetails_By_Date_LocationId";
 
     public static string LoadRecipeByProduct => "Load_Recipe_By_Product";
     public static string LoadRecipeDetailByRecipe => "Load_RecipeDetail_By_Recipe";
 
-	public static string LoadOrderDetailByOrder => "Load_OrderDetail_By_Order";
     public static string LoadOrderByLocationPending => "Load_Order_By_Location_Pending";
-    public static string LoadOrderOverviewByDate => "Load_Order_Overview_By_Date";
-    public static string LoadOrderItemOverviewByDate => "Load_Order_Item_Overview_By_Date";
 
     public static string LoadProductByProductCategory => "Load_Product_By_ProductCategory";
     public static string LoadProductRateByProduct => "Load_ProductRate_By_Product";

@@ -14,7 +14,7 @@ public static class RawMaterialStockDetailsReportPDFExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportRawMaterialStockDetailsReport(
+    public static async Task<MemoryStream> ExportRawMaterialStockDetailsReport(
         IEnumerable<RawMaterialStockDetailsModel> stockDetailsData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null)
@@ -25,7 +25,7 @@ public static class RawMaterialStockDetailsReportPDFExport
         // Define column order for details (no toggle - always same columns)
         var columnOrder = new List<string>
         {
-            nameof(RawMaterialStockDetailsModel.TransactionDate),
+            nameof(RawMaterialStockDetailsModel.TransactionDateTime),
             nameof(RawMaterialStockDetailsModel.TransactionNo),
             nameof(RawMaterialStockDetailsModel.Type),
             nameof(RawMaterialStockDetailsModel.RawMaterialName),
@@ -35,7 +35,7 @@ public static class RawMaterialStockDetailsReportPDFExport
         };
 
         // Customize specific columns for PDF display
-        columnSettings[nameof(RawMaterialStockDetailsModel.TransactionDate)] = new()
+        columnSettings[nameof(RawMaterialStockDetailsModel.TransactionDateTime)] = new()
         {
             DisplayName = "Trans Date",
             Format = "dd-MMM-yyyy",
@@ -106,7 +106,7 @@ public static class RawMaterialStockDetailsReportPDFExport
         };
 
         // Call the generic PDF export utility with portrait mode
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             stockDetailsData,
             "RAW MATERIAL STOCK TRANSACTION DETAILS",
             dateRangeStart,

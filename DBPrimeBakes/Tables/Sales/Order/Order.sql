@@ -1,12 +1,14 @@
 ﻿CREATE TABLE [dbo].[Order]
 (
 	[Id] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [TransactionNo] VARCHAR(MAX) NOT NULL, 
+    [TransactionNo] VARCHAR(100) NOT NULL UNIQUE, 
 	[CompanyId] INT NOT NULL,
     [LocationId] INT NOT NULL,
     [SaleId] INT NULL , 
     [TransactionDateTime] DATETIME NOT NULL,
 	[FinancialYearId] INT NOT NULL,
+	[TotalItems] INT NOT NULL DEFAULT 0,
+	[TotalQuantity] MONEY NOT NULL DEFAULT 0,
     [Remarks] VARCHAR(MAX) NULL,
 	[CreatedBy] INT NOT NULL,
 	[CreatedAt] DATETIME NOT NULL DEFAULT (((getdate() AT TIME ZONE 'UTC') AT TIME ZONE 'India Standard Time')),

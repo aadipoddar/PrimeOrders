@@ -134,8 +134,12 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 
 	private async Task LoadStockDetails()
 	{
-		_stockDetails = await RawMaterialStockData.LoadRawMaterialStockDetailsByDate(_fromDate, _toDate);
-		_stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDate).ThenBy(_ => _.RawMaterialName)];
+		_stockDetails = await CommonData.LoadTableDataByDate<RawMaterialStockDetailsModel>(
+				ViewNames.RawMaterialStockDetails,
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+		_stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDateTime).ThenBy(_ => _.RawMaterialName)];
 	}
 	#endregion
 
@@ -240,15 +244,13 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				RawMaterialStockReportExcelExport.ExportRawMaterialStockReport(
+			var stream = await RawMaterialStockReportExcelExport.ExportRawMaterialStockReport(
 					_stockSummary,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_showDetails ? _stockDetails : null
-				)
-			);
+				);
 
 			string fileName = $"RAW_MATERIAL_STOCK_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -281,14 +283,12 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var summaryStream = await Task.Run(() =>
-				RawMaterialStockSummaryReportPDFExport.ExportRawMaterialStockReport(
+			var summaryStream = await RawMaterialStockSummaryReportPDFExport.ExportRawMaterialStockReport(
 					_stockSummary,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string summaryFileName = $"RAW_MATERIAL_STOCK_SUMMARY";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -298,13 +298,11 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 
 			if (_showDetails && _stockDetails is not null && _stockDetails.Count > 0)
 			{
-				var detailsStream = await Task.Run(() =>
-					RawMaterialStockDetailsReportPDFExport.ExportRawMaterialStockDetailsReport(
+				var detailsStream = await RawMaterialStockDetailsReportPDFExport.ExportRawMaterialStockDetailsReport(
 						_stockDetails,
 						dateRangeStart,
 						dateRangeEnd
-					)
-				);
+					);
 
 				string detailsFileName = $"RAW_MATERIAL_STOCK_DETAILS";
 				if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

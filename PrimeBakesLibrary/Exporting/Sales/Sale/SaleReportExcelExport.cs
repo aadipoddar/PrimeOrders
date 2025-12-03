@@ -17,7 +17,7 @@ public static class SaleReportExcelExport
     /// <param name="showLocation">Whether to include location column</param>
     /// <param name="locationName">Name of the location for report header</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportSaleReport(
+    public static async Task<MemoryStream> ExportSaleReport(
         IEnumerable<SaleOverviewModel> saleData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -166,7 +166,7 @@ public static class SaleReportExcelExport
         }
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             saleData,
             "SALE REPORT",
             "Sale Transactions",

@@ -259,14 +259,12 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-			KitchenProductionItemReportExcelExport.ExportKitchenProductionItemReport(
+			var stream = await KitchenProductionItemReportExcelExport.ExportKitchenProductionItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -301,14 +299,12 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				KitchenProductionItemReportPDFExport.ExportKitchenProductionItemReport(
+			var stream = await KitchenProductionItemReportPDFExport.ExportKitchenProductionItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

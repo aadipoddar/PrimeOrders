@@ -262,14 +262,12 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				PurchaseReturnItemReportExcelExport.ExportPurchaseReturnItemReport(
+			var stream = await PurchaseReturnItemReportExcelExport.ExportPurchaseReturnItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -304,14 +302,12 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				PurchaseReturnItemReportPDFExport.ExportPurchaseReturnItemReport(
+			var stream = await PurchaseReturnItemReportPDFExport.ExportPurchaseReturnItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string fileName = $"PURCHASE_RETURN_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

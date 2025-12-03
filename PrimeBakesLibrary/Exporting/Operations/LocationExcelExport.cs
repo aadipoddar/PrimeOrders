@@ -12,7 +12,7 @@ public static class LocationExcelExport
     /// </summary>
     /// <param name="locationData">Collection of location records</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportLocation(IEnumerable<LocationModel> locationData)
+    public static async Task<MemoryStream> ExportLocation(IEnumerable<LocationModel> locationData)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
@@ -39,7 +39,7 @@ public static class LocationExcelExport
         ];
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             locationData,
             "LOCATION MASTER",
             "Location Data",

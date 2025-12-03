@@ -12,7 +12,7 @@ public static class FinancialYearExcelExport
     /// </summary>
     /// <param name="financialYearData">Collection of financial year records</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportFinancialYear(IEnumerable<FinancialYearModel> financialYearData)
+    public static async Task<MemoryStream> ExportFinancialYear(IEnumerable<FinancialYearModel> financialYearData)
     {
         // Create enriched data with status formatting
         var enrichedData = financialYearData.Select(fy => new
@@ -56,7 +56,7 @@ public static class FinancialYearExcelExport
         ];
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             enrichedData,
             "FINANCIAL YEAR",
             "Financial Year Data",

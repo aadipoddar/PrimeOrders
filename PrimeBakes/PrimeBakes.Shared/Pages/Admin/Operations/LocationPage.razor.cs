@@ -416,7 +416,7 @@ public partial class LocationPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => LocationExcelExport.ExportLocation(_locations));
+			var stream = await LocationExcelExport.ExportLocation(_locations);
 
 			// Generate file name
 			string fileName = "LOCATION_MASTER.xlsx";
@@ -448,7 +448,7 @@ public partial class LocationPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => LocationPDFExport.ExportLocation(_locations));
+			var stream = await LocationPDFExport.ExportLocation(_locations);
 
 			// Generate file name
 			string fileName = "LOCATION_MASTER.pdf";

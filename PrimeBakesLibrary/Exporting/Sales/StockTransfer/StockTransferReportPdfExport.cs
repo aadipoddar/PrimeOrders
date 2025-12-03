@@ -4,7 +4,7 @@ namespace PrimeBakesLibrary.Exporting.Sales.StockTransfer;
 
 public static class StockTransferReportPdfExport
 {
-    public static MemoryStream ExportStockTransferReport(
+    public static async Task<MemoryStream> ExportStockTransferReport(
         IEnumerable<StockTransferOverviewModel> data,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -120,7 +120,7 @@ public static class StockTransferReportPdfExport
         columnSettings[nameof(StockTransferOverviewModel.Credit)] = new() { DisplayName = "Credit", Format = "#,##0.00", StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat { Alignment = Syncfusion.Pdf.Graphics.PdfTextAlignment.Right, LineAlignment = Syncfusion.Pdf.Graphics.PdfVerticalAlignment.Middle } };
         columnSettings[nameof(StockTransferOverviewModel.PaymentModes)] = new() { DisplayName = "Payment Modes", IncludeInTotal = false };
 
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             data,
             "STOCK TRANSFER REPORT",
             dateRangeStart,

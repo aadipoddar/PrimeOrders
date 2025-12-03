@@ -7,7 +7,7 @@ SELECT
 	[pc].[Id] AS ItemCategoryId,
 	[pc].[Name] AS ItemCategoryName,
 
-	[o].[Id] AS OrderId,
+	[o].[Id] AS MasterId,
 	[o].[TransactionNo],
 	[o].[TransactionDateTime],
 	[c].[Id] AS CompanyId,
@@ -26,7 +26,7 @@ FROM
 	[dbo].[OrderDetail] od
 
 INNER JOIN
-	[dbo].[Order] o ON od.OrderId = o.Id
+	[dbo].[Order] o ON od.[MasterId] = o.Id
 INNER JOIN
 	[dbo].[Product] pr ON od.ProductId = pr.Id
 INNER JOIN

@@ -269,7 +269,7 @@ public partial class StateUTPage
             StateHasChanged();
 
             // Call the Excel export utility
-            var stream = await Task.Run(() => StateUTExcelExport.ExportStateUT(_stateUTs));
+            var stream = await StateUTExcelExport.ExportStateUT(_stateUTs);
 
             // Generate file name
             string fileName = "STATE_UT_MASTER.xlsx";
@@ -301,7 +301,7 @@ public partial class StateUTPage
             StateHasChanged();
 
             // Call the PDF export utility
-            var stream = await Task.Run(() => StateUTPDFExport.ExportStateUT(_stateUTs));
+            var stream = await StateUTPDFExport.ExportStateUT(_stateUTs);
 
             // Generate file name
             string fileName = "STATE_UT_MASTER.pdf";

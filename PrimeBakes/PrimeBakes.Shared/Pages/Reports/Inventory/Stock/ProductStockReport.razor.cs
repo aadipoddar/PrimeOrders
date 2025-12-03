@@ -13,6 +13,7 @@ using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Inventory.Stock;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
+using PrimeBakesLibrary.Models.Inventory.Purchase;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Grids;
@@ -157,8 +158,13 @@ public partial class ProductStockReport : IAsyncDisposable
 
 	private async Task LoadStockDetails()
 	{
-		_stockDetails = await ProductStockData.LoadProductStockDetailsByDateLocationId(_fromDate, _toDate, _selectedLocation.Id);
-		_stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDate).ThenBy(_ => _.ProductName)];
+		_stockDetails = await CommonData.LoadTableDataByDate<ProductStockDetailsModel>(
+				ViewNames.ProductStockDetails,
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+
+		_stockDetails = [.. _stockDetails.Where(_ => _.LocationId == _selectedLocation.Id)];
+		_stockDetails = [.. _stockDetails.OrderBy(_ => _.TransactionDateTime).ThenBy(_ => _.ProductName)];
 	}
 	#endregion
 
@@ -173,7 +179,7 @@ public partial class ProductStockReport : IAsyncDisposable
 	private async Task OnLocationChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
 	{
 		if (args.Value is null)
-			_selectedLocation = _locations.FirstOrDefault(l => l.Id == 1);
+			_selectedLocation = _locations.FirstOrDefault(l => l.Id == _user.LocationId);
 
 		_selectedLocation = args.Value;
 		await LoadStockData();
@@ -275,16 +281,14 @@ public partial class ProductStockReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				ProductStockReportExcelExport.ExportProductStockReport(
+			var stream = await ProductStockReportExcelExport.ExportProductStockReport(
 					_stockSummary,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_showDetails ? _stockDetails : null,
 					_selectedLocation?.Name
-				)
-			);
+				);
 
 			string fileName = $"PRODUCT_STOCK_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -318,15 +322,13 @@ public partial class ProductStockReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var summaryStream = await Task.Run(() =>
-				ProductStockSummaryReportPDFExport.ExportProductStockReport(
+			var summaryStream = await ProductStockSummaryReportPDFExport.ExportProductStockReport(
 					_stockSummary,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_selectedLocation?.Name
-				)
-			);
+				);
 
 			string summaryFileName = $"PRODUCT_STOCK_SUMMARY";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -336,14 +338,12 @@ public partial class ProductStockReport : IAsyncDisposable
 
 			if (_showDetails && _stockDetails is not null && _stockDetails.Count > 0)
 			{
-				var detailsStream = await Task.Run(() =>
-					ProductStockDetailsReportPDFExport.ExportProductStockDetailsReport(
+				var detailsStream = await ProductStockDetailsReportPDFExport.ExportProductStockDetailsReport(
 						_stockDetails,
 						dateRangeStart,
 						dateRangeEnd,
 						_selectedLocation?.Name
-					)
-				);
+					);
 
 				string detailsFileName = $"PRODUCT_STOCK_DETAILS";
 				if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

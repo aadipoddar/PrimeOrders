@@ -12,7 +12,7 @@ public static class CompanyPDFExport
 	/// </summary>
 	/// <param name="companyData">Collection of company records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportCompany(IEnumerable<CompanyModel> companyData)
+	public static async Task<MemoryStream> ExportCompany(IEnumerable<CompanyModel> companyData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = companyData.Select(company => new
@@ -67,7 +67,7 @@ public static class CompanyPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"COMPANY MASTER",
 			null,

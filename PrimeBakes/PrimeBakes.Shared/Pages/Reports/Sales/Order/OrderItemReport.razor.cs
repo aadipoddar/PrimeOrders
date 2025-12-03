@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using PrimeBakes.Shared.Services;
@@ -10,15 +11,21 @@ using PrimeBakesLibrary.Exporting.Sales.Order;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Order;
+using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Reports.Sales.Order;
 
-public partial class OrderItemReport
+public partial class OrderItemReport : IAsyncDisposable
 {
-    private UserModel _user;
+	[Inject] private HotKeys HotKeys { get; set; }
+	private HotKeysContext _hotKeysContext;
+
+	private UserModel _user;
 
     private bool _isLoading = true;
     private bool _isProcessing = false;
@@ -33,9 +40,9 @@ public partial class OrderItemReport
 
     private List<LocationModel> _locations = [];
     private List<CompanyModel> _companies = [];
-    private List<OrderItemOverviewModel> _orderItemOverviews = [];
+    private List<OrderItemOverviewModel> _transactionOverviews = [];
 
-    private SfGrid<OrderItemOverviewModel> _sfOrderItemGrid;
+    private SfGrid<OrderItemOverviewModel> _sfGrid;
 
     private string _errorTitle = string.Empty;
     private string _errorMessage = string.Empty;
@@ -59,10 +66,24 @@ public partial class OrderItemReport
 
     private async Task LoadData()
     {
-        await LoadDates();
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.R, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(Code.F5, LoadTransactionOverviews, "Refresh Data", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
+            .Add(ModCode.Ctrl | ModCode.Shift, Code.E, ExportConsolidatedExcel, "Export Consolidated to Excel", Exclude.None)
+            .Add(ModCode.Ctrl | ModCode.Shift, Code.P, ExportConsolidatedPdf, "Export Consolidated to PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistory, "Open transaction history", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None);
+
+		await LoadDates();
         await LoadLocations();
         await LoadCompanies();
-        await LoadOrderItemOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task LoadDates()
@@ -95,7 +116,7 @@ public partial class OrderItemReport
         _selectedCompany = _companies.FirstOrDefault(_ => _.Id == 0);
     }
 
-    private async Task LoadOrderItemOverviews()
+    private async Task LoadTransactionOverviews()
     {
         if (_isProcessing)
             return;
@@ -104,32 +125,33 @@ public partial class OrderItemReport
         {
             _isProcessing = true;
 
-            _orderItemOverviews = await OrderData.LoadOrderItemOverviewByDate(
-            DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
-            DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
+			_transactionOverviews = await CommonData.LoadTableDataByDate<OrderItemOverviewModel>(
+				ViewNames.OrderItemOverview,
+				DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
+				DateOnly.FromDateTime(_toDate).ToDateTime(TimeOnly.MaxValue));
 
             if (_selectedLocation?.Id > 0)
-                _orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
+                _transactionOverviews = [.. _transactionOverviews.Where(_ => _.LocationId == _selectedLocation.Id)];
 
             if (_selectedCompany?.Id > 0)
-                _orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
+                _transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
             // Filter by order status
             if (_selectedOrderStatus == "Pending")
-                _orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.SaleId == null)];
+                _transactionOverviews = [.. _transactionOverviews.Where(_ => _.SaleId == null)];
             else if (_selectedOrderStatus == "Completed")
-                _orderItemOverviews = [.. _orderItemOverviews.Where(_ => _.SaleId != null)];
+                _transactionOverviews = [.. _transactionOverviews.Where(_ => _.SaleId != null)];
 
-            _orderItemOverviews = [.. _orderItemOverviews.OrderBy(_ => _.TransactionDateTime)];
+            _transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while loading purchase item overviews: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
         }
         finally
         {
-            if (_sfOrderItemGrid is not null)
-                await _sfOrderItemGrid.Refresh();
+            if (_sfGrid is not null)
+                await _sfGrid.Refresh();
             _isProcessing = false;
             StateHasChanged();
         }
@@ -141,7 +163,7 @@ public partial class OrderItemReport
     {
         _fromDate = args.StartDate;
         _toDate = args.EndDate;
-        await LoadOrderItemOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task OnLocationChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
@@ -150,7 +172,7 @@ public partial class OrderItemReport
             return;
 
         _selectedLocation = args.Value;
-        await LoadOrderItemOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task OnCompanyChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<CompanyModel, CompanyModel> args)
@@ -159,13 +181,13 @@ public partial class OrderItemReport
             return;
 
         _selectedCompany = args.Value;
-        await LoadOrderItemOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task OnOrderStatusChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
     {
         _selectedOrderStatus = args.Value;
-        await LoadOrderItemOverviews();
+        await LoadTransactionOverviews();
     }
 
     private async Task SetDateRange(DateRangeType rangeType)
@@ -241,14 +263,14 @@ public partial class OrderItemReport
         finally
         {
             _isProcessing = false;
-            await LoadOrderItemOverviews();
+            await LoadTransactionOverviews();
             StateHasChanged();
         }
     }
     #endregion
 
     #region Exporting
-    private async Task ExportExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportExcel()
     {
         if (_isProcessing)
             return;
@@ -261,16 +283,14 @@ public partial class OrderItemReport
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-            OrderItemReportExcelExport.ExportOrderItemReport(
-                    _orderItemOverviews,
+            var stream = await OrderItemReportExcelExport.ExportOrderItemReport(
+                    _transactionOverviews,
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns,
                     _user.LocationId == 1,
                     _selectedLocation?.Name
-                )
-            );
+                );
 
             string fileName = $"ORDER_ITEM_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -278,8 +298,7 @@ public partial class OrderItemReport
             fileName += ".xlsx";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
-            await ShowToast("Success", "Order item report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
         }
         catch (Exception ex)
         {
@@ -292,7 +311,7 @@ public partial class OrderItemReport
         }
     }
 
-    private async Task ExportPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportPdf()
     {
         if (_isProcessing)
             return;
@@ -305,16 +324,14 @@ public partial class OrderItemReport
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-            OrderItemReportPdfExport.ExportOrderItemReport(
-            _orderItemOverviews,
-            dateRangeStart,
-            dateRangeEnd,
-            _showAllColumns,
-            _user.LocationId == 1,
-            _selectedLocation?.Name
-            )
-            );
+            var stream = await OrderItemReportPdfExport.ExportOrderItemReport(
+                    _transactionOverviews,
+                    dateRangeStart,
+                    dateRangeEnd,
+                    _showAllColumns,
+                    _user.LocationId == 1,
+                    _selectedLocation?.Name
+                );
 
             string fileName = $"ORDER_ITEM_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -322,8 +339,7 @@ public partial class OrderItemReport
             fileName += ".pdf";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
-            await ShowToast("Success", "Order item report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
         }
         catch (Exception ex)
         {
@@ -336,7 +352,7 @@ public partial class OrderItemReport
         }
     }
 
-    private async Task ExportConsolidatedExcel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportConsolidatedExcel()
     {
         if (_isProcessing)
             return;
@@ -349,14 +365,12 @@ public partial class OrderItemReport
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-            OrderItemConsolidatedExcelExport.ExportConsolidatedOrderItemReport(
-                    _orderItemOverviews,
+            var stream = await OrderItemConsolidatedExcelExport.ExportConsolidatedOrderItemReport(
+                    _transactionOverviews,
                     dateRangeStart,
                     dateRangeEnd,
                     _selectedLocation?.Name
-                )
-            );
+                );
 
             string fileName = $"ORDER_ITEM_CONSOLIDATED_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -364,13 +378,12 @@ public partial class OrderItemReport
             fileName += ".xlsx";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
-            await ShowToast("Success", "Consolidated order item report exported to Excel successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting consolidated report to Excel: {ex.Message}", "error");
-        }
+			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+		}
         finally
         {
             _isProcessing = false;
@@ -378,7 +391,7 @@ public partial class OrderItemReport
         }
     }
 
-    private async Task ExportConsolidatedPdf(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task ExportConsolidatedPdf()
     {
         if (_isProcessing)
             return;
@@ -391,14 +404,12 @@ public partial class OrderItemReport
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-            OrderItemConsolidatedPdfExport.ExportConsolidatedOrderItemReport(
-                _orderItemOverviews,
-                dateRangeStart,
-                dateRangeEnd,
-                _selectedLocation?.Name
-                )
-            );
+            var stream = await OrderItemConsolidatedPdfExport.ExportConsolidatedOrderItemReport(
+                    _transactionOverviews,
+                    dateRangeStart,
+                    dateRangeEnd,
+                    _selectedLocation?.Name
+                );
 
             string fileName = $"ORDER_ITEM_CONSOLIDATED_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -406,12 +417,11 @@ public partial class OrderItemReport
             fileName += ".pdf";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-
-            await ShowToast("Success", "Consolidated order item report exported to PDF successfully.", "success");
+			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting consolidated report to PDF: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
         }
         finally
         {
@@ -419,25 +429,43 @@ public partial class OrderItemReport
             StateHasChanged();
         }
     }
-    #endregion
+	#endregion
 
-    #region Actions
-    private async Task ViewOrder(int orderId)
+	#region Actions
+	private async Task ViewSelectedCartItem()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await ViewTransaction(selectedCartItem.MasterId);
+	}
+
+	private async Task ViewTransaction(int transactionId)
     {
         try
         {
             if (FormFactor.GetFormFactor() == "Web")
-                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{orderId}", "_blank");
+                await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{transactionId}", "_blank");
             else
-                NavigationManager.NavigateTo($"{PageRouteNames.Order}/{orderId}");
+                NavigationManager.NavigateTo($"{PageRouteNames.Order}/{transactionId}");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while opening order: {ex.Message}", "error");
+			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
         }
     }
 
-    private async Task DownloadInvoice(int orderId)
+	private async Task DownloadSelectedCartItemInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadInvoice(selectedCartItem.MasterId);
+	}
+
+	private async Task DownloadInvoice(int transactionId)
     {
         if (_isProcessing)
             return;
@@ -447,9 +475,10 @@ public partial class OrderItemReport
             _isProcessing = true;
             StateHasChanged();
 
-            var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(orderId);
+            var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(transactionId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
-        }
+			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+		}
         catch (Exception ex)
         {
             await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
@@ -466,13 +495,13 @@ public partial class OrderItemReport
         _showAllColumns = !_showAllColumns;
         StateHasChanged();
 
-        if (_sfOrderItemGrid is not null)
-            await _sfOrderItemGrid.Refresh();
+        if (_sfGrid is not null)
+            await _sfGrid.Refresh();
     }
     #endregion
 
     #region Utilities
-    private async Task NavigateToOrderPage()
+    private async Task NavigateToTransactionPage()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.Order, "_blank");
@@ -480,7 +509,7 @@ public partial class OrderItemReport
             NavigationManager.NavigateTo(PageRouteNames.Order);
     }
 
-    private async Task NavigateToOrderReport(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    private async Task NavigateToTransactionHistory()
     {
         if (FormFactor.GetFormFactor() == "Web")
             await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportOrder, "_blank");
@@ -488,7 +517,13 @@ public partial class OrderItemReport
             NavigationManager.NavigateTo(PageRouteNames.ReportOrder);
     }
 
-    private async Task ShowToast(string title, string message, string type)
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
     {
         VibrationService.VibrateWithTime(200);
 
@@ -513,5 +548,11 @@ public partial class OrderItemReport
             });
         }
     }
-    #endregion
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

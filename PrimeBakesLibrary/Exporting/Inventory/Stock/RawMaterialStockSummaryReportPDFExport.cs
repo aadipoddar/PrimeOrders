@@ -15,7 +15,7 @@ public static class RawMaterialStockSummaryReportPDFExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportRawMaterialStockReport(
+    public static async Task<MemoryStream> ExportRawMaterialStockReport(
         IEnumerable<RawMaterialStockSummaryModel> stockData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -212,7 +212,7 @@ public static class RawMaterialStockSummaryReportPDFExport
         };
 
         // Call the generic PDF export utility with landscape mode for all columns
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             stockData,
             "RAW MATERIAL STOCK REPORT",
             dateRangeStart,

@@ -331,7 +331,7 @@ public partial class CompanyPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => CompanyExcelExport.ExportCompany(_companies));
+			var stream = await CompanyExcelExport.ExportCompany(_companies);
 
 			// Generate file name
 			string fileName = "COMPANY_MASTER.xlsx";
@@ -363,7 +363,7 @@ public partial class CompanyPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => CompanyPDFExport.ExportCompany(_companies));
+			var stream = await CompanyPDFExport.ExportCompany(_companies);
 
 			// Generate file name
 			string fileName = "COMPANY_MASTER.pdf";

@@ -18,7 +18,7 @@ public static class AccountingReportPdfExport
     /// <param name="companyName">Name of the company for report header</param>
     /// <param name="voucherName">Name of the voucher for report header</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportAccountingReport(
+    public static async Task<MemoryStream> ExportAccountingReport(
         IEnumerable<AccountingOverviewModel> accountingData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -158,7 +158,7 @@ public static class AccountingReportPdfExport
 
         // Call the generic PDF export utility
         // Use landscape only when showing all columns, portrait for summary view
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             accountingData,
             "FINANCIAL ACCOUNTING REPORT",
             dateRangeStart,

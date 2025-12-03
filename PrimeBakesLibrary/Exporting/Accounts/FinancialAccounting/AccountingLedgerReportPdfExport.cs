@@ -4,7 +4,7 @@ namespace PrimeBakesLibrary.Exporting.Accounts.FinancialAccounting;
 
 public static class AccountingLedgerReportPdfExport
 {
-    public static MemoryStream ExportAccountingLedgerReport(
+    public static async Task<MemoryStream> ExportAccountingLedgerReport(
         IEnumerable<AccountingLedgerOverviewModel> ledgerData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -122,7 +122,7 @@ public static class AccountingLedgerReportPdfExport
 
         // Call the generic PDF export utility
         // Use landscape only when showing all columns, portrait for summary view
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             ledgerData,
             "FINANCIAL LEDGER REPORT",
             dateRangeStart,

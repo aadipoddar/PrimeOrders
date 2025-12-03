@@ -1671,19 +1671,13 @@ static async Task RecalculateTransactions()
 {
 	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
-	var sale = await CommonData.LoadTableData<SaleReturnModel>(TableNames.SaleReturn);
-	foreach (var p in sale)
+	var order = await CommonData.LoadTableData<OrderModel>(TableNames.Order);
+	foreach (var p in order)
 	{
 		Console.WriteLine("Recalculating Transaction: " + p.Id);
-		var details = await CommonData.LoadTableDataByMasterId<SaleReturnDetailModel>(TableNames.SaleReturnDetail, p.Id);
+		var details = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, p.Id);
 		p.TotalItems = details.Count;
 		p.TotalQuantity = details.Sum(d => d.Quantity);
-		p.BaseTotal = details.Sum(d => d.BaseTotal);
-		p.ItemDiscountAmount = details.Sum(d => d.DiscountAmount);
-		p.TotalAfterItemDiscount = details.Sum(d => d.AfterDiscount);
-		p.TotalExtraTaxAmount = details.Where(d => d.InclusiveTax == false).Sum(d => d.TotalTaxAmount);
-		p.TotalInclusiveTaxAmount = details.Where(d => d.InclusiveTax == true).Sum(d => d.TotalTaxAmount);
-		p.TotalAfterTax = details.Sum(d => d.Total);
-		await SaleReturnData.InsertSaleReturn(p);
+		await OrderData.InsertOrder(p);
 	}
 }

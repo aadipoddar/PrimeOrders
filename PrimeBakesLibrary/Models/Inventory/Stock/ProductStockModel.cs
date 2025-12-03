@@ -24,7 +24,7 @@ public class ProductStockDetailsModel
     public string Type { get; set; }
     public int? TransactionId { get; set; }
     public string TransactionNo { get; set; }
-    public DateOnly TransactionDate { get; set; }
+    public DateOnly TransactionDateTime { get; set; }
     public int LocationId { get; set; }
     public string LocationName { get; set; }
 }

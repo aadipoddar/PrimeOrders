@@ -372,7 +372,7 @@ public partial class RawMaterialPage
             }).ToList();
 
             // Call the Excel export utility
-            var stream = await Task.Run(() => RawMaterialExcelExport.ExportRawMaterial(enrichedData));
+            var stream = await RawMaterialExcelExport.ExportRawMaterial(enrichedData);
 
             // Generate file name
             string fileName = "RAW_MATERIAL_MASTER.xlsx";
@@ -418,7 +418,7 @@ public partial class RawMaterialPage
             }).ToList();
 
             // Call the PDF export utility
-            var stream = await Task.Run(() => RawMaterialPDFExport.ExportRawMaterial(enrichedData));
+            var stream = await RawMaterialPDFExport.ExportRawMaterial(enrichedData);
 
             // Generate file name
             string fileName = "RAW_MATERIAL_MASTER.pdf";

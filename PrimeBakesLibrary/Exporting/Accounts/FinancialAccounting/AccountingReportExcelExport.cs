@@ -18,7 +18,7 @@ public static class AccountingReportExcelExport
     /// <param name="companyName">Name of the company for report header</param>
     /// <param name="voucherName">Name of the voucher for report header</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportAccountingReport(
+    public static async Task<MemoryStream> ExportAccountingReport(
         IEnumerable<AccountingOverviewModel> accountingData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -116,7 +116,7 @@ public static class AccountingReportExcelExport
             reportLocation = voucherName;
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             accountingData,
             "FINANCIAL ACCOUNTING REPORT",
             "Accounting Transactions",

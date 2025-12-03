@@ -12,7 +12,7 @@ public static class LedgerExcelExport
 	/// </summary>
 	/// <param name="ledgerData">Collection of ledger records</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportLedger(IEnumerable<LedgerModel> ledgerData)
+	public static async Task<MemoryStream> ExportLedger(IEnumerable<LedgerModel> ledgerData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = ledgerData.Select(ledger => new
@@ -69,7 +69,7 @@ public static class LedgerExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			enrichedData,
 			"LEDGER",
 			"Ledger Data",

@@ -4,7 +4,7 @@ namespace PrimeBakesLibrary.Exporting.Accounts.FinancialAccounting;
 
 public static class TrialBalancePdfExport
 {
-    public static MemoryStream ExportTrialBalance(
+    public static async Task<MemoryStream> ExportTrialBalance(
         IEnumerable<TrialBalanceModel> trialBalanceData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -158,7 +158,7 @@ public static class TrialBalancePdfExport
 
         // Call the generic PDF export utility
         // Use landscape for detailed view, portrait for summary view
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             trialBalanceData,
             "TRIAL BALANCE REPORT",
             dateRangeStart,

@@ -188,9 +188,7 @@
     <Build Include="Tables\Inventory\Stock\ProductStock.sql" />
     <Build Include="Tables\Inventory\Stock\RawMaterialStock.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Stock\Load_RawMaterialStockSummary_By_Date.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Stock\Load_RawMaterialStockDetails_By_Date.sql" />
     <Build Include="StoredProcedures\LoadData\Inventory\Stock\Load_ProductStockSummary_By_Date_LocationId.sql" />
-    <Build Include="StoredProcedures\LoadData\Inventory\Stock\Load_ProductStockDetails_By_Date_LocationId.sql" />
     <Build Include="Views\Inventory\Stock\RawMaterialStockDetails.sql" />
     <Build Include="Views\Inventory\Stock\ProductStockDetails.sql" />
     <Build Include="StoredProcedures\Delete\Delete_RawMaterialStock_By_Id.sql" />
@@ -215,13 +213,10 @@
     <Build Include="Views\Sales\Order\Order_Overview.sql" />
     <Build Include="Tables\Sales\Order\Order.sql" />
     <Build Include="Tables\Sales\Order\OrderDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Order\Load_OrderDetail_By_Order.sql" />
     <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_By_Location_Pending.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Order\Insert_Order.sql" />
     <Build Include="StoredProcedures\Insert\Sales\Order\Insert_OrderDetail.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_Overview_By_Date.sql" />
     <Build Include="Views\Sales\Order\Order_Item_Overview.sql" />
-    <Build Include="StoredProcedures\LoadData\Sales\Order\Load_Order_Item_Overview_By_Date.sql" />
     <Build Include="Views\Accounts\Accounting_Overview.sql" />
     <Build Include="Views\Sales\ProductLocation_Overview.sql" />
     <Build Include="StoredProcedures\LoadData\Accounts\Masters\Load_Ledger_By_Location.sql" />

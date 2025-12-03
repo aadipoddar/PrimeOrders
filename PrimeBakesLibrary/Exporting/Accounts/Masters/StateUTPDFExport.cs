@@ -12,7 +12,7 @@ public static class StateUTPDFExport
     /// </summary>
     /// <param name="stateUTData">Collection of state/UT records</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportStateUT(IEnumerable<StateUTModel> stateUTData)
+    public static async Task<MemoryStream> ExportStateUT(IEnumerable<StateUTModel> stateUTData)
     {
         // Create enriched data with status formatting
         var enrichedData = stateUTData.Select(stateUT => new
@@ -66,7 +66,7 @@ public static class StateUTPDFExport
         [
             "Id", "Name", "Remarks", "UnionTerritory", "Status"
         ];        // Call the generic PDF export utility
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "STATE & UNION TERRITORY MASTER",
             null,

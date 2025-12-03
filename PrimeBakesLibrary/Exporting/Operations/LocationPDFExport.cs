@@ -12,7 +12,7 @@ public static class LocationPDFExport
     /// </summary>
     /// <param name="locationData">Collection of location records</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportLocation(IEnumerable<LocationModel> locationData)
+    public static async Task<MemoryStream> ExportLocation(IEnumerable<LocationModel> locationData)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
@@ -53,7 +53,7 @@ public static class LocationPDFExport
         ];
 
         // Call the generic PDF export utility
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             locationData,
             "LOCATION MASTER",
             null,

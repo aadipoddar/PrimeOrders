@@ -15,7 +15,7 @@ public static class PurchaseItemReportExcelExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportPurchaseItemReport(
+    public static async Task<MemoryStream> ExportPurchaseItemReport(
         IEnumerable<PurchaseItemOverviewModel> purchaseItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -120,7 +120,7 @@ public static class PurchaseItemReportExcelExport
 			];
 
         // Export using the generic utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             purchaseItemData,
             "PURCHASE ITEM REPORT",
             "Purchase Item Transactions",

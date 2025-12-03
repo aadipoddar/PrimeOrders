@@ -4,7 +4,7 @@ namespace PrimeBakesLibrary.Exporting.Accounts.FinancialAccounting;
 
 public static class AccountingLedgerReportExcelExport
 {
-    public static MemoryStream ExportAccountingLedgerReport(
+    public static async Task<MemoryStream> ExportAccountingLedgerReport(
         IEnumerable<AccountingLedgerOverviewModel> ledgerData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -103,7 +103,7 @@ public static class AccountingLedgerReportExcelExport
         }
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             ledgerData,
             "FINANCIAL LEDGER REPORT",
             "Ledger Report",

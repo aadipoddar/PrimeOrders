@@ -344,14 +344,12 @@ public partial class PurchaseReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				PurchaseReportExcelExport.ExportPurchaseReport(
+			var stream = await PurchaseReportExcelExport.ExportPurchaseReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string fileName = $"PURCHASE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -385,14 +383,12 @@ public partial class PurchaseReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				PurchaseReportPDFExport.ExportPurchaseReport(
+			var stream = await PurchaseReportPDFExport.ExportPurchaseReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			string fileName = $"PURCHASE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

@@ -12,7 +12,7 @@ public static class VoucherExcelExport
 	/// </summary>
 	/// <param name="voucherData">Collection of voucher records</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportVoucher(IEnumerable<VoucherModel> voucherData)
+	public static async Task<MemoryStream> ExportVoucher(IEnumerable<VoucherModel> voucherData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = voucherData.Select(voucher => new
@@ -46,7 +46,7 @@ public static class VoucherExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			enrichedData,
 			"VOUCHER",
 			"Voucher Data",

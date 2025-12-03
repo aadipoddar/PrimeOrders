@@ -323,7 +323,7 @@ public partial class ProductLocationPage
                 Status = _productLocations.FirstOrDefault(p => p.Id == pl.Id)?.Status ?? false
             }).ToList();
 
-            var stream = ProductLocationExcelExport.ExportProductLocation(exportData);
+            var stream = await ProductLocationExcelExport.ExportProductLocation(exportData);
 
             await SaveAndViewService.SaveAndView("Product_Location.xlsx", stream);
             await ShowToast("Success", "Excel export completed successfully", true);
@@ -357,7 +357,7 @@ public partial class ProductLocationPage
                 Status = _productLocations.FirstOrDefault(p => p.Id == pl.Id)?.Status ?? false
             }).ToList();
 
-            var stream = ProductLocationPDFExport.ExportProductLocation(exportData);
+            var stream = await ProductLocationPDFExport.ExportProductLocation(exportData);
 
             await SaveAndViewService.SaveAndView("Product_Location.pdf", stream);
 

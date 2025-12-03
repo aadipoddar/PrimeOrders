@@ -2,7 +2,7 @@
 
 public static class ProductLocationExcelExport
 {
-    public static MemoryStream ExportProductLocation<T>(IEnumerable<T> productLocationData)
+    public static async Task<MemoryStream> ExportProductLocation<T>(IEnumerable<T> productLocationData)
     {
         var props = typeof(T).GetProperties();
 
@@ -38,7 +38,7 @@ public static class ProductLocationExcelExport
 
         var columnOrder = new List<string> { "Id", "Location", "ProductCode", "ProductName", "Rate", "Status" };
 
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             enrichedData,
             "PRODUCT LOCATION MASTER",
             "Product Location Data",

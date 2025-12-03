@@ -71,7 +71,7 @@ public static class PurchaseInvoicePDFExport
         };
 
         // Generate invoice PDF with generic models
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,

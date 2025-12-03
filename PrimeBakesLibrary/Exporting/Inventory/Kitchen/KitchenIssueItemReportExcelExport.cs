@@ -15,7 +15,7 @@ public static class KitchenIssueItemReportExcelExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportKitchenIssueItemReport(
+    public static async Task<MemoryStream> ExportKitchenIssueItemReport(
         IEnumerable<KitchenIssueItemOverviewModel> kitchenIssueItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -86,7 +86,7 @@ public static class KitchenIssueItemReportExcelExport
             ];
 
         // Export using the generic utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             kitchenIssueItemData,
             "KITCHEN ISSUE ITEM REPORT",
             "Kitchen Issue Item Transactions",

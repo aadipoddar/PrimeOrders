@@ -78,7 +78,7 @@ public static class StockTransferInvoicePDFExport
         };
 
         // Generate invoice PDF - From Location is the source, To Location is the destination
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,
@@ -146,7 +146,7 @@ public static class StockTransferInvoicePDFExport
         };
 
         // Generate invoice PDF - From Location is the source, To Location is the destination
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,

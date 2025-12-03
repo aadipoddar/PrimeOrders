@@ -1,4 +1,6 @@
-﻿using PrimeBakesLibrary.Data.Common;
+﻿using System.Threading.Tasks;
+
+using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
@@ -79,7 +81,7 @@ public static class AccountingInvoicePDFExport
             : invoiceType;
 
         // Generate specialized accounting voucher PDF
-        return PDFInvoiceExportUtil.ExportAccountingVoucherToPdf(
+        return await PDFInvoiceExportUtil.ExportAccountingVoucherToPdf(
             invoiceData,
             accountingLineItems,
             company,
@@ -91,7 +93,7 @@ public static class AccountingInvoicePDFExport
     /// <summary>
     /// Export Accounting with ledger names (requires additional data)
     /// </summary>
-    public static MemoryStream ExportAccountingInvoiceWithItems(
+    public static async Task<MemoryStream> ExportAccountingInvoiceWithItems(
         AccountingModel accountingHeader,
         List<AccountingItemCartModel> accountingItems,
         CompanyModel company,
@@ -142,7 +144,7 @@ public static class AccountingInvoicePDFExport
             : invoiceType;
 
         // Generate specialized accounting voucher PDF
-        return PDFInvoiceExportUtil.ExportAccountingVoucherToPdf(
+        return await PDFInvoiceExportUtil.ExportAccountingVoucherToPdf(
             invoiceData,
             accountingLineItems,
             company,

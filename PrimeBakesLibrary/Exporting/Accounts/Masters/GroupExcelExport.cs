@@ -12,7 +12,7 @@ public static class GroupExcelExport
 	/// </summary>
 	/// <param name="groupData">Collection of group records</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportGroup(IEnumerable<GroupModel> groupData)
+	public static async Task<MemoryStream> ExportGroup(IEnumerable<GroupModel> groupData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = groupData.Select(group => new
@@ -44,7 +44,7 @@ public static class GroupExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			enrichedData,
 			"GROUP",
 			"Group Data",

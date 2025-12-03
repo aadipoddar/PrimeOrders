@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 
+using PrimeBakesLibrary.Data.Common;
+
 using Syncfusion.Drawing;
 using Syncfusion.XlsIO;
 
@@ -28,7 +30,7 @@ public static class ExcelExportUtil
     /// <param name="partyName">Optional party/ledger name to display in header</param>
     /// <param name="customSummaryFields">Optional: Custom fields to display in summary section (key=label, value=formatted value)</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportToExcel<T>(
+    public static async Task<MemoryStream> ExportToExcel<T>(
         IEnumerable<T> data,
         string reportTitle,
         string worksheetName,
@@ -78,7 +80,7 @@ public static class ExcelExportUtil
                 AddBrandingFooter(worksheet, currentRow, effectiveColumnOrder.Count);
 
                 // Apply final formatting
-                ApplyFinalFormatting(worksheet, effectiveColumnOrder.Count);
+                await ApplyFinalFormatting(worksheet, effectiveColumnOrder.Count);
 
                 // Save workbook to stream
                 workbook.SaveAs(ms);
@@ -791,7 +793,7 @@ public static class ExcelExportUtil
     /// <summary>
     /// Apply final formatting to the worksheet
     /// </summary>
-    private static void ApplyFinalFormatting(IWorksheet worksheet, int columnCount)
+    private static async Task ApplyFinalFormatting(IWorksheet worksheet, int columnCount)
     {
         try
         {
@@ -817,9 +819,10 @@ public static class ExcelExportUtil
                 }
             }
 
-            // Add footer with AadiSoft branding, date and page numbers
-            worksheet.PageSetup.LeftFooter = $"© {DateTime.Now.Year} A Product By AadiSoft";
-            worksheet.PageSetup.CenterFooter = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
+			// Add footer with AadiSoft branding, date and page numbers
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			worksheet.PageSetup.LeftFooter = $"© {currentDateTime.Year} A Product By AadiSoft";
+            worksheet.PageSetup.CenterFooter = $"Exported on: {currentDateTime:dd-MMM-yyyy hh:mm tt}";
             worksheet.PageSetup.RightFooter = "Page &P of &N";
 
             // Set print options for better presentation

@@ -12,7 +12,7 @@ public static class TaxPDFExport
     /// </summary>
     /// <param name="taxData">Collection of tax records</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportTax(IEnumerable<TaxModel> taxData)
+    public static async Task<MemoryStream> ExportTax(IEnumerable<TaxModel> taxData)
     {
         // Create enriched data with status formatting
         var enrichedData = taxData.Select(tax => new
@@ -130,7 +130,7 @@ public static class TaxPDFExport
         ];
 
         // Call the generic PDF export utility
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "TAX MASTER",
             null,

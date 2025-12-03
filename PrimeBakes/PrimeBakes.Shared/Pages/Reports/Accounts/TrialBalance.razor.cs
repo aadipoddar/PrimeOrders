@@ -243,16 +243,14 @@ public partial class TrialBalance
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-                TrialBalanceExcelExport.ExportTrialBalance(
+            var stream = await TrialBalanceExcelExport.ExportTrialBalance(
                     _trialBalance,
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns,
                     _selectedGroup?.Id > 0 ? _selectedGroup?.Name : null,
                     _selectedAccountType?.Id > 0 ? _selectedAccountType?.Name : null
-                )
-            );
+                );
 
             string fileName = $"TRIAL_BALANCE";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -287,16 +285,14 @@ public partial class TrialBalance
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-                TrialBalancePdfExport.ExportTrialBalance(
+            var stream = await TrialBalancePdfExport.ExportTrialBalance(
                     _trialBalance,
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns,
                     _selectedGroup?.Id > 0 ? _selectedGroup?.Name : null,
                     _selectedAccountType?.Id > 0 ? _selectedAccountType?.Name : null
-                )
-            );
+                );
 
             string fileName = $"TRIAL_BALANCE";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

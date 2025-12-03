@@ -55,16 +55,14 @@ public static class KitchenIssueData
             }
 
             // Generate invoice PDF
-            var pdfStream = await Task.Run(() =>
-                KitchenIssueInvoicePDFExport.ExportKitchenIssueInvoiceWithItems(
+            var pdfStream = await KitchenIssueInvoicePDFExport.ExportKitchenIssueInvoiceWithItems(
                     transaction,
                     cartItems,
                     company,
                     kitchen,
                     null, // logo path - uses default
                     "KITCHEN ISSUE INVOICE"
-                )
-            );
+                );
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();

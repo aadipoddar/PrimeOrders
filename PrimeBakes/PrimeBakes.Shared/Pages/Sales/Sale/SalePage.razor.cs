@@ -545,7 +545,7 @@ public partial class SalePage : IAsyncDisposable
 		_sale.OrderId = _selectedOrder.Id;
 		_cart.Clear();
 
-		var orderItems = await OrderData.LoadOrderDetailByOrder(_selectedOrder.Id);
+		var orderItems = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, _selectedOrder.Id);
 		foreach (var item in orderItems)
 		{
 			if (_products.FirstOrDefault(s => s.ProductId == item.ProductId) is null)

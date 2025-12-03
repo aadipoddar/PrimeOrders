@@ -255,8 +255,7 @@ public partial class FinancialAccountingReport
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
             // Call the Excel export utility
-            var stream = await Task.Run(() =>
-                AccountingReportExcelExport.ExportAccountingReport(
+            var stream = await AccountingReportExcelExport.ExportAccountingReport(
                     _accountingOverviews.Where(_ => _.Status),
                     dateRangeStart,
                     dateRangeEnd,
@@ -264,8 +263,7 @@ public partial class FinancialAccountingReport
                     _user.Admin,
                     _selectedCompany?.Id > 0 ? _selectedCompany?.Name : null,
                     _selectedVoucher?.Id > 0 ? _selectedVoucher?.Name : null
-                )
-            );
+                );
 
             // Generate file name with date range
             string fileName = $"ACCOUNTING_REPORT";
@@ -304,8 +302,7 @@ public partial class FinancialAccountingReport
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
             // Call the PDF export utility
-            var stream = await Task.Run(() =>
-                AccountingReportPdfExport.ExportAccountingReport(
+            var stream = await AccountingReportPdfExport.ExportAccountingReport(
                     _accountingOverviews.Where(_ => _.Status),
                     dateRangeStart,
                     dateRangeEnd,
@@ -313,8 +310,7 @@ public partial class FinancialAccountingReport
                     _user.Admin,
                     _selectedCompany?.Id > 0 ? _selectedCompany?.Name : null,
                     _selectedVoucher?.Id > 0 ? _selectedVoucher?.Name : null
-                )
-            );
+                );
 
             // Generate file name with date range
             string fileName = $"ACCOUNTING_REPORT";

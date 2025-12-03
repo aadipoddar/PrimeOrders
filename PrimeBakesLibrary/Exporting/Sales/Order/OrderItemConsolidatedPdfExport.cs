@@ -15,7 +15,7 @@ public static class OrderItemConsolidatedPdfExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="locationName">Name of the location for report header</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportConsolidatedOrderItemReport(
+    public static async Task<MemoryStream> ExportConsolidatedOrderItemReport(
         IEnumerable<OrderItemOverviewModel> orderItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -40,20 +40,20 @@ public static class OrderItemConsolidatedPdfExport
         // Define column order
         List<string> columnOrder =
         [
-            "ItemName",
-            "ItemCode",
-            "ItemCategoryName",
-            "TotalQuantity"
+            nameof(ConsolidatedOrderItemModel.ItemName),
+            nameof(ConsolidatedOrderItemModel.ItemCode),
+            nameof(ConsolidatedOrderItemModel.ItemCategoryName),
+            nameof(ConsolidatedOrderItemModel.TotalQuantity)
         ];
 
         // Customize specific columns for PDF display
-        columnSettings["ItemName"] = new() { DisplayName = "Item Name", IncludeInTotal = false };
-        columnSettings["ItemCode"] = new() { DisplayName = "Item Code", IncludeInTotal = false };
-        columnSettings["ItemCategoryName"] = new() { DisplayName = "Category", IncludeInTotal = false };
+        columnSettings[nameof(ConsolidatedOrderItemModel.ItemName)] = new() { DisplayName = "Item", IncludeInTotal = false };
+        columnSettings[nameof(ConsolidatedOrderItemModel.ItemCode)] = new() { DisplayName = "Code", IncludeInTotal = false };
+        columnSettings[nameof(ConsolidatedOrderItemModel.ItemCategoryName)] = new() { DisplayName = "Category", IncludeInTotal = false };
 
-        columnSettings["TotalQuantity"] = new()
+        columnSettings[nameof(ConsolidatedOrderItemModel.TotalQuantity)] = new()
         {
-            DisplayName = "Total Quantity",
+            DisplayName = "Qty",
             Format = "#,##0.00",
             StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
             {
@@ -63,7 +63,7 @@ public static class OrderItemConsolidatedPdfExport
         };
 
         // Call the generic PDF export utility (portrait mode is fine for 4 columns)
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             consolidatedData,
             "CONSOLIDATED ORDER ITEM REPORT",
             dateRangeStart,

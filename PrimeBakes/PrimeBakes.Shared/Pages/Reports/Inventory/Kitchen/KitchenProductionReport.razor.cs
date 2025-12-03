@@ -275,14 +275,12 @@ public partial class KitchenProductionReport
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-            KitchenProductionReportExcelExport.ExportKitchenProductionReport(
+            var stream = await KitchenProductionReportExcelExport.ExportKitchenProductionReport(
                     _transactionOverviews,
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns
-                )
-            );
+                );
 
             string fileName = $"KITCHEN_PRODUCTION_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -317,14 +315,12 @@ public partial class KitchenProductionReport
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-            var stream = await Task.Run(() =>
-            KitchenProductionReportPDFExport.ExportKitchenProductionReport(
-            _transactionOverviews,
-            dateRangeStart,
-            dateRangeEnd,
-            _showAllColumns
-            )
-            );
+            var stream = await KitchenProductionReportPDFExport.ExportKitchenProductionReport(
+                    _transactionOverviews,
+                    dateRangeStart,
+                    dateRangeEnd,
+                    _showAllColumns
+                );
 
             string fileName = $"KITCHEN_PRODUCTION_REPORT";
             if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

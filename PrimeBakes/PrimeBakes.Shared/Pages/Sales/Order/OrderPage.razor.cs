@@ -21,11 +21,16 @@ using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
 using Syncfusion.Blazor.Notifications;
 
+using Toolbelt.Blazor.HotKeys2;
+
 namespace PrimeBakes.Shared.Pages.Sales.Order;
 
-public partial class OrderPage
+public partial class OrderPage : IAsyncDisposable
 {
-    [Parameter] public int? Id { get; set; }
+	[Inject] private HotKeys HotKeys { get; set; }
+    private HotKeysContext _hotKeysContext;
+
+	[Parameter] public int? Id { get; set; }
 
     private UserModel _user;
 
@@ -71,7 +76,20 @@ public partial class OrderPage
 
     private async Task LoadData()
     {
-        await LoadLocations();
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.Enter, AddItemToCart, "Add item to cart", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, () => _sfItemAutoComplete.FocusAsync(), "Focus on item input", Exclude.None)
+			.Add(ModCode.Ctrl, Code.S, SaveTransaction, "Save the transaction", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, DownloadInvoice, "Download invoice", Exclude.None)
+			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistoryPage, "Open transaction history", Exclude.None)
+			.Add(ModCode.Ctrl, Code.I, NavigateToItemReport, "Open item report", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, ResetPage, "Reset the page", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
+			.Add(Code.Delete, RemoveSelectedCartItem, "Delete selected cart item", Exclude.None)
+			.Add(Code.Insert, EditSelectedCartItem, "Edit selected cart item", Exclude.None);
+
+		await LoadLocations();
         await LoadCompanies();
         await LoadExistingOrder();
         await LoadItems();
@@ -133,7 +151,7 @@ public partial class OrderPage
                 _order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, Id.Value);
                 if (_order is null || _order.Id == 0 || _user.LocationId > 1)
                 {
-                    await ShowToast("Order Not Found", "The requested order could not be found.", "error");
+					await ShowToast("Transaction Not Found", "The requested transaction could not be found.", "error");
                     NavigationManager.NavigateTo(PageRouteNames.Order, true);
                 }
             }
@@ -190,7 +208,7 @@ public partial class OrderPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Order Data", ex.Message, "error");
+			await ShowToast("An Error Occurred While Loading Transaction Data", ex.Message, "error");
             await DeleteLocalFiles();
         }
         finally
@@ -227,13 +245,14 @@ public partial class OrderPage
 
             if (_order.Id > 0)
             {
-                var existingCart = await OrderData.LoadOrderDetailByOrder(_order.Id);
+                var existingCart = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, _order.Id);
 
                 foreach (var item in existingCart)
                 {
                     if (_products.FirstOrDefault(s => s.ProductId == item.ProductId) is null)
                     {
-                        await ShowToast("Item Not Found", $"The item with ID {item.ProductId} in the existing order cart was not found in the available items list. It may have been deleted or is inaccessible.", "error");
+						var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
+						await ShowToast("Item Not Found", $"The item {product?.Name} (ID: {item.ProductId}) in the existing transaction cart was not found in the available items list. It may have been deleted or is inaccessible.", "error");
                         continue;
                     }
 
@@ -426,7 +445,16 @@ public partial class OrderPage
         await SaveOrderFile();
     }
 
-    private async Task EditCartItem(OrderItemCartModel cartItem)
+	private async Task EditSelectedCartItem()
+	{
+		if (_sfCartGrid is null || _sfCartGrid.SelectedRecords is null || _sfCartGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfCartGrid.SelectedRecords.First();
+		await EditCartItem(selectedCartItem);
+	}
+
+	private async Task EditCartItem(OrderItemCartModel cartItem)
     {
         _selectedProduct = _products.FirstOrDefault(s => s.ProductId == cartItem.ItemId);
 
@@ -447,7 +475,16 @@ public partial class OrderPage
         await RemoveItemFromCart(cartItem);
     }
 
-    private async Task RemoveItemFromCart(OrderItemCartModel cartItem)
+	private async Task RemoveSelectedCartItem()
+	{
+		if (_sfCartGrid is null || _sfCartGrid.SelectedRecords is null || _sfCartGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfCartGrid.SelectedRecords.First();
+		await RemoveItemFromCart(selectedCartItem);
+	}
+
+	private async Task RemoveItemFromCart(OrderItemCartModel cartItem)
     {
         _cart.Remove(cartItem);
         await SaveOrderFile();
@@ -467,7 +504,10 @@ public partial class OrderPage
                 item.Remarks = null;
         }
 
-        var mainCompanyId = await SettingsData.LoadSettingsByKey(SettingsKeys.PrimaryCompanyLinkingId);
+        _order.TotalItems = _cart.Count;
+        _order.TotalQuantity = _cart.Sum(s => s.Quantity);
+
+		var mainCompanyId = await SettingsData.LoadSettingsByKey(SettingsKeys.PrimaryCompanyLinkingId);
         _order.CompanyId = _user.LocationId == 1 ? _selectedCompany.Id : _companies.FirstOrDefault(s => s.Id.ToString() == mainCompanyId.Value).Id;
         _order.LocationId = _user.LocationId == 1 ? _selectedLocation.Id : _user.LocationId;
         _order.CreatedBy = _user.Id;
@@ -509,7 +549,7 @@ public partial class OrderPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Order Data", ex.Message, "error");
+			await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
         }
         finally
         {
@@ -538,12 +578,6 @@ public partial class OrderPage
         if (_order.LocationId <= 1)
         {
             await ShowToast("Location Not Selected", "Please select a location for the transaction.", "error");
-            return false;
-        }
-
-        if (_cart.Count == 0)
-        {
-            await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
             return false;
         }
 
@@ -583,7 +617,19 @@ public partial class OrderPage
             return false;
         }
 
-        if (_cart.Any(item => item.Quantity <= 0))
+		if (_order.TotalItems <= 0)
+		{
+			await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
+			return false;
+		}
+
+		if (_order.TotalQuantity <= 0)
+		{
+			await ShowToast("Invalid Total Quantity", "The total quantity of items in the cart must be greater than zero.", "error");
+			return false;
+		}
+
+		if (_cart.Any(item => item.Quantity <= 0))
         {
             await ShowToast("Invalid Item Quantity", "One or more items in the cart have a quantity less than or equal to zero. Please correct the quantities before saving.", "error");
             return false;
@@ -670,10 +716,38 @@ public partial class OrderPage
         await DataStorageService.LocalRemove(StorageFileNames.OrderDataFileName);
         await DataStorageService.LocalRemove(StorageFileNames.OrderCartDataFileName);
     }
-    #endregion
+	#endregion
 
-    #region Utilities
-    private async Task ResetPage()
+	#region Utilities
+	private async Task DownloadInvoice()
+	{
+		if (!Id.HasValue || Id.Value <= 0)
+		{
+			await ShowToast("No Transaction Selected", "Please save the transaction first before downloading the invoice.", "error");
+			return;
+		}
+
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(Id.Value);
+			await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+		}
+		catch (Exception ex)
+		{
+			await ShowToast("An Error Occurred While Downloading Invoice", ex.Message, "error");
+		}
+		finally
+		{
+			_isProcessing = false;
+		}
+	}
+
+	private async Task ResetPage()
     {
         await DeleteLocalFiles();
         NavigationManager.NavigateTo(PageRouteNames.Order, true);
@@ -687,7 +761,15 @@ public partial class OrderPage
             NavigationManager.NavigateTo(PageRouteNames.ReportOrder);
     }
 
-    private async Task NavigateToSelectedSalePage()
+	private async Task NavigateToItemReport()
+	{
+		if (FormFactor.GetFormFactor() == "Web")
+			await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportOrderItem, "_blank");
+		else
+			NavigationManager.NavigateTo(PageRouteNames.ReportOrderItem);
+	}
+
+	private async Task NavigateToSelectedSalePage()
     {
         if (_order.SaleId is null || _order.SaleId <= 0)
         {
@@ -713,7 +795,13 @@ public partial class OrderPage
         await SaveAndViewService.SaveAndView(fileName, fileStream);
     }
 
-    private async Task ShowToast(string title, string message, string type)
+	private async Task NavigateToDashboard() =>
+		NavigationManager.NavigateTo(PageRouteNames.Dashboard);
+
+	private async Task NavigateBack() =>
+		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
+
+	private async Task ShowToast(string title, string message, string type)
     {
         VibrationService.VibrateWithTime(200);
 
@@ -739,5 +827,11 @@ public partial class OrderPage
             });
         }
     }
-    #endregion
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
+	#endregion
 }

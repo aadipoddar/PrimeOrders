@@ -10,7 +10,7 @@ public static class ProductPDFExport
 	/// </summary>
 	/// <param name="productData">Collection of product records with enriched category and tax information</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportProduct<T>(IEnumerable<T> productData)
+	public static async Task<MemoryStream> ExportProduct<T>(IEnumerable<T> productData)
 	{
 		// Create enriched data with status and rate formatting
 		var formattedData = productData.Select(product =>
@@ -106,7 +106,7 @@ public static class ProductPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			formattedData,
 			"PRODUCT MASTER",
 			null,

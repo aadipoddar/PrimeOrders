@@ -294,16 +294,14 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleReturnItemReportExcelExport.ExportSaleReturnItemReport(
+			var stream = await SaleReturnItemReportExcelExport.ExportSaleReturnItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_user.LocationId == 1,
 					_selectedLocation?.Id > 0 ? _selectedLocation.Name : null
-				)
-			);
+				);
 
 			string fileName = $"SALE_RETURN_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -337,16 +335,14 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleReturnItemReportPDFExport.ExportSaleReturnItemReport(
+			var stream = await SaleReturnItemReportPDFExport.ExportSaleReturnItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_user.LocationId == 1,
 					_selectedLocation?.Name
-				)
-			);
+				);
 
 			string fileName = $"SALE_RETURN_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

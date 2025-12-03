@@ -476,8 +476,7 @@ public partial class SaleReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleReportExcelExport.ExportSaleReport(
+			var stream = await SaleReportExcelExport.ExportSaleReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
@@ -485,8 +484,7 @@ public partial class SaleReport : IAsyncDisposable
 					_user.LocationId == 1,
 					_selectedLocation?.Name,
 					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
-				)
-			);
+				);
 
 			string fileName = $"SALE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -520,8 +518,7 @@ public partial class SaleReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleReportPdfExport.ExportSaleReport(
+			var stream = await SaleReportPdfExport.ExportSaleReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
@@ -529,8 +526,7 @@ public partial class SaleReport : IAsyncDisposable
 					_user.LocationId == 1,
 					_selectedLocation?.Name,
 					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
-				)
-			);
+				);
 
 			string fileName = $"SALE_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -774,7 +770,7 @@ public partial class SaleReport : IAsyncDisposable
 		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, recoverTransactionId);
 		if (sale is null)
 		{
-			await ShowToast("Error", "Sale transaction not found.", "error");
+			await ShowToast("Error", "Transaction not found.", "error");
 			return;
 		}
 

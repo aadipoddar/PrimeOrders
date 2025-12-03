@@ -9,7 +9,9 @@ public class OrderModel
     public int? SaleId { get; set; }
     public DateTime TransactionDateTime { get; set; }
     public int FinancialYearId { get; set; }
-    public string? Remarks { get; set; }
+    public int TotalItems { get; set; }
+	public decimal TotalQuantity { get; set; }
+	public string? Remarks { get; set; }
     public int CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string CreatedFromPlatform { get; set; }
@@ -23,7 +25,7 @@ public class OrderModel
 public class OrderDetailModel
 {
     public int Id { get; set; }
-    public int OrderId { get; set; }
+    public int MasterId { get; set; }
     public int ProductId { get; set; }
     public decimal Quantity { get; set; }
     public string? Remarks { get; set; }
@@ -79,7 +81,7 @@ public class OrderItemOverviewModel
     public int ItemCategoryId { get; set; }
     public string ItemCategoryName { get; set; }
 
-    public int OrderId { get; set; }
+    public int MasterId { get; set; }
     public string TransactionNo { get; set; }
     public DateTime TransactionDateTime { get; set; }
     public int CompanyId { get; set; }

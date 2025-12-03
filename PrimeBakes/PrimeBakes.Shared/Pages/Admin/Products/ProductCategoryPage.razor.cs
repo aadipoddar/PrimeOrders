@@ -269,7 +269,7 @@ public partial class ProductCategoryPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => ProductCategoryExcelExport.ExportProductCategory(_productCategories));
+			var stream = await ProductCategoryExcelExport.ExportProductCategory(_productCategories);
 
 			// Generate file name
 			string fileName = "PRODUCT_CATEGORY_MASTER.xlsx";
@@ -301,7 +301,7 @@ public partial class ProductCategoryPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => ProductCategoryPDFExport.ExportProductCategory(_productCategories));
+			var stream = await ProductCategoryPDFExport.ExportProductCategory(_productCategories);
 
 			// Generate file name
 			string fileName = "PRODUCT_CATEGORY_MASTER.pdf";

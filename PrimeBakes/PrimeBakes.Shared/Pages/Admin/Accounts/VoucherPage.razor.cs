@@ -293,7 +293,7 @@ public partial class VoucherPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => VoucherExcelExport.ExportVoucher(_vouchers));
+			var stream = await VoucherExcelExport.ExportVoucher(_vouchers);
 
 			// Generate file name
 			string fileName = "VOUCHER_MASTER.xlsx";
@@ -325,7 +325,7 @@ public partial class VoucherPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => VoucherPDFExport.ExportVoucher(_vouchers));
+			var stream = await VoucherPDFExport.ExportVoucher(_vouchers);
 
 			// Generate file name
 			string fileName = "VOUCHER_MASTER.pdf";

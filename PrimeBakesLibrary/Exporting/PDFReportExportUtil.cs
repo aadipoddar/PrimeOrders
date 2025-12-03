@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 
-using PrimeBakesLibrary.Data;
-
 using NumericWordsConversion;
+
+using PrimeBakesLibrary.Data;
+using PrimeBakesLibrary.Data.Common;
 
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
@@ -19,7 +20,8 @@ public static class PDFReportExportUtil
 {
     private static PdfLayoutFormat _layoutFormat;
 
-    #region Public Methods	/// <summary>
+    #region Public Methods
+    /// <summary>
     /// Export data to PDF with automatic column detection and formatting
     /// </summary>
     /// <typeparam name="T">Type of data to export</typeparam>
@@ -37,7 +39,7 @@ public static class PDFReportExportUtil
     /// <param name="partyName">Optional: Party/ledger name to display in header</param>
     /// <param name="customSummaryFields">Optional: Custom fields to display in summary section (key=label, value=formatted value)</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportToPdf<T>(
+    public static async Task<MemoryStream> ExportToPdf<T>(
         IEnumerable<T> data,
         string reportTitle,
         DateOnly? dateRangeStart = null,
@@ -82,7 +84,7 @@ public static class PDFReportExportUtil
                 }
 
                 // Add footer template first
-                AddBrandingFooter(pdfDocument);
+                await AddBrandingFooter(pdfDocument);
 
                 // Initialize layout format for proper pagination
                 _layoutFormat = new()
@@ -832,7 +834,7 @@ public static class PDFReportExportUtil
     /// <summary>
     /// Add branding footer to all pages
     /// </summary>
-    private static void AddBrandingFooter(PdfDocument document)
+    private static async Task AddBrandingFooter(PdfDocument document)
     {
         try
         {
@@ -848,12 +850,13 @@ public static class PDFReportExportUtil
             footer.Graphics.DrawLine(separatorPen, new PointF(0, 0), new PointF(footer.Width, 0));
 
             // Left: AadiSoft branding
-            string branding = $"© {DateTime.Now.Year} A Product By aadisoft.vercel.app";
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+            string branding = $"© {currentDateTime.Year} A Product By aadisoft.vercel.app";
             footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 8));
 
-            // Center: Export date
-            string exportDate = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
-            SizeF exportDateSize = footerFont.MeasureString(exportDate);
+			// Center: Export date
+			string exportDate = $"Exported on: {currentDateTime:dd-MMM-yyyy hh:mm tt}";
+			SizeF exportDateSize = footerFont.MeasureString(exportDate);
             float centerX = (document.Pages[0].GetClientSize().Width - exportDateSize.Width) / 2;
             footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 8));
 

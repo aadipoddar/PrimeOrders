@@ -9,156 +9,147 @@ namespace PrimeBakesLibrary.Data.Sales.Order;
 
 public static class OrderData
 {
-    public static async Task<int> InsertOrder(OrderModel order) =>
-        (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertOrder, order)).FirstOrDefault();
+	public static async Task<int> InsertOrder(OrderModel order) =>
+		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertOrder, order)).FirstOrDefault();
 
-    public static async Task<int> InsertOrderDetail(OrderDetailModel orderDetail) =>
-        (await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertOrderDetail, orderDetail)).FirstOrDefault();
+	public static async Task<int> InsertOrderDetail(OrderDetailModel orderDetail) =>
+		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertOrderDetail, orderDetail)).FirstOrDefault();
 
-    public static async Task<List<OrderDetailModel>> LoadOrderDetailByOrder(int OrderId) =>
-        await SqlDataAccess.LoadData<OrderDetailModel, dynamic>(StoredProcedureNames.LoadOrderDetailByOrder, new { OrderId });
+	public static async Task<List<OrderModel>> LoadOrderByLocationPending(int LocationId) =>
+		await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByLocationPending, new { LocationId });
 
-    public static async Task<List<OrderModel>> LoadOrderByLocationPending(int LocationId) =>
-        await SqlDataAccess.LoadData<OrderModel, dynamic>(StoredProcedureNames.LoadOrderByLocationPending, new { LocationId });
+	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int orderId)
+	{
+		try
+		{
+			// Load saved order details
+			var transaction = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId) ??
+				throw new InvalidOperationException("Transaction not found.");
 
-    public static async Task<List<OrderOverviewModel>> LoadOrderOverviewByDate(DateTime StartDate, DateTime EndDate, bool OnlyActive = true) =>
-        await SqlDataAccess.LoadData<OrderOverviewModel, dynamic>(StoredProcedureNames.LoadOrderOverviewByDate, new { StartDate, EndDate, OnlyActive });
+			// Load order details from database
+			var orderDetails = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, orderId);
+			if (orderDetails is null || orderDetails.Count == 0)
+				throw new InvalidOperationException("No transaction details found for the transaction.");
 
-    public static async Task<List<OrderItemOverviewModel>> LoadOrderItemOverviewByDate(DateTime StartDate, DateTime EndDate) =>
-        await SqlDataAccess.LoadData<OrderItemOverviewModel, dynamic>(StoredProcedureNames.LoadOrderItemOverviewByDate, new { StartDate, EndDate });
+			// Load company and location
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, transaction.LocationId);
 
-    public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int orderId)
-    {
-        try
-        {
-            // Load saved order details
-            var savedOrder = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId) ??
-                throw new InvalidOperationException("Saved order transaction not found.");
+			if (company is null)
+				throw new InvalidOperationException("Invoice generation skipped - company not found.");
+			if (location is null)
+				throw new InvalidOperationException("Invoice generation skipped - location not found.");
 
-            // Load order details from database
-            var orderDetails = await LoadOrderDetailByOrder(orderId);
-            if (orderDetails is null || orderDetails.Count == 0)
-                throw new InvalidOperationException("No order details found for invoice generation.");
+			// Try to load sale information if order is converted to sale
+			SaleModel sale = null;
+			if (transaction.SaleId.HasValue && transaction.SaleId.Value > 0)
+				sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, transaction.SaleId.Value);
 
-            // Load company and location
-            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, savedOrder.CompanyId);
-            var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, savedOrder.LocationId);
+			// Generate invoice PDF
+			var pdfStream = await OrderInvoicePDFExport.ExportOrderInvoice(
+				transaction,
+				orderDetails,
+				company,
+				location,
+				sale?.TransactionNo,
+				sale?.TransactionDateTime,
+				null, // logo path - uses default
+				"ORDER CONFIRMATION",
+				location?.Name // outlet
+			);
 
-            if (company is null)
-                throw new InvalidOperationException("Invoice generation skipped - company not found.");
-            if (location is null)
-                throw new InvalidOperationException("Invoice generation skipped - location not found.");
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"ORDER_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
+			return (pdfStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
+		}
+	}
 
-            // Try to load sale information if order is converted to sale
-            SaleModel sale = null;
-            if (savedOrder.SaleId.HasValue && savedOrder.SaleId.Value > 0)
-                sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, savedOrder.SaleId.Value);
+	public static async Task DeleteOrder(int orderId)
+	{
+		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId);
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
+		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
-            // Generate invoice PDF
-            var pdfStream = await OrderInvoicePDFExport.ExportOrderInvoice(
-                savedOrder,
-                orderDetails,
-                company,
-                location,
-                sale?.TransactionNo,
-                sale?.TransactionDateTime,
-                null, // logo path - uses default
-                "ORDER CONFIRMATION",
-                location?.Name // outlet
-            );
+		if (order.SaleId is not null && order.SaleId > 0)
+			throw new InvalidOperationException("Cannot delete order as it is already converted to a sale.");
 
-            // Generate file name
-            var currentDateTime = await CommonData.LoadCurrentDateTime();
-            string fileName = $"ORDER_INVOICE_{savedOrder.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.pdf";
-            return (pdfStream, fileName);
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Invoice generation failed: {ex.Message}", ex);
-        }
-    }
+		order.Status = false;
+		await InsertOrder(order);
+	}
 
-    public static async Task DeleteOrder(int orderId)
-    {
-        var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId);
-        var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot delete order transaction as the financial year is locked.");
+	public static async Task RecoverOrderTransaction(OrderModel order)
+	{
+		var transactionDetails = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, order.Id);
+		List<OrderItemCartModel> orderItemCarts = [];
 
-        if (order.SaleId is not null && order.SaleId > 0)
-            throw new InvalidOperationException("Cannot delete order as it is already converted to a sale.");
+		foreach (var item in transactionDetails)
+			orderItemCarts.Add(new()
+			{
+				ItemId = item.ProductId,
+				ItemName = "",
+				Quantity = item.Quantity,
+				Remarks = item.Remarks
+			});
 
-        order.Status = false;
-        await InsertOrder(order);
-    }
+		await SaveOrderTransaction(order, orderItemCarts);
+	}
 
-    public static async Task RecoverOrderTransaction(OrderModel order)
-    {
-        var orderDetails = await LoadOrderDetailByOrder(order.Id);
-        List<OrderItemCartModel> orderItemCarts = [];
+	public static async Task<int> SaveOrderTransaction(OrderModel order, List<OrderItemCartModel> orderDetails)
+	{
+		bool update = order.Id > 0;
 
-        foreach (var item in orderDetails)
-            orderItemCarts.Add(new()
-            {
-                ItemId = item.ProductId,
-                ItemName = "",
-                Quantity = item.Quantity,
-                Remarks = item.Remarks
-            });
+		if (update)
+		{
+			var existingOrder = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, order.Id);
+			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingOrder.FinancialYearId);
+			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
-        await SaveOrderTransaction(order, orderItemCarts);
-    }
+			if (existingOrder.SaleId is not null && existingOrder.SaleId > 0)
+				throw new InvalidOperationException("Cannot update order as it is already converted to a sale.");
 
-    public static async Task<int> SaveOrderTransaction(OrderModel order, List<OrderItemCartModel> orderDetails)
-    {
-        bool update = order.Id > 0;
+			order.TransactionNo = existingOrder.TransactionNo;
+		}
+		else
+			order.TransactionNo = await GenerateCodes.GenerateOrderTransactionNo(order);
 
-        if (update)
-        {
-            var existingOrder = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, order.Id);
-            var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingOrder.FinancialYearId);
-            if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
-                throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
+		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
+		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
-            if (existingOrder.SaleId is not null && existingOrder.SaleId > 0)
-                throw new InvalidOperationException("Cannot update order as it is already converted to a sale.");
+		order.Id = await InsertOrder(order);
+		await SaveOrderDetail(order, orderDetails, update);
 
-            order.TransactionNo = existingOrder.TransactionNo;
-        }
-        else
-            order.TransactionNo = await GenerateCodes.GenerateOrderTransactionNo(order);
+		return order.Id;
+	}
 
-        var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
-            throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
+	private static async Task SaveOrderDetail(OrderModel order, List<OrderItemCartModel> orderDetails, bool update)
+	{
+		if (update)
+		{
+			var existingOrderDetails = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, order.Id);
+			foreach (var item in existingOrderDetails)
+			{
+				item.Status = false;
+				await InsertOrderDetail(item);
+			}
+		}
 
-        order.Id = await InsertOrder(order);
-        await SaveOrderDetail(order, orderDetails, update);
-
-        return order.Id;
-    }
-
-    private static async Task SaveOrderDetail(OrderModel order, List<OrderItemCartModel> orderDetails, bool update)
-    {
-        if (update)
-        {
-            var existingOrderDetails = await LoadOrderDetailByOrder(order.Id);
-            foreach (var item in existingOrderDetails)
-            {
-                item.Status = false;
-                await InsertOrderDetail(item);
-            }
-        }
-
-        foreach (var item in orderDetails)
-            await InsertOrderDetail(new()
-            {
-                Id = 0,
-                OrderId = order.Id,
-                ProductId = item.ItemId,
-                Quantity = item.Quantity,
-                Remarks = item.Remarks,
-                Status = true
-            });
-    }
+		foreach (var item in orderDetails)
+			await InsertOrderDetail(new()
+			{
+				Id = 0,
+				MasterId = order.Id,
+				ProductId = item.ItemId,
+				Quantity = item.Quantity,
+				Remarks = item.Remarks,
+				Status = true
+			});
+	}
 }

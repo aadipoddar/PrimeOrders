@@ -299,7 +299,7 @@ public partial class TaxPage
             StateHasChanged();
 
             // Call the Excel export utility
-            var stream = await Task.Run(() => TaxExcelExport.ExportTax(_taxes));
+            var stream = await TaxExcelExport.ExportTax(_taxes);
 
             // Generate file name
             string fileName = "TAX_MASTER.xlsx";
@@ -331,7 +331,7 @@ public partial class TaxPage
             StateHasChanged();
 
             // Call the PDF export utility
-            var stream = await Task.Run(() => TaxPDFExport.ExportTax(_taxes));
+            var stream = await TaxPDFExport.ExportTax(_taxes);
 
             // Generate file name
             string fileName = "TAX_MASTER.pdf";

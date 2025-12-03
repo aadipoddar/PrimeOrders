@@ -51,7 +51,7 @@ public static class KitchenProductionInvoicePDFExport
         }).ToList();
 
         // Use the simplified export method
-        return ExportKitchenProductionInvoiceWithItems(
+        return await ExportKitchenProductionInvoiceWithItems(
             kitchenProductionHeader,
             cartItems,
             company,
@@ -65,7 +65,7 @@ public static class KitchenProductionInvoicePDFExport
     /// Export Kitchen Production with product names already loaded (requires additional data)
     /// Uses generic invoice utility with zero discount/tax for simplified format
     /// </summary>
-    public static MemoryStream ExportKitchenProductionInvoiceWithItems(
+    public static async Task<MemoryStream> ExportKitchenProductionInvoiceWithItems(
         KitchenProductionModel kitchenProductionHeader,
         List<KitchenProductionProductCartModel> kitchenProductionProducts,
         CompanyModel company,
@@ -117,7 +117,7 @@ public static class KitchenProductionInvoicePDFExport
         };
 
         // Generate invoice PDF using generic utility
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,

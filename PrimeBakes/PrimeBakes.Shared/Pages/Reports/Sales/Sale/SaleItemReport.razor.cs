@@ -440,16 +440,14 @@ public partial class SaleItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleItemReportExcelExport.ExportSaleItemReport(
+			var stream = await SaleItemReportExcelExport.ExportSaleItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_user.LocationId == 1,
 					_selectedLocation?.Name
-				)
-			);
+				);
 
 			string fileName = $"SALE_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -483,16 +481,14 @@ public partial class SaleItemReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleItemReportPDFExport.ExportSaleItemReport(
+			var stream = await SaleItemReportPDFExport.ExportSaleItemReport(
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_user.LocationId == 1,
 					_selectedLocation?.Name
-				)
-			);
+				);
 
 			string fileName = $"SALE_ITEM_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

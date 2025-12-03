@@ -16,7 +16,7 @@ public static class ProductStockSummaryReportPDFExport
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="locationName">Optional location name to display in header</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportProductStockReport(
+    public static async Task<MemoryStream> ExportProductStockReport(
         IEnumerable<ProductStockSummaryModel> stockData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -202,7 +202,7 @@ public static class ProductStockSummaryReportPDFExport
         };
 
         // Call the generic PDF export utility with landscape mode for all columns
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             stockData,
             "PRODUCT STOCK REPORT",
             dateRangeStart,

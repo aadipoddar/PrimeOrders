@@ -16,7 +16,7 @@ public static class RawMaterialStockReportExcelExport
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="stockDetailsData">Optional collection of raw material stock detail records for second worksheet</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportRawMaterialStockReport(
+    public static async Task<MemoryStream> ExportRawMaterialStockReport(
         IEnumerable<RawMaterialStockSummaryModel> stockData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -93,7 +93,7 @@ public static class RawMaterialStockReportExcelExport
 
         // If no details data provided, use the simple single-worksheet export
         if (stockDetailsData == null || !stockDetailsData.Any())
-            return ExcelExportUtil.ExportToExcel(
+            return await ExcelExportUtil.ExportToExcel(
                 stockData,
                 "RAW MATERIAL STOCK REPORT",
                 "Stock Summary",
@@ -104,7 +104,7 @@ public static class RawMaterialStockReportExcelExport
             );
 
         // Multi-worksheet export
-        return ExportWithDetails(
+        return await ExportWithDetails(
             stockData,
             stockDetailsData,
             dateRangeStart,
@@ -117,7 +117,7 @@ public static class RawMaterialStockReportExcelExport
     /// <summary>
     /// Export with both summary and details worksheets
     /// </summary>
-    private static MemoryStream ExportWithDetails(
+    private static async Task<MemoryStream> ExportWithDetails(
         IEnumerable<RawMaterialStockSummaryModel> stockData,
         IEnumerable<RawMaterialStockDetailsModel> stockDetailsData,
         DateOnly? dateRangeStart,
@@ -126,7 +126,7 @@ public static class RawMaterialStockReportExcelExport
         List<string> summaryColumnOrder)
     {
         // Create the first worksheet with summary data
-        var summaryStream = ExcelExportUtil.ExportToExcel(
+        var summaryStream = await ExcelExportUtil.ExportToExcel(
             stockData,
             "RAW MATERIAL STOCK REPORT",
             "Stock Summary",
@@ -151,7 +151,7 @@ public static class RawMaterialStockReportExcelExport
             [nameof(RawMaterialStockDetailsModel.Type)] = new() { DisplayName = "Trans Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 18 },
 
             // Date fields
-            [nameof(RawMaterialStockDetailsModel.TransactionDate)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
+            [nameof(RawMaterialStockDetailsModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
             // Numeric fields
             [nameof(RawMaterialStockDetailsModel.Quantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
             [nameof(RawMaterialStockDetailsModel.NetRate)] = new() { DisplayName = "Net Rate", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = false, Width = 12 }
@@ -160,7 +160,7 @@ public static class RawMaterialStockReportExcelExport
         // Define column order for details
         var detailsColumnOrder = new List<string>
         {
-            nameof(RawMaterialStockDetailsModel.TransactionDate),
+            nameof(RawMaterialStockDetailsModel.TransactionDateTime),
             nameof(RawMaterialStockDetailsModel.TransactionNo),
             nameof(RawMaterialStockDetailsModel.Type),
             nameof(RawMaterialStockDetailsModel.RawMaterialName),
@@ -170,7 +170,7 @@ public static class RawMaterialStockReportExcelExport
         };
 
         // Create the details worksheet
-        var detailsStream = ExcelExportUtil.ExportToExcel(
+        var detailsStream = await ExcelExportUtil.ExportToExcel(
             stockDetailsData,
             "RAW MATERIAL STOCK DETAILS",
             "Transaction Details",

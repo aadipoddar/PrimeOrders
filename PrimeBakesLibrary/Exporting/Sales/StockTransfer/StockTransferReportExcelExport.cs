@@ -4,7 +4,7 @@ namespace PrimeBakesLibrary.Exporting.Sales.StockTransfer;
 
 public static class StockTransferReportExcelExport
 {
-    public static MemoryStream ExportStockTransferReport(
+    public static async Task<MemoryStream> ExportStockTransferReport(
         IEnumerable<StockTransferOverviewModel> data,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -117,7 +117,7 @@ public static class StockTransferReportExcelExport
                 columnOrder.Insert(3, nameof(StockTransferOverviewModel.ToLocationName));
         }
 
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             data,
             "STOCK TRANSFER REPORT",
             "Stock Transfers",

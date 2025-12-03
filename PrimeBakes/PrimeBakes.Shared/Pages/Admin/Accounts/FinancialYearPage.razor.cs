@@ -328,7 +328,7 @@ public partial class FinancialYearPage
             StateHasChanged();
 
             // Call the Excel export utility
-            var stream = await Task.Run(() => FinancialYearExcelExport.ExportFinancialYear(_financialYears));
+            var stream = await FinancialYearExcelExport.ExportFinancialYear(_financialYears);
 
             // Generate file name
             string fileName = "FINANCIAL_YEAR_MASTER.xlsx";
@@ -360,7 +360,7 @@ public partial class FinancialYearPage
             StateHasChanged();
 
             // Call the PDF export utility
-            var stream = await Task.Run(() => FinancialYearPDFExport.ExportFinancialYear(_financialYears));
+            var stream = await FinancialYearPDFExport.ExportFinancialYear(_financialYears);
 
             // Generate file name
             string fileName = "FINANCIAL_YEAR_MASTER.pdf";

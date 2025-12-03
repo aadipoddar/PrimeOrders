@@ -63,7 +63,6 @@ else
 				</svg>
 			</button>
 			<button class="btn-icon" @onclick="NavigateToTransactionPage" title="New Transaction (Ctrl + N)" disabled="@_isProcessing">
-				disabled="@_isProcessing">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="12" y1="5" x2="12" y2="19" />
@@ -269,7 +268,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.ItemDiscountAmount)"
+								<GridAggregateColumn Field="@nameof(PurchaseReturnOverviewModel.ItemDiscountAmount)"
 													 Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -280,7 +279,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalAfterItemDiscount)"
+								<GridAggregateColumn Field="@nameof(PurchaseReturnOverviewModel.TotalAfterItemDiscount)"
 													 Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -289,7 +288,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalInclusiveTaxAmount)"
+								<GridAggregateColumn Field="@nameof(PurchaseReturnOverviewModel.TotalInclusiveTaxAmount)"
 													 Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -298,7 +297,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalExtraTaxAmount)"
+								<GridAggregateColumn Field="@nameof(PurchaseReturnOverviewModel.TotalExtraTaxAmount)"
 													 Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{
@@ -307,7 +306,7 @@ else
 										}
 									</FooterTemplate>
 								</GridAggregateColumn>
-								<GridAggregateColumn Field="@nameof(PurchaseOverviewModel.TotalAfterTax)"
+								<GridAggregateColumn Field="@nameof(PurchaseReturnOverviewModel.TotalAfterTax)"
 													 Type="AggregateType.Sum" Format="N2">
 									<FooterTemplate>
 										@{

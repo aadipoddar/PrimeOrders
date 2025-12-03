@@ -15,7 +15,7 @@ public static class ProductStockDetailsReportPDFExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="locationName">Optional location name to display in header</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportProductStockDetailsReport(
+    public static async Task<MemoryStream> ExportProductStockDetailsReport(
         IEnumerable<ProductStockDetailsModel> stockDetailsData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -27,7 +27,7 @@ public static class ProductStockDetailsReportPDFExport
         // Define column order for details (no toggle - always same columns)
         var columnOrder = new List<string>
         {
-            nameof(ProductStockDetailsModel.TransactionDate),
+            nameof(ProductStockDetailsModel.TransactionDateTime),
             nameof(ProductStockDetailsModel.TransactionNo),
             nameof(ProductStockDetailsModel.Type),
             nameof(ProductStockDetailsModel.ProductName),
@@ -37,7 +37,7 @@ public static class ProductStockDetailsReportPDFExport
         };
 
         // Customize specific columns for PDF display
-        columnSettings[nameof(ProductStockDetailsModel.TransactionDate)] = new()
+        columnSettings[nameof(ProductStockDetailsModel.TransactionDateTime)] = new()
         {
             DisplayName = "Trans Date",
             Format = "dd-MMM-yyyy",
@@ -108,7 +108,7 @@ public static class ProductStockDetailsReportPDFExport
         };
 
         // Call the generic PDF export utility with portrait mode
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             stockDetailsData,
             "PRODUCT STOCK TRANSACTION DETAILS",
             dateRangeStart,

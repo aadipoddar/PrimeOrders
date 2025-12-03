@@ -360,7 +360,7 @@ public partial class LedgerPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => LedgerExcelExport.ExportLedger(_ledgers));
+			var stream = await LedgerExcelExport.ExportLedger(_ledgers);
 
 			// Generate file name
 			string fileName = "LEDGER_MASTER.xlsx";
@@ -392,7 +392,7 @@ public partial class LedgerPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => LedgerPDFExport.ExportLedger(_ledgers));
+			var stream = await LedgerPDFExport.ExportLedger(_ledgers);
 
 			// Generate file name
 			string fileName = "LEDGER_MASTER.pdf";

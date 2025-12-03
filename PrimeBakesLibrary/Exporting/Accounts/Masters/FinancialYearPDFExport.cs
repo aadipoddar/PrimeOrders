@@ -12,7 +12,7 @@ public static class FinancialYearPDFExport
     /// </summary>
     /// <param name="financialYearData">Collection of financial year records</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportFinancialYear(IEnumerable<FinancialYearModel> financialYearData)
+    public static async Task<MemoryStream> ExportFinancialYear(IEnumerable<FinancialYearModel> financialYearData)
     {
         // Create enriched data with status formatting
         var enrichedData = financialYearData.Select(fy => new
@@ -105,7 +105,7 @@ public static class FinancialYearPDFExport
         ];
 
         // Call the generic PDF export utility
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "FINANCIAL YEAR MASTER",
             null,

@@ -12,7 +12,7 @@ public static class CompanyExcelExport
 	/// </summary>
 	/// <param name="companyData">Collection of company records</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportCompany(IEnumerable<CompanyModel> companyData)
+	public static async Task<MemoryStream> ExportCompany(IEnumerable<CompanyModel> companyData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = companyData.Select(company => new
@@ -60,7 +60,7 @@ public static class CompanyExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			enrichedData,
 			"COMPANY",
 			"Company Data",

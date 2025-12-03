@@ -8,6 +8,7 @@ using Syncfusion.Drawing;
 using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Pdf.Grid;
+using PrimeBakesLibrary.Data.Common;
 
 namespace PrimeBakesLibrary.Exporting;
 
@@ -116,7 +117,7 @@ public static class PDFInvoiceExportUtil
     /// <param name="invoiceType">Type of invoice (INVOICE, PURCHASE RETURN, SALES INVOICE, etc.)</param>
     /// <param name="outlet">Optional: Outlet/Location name</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportInvoiceToPdf(
+    public static async Task<MemoryStream> ExportInvoiceToPdf(
         InvoiceData invoiceData,
         List<InvoiceLineItem> lineItems,
         CompanyModel company,
@@ -136,7 +137,7 @@ public static class PDFInvoiceExportUtil
             PdfGraphics graphics = page.Graphics;
 
             // Add footer template first
-            AddBrandingFooter(pdfDocument);
+            await AddBrandingFooter(pdfDocument);
 
             // Initialize layout format for proper pagination
             _layoutFormat = new()
@@ -204,7 +205,7 @@ public static class PDFInvoiceExportUtil
     /// <param name="logoPath">Optional: Path to company logo</param>
     /// <param name="invoiceType">Type of voucher (JOURNAL VOUCHER, PAYMENT VOUCHER, etc.)</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportAccountingVoucherToPdf(
+    public static async Task<MemoryStream> ExportAccountingVoucherToPdf(
         InvoiceData invoiceData,
         List<AccountingLineItem> accountingItems,
         CompanyModel company,
@@ -220,7 +221,7 @@ public static class PDFInvoiceExportUtil
             PdfGraphics graphics = page.Graphics;
 
             // Add footer template first
-            AddBrandingFooter(pdfDocument);
+            await AddBrandingFooter(pdfDocument);
 
             // Initialize layout format for proper pagination
             _layoutFormat = new()
@@ -928,7 +929,7 @@ public static class PDFInvoiceExportUtil
     /// <summary>
     /// Add branding footer to all pages
     /// </summary>
-    private static void AddBrandingFooter(PdfDocument document)
+    private static async Task AddBrandingFooter(PdfDocument document)
     {
         try
         {
@@ -944,11 +945,12 @@ public static class PDFInvoiceExportUtil
             footer.Graphics.DrawLine(separatorPen, new PointF(0, 0), new PointF(footer.Width, 0));
 
             // Left: AadiSoft branding
-            string branding = $"© {DateTime.Now.Year} A Product By aadisoft.vercel.app";
+            var currentDateTime = await CommonData.LoadCurrentDateTime();
+            string branding = $"© {currentDateTime.Year} A Product By aadisoft.vercel.app";
             footer.Graphics.DrawString(branding, footerFont, footerBrush, new PointF(15, 8));
 
             // Center: Export date
-            string exportDate = $"Exported on: {DateTime.Now:dd-MMM-yyyy hh:mm tt}";
+            string exportDate = $"Exported on: {currentDateTime:dd-MMM-yyyy hh:mm tt}";
             SizeF exportDateSize = footerFont.MeasureString(exportDate);
             float centerX = (document.Pages[0].GetClientSize().Width - exportDateSize.Width) / 2;
             footer.Graphics.DrawString(exportDate, footerFont, footerBrush, new PointF(centerX, 8));

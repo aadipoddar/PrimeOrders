@@ -12,7 +12,7 @@ public static class VoucherPDFExport
 	/// </summary>
 	/// <param name="voucherData">Collection of voucher records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportVoucher(IEnumerable<VoucherModel> voucherData)
+	public static async Task<MemoryStream> ExportVoucher(IEnumerable<VoucherModel> voucherData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = voucherData.Select(voucher => new
@@ -61,7 +61,7 @@ public static class VoucherPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"VOUCHER MASTER",
 			null,

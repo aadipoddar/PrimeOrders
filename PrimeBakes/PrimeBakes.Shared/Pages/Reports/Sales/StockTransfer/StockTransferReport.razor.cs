@@ -286,8 +286,7 @@ public partial class StockTransferReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				StockTransferReportExcelExport.ExportStockTransferReport(
+			var stream = await StockTransferReportExcelExport.ExportStockTransferReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
@@ -296,8 +295,7 @@ public partial class StockTransferReport : IAsyncDisposable
 					_selectedLocation?.Name,
 					_selectedToLocation?.Id > 0,
 					_selectedToLocation?.Name
-				)
-			);
+				);
 
 			string fileName = $"STOCK_TRANSFER_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -331,8 +329,7 @@ public partial class StockTransferReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				StockTransferReportPdfExport.ExportStockTransferReport(
+			var stream = await StockTransferReportPdfExport.ExportStockTransferReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
@@ -341,8 +338,7 @@ public partial class StockTransferReport : IAsyncDisposable
 					_selectedLocation?.Name,
 					_selectedToLocation?.Id > 0,
 					_selectedToLocation?.Name
-				)
-			);
+				);
 
 			string fileName = $"STOCK_TRANSFER_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

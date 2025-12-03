@@ -269,7 +269,7 @@ public partial class KitchenPage
             StateHasChanged();
 
             // Call the Excel export utility
-            var stream = await Task.Run(() => KitchenExcelExport.ExportKitchen(_kitchens));
+            var stream = await KitchenExcelExport.ExportKitchen(_kitchens);
 
             // Generate file name
             string fileName = _showDeleted ? "KITCHEN_MASTER_DELETED.xlsx" : "KITCHEN_MASTER.xlsx";
@@ -301,7 +301,7 @@ public partial class KitchenPage
             StateHasChanged();
 
             // Call the PDF export utility
-            var stream = await Task.Run(() => KitchenPDFExport.ExportKitchen(_kitchens));
+            var stream = await KitchenPDFExport.ExportKitchen(_kitchens);
 
             // Generate file name
             string fileName = _showDeleted ? "KITCHEN_MASTER_DELETED.pdf" : "KITCHEN_MASTER.pdf";

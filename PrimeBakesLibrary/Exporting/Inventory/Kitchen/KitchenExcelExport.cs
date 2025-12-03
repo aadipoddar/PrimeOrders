@@ -12,7 +12,7 @@ public static class KitchenExcelExport
     /// </summary>
     /// <param name="kitchenData">Collection of kitchen records</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportKitchen(IEnumerable<KitchenModel> kitchenData)
+    public static async Task<MemoryStream> ExportKitchen(IEnumerable<KitchenModel> kitchenData)
     {
         // Create enriched data with status formatting
         var enrichedData = kitchenData.Select(kitchen => new
@@ -44,7 +44,7 @@ public static class KitchenExcelExport
         ];
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             enrichedData,
             "KITCHEN MASTER",
             "Kitchen Data",

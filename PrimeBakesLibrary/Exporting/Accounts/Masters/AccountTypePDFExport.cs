@@ -12,7 +12,7 @@ public static class AccountTypePDFExport
 	/// </summary>
 	/// <param name="accountTypeData">Collection of account type records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportAccountType(IEnumerable<AccountTypeModel> accountTypeData)
+	public static async Task<MemoryStream> ExportAccountType(IEnumerable<AccountTypeModel> accountTypeData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = accountTypeData.Select(accountType => new
@@ -59,7 +59,7 @@ public static class AccountTypePDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"ACCOUNT TYPE MASTER",
 			null,

@@ -280,14 +280,12 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() =>
-				PurchaseReturnReportExcelExport.ExportPurchaseReturnReport(
+			var stream = await PurchaseReturnReportExcelExport.ExportPurchaseReturnReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
+				);
 
 			// Generate file name with date range
 			string fileName = $"PURCHASE_RETURN_REPORT";
@@ -326,15 +324,13 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() =>
-				PurchaseReturnReportPdfExport.ExportPurchaseReturnReport(
+			var stream = await PurchaseReturnReportPdfExport.ExportPurchaseReturnReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns
-				)
-			);
-
+				);
+			
 			// Generate file name with date range
 			string fileName = $"PURCHASE_RETURN_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

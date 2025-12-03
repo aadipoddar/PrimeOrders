@@ -13,7 +13,7 @@ public static class UserExcelExport
     /// </summary>
     /// <param name="userData">Collection of user records</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportUser(IEnumerable<UserModel> userData)
+    public static async Task<MemoryStream> ExportUser(IEnumerable<UserModel> userData)
     {
         // Load locations to display location names instead of IDs
         var locations = CommonData.LoadTableData<LocationModel>(TableNames.Location).Result;
@@ -64,7 +64,7 @@ public static class UserExcelExport
         ];
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             enrichedData,
             "USER MASTER",
             "User Data",

@@ -26,7 +26,7 @@ public static class OrderItemConsolidatedExcelExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="locationName">Name of the location for report header</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportConsolidatedOrderItemReport(
+    public static async Task<MemoryStream> ExportConsolidatedOrderItemReport(
         IEnumerable<OrderItemOverviewModel> orderItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -49,25 +49,25 @@ public static class OrderItemConsolidatedExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // Text fields
-            ["ItemName"] = new() { DisplayName = "Item Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["ItemCode"] = new() { DisplayName = "Item Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["ItemCategoryName"] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(ConsolidatedOrderItemModel.ItemName)] = new() { DisplayName = "Item", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(ConsolidatedOrderItemModel.ItemCode)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(ConsolidatedOrderItemModel.ItemCategoryName)] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
             // Numeric fields - Quantity
-            ["TotalQuantity"] = new() { DisplayName = "Total Quantity", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
+            [nameof(ConsolidatedOrderItemModel.TotalQuantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
         };
 
         // Define column order
         List<string> columnOrder =
         [
-            "ItemName",
-            "ItemCode",
-            "ItemCategoryName",
-            "TotalQuantity"
+            nameof(ConsolidatedOrderItemModel.ItemName),
+            nameof(ConsolidatedOrderItemModel.ItemCode),
+            nameof(ConsolidatedOrderItemModel.ItemCategoryName),
+            nameof(ConsolidatedOrderItemModel.TotalQuantity)
         ];
 
         // Export using the generic utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             consolidatedData,
             "CONSOLIDATED ORDER ITEM REPORT",
             "Order Items Grouped by Product",

@@ -12,7 +12,7 @@ public static class StateUTExcelExport
     /// </summary>
     /// <param name="stateUTData">Collection of state/UT records</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportStateUT(IEnumerable<StateUTModel> stateUTData)
+    public static async Task<MemoryStream> ExportStateUT(IEnumerable<StateUTModel> stateUTData)
     {
         // Create enriched data with status formatting
         var enrichedData = stateUTData.Select(stateUT => new
@@ -42,7 +42,7 @@ public static class StateUTExcelExport
         [
             "Id", "Name", "Remarks", "UnionTerritory", "Status"
         ];        // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             enrichedData,
             "STATE & UNION TERRITORY",
             "State UT Data",

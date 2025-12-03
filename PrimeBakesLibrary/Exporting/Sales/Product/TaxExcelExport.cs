@@ -12,7 +12,7 @@ public static class TaxExcelExport
     /// </summary>
     /// <param name="taxData">Collection of tax records</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportTax(IEnumerable<TaxModel> taxData)
+    public static async Task<MemoryStream> ExportTax(IEnumerable<TaxModel> taxData)
     {
         // Create enriched data with status formatting
         var enrichedData = taxData.Select(tax => new
@@ -62,7 +62,7 @@ public static class TaxExcelExport
         ];
 
         // Call the generic Excel export utility
-        return ExcelExportUtil.ExportToExcel(
+        return await ExcelExportUtil.ExportToExcel(
             enrichedData,
             "TAX MASTER",
             "Tax Data",

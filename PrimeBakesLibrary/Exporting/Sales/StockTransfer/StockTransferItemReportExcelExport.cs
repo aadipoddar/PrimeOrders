@@ -18,7 +18,7 @@ public static class StockTransferItemReportExcelExport
 	/// <param name="locationName">Name of the location for report header</param>
 	/// <param name="toLocationName">Name of the to-location for report header</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportStockTransferItemReport(
+	public static async Task<MemoryStream> ExportStockTransferItemReport(
 		IEnumerable<StockTransferItemOverviewModel> stockTransferItemData,
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
@@ -143,7 +143,7 @@ public static class StockTransferItemReportExcelExport
 		}
 
 		// Export using the generic utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			stockTransferItemData,
 			"STOCK TRANSFER ITEM REPORT",
 			"Stock Transfer Item Transactions",

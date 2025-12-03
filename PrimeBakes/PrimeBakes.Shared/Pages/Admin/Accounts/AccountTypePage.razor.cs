@@ -269,7 +269,7 @@ public partial class AccountTypePage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => AccountTypeExcelExport.ExportAccountType(_accountTypes));
+			var stream = await AccountTypeExcelExport.ExportAccountType(_accountTypes);
 
 			// Generate file name
 			string fileName = "ACCOUNT_TYPE_MASTER.xlsx";
@@ -301,7 +301,7 @@ public partial class AccountTypePage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => AccountTypePDFExport.ExportAccountType(_accountTypes));
+			var stream = await AccountTypePDFExport.ExportAccountType(_accountTypes);
 
 			// Generate file name
 			string fileName = "ACCOUNT_TYPE_MASTER.pdf";

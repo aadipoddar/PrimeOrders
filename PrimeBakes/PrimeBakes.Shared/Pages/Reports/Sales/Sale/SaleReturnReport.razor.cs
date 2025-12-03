@@ -311,8 +311,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleReturnReportExcelExport.ExportSaleReturnReport(
+			var stream = await SaleReturnReportExcelExport.ExportSaleReturnReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
@@ -320,8 +319,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 					_user.LocationId == 1,
 					_selectedLocation?.Name,
 					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
-				)
-			);
+				);
 
 			string fileName = $"SALE_RETURN_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
@@ -356,8 +354,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
-			var stream = await Task.Run(() =>
-				SaleReturnReportPdfExport.ExportSaleReturnReport(
+			var stream = await SaleReturnReportPdfExport.ExportSaleReturnReport(
 					_transactionOverviews.Where(_ => _.Status),
 					dateRangeStart,
 					dateRangeEnd,
@@ -365,8 +362,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 					_user.LocationId == 1,
 					_selectedLocation?.Name,
 					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
-				)
-			);
+				);
 
 			string fileName = $"SALE_RETURN_REPORT";
 			if (dateRangeStart.HasValue || dateRangeEnd.HasValue)

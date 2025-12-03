@@ -269,7 +269,7 @@ public partial class RawMaterialCategoryPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => RawMaterialCategoryExcelExport.ExportRawMaterialCategory(_rawMaterialCategories));
+			var stream = await RawMaterialCategoryExcelExport.ExportRawMaterialCategory(_rawMaterialCategories);
 
 			// Generate file name
 			string fileName = "RAW_MATERIAL_CATEGORY_MASTER.xlsx";
@@ -301,7 +301,7 @@ public partial class RawMaterialCategoryPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => RawMaterialCategoryPDFExport.ExportRawMaterialCategory(_rawMaterialCategories));
+			var stream = await RawMaterialCategoryPDFExport.ExportRawMaterialCategory(_rawMaterialCategories);
 
 			// Generate file name
 			string fileName = "RAW_MATERIAL_CATEGORY_MASTER.pdf";

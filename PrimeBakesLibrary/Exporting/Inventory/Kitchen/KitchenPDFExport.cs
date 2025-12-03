@@ -12,7 +12,7 @@ public static class KitchenPDFExport
     /// </summary>
     /// <param name="kitchenData">Collection of kitchen records</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportKitchen(IEnumerable<KitchenModel> kitchenData)
+    public static async Task<MemoryStream> ExportKitchen(IEnumerable<KitchenModel> kitchenData)
     {
         // Create enriched data with status formatting
         var enrichedData = kitchenData.Select(kitchen => new
@@ -59,7 +59,7 @@ public static class KitchenPDFExport
         ];
 
         // Call the generic PDF export utility
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "KITCHEN MASTER",
             null,

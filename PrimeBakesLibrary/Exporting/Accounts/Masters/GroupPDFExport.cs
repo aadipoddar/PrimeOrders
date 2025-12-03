@@ -12,7 +12,7 @@ public static class GroupPDFExport
 	/// </summary>
 	/// <param name="groupData">Collection of group records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportGroup(IEnumerable<GroupModel> groupData)
+	public static async Task<MemoryStream> ExportGroup(IEnumerable<GroupModel> groupData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = groupData.Select(group => new
@@ -59,7 +59,7 @@ public static class GroupPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"GROUP MASTER",
 			null,

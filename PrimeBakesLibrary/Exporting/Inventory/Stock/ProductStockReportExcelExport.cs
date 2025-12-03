@@ -17,7 +17,7 @@ public static class ProductStockReportExcelExport
     /// <param name="stockDetailsData">Optional collection of product stock detail records for second worksheet</param>
     /// <param name="locationName">Optional location name to display in header</param>
     /// <returns>MemoryStream containing the Excel file</returns>
-    public static MemoryStream ExportProductStockReport(
+    public static async Task<MemoryStream> ExportProductStockReport(
         IEnumerable<ProductStockSummaryModel> stockData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
@@ -93,7 +93,7 @@ public static class ProductStockReportExcelExport
         // If no details data provided, use the simple single-worksheet export
         if (stockDetailsData == null || !stockDetailsData.Any())
         {
-            return ExcelExportUtil.ExportToExcel(
+            return await ExcelExportUtil.ExportToExcel(
                 stockData,
                 "PRODUCT STOCK REPORT",
                 "Stock Summary",
@@ -106,7 +106,7 @@ public static class ProductStockReportExcelExport
         }
 
         // Multi-worksheet export
-        return ExportWithDetails(
+        return await ExportWithDetails(
             stockData,
             stockDetailsData,
             dateRangeStart,
@@ -120,7 +120,7 @@ public static class ProductStockReportExcelExport
     /// <summary>
     /// Export with both summary and details worksheets
     /// </summary>
-    private static MemoryStream ExportWithDetails(
+    private static async Task<MemoryStream> ExportWithDetails(
         IEnumerable<ProductStockSummaryModel> stockData,
         IEnumerable<ProductStockDetailsModel> stockDetailsData,
         DateOnly? dateRangeStart,
@@ -130,7 +130,7 @@ public static class ProductStockReportExcelExport
         string locationName = null)
     {
         // Create the first worksheet with summary data
-        var summaryStream = ExcelExportUtil.ExportToExcel(
+        var summaryStream = await ExcelExportUtil.ExportToExcel(
             stockData,
             "PRODUCT STOCK REPORT",
             "Stock Summary",
@@ -157,7 +157,7 @@ public static class ProductStockReportExcelExport
             [nameof(ProductStockDetailsModel.Type)] = new() { DisplayName = "Trans Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 18 },
 
             // Date fields
-            [nameof(ProductStockDetailsModel.TransactionDate)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
+            [nameof(ProductStockDetailsModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, Width = 15 },
 
             // Numeric fields
             [nameof(ProductStockDetailsModel.Quantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true, HighlightNegative = true, Width = 15 },
@@ -167,7 +167,7 @@ public static class ProductStockReportExcelExport
         // Define column order for details
         var detailsColumnOrder = new List<string>
         {
-            nameof(ProductStockDetailsModel.TransactionDate),
+            nameof(ProductStockDetailsModel.TransactionDateTime),
             nameof(ProductStockDetailsModel.TransactionNo),
             nameof(ProductStockDetailsModel.Type),
             nameof(ProductStockDetailsModel.ProductName),
@@ -177,7 +177,7 @@ public static class ProductStockReportExcelExport
         };
 
         // Create the details worksheet
-        var detailsStream = ExcelExportUtil.ExportToExcel(
+        var detailsStream = await ExcelExportUtil.ExportToExcel(
             stockDetailsData,
             "PRODUCT STOCK DETAILS",
             "Transaction Details",

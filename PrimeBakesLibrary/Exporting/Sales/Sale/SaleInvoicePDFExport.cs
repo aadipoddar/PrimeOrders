@@ -83,7 +83,7 @@ public static class SaleInvoicePDFExport
         };
 
         // Generate invoice PDF with generic models
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,
@@ -98,7 +98,7 @@ public static class SaleInvoicePDFExport
     /// <summary>
     /// Export Sale with item names (requires additional data)
     /// </summary>
-    public static MemoryStream ExportSaleInvoiceWithItems(
+    public static async Task<MemoryStream> ExportSaleInvoiceWithItems(
         SaleModel saleHeader,
         List<SaleItemCartModel> saleItems,
         CompanyModel company,
@@ -149,7 +149,7 @@ public static class SaleInvoicePDFExport
         };
 
         // Generate invoice PDF with generic models
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,

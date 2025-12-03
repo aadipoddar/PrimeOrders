@@ -42,16 +42,14 @@ public static class PurchaseData
 				throw new InvalidOperationException("Company or party information is missing.");
 
 			// Generate invoice PDF
-			var pdfStream = await Task.Run(() =>
-				PurchaseInvoicePDFExport.ExportPurchaseInvoice(
+			var pdfStream = await PurchaseInvoicePDFExport.ExportPurchaseInvoice(
 					transaction,
 					transactionDetails,
 					company,
 					party,
 					null, // logo path - uses default
 					"PURCHASE INVOICE"
-				)
-			);
+				);
 
 			// Generate file name
 			var currentDateTime = await CommonData.LoadCurrentDateTime();

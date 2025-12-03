@@ -13,7 +13,7 @@ public static class UserPDFExport
     /// </summary>
     /// <param name="userData">Collection of user records</param>
     /// <returns>MemoryStream containing the PDF file</returns>
-    public static MemoryStream ExportUser(IEnumerable<UserModel> userData)
+    public static async Task<MemoryStream> ExportUser(IEnumerable<UserModel> userData)
     {
         // Load locations to display location names instead of IDs
         var locations = CommonData.LoadTableData<LocationModel>(TableNames.Location).Result;
@@ -137,7 +137,7 @@ public static class UserPDFExport
         ];
 
         // Call the generic PDF export utility
-        return PDFReportExportUtil.ExportToPdf(
+        return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "USER MASTER",
             null,

@@ -12,7 +12,7 @@ public static class LedgerPDFExport
 	/// </summary>
 	/// <param name="ledgerData">Collection of ledger records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportLedger(IEnumerable<LedgerModel> ledgerData)
+	public static async Task<MemoryStream> ExportLedger(IEnumerable<LedgerModel> ledgerData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = ledgerData.Select(ledger => new
@@ -67,7 +67,7 @@ public static class LedgerPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"LEDGER MASTER",
 			null,

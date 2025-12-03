@@ -269,7 +269,7 @@ public partial class GroupPage
 			StateHasChanged();
 
 			// Call the Excel export utility
-			var stream = await Task.Run(() => GroupExcelExport.ExportGroup(_groups));
+			var stream = await GroupExcelExport.ExportGroup(_groups);
 
 			// Generate file name
 			string fileName = "GROUP_MASTER.xlsx";
@@ -301,7 +301,7 @@ public partial class GroupPage
 			StateHasChanged();
 
 			// Call the PDF export utility
-			var stream = await Task.Run(() => GroupPDFExport.ExportGroup(_groups));
+			var stream = await GroupPDFExport.ExportGroup(_groups);
 
 			// Generate file name
 			string fileName = "GROUP_MASTER.pdf";

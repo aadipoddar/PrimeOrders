@@ -12,7 +12,7 @@ public static class RawMaterialCategoryExcelExport
 	/// </summary>
 	/// <param name="rawMaterialCategoryData">Collection of raw material category records</param>
 	/// <returns>MemoryStream containing the Excel file</returns>
-	public static MemoryStream ExportRawMaterialCategory(IEnumerable<RawMaterialCategoryModel> rawMaterialCategoryData)
+	public static async Task<MemoryStream> ExportRawMaterialCategory(IEnumerable<RawMaterialCategoryModel> rawMaterialCategoryData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = rawMaterialCategoryData.Select(rawMaterialCategory => new
@@ -44,7 +44,7 @@ public static class RawMaterialCategoryExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return ExcelExportUtil.ExportToExcel(
+		return await ExcelExportUtil.ExportToExcel(
 			enrichedData,
 			"RAW MATERIAL CATEGORY",
 			"Raw Material Category Data",

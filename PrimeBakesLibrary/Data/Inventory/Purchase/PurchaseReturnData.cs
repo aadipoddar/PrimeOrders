@@ -38,16 +38,14 @@ public static class PurchaseReturnData
                 throw new InvalidOperationException("Invoice generation skipped - company or party not found.");
 
             // Generate invoice PDF
-            var pdfStream = await Task.Run(() =>
-                PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
+            var pdfStream = await PurchaseReturnInvoicePDFExport.ExportPurchaseReturnInvoice(
                     transaction,
                     transactionDetails,
                     company,
                     party,
                     null, // logo path - uses default
                     "PURCHASE RETURN INVOICE"
-                )
-            );
+                );
 
             // Generate file name
             var currentDateTime = await CommonData.LoadCurrentDateTime();

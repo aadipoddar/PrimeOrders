@@ -12,7 +12,7 @@ public static class RawMaterialCategoryPDFExport
 	/// </summary>
 	/// <param name="rawMaterialCategoryData">Collection of raw material category records</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
-	public static MemoryStream ExportRawMaterialCategory(IEnumerable<RawMaterialCategoryModel> rawMaterialCategoryData)
+	public static async Task<MemoryStream> ExportRawMaterialCategory(IEnumerable<RawMaterialCategoryModel> rawMaterialCategoryData)
 	{
 		// Create enriched data with status formatting
 		var enrichedData = rawMaterialCategoryData.Select(rawMaterialCategory => new
@@ -59,7 +59,7 @@ public static class RawMaterialCategoryPDFExport
 		];
 
 		// Call the generic PDF export utility
-		return PDFReportExportUtil.ExportToPdf(
+		return await PDFReportExportUtil.ExportToPdf(
 			enrichedData,
 			"Raw Material Category MASTER",
 			null,

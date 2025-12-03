@@ -92,7 +92,7 @@ public static class OrderInvoicePDFExport
             // Note: LocationModel doesn't have Address, MobileNo, GSTIN fields
         };
 
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,
@@ -107,7 +107,7 @@ public static class OrderInvoicePDFExport
     /// <summary>
     /// Export Order with item names already provided
     /// </summary>
-    public static MemoryStream ExportOrderInvoiceWithItems(
+    public static async Task<MemoryStream> ExportOrderInvoiceWithItems(
         OrderModel orderHeader,
         List<OrderItemCartModel> orderItems,
         CompanyModel company,
@@ -163,7 +163,7 @@ public static class OrderInvoicePDFExport
             Name = location.Name
         };
 
-        return PDFInvoiceExportUtil.ExportInvoiceToPdf(
+        return await PDFInvoiceExportUtil.ExportInvoiceToPdf(
             invoiceData,
             lineItems,
             company,
