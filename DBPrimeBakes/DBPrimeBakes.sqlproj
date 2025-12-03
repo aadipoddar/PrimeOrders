@@ -257,7 +257,4 @@
     <None Include="PublishLocations\AzureDBPrimeBakes.publish.xml" />
     <None Include="PublishLocations\LocalDBPrimeBakes.publish.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="DBPrimeBakes.refactorlog" />
-  </ItemGroup>
 </Project>

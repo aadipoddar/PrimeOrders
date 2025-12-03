@@ -63,7 +63,7 @@ public partial class Dashboard : IDisposable
             InvokeAsync(StateHasChanged);
         });
 
-        // await UpdateService.UpdateAppAsync("aadipoddar", "PrimeOrders", "com.aadisoft.primebakes", progress);
+        await UpdateService.UpdateAppAsync("aadipoddar", "PrimeBakes", "com.aadisoft.primebakes", progress);
 
         _isUpdating = false;
         StateHasChanged();
@@ -83,7 +83,7 @@ public partial class Dashboard : IDisposable
         {
             if (Factor == "Phone" && Platform.Contains("Android"))
             {
-                var hasUpdate = await UpdateService.CheckForUpdatesAsync("aadipoddar", "PrimeOrders", AppVersion);
+                var hasUpdate = await UpdateService.CheckForUpdatesAsync("aadipoddar", "PrimeBakes", AppVersion);
                 if (hasUpdate)
                     await StartUpdateProcess();
             }
