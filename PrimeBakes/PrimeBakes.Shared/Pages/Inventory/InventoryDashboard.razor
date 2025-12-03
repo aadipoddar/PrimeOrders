@@ -24,7 +24,7 @@ else
 			<p class="page-subtitle">Access all inventory modules and reports</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout">
+			<button class="btn-icon btn-icon-logout" @onclick="async () => await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService)" title="Logout">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
@@ -62,7 +62,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Purchase -->
-					<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToPurchase">
+					<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.Purchase)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -79,7 +79,7 @@ else
 					</SfButton>
 
 					<!-- Purchase Return -->
-					<SfButton CssClass="dashboard-button btn-red" OnClick="NavigateToPurchaseReturn">
+					<SfButton CssClass="dashboard-button btn-red" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.PurchaseReturn)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -95,7 +95,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen Issue -->
-					<SfButton CssClass="dashboard-button btn-orange" OnClick="NavigateToKitchenIssue">
+					<SfButton CssClass="dashboard-button btn-orange" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.KitchenIssue)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen Production -->
-					<SfButton CssClass="dashboard-button btn-green" OnClick="NavigateToKitchenProduction">
+					<SfButton CssClass="dashboard-button btn-green" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.KitchenProduction)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -127,7 +127,7 @@ else
 					</SfButton>
 
 					<!-- Raw Material Stock Adjustment -->
-					<SfButton CssClass="dashboard-button btn-purple" OnClick="NavigateToRawMaterialAdjustment">
+					<SfButton CssClass="dashboard-button btn-purple" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -146,7 +146,7 @@ else
 					</SfButton>
 
 					<!-- Product Stock Adjustment -->
-					<SfButton CssClass="dashboard-button btn-indigo" OnClick="NavigateToProductAdjustment">
+					<SfButton CssClass="dashboard-button btn-indigo" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -163,7 +163,7 @@ else
 					</SfButton>
 
 					<!-- Recipe -->
-					<SfButton CssClass="dashboard-button btn-pink" OnClick="NavigateToRecipe">
+					<SfButton CssClass="dashboard-button btn-pink" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.Recipe)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
@@ -200,7 +200,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Purchase Report -->
-					<SfButton CssClass="dashboard-button btn-cyan" OnClick="NavigateToPurchaseReport">
+					<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchase)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -215,7 +215,7 @@ else
 					</SfButton>
 
 					<!-- Purchase Item Report -->
-					<SfButton CssClass="dashboard-button btn-sky" OnClick="NavigateToPurchaseItemReport">
+					<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -234,7 +234,7 @@ else
 					</SfButton>
 
 					<!-- Purchase Return Report -->
-					<SfButton CssClass="dashboard-button btn-rose" OnClick="NavigateToPurchaseReturnReport">
+					<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -250,7 +250,7 @@ else
 					</SfButton>
 
 					<!-- Purchase Return Item Report -->
-					<SfButton CssClass="dashboard-button btn-amber" OnClick="NavigateToPurchaseReturnItemReport">
+					<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -268,7 +268,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen Issue Report -->
-					<SfButton CssClass="dashboard-button btn-emerald" OnClick="NavigateToKitchenIssueReport">
+					<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -284,7 +284,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen Issue Item Report -->
-					<SfButton CssClass="dashboard-button btn-teal" OnClick="NavigateToKitchenIssueItemReport">
+					<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -304,7 +304,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen Production Report -->
-					<SfButton CssClass="dashboard-button btn-violet" OnClick="NavigateToKitchenProductionReport">
+					<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -320,7 +320,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen Production Item Report -->
-					<SfButton CssClass="dashboard-button btn-lime" OnClick="NavigateToKitchenProductionItemReport">
+					<SfButton CssClass="dashboard-button btn-lime" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -336,7 +336,7 @@ else
 					</SfButton>
 
 					<!-- Raw Material Stock Report -->
-					<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToRawMaterialStockReport">
+					<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -353,7 +353,7 @@ else
 					</SfButton>
 
 					<!-- Product Stock Report -->
-					<SfButton CssClass="dashboard-button btn-indigo" OnClick="NavigateToProductStockReport">
+					<SfButton CssClass="dashboard-button btn-indigo" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportProductStock)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -390,7 +390,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Raw Material -->
-					<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToRawMaterial">
+					<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -408,7 +408,7 @@ else
 					</SfButton>
 
 					<!-- Raw Material Category -->
-					<SfButton CssClass="dashboard-button btn-cyan" OnClick="NavigateToRawMaterialCategory">
+					<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterialCategory)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -426,7 +426,7 @@ else
 					</SfButton>
 
 					<!-- Kitchen -->
-					<SfButton CssClass="dashboard-button btn-orange" OnClick="NavigateToKitchen">
+					<SfButton CssClass="dashboard-button btn-orange" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminKitchen)">
 						<div class="button-content">
 							<div class="button-icon-wrapper">
 								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"

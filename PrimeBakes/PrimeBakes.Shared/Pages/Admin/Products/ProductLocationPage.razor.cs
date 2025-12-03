@@ -74,9 +74,9 @@ public partial class ProductLocationPage
             if (_productLocation.LocationId > 0)
                 _productLocationOverviews = await ProductData.LoadProductByLocation(_productLocation.LocationId);
             else
-                _productLocationOverviews = [];
+                _productLocationOverviews = await CommonData.LoadTableData<ProductLocationOverviewModel>(ViewNames.ProductLocationOverview);
 
-            if (_sfGrid is not null)
+			if (_sfGrid is not null)
                 await _sfGrid.Refresh();
         }
         catch (Exception ex)
@@ -172,11 +172,6 @@ public partial class ProductLocationPage
         StateHasChanged();
     }
 
-    private async Task ConfirmDelete()
-    {
-        DeleteProductLocation();
-    }
-
     private void CancelDelete()
     {
         _deleteProductLocationId = 0;
@@ -185,7 +180,7 @@ public partial class ProductLocationPage
         StateHasChanged();
     }
 
-    private async void DeleteProductLocation()
+    private async void ConfirmDelete()
     {
         _isProcessing = true;
         _isDeleteDialogVisible = false;

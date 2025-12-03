@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
 
-using Microsoft.JSInterop;
-
 using PrimeBakes.Shared.Services;
 
 using PrimeBakesLibrary.Models.Common;
@@ -108,50 +106,8 @@ public partial class Dashboard : IDisposable
         if (Factor == "Phone" && Platform.Contains("Android"))
             await NotificationService.RegisterDevicePushNotification(_user.Id.ToString());
     }
-    #endregion
 
-    #region Navigation
-    private async Task Logout() =>
-        await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
-
-    private async Task NavigateToSales()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.SalesDashboard, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.SalesDashboard, true);
-    }
-
-    private async Task NavigateToInventory()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.InventoryDashboard, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard, true);
-    }
-
-    private async Task NavigateToAccounts()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AccountsDashboard, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard, true);
-    }
-
-    private async Task NavigateToReport()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.ReportDashboard, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.ReportDashboard, true);
-    }
-
-    private async Task NavigateToAdmin()
-    {
-        if (FormFactor.GetFormFactor() == "Web")
-            await JSRuntime.InvokeVoidAsync("open", PageRouteNames.AdminDashboard, "_blank");
-        else
-            NavigationManager.NavigateTo(PageRouteNames.AdminDashboard, true);
-    }
-    #endregion
+	private async Task Logout() =>
+		await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+	#endregion
 }

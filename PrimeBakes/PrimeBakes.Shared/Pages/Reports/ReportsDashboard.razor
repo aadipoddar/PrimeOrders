@@ -24,7 +24,7 @@ else
 			<p class="page-subtitle">Access all business reports and analytics</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout">
+			<button class="btn-icon btn-icon-logout" @onclick="async () => await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService)" title="Logout">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
@@ -66,7 +66,7 @@ else
 					@if (_user is not null && _user.Order)
 					{
 						<!-- Order Report -->
-						<SfButton CssClass="dashboard-button btn-cyan" OnClick="NavigateToOrderReport">
+						<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrder)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -81,7 +81,7 @@ else
 						</SfButton>
 
 						<!-- Order Item Report -->
-						<SfButton CssClass="dashboard-button btn-sky" OnClick="NavigateToOrderItemReport">
+						<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrderItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ else
 					@if (_user is not null && _user.Sales)
 					{
 						<!-- Sale Report -->
-						<SfButton CssClass="dashboard-button btn-emerald" OnClick="NavigateToSaleReport">
+						<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSale)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -119,7 +119,7 @@ else
 						</SfButton>
 
 						<!-- Sale Item Report -->
-						<SfButton CssClass="dashboard-button btn-teal" OnClick="NavigateToSaleItemReport">
+						<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -139,7 +139,7 @@ else
 						</SfButton>
 
 						<!-- Sale Return Report -->
-						<SfButton CssClass="dashboard-button btn-rose" OnClick="NavigateToSaleReturnReport">
+						<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturn)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -155,7 +155,7 @@ else
 						</SfButton>
 
 						<!-- Sale Return Item Report -->
-						<SfButton CssClass="dashboard-button btn-amber" OnClick="NavigateToSaleReturnItemReport">
+						<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -173,7 +173,7 @@ else
 						</SfButton>
 
 						<!-- Stock Transfer Report -->
-						<SfButton CssClass="dashboard-button btn-orange" OnClick="NavigateToStockTransferReport">
+						<SfButton CssClass="dashboard-button btn-orange" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransfer)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -191,7 +191,7 @@ else
 						</SfButton>
 
 						<!-- Stock Transfer Item Report -->
-						<SfButton CssClass="dashboard-button btn-violet" OnClick="NavigateToStockTransferItemReport">
+						<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransferItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -233,7 +233,7 @@ else
 					@if (_user is not null && _user.Inventory && _user.LocationId == 1)
 					{
 						<!-- Purchase Report -->
-						<SfButton CssClass="dashboard-button btn-cyan" OnClick="NavigateToPurchaseReport">
+						<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchase)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -248,7 +248,7 @@ else
 						</SfButton>
 
 						<!-- Purchase Item Report -->
-						<SfButton CssClass="dashboard-button btn-sky" OnClick="NavigateToPurchaseItemReport">
+						<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -267,7 +267,7 @@ else
 						</SfButton>
 
 						<!-- Purchase Return Report -->
-						<SfButton CssClass="dashboard-button btn-rose" OnClick="NavigateToPurchaseReturnReport">
+						<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -283,7 +283,7 @@ else
 						</SfButton>
 
 						<!-- Purchase Return Item Report -->
-						<SfButton CssClass="dashboard-button btn-amber" OnClick="NavigateToPurchaseReturnItemReport">
+						<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -301,7 +301,7 @@ else
 						</SfButton>
 
 						<!-- Kitchen Issue Report -->
-						<SfButton CssClass="dashboard-button btn-emerald" OnClick="NavigateToKitchenIssueReport">
+						<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -317,7 +317,7 @@ else
 						</SfButton>
 
 						<!-- Kitchen Issue Item Report -->
-						<SfButton CssClass="dashboard-button btn-teal" OnClick="NavigateToKitchenIssueItemReport">
+						<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -337,7 +337,7 @@ else
 						</SfButton>
 
 						<!-- Kitchen Production Report -->
-						<SfButton CssClass="dashboard-button btn-violet" OnClick="NavigateToKitchenProductionReport">
+						<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -353,7 +353,7 @@ else
 						</SfButton>
 
 						<!-- Kitchen Production Item Report -->
-						<SfButton CssClass="dashboard-button btn-lime" OnClick="NavigateToKitchenProductionItemReport">
+						<SfButton CssClass="dashboard-button btn-lime" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -369,7 +369,7 @@ else
 						</SfButton>
 
 						<!-- Raw Material Stock Report -->
-						<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToRawMaterialStockReport">
+						<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -389,7 +389,7 @@ else
 					@if (_user is not null && _user.Inventory)
 					{
 						<!-- Product Stock Report -->
-						<SfButton CssClass="dashboard-button btn-indigo" OnClick="NavigateToProductStockReport">
+						<SfButton CssClass="dashboard-button btn-indigo" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportProductStock)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -427,7 +427,7 @@ else
 				<div class="section-body">
 					<div class="dashboard-grid">
 						<!-- Financial Accounting Report -->
-						<SfButton CssClass="dashboard-button btn-blue" OnClick="NavigateToFinancialAccountingReport">
+						<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -442,7 +442,7 @@ else
 						</SfButton>
 
 						<!-- Ledger Report -->
-						<SfButton CssClass="dashboard-button btn-emerald" OnClick="NavigateToLedgerReport">
+						<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -458,7 +458,7 @@ else
 						</SfButton>
 
 						<!-- Trial Balance Report -->
-						<SfButton CssClass="dashboard-button btn-sky" OnClick="NavigateToTrialBalanceReport">
+						<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
 							<div class="button-content">
 								<div class="button-icon-wrapper">
 									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"

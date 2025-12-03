@@ -320,7 +320,11 @@ public partial class ProductPage
             if (_product.Id == 0)
                 _product.Code = await GenerateCodes.GenerateProductCode();
 
-            await ProductData.InsertProduct(_product);
+            var isNewProduct = _product.Id == 0;
+
+			_product.Id =  await ProductData.InsertProduct(_product);
+            if (isNewProduct)
+				await InsertProductLocations();
 
             await ShowToast("Success", $"Product '{_product.Name}' has been saved successfully.", "success");
             NavigationManager.NavigateTo(PageRouteNames.AdminProduct, true);
@@ -334,6 +338,20 @@ public partial class ProductPage
             _isProcessing = false;
         }
     }
+
+    private async Task InsertProductLocations()
+    {
+        var locations = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+        foreach (var location in locations)
+            await ProductData.InsertProductLocation(new ()
+			{
+                Id = 0,
+                Rate = _product.Rate,
+				ProductId = _product.Id,
+				LocationId = location.Id,
+                Status = true,
+			});
+	}
     #endregion
 
     #region Exporting
