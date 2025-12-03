@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using PrimeBakes.Shared.Services;
-
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -19,13 +17,10 @@ using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-using Toolbelt.Blazor.HotKeys2;
-
 namespace PrimeBakes.Shared.Pages.Accounts;
 
 public partial class FinancialAccounting : IAsyncDisposable
 {
-	[Inject] private HotKeys HotKeys { get; set; }
 	private HotKeysContext _hotKeysContext;
 
 	[Parameter] public int? Id { get; set; }

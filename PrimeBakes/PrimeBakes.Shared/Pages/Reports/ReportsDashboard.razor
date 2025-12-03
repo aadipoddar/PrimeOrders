@@ -24,14 +24,14 @@ else
 			<p class="page-subtitle">Access all business reports and analytics</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-logout" @onclick="async () => await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService)" title="Logout">
+            <button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout (Ctrl + L)">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
 					<line x1="12" y1="2" x2="12" y2="12" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home">
+			<button class="btn-icon" @onclick="NavigateToDashboard" title="Home (Ctrl + D)">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -66,147 +66,139 @@ else
 					@if (_user is not null && _user.Order)
 					{
 						<!-- Order Report -->
-						<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrder)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-									</svg>
-								</div>
-								<h3 class="button-title">Order Report</h3>
-								<p class="button-description">View order transaction history</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Order Report"
+									   Description="View order transaction history"
+									   Color="cyan"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrder)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Order Item Report -->
-						<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrderItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-										<polyline points="14 2 14 8 20 8" />
-										<line x1="16" y1="13" x2="8" y2="13" />
-										<line x1="16" y1="17" x2="8" y2="17" />
-										<line x1="10" y1="9" x2="8" y2="9" />
-									</svg>
-								</div>
-								<h3 class="button-title">Order Item Report</h3>
-								<p class="button-description">View detailed order items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Order Item Report"
+									   Description="View detailed order items"
+									   Color="sky"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrderItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+									<line x1="16" y1="13" x2="8" y2="13" />
+									<line x1="16" y1="17" x2="8" y2="17" />
+									<line x1="10" y1="9" x2="8" y2="9" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 					}
 
 					@if (_user is not null && _user.Sales)
 					{
 						<!-- Sale Report -->
-						<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSale)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<line x1="22" y1="2" x2="11" y2="13" />
-										<polygon points="22 2 15 22 11 13 2 9 22 2" />
-									</svg>
-								</div>
-								<h3 class="button-title">Sale Report</h3>
-								<p class="button-description">View sales transaction history</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Sale Report"
+									   Description="View sales transaction history"
+									   Color="emerald"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSale)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<line x1="22" y1="2" x2="11" y2="13" />
+									<polygon points="22 2 15 22 11 13 2 9 22 2" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Sale Item Report -->
-						<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<line x1="8" y1="6" x2="21" y2="6" />
-										<line x1="8" y1="12" x2="21" y2="12" />
-										<line x1="8" y1="18" x2="21" y2="18" />
-										<line x1="3" y1="6" x2="3.01" y2="6" />
-										<line x1="3" y1="12" x2="3.01" y2="12" />
-										<line x1="3" y1="18" x2="3.01" y2="18" />
-									</svg>
-								</div>
-								<h3 class="button-title">Sale Item Report</h3>
-								<p class="button-description">View detailed sale items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Sale Item Report"
+									   Description="View detailed sale items"
+									   Color="teal"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<line x1="8" y1="6" x2="21" y2="6" />
+									<line x1="8" y1="12" x2="21" y2="12" />
+									<line x1="8" y1="18" x2="21" y2="18" />
+									<line x1="3" y1="6" x2="3.01" y2="6" />
+									<line x1="3" y1="12" x2="3.01" y2="12" />
+									<line x1="3" y1="18" x2="3.01" y2="18" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Sale Return Report -->
-						<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturn)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
-										<polyline points="17 18 23 18 23 12" />
-									</svg>
-								</div>
-								<h3 class="button-title">Sale Return Report</h3>
-								<p class="button-description">View sales return records</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Sale Return Report"
+									   Description="View sales return records"
+									   Color="rose"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturn)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+									<polyline points="17 18 23 18 23 12" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Sale Return Item Report -->
-						<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-										<polyline points="14 2 14 8 20 8" />
-										<line x1="12" y1="18" x2="12" y2="12" />
-										<line x1="12" y1="9" x2="12.01" y2="9" />
-									</svg>
-								</div>
-								<h3 class="button-title">Sale Return Item Report</h3>
-								<p class="button-description">View detailed sale return items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Sale Return Item Report"
+									   Description="View detailed sale return items"
+									   Color="amber"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+									<line x1="12" y1="18" x2="12" y2="12" />
+									<line x1="12" y1="9" x2="12.01" y2="9" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Stock Transfer Report -->
-						<SfButton CssClass="dashboard-button btn-orange" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransfer)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="17 1 21 5 17 9" />
-										<path d="M3 11V9a4 4 0 0 1 4-4h14" />
-										<polyline points="7 23 3 19 7 15" />
-										<path d="M21 13v2a4 4 0 0 1-4 4H3" />
-									</svg>
-								</div>
-								<h3 class="button-title">Stock Transfer Report</h3>
-								<p class="button-description">View stock transfer records</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Stock Transfer Report"
+									   Description="View stock transfer records"
+									   Color="orange"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransfer)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="17 1 21 5 17 9" />
+									<path d="M3 11V9a4 4 0 0 1 4-4h14" />
+									<polyline points="7 23 3 19 7 15" />
+									<path d="M21 13v2a4 4 0 0 1-4 4H3" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Stock Transfer Item Report -->
-						<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransferItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-										<polyline points="14 2 14 8 20 8" />
-										<polyline points="9 17 14 12 19 17" />
-										<line x1="14" y1="12" x2="14" y2="21" />
-									</svg>
-								</div>
-								<h3 class="button-title">Stock Transfer Item Report</h3>
-								<p class="button-description">View detailed transfer items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Stock Transfer Item Report"
+									   Description="View detailed transfer items"
+									   Color="violet"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransferItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+									<polyline points="9 17 14 12 19 17" />
+									<line x1="14" y1="12" x2="14" y2="21" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 					}
 				</div>
 			</div>
@@ -233,177 +225,167 @@ else
 					@if (_user is not null && _user.Inventory && _user.LocationId == 1)
 					{
 						<!-- Purchase Report -->
-						<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchase)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-									</svg>
-								</div>
-								<h3 class="button-title">Purchase Report</h3>
-								<p class="button-description">View purchase transaction history</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Purchase Report"
+									   Description="View purchase transaction history"
+									   Color="cyan"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchase)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Purchase Item Report -->
-						<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-										<polyline points="14 2 14 8 20 8" />
-										<line x1="16" y1="13" x2="8" y2="13" />
-										<line x1="16" y1="17" x2="8" y2="17" />
-										<line x1="10" y1="9" x2="8" y2="9" />
-									</svg>
-								</div>
-								<h3 class="button-title">Purchase Item Report</h3>
-								<p class="button-description">View detailed purchase items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Purchase Item Report"
+									   Description="View detailed purchase items"
+									   Color="sky"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+									<line x1="16" y1="13" x2="8" y2="13" />
+									<line x1="16" y1="17" x2="8" y2="17" />
+									<line x1="10" y1="9" x2="8" y2="9" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Purchase Return Report -->
-						<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
-										<polyline points="17 18 23 18 23 12" />
-									</svg>
-								</div>
-								<h3 class="button-title">Purchase Return Report</h3>
-								<p class="button-description">View purchase return records</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Purchase Return Report"
+									   Description="View purchase return records"
+									   Color="rose"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturn)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+									<polyline points="17 18 23 18 23 12" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Purchase Return Item Report -->
-						<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-										<polyline points="14 2 14 8 20 8" />
-										<line x1="12" y1="18" x2="12" y2="12" />
-										<line x1="12" y1="9" x2="12.01" y2="9" />
-									</svg>
-								</div>
-								<h3 class="button-title">Purchase Return Item Report</h3>
-								<p class="button-description">View detailed purchase return items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Purchase Return Item Report"
+									   Description="View detailed purchase return items"
+									   Color="amber"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportPurchaseReturnItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+									<polyline points="14 2 14 8 20 8" />
+									<line x1="12" y1="18" x2="12" y2="12" />
+									<line x1="12" y1="9" x2="12.01" y2="9" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Kitchen Issue Report -->
-						<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<line x1="22" y1="2" x2="11" y2="13" />
-										<polygon points="22 2 15 22 11 13 2 9 22 2" />
-									</svg>
-								</div>
-								<h3 class="button-title">Kitchen Issue Report</h3>
-								<p class="button-description">View material issue history</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Kitchen Issue Report"
+									   Description="View material issue history"
+									   Color="emerald"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssue)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<line x1="22" y1="2" x2="11" y2="13" />
+									<polygon points="22 2 15 22 11 13 2 9 22 2" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Kitchen Issue Item Report -->
-						<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<line x1="8" y1="6" x2="21" y2="6" />
-										<line x1="8" y1="12" x2="21" y2="12" />
-										<line x1="8" y1="18" x2="21" y2="18" />
-										<line x1="3" y1="6" x2="3.01" y2="6" />
-										<line x1="3" y1="12" x2="3.01" y2="12" />
-										<line x1="3" y1="18" x2="3.01" y2="18" />
-									</svg>
-								</div>
-								<h3 class="button-title">Kitchen Issue Item Report</h3>
-								<p class="button-description">View detailed kitchen issue items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Kitchen Issue Item Report"
+									   Description="View detailed kitchen issue items"
+									   Color="teal"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<line x1="8" y1="6" x2="21" y2="6" />
+									<line x1="8" y1="12" x2="21" y2="12" />
+									<line x1="8" y1="18" x2="21" y2="18" />
+									<line x1="3" y1="6" x2="3.01" y2="6" />
+									<line x1="3" y1="12" x2="3.01" y2="12" />
+									<line x1="3" y1="18" x2="3.01" y2="18" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Kitchen Production Report -->
-						<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<circle cx="12" cy="8" r="7" />
-										<polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-									</svg>
-								</div>
-								<h3 class="button-title">Kitchen Production Report</h3>
-								<p class="button-description">View kitchen production records</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Kitchen Production Report"
+									   Description="View kitchen production records"
+									   Color="violet"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProduction)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<circle cx="12" cy="8" r="7" />
+									<polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Kitchen Production Item Report -->
-						<SfButton CssClass="dashboard-button btn-lime" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-										<polyline points="22 4 12 14.01 9 11.01" />
-									</svg>
-								</div>
-								<h3 class="button-title">Kitchen Production Item Report</h3>
-								<p class="button-description">View detailed production items</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Kitchen Production Item Report"
+									   Description="View detailed production items"
+									   Color="green"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportKitchenProductionItem)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+									<polyline points="22 4 12 14.01 9 11.01" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Raw Material Stock Report -->
-						<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<ellipse cx="12" cy="5" rx="9" ry="3" />
-										<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-										<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-									</svg>
-								</div>
-								<h3 class="button-title">Raw Material Stock</h3>
-								<p class="button-description">View current raw material stock levels</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Raw Material Stock"
+									   Description="View current raw material stock levels"
+									   Color="blue"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportRawMaterialStock)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<ellipse cx="12" cy="5" rx="9" ry="3" />
+									<path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+									<path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 					}
 
 					@if (_user is not null && _user.Inventory)
 					{
 						<!-- Product Stock Report -->
-						<SfButton CssClass="dashboard-button btn-indigo" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportProductStock)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="21 8 21 21 3 21 3 8" />
-										<rect x="1" y="3" width="22" height="5" />
-										<line x1="10" y1="12" x2="14" y2="12" />
-									</svg>
-								</div>
-								<h3 class="button-title">Finished Product Stock</h3>
-								<p class="button-description">View current product stock levels</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Finished Product Stock"
+									   Description="View current product stock levels"
+									   Color="indigo"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportProductStock)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="21 8 21 21 3 21 3 8" />
+									<rect x="1" y="3" width="22" height="5" />
+									<line x1="10" y1="12" x2="14" y2="12" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 					}
 				</div>
 			</div>
@@ -427,53 +409,50 @@ else
 				<div class="section-body">
 					<div class="dashboard-grid">
 						<!-- Financial Accounting Report -->
-						<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-									</svg>
-								</div>
-								<h3 class="button-title">Financial Accounting Report</h3>
-								<p class="button-description">View accounting transaction history</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Financial Accounting Report"
+									   Description="View accounting transaction history"
+									   Color="blue"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Ledger Report -->
-						<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-										<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-									</svg>
-								</div>
-								<h3 class="button-title">Ledger Report</h3>
-								<p class="button-description">View detailed ledger transactions</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Ledger Report"
+									   Description="View detailed ledger transactions"
+									   Color="emerald"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+									<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 
 						<!-- Trial Balance Report -->
-						<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
-							<div class="button-content">
-								<div class="button-icon-wrapper">
-									<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-										 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-										 stroke-linejoin="round">
-										<rect x="3" y="3" width="7" height="7" />
-										<rect x="14" y="3" width="7" height="7" />
-										<rect x="14" y="14" width="7" height="7" />
-										<rect x="3" y="14" width="7" height="7" />
-									</svg>
-								</div>
-								<h3 class="button-title">Trial Balance</h3>
-								<p class="button-description">View trial balance summary</p>
-							</div>
-						</SfButton>
+						<DashboardCard Title="Trial Balance"
+									   Description="View trial balance summary"
+									   Color="sky"
+									   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
+							<IconContent>
+								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+									 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+									 stroke-linejoin="round">
+									<rect x="3" y="3" width="7" height="7" />
+									<rect x="14" y="3" width="7" height="7" />
+									<rect x="14" y="14" width="7" height="7" />
+									<rect x="3" y="14" width="7" height="7" />
+								</svg>
+							</IconContent>
+						</DashboardCard>
 					</div>
 				</div>
 			</div>
@@ -658,348 +637,11 @@ else
 		padding: 24px;
 	}
 
-	/* Dashboard Grid */
+	/* Dashboard Grid - Flexbox for consistent card sizing */
 	.dashboard-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 16px;
-	}
-
-	/* Dashboard Button (SfButton) */
-	.dashboard-button {
-		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%) !important;
-		border: 2px solid #e2e8f0 !important;
-		border-radius: 10px !important;
-		padding: 16px !important;
-		cursor: pointer !important;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-		position: relative !important;
-		overflow: visible !important;
-		height: auto !important;
-		min-height: 120px !important;
-		text-align: left !important;
-	}
-
-		.dashboard-button::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			height: 4px;
-			background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-			transform: scaleX(0);
-			transition: transform 0.3s ease;
-			border-radius: 12px 12px 0 0;
-		}
-
-		.dashboard-button:hover {
-			transform: translateY(-4px) !important;
-			box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-			border-color: #3b82f6 !important;
-			background: #f8fafc !important;
-		}
-
-			.dashboard-button:hover::before {
-				transform: scaleX(1);
-			}
-
-		.dashboard-button:active {
-			transform: translateY(-2px) !important;
-			box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2) !important;
-		}
-
-		.dashboard-button:focus {
-			outline: 2px solid #3b82f6 !important;
-			outline-offset: 2px !important;
-		}
-
-	/* Button Content Structure */
-	.button-content {
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+		flex-wrap: wrap;
+		gap: 24px;
 		width: 100%;
-		height: 100%;
-	}
-
-	.button-icon-wrapper {
-		width: 48px;
-		height: 48px;
-		border-radius: 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 12px;
-		transition: all 0.3s ease;
-	}
-
-	.dashboard-button:hover .button-icon-wrapper {
-		transform: scale(1.1) rotate(5deg);
-	}
-
-	.button-icon-wrapper svg {
-		width: 28px;
-		height: 28px;
-	}
-
-	.button-title {
-		font-size: 14px;
-		font-weight: 600;
-		color: #0f172a;
-		margin: 0 0 6px 0;
-		letter-spacing: -0.3px;
-	}
-
-	.button-description {
-		font-size: 11px;
-		color: #64748b;
-		margin: 0;
-		line-height: 1.3;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		word-wrap: break-word;
-	}
-
-	/* Button Color Variations */
-	.btn-blue::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-blue .button-icon-wrapper {
-		background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-		color: #2563eb;
-	}
-
-	.btn-blue:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-cyan::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-cyan .button-icon-wrapper {
-		background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
-		color: #0891b2;
-	}
-
-	.btn-cyan:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-emerald::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-emerald .button-icon-wrapper {
-		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-		color: #10b981;
-	}
-
-	.btn-emerald:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-sky::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-sky .button-icon-wrapper {
-		background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-		color: #0284c7;
-	}
-
-	.btn-sky:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-purple::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-purple .button-icon-wrapper {
-		background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
-		color: #9333ea;
-	}
-
-	.btn-purple:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-indigo::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-indigo .button-icon-wrapper {
-		background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-		color: #4f46e5;
-	}
-
-	.btn-indigo:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-teal::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-teal .button-icon-wrapper {
-		background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
-		color: #0d9488;
-	}
-
-	.btn-teal:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-rose::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-rose .button-icon-wrapper {
-		background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
-		color: #e11d48;
-	}
-
-	.btn-rose:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-amber::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-amber .button-icon-wrapper {
-		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-		color: #d97706;
-	}
-
-	.btn-amber:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-violet::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-violet .button-icon-wrapper {
-		background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
-		color: #7c3aed;
-	}
-
-	.btn-violet:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-orange::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-orange .button-icon-wrapper {
-		background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-		color: #ea580c;
-	}
-
-	.btn-orange:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-lime::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-lime .button-icon-wrapper {
-		background: linear-gradient(135deg, #d9f99d 0%, #bef264 100%);
-		color: #65a30d;
-	}
-
-	.btn-lime:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-yellow::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-yellow .button-icon-wrapper {
-		background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-		color: #ca8a04;
-	}
-
-	.btn-yellow:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-fuchsia::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-fuchsia .button-icon-wrapper {
-		background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%);
-		color: #c026d3;
-	}
-
-	.btn-fuchsia:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-pink::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-pink .button-icon-wrapper {
-		background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
-		color: #db2777;
-	}
-
-	.btn-pink:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-orange::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-orange .button-icon-wrapper {
-		background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-		color: #ea580c;
-	}
-
-	.btn-orange:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-violet::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-violet .button-icon-wrapper {
-		background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
-		color: #7c3aed;
-	}
-
-	.btn-violet:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
 	}
 </style>

@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using PrimeBakes.Shared.Services;
-
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -15,13 +13,10 @@ using PrimeBakesLibrary.Models.Common;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-using Toolbelt.Blazor.HotKeys2;
-
 namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
 public partial class TrialBalance : IAsyncDisposable
 {
-	[Inject] private HotKeys HotKeys { get; set; }
 	private HotKeysContext _hotKeysContext;
 
 	private UserModel _user;

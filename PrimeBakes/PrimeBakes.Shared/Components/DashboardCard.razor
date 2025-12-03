@@ -1,0 +1,370 @@
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Buttons
+
+<SfButton CssClass="@CssClasses" OnClick="OnClick" Disabled="@Disabled">
+    <div class="card-content">
+        <div class="card-icon-wrapper">
+            @IconContent
+        </div>
+        <h3 class="card-title">@Title</h3>
+        <p class="card-description">@Description</p>
+    </div>
+</SfButton>
+
+<style>
+    /* Dashboard Card Component Styles */
+
+    /* Dashboard Card Base */
+    .dashboard-card {
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%) !important;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 10px !important;
+        padding: 16px !important;
+        cursor: pointer !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: visible !important;
+        height: auto !important;
+        min-height: 120px !important;
+        text-align: left !important;
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+        flex-shrink: 0 !important;
+    }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+            border-color: #3b82f6 !important;
+            background: #f8fafc !important;
+        }
+
+            .dashboard-card:hover::before {
+                transform: scaleX(1);
+            }
+
+        .dashboard-card:active {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2) !important;
+        }
+
+        .dashboard-card:focus {
+            outline: 2px solid #3b82f6 !important;
+            outline-offset: 2px !important;
+        }
+
+    /* Card Content Structure */
+    .card-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        height: 100%;
+    }
+
+    .card-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover .card-icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .card-icon-wrapper svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.3px;
+    }
+
+    .card-description {
+        font-size: 11px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        word-wrap: break-word;
+    }
+
+    /* Color Variations */
+
+    /* Blue */
+    .card-blue::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-blue .card-icon-wrapper {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #2563eb;
+    }
+
+    .card-blue:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Green */
+    .card-green::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-green .card-icon-wrapper {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #059669;
+    }
+
+    .card-green:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Red */
+    .card-red::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-red .card-icon-wrapper {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
+
+    .card-red:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Orange */
+    .card-orange::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-orange .card-icon-wrapper {
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+        color: #ea580c;
+    }
+
+    .card-orange:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Purple */
+    .card-purple::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-purple .card-icon-wrapper {
+        background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+        color: #9333ea;
+    }
+
+    .card-purple:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Teal */
+    .card-teal::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-teal .card-icon-wrapper {
+        background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+        color: #0d9488;
+    }
+
+    .card-teal:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Indigo */
+    .card-indigo::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-indigo .card-icon-wrapper {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #4f46e5;
+    }
+
+    .card-indigo:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Amber */
+    .card-amber::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-amber .card-icon-wrapper {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #d97706;
+    }
+
+    .card-amber:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Emerald */
+    .card-emerald::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-emerald .card-icon-wrapper {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #10b981;
+    }
+
+    .card-emerald:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Cyan */
+    .card-cyan::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-cyan .card-icon-wrapper {
+        background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+        color: #0891b2;
+    }
+
+    .card-cyan:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Rose */
+    .card-rose::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-rose .card-icon-wrapper {
+        background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+        color: #e11d48;
+    }
+
+    .card-rose:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Sky */
+    .card-sky::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-sky .card-icon-wrapper {
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        color: #0284c7;
+    }
+
+    .card-sky:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Violet */
+    .card-violet::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+    }
+
+    .card-violet .card-icon-wrapper {
+        background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);
+        color: #7c3aed;
+    }
+
+    .card-violet:hover {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    /* Dashboard Grid - for layout */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 280px));
+        gap: 24px;
+        width: 100%;
+        margin-bottom: 32px;
+    }
+
+        .dashboard-grid:last-child {
+            margin-bottom: 0;
+        }
+
+</style>
+
+@code {
+    /// <summary>
+    /// The title displayed on the card
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The description text displayed below the title
+    /// </summary>
+    [Parameter]
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The color theme for the card (blue, green, red, orange, purple, teal, indigo, amber, emerald, cyan, rose, sky, violet)
+    /// </summary>
+    [Parameter]
+    public string Color { get; set; } = "blue";
+
+    /// <summary>
+    /// The SVG icon content to display
+    /// </summary>
+    [Parameter]
+    public RenderFragment? IconContent { get; set; }
+
+    /// <summary>
+    /// The click event callback
+    /// </summary>
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    /// <summary>
+    /// Whether the button is disabled
+    /// </summary>
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    private string CssClasses => $"dashboard-card card-{Color.ToLower()}";
+}

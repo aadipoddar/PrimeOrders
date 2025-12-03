@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using PrimeBakes.Shared.Services;
-
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
@@ -15,13 +13,10 @@ using PrimeBakesLibrary.Models.Inventory.Kitchen;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-using Toolbelt.Blazor.HotKeys2;
-
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Kitchen;
 
 public partial class KitchenIssueItemReport : IAsyncDisposable
 {
-	[Inject] private HotKeys HotKeys { get; set; }
 	private HotKeysContext _hotKeysContext;
 
 	private bool _isLoading = true;

@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using Toolbelt.Blazor.HotKeys2;
-
-using PrimeBakes.Shared.Services;
-
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -27,7 +23,6 @@ namespace PrimeBakes.Shared.Pages.Inventory.Kitchen;
 
 public partial class KitchenIssuePage : IAsyncDisposable
 {
-	[Inject] private HotKeys HotKeys { get; set; }
 	private HotKeysContext _hotKeysContext;
 
 	[Parameter] public int? Id { get; set; }

@@ -24,14 +24,14 @@ else
 			<p class="page-subtitle">Access all accounting modules and reports</p>
 		</div>
 		<div class="header-right">
-			<button class="btn-icon btn-icon-logout" @onclick="async () => await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService)" title="Logout">
+			<button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout (Ctrl + L)">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
 					<line x1="12" y1="2" x2="12" y2="12" />
 				</svg>
 			</button>
-			<button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.Dashboard)' title="Home">
+			<button class="btn-icon" @onclick="NavigateToDashboard" title="Home (Ctrl + D)">
 				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
 					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -60,20 +60,17 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Financial Accounting -->
-					<SfButton CssClass="dashboard-button btn-blue" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<line x1="12" y1="1" x2="12" y2="23" />
-									<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-								</svg>
-							</div>
-							<h3 class="button-title">Financial Accounting</h3>
-							<p class="button-description">Record journal entries and transactions</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Financial Accounting" Description="Record journal entries and transactions" Color="blue"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<line x1="12" y1="1" x2="12" y2="23" />
+								<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 				</div>
 			</div>
 		</div>
@@ -97,53 +94,44 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Financial Accounting Report -->
-					<SfButton CssClass="dashboard-button btn-cyan" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-								</svg>
-							</div>
-							<h3 class="button-title">Financial Accounting Report</h3>
-							<p class="button-description">View accounting transaction history</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Financial Accounting Report" Description="View accounting transaction history" Color="cyan"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Ledger Report -->
-					<SfButton CssClass="dashboard-button btn-emerald" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-									<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-								</svg>
-							</div>
-							<h3 class="button-title">Ledger Report</h3>
-							<p class="button-description">View detailed ledger transactions</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Ledger Report" Description="View detailed ledger transactions" Color="emerald"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+								<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Trial Balance -->
-					<SfButton CssClass="dashboard-button btn-sky" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<rect x="3" y="3" width="7" height="7" />
-									<rect x="14" y="3" width="7" height="7" />
-									<rect x="14" y="14" width="7" height="7" />
-									<rect x="3" y="14" width="7" height="7" />
-								</svg>
-							</div>
-							<h3 class="button-title">Trial Balance</h3>
-							<p class="button-description">View trial balance summary</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Trial Balance" Description="View trial balance summary" Color="sky"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<rect x="3" y="3" width="7" height="7" />
+								<rect x="14" y="3" width="7" height="7" />
+								<rect x="14" y="14" width="7" height="7" />
+								<rect x="3" y="14" width="7" height="7" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 				</div>
 			</div>
 		</div>
@@ -164,142 +152,118 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Group -->
-					<SfButton CssClass="dashboard-button btn-purple" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminGroup)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-									<circle cx="9" cy="7" r="4" />
-									<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-									<path d="M16 3.13a4 4 0 0 1 0 7.75" />
-								</svg>
-							</div>
-							<h3 class="button-title">Group</h3>
-							<p class="button-description">Manage account groups</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Group" Description="Manage account groups" Color="purple"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminGroup)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+								<circle cx="9" cy="7" r="4" />
+								<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+								<path d="M16 3.13a4 4 0 0 1 0 7.75" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Account Type -->
-					<SfButton CssClass="dashboard-button btn-indigo" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminAccountType)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-									<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-								</svg>
-							</div>
-							<h3 class="button-title">Account Type</h3>
-							<p class="button-description">Manage account types</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Account Type" Description="Manage account types" Color="indigo"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminAccountType)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+								<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Ledgers -->
-					<SfButton CssClass="dashboard-button btn-teal" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminLedger)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-									<polyline points="14 2 14 8 20 8" />
-									<line x1="16" y1="13" x2="8" y2="13" />
-									<line x1="16" y1="17" x2="8" y2="17" />
-									<line x1="10" y1="9" x2="8" y2="9" />
-								</svg>
-							</div>
-							<h3 class="button-title">Ledgers</h3>
-							<p class="button-description">Manage ledger accounts</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Ledgers" Description="Manage ledger accounts" Color="teal"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminLedger)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+								<polyline points="14 2 14 8 20 8" />
+								<line x1="16" y1="13" x2="8" y2="13" />
+								<line x1="16" y1="17" x2="8" y2="17" />
+								<line x1="10" y1="9" x2="8" y2="9" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Voucher -->
-					<SfButton CssClass="dashboard-button btn-rose" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminVoucher)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-									<polyline points="14 2 14 8 20 8" />
-									<line x1="12" y1="18" x2="12" y2="12" />
-									<line x1="9" y1="15" x2="15" y2="15" />
-								</svg>
-							</div>
-							<h3 class="button-title">Voucher</h3>
-							<p class="button-description">Manage voucher types</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Voucher" Description="Manage voucher types" Color="rose"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminVoucher)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+								<polyline points="14 2 14 8 20 8" />
+								<line x1="12" y1="18" x2="12" y2="12" />
+								<line x1="9" y1="15" x2="15" y2="15" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Financial Years -->
-					<SfButton CssClass="dashboard-button btn-amber" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-									<line x1="16" y1="2" x2="16" y2="6" />
-									<line x1="8" y1="2" x2="8" y2="6" />
-									<line x1="3" y1="10" x2="21" y2="10" />
-								</svg>
-							</div>
-							<h3 class="button-title">Financial Years</h3>
-							<p class="button-description">Manage financial year periods</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Financial Years" Description="Manage financial year periods" Color="amber"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+								<line x1="16" y1="2" x2="16" y2="6" />
+								<line x1="8" y1="2" x2="8" y2="6" />
+								<line x1="3" y1="10" x2="21" y2="10" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- States -->
-					<SfButton CssClass="dashboard-button btn-violet" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminStateUT)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<circle cx="12" cy="12" r="10" />
-									<line x1="2" y1="12" x2="22" y2="12" />
-									<path
-										d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-								</svg>
-							</div>
-							<h3 class="button-title">States</h3>
-							<p class="button-description">Manage state/UT information</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="States" Description="Manage state/UT information" Color="violet"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminStateUT)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<circle cx="12" cy="12" r="10" />
+								<line x1="2" y1="12" x2="22" y2="12" />
+								<path
+									d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Company -->
-					<SfButton CssClass="dashboard-button btn-green" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminCompany)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-									stroke-linejoin="round">
-									<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-									<polyline points="9 22 9 12 15 12 15 22" />
-								</svg>
-							</div>
-							<h3 class="button-title">Company</h3>
-							<p class="button-description">Manage company settings</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Company" Description="Manage company settings" Color="green"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminCompany)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+								<polyline points="9 22 9 12 15 12 15 22" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 
 					<!-- Settings -->
-					<SfButton CssClass="dashboard-button btn-slate" OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminSettings)">
-						<div class="button-content">
-							<div class="button-icon-wrapper">
-								<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-									fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<circle cx="12" cy="12" r="3" />
-									<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-								</svg>
-							</div>
-							<h3 class="button-title">Settings</h3>
-							<p class="button-description">Manage system settings</p>
-						</div>
-					</SfButton>
+					<DashboardCard Title="Settings" Description="Manage system settings" Color="blue"
+								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminSettings)">
+						<IconContent>
+							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="3" />
+								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+							</svg>
+						</IconContent>
+					</DashboardCard>
 				</div>
 			</div>
 		</div>
@@ -486,276 +450,14 @@ else
 
 	/* Dashboard Grid */
 	.dashboard-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 16px;
-	}
-
-	/* Dashboard Button (SfButton) */
-	.dashboard-button {
-		background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%) !important;
-		border: 2px solid #e2e8f0 !important;
-		border-radius: 10px !important;
-		padding: 16px !important;
-		cursor: pointer !important;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-		position: relative !important;
-		overflow: visible !important;
-		height: auto !important;
-		min-height: 120px !important;
-		text-align: left !important;
-	}
-
-	.dashboard-button::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 4px;
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-		transform: scaleX(0);
-		transition: transform 0.3s ease;
-		border-radius: 12px 12px 0 0;
-	}
-
-	.dashboard-button:hover {
-		transform: translateY(-4px) !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-		border-color: #3b82f6 !important;
-		background: #f8fafc !important;
-	}
-
-	.dashboard-button:hover::before {
-		transform: scaleX(1);
-	}
-
-	.dashboard-button:active {
-		transform: translateY(-2px) !important;
-		box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2) !important;
-	}
-
-	.dashboard-button:focus {
-		outline: 2px solid #3b82f6 !important;
-		outline-offset: 2px !important;
-	}
-
-	/* Button Content Structure */
-	.button-content {
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+		flex-wrap: wrap;
+		gap: 24px;
 		width: 100%;
-		height: 100%;
+		margin-bottom: 32px;
 	}
 
-	.button-icon-wrapper {
-		width: 48px;
-		height: 48px;
-		border-radius: 10px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 12px;
-		transition: all 0.3s ease;
-	}
-
-	.dashboard-button:hover .button-icon-wrapper {
-		transform: scale(1.1) rotate(5deg);
-	}
-
-	.button-icon-wrapper svg {
-		width: 28px;
-		height: 28px;
-	}
-
-	.button-title {
-		font-size: 14px;
-		font-weight: 600;
-		color: #0f172a;
-		margin: 0 0 6px 0;
-		letter-spacing: -0.3px;
-	}
-
-	.button-description {
-		font-size: 11px;
-		color: #64748b;
-		margin: 0;
-		line-height: 1.3;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		word-wrap: break-word;
-	}
-
-	/* Button Color Variations */
-	.btn-blue::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-blue .button-icon-wrapper {
-		background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-		color: #2563eb;
-	}
-
-	.btn-blue:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-cyan::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-cyan .button-icon-wrapper {
-		background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
-		color: #0891b2;
-	}
-
-	.btn-cyan:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-emerald::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-emerald .button-icon-wrapper {
-		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-		color: #10b981;
-	}
-
-	.btn-emerald:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-sky::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-sky .button-icon-wrapper {
-		background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-		color: #0284c7;
-	}
-
-	.btn-sky:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-purple::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-purple .button-icon-wrapper {
-		background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
-		color: #9333ea;
-	}
-
-	.btn-purple:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-indigo::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-indigo .button-icon-wrapper {
-		background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-		color: #4f46e5;
-	}
-
-	.btn-indigo:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-teal::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-teal .button-icon-wrapper {
-		background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
-		color: #0d9488;
-	}
-
-	.btn-teal:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-rose::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-rose .button-icon-wrapper {
-		background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
-		color: #e11d48;
-	}
-
-	.btn-rose:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-amber::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-amber .button-icon-wrapper {
-		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-		color: #d97706;
-	}
-
-	.btn-amber:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-violet::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-violet .button-icon-wrapper {
-		background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
-		color: #7c3aed;
-	}
-
-	.btn-violet:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-green::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-green .button-icon-wrapper {
-		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-		color: #059669;
-	}
-
-	.btn-green:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
-	}
-
-	.btn-slate::before {
-		background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
-	}
-
-	.btn-slate .button-icon-wrapper {
-		background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-		color: #475569;
-	}
-
-	.btn-slate:hover {
-		border-color: #3b82f6 !important;
-		box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15) !important;
+	.dashboard-grid:last-child {
+		margin-bottom: 0;
 	}
 </style>

@@ -1,14 +1,13 @@
 ﻿using System.Reflection;
 
-using PrimeBakes.Shared.Services;
-
 using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakes.Shared.Pages;
 
 public partial class Dashboard : IDisposable
 {
-    private UserModel _user;
+	private HotKeysContext _hotKeysContext;
+	private UserModel _user;
     private bool _isLoading = true;
     private bool _isUpdating = false;
     private int _updateProgress = 0;
@@ -103,11 +102,20 @@ public partial class Dashboard : IDisposable
     {
         _user = await AuthenticationService.ValidateUser(DataStorageService, NavigationManager, NotificationService, VibrationService);
 
-        if (Factor == "Phone" && Platform.Contains("Android"))
+        _hotKeysContext = HotKeys.CreateContext()
+            .Add(ModCode.Ctrl, Code.L, Logout, "Logout", Exclude.None);
+
+		if (Factor == "Phone" && Platform.Contains("Android"))
             await NotificationService.RegisterDevicePushNotification(_user.Id.ToString());
     }
 
 	private async Task Logout() =>
 		await AuthenticationService.Logout(DataStorageService, NavigationManager, NotificationService, VibrationService);
+
+	public async ValueTask DisposeAsync()
+	{
+		if (_hotKeysContext is not null)
+			await _hotKeysContext.DisposeAsync();
+	}
 	#endregion
 }

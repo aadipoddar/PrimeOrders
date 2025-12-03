@@ -27,8 +27,6 @@ public static class MauiProgram
             .RegisterViews()
             .ConfigureFonts(fonts =>
             {
-                fonts.AddFont("CascadiaCode-Regular.ttf", "CascadiaCodeRegular");
-                fonts.AddFont("CascadiaCode-SemiBold.ttf", "CascadiaCodeSemibold");
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
