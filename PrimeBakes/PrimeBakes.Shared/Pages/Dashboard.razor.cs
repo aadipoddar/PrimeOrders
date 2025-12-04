@@ -30,7 +30,8 @@ public partial class Dashboard : IDisposable
     #region Updating
     private async Task StartUpdateProcess()
     {
-        _isUpdating = true;
+		_isLoading = false;
+		_isUpdating = true;
         _updateProgress = 0;
         _timeRemaining = 0;
         _updateStartTime = DateTime.Now;
@@ -61,7 +62,7 @@ public partial class Dashboard : IDisposable
         });
 
         // Use appropriate file name based on platform
-        var setupFileName = Platform.Contains("Windows") ? "PrimeBakesSetup" : "com.aadisoft.primebakes";
+        var setupFileName = Factor.Contains("Desktop") ? "PrimeBakes" : "com.aadisoft.primebakes";
         await UpdateService.UpdateAppAsync("aadipoddar", "PrimeBakes", setupFileName, progress);
 
         _isUpdating = false;
@@ -81,7 +82,7 @@ public partial class Dashboard : IDisposable
         try
         {
             // Check for updates on Android Phone or Windows Desktop
-            var shouldCheckUpdate = (Factor == "Phone" && Platform.Contains("Android")) || Platform.Contains("Windows");
+            var shouldCheckUpdate = (Factor == "Phone" && Platform.Contains("Android")) || Factor.Contains("Desktop");
             
             if (shouldCheckUpdate)
             {

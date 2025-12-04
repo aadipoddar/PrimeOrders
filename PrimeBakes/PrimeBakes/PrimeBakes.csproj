@@ -115,14 +115,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AndroidResource Remove="publish\**" />
+	  <Compile Remove="publish\**" />
+	  <Content Remove="publish\**" />
+	  <EmbeddedResource Remove="publish\**" />
+	  <MauiXaml Remove="publish\**" />
+	  <None Remove="publish\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Content Remove="Platforms\Android\google-services.json" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="keycommand.txt" />
+	  <None Remove="Package.StoreAssociation.xml" />
 	  <None Remove="Prime Bakes.keyInfo" />
 	  <None Remove="PrimeBakes.cer" />
 	  <None Remove="PrimeBakes.keystore" />
 	  <None Remove="PrimeBakes_TemporaryKey.pfx" />
+	  <None Remove="PrimeBakes_Windows.pfx" />
 	</ItemGroup>
 
 	<ItemGroup>

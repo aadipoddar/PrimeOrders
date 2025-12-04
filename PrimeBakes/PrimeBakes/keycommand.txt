@@ -1,0 +1,14 @@
+-- Android
+dotnet publish -f net10.0-android -c Release
+
+-- Windows
+cd "c:\dev\PrimeBakes\PrimeBakes\PrimeBakes"; dotnet publish -f net10.0-windows10.0.19041.0 -c Release -p:WindowsPackageType=None -o ".\publish\windows"; Compress-Archive -Path ".\publish\windows\*" -DestinationPath ".\PrimeBakes.zip" -Force
+
+
+-- Windows Detailed
+# Build and publish
+dotnet publish -f net10.0-windows10.0.19041.0 -c Release -p:WindowsPackageType=None -o "c:\dev\PrimeBakes\PrimeBakes\PrimeBakes\publish\windows"
+
+# Create ZIP
+Compress-Archive -Path "c:\dev\PrimeBakes\PrimeBakes\PrimeBakes\publish\windows\*" -DestinationPath "c:\dev\PrimeBakes\PrimeBakes\PrimeBakes\PrimeBakes.zip" -Force
+
