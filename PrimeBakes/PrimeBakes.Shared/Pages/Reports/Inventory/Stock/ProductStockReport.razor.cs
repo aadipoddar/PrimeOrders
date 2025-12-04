@@ -116,6 +116,8 @@ public partial class ProductStockReport : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Loading", "Fetching stock data...", ToastType.Info);
 
 			_stockSummary = await ProductStockData.LoadProductStockSummaryByDateLocationId(_fromDate, _toDate, _selectedLocation.Id);
 
@@ -130,7 +132,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while loading stock data : {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Failed to load stock: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -242,7 +244,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while setting date range: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Failed to set date range: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -263,7 +265,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
+			await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
 
 			if (_showDetails && (_stockDetails is null || _stockDetails.Count == 0))
 				await LoadStockDetails();
@@ -286,11 +288,11 @@ public partial class ProductStockReport : IAsyncDisposable
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Success", "Transaction report exported to Excel successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -308,7 +310,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
+			await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -343,11 +345,11 @@ public partial class ProductStockReport : IAsyncDisposable
 				await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
 			}
 
-			await _toastNotification.ShowAsync("Success", "Transaction report exported to PDF successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{

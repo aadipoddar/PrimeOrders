@@ -122,6 +122,8 @@ public partial class OrderReport : IAsyncDisposable
         try
         {
             _isProcessing = true;
+            StateHasChanged();
+            await _toastNotification.ShowAsync("Loading", "Fetching transactions...", ToastType.Info);
 
 			_transactionOverviews = await CommonData.LoadTableDataByDate<OrderOverviewModel>(
 				ViewNames.OrderOverview,
@@ -147,7 +149,7 @@ public partial class OrderReport : IAsyncDisposable
         }
         catch (Exception ex)
         {
-			await _toastNotification.ShowAsync("Error", $"An error occurred while loading transaction overviews: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Failed to load orders: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -259,7 +261,7 @@ public partial class OrderReport : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await _toastNotification.ShowAsync("Error", $"An error occurred while setting date range: {ex.Message}", ToastType.Error);
+            await _toastNotification.ShowAsync("Error", $"Failed to set date range: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -299,11 +301,11 @@ public partial class OrderReport : IAsyncDisposable
             fileName += ".xlsx";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Success", "Transaction report exported to Excel successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -340,11 +342,11 @@ public partial class OrderReport : IAsyncDisposable
             fileName += ".pdf";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Success", "Transaction report exported to PDF successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
+            await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
         }
         finally
         {

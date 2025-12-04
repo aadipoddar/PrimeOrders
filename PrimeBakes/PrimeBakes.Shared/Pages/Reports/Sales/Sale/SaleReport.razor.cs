@@ -385,7 +385,6 @@ public partial class SaleReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Loading", "Setting date range...", ToastType.Info);
 
 			var today = await CommonData.LoadCurrentDateTime();
 			var currentYear = today.Year;

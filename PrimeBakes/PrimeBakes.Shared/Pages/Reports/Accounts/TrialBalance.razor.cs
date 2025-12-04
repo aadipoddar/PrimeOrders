@@ -108,6 +108,8 @@ public partial class TrialBalance : IAsyncDisposable
         try
         {
             _isProcessing = true;
+            StateHasChanged();
+            await _toastNotification.ShowAsync("Loading", "Fetching trial balance...", ToastType.Info);
 
             _trialBalance = await AccountingData.LoadTrialBalanceByDate(
                 DateOnly.FromDateTime(_fromDate).ToDateTime(TimeOnly.MinValue),
@@ -123,7 +125,7 @@ public partial class TrialBalance : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await _toastNotification.ShowAsync("Error", $"An error occurred while loading trial balance: {ex.Message}", ToastType.Error);
+            await _toastNotification.ShowAsync("Error", $"Failed to load transactions: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -223,7 +225,7 @@ public partial class TrialBalance : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await _toastNotification.ShowAsync("Error", $"An error occurred while setting date range: {ex.Message}", ToastType.Error);
+            await _toastNotification.ShowAsync("Error", $"Failed to set date range: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -244,7 +246,7 @@ public partial class TrialBalance : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
+            await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
 
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -264,11 +266,11 @@ public partial class TrialBalance : IAsyncDisposable
             fileName += ".xlsx";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Success", "Transaction report exported to Excel successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
+            await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -286,7 +288,7 @@ public partial class TrialBalance : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
+            await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
 
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -306,11 +308,11 @@ public partial class TrialBalance : IAsyncDisposable
             fileName += ".pdf";
 
             await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Success", "Transaction report exported to PDF successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
+            await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
         }
         finally
         {
