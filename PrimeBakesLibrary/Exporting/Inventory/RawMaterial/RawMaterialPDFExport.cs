@@ -1,3 +1,5 @@
+using PrimeBakesLibrary.Models.Inventory;
+
 namespace PrimeBakesLibrary.Exporting.Inventory.RawMaterial;
 
 /// <summary>
@@ -43,7 +45,7 @@ public static class RawMaterialPDFExport
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(RawMaterialModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -54,13 +56,13 @@ public static class RawMaterialPDFExport
                 IncludeInTotal = false
             },
 
-            ["Name"] = new() { DisplayName = "Raw Material Name", IncludeInTotal = false },
+            [nameof(RawMaterialModel.Name)] = new() { DisplayName = "Raw Material Name", IncludeInTotal = false },
 
-            ["Code"] = new() { DisplayName = "Code", IncludeInTotal = false },
+            [nameof(RawMaterialModel.Code)] = new() { DisplayName = "Code", IncludeInTotal = false },
 
             ["Category"] = new() { DisplayName = "Category", IncludeInTotal = false },
 
-            ["Rate"] = new()
+            [nameof(RawMaterialModel.Rate)] = new()
             {
                 DisplayName = "Rate",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -71,7 +73,7 @@ public static class RawMaterialPDFExport
                 IncludeInTotal = false
             },
 
-            ["UnitOfMeasurement"] = new()
+            [nameof(RawMaterialModel.UnitOfMeasurement)] = new()
             {
                 DisplayName = "Unit",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -93,7 +95,7 @@ public static class RawMaterialPDFExport
                 IncludeInTotal = false
             },
 
-            ["Status"] = new()
+            [nameof(RawMaterialModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -108,7 +110,15 @@ public static class RawMaterialPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "Code", "Category", "Rate", "UnitOfMeasurement", "Tax", "Remarks", "Status"
+			nameof(RawMaterialModel.Id),
+			nameof(RawMaterialModel.Name),
+			nameof(RawMaterialModel.Code),
+			"Category",
+			nameof(RawMaterialModel.Rate),
+			nameof(RawMaterialModel.UnitOfMeasurement),
+			"Tax",
+			nameof(RawMaterialModel.Remarks),
+			nameof(RawMaterialModel.Status)
         ];
 
         // Call the generic PDF export utility

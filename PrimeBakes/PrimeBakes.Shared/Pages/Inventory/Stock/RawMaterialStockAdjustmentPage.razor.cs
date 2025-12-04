@@ -11,10 +11,11 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
+using PrimeBakes.Shared.Components;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Inventory.Stock;
 
@@ -39,14 +40,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
     private SfAutoComplete<RawMaterialModel?, RawMaterialModel> _sfItemAutoComplete;
     private SfGrid<RawMaterialStockAdjustmentCartModel> _sfCartGrid;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -89,7 +83,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Stock Data", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Loading Stock Data", ex.Message, ToastType.Error);
         }
     }
 
@@ -108,7 +102,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Items", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Loading Items", ex.Message, ToastType.Error);
         }
     }
 
@@ -123,7 +117,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Existing Cart", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Loading Existing Cart", ex.Message, ToastType.Error);
             await DeleteLocalFiles();
         }
         finally
@@ -207,7 +201,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
     {
         if (_selectedRawMaterial is null || _selectedRawMaterial.Id <= 0)
         {
-            await ShowToast("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", "error");
+            await _toastNotification.ShowAsync("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", ToastType.Error);
             return;
         }
 
@@ -298,7 +292,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
         _selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_transactionDateTime);
         if (_selectedFinancialYear is null || _selectedFinancialYear.Locked || _selectedFinancialYear.Status == false)
         {
-            await ShowToast("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", "error");
+            await _toastNotification.ShowAsync("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", ToastType.Error);
             _transactionDateTime = await CommonData.LoadCurrentDateTime();
             _selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_transactionDateTime);
             _stockSummary = await RawMaterialStockData.LoadRawMaterialStockSummaryByDate(_transactionDateTime, _transactionDateTime);
@@ -323,7 +317,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Saving Transaction Data", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -339,37 +333,37 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
     {
         if (_cart.Count == 0)
         {
-            await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
+            await _toastNotification.ShowAsync("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", ToastType.Warning);
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(_transactionNo))
         {
-            await ShowToast("Transaction Number Missing", "Transaction number is missing for the adjustment.", "error");
+            await _toastNotification.ShowAsync("Transaction Number Missing", "Transaction number is missing for the adjustment.", ToastType.Warning);
             return false;
         }
 
         if (_transactionDateTime == default)
         {
-            await ShowToast("Transaction Date Missing", "Please select a valid transaction date for the adjustment.", "error");
+            await _toastNotification.ShowAsync("Transaction Date Missing", "Please select a valid transaction date for the adjustment.", ToastType.Warning);
             return false;
         }
 
         if (_selectedFinancialYear is null || _selectedFinancialYear.Id <= 0)
         {
-            await ShowToast("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", "error");
+            await _toastNotification.ShowAsync("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", ToastType.Error);
             return false;
         }
 
         if (_selectedFinancialYear.Locked)
         {
-            await ShowToast("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", "error");
+            await _toastNotification.ShowAsync("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", ToastType.Error);
             return false;
         }
 
         if (_selectedFinancialYear.Status == false)
         {
-            await ShowToast("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", "error");
+            await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
             return false;
         }
 
@@ -394,17 +388,17 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
                 return;
             }
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
             await RawMaterialStockData.SaveRawMaterialStockAdjustment(_transactionDateTime, _cart);
             await DeleteLocalFiles();
             NavigationManager.NavigateTo(PageRouteNames.RawMaterialStockAdjustment, true);
 
-            await ShowToast("Save Transaction", "Transaction saved successfully!", "success");
+            await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully!", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Transaction", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Saving Transaction", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -436,33 +430,6 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
 
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
-
-	private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
-    }
 
 	public async ValueTask DisposeAsync()
 	{

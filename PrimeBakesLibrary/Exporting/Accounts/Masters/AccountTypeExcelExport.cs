@@ -27,20 +27,23 @@ public static class AccountTypeExcelExport
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
-			["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+			[nameof(AccountTypeModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
 			// Text fields - Left aligned
-			["Name"] = new() { DisplayName = "Account Type Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(AccountTypeModel.Name)] = new() { DisplayName = "Account Type Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			[nameof(AccountTypeModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
 			// Status - Center aligned
-			["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+			[nameof(AccountTypeModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
 		};
 
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Remarks", "Status"
+			nameof(AccountTypeModel.Id),
+			nameof(AccountTypeModel.Name),
+			nameof(AccountTypeModel.Remarks),
+			nameof(AccountTypeModel.Status)
 		];
 
 		// Call the generic Excel export utility

@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -7,7 +9,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
@@ -39,14 +40,7 @@ public partial class LedgerPage : IAsyncDisposable
 	private string _recoverLedgerName = string.Empty;
 	private bool _isRecoverDialogVisible = false;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -138,19 +132,19 @@ public partial class LedgerPage : IAsyncDisposable
 			var ledger = _ledgers.FirstOrDefault(l => l.Id == _deleteLedgerId);
 			if (ledger == null)
 			{
-				await ShowToast("Error", "Ledger not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Ledger not found.", ToastType.Error);
 				return;
 			}
 
 			ledger.Status = false;
 			await LedgerData.InsertLedger(ledger);
 
-			await ShowToast("Success", $"Ledger '{ledger.Name}' has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Ledger '{ledger.Name}' has been deleted successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete Ledger: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to delete Ledger: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -193,19 +187,19 @@ public partial class LedgerPage : IAsyncDisposable
 			var ledger = _ledgers.FirstOrDefault(l => l.Id == _recoverLedgerId);
 			if (ledger == null)
 			{
-				await ShowToast("Error", "Ledger not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Ledger not found.", ToastType.Error);
 				return;
 			}
 
 			ledger.Status = true;
 			await LedgerData.InsertLedger(ledger);
 
-			await ShowToast("Success", $"Ledger '{ledger.Name}' has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Ledger '{ledger.Name}' has been recovered successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover Ledger: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to recover Ledger: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -243,25 +237,25 @@ public partial class LedgerPage : IAsyncDisposable
 
 		if (string.IsNullOrWhiteSpace(_ledger.Name))
 		{
-			await ShowToast("Error", "Ledger name is required. Please enter a valid ledger name.", "error");
+			await _toastNotification.ShowAsync("Error", "Ledger name is required. Please enter a valid ledger name.", ToastType.Error);
 			return false;
 		}
 
 		if (_ledger.GroupId <= 0)
 		{
-			await ShowToast("Error", "Group is required. Please select a valid group.", "error");
+			await _toastNotification.ShowAsync("Error", "Group is required. Please select a valid group.", ToastType.Error);
 			return false;
 		}
 
 		if (_ledger.AccountTypeId <= 0)
 		{
-			await ShowToast("Error", "Account Type is required. Please select a valid account type.", "error");
+			await _toastNotification.ShowAsync("Error", "Account Type is required. Please select a valid account type.", ToastType.Error);
 			return false;
 		}
 
 		if (_ledger.StateUTId <= 0)
 		{
-			await ShowToast("Error", "State/UT is required. Please select a valid State/UT.", "error");
+			await _toastNotification.ShowAsync("Error", "State/UT is required. Please select a valid State/UT.", ToastType.Error);
 			return false;
 		}
 
@@ -284,7 +278,7 @@ public partial class LedgerPage : IAsyncDisposable
 				if (existingLedgerWithLocation is not null)
 				{
 					var locationName = _locations.FirstOrDefault(l => l.Id == _ledger.LocationId)?.Name ?? "Unknown";
-					await ShowToast("Error", $"Location '{locationName}' is already tagged to another ledger '{existingLedgerWithLocation.Name}'. Each location can only be tagged to one ledger.", "error");
+					await _toastNotification.ShowAsync("Error", $"Location '{locationName}' is already tagged to another ledger '{existingLedgerWithLocation.Name}'. Each location can only be tagged to one ledger.", ToastType.Error);
 					return false;
 				}
 			}
@@ -295,7 +289,7 @@ public partial class LedgerPage : IAsyncDisposable
 				if (existingLedgerWithLocation is not null)
 				{
 					var locationName = _locations.FirstOrDefault(l => l.Id == _ledger.LocationId)?.Name ?? "Unknown";
-					await ShowToast("Error", $"Location '{locationName}' is already tagged to ledger '{existingLedgerWithLocation.Name}'. Each location can only be tagged to one ledger.", "error");
+					await _toastNotification.ShowAsync("Error", $"Location '{locationName}' is already tagged to ledger '{existingLedgerWithLocation.Name}'. Each location can only be tagged to one ledger.", ToastType.Error);
 					return false;
 				}
 			}
@@ -306,7 +300,7 @@ public partial class LedgerPage : IAsyncDisposable
 			var existingLedger = _ledgers.FirstOrDefault(_ => _.Id != _ledger.Id && _.Name.Equals(_ledger.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingLedger is not null)
 			{
-				await ShowToast("Error", $"Ledger name '{_ledger.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Error", $"Ledger name '{_ledger.Name}' already exists. Please choose a different name.", ToastType.Error);
 				return false;
 			}
 		}
@@ -315,7 +309,7 @@ public partial class LedgerPage : IAsyncDisposable
 			var existingLedger = _ledgers.FirstOrDefault(_ => _.Name.Equals(_ledger.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingLedger is not null)
 			{
-				await ShowToast("Error", $"Ledger name '{_ledger.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Error", $"Ledger name '{_ledger.Name}' already exists. Please choose a different name.", ToastType.Error);
 				return false;
 			}
 		}
@@ -339,19 +333,19 @@ public partial class LedgerPage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			if (_ledger.Id == 0)
 				_ledger.Code = await GenerateCodes.GenerateLedgerCode();
 
 			await LedgerData.InsertLedger(_ledger);
 
-			await ShowToast("Success", $"Ledger '{_ledger.Name}' has been saved successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Ledger '{_ledger.Name}' has been saved successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminLedger, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to save Ledger: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save Ledger: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -370,7 +364,7 @@ public partial class LedgerPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
 			// Call the Excel export utility
 			var stream = await LedgerExcelExport.ExportLedger(_ledgers);
@@ -381,11 +375,11 @@ public partial class LedgerPage : IAsyncDisposable
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Ledger data exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Ledger data exported to Excel successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -403,7 +397,7 @@ public partial class LedgerPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
 			// Call the PDF export utility
 			var stream = await LedgerPDFExport.ExportLedger(_ledgers);
@@ -414,45 +408,16 @@ public partial class LedgerPage : IAsyncDisposable
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Ledger data exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Ledger data exported to PDF successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-		}
-	}
-	#endregion
-
-	#region Utilities
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
 		}
 	}
 	#endregion

@@ -1,4 +1,6 @@
-﻿namespace PrimeBakesLibrary.Exporting.Sales.Product;
+﻿using PrimeBakesLibrary.Models.Sales.Product;
+
+namespace PrimeBakesLibrary.Exporting.Sales.Product;
 
 /// <summary>
 /// Excel export functionality for Product
@@ -42,26 +44,33 @@ public static class ProductExcelExport
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
-			["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+			[nameof(ProductModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
 			// Text fields - Left aligned
-			["Name"] = new() { DisplayName = "Product Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["Code"] = new() { DisplayName = "Product Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			[nameof(ProductModel.Name)] = new() { DisplayName = "Product Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			[nameof(ProductModel.Code)] = new() { DisplayName = "Product Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
 			["Category"] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 			["Tax"] = new() { DisplayName = "Tax", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(ProductModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
 			// Numeric fields - Right aligned
-			["Rate"] = new() { DisplayName = "Rate", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, Format = "0.00" },
+			[nameof(ProductModel.Rate)] = new() { DisplayName = "Rate", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, Format = "0.00" },
 
 			// Status - Center aligned
-			["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+			[nameof(ProductModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
 		};
 
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Code", "Category", "Rate", "Tax", "Remarks", "Status"
+			nameof(ProductModel.Id),
+			nameof(ProductModel.Name),
+			nameof(ProductModel.Code),
+			"Category",
+			nameof(ProductModel.Rate),
+			"Tax",
+			nameof(ProductModel.Remarks),
+			nameof(ProductModel.Status)
 		];
 
 		// Call the generic Excel export utility

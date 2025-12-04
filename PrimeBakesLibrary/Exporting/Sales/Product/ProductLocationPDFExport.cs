@@ -1,4 +1,6 @@
-﻿using Syncfusion.Pdf.Graphics;
+﻿using PrimeBakesLibrary.Models.Sales.Product;
+
+using Syncfusion.Pdf.Graphics;
 
 namespace PrimeBakesLibrary.Exporting.Sales.Product;
 
@@ -30,15 +32,23 @@ public static class ProductLocationPDFExport
 
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new() { DisplayName = "ID", StringFormat = new PdfStringFormat(PdfTextAlignment.Center), IncludeInTotal = false },
+            [nameof(ProductLocationModel.Id)] = new() { DisplayName = "ID", StringFormat = new PdfStringFormat(PdfTextAlignment.Center), IncludeInTotal = false },
             ["Location"] = new() { DisplayName = "Location", StringFormat = new PdfStringFormat(PdfTextAlignment.Left), IncludeInTotal = false },
             ["ProductCode"] = new() { DisplayName = "Product Code", StringFormat = new PdfStringFormat(PdfTextAlignment.Left), IncludeInTotal = false },
             ["ProductName"] = new() { DisplayName = "Product Name", StringFormat = new PdfStringFormat(PdfTextAlignment.Left), IsRequired = true },
-            ["Rate"] = new() { DisplayName = "Rate", StringFormat = new PdfStringFormat(PdfTextAlignment.Right), IncludeInTotal = false },
-            ["Status"] = new() { DisplayName = "Status", StringFormat = new PdfStringFormat(PdfTextAlignment.Center), IncludeInTotal = false }
+            [nameof(ProductLocationModel.Rate)] = new() { DisplayName = "Rate", StringFormat = new PdfStringFormat(PdfTextAlignment.Right), IncludeInTotal = false },
+            [nameof(ProductLocationModel.Status)] = new() { DisplayName = "Status", StringFormat = new PdfStringFormat(PdfTextAlignment.Center), IncludeInTotal = false }
         };
 
-        var columnOrder = new List<string> { "Id", "Location", "ProductCode", "ProductName", "Rate", "Status" };
+		List<string> columnOrder =
+		[
+			nameof(ProductLocationModel.Id),
+			"Location",
+			"ProductCode",
+			"ProductName",
+			nameof(ProductLocationModel.Rate),
+			nameof(ProductLocationModel.Status)
+		];
 
         return await PDFReportExportUtil.ExportToPdf(
             enrichedData,

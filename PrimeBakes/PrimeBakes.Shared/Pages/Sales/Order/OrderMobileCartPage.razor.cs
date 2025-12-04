@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -9,7 +11,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Order;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Sales.Order;
 
@@ -29,14 +30,7 @@ public partial class OrderMobileCartPage
 
     private SfGrid<OrderItemCartModel> _sfCartGrid;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -104,7 +98,7 @@ public partial class OrderMobileCartPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Cart Data", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Saving Cart Data", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -148,7 +142,7 @@ public partial class OrderMobileCartPage
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Saving transaction...", "success");
+            await _toastNotification.ShowAsync("Processing", "Saving transaction...", ToastType.Info);
 
             await SaveOrderFile();
 
@@ -186,7 +180,7 @@ public partial class OrderMobileCartPage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Order", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Saving Order", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -227,34 +221,6 @@ public partial class OrderMobileCartPage
     {
         _showConfirmDialog = false;
         await SaveOrder();
-    }
-
-
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
     }
     #endregion
 }

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -12,7 +14,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 
@@ -38,14 +39,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	private List<AccountingLedgerOverviewModel> _transactionOverviews = [];
 
 	private SfGrid<AccountingLedgerOverviewModel> _sfGrid;
-
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfErrorToast;
-	private SfToast _sfSuccessToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -159,7 +153,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while loading transaction overviews: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -243,7 +237,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 
 					if (previousFY == null)
 					{
-						await ShowToast("Warning", "No previous financial year found.", "error");
+						await _toastNotification.ShowAsync("Warning", "No previous financial year found.", ToastType.Warning);
 						return;
 					}
 
@@ -259,7 +253,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while setting date range: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -280,7 +274,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -301,11 +295,11 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Transaction report exported to Excel successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -323,7 +317,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -344,11 +338,11 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 			fileName += ".pdf";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Transaction report exported to PDF successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -379,7 +373,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while opening transaction: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -401,15 +395,15 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Generating invoice...", "success");
+			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
 
 			var (pdfStream, fileName) = await AccountingData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Invoice downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while generating invoice: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -458,32 +452,6 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
-		}
-	}
 
 	public async ValueTask DisposeAsync()
 	{

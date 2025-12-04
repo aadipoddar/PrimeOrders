@@ -1,3 +1,4 @@
+using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +7,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
@@ -34,14 +34,7 @@ public partial class ProductCategoryPage : IAsyncDisposable
 	private string _recoverProductCategoryName = string.Empty;
 	private bool _isRecoverDialogVisible = false;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -117,19 +110,19 @@ public partial class ProductCategoryPage : IAsyncDisposable
 			var productCategory = _productCategories.FirstOrDefault(pc => pc.Id == _deleteProductCategoryId);
 			if (productCategory == null)
 			{
-				await ShowToast("Error", "Product Category not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Category not found.", ToastType.Error);
 				return;
 			}
 
 			productCategory.Status = false;
 			await ProductData.InsertProductCategory(productCategory);
 
-			await ShowToast("Success", $"Product Category '{productCategory.Name}' has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Deleted", $"Category '{productCategory.Name}' removed successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminProductCategory, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete Product Category: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to delete category: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -172,19 +165,19 @@ public partial class ProductCategoryPage : IAsyncDisposable
 			var productCategory = _productCategories.FirstOrDefault(pc => pc.Id == _recoverProductCategoryId);
 			if (productCategory == null)
 			{
-				await ShowToast("Error", "Product Category not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Category not found.", ToastType.Error);
 				return;
 			}
 
 			productCategory.Status = true;
 			await ProductData.InsertProductCategory(productCategory);
 
-			await ShowToast("Success", $"Product Category '{productCategory.Name}' has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Recovered", $"Category '{productCategory.Name}' restored successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminProductCategory, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover Product Category: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to recover category: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -206,7 +199,7 @@ public partial class ProductCategoryPage : IAsyncDisposable
 
 		if (string.IsNullOrWhiteSpace(_productCategory.Name))
 		{
-			await ShowToast("Error", "Product Category name is required. Please enter a valid product category name.", "error");
+			await _toastNotification.ShowAsync("Validation", "Category name is required.", ToastType.Warning);
 			return false;
 		}
 
@@ -218,7 +211,7 @@ public partial class ProductCategoryPage : IAsyncDisposable
 			var existingProductCategory = _productCategories.FirstOrDefault(_ => _.Id != _productCategory.Id && _.Name.Equals(_productCategory.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingProductCategory is not null)
 			{
-				await ShowToast("Error", $"Product Category name '{_productCategory.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Category '{_productCategory.Name}' already exists.", ToastType.Warning);
 				return false;
 			}
 		}
@@ -227,7 +220,7 @@ public partial class ProductCategoryPage : IAsyncDisposable
 			var existingProductCategory = _productCategories.FirstOrDefault(_ => _.Name.Equals(_productCategory.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingProductCategory is not null)
 			{
-				await ShowToast("Error", $"Product Category name '{_productCategory.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Category '{_productCategory.Name}' already exists.", ToastType.Warning);
 				return false;
 			}
 		}
@@ -251,16 +244,16 @@ public partial class ProductCategoryPage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Saving", "Processing category...", ToastType.Info);
 
 			await ProductData.InsertProductCategory(_productCategory);
 
-			await ShowToast("Success", $"Product Category '{_productCategory.Name}' has been saved successfully.", "success");
+			await _toastNotification.ShowAsync("Saved", $"Category '{_productCategory.Name}' saved successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminProductCategory, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to save Product Category: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save category: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -279,7 +272,7 @@ public partial class ProductCategoryPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
 
 			// Call the Excel export utility
 			var stream = await ProductCategoryExcelExport.ExportProductCategory(_productCategories);
@@ -290,11 +283,11 @@ public partial class ProductCategoryPage : IAsyncDisposable
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Product Category data exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -312,7 +305,7 @@ public partial class ProductCategoryPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
 
 			// Call the PDF export utility
 			var stream = await ProductCategoryPDFExport.ExportProductCategory(_productCategories);
@@ -323,45 +316,16 @@ public partial class ProductCategoryPage : IAsyncDisposable
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Product Category data exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-		}
-	}
-	#endregion
-
-	#region Utilities
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
 		}
 	}
 	#endregion

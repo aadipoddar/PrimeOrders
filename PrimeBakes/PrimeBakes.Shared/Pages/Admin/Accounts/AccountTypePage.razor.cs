@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
@@ -34,14 +35,7 @@ public partial class AccountTypePage : IAsyncDisposable
 	private string _recoverAccountTypeName = string.Empty;
 	private bool _isRecoverDialogVisible = false;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -117,19 +111,19 @@ public partial class AccountTypePage : IAsyncDisposable
 			var accountType = _accountTypes.FirstOrDefault(at => at.Id == _deleteAccountTypeId);
 			if (accountType == null)
 			{
-				await ShowToast("Error", "Account Type not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Account Type not found.", ToastType.Error);
 				return;
 			}
 
 			accountType.Status = false;
 			await AccountTypeData.InsertAccountType(accountType);
 
-			await ShowToast("Success", $"Account Type '{accountType.Name}' has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Account Type '{accountType.Name}' has been deleted successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminAccountType, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete Account Type: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to delete Account Type: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -172,19 +166,19 @@ public partial class AccountTypePage : IAsyncDisposable
 			var accountType = _accountTypes.FirstOrDefault(at => at.Id == _recoverAccountTypeId);
 			if (accountType == null)
 			{
-				await ShowToast("Error", "Account Type not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Account Type not found.", ToastType.Error);
 				return;
 			}
 
 			accountType.Status = true;
 			await AccountTypeData.InsertAccountType(accountType);
 
-			await ShowToast("Success", $"Account Type '{accountType.Name}' has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Account Type '{accountType.Name}' has been recovered successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminAccountType, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover Account Type: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to recover Account Type: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -206,7 +200,7 @@ public partial class AccountTypePage : IAsyncDisposable
 
 		if (string.IsNullOrWhiteSpace(_accountType.Name))
 		{
-			await ShowToast("Error", "Account Type name is required. Please enter a valid account type name.", "error");
+			await _toastNotification.ShowAsync("Error", "Account Type name is required. Please enter a valid account type name.", ToastType.Error);
 			return false;
 		}
 
@@ -218,7 +212,7 @@ public partial class AccountTypePage : IAsyncDisposable
 			var existingAccountType = _accountTypes.FirstOrDefault(_ => _.Id != _accountType.Id && _.Name.Equals(_accountType.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingAccountType is not null)
 			{
-				await ShowToast("Error", $"Account Type name '{_accountType.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Error", $"Account Type name '{_accountType.Name}' already exists. Please choose a different name.", ToastType.Error);
 				return false;
 			}
 		}
@@ -227,7 +221,7 @@ public partial class AccountTypePage : IAsyncDisposable
 			var existingAccountType = _accountTypes.FirstOrDefault(_ => _.Name.Equals(_accountType.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingAccountType is not null)
 			{
-				await ShowToast("Error", $"Account Type name '{_accountType.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Error", $"Account Type name '{_accountType.Name}' already exists. Please choose a different name.", ToastType.Error);
 				return false;
 			}
 		}
@@ -251,16 +245,16 @@ public partial class AccountTypePage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			await AccountTypeData.InsertAccountType(_accountType);
 
-			await ShowToast("Success", $"Account Type '{_accountType.Name}' has been saved successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Account Type '{_accountType.Name}' has been saved successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminAccountType, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to save Account Type: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save Account Type: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -279,7 +273,7 @@ public partial class AccountTypePage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
 			// Call the Excel export utility
 			var stream = await AccountTypeExcelExport.ExportAccountType(_accountTypes);
@@ -290,11 +284,11 @@ public partial class AccountTypePage : IAsyncDisposable
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Account Type data exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Account Type data exported to Excel successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -312,7 +306,7 @@ public partial class AccountTypePage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
 			// Call the PDF export utility
 			var stream = await AccountTypePDFExport.ExportAccountType(_accountTypes);
@@ -323,45 +317,16 @@ public partial class AccountTypePage : IAsyncDisposable
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Account Type data exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Account Type data exported to PDF successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-		}
-	}
-	#endregion
-
-	#region Utilities
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
 		}
 	}
 	#endregion

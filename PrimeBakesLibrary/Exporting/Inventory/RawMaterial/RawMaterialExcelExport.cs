@@ -1,3 +1,5 @@
+using PrimeBakesLibrary.Models.Inventory;
+
 namespace PrimeBakesLibrary.Exporting.Inventory.RawMaterial;
 
 /// <summary>
@@ -44,37 +46,45 @@ public static class RawMaterialExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // ID - Center aligned, no totals
-            ["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(RawMaterialModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Name - Left aligned
-            ["Name"] = new() { DisplayName = "Raw Material Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+            [nameof(RawMaterialModel.Name)] = new() { DisplayName = "Raw Material Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
 
             // Code - Left aligned
-            ["Code"] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+            [nameof(RawMaterialModel.Code)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
 
             // Category - Left aligned
             ["Category"] = new() { DisplayName = "Category", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
 
             // Rate - Right aligned with 2 decimal places
-            ["Rate"] = new() { DisplayName = "Rate", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, Format = "0.00", IncludeInTotal = false },
+            [nameof(RawMaterialModel.Rate)] = new() { DisplayName = "Rate", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, Format = "0.00", IncludeInTotal = false },
 
             // Unit - Center aligned
-            ["UnitOfMeasurement"] = new() { DisplayName = "Unit", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(RawMaterialModel.UnitOfMeasurement)] = new() { DisplayName = "Unit", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Tax - Center aligned
             ["Tax"] = new() { DisplayName = "Tax Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Remarks - Left aligned
-            ["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(RawMaterialModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
             // Status - Center aligned
-            ["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+            [nameof(RawMaterialModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
         };
 
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "Code", "Category", "Rate", "UnitOfMeasurement", "Tax", "Remarks", "Status"
+            nameof(RawMaterialModel.Id),
+            nameof(RawMaterialModel.Name),
+            nameof(RawMaterialModel.Code),
+			"Category",
+            nameof(RawMaterialModel.Rate),
+            nameof(RawMaterialModel.UnitOfMeasurement),
+            "Tax",
+            nameof(RawMaterialModel.Remarks),
+            nameof(RawMaterialModel.Status)
         ];
 
         // Call the generic Excel export utility

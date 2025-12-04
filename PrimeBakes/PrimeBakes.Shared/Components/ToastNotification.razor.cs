@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components;
+
 using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Components;
@@ -17,9 +19,15 @@ public enum ToastType
 	Info
 }
 
-public partial class ToastNotification
+public partial class ToastNotification : ComponentBase
 {
 	private SfToast _sfToast = null!;
+
+	/// <summary>
+	/// Event callback that fires after a toast is shown, allowing parent to update UI
+	/// </summary>
+	[Parameter]
+	public EventCallback OnToastShown { get; set; }
 
 	/// <summary>
 	/// Shows a toast notification with the specified type
@@ -44,6 +52,11 @@ public partial class ToastNotification
 			Content = message,
 			CssClass = cssClass
 		});
+
+		await InvokeAsync(StateHasChanged);
+
+		if (OnToastShown.HasDelegate)
+			await OnToastShown.InvokeAsync();
 	}
 
 	/// <summary>

@@ -32,7 +32,7 @@ public static class TaxPDFExport
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(TaxModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -43,9 +43,9 @@ public static class TaxPDFExport
                 IncludeInTotal = false
             },
 
-            ["Code"] = new() { DisplayName = "Tax Code", IncludeInTotal = false },
+            [nameof(TaxModel.Code)] = new() { DisplayName = "Tax Code", IncludeInTotal = false },
 
-            ["CGST"] = new()
+            [nameof(TaxModel.CGST)] = new()
             {
                 DisplayName = "CGST %",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -56,7 +56,7 @@ public static class TaxPDFExport
                 IncludeInTotal = false
             },
 
-            ["SGST"] = new()
+            [nameof(TaxModel.SGST)] = new()
             {
                 DisplayName = "SGST %",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -67,7 +67,7 @@ public static class TaxPDFExport
                 IncludeInTotal = false
             },
 
-            ["IGST"] = new()
+            [nameof(TaxModel.IGST)] = new()
             {
                 DisplayName = "IGST %",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -89,7 +89,7 @@ public static class TaxPDFExport
                 IncludeInTotal = false
             },
 
-            ["Inclusive"] = new()
+            [nameof(TaxModel.Inclusive)] = new()
             {
                 DisplayName = "Inclusive",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -100,7 +100,7 @@ public static class TaxPDFExport
                 IncludeInTotal = false
             },
 
-            ["Extra"] = new()
+            [nameof(TaxModel.Extra)] = new()
             {
                 DisplayName = "Extra",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -111,7 +111,7 @@ public static class TaxPDFExport
                 IncludeInTotal = false
             },
 
-            ["Status"] = new()
+            [nameof(TaxModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -126,8 +126,17 @@ public static class TaxPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Code", "CGST", "SGST", "IGST", "Total", "Inclusive", "Extra", "Remarks", "Status"
-        ];
+			nameof(TaxModel.Id),
+			nameof(TaxModel.Code),
+			nameof(TaxModel.CGST),
+			nameof(TaxModel.SGST),
+			nameof(TaxModel.IGST),
+			"Total",
+			nameof(TaxModel.Inclusive),
+			nameof(TaxModel.Extra),
+			nameof(TaxModel.Remarks),
+			nameof(TaxModel.Status)
+		];
 
         // Call the generic PDF export utility
         return await PDFReportExportUtil.ExportToPdf(

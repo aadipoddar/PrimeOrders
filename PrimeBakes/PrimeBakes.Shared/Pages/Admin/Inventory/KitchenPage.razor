@@ -311,13 +311,8 @@ else
     </DialogTemplates>
 </SfDialog>
 
-<!-- Toast Notifications -->
-<SfToast @ref="_sfSuccessToast" CssClass="e-toast-success" ShowCloseButton="true" Target="body" Timeout="5000">
-    <ToastPosition X="Right" Y="Top" />
-</SfToast>
-<SfToast @ref="_sfErrorToast" CssClass="e-toast-danger" ShowCloseButton="true" Target="body" Timeout="8000">
-    <ToastPosition X="Right" Y="Top" />
-</SfToast>
+<!-- Toast Notification -->
+<ToastNotification @ref="_toastNotification" />
 
 <style>
     * {

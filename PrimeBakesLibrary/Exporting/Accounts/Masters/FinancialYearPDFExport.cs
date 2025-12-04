@@ -29,7 +29,7 @@ public static class FinancialYearPDFExport
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(FinancialYearModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -40,7 +40,7 @@ public static class FinancialYearPDFExport
                 IncludeInTotal = false
             },
 
-            ["StartDate"] = new()
+            [nameof(FinancialYearModel.StartDate)] = new()
             {
                 DisplayName = "Start Date",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -51,7 +51,7 @@ public static class FinancialYearPDFExport
                 IncludeInTotal = false
             },
 
-            ["EndDate"] = new()
+            [nameof(FinancialYearModel.EndDate)] = new()
             {
                 DisplayName = "End Date",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -62,7 +62,7 @@ public static class FinancialYearPDFExport
                 IncludeInTotal = false
             },
 
-            ["YearNo"] = new()
+            [nameof(FinancialYearModel.YearNo)] = new()
             {
                 DisplayName = "Year No",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -73,9 +73,9 @@ public static class FinancialYearPDFExport
                 IncludeInTotal = false
             },
 
-            ["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+            [nameof(FinancialYearModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-            ["Locked"] = new()
+            [nameof(FinancialYearModel.Locked)] = new()
             {
                 DisplayName = "Locked",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -86,7 +86,7 @@ public static class FinancialYearPDFExport
                 IncludeInTotal = false
             },
 
-            ["Status"] = new()
+            [nameof(FinancialYearModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -101,7 +101,13 @@ public static class FinancialYearPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "StartDate", "EndDate", "YearNo", "Remarks", "Locked", "Status"
+			nameof(FinancialYearModel.Id),
+			nameof(FinancialYearModel.StartDate),
+			nameof(FinancialYearModel.EndDate),
+			nameof(FinancialYearModel.YearNo),
+			nameof(FinancialYearModel.Remarks),
+			nameof(FinancialYearModel.Locked),
+			nameof(FinancialYearModel.Status)
         ];
 
         // Call the generic PDF export utility

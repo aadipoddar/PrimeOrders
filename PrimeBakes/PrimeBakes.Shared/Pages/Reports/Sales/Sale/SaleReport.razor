@@ -560,8 +560,6 @@ else
     </div>
 }
 
-<ToastNotification @ref="_toastNotification" />
-
 <SfDialog @ref="_deleteConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
           @bind-Visible="_isDeleteDialogVisible">
     <DialogTemplates>
@@ -677,6 +675,8 @@ else
         </Content>
     </DialogTemplates>
 </SfDialog>
+
+<ToastNotification @ref="_toastNotification" />
 
 <style>
     * {

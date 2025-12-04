@@ -37,7 +37,7 @@ public static class UserPDFExport
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(UserModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -48,8 +48,8 @@ public static class UserPDFExport
                 IncludeInTotal = false
             },
 
-            ["Name"] = new() { DisplayName = "User Name", IncludeInTotal = false },
-            ["Passcode"] = new()
+            [nameof(UserModel.Name)] = new() { DisplayName = "User Name", IncludeInTotal = false },
+            [nameof(UserModel.Passcode)] = new()
             {
                 DisplayName = "Passcode",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -61,7 +61,7 @@ public static class UserPDFExport
             },
             ["Location"] = new() { DisplayName = "Location", IncludeInTotal = false },
 
-            ["Sales"] = new()
+            [nameof(UserModel.Sales)] = new()
             {
                 DisplayName = "Sales",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -72,7 +72,7 @@ public static class UserPDFExport
                 IncludeInTotal = false
             },
 
-            ["Order"] = new()
+            [nameof(UserModel.Order)] = new()
             {
                 DisplayName = "Order",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -83,7 +83,7 @@ public static class UserPDFExport
                 IncludeInTotal = false
             },
 
-            ["Inventory"] = new()
+            [nameof(UserModel.Inventory)] = new()
             {
                 DisplayName = "Inventory",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -94,7 +94,7 @@ public static class UserPDFExport
                 IncludeInTotal = false
             },
 
-            ["Accounts"] = new()
+            [nameof(UserModel.Accounts)] = new()
             {
                 DisplayName = "Accounts",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -105,7 +105,7 @@ public static class UserPDFExport
                 IncludeInTotal = false
             },
 
-            ["Admin"] = new()
+            [nameof(UserModel.Admin)] = new()
             {
                 DisplayName = "Admin",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -116,9 +116,9 @@ public static class UserPDFExport
                 IncludeInTotal = false
             },
 
-            ["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+            [nameof(UserModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-            ["Status"] = new()
+            [nameof(UserModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -133,8 +133,18 @@ public static class UserPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "Passcode", "Location", "Sales", "Order", "Inventory", "Accounts", "Admin", "Remarks", "Status"
-        ];
+			nameof(UserModel.Id),
+			nameof(UserModel.Name),
+			nameof(UserModel.Passcode),
+			"Location",
+			nameof(UserModel.Sales),
+			nameof(UserModel.Order),
+			nameof(UserModel.Inventory),
+			nameof(UserModel.Accounts),
+			nameof(UserModel.Admin),
+			nameof(UserModel.Remarks),
+			nameof(UserModel.Status)
+		];
 
         // Call the generic PDF export utility
         return await PDFReportExportUtil.ExportToPdf(

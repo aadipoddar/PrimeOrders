@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
@@ -35,14 +36,7 @@ public partial class CompanyPage : IAsyncDisposable
 	private string _recoverCompanyName = string.Empty;
 	private bool _isRecoverDialogVisible = false;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -128,19 +122,19 @@ public partial class CompanyPage : IAsyncDisposable
 			var company = _companies.FirstOrDefault(c => c.Id == _deleteCompanyId);
 			if (company == null)
 			{
-				await ShowToast("Error", "Company not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Company not found.", ToastType.Error);
 				return;
 			}
 
 			company.Status = false;
 			await CompanyData.InsertCompany(company);
 
-			await ShowToast("Success", $"Company '{company.Name}' has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Company '{company.Name}' has been deleted successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminCompany, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete Company: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to delete Company: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -183,19 +177,19 @@ public partial class CompanyPage : IAsyncDisposable
 			var company = _companies.FirstOrDefault(c => c.Id == _recoverCompanyId);
 			if (company == null)
 			{
-				await ShowToast("Error", "Company not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Company not found.", ToastType.Error);
 				return;
 			}
 
 			company.Status = true;
 			await CompanyData.InsertCompany(company);
 
-			await ShowToast("Success", $"Company '{company.Name}' has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Company '{company.Name}' has been recovered successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminCompany, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover Company: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to recover Company: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -236,19 +230,19 @@ public partial class CompanyPage : IAsyncDisposable
 
 		if (string.IsNullOrWhiteSpace(_company.Name))
 		{
-			await ShowToast("Error", "Company name is required. Please enter a valid company name.", "error");
+			await _toastNotification.ShowAsync("Error", "Company name is required. Please enter a valid company name.", ToastType.Error);
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(_company.Code))
 		{
-			await ShowToast("Error", "Code is required. Please enter a valid code.", "error");
+			await _toastNotification.ShowAsync("Error", "Code is required. Please enter a valid code.", ToastType.Error);
 			return false;
 		}
 
 		if (_company.StateUTId <= 0)
 		{
-			await ShowToast("Error", "State/UT is required. Please select a valid State/UT.", "error");
+			await _toastNotification.ShowAsync("Error", "State/UT is required. Please select a valid State/UT.", ToastType.Error);
 			return false;
 		}
 
@@ -266,14 +260,14 @@ public partial class CompanyPage : IAsyncDisposable
 			var existingCompany = _companies.FirstOrDefault(_ => _.Id != _company.Id && _.Name.Equals(_company.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingCompany is not null)
 			{
-				await ShowToast("Error", $"Company name '{_company.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Error", $"Company name '{_company.Name}' already exists. Please choose a different name.", ToastType.Error);
 				return false;
 			}
 
 			var existingCode = _companies.FirstOrDefault(_ => _.Id != _company.Id && _.Code.Equals(_company.Code, StringComparison.OrdinalIgnoreCase));
 			if (existingCode is not null)
 			{
-				await ShowToast("Error", $"Company code '{_company.Code}' already exists. Please choose a different code.", "error");
+				await _toastNotification.ShowAsync("Error", $"Company code '{_company.Code}' already exists. Please choose a different code.", ToastType.Error);
 				return false;
 			}
 		}
@@ -282,14 +276,14 @@ public partial class CompanyPage : IAsyncDisposable
 			var existingCompany = _companies.FirstOrDefault(_ => _.Name.Equals(_company.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingCompany is not null)
 			{
-				await ShowToast("Error", $"Company name '{_company.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Error", $"Company name '{_company.Name}' already exists. Please choose a different name.", ToastType.Error);
 				return false;
 			}
 
 			var existingCode = _companies.FirstOrDefault(_ => _.Code.Equals(_company.Code, StringComparison.OrdinalIgnoreCase));
 			if (existingCode is not null)
 			{
-				await ShowToast("Error", $"Company code '{_company.Code}' already exists. Please choose a different code.", "error");
+				await _toastNotification.ShowAsync("Error", $"Company code '{_company.Code}' already exists. Please choose a different code.", ToastType.Error);
 				return false;
 			}
 		}
@@ -313,16 +307,16 @@ public partial class CompanyPage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			await CompanyData.InsertCompany(_company);
 
-			await ShowToast("Success", $"Company '{_company.Name}' has been saved successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Company '{_company.Name}' has been saved successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminCompany, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to save Company: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save Company: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -341,7 +335,7 @@ public partial class CompanyPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
 			// Call the Excel export utility
 			var stream = await CompanyExcelExport.ExportCompany(_companies);
@@ -352,11 +346,11 @@ public partial class CompanyPage : IAsyncDisposable
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Company data exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Company data exported to Excel successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -374,7 +368,7 @@ public partial class CompanyPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
 			// Call the PDF export utility
 			var stream = await CompanyPDFExport.ExportCompany(_companies);
@@ -385,45 +379,16 @@ public partial class CompanyPage : IAsyncDisposable
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Company data exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Company data exported to PDF successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-		}
-	}
-	#endregion
-
-	#region Utilities
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
 		}
 	}
 	#endregion

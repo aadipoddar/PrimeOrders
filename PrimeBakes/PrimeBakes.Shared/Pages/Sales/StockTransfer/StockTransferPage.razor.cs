@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -15,7 +17,6 @@ using PrimeBakesLibrary.Models.Sales.StockTransfer;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Sales.StockTransfer;
 
@@ -47,14 +48,7 @@ public partial class StockTransferPage : IAsyncDisposable
 	private SfAutoComplete<ProductLocationOverviewModel?, ProductLocationOverviewModel> _sfItemAutoComplete;
 	private SfGrid<StockTransferItemCartModel> _sfCartGrid;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -108,7 +102,7 @@ public partial class StockTransferPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Locations", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Locations", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -129,7 +123,7 @@ public partial class StockTransferPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Companies", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Companies", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -142,7 +136,7 @@ public partial class StockTransferPage : IAsyncDisposable
 				_stockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, Id.Value);
 				if (_stockTransfer is null || _stockTransfer.Id == 0)
 				{
-					await ShowToast("Transaction Not Found", "The requested transaction could not be found.", "error");
+					await _toastNotification.ShowAsync("Transaction Not Found", "The requested transaction could not be found.", ToastType.Error);
 					NavigationManager.NavigateTo(PageRouteNames.StockTransfer, true);
 				}
 			}
@@ -202,7 +196,7 @@ public partial class StockTransferPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Transaction Data", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Transaction Data", ex.Message, ToastType.Error);
 			await DeleteLocalFiles();
 		}
 		finally
@@ -228,7 +222,7 @@ public partial class StockTransferPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Items", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Items", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -247,7 +241,7 @@ public partial class StockTransferPage : IAsyncDisposable
 					if (_products.FirstOrDefault(s => s.ProductId == item.ProductId) is null)
 					{
 						var product = await CommonData.LoadTableDataById<ProductModel>(TableNames.Product, item.ProductId);
-						await ShowToast("Item Not Found", $"The item {product?.Name} (ID: {item.ProductId}) in the existing transaction cart was not found in the available items list. It may have been deleted or is inaccessible.", "error");
+						await _toastNotification.ShowAsync("Item Not Found", $"The item {product?.Name} (ID: {item.ProductId}) in the existing transaction cart was not found in the available items list. It may have been deleted or is inaccessible.", ToastType.Error);
 						continue;
 					}
 
@@ -281,7 +275,7 @@ public partial class StockTransferPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Existing Cart", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Existing Cart", ex.Message, ToastType.Error);
 			await DeleteLocalFiles();
 		}
 		finally
@@ -514,7 +508,7 @@ public partial class StockTransferPage : IAsyncDisposable
 	{
 		if (_selectedProduct is null || _selectedProduct.ProductId <= 0 || _selectedCart.Quantity <= 0 || _selectedCart.Rate < 0 || _selectedCart.DiscountPercent < 0 || _selectedCart.CGSTPercent < 0 || _selectedCart.SGSTPercent < 0 || _selectedCart.IGSTPercent < 0 || _selectedCart.Total < 0)
 		{
-			await ShowToast("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", "error");
+			await _toastNotification.ShowAsync("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", ToastType.Error);
 			return;
 		}
 
@@ -526,7 +520,7 @@ public partial class StockTransferPage : IAsyncDisposable
 
 		if (taxCount == 3)
 		{
-			await ShowToast("Invalid Tax Configuration", "All three taxes (CGST, SGST, IGST) cannot be applied together. Use either CGST+SGST or IGST only.", "error");
+			await _toastNotification.ShowAsync("Invalid Tax Configuration", "All three taxes (CGST, SGST, IGST) cannot be applied together. Use either CGST+SGST or IGST only.", ToastType.Error);
 			return;
 		}
 
@@ -684,7 +678,7 @@ public partial class StockTransferPage : IAsyncDisposable
 			_stockTransfer.FinancialYearId = _selectedFinancialYear.Id;
 		else
 		{
-			await ShowToast("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", "error");
+			await _toastNotification.ShowAsync("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", ToastType.Error);
 			_stockTransfer.TransactionDateTime = await CommonData.LoadCurrentDateTime();
 			_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_stockTransfer.TransactionDateTime);
 			_stockTransfer.FinancialYearId = _selectedFinancialYear.Id;
@@ -711,7 +705,7 @@ public partial class StockTransferPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Saving Transaction Data", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -727,73 +721,73 @@ public partial class StockTransferPage : IAsyncDisposable
 	{
 		if (_cart.Count == 0)
 		{
-			await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
+			await _toastNotification.ShowAsync("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedCompany is null || _stockTransfer.CompanyId <= 0)
 		{
-			await ShowToast("Company Not Selected", "Please select a company for the transaction.", "error");
+			await _toastNotification.ShowAsync("Company Not Selected", "Please select a company for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(_stockTransfer.TransactionNo))
 		{
-			await ShowToast("Transaction Number Missing", "Please enter a transaction number for the transaction.", "error");
+			await _toastNotification.ShowAsync("Transaction Number Missing", "Please enter a transaction number for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_stockTransfer.TransactionDateTime == default)
 		{
-			await ShowToast("Transaction Date Missing", "Please select a valid transaction date for the transaction.", "error");
+			await _toastNotification.ShowAsync("Transaction Date Missing", "Please select a valid transaction date for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedFinancialYear is null || _stockTransfer.FinancialYearId <= 0)
 		{
-			await ShowToast("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", "error");
+			await _toastNotification.ShowAsync("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedFinancialYear.Locked)
 		{
-			await ShowToast("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", "error");
+			await _toastNotification.ShowAsync("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedFinancialYear.Status == false)
 		{
-			await ShowToast("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", "error");
+			await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
 			return false;
 		}
 
 		if (_stockTransfer.TotalItems <= 0)
 		{
-			await ShowToast("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", "error");
+			await _toastNotification.ShowAsync("Cart is Empty", "Please add at least one item to the cart before saving the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_stockTransfer.TotalQuantity <= 0)
 		{
-			await ShowToast("Invalid Total Quantity", "The total quantity of items in the cart must be greater than zero.", "error");
+			await _toastNotification.ShowAsync("Invalid Total Quantity", "The total quantity of items in the cart must be greater than zero.", ToastType.Error);
 			return false;
 		}
 
 		if (_stockTransfer.TotalAmount < 0)
 		{
-			await ShowToast("Invalid Total Amount", "The total amount of the transaction must be greater than zero.", "error");
+			await _toastNotification.ShowAsync("Invalid Total Amount", "The total amount of the transaction must be greater than zero.", ToastType.Error);
 			return false;
 		}
 
 		if (_cart.Any(item => item.Quantity <= 0))
 		{
-			await ShowToast("Invalid Item Quantity", "One or more items in the cart have a quantity less than or equal to zero. Please correct the quantities before saving.", "error");
+			await _toastNotification.ShowAsync("Invalid Item Quantity", "One or more items in the cart have a quantity less than or equal to zero. Please correct the quantities before saving.", ToastType.Error);
 			return false;
 		}
 
 		if (_stockTransfer.LocationId == _stockTransfer.ToLocationId)
 		{
-			await ShowToast("Invalid Locations", "The 'From' and 'To' locations cannot be the same. Please select different locations.", "error");
+			await _toastNotification.ShowAsync("Invalid Locations", "The 'From' and 'To' locations cannot be the same. Please select different locations.", ToastType.Error);
 			return false;
 		}
 
@@ -803,13 +797,13 @@ public partial class StockTransferPage : IAsyncDisposable
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingTransfer.FinancialYearId);
 			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
 			{
-				await ShowToast("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", "error");
+				await _toastNotification.ShowAsync("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", ToastType.Error);
 				return false;
 			}
 
 			if (!_user.Admin)
 			{
-				await ShowToast("Insufficient Permissions", "You do not have the necessary permissions to modify this transaction.", "error");
+				await _toastNotification.ShowAsync("Insufficient Permissions", "You do not have the necessary permissions to modify this transaction.", ToastType.Error);
 				await DeleteLocalFiles();
 				NavigationManager.NavigateTo(PageRouteNames.StockTransfer, true);
 				return false;
@@ -822,13 +816,13 @@ public partial class StockTransferPage : IAsyncDisposable
 
 		if (_stockTransfer.Cash < 0 || _stockTransfer.Card < 0 || _stockTransfer.Credit < 0 || _stockTransfer.UPI < 0)
 		{
-			await ShowToast("Invalid Payment Amounts", "Payment amounts (Cash, Card, Credit, UPI) cannot be negative. Please correct the amounts before saving.", "error");
+			await _toastNotification.ShowAsync("Invalid Payment Amounts", "Payment amounts (Cash, Card, Credit, UPI) cannot be negative. Please correct the amounts before saving.", ToastType.Error);
 			return false;
 		}
 
 		if (_stockTransfer.Cash + _stockTransfer.Card + _stockTransfer.Credit + _stockTransfer.UPI != _stockTransfer.TotalAmount)
 		{
-			await ShowToast("Payment Amount Mismatch", "The sum of payment amounts (Cash, Card, Credit, UPI) must equal the total amount of the transaction. Please correct the amounts before saving.", "error");
+			await _toastNotification.ShowAsync("Payment Amount Mismatch", "The sum of payment amounts (Cash, Card, Credit, UPI) must equal the total amount of the transaction. Please correct the amounts before saving.", ToastType.Error);
 			return false;
 		}
 
@@ -852,7 +846,7 @@ public partial class StockTransferPage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			_stockTransfer.Status = true;
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -869,11 +863,11 @@ public partial class StockTransferPage : IAsyncDisposable
 			await DeleteLocalFiles();
 			NavigationManager.NavigateTo(PageRouteNames.StockTransfer, true);
 
-			await ShowToast("Save Transaction", "Transaction saved successfully! Invoice has been generated.", "success");
+			await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully! Invoice has been generated.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Saving Transaction", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Saving Transaction", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -893,7 +887,7 @@ public partial class StockTransferPage : IAsyncDisposable
 	{
 		if (!Id.HasValue || Id.Value <= 0)
 		{
-			await ShowToast("No Transaction Selected", "Please save the transaction first before downloading the invoice.", "error");
+			await _toastNotification.ShowAsync("No Transaction Selected", "Please save the transaction first before downloading the invoice.", ToastType.Error);
 			return;
 		}
 
@@ -904,14 +898,14 @@ public partial class StockTransferPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Generating invoice...", "success");
+			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
 			var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(Id.Value);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Invoice Downloaded", "The invoice has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Downloading Invoice", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Downloading Invoice", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -946,33 +940,6 @@ public partial class StockTransferPage : IAsyncDisposable
 
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
-		}
-	}
 
 	public async ValueTask DisposeAsync()
 	{

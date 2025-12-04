@@ -26,7 +26,7 @@ public static class AccountTypePDFExport
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
 		{
-			["Id"] = new()
+			[nameof(AccountTypeModel.Id)] = new()
 			{
 				DisplayName = "ID",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -37,10 +37,10 @@ public static class AccountTypePDFExport
 				IncludeInTotal = false
 			},
 
-			["Name"] = new() { DisplayName = "Account Type Name", IncludeInTotal = false },
-			["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+			[nameof(AccountTypeModel.Name)] = new() { DisplayName = "Account Type Name", IncludeInTotal = false },
+			[nameof(AccountTypeModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-			["Status"] = new()
+			[nameof(AccountTypeModel.Status)] = new()
 			{
 				DisplayName = "Status",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -55,7 +55,10 @@ public static class AccountTypePDFExport
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Remarks", "Status"
+			nameof(AccountTypeModel.Id),
+			nameof(AccountTypeModel.Name),
+			nameof(AccountTypeModel.Remarks),
+			nameof(AccountTypeModel.Status)
 		];
 
 		// Call the generic PDF export utility

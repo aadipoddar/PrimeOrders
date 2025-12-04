@@ -26,7 +26,7 @@ public static class ProductCategoryPDFExport
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
 		{
-			["Id"] = new()
+			[nameof(ProductCategoryModel.Id)] = new()
 			{
 				DisplayName = "ID",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -37,10 +37,10 @@ public static class ProductCategoryPDFExport
 				IncludeInTotal = false
 			},
 
-			["Name"] = new() { DisplayName = "Product Category Name", IncludeInTotal = false },
-			["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+			[nameof(ProductCategoryModel.Name)] = new() { DisplayName = "Product Category Name", IncludeInTotal = false },
+			[nameof(ProductCategoryModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-			["Status"] = new()
+			[nameof(ProductCategoryModel.Status)] = new()
 			{
 				DisplayName = "Status",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -55,7 +55,10 @@ public static class ProductCategoryPDFExport
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Remarks", "Status"
+			nameof(ProductCategoryModel.Id),
+			nameof(ProductCategoryModel.Name),
+			nameof(ProductCategoryModel.Remarks),
+			nameof(ProductCategoryModel.Status)
 		];
 
 		// Call the generic PDF export utility

@@ -26,7 +26,7 @@ public static class RawMaterialCategoryPDFExport
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(RawMaterialCategoryModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -37,10 +37,10 @@ public static class RawMaterialCategoryPDFExport
                 IncludeInTotal = false
             },
 
-            ["Name"] = new() { DisplayName = "Raw Material Category Name", IncludeInTotal = false },
-            ["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+            [nameof(RawMaterialCategoryModel.Name)] = new() { DisplayName = "Raw Material Category Name", IncludeInTotal = false },
+            [nameof(RawMaterialCategoryModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-            ["Status"] = new()
+            [nameof(RawMaterialCategoryModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -55,7 +55,10 @@ public static class RawMaterialCategoryPDFExport
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Remarks", "Status"
+			nameof(RawMaterialCategoryModel.Id),
+			nameof(RawMaterialCategoryModel.Name),
+			nameof(RawMaterialCategoryModel.Remarks),
+			nameof(RawMaterialCategoryModel.Status)
 		];
 
 		// Call the generic PDF export utility

@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
@@ -34,14 +35,7 @@ public partial class FinancialYearPage : IAsyncDisposable
     private string _recoverFinancialYearName = string.Empty;
     private bool _isRecoverDialogVisible = false;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -166,19 +160,19 @@ public partial class FinancialYearPage : IAsyncDisposable
             var financialYear = _financialYears.FirstOrDefault(g => g.Id == _deleteFinancialYearId);
             if (financialYear == null)
             {
-                await ShowToast("Error", "Financial Year not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Financial Year not found.", ToastType.Error);
                 return;
             }
 
             financialYear.Status = false;
             await FinancialYearData.InsertFinancialYear(financialYear);
 
-            await ShowToast("Success", $"Financial Year '{_deleteFinancialYearName}' has been deleted successfully.", "success");
+            await _toastNotification.ShowAsync("Success", $"Financial Year '{_deleteFinancialYearName}' has been deleted successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to delete Financial Year: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to delete Financial Year: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -221,19 +215,19 @@ public partial class FinancialYearPage : IAsyncDisposable
             var financialYear = _financialYears.FirstOrDefault(g => g.Id == _recoverFinancialYearId);
             if (financialYear == null)
             {
-                await ShowToast("Error", "Financial Year not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Financial Year not found.", ToastType.Error);
                 return;
             }
 
             financialYear.Status = true;
             await FinancialYearData.InsertFinancialYear(financialYear);
 
-            await ShowToast("Success", $"Financial Year '{_recoverFinancialYearName}' has been recovered successfully.", "success");
+            await _toastNotification.ShowAsync("Success", $"Financial Year '{_recoverFinancialYearName}' has been recovered successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to recover Financial Year: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to recover Financial Year: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -252,25 +246,25 @@ public partial class FinancialYearPage : IAsyncDisposable
 
         if (_financialYear.StartDate == default)
         {
-            await ShowToast("Error", "Start date is required. Please select a valid start date.", "error");
+            await _toastNotification.ShowAsync("Error", "Start date is required. Please select a valid start date.", ToastType.Error);
             return false;
         }
 
         if (_financialYear.EndDate == default)
         {
-            await ShowToast("Error", "End date is required. Please select a valid end date.", "error");
+            await _toastNotification.ShowAsync("Error", "End date is required. Please select a valid end date.", ToastType.Error);
             return false;
         }
 
         if (_financialYear.EndDate <= _financialYear.StartDate)
         {
-            await ShowToast("Error", "End date must be after start date.", "error");
+            await _toastNotification.ShowAsync("Error", "End date must be after start date.", ToastType.Error);
             return false;
         }
 
         if (_financialYear.YearNo <= 0)
         {
-            await ShowToast("Error", "Year number must be greater than 0.", "error");
+            await _toastNotification.ShowAsync("Error", "Year number must be greater than 0.", ToastType.Error);
             return false;
         }
 
@@ -287,7 +281,7 @@ public partial class FinancialYearPage : IAsyncDisposable
 
         if (overlapping is not null)
         {
-            await ShowToast("Error", $"Date range overlaps with existing financial year ({overlapping.StartDate:dd-MMM-yyyy} to {overlapping.EndDate:dd-MMM-yyyy}).", "error");
+            await _toastNotification.ShowAsync("Error", $"Date range overlaps with existing financial year ({overlapping.StartDate:dd-MMM-yyyy} to {overlapping.EndDate:dd-MMM-yyyy}).", ToastType.Error);
             return false;
         }
 
@@ -310,16 +304,16 @@ public partial class FinancialYearPage : IAsyncDisposable
                 return;
             }
 
-            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+            await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
             await FinancialYearData.InsertFinancialYear(_financialYear);
 
-            await ShowToast("Success", $"Financial Year '{_financialYear.StartDate:dd-MMM-yyyy} to {_financialYear.EndDate:dd-MMM-yyyy}' has been saved successfully.", "success");
+            await _toastNotification.ShowAsync("Success", $"Financial Year '{_financialYear.StartDate:dd-MMM-yyyy} to {_financialYear.EndDate:dd-MMM-yyyy}' has been saved successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to save Financial Year: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to save Financial Year: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -338,7 +332,7 @@ public partial class FinancialYearPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to Excel...", "success");
+            await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
             // Call the Excel export utility
             var stream = await FinancialYearExcelExport.ExportFinancialYear(_financialYears);
@@ -349,11 +343,11 @@ public partial class FinancialYearPage : IAsyncDisposable
             // Save and view the Excel file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Financial Year data exported to Excel successfully.", "success");
+            await _toastNotification.ShowAsync("Success", "Financial Year data exported to Excel successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -371,7 +365,7 @@ public partial class FinancialYearPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to PDF...", "success");
+            await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
             // Call the PDF export utility
             var stream = await FinancialYearPDFExport.ExportFinancialYear(_financialYears);
@@ -382,45 +376,16 @@ public partial class FinancialYearPage : IAsyncDisposable
             // Save and view the PDF file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Financial Year data exported to PDF successfully.", "success");
+            await _toastNotification.ShowAsync("Success", "Financial Year data exported to PDF successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
         }
         finally
         {
             _isProcessing = false;
             StateHasChanged();
-        }
-    }
-    #endregion
-
-    #region Utilities
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
         }
     }
     #endregion

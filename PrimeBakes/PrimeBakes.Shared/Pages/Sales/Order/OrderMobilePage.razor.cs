@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
@@ -8,7 +10,6 @@ using PrimeBakesLibrary.Models.Sales.Order;
 using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Sales.Order;
 
@@ -26,14 +27,7 @@ public partial class OrderMobilePage
 
     private SfGrid<OrderItemCartModel> _sfCartGrid;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -86,7 +80,7 @@ public partial class OrderMobilePage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Items", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Loading Items", ex.Message, ToastType.Error);
         }
     }
 
@@ -103,7 +97,7 @@ public partial class OrderMobilePage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Existing Cart", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Loading Existing Cart", ex.Message, ToastType.Error);
             await DeleteLocalFiles();
         }
         finally
@@ -150,7 +144,7 @@ public partial class OrderMobilePage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Saving Cart Data", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Saving Cart Data", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -181,33 +175,6 @@ public partial class OrderMobilePage
     {
         await DataStorageService.LocalRemove(StorageFileNames.OrderMobileCartDataFileName);
         await DataStorageService.LocalRemove(StorageFileNames.OrderMobileDataFileName);
-    }
-
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
     }
     #endregion
 }

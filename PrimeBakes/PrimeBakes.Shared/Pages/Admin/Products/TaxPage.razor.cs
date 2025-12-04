@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
@@ -34,14 +35,7 @@ public partial class TaxPage : IAsyncDisposable
     private string _recoverTaxCode = string.Empty;
     private bool _isRecoverDialogVisible = false;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -122,19 +116,19 @@ public partial class TaxPage : IAsyncDisposable
             var tax = _taxes.FirstOrDefault(t => t.Id == _deleteTaxId);
             if (tax == null)
             {
-                await ShowToast("Error", "Tax not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Tax not found.", ToastType.Error);
                 return;
             }
 
             tax.Status = false;
             await TaxData.InsertTax(tax);
 
-            await ShowToast("Success", $"Tax '{tax.Code}' has been deleted successfully.", "success");
+            await _toastNotification.ShowAsync("Deleted", $"Tax '{tax.Code}' has been deleted successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to delete tax: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to delete tax: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -177,19 +171,19 @@ public partial class TaxPage : IAsyncDisposable
             var tax = _taxes.FirstOrDefault(t => t.Id == _recoverTaxId);
             if (tax == null)
             {
-                await ShowToast("Error", "Tax not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Tax not found.", ToastType.Error);
                 return;
             }
 
             tax.Status = true;
             await TaxData.InsertTax(tax);
 
-            await ShowToast("Success", $"Tax '{tax.Code}' has been recovered successfully.", "success");
+            await _toastNotification.ShowAsync("Recovered", $"Tax '{tax.Code}' has been recovered successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to recover tax: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to recover tax: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -211,32 +205,32 @@ public partial class TaxPage : IAsyncDisposable
 
         if (string.IsNullOrWhiteSpace(_tax.Code))
         {
-            await ShowToast("Error", "Tax code is required. Please enter a valid tax code.", "error");
+            await _toastNotification.ShowAsync("Validation", "Tax code is required. Please enter a valid tax code.", ToastType.Warning);
             return false;
         }
 
         if (_tax.CGST < 0 || _tax.CGST > 100)
         {
-            await ShowToast("Error", "CGST must be between 0 and 100.", "error");
+            await _toastNotification.ShowAsync("Validation", "CGST must be between 0 and 100.", ToastType.Warning);
             return false;
         }
 
         if (_tax.SGST < 0 || _tax.SGST > 100)
         {
-            await ShowToast("Error", "SGST must be between 0 and 100.", "error");
+            await _toastNotification.ShowAsync("Validation", "SGST must be between 0 and 100.", ToastType.Warning);
             return false;
         }
 
         if (_tax.IGST < 0 || _tax.IGST > 100)
         {
-            await ShowToast("Error", "IGST must be between 0 and 100.", "error");
+            await _toastNotification.ShowAsync("Validation", "IGST must be between 0 and 100.", ToastType.Warning);
             return false;
         }
 
         // Tax must be either Inclusive or Extra, not both, and not both false
         if (_tax.Inclusive == _tax.Extra)
         {
-            await ShowToast("Error", "Tax must be either Inclusive or Extra, but not both and not neither.", "error");
+            await _toastNotification.ShowAsync("Validation", "Tax must be either Inclusive or Extra, but not both and not neither.", ToastType.Warning);
             return false;
         }
 
@@ -248,7 +242,7 @@ public partial class TaxPage : IAsyncDisposable
             var existingTax = _taxes.FirstOrDefault(t => t.Id != _tax.Id && t.Code.Equals(_tax.Code, StringComparison.OrdinalIgnoreCase));
             if (existingTax is not null)
             {
-                await ShowToast("Error", $"Tax code '{_tax.Code}' already exists. Please choose a different code.", "error");
+                await _toastNotification.ShowAsync("Duplicate", $"Tax code '{_tax.Code}' already exists. Please choose a different code.", ToastType.Warning);
                 return false;
             }
         }
@@ -257,7 +251,7 @@ public partial class TaxPage : IAsyncDisposable
             var existingTax = _taxes.FirstOrDefault(t => t.Code.Equals(_tax.Code, StringComparison.OrdinalIgnoreCase));
             if (existingTax is not null)
             {
-                await ShowToast("Error", $"Tax code '{_tax.Code}' already exists. Please choose a different code.", "error");
+                await _toastNotification.ShowAsync("Duplicate", $"Tax code '{_tax.Code}' already exists. Please choose a different code.", ToastType.Warning);
                 return false;
             }
         }
@@ -281,16 +275,16 @@ public partial class TaxPage : IAsyncDisposable
                 return;
             }
 
-            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+            await _toastNotification.ShowAsync("Processing", "Please wait while the tax is being saved...", ToastType.Info);
 
             await TaxData.InsertTax(_tax);
 
-            await ShowToast("Success", $"Tax '{_tax.Code}' has been saved successfully.", "success");
+            await _toastNotification.ShowAsync("Saved", $"Tax '{_tax.Code}' has been saved successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminTax, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to save tax: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to save tax: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -309,7 +303,7 @@ public partial class TaxPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to Excel...", "success");
+            await _toastNotification.ShowAsync("Exporting", "Exporting to Excel...", ToastType.Info);
 
             // Call the Excel export utility
             var stream = await TaxExcelExport.ExportTax(_taxes);
@@ -320,11 +314,11 @@ public partial class TaxPage : IAsyncDisposable
             // Save and view the Excel file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Tax data exported to Excel successfully.", "success");
+            await _toastNotification.ShowAsync("Exported", "Tax data exported to Excel successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -342,7 +336,7 @@ public partial class TaxPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to PDF...", "success");
+            await _toastNotification.ShowAsync("Exporting", "Exporting to PDF...", ToastType.Info);
 
             // Call the PDF export utility
             var stream = await TaxPDFExport.ExportTax(_taxes);
@@ -353,45 +347,16 @@ public partial class TaxPage : IAsyncDisposable
             // Save and view the PDF file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Tax data exported to PDF successfully.", "success");
+            await _toastNotification.ShowAsync("Exported", "Tax data exported to PDF successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
         }
         finally
         {
             _isProcessing = false;
             StateHasChanged();
-        }
-    }
-    #endregion
-
-    #region Utilities
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
         }
     }
     #endregion

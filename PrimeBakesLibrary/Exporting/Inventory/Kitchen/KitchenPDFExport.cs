@@ -26,7 +26,7 @@ public static class KitchenPDFExport
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(KitchenModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -37,10 +37,10 @@ public static class KitchenPDFExport
                 IncludeInTotal = false
             },
 
-            ["Name"] = new() { DisplayName = "Kitchen Name", IncludeInTotal = false },
-            ["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+            [nameof(KitchenModel.Name)] = new() { DisplayName = "Kitchen Name", IncludeInTotal = false },
+            [nameof(KitchenModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-            ["Status"] = new()
+            [nameof(KitchenModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -55,7 +55,10 @@ public static class KitchenPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "Remarks", "Status"
+            nameof(KitchenModel.Id),
+            nameof(KitchenModel.Name),
+            nameof(KitchenModel.Remarks),
+            nameof(KitchenModel.Status)
         ];
 
         // Call the generic PDF export utility

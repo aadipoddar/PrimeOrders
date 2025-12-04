@@ -27,7 +27,7 @@ public static class VoucherPDFExport
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
 		{
-			["Id"] = new()
+			[nameof(VoucherModel.Id)] = new()
 			{
 				DisplayName = "ID",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -38,11 +38,11 @@ public static class VoucherPDFExport
 				IncludeInTotal = false
 			},
 
-			["Name"] = new() { DisplayName = "Voucher Name", IncludeInTotal = false },
-			["PrefixCode"] = new() { DisplayName = "Prefix Code", IncludeInTotal = false },
-			["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+			[nameof(VoucherModel.Name)] = new() { DisplayName = "Voucher Name", IncludeInTotal = false },
+			[nameof(VoucherModel.PrefixCode)] = new() { DisplayName = "Prefix Code", IncludeInTotal = false },
+			[nameof(VoucherModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-			["Status"] = new()
+			[nameof(VoucherModel.Status)] = new()
 			{
 				DisplayName = "Status",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -57,7 +57,11 @@ public static class VoucherPDFExport
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "PrefixCode", "Remarks", "Status"
+			nameof(VoucherModel.Id),
+			nameof(VoucherModel.Name),
+			nameof(VoucherModel.PrefixCode),
+			nameof(VoucherModel.Remarks),
+			nameof(VoucherModel.Status)
 		];
 
 		// Call the generic PDF export utility

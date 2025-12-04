@@ -526,17 +526,8 @@ else
         </DialogTemplates>
     </SfDialog>
 
-    <!-- Success Toast -->
-    <SfToast @ref="_sfSuccessToast" CssClass="e-toast-success" NewestOnTop="true" ShowCloseButton="true" Target="body"
-        TimeOut="3000">
-        <ToastPosition X="Right" Y="Top" />
-    </SfToast>
-
-    <!-- Error Toast -->
-    <SfToast @ref="_sfErrorToast" CssClass="e-toast-danger" NewestOnTop="true" ShowCloseButton="true" Target="body"
-        TimeOut="5000">
-        <ToastPosition X="Right" Y="Top" />
-    </SfToast>
+    <!-- Toast Notification -->
+    <ToastNotification @ref="_toastNotification" />
 }
 
 <style>

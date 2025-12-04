@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
@@ -9,7 +11,6 @@ using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
@@ -42,14 +43,7 @@ public partial class RawMaterialPage : IAsyncDisposable
     private string _recoverRawMaterialName = string.Empty;
     private bool _isRecoverDialogVisible = false;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -169,19 +163,19 @@ public partial class RawMaterialPage : IAsyncDisposable
             var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == _deleteRawMaterialId);
             if (rawMaterial == null)
             {
-                await ShowToast("Error", "Raw material not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Raw material not found.", ToastType.Error);
                 return;
             }
 
             rawMaterial.Status = false;
             await RawMaterialData.InsertRawMaterial(rawMaterial);
 
-            await ShowToast("Success", $"Raw material '{rawMaterial.Name}' has been deleted successfully.", "success");
+            await _toastNotification.ShowAsync("Deleted", $"Raw material '{rawMaterial.Name}' has been deleted successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to delete raw material: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to delete raw material: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -224,19 +218,19 @@ public partial class RawMaterialPage : IAsyncDisposable
             var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == _recoverRawMaterialId);
             if (rawMaterial == null)
             {
-                await ShowToast("Error", "Raw material not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Raw material not found.", ToastType.Error);
                 return;
             }
 
             rawMaterial.Status = true;
             await RawMaterialData.InsertRawMaterial(rawMaterial);
 
-            await ShowToast("Success", $"Raw material '{rawMaterial.Name}' has been recovered successfully.", "success");
+            await _toastNotification.ShowAsync("Recovered", $"Raw material '{rawMaterial.Name}' has been recovered successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to recover raw material: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to recover raw material: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -262,7 +256,7 @@ public partial class RawMaterialPage : IAsyncDisposable
 
         if (string.IsNullOrWhiteSpace(_rawMaterial.Name))
         {
-            await ShowToast("Error", "Raw material name is required. Please enter a valid name.", "error");
+            await _toastNotification.ShowAsync("Validation", "Raw material name is required. Please enter a valid name.", ToastType.Warning);
             return false;
         }
 
@@ -270,25 +264,25 @@ public partial class RawMaterialPage : IAsyncDisposable
 
         if (_rawMaterial.RawMaterialCategoryId <= 0)
         {
-            await ShowToast("Error", "Category is required. Please select a category.", "error");
+            await _toastNotification.ShowAsync("Validation", "Category is required. Please select a category.", ToastType.Warning);
             return false;
         }
 
         if (_rawMaterial.Rate < 0)
         {
-            await ShowToast("Error", "Rate must be greater than or equal to 0.", "error");
+            await _toastNotification.ShowAsync("Validation", "Rate must be greater than or equal to 0.", ToastType.Warning);
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(_rawMaterial.UnitOfMeasurement))
         {
-            await ShowToast("Error", "Unit of measurement is required. Please enter a valid unit.", "error");
+            await _toastNotification.ShowAsync("Validation", "Unit of measurement is required. Please enter a valid unit.", ToastType.Warning);
             return false;
         }
 
         if (_rawMaterial.TaxId <= 0)
         {
-            await ShowToast("Error", "Tax is required. Please select a tax.", "error");
+            await _toastNotification.ShowAsync("Validation", "Tax is required. Please select a tax.", ToastType.Warning);
             return false;
         }
 
@@ -300,7 +294,7 @@ public partial class RawMaterialPage : IAsyncDisposable
             var existingByName = _rawMaterials.FirstOrDefault(rm => rm.Id != _rawMaterial.Id && rm.Name.Equals(_rawMaterial.Name, StringComparison.OrdinalIgnoreCase));
             if (existingByName is not null)
             {
-                await ShowToast("Error", $"Raw material name '{_rawMaterial.Name}' already exists. Please choose a different name.", "error");
+                await _toastNotification.ShowAsync("Duplicate", $"Raw material name '{_rawMaterial.Name}' already exists. Please choose a different name.", ToastType.Warning);
                 return false;
             }
 
@@ -311,7 +305,7 @@ public partial class RawMaterialPage : IAsyncDisposable
             var existingByName = _rawMaterials.FirstOrDefault(rm => rm.Name.Equals(_rawMaterial.Name, StringComparison.OrdinalIgnoreCase));
             if (existingByName is not null)
             {
-                await ShowToast("Error", $"Raw material name '{_rawMaterial.Name}' already exists. Please choose a different name.", "error");
+                await _toastNotification.ShowAsync("Duplicate", $"Raw material name '{_rawMaterial.Name}' already exists. Please choose a different name.", ToastType.Warning);
                 return false;
             }
 
@@ -337,19 +331,19 @@ public partial class RawMaterialPage : IAsyncDisposable
                 return;
             }
 
-            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+            await _toastNotification.ShowAsync("Processing", "Please wait while the raw material is being saved...", ToastType.Info);
 
             if (_rawMaterial.Id == 0)
                 _rawMaterial.Code = await GenerateCodes.GenerateRawMaterialCode();
 
             await RawMaterialData.InsertRawMaterial(_rawMaterial);
 
-            await ShowToast("Success", $"Raw material '{_rawMaterial.Name}' has been saved successfully.", "success");
+            await _toastNotification.ShowAsync("Saved", $"Raw material '{_rawMaterial.Name}' has been saved successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterial, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to save raw material: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to save raw material: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -368,7 +362,7 @@ public partial class RawMaterialPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to Excel...", "success");
+            await _toastNotification.ShowAsync("Exporting", "Exporting to Excel...", ToastType.Info);
 
             // Enrich data with category and tax names
             var enrichedData = _rawMaterials.Select(rm => new
@@ -393,11 +387,11 @@ public partial class RawMaterialPage : IAsyncDisposable
             // Save and view the Excel file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Raw material data exported to Excel successfully.", "success");
+            await _toastNotification.ShowAsync("Exported", "Raw material data exported to Excel successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -415,7 +409,7 @@ public partial class RawMaterialPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to PDF...", "success");
+            await _toastNotification.ShowAsync("Exporting", "Exporting to PDF...", ToastType.Info);
 
             // Enrich data with category and tax names
             var enrichedData = _rawMaterials.Select(rm => new
@@ -440,45 +434,16 @@ public partial class RawMaterialPage : IAsyncDisposable
             // Save and view the PDF file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Raw material data exported to PDF successfully.", "success");
+            await _toastNotification.ShowAsync("Exported", "Raw material data exported to PDF successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
         }
         finally
         {
             _isProcessing = false;
             StateHasChanged();
-        }
-    }
-    #endregion
-
-    #region Utilities
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
         }
     }
     #endregion

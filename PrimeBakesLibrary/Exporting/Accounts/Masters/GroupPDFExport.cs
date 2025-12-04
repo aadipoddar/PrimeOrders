@@ -26,7 +26,7 @@ public static class GroupPDFExport
 		// Define custom column settings
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
 		{
-			["Id"] = new()
+			[nameof(GroupModel.Id)] = new()
 			{
 				DisplayName = "ID",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -37,10 +37,10 @@ public static class GroupPDFExport
 				IncludeInTotal = false
 			},
 
-			["Name"] = new() { DisplayName = "Group Name", IncludeInTotal = false },
-			["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+			[nameof(GroupModel.Name)] = new() { DisplayName = "Group Name", IncludeInTotal = false },
+			[nameof(GroupModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-			["Status"] = new()
+			[nameof(GroupModel.Status)] = new()
 			{
 				DisplayName = "Status",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -55,7 +55,10 @@ public static class GroupPDFExport
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Remarks", "Status"
+			nameof(GroupModel.Id),
+			nameof(GroupModel.Name),
+			nameof(GroupModel.Remarks),
+			nameof(GroupModel.Status)
 		];
 
 		// Call the generic PDF export utility

@@ -16,7 +16,7 @@ public static class UserExcelExport
     public static async Task<MemoryStream> ExportUser(IEnumerable<UserModel> userData)
     {
         // Load locations to display location names instead of IDs
-        var locations = CommonData.LoadTableData<LocationModel>(TableNames.Location).Result;
+        var locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
         // Create enriched data with location names
         var enrichedData = userData.Select(user => new
@@ -38,29 +38,39 @@ public static class UserExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
-            ["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(UserModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Text fields - Left aligned
-            ["Name"] = new() { DisplayName = "User Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-            ["Passcode"] = new() { DisplayName = "Passcode", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IsRequired = true },
+            [nameof(UserModel.Name)] = new() { DisplayName = "User Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+            [nameof(UserModel.Passcode)] = new() { DisplayName = "Passcode", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IsRequired = true },
             ["Location"] = new() { DisplayName = "Location", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-            ["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(UserModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
             // Permissions - Center aligned
-            ["Sales"] = new() { DisplayName = "Sales", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["Order"] = new() { DisplayName = "Order", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["Inventory"] = new() { DisplayName = "Inventory", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["Accounts"] = new() { DisplayName = "Accounts", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["Admin"] = new() { DisplayName = "Admin", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(UserModel.Sales)] = new() { DisplayName = "Sales", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(UserModel.Order)] = new() { DisplayName = "Order", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(UserModel.Inventory)] = new() { DisplayName = "Inventory", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(UserModel.Accounts)] = new() { DisplayName = "Accounts", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(UserModel.Admin)] = new() { DisplayName = "Admin", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Status - Center aligned
-            ["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+            [nameof(UserModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
         };
 
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "Passcode", "Location", "Sales", "Order", "Inventory", "Accounts", "Admin", "Remarks", "Status"
+            nameof(UserModel.Id),
+            nameof(UserModel.Name),
+            nameof(UserModel.Passcode),
+			"Location",
+			nameof(UserModel.Sales),
+            nameof(UserModel.Order),
+            nameof(UserModel.Inventory),
+            nameof(UserModel.Accounts),
+            nameof(UserModel.Admin),
+            nameof(UserModel.Remarks),
+            nameof(UserModel.Status)
         ];
 
         // Call the generic Excel export utility

@@ -17,12 +17,12 @@ public static class LocationPDFExport
         // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new() { DisplayName = "ID", IncludeInTotal = false },
-            ["Name"] = new() { DisplayName = "Location Name", IncludeInTotal = false },
-            ["PrefixCode"] = new() { DisplayName = "Prefix Code", IncludeInTotal = false },
-            ["Remarks"] = new() { DisplayName = "Remarks", IncludeInTotal = false },
+            [nameof(LocationModel.Id)] = new() { DisplayName = "ID", IncludeInTotal = false },
+            [nameof(LocationModel.Name)] = new() { DisplayName = "Location Name", IncludeInTotal = false },
+            [nameof(LocationModel.PrefixCode)] = new() { DisplayName = "Prefix Code", IncludeInTotal = false },
+            [nameof(LocationModel.Remarks)] = new() { DisplayName = "Remarks", IncludeInTotal = false },
 
-            ["Discount"] = new()
+            [nameof(LocationModel.Discount)] = new()
             {
                 DisplayName = "Discount %",
                 Format = "#,##0.00",
@@ -34,7 +34,7 @@ public static class LocationPDFExport
                 IncludeInTotal = false
             },
 
-            ["Status"] = new()
+            [nameof(LocationModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -49,8 +49,13 @@ public static class LocationPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "PrefixCode", "Discount", "Remarks", "Status"
-        ];
+			nameof(LocationModel.Id),
+			nameof(LocationModel.Name),
+			nameof(LocationModel.PrefixCode),
+			nameof(LocationModel.Discount),
+			nameof(LocationModel.Remarks),
+			nameof(LocationModel.Status)
+		];
 
         // Call the generic PDF export utility
         return await PDFReportExportUtil.ExportToPdf(

@@ -6,9 +6,10 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Sales.Product;
 
+using PrimeBakes.Shared.Components;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Inventory;
 
@@ -30,14 +31,7 @@ public partial class RecipePage
     private SfAutoComplete<RawMaterialModel?, RawMaterialModel> _sfItemAutoComplete;
     private SfGrid<RecipeItemCartModel> _sfCartGrid;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -61,7 +55,7 @@ public partial class RecipePage
         }
         catch (Exception ex)
         {
-            await ShowToast("An Error Occurred While Loading Data", ex.Message, "error");
+            await _toastNotification.ShowAsync("An Error Occurred While Loading Data", ex.Message, ToastType.Error);
         }
     }
 
@@ -79,8 +73,7 @@ public partial class RecipePage
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Error changing product: {ex.Message}";
-            await _sfErrorToast?.ShowAsync();
+            await _toastNotification.ShowAsync("Error Changing Product", ex.Message, ToastType.Error);
         }
     }
 
@@ -119,11 +112,11 @@ public partial class RecipePage
                 });
             }
 
-            await ShowToast("Recipe Loaded", $"Recipe loaded for {_selectedProduct.Name} with {_recipeItems.Count} items", "success");
+            await _toastNotification.ShowAsync("Recipe Loaded", $"Recipe loaded for {_selectedProduct.Name} with {_recipeItems.Count} items", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error Loading Recipe", ex.Message, "error");
+            await _toastNotification.ShowAsync("Error Loading Recipe", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -203,7 +196,7 @@ public partial class RecipePage
         }
         catch (Exception ex)
         {
-            await ShowToast("Error Deleting Recipe", ex.Message, "error");
+            await _toastNotification.ShowAsync("Error Deleting Recipe", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -227,17 +220,17 @@ public partial class RecipePage
 
             if (_selectedProduct is null || _selectedProduct.Id == 0)
             {
-                await ShowToast("No Product Selected", "Please select a product to save the recipe for", "error");
+                await _toastNotification.ShowAsync("No Product Selected", "Please select a product to save the recipe for", ToastType.Warning);
                 return;
             }
 
             if (_recipeItems.Count == 0)
             {
-                await ShowToast("No Raw Materials Added", "Please add at least one raw material to the recipe", "error");
+                await _toastNotification.ShowAsync("No Raw Materials Added", "Please add at least one raw material to the recipe", ToastType.Warning);
                 return;
             }
 
-            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+            await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
             await RecipeData.SaveRecipe(new()
             {
@@ -246,12 +239,12 @@ public partial class RecipePage
                 Status = true,
             }, _recipeItems);
 
-            await ShowToast("Recipe Saved", $"Recipe saved successfully for {_selectedProduct.Name} with {_recipeItems.Count} items!", "success");
+            await _toastNotification.ShowAsync("Recipe Saved", $"Recipe saved successfully for {_selectedProduct.Name} with {_recipeItems.Count} items!", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error Saving Recipe", ex.Message, "error");
+            await _toastNotification.ShowAsync("Error Saving Recipe", ex.Message, ToastType.Error);
         }
         finally
         {
@@ -267,32 +260,5 @@ public partial class RecipePage
     #region Utilities
     private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args) =>
         NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
-
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
-    }
     #endregion
 }

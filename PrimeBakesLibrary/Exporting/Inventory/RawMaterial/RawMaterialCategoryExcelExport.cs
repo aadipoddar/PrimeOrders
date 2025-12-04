@@ -27,20 +27,23 @@ public static class RawMaterialCategoryExcelExport
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
-			["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+			[nameof(RawMaterialCategoryModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
 			// Text fields - Left aligned
-			["Name"] = new() { DisplayName = "Raw Material Category Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(RawMaterialCategoryModel.Name)] = new() { DisplayName = "Raw Material Category Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			[nameof(RawMaterialCategoryModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
 			// Status - Center aligned
-			["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+			[nameof(RawMaterialCategoryModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
 		};
 
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Remarks", "Status"
+			nameof(RawMaterialCategoryModel.Id),
+			nameof(RawMaterialCategoryModel.Name),
+			nameof(RawMaterialCategoryModel.Remarks),
+			nameof(RawMaterialCategoryModel.Status)
 		];
 
 		// Call the generic Excel export utility

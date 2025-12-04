@@ -13,9 +13,10 @@ using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
+using PrimeBakes.Shared.Components;
+
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 
 namespace PrimeBakes.Shared.Pages.Accounts;
 
@@ -47,14 +48,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 	private SfAutoComplete<LedgerModel?, LedgerModel> _sfLedgerAutoComplete;
 	private SfGrid<AccountingItemCartModel> _sfCartGrid;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -109,7 +103,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Companies", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Companies", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -129,7 +123,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Vouchers", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Vouchers", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -142,7 +136,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 				_accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, Id.Value);
 				if (_accounting is null || _accounting.Id == 0)
 				{
-					await ShowToast("Transaction Not Found", "The requested transaction could not be found.", "error");
+					await _toastNotification.ShowAsync("Transaction Not Found", "The requested transaction could not be found.", ToastType.Error);
 					NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting, true);
 				}
 			}
@@ -201,7 +195,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Transaction Data", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Transaction Data", ex.Message, ToastType.Error);
 			await DeleteLocalFiles();
 		}
 		finally
@@ -224,7 +218,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Ledgers", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Ledgers", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -243,7 +237,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 					if (_ledgers.FirstOrDefault(s => s.Id == item.LedgerId) is null)
 					{
 						var ledger = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, item.LedgerId);
-						await ShowToast("Ledger Not Found", $"The ledger {ledger?.Name} (ID: {item.LedgerId}) in the existing transaction cart was not found in the available ledgers list. It may have been deleted or is inaccessible.", "error");
+						await _toastNotification.ShowAsync("Ledger Not Found", $"The ledger {ledger?.Name} (ID: {item.LedgerId}) in the existing transaction cart was not found in the available ledgers list. It may have been deleted or is inaccessible.", ToastType.Error);
 						continue;
 					}
 
@@ -266,7 +260,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Existing Cart", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Existing Cart", ex.Message, ToastType.Error);
 			await DeleteLocalFiles();
 		}
 		finally
@@ -395,7 +389,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 			((_selectedCart.Debit ?? 0) > 0 && (_selectedCart.Credit ?? 0) > 0) ||
 			(_selectedCart.Debit ?? 0) < 0 || (_selectedCart.Credit ?? 0) < 0)
 		{
-			await ShowToast("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", "error");
+			await _toastNotification.ShowAsync("Invalid Item Details", "Please ensure all item details are correctly filled before adding to the cart.", ToastType.Error);
 			return;
 		}
 
@@ -474,7 +468,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 		if (_selectedLedger is null || _selectedLedger.Id <= 0)
 		{
-			await ShowToast("Select Ledger", "Please select a ledger first.", "error");
+			await _toastNotification.ShowAsync("Select Ledger", "Please select a ledger first.", ToastType.Warning);
 			return;
 		}
 
@@ -493,7 +487,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 			if (ledgerTransactions.Count == 0)
 			{
-				await ShowToast("No References Found", "No reference transactions found for the selected ledger within the financial year.", "info");
+				await _toastNotification.ShowAsync("No References Found", "No reference transactions found for the selected ledger within the financial year.", ToastType.Info);
 				return;
 			}
 
@@ -525,15 +519,15 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 			if (_accountingLedgers.Count == 0)
 			{
-				await ShowToast("No Outstanding References", "All references for this ledger are fully balanced.", "info");
+				await _toastNotification.ShowAsync("No Outstanding References", "All references for this ledger are fully balanced.", ToastType.Info);
 				return;
 			}
 
-			await ShowToast("References Loaded", $"Found {_accountingLedgers.Count} outstanding reference(s) for the selected ledger.", "success");
+			await _toastNotification.ShowAsync("References Loaded", $"Found {_accountingLedgers.Count} outstanding reference(s) for the selected ledger.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Fetching References", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Fetching References", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -593,7 +587,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 			_accounting.FinancialYearId = _selectedFinancialYear.Id;
 		else
 		{
-			await ShowToast("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", "error");
+			await _toastNotification.ShowAsync("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", ToastType.Error);
 			_accounting.TransactionDateTime = await CommonData.LoadCurrentDateTime();
 			_selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_accounting.TransactionDateTime);
 			_accounting.FinancialYearId = _selectedFinancialYear.Id;
@@ -620,7 +614,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Saving Transaction Data", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Saving Transaction Data", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -636,67 +630,67 @@ public partial class FinancialAccounting : IAsyncDisposable
 	{
 		if (_selectedCompany is null || _accounting.CompanyId <= 0)
 		{
-			await ShowToast("Company Not Selected", "Please select a company for the transaction.", "error");
+			await _toastNotification.ShowAsync("Company Not Selected", "Please select a company for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedVoucher is null || _accounting.VoucherId <= 0)
 		{
-			await ShowToast("Voucher Not Selected", "Please select a voucher for the transaction.", "error");
+			await _toastNotification.ShowAsync("Voucher Not Selected", "Please select a voucher for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(_accounting.TransactionNo))
 		{
-			await ShowToast("Transaction Number Missing", "Please enter a transaction number for the transaction.", "error");
+			await _toastNotification.ShowAsync("Transaction Number Missing", "Please enter a transaction number for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_accounting.TransactionDateTime == default)
 		{
-			await ShowToast("Transaction Date Missing", "Please select a valid transaction date for the transaction.", "error");
+			await _toastNotification.ShowAsync("Transaction Date Missing", "Please select a valid transaction date for the transaction.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedFinancialYear is null || _accounting.FinancialYearId <= 0)
 		{
-			await ShowToast("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", "error");
+			await _toastNotification.ShowAsync("Financial Year Not Found", "The transaction date does not fall within any financial year. Please check the date and try again.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedFinancialYear.Locked)
 		{
-			await ShowToast("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", "error");
+			await _toastNotification.ShowAsync("Financial Year Locked", "The financial year for the selected transaction date is locked. Please select a different date.", ToastType.Error);
 			return false;
 		}
 
 		if (_selectedFinancialYear.Status == false)
 		{
-			await ShowToast("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", "error");
+			await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
 			return false;
 		}
 
 		if (_cart.Any(item => (item.Credit ?? 0) < 0) || _cart.Any(item => (item.Debit ?? 0) < 0))
 		{
-			await ShowToast("Invalid Item Amount", "One or more items in the cart have an invalid amount. Please correct the amounts before saving.", "error");
+			await _toastNotification.ShowAsync("Invalid Item Amount", "One or more items in the cart have an invalid amount. Please correct the amounts before saving.", ToastType.Error);
 			return false;
 		}
 
 		if (_accounting.TotalCreditAmount <= 0 && _accounting.TotalDebitAmount <= 0)
 		{
-			await ShowToast("Invalid Total Amounts", "The total credit and debit amounts must be greater than zero.", "error");
+			await _toastNotification.ShowAsync("Invalid Total Amounts", "The total credit and debit amounts must be greater than zero.", ToastType.Error);
 			return false;
 		}
 
 		if (_accounting.TotalDebitLedgers <= 0 && _accounting.TotalCreditLedgers <= 0)
 		{
-			await ShowToast("Invalid Total Ledgers", "The total number of credit and debit ledgers must be greater than zero.", "error");
+			await _toastNotification.ShowAsync("Invalid Total Ledgers", "The total number of credit and debit ledgers must be greater than zero.", ToastType.Error);
 			return false;
 		}
 
 		if (_accounting.TotalDebitAmount - _accounting.TotalCreditAmount != 0)
 		{
-			await ShowToast("Debit and Credit Amounts Mismatch", "The total debit and credit amounts do not match. Please ensure they are equal before saving.", "error");
+			await _toastNotification.ShowAsync("Debit and Credit Amounts Mismatch", "The total debit and credit amounts do not match. Please ensure they are equal before saving.", ToastType.Error);
 			return false;
 		}
 
@@ -706,13 +700,13 @@ public partial class FinancialAccounting : IAsyncDisposable
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingAccounting.FinancialYearId);
 			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
 			{
-				await ShowToast("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", "error");
+				await _toastNotification.ShowAsync("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", ToastType.Error);
 				return false;
 			}
 
 			if (!_user.Admin)
 			{
-				await ShowToast("Insufficient Permissions", "You do not have the necessary permissions to modify this transaction.", "error");
+				await _toastNotification.ShowAsync("Insufficient Permissions", "You do not have the necessary permissions to modify this transaction.", ToastType.Error);
 				await DeleteLocalFiles();
 				NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting, true);
 				return false;
@@ -743,7 +737,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Processing Transaction", "Please wait while the transaction is being saved...", ToastType.Info);
 
 			_accounting.Status = true;
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -760,11 +754,11 @@ public partial class FinancialAccounting : IAsyncDisposable
 			await DeleteLocalFiles();
 			NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting, true);
 
-			await ShowToast("Save Transaction", "Transaction saved successfully! Invoice has been generated.", "success");
+			await _toastNotification.ShowAsync("Save Transaction", "Transaction saved successfully! Invoice has been generated.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Saving Transaction", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Saving Transaction", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -784,7 +778,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 	{
 		if (!Id.HasValue || Id.Value <= 0)
 		{
-			await ShowToast("No Transaction Selected", "Please save the transaction first before downloading the invoice.", "error");
+			await _toastNotification.ShowAsync("No Transaction Selected", "Please save the transaction first before downloading the invoice.", ToastType.Error);
 			return;
 		}
 
@@ -796,11 +790,11 @@ public partial class FinancialAccounting : IAsyncDisposable
 			_isProcessing = true;
 			var (pdfStream, fileName) = await AccountingData.GenerateAndDownloadInvoice(Id.Value);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Invoice Downloaded", "The invoice has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Downloading Invoice", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Downloading Invoice", ex.Message, ToastType.Error);
 		}
 		finally
 		{
@@ -842,7 +836,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 	{
 		if (_accounting.ReferenceId is null || _accounting.ReferenceId <= 0)
 		{
-			await ShowToast("Invalid Reference", "No reference transaction found.", "error");
+			await _toastNotification.ShowAsync("Invalid Reference", "No reference transaction found.", ToastType.Error);
 			return;
 		}
 
@@ -895,11 +889,11 @@ public partial class FinancialAccounting : IAsyncDisposable
 			}
 
 			else
-				await ShowToast("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for viewing.", "error");
+				await _toastNotification.ShowAsync("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for viewing.", ToastType.Error);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to view invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to view invoice: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -907,7 +901,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 	{
 		if (_accounting.ReferenceId is null || _accounting.ReferenceId <= 0)
 		{
-			await ShowToast("Invalid Reference", "No reference transaction found.", "error");
+			await _toastNotification.ShowAsync("Invalid Reference", "No reference transaction found.", ToastType.Error);
 			return;
 		}
 
@@ -951,15 +945,15 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 			else
 			{
-				await ShowToast("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for downloading.", "error");
+				await _toastNotification.ShowAsync("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for downloading.", ToastType.Error);
 				return;
 			}
 
-			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Invoice Downloaded", "The invoice has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to download invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to download invoice: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -967,7 +961,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 	{
 		if (_selectedAccountingLedger is null || _selectedAccountingLedger.ReferenceId is null || _selectedAccountingLedger.ReferenceId <= 0)
 		{
-			await ShowToast("Invalid Reference", "No reference transaction found.", "error");
+			await _toastNotification.ShowAsync("Invalid Reference", "No reference transaction found.", ToastType.Error);
 			return;
 		}
 
@@ -1014,11 +1008,11 @@ public partial class FinancialAccounting : IAsyncDisposable
 			}
 
 			else
-				await ShowToast("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for viewing.", "error");
+				await _toastNotification.ShowAsync("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for viewing.", ToastType.Error);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to view invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to view invoice: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -1026,7 +1020,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 	{
 		if (_selectedAccountingLedger is null || _selectedAccountingLedger.ReferenceId is null || _selectedAccountingLedger.ReferenceId <= 0)
 		{
-			await ShowToast("Invalid Reference", "No reference transaction found.", "error");
+			await _toastNotification.ShowAsync("Invalid Reference", "No reference transaction found.", ToastType.Error);
 			return;
 		}
 
@@ -1064,15 +1058,15 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 			else
 			{
-				await ShowToast("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for downloading.", "error");
+				await _toastNotification.ShowAsync("Unsupported Voucher Type", "The voucher type associated with the reference transaction is not supported for downloading.", ToastType.Error);
 				return;
 			}
 
-			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Invoice Downloaded", "The invoice has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to download invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to download invoice: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -1081,33 +1075,6 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
-		}
-	}
 
 	public async ValueTask DisposeAsync()
 	{

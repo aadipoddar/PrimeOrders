@@ -12,6 +12,8 @@ using PrimeBakesLibrary.Exporting.Operations;
 using PrimeBakesLibrary.Models.Sales.Product;
 using PrimeBakesLibrary.Data.Sales.Product;
 
+using PrimeBakes.Shared.Components;
+
 namespace PrimeBakes.Shared.Pages.Admin.Operations;
 
 public partial class LocationPage : IAsyncDisposable
@@ -38,14 +40,7 @@ public partial class LocationPage : IAsyncDisposable
 	private string _recoverLocationName = string.Empty;
 	private bool _isRecoverDialogVisible = false;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -123,25 +118,25 @@ public partial class LocationPage : IAsyncDisposable
 			var location = _locations.FirstOrDefault(l => l.Id == _deleteLocationId);
 			if (location == null)
 			{
-				await ShowToast("Error", "Location not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Location not found.", ToastType.Error);
 				return;
 			}
 
 			if (location.Id == 1 && location.Status)
 			{
-				await ShowToast("Error", "Cannot delete the main location. It must remain active for system operations.", "error");
+				await _toastNotification.ShowAsync("Error", "Cannot delete main location.", ToastType.Error);
 				return;
 			}
 
 			location.Status = false;
 			await LocationData.InsertLocation(location);
 
-			await ShowToast("Success", $"Location '{location.Name}' has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Deleted", $"Location '{location.Name}' removed successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminLocation, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete location: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to delete location: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -184,19 +179,19 @@ public partial class LocationPage : IAsyncDisposable
 			var location = _locations.FirstOrDefault(l => l.Id == _recoverLocationId);
 			if (location == null)
 			{
-				await ShowToast("Error", "Location not found.", "error");
+				await _toastNotification.ShowAsync("Error", "Location not found.", ToastType.Error);
 				return;
 			}
 
 			location.Status = true;
 			await LocationData.InsertLocation(location);
 
-			await ShowToast("Success", $"Location '{location.Name}' has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Recovered", $"Location '{location.Name}' restored successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminLocation, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover location: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to recover location: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -221,13 +216,13 @@ public partial class LocationPage : IAsyncDisposable
 
 		if (string.IsNullOrWhiteSpace(_location.Name))
 		{
-			await ShowToast("Error", "Location name is required. Please enter a valid location name.", "error");
+			await _toastNotification.ShowAsync("Validation", "Location name is required.", ToastType.Warning);
 			return false;
 		}
 
 		if (string.IsNullOrWhiteSpace(_location.PrefixCode))
 		{
-			await ShowToast("Error", "Prefix code is required. Please enter a valid prefix code for the location.", "error");
+			await _toastNotification.ShowAsync("Validation", "Prefix code is required.", ToastType.Warning);
 			return false;
 		}
 
@@ -239,14 +234,14 @@ public partial class LocationPage : IAsyncDisposable
 			var existingLocation = _locations.FirstOrDefault(_ => _.Id != _location.Id && _.PrefixCode.Equals(_location.PrefixCode, StringComparison.OrdinalIgnoreCase));
 			if (existingLocation is not null)
 			{
-				await ShowToast("Error", $"Prefix code '{_location.PrefixCode}' is already used by location '{existingLocation.Name}'. Please choose a different prefix code.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Prefix code '{_location.PrefixCode}' already exists.", ToastType.Warning);
 				return false;
 			}
 
 			existingLocation = _locations.FirstOrDefault(_ => _.Id != _location.Id && _.Name.Equals(_location.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingLocation is not null)
 			{
-				await ShowToast("Error", $"Location name '{_location.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Location name '{_location.Name}' already exists.", ToastType.Warning);
 				return false;
 			}
 		}
@@ -255,21 +250,21 @@ public partial class LocationPage : IAsyncDisposable
 			var existingLocation = _locations.FirstOrDefault(_ => _.PrefixCode.Equals(_location.PrefixCode, StringComparison.OrdinalIgnoreCase));
 			if (existingLocation is not null)
 			{
-				await ShowToast("Error", $"Prefix code '{_location.PrefixCode}' is already used by location '{existingLocation.Name}'. Please choose a different prefix code.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Prefix code '{_location.PrefixCode}' already exists.", ToastType.Warning);
 				return false;
 			}
 
 			existingLocation = _locations.FirstOrDefault(_ => _.Name.Equals(_location.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingLocation is not null)
 			{
-				await ShowToast("Error", $"Location name '{_location.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Location name '{_location.Name}' already exists.", ToastType.Warning);
 				return false;
 			}
 		}
 
 		if (_location.Discount < 0 || _location.Discount > 100)
 		{
-			await ShowToast("Error", $"Discount must be between 0% and 100%. Current value: {_location.Discount}%", "error");
+			await _toastNotification.ShowAsync("Validation", "Discount must be between 0% and 100%.", ToastType.Warning);
 			return false;
 		}
 
@@ -292,19 +287,19 @@ public partial class LocationPage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Saving", "Processing location...", ToastType.Info);
 
 			var isNewLocation = _location.Id == 0;
 			_location.Id = await LocationData.InsertLocation(_location);
 			await InsertLedger();
 			await InsertProducts(isNewLocation);
 
-			await ShowToast("Success", $"Location '{_location.Name}' has been saved successfully.", "success");
+			await _toastNotification.ShowAsync("Saved", $"Location '{_location.Name}' saved successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminLocation, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to save location: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save location: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -345,7 +340,7 @@ public partial class LocationPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to create or update ledger for location: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to create ledger: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -357,7 +352,7 @@ public partial class LocationPage : IAsyncDisposable
 			{
 				if (_copyLocation.Id == _location.Id)
 				{
-					await ShowToast("Error", "Cannot copy products from the same location. Please select a different location to copy products from.", "error");
+					await _toastNotification.ShowAsync("Warning", "Cannot copy products from the same location.", ToastType.Warning);
 					return;
 				}
 
@@ -411,7 +406,7 @@ public partial class LocationPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to copy products to new location: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to copy products: {ex.Message}", ToastType.Error);
 		}
 	}
 	#endregion
@@ -426,7 +421,7 @@ public partial class LocationPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
 
 			// Call the Excel export utility
 			var stream = await LocationExcelExport.ExportLocation(_locations);
@@ -437,11 +432,11 @@ public partial class LocationPage : IAsyncDisposable
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Location data exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -459,7 +454,7 @@ public partial class LocationPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
 
 			// Call the PDF export utility
 			var stream = await LocationPDFExport.ExportLocation(_locations);
@@ -470,45 +465,16 @@ public partial class LocationPage : IAsyncDisposable
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "Location data exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-		}
-	}
-	#endregion
-
-	#region Utilities
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
 		}
 	}
 	#endregion

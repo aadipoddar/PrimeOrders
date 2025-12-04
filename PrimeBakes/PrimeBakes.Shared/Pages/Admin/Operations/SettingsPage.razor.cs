@@ -1,3 +1,4 @@
+using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -5,7 +6,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.DropDowns;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Operations;
@@ -22,8 +22,7 @@ public partial class SettingsPage : IAsyncDisposable
 	private bool _isResetDialogVisible = false;
 
 	// Toast and Dialog References
-	private SfToast _sfSuccessToast = default!;
-	private SfToast _sfErrorToast = default!;
+	private ToastNotification _toastNotification;
 	private SfDialog _resetConfirmationDialog = default!;
 
 	// Primary Configuration
@@ -119,7 +118,7 @@ public partial class SettingsPage : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Load Error", $"Failed to load settings: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to load settings: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -427,11 +426,11 @@ public partial class SettingsPage : IAsyncDisposable
 			// Validate required fields
 			if (string.IsNullOrWhiteSpace(_primaryCompanyLinkingId))
 			{
-				await ShowToast("Validation Error", "Primary Company is required.", "error");
+				await _toastNotification.ShowAsync("Validation", "Primary Company is required.", ToastType.Warning);
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Saving", "Processing settings...", ToastType.Info);
 
 			// Save all settings
 			var settings = await CommonData.LoadTableData<SettingsModel>(TableNames.Settings);
@@ -467,11 +466,11 @@ public partial class SettingsPage : IAsyncDisposable
 			await UpdateSetting(SettingsKeys.UpdateItemMasterRateOnPurchase, _updateItemMasterRateOnPurchase.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.UpdateItemMasterRateOnPurchase).Description);
 			await UpdateSetting(SettingsKeys.UpdateItemMasterUOMOnPurchase, _updateItemMasterUOMOnPurchase.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.UpdateItemMasterUOMOnPurchase).Description);
 
-			await ShowToast("Success", "Settings saved successfully.", "success");
+			await _toastNotification.ShowAsync("Saved", "Settings saved successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Save Error", $"Failed to save settings: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save settings: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -513,49 +512,23 @@ public partial class SettingsPage : IAsyncDisposable
 			_isResetDialogVisible = false;
 			_isProcessing = true;
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Resetting", "Restoring default settings...", ToastType.Info);
 
 			await SettingsData.ResetSettings();
 
 			// Reload data
 			await LoadData();
 
-			await ShowToast("Success", "Settings have been reset to default values.", "success");
+			await _toastNotification.ShowAsync("Reset", "Settings restored to defaults.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Reset Error", $"Failed to reset settings: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to reset settings: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
 			_isProcessing = false;
 			StateHasChanged();
-		}
-	}
-
-	#endregion
-
-	#region Toast Notifications
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "success")
-		{
-			await _sfSuccessToast?.ShowAsync(new()
-			{
-				Title = title,
-				Content = message
-			});
-		}
-		else
-		{
-			await _sfErrorToast?.ShowAsync(new()
-			{
-				Title = title,
-				Content = message
-			});
 		}
 	}
 

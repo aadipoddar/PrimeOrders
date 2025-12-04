@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Accounts.Masters;
+﻿using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 
 namespace PrimeBakesLibrary.Exporting.Accounts.Masters;
 
@@ -14,12 +15,15 @@ public static class CompanyExcelExport
 	/// <returns>MemoryStream containing the Excel file</returns>
 	public static async Task<MemoryStream> ExportCompany(IEnumerable<CompanyModel> companyData)
 	{
+		var stateUTs = await CommonData.LoadTableData<StateUTModel>(TableNames.StateUT);
+
 		// Create enriched data with status formatting
 		var enrichedData = companyData.Select(company => new
 		{
 			company.Id,
 			company.Name,
 			company.Code,
+			StateUT = stateUTs.FirstOrDefault(su => su.Id == company.StateUTId)?.Name ?? "N/A",
 			company.GSTNo,
 			company.PANNo,
 			company.CINNo,
@@ -35,28 +39,41 @@ public static class CompanyExcelExport
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
-			["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+			[nameof(CompanyModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
 			// Text fields - Left aligned
-			["Name"] = new() { DisplayName = "Company Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["Code"] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["GSTNo"] = new() { DisplayName = "GST No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["PANNo"] = new() { DisplayName = "PAN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["CINNo"] = new() { DisplayName = "CIN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Alias"] = new() { DisplayName = "Alias", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Phone"] = new() { DisplayName = "Phone", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Email"] = new() { DisplayName = "Email", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Address"] = new() { DisplayName = "Address", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.Name)] = new() { DisplayName = "Company Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			[nameof(CompanyModel.Code)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			["StateUT"] = new() { DisplayName = "State/UT", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.GSTNo)] = new() { DisplayName = "GST No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.PANNo)] = new() { DisplayName = "PAN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.CINNo)] = new() { DisplayName = "CIN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.Alias)] = new() { DisplayName = "Alias", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.Phone)] = new() { DisplayName = "Phone", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.Email)] = new() { DisplayName = "Email", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.Address)] = new() { DisplayName = "Address", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(CompanyModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
 			// Status - Center aligned
-			["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+			[nameof(CompanyModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
 		};
 
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Code", "GSTNo", "PANNo", "CINNo", "Alias", "Phone", "Email", "Address", "Remarks", "Status"
+			nameof(CompanyModel.Id),
+			nameof(CompanyModel.Name),
+			nameof(CompanyModel.Code),
+			"StateUT",
+			nameof(CompanyModel.GSTNo),
+			nameof(CompanyModel.PANNo),
+			nameof(CompanyModel.CINNo),
+			nameof(CompanyModel.Alias),
+			nameof(CompanyModel.Phone),
+			nameof(CompanyModel.Email),
+			nameof(CompanyModel.Address),
+			nameof(CompanyModel.Remarks),
+			nameof(CompanyModel.Status)
 		];
 
 		// Call the generic Excel export utility

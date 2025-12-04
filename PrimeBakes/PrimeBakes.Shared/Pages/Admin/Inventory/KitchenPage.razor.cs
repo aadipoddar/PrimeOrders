@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
@@ -34,14 +35,7 @@ public partial class KitchenPage : IAsyncDisposable
     private string _recoverKitchenName = string.Empty;
     private bool _isRecoverDialogVisible = false;
 
-    private string _errorTitle = string.Empty;
-    private string _errorMessage = string.Empty;
-
-    private string _successTitle = string.Empty;
-    private string _successMessage = string.Empty;
-
-    private SfToast _sfSuccessToast;
-    private SfToast _sfErrorToast;
+    private ToastNotification _toastNotification;
 
     #region Load Data
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -117,19 +111,19 @@ public partial class KitchenPage : IAsyncDisposable
             var kitchen = _kitchens.FirstOrDefault(k => k.Id == _deleteKitchenId);
             if (kitchen == null)
             {
-                await ShowToast("Error", "Kitchen not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Kitchen not found.", ToastType.Error);
                 return;
             }
 
             kitchen.Status = false;
             await KitchenData.InsertKitchen(kitchen);
 
-            await ShowToast("Success", $"Kitchen '{kitchen.Name}' has been deleted successfully.", "success");
+            await _toastNotification.ShowAsync("Deleted", $"Kitchen '{kitchen.Name}' has been deleted successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminKitchen, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to delete kitchen: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to delete kitchen: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -172,19 +166,19 @@ public partial class KitchenPage : IAsyncDisposable
             var kitchen = _kitchens.FirstOrDefault(k => k.Id == _recoverKitchenId);
             if (kitchen == null)
             {
-                await ShowToast("Error", "Kitchen not found.", "error");
+                await _toastNotification.ShowAsync("Error", "Kitchen not found.", ToastType.Error);
                 return;
             }
 
             kitchen.Status = true;
             await KitchenData.InsertKitchen(kitchen);
 
-            await ShowToast("Success", $"Kitchen '{kitchen.Name}' has been recovered successfully.", "success");
+            await _toastNotification.ShowAsync("Recovered", $"Kitchen '{kitchen.Name}' has been recovered successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminKitchen, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to recover kitchen: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to recover kitchen: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -206,7 +200,7 @@ public partial class KitchenPage : IAsyncDisposable
 
         if (string.IsNullOrWhiteSpace(_kitchen.Name))
         {
-            await ShowToast("Error", "Kitchen name is required. Please enter a valid kitchen name.", "error");
+            await _toastNotification.ShowAsync("Validation", "Kitchen name is required. Please enter a valid kitchen name.", ToastType.Warning);
             return false;
         }
 
@@ -218,7 +212,7 @@ public partial class KitchenPage : IAsyncDisposable
             var existingKitchen = _kitchens.FirstOrDefault(_ => _.Id != _kitchen.Id && _.Name.Equals(_kitchen.Name, StringComparison.OrdinalIgnoreCase));
             if (existingKitchen is not null)
             {
-                await ShowToast("Error", $"Kitchen name '{_kitchen.Name}' already exists. Please choose a different name.", "error");
+                await _toastNotification.ShowAsync("Duplicate", $"Kitchen name '{_kitchen.Name}' already exists. Please choose a different name.", ToastType.Warning);
                 return false;
             }
         }
@@ -227,7 +221,7 @@ public partial class KitchenPage : IAsyncDisposable
             var existingKitchen = _kitchens.FirstOrDefault(_ => _.Name.Equals(_kitchen.Name, StringComparison.OrdinalIgnoreCase));
             if (existingKitchen is not null)
             {
-                await ShowToast("Error", $"Kitchen name '{_kitchen.Name}' already exists. Please choose a different name.", "error");
+                await _toastNotification.ShowAsync("Duplicate", $"Kitchen name '{_kitchen.Name}' already exists. Please choose a different name.", ToastType.Warning);
                 return false;
             }
         }
@@ -251,16 +245,16 @@ public partial class KitchenPage : IAsyncDisposable
                 return;
             }
 
-            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+            await _toastNotification.ShowAsync("Processing", "Please wait while the kitchen is being saved...", ToastType.Info);
 
             await KitchenData.InsertKitchen(_kitchen);
 
-            await ShowToast("Success", $"Kitchen '{_kitchen.Name}' has been saved successfully.", "success");
+            await _toastNotification.ShowAsync("Saved", $"Kitchen '{_kitchen.Name}' has been saved successfully.", ToastType.Success);
             NavigationManager.NavigateTo(PageRouteNames.AdminKitchen, true);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to save kitchen: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"Failed to save kitchen: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -279,7 +273,7 @@ public partial class KitchenPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to Excel...", "success");
+            await _toastNotification.ShowAsync("Exporting", "Exporting to Excel...", ToastType.Info);
 
             // Call the Excel export utility
             var stream = await KitchenExcelExport.ExportKitchen(_kitchens);
@@ -290,11 +284,11 @@ public partial class KitchenPage : IAsyncDisposable
             // Save and view the Excel file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Kitchen data exported to Excel successfully.", "success");
+            await _toastNotification.ShowAsync("Exported", "Kitchen data exported to Excel successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -312,7 +306,7 @@ public partial class KitchenPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-            await ShowToast("Processing", "Exporting to PDF...", "success");
+            await _toastNotification.ShowAsync("Exporting", "Exporting to PDF...", ToastType.Info);
 
             // Call the PDF export utility
             var stream = await KitchenPDFExport.ExportKitchen(_kitchens);
@@ -323,45 +317,16 @@ public partial class KitchenPage : IAsyncDisposable
             // Save and view the PDF file
             await SaveAndViewService.SaveAndView(fileName, stream);
 
-            await ShowToast("Success", "Kitchen data exported to PDF successfully.", "success");
+            await _toastNotification.ShowAsync("Exported", "Kitchen data exported to PDF successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+            await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
         }
         finally
         {
             _isProcessing = false;
             StateHasChanged();
-        }
-    }
-    #endregion
-
-    #region Utilities
-    private async Task ShowToast(string title, string message, string type)
-    {
-        VibrationService.VibrateWithTime(200);
-
-        if (type == "error")
-        {
-            _errorTitle = title;
-            _errorMessage = message;
-            await _sfErrorToast.ShowAsync(new()
-            {
-                Title = _errorTitle,
-                Content = _errorMessage
-            });
-        }
-
-        else if (type == "success")
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
         }
     }
     #endregion

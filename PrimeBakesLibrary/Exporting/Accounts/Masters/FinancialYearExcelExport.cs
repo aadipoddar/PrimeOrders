@@ -30,30 +30,36 @@ public static class FinancialYearExcelExport
         var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
         {
             // ID - Center aligned, no totals
-            ["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(FinancialYearModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Date fields - Center aligned
-            ["StartDate"] = new() { DisplayName = "Start Date", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
-            ["EndDate"] = new() { DisplayName = "End Date", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(FinancialYearModel.StartDate)] = new() { DisplayName = "Start Date", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(FinancialYearModel.EndDate)] = new() { DisplayName = "End Date", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Year No - Center aligned
-            ["YearNo"] = new() { DisplayName = "Year No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(FinancialYearModel.YearNo)] = new() { DisplayName = "Year No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Text fields - Left aligned
-            ["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+            [nameof(FinancialYearModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
             // Locked - Center aligned
-            ["Locked"] = new() { DisplayName = "Locked", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+            [nameof(FinancialYearModel.Locked)] = new() { DisplayName = "Locked", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
             // Status - Center aligned
-            ["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+            [nameof(FinancialYearModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
         };
 
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "StartDate", "EndDate", "YearNo", "Remarks", "Locked", "Status"
-        ];
+            nameof(FinancialYearModel.Id),
+            nameof(FinancialYearModel.StartDate),
+            nameof(FinancialYearModel.EndDate),
+            nameof(FinancialYearModel.YearNo),
+            nameof(FinancialYearModel.Remarks),
+            nameof(FinancialYearModel.Locked),
+            nameof(FinancialYearModel.Status)
+		];
 
         // Call the generic Excel export utility
         return await ExcelExportUtil.ExportToExcel(

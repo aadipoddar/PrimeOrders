@@ -1,4 +1,6 @@
-﻿using PrimeBakesLibrary.Models.Accounts.Masters;
+﻿using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Models.Accounts.Masters;
+using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakesLibrary.Exporting.Accounts.Masters;
 
@@ -14,15 +16,20 @@ public static class LedgerExcelExport
 	/// <returns>MemoryStream containing the Excel file</returns>
 	public static async Task<MemoryStream> ExportLedger(IEnumerable<LedgerModel> ledgerData)
 	{
+		var groups = await CommonData.LoadTableData<GroupModel>(TableNames.Group);
+		var accountTypes = await CommonData.LoadTableData<AccountTypeModel>(TableNames.AccountType);
+		var stateUTs = await CommonData.LoadTableData<StateUTModel>(TableNames.StateUT);
+		var locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
+
 		// Create enriched data with status formatting
 		var enrichedData = ledgerData.Select(ledger => new
 		{
 			ledger.Id,
 			ledger.Name,
 			ledger.Code,
-			ledger.GroupId,
-			ledger.AccountTypeId,
-			ledger.StateUTId,
+			Group = groups.FirstOrDefault(g => g.Id == ledger.GroupId)?.Name ?? "N/A",
+			AccountType = accountTypes.FirstOrDefault(at => at.Id == ledger.AccountTypeId)?.Name ?? "N/A",
+			StateUT = stateUTs.FirstOrDefault(su => su.Id == ledger.StateUTId)?.Name ?? "N/A",
 			ledger.GSTNo,
 			ledger.PANNo,
 			ledger.CINNo,
@@ -30,7 +37,9 @@ public static class LedgerExcelExport
 			ledger.Phone,
 			ledger.Email,
 			ledger.Address,
-			ledger.LocationId,
+			Location = ledger.LocationId.HasValue
+				? locations.FirstOrDefault(loc => loc.Id == ledger.LocationId.Value)?.Name ?? "N/A"
+				: "N/A",
 			ledger.Remarks,
 			Status = ledger.Status ? "Active" : "Deleted"
 		});
@@ -39,33 +48,47 @@ public static class LedgerExcelExport
 		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
-			["Id"] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
+			[nameof(LedgerModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 
 			// Text fields - Left aligned
-			["Name"] = new() { DisplayName = "Ledger Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["Code"] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
-			["GroupId"] = new() { DisplayName = "Group ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
-			["AccountTypeId"] = new() { DisplayName = "Account Type ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
-			["StateUTId"] = new() { DisplayName = "State/UT ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
-			["GSTNo"] = new() { DisplayName = "GST No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["PANNo"] = new() { DisplayName = "PAN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["CINNo"] = new() { DisplayName = "CIN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Alias"] = new() { DisplayName = "Alias", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Phone"] = new() { DisplayName = "Phone", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Email"] = new() { DisplayName = "Email", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["Address"] = new() { DisplayName = "Address", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
-			["LocationId"] = new() { DisplayName = "Location ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
-			["Remarks"] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.Name)] = new() { DisplayName = "Ledger Name", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			[nameof(LedgerModel.Code)] = new() { DisplayName = "Code", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IsRequired = true },
+			["Group"] = new() { DisplayName = "Group", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
+			["AccountType"] = new() { DisplayName = "Account Type", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
+			["StateUT"] = new() { DisplayName = "State/UT", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
+			[nameof(LedgerModel.GSTNo)] = new() { DisplayName = "GST No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.PANNo)] = new() { DisplayName = "PAN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.CINNo)] = new() { DisplayName = "CIN No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.Alias)] = new() { DisplayName = "Alias", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.Phone)] = new() { DisplayName = "Phone", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.Email)] = new() { DisplayName = "Email", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			[nameof(LedgerModel.Address)] = new() { DisplayName = "Address", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
+			["Location"] = new() { DisplayName = "Location", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
+			[nameof(LedgerModel.Remarks)] = new() { DisplayName = "Remarks", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
 
 			// Status - Center aligned
-			["Status"] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
+			[nameof(LedgerModel.Status)] = new() { DisplayName = "Status", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
 		};
 
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Code", "GroupId", "AccountTypeId", "StateUTId", "GSTNo", "PANNo", "CINNo", 
-			"Alias", "Phone", "Email", "Address", "LocationId", "Remarks", "Status"
+			nameof(LedgerModel.Id),
+			nameof(LedgerModel.Name),
+			nameof(LedgerModel.Code),
+			"Group",
+			"AccountType",
+			"StateUT",
+			nameof(LedgerModel.GSTNo),
+			nameof(LedgerModel.PANNo),
+			nameof(LedgerModel.CINNo),
+			nameof(LedgerModel.Alias),
+			nameof(LedgerModel.Phone),
+			nameof(LedgerModel.Email),
+			nameof(LedgerModel.Address),
+			"Location",
+			nameof(LedgerModel.Remarks),
+			nameof(LedgerModel.Status)
 		];
 
 		// Call the generic Excel export utility

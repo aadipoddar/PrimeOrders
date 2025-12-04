@@ -10,8 +10,9 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
+using PrimeBakes.Shared.Components;
+
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Sales.StockTransfer;
@@ -42,17 +43,12 @@ public partial class StockTransferReport : IAsyncDisposable
 
 	private SfGrid<StockTransferOverviewModel> _sfGrid;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
 	private string _deleteTransactionNo = string.Empty;
 	private int _deleteTransactionId = 0;
 	private string _recoverTransactionNo = string.Empty;
 	private int _recoverTransactionId = 0;
 
-	private SfToast _sfErrorToast;
-	private SfToast _sfSuccessToast;
+	private ToastNotification _toastNotification;
 	private SfDialog _deleteConfirmationDialog;
 	private SfDialog _recoverConfirmationDialog;
 
@@ -150,7 +146,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading transaction overviews: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while loading transaction overviews: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -240,7 +236,7 @@ public partial class StockTransferReport : IAsyncDisposable
 
 					if (previousFY == null)
 					{
-						await ShowToast("Warning", "No previous financial year found.", "error");
+						await _toastNotification.ShowAsync("Warning", "No previous financial year found.", ToastType.Warning);
 						return;
 					}
 
@@ -256,7 +252,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while setting date range: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -277,7 +273,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -299,11 +295,11 @@ public partial class StockTransferReport : IAsyncDisposable
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Transaction report exported to Excel successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -321,7 +317,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -343,11 +339,11 @@ public partial class StockTransferReport : IAsyncDisposable
 			fileName += ".pdf";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Transaction report exported to PDF successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -378,7 +374,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while opening transaction: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -400,15 +396,15 @@ public partial class StockTransferReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Generating invoice...", "success");
+			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
 
 			var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Invoice downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while generating invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while generating invoice: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -444,17 +440,17 @@ public partial class StockTransferReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-			await ShowToast("Processing", "Deleting transaction...", "success");
+			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
 
 			await StockTransferData.DeleteStockTransfer(_deleteTransactionId);
-			await ShowToast("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", ToastType.Success);
 
 			_deleteTransactionId = 0;
 			_deleteTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while deleting transaction: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while deleting transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -496,17 +492,17 @@ public partial class StockTransferReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
 
-			await ShowToast("Processing", "Recovering transaction...", "success");
+			await _toastNotification.ShowAsync("Processing", "Recovering transaction...", ToastType.Info);
 
 			await RecoverTransaction(_recoverTransactionId);
-			await ShowToast("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Transaction {_recoverTransactionNo} has been recovered successfully.", ToastType.Success);
 
 			_recoverTransactionId = 0;
 			_recoverTransactionNo = string.Empty;
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while recovering transaction: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while recovering transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -521,7 +517,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		var stockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, recoverTransactionId);
 		if (stockTransfer is null)
 		{
-			await ShowToast("Error", "Transaction not found.", "error");
+			await _toastNotification.ShowAsync("Error", "Transaction not found.", ToastType.Error);
 			return;
 		}
 
@@ -557,32 +553,6 @@ public partial class StockTransferReport : IAsyncDisposable
 
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
-		}
-	}
 
 	private void ShowDeleteConfirmation(int id, string transactionNo)
 	{

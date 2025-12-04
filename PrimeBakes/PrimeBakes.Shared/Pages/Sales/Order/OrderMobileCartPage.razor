@@ -213,14 +213,7 @@ else
     </DialogTemplates>
 </SfDialog>
 
-<!-- Toast Notifications -->
-<SfToast @ref="_sfSuccessToast" ID="toast_success" Icon="e-success" Timeout="5000" ShowProgressBar="true">
-    <ToastPosition X="Center" Y="Top" />
-</SfToast>
-
-<SfToast @ref="_sfErrorToast" ID="toast_error" Icon="e-error" Timeout="5000" ShowProgressBar="true">
-    <ToastPosition X="Center" Y="Top" />
-</SfToast>
+<ToastNotification @ref="_toastNotification" />
 
 <style>
     :root {

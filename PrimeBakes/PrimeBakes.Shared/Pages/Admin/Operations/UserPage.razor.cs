@@ -1,10 +1,10 @@
+using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
 using PrimeBakesLibrary.Exporting.Operations;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Operations;
@@ -34,14 +34,7 @@ public partial class UserPage : IAsyncDisposable
 	private string _recoverUserName = string.Empty;
 	private bool _isRecoverDialogVisible = false;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfSuccessToast;
-	private SfToast _sfErrorToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -126,19 +119,19 @@ public partial class UserPage : IAsyncDisposable
 			var user = _users.FirstOrDefault(u => u.Id == _deleteUserId);
 			if (user == null)
 			{
-				await ShowToast("Error", "User not found.", "error");
+				await _toastNotification.ShowAsync("Error", "User not found.", ToastType.Error);
 				return;
 			}
 
 			user.Status = false;
 			await UserData.InsertUser(user);
 
-			await ShowToast("Success", $"User '{user.Name}' has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Deleted", $"User '{user.Name}' removed successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminUser, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to delete user: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to delete user: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -181,19 +174,19 @@ public partial class UserPage : IAsyncDisposable
 			var user = _users.FirstOrDefault(u => u.Id == _recoverUserId);
 			if (user == null)
 			{
-				await ShowToast("Error", "User not found.", "error");
+				await _toastNotification.ShowAsync("Error", "User not found.", ToastType.Error);
 				return;
 			}
 
 			user.Status = true;
 			await UserData.InsertUser(user);
 
-			await ShowToast("Success", $"User '{user.Name}' has been recovered successfully.", "success");
+			await _toastNotification.ShowAsync("Recovered", $"User '{user.Name}' restored successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminUser, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to recover user: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to recover user: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -215,31 +208,31 @@ public partial class UserPage : IAsyncDisposable
 
 		if (string.IsNullOrWhiteSpace(_user.Name))
 		{
-			await ShowToast("Error", "User name is required. Please enter a valid user name.", "error");
+			await _toastNotification.ShowAsync("Validation", "User name is required.", ToastType.Warning);
 			return false;
 		}
 
 		if (_user.Passcode.ToString().Length != 4)
 		{
-			await ShowToast("Error", "Passcode must be a 4-digit number. Please enter a valid passcode.", "error");
+			await _toastNotification.ShowAsync("Validation", "Passcode must be a 4-digit number.", ToastType.Warning);
 			return false;
 		}
 
 		if (_user.LocationId <= 0)
 		{
-			await ShowToast("Error", "Please select a valid location for the user.", "error");
+			await _toastNotification.ShowAsync("Validation", "Please select a location.", ToastType.Warning);
 			return false;
 		}
 
 		if (_user.Admin == false && _user.Sales == false && _user.Inventory == false && _user.Accounts == false && _user.Order == false)
 		{
-			await ShowToast("Error", "At least one role (Sales, Inventory, Accounts, Order, or Admin) must be assigned to the user.", "error");
+			await _toastNotification.ShowAsync("Validation", "At least one role must be assigned.", ToastType.Warning);
 			return false;
 		}
 
 		if (_location is null || _location.Id <= 0)
 		{
-			await ShowToast("Error", "Please select a valid location for the user.", "error");
+			await _toastNotification.ShowAsync("Validation", "Please select a valid location.", ToastType.Warning);
 			return false;
 		}
 		_user.LocationId = _location.Id;
@@ -260,14 +253,14 @@ public partial class UserPage : IAsyncDisposable
 			var existingUser = _users.FirstOrDefault(_ => _.Id != _user.Id && _.Passcode == _user.Passcode);
 			if (existingUser is not null)
 			{
-				await ShowToast("Error", $"Passcode '{_user.Passcode}' is already used by user '{existingUser.Name}'. Please choose a different passcode.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Passcode '{_user.Passcode}' already exists.", ToastType.Warning);
 				return false;
 			}
 
 			existingUser = _users.FirstOrDefault(_ => _.Id != _user.Id && _.Name.Equals(_user.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingUser is not null)
 			{
-				await ShowToast("Error", $"User name '{_user.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Validation", $"User name '{_user.Name}' already exists.", ToastType.Warning);
 				return false;
 			}
 		}
@@ -276,14 +269,14 @@ public partial class UserPage : IAsyncDisposable
 			var existingUser = _users.FirstOrDefault(_ => _.Passcode == _user.Passcode);
 			if (existingUser is not null)
 			{
-				await ShowToast("Error", $"Passcode '{_user.Passcode}' is already used by user '{existingUser.Name}'. Please choose a different passcode.", "error");
+				await _toastNotification.ShowAsync("Validation", $"Passcode '{_user.Passcode}' already exists.", ToastType.Warning);
 				return false;
 			}
 
 			existingUser = _users.FirstOrDefault(_ => _.Name.Equals(_user.Name, StringComparison.OrdinalIgnoreCase));
 			if (existingUser is not null)
 			{
-				await ShowToast("Error", $"User name '{_user.Name}' already exists. Please choose a different name.", "error");
+				await _toastNotification.ShowAsync("Validation", $"User name '{_user.Name}' already exists.", ToastType.Warning);
 				return false;
 			}
 		}
@@ -307,16 +300,16 @@ public partial class UserPage : IAsyncDisposable
 				return;
 			}
 
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+			await _toastNotification.ShowAsync("Saving", "Processing user...", ToastType.Info);
 
 			await UserData.InsertUser(_user);
 
-			await ShowToast("Success", $"User '{_user.Name}' has been saved successfully.", "success");
+			await _toastNotification.ShowAsync("Saved", $"User '{_user.Name}' saved successfully.", ToastType.Success);
 			NavigationManager.NavigateTo(PageRouteNames.AdminUser, true);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"Failed to save user: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Failed to save user: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -335,7 +328,7 @@ public partial class UserPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
 
 			// Call the Excel export utility
 			var stream = await UserExcelExport.ExportUser(_users);
@@ -346,11 +339,11 @@ public partial class UserPage : IAsyncDisposable
 			// Save and view the Excel file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "User data exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -368,7 +361,7 @@ public partial class UserPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
 
 			// Call the PDF export utility
 			var stream = await UserPDFExport.ExportUser(_users);
@@ -379,11 +372,11 @@ public partial class UserPage : IAsyncDisposable
 			// Save and view the PDF file
 			await SaveAndViewService.SaveAndView(fileName, stream);
 
-			await ShowToast("Success", "User data exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -397,33 +390,6 @@ public partial class UserPage : IAsyncDisposable
 	private void ResetPage()
 	{
 		NavigationManager.NavigateTo(PageRouteNames.AdminUser, true);
-	}
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
-		}
 	}
 	#endregion
 

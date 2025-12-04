@@ -1,4 +1,6 @@
-﻿namespace PrimeBakesLibrary.Exporting.Sales.Product;
+﻿using PrimeBakesLibrary.Models.Sales.Product;
+
+namespace PrimeBakesLibrary.Exporting.Sales.Product;
 
 /// <summary>
 /// PDF export functionality for Product
@@ -42,7 +44,7 @@ public static class ProductPDFExport
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned
-			["Id"] = new()
+			[nameof(ProductModel.Id)] = new()
 			{
 				DisplayName = "ID",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -54,16 +56,16 @@ public static class ProductPDFExport
 			},
 
 			// Name - Left aligned
-			["Name"] = new() { DisplayName = "Product Name", IncludeInTotal = false },
+			[nameof(ProductModel.Name)] = new() { DisplayName = "Product Name", IncludeInTotal = false },
 
 			// Code - Left aligned
-			["Code"] = new() { DisplayName = "Code", IncludeInTotal = false },
+			[nameof(ProductModel.Code)] = new() { DisplayName = "Code", IncludeInTotal = false },
 
 			// Category - Left aligned
 			["Category"] = new() { DisplayName = "Category", IncludeInTotal = false },
 
 			// Rate - Right aligned
-			["Rate"] = new()
+			[nameof(ProductModel.Rate)] = new()
 			{
 				DisplayName = "Rate",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -87,7 +89,7 @@ public static class ProductPDFExport
 			},
 
 			// Status - Center aligned
-			["Status"] = new()
+			[nameof(ProductModel.Status)] = new()
 			{
 				DisplayName = "Status",
 				StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -102,7 +104,14 @@ public static class ProductPDFExport
 		// Define column order
 		List<string> columnOrder =
 		[
-			"Id", "Name", "Code", "Category", "Rate", "Tax", "Remarks", "Status"
+			nameof(ProductModel.Id),
+			nameof(ProductModel.Name),
+			nameof(ProductModel.Code),
+			"Category",
+			nameof(ProductModel.Rate),
+			"Tax",
+			nameof(ProductModel.Remarks),
+			nameof(ProductModel.Status)
 		];
 
 		// Call the generic PDF export utility

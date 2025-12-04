@@ -375,17 +375,7 @@ else
     </div>
 }
 
-<SfToast @ref="_sfErrorToast" ID="_sfErrorToast" Title="@_errorTitle" Content="@_errorMessage" Timeout="5000">
-    <ToastPosition X="Right" Y="Top" />
-    <ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
-    <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
-</SfToast>
-
-<SfToast @ref="_sfSuccessToast" ID="_sfSuccessToast" Title="@_successTitle" Content="@_successMessage" Timeout="5000">
-    <ToastPosition X="Right" Y="Top" />
-    <ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
-    <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
-</SfToast>
+<ToastNotification @ref="_toastNotification" />
 
 <style>
     * {

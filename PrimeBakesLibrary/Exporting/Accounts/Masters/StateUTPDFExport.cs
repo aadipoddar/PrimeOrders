@@ -25,7 +25,7 @@ public static class StateUTPDFExport
         });        // Define custom column settings
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>
         {
-            ["Id"] = new()
+            [nameof(StateUTModel.Id)] = new()
             {
                 DisplayName = "ID",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -36,9 +36,9 @@ public static class StateUTPDFExport
                 IncludeInTotal = false
             },
 
-            ["Name"] = new() { DisplayName = "State/UT Name", IncludeInTotal = false },
+            [nameof(StateUTModel.Name)] = new() { DisplayName = "State/UT Name", IncludeInTotal = false },
 
-            ["UnionTerritory"] = new()
+            [nameof(StateUTModel.UnionTerritory)] = new()
             {
                 DisplayName = "Union Territory",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -49,7 +49,7 @@ public static class StateUTPDFExport
                 IncludeInTotal = false
             },
 
-            ["Status"] = new()
+            [nameof(StateUTModel.Status)] = new()
             {
                 DisplayName = "Status",
                 StringFormat = new Syncfusion.Pdf.Graphics.PdfStringFormat
@@ -64,8 +64,14 @@ public static class StateUTPDFExport
         // Define column order
         List<string> columnOrder =
         [
-            "Id", "Name", "Remarks", "UnionTerritory", "Status"
-        ];        // Call the generic PDF export utility
+            nameof(StateUTModel.Id),
+            nameof(StateUTModel.Name),
+            nameof(StateUTModel.Remarks),
+            nameof(StateUTModel.UnionTerritory),
+            nameof(StateUTModel.Status)
+        ];
+        
+        // Call the generic PDF export utility
         return await PDFReportExportUtil.ExportToPdf(
             enrichedData,
             "STATE & UNION TERRITORY MASTER",

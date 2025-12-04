@@ -13,8 +13,9 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
+using PrimeBakes.Shared.Components;
+
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Stock;
@@ -47,13 +48,7 @@ public partial class ProductStockReport : IAsyncDisposable
 	private string _deleteTransactionNo = string.Empty;
 	private SfDialog _deleteConfirmationDialog;
 
-	private string _errorTitle = string.Empty;
-	private string _errorMessage = string.Empty;
-	private string _successTitle = string.Empty;
-	private string _successMessage = string.Empty;
-
-	private SfToast _sfErrorToast;
-	private SfToast _sfSuccessToast;
+	private ToastNotification _toastNotification;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -109,7 +104,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("An Error Occurred While Loading Locations", ex.Message, "error");
+			await _toastNotification.ShowAsync("An Error Occurred While Loading Locations", ex.Message, ToastType.Error);
 		}
 	}
 
@@ -135,7 +130,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while loading stock data : {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while loading stock data : {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -231,7 +226,7 @@ public partial class ProductStockReport : IAsyncDisposable
 
 					if (previousFY == null)
 					{
-						await ShowToast("Warning", "No previous financial year found.", "error");
+						await _toastNotification.ShowAsync("Warning", "No previous financial year found.", ToastType.Warning);
 						return;
 					}
 
@@ -247,7 +242,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while setting date range: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while setting date range: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -268,7 +263,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to Excel...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to Excel...", ToastType.Info);
 
 			if (_showDetails && (_stockDetails is null || _stockDetails.Count == 0))
 				await LoadStockDetails();
@@ -291,11 +286,11 @@ public partial class ProductStockReport : IAsyncDisposable
 			fileName += ".xlsx";
 
 			await SaveAndViewService.SaveAndView(fileName, stream);
-			await ShowToast("Success", "Transaction report exported to Excel successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Transaction report exported to Excel successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to Excel: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to Excel: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -313,7 +308,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Exporting to PDF...", "success");
+			await _toastNotification.ShowAsync("Processing", "Exporting to PDF...", ToastType.Info);
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -348,11 +343,11 @@ public partial class ProductStockReport : IAsyncDisposable
 				await SaveAndViewService.SaveAndView(detailsFileName, detailsStream);
 			}
 
-			await ShowToast("Success", "Transaction report exported to PDF successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Transaction report exported to PDF successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while exporting to PDF: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while exporting to PDF: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -405,7 +400,7 @@ public partial class ProductStockReport : IAsyncDisposable
 
 			if (string.IsNullOrEmpty(url))
 			{
-				await ShowToast("Error", "Unknown transaction type.", "error");
+				await _toastNotification.ShowAsync("Error", "Unknown transaction type.", ToastType.Error);
 				return;
 			}
 
@@ -416,7 +411,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while opening transaction: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while opening transaction: {ex.Message}", ToastType.Error);
 		}
 	}
 
@@ -438,7 +433,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await ShowToast("Processing", "Generating invoice...", "success");
+			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
 
 			if (type.Equals("purchase", StringComparison.CurrentCultureIgnoreCase))
 			{
@@ -476,11 +471,11 @@ public partial class ProductStockReport : IAsyncDisposable
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			await ShowToast("Success", "Invoice downloaded successfully.", "success");
+			await _toastNotification.ShowAsync("Success", "Invoice downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while downloading invoice: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while downloading invoice: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -514,18 +509,18 @@ public partial class ProductStockReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
-			await ShowToast("Processing", "Deleting transaction...", "success");
+			await _toastNotification.ShowAsync("Processing", "Deleting transaction...", ToastType.Info);
 
 			var adjustment = _stockDetails.FirstOrDefault(x => x.Id == _deleteAdjustmentId);
 			if (adjustment is null && !adjustment.Type.Equals("adjustment", StringComparison.CurrentCultureIgnoreCase))
 				return;
 
 			await ProductStockData.DeleteProductStockById(_deleteAdjustmentId);
-			await ShowToast("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", "success");
+			await _toastNotification.ShowAsync("Success", $"Transaction {_deleteTransactionNo} has been deleted successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Error", $"An error occurred while deleting transaction: {ex.Message}", "error");
+			await _toastNotification.ShowAsync("Error", $"An error occurred while deleting transaction: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{
@@ -552,32 +547,6 @@ public partial class ProductStockReport : IAsyncDisposable
 
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
-
-	private async Task ShowToast(string title, string message, string type)
-	{
-		VibrationService.VibrateWithTime(200);
-
-		if (type == "error")
-		{
-			_errorTitle = title;
-			_errorMessage = message;
-			await _sfErrorToast.ShowAsync(new()
-			{
-				Title = _errorTitle,
-				Content = _errorMessage
-			});
-		}
-		else if (type == "success")
-		{
-			_successTitle = title;
-			_successMessage = message;
-			await _sfSuccessToast.ShowAsync(new()
-			{
-				Title = _successTitle,
-				Content = _successMessage
-			});
-		}
-	}
 
 	private void ShowDeleteConfirmation(int id, string transactionNo)
 	{
