@@ -10,36 +10,12 @@
 }
 else
 {
-    <!-- Professional Header Section -->
-    <div class="page-header">
-        <div class="header-left">
-            <img src="images/logo.png" alt="PrimeBakes" class="header-logo" />
-            <div class="header-divider"></div>
-            <div class="header-text">
-                <span class="app-name">Prime Bakes</span>
-            </div>
-        </div>
-        <div class="header-center">
-            <h1 class="page-title">Sales Dashboard</h1>
-            <p class="page-subtitle">Access all sales modules and reports</p>
-        </div>
-        <div class="header-right">
-            <button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout (Ctrl + L)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
-                    <line x1="12" y1="2" x2="12" y2="12" />
-                </svg>
-            </button>
-            <button class="btn-icon" @onclick="NavigateToDashboard" title="Home (Ctrl + D)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-            </button>
-        </div>
-    </div>
+    <PageHeader Title="Sales Dashboard"
+                Subtitle="Access all sales modules and reports"
+                ShowLogout="true"
+                ShowHome="true"
+                OnLogoutClick="Logout"
+                OnHomeClick="NavigateToDashboard" />
 
     <!-- Main Content Container -->
     <div class="dashboard-container">
@@ -63,7 +39,7 @@ else
                     @if (_user.Order)
                     {
                         <!-- Order -->
-                        <DashboardCard Title="Order" Description="Create and manage customer orders" Color="blue"
+                        <ButtonCard Title="Order" Description="Create and manage customer orders" Color="blue"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.Order)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -73,13 +49,13 @@ else
                                     <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
 
                     @if (_user.Sales)
                     {
                         <!-- Sale -->
-                        <DashboardCard Title="Sale" Description="Process sales transactions" Color="green"
+                        <ButtonCard Title="Sale" Description="Process sales transactions" Color="green"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.Sale)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -90,10 +66,10 @@ else
                                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Sale Return -->
-                        <DashboardCard Title="Sale Return" Description="Process customer returns" Color="red"
+                        <ButtonCard Title="Sale Return" Description="Process customer returns" Color="red"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.SaleReturn)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -103,32 +79,14 @@ else
                                     <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
 
 
                     @if (_user.Sales && _user.LocationId == 1)
                     {
-                        <!-- Stock Transfer -->
-                        <DashboardCard Title="Stock Transfer" Description="Transfer stock between locations" Color="amber"
-                            OnClick="() => NavigationManager.NavigateTo(PageRouteNames.StockTransfer)">
-                            <IconContent>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                     stroke-linejoin="round">
-                                    <polyline points="17 1 21 5 17 9" />
-                                    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                                    <polyline points="7 23 3 19 7 15" />
-                                    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-                                </svg>
-                            </IconContent>
-                        </DashboardCard>
-                    }
-
-                    @if (_user.Inventory && _user.LocationId == 1)
-                    {
                         <!-- Product Stock Adjustment -->
-                        <DashboardCard Title="Finished Product Adjustment" Description="Adjust finished product stock levels" Color="indigo"
+                        <ButtonCard Title="Finished Product Adjustment" Description="Adjust finished product stock levels" Color="indigo"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ProductStockAdjustment)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -139,7 +97,7 @@ else
                                     <polyline points="2 12 12 17 22 12" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
                 </div>
             </div>
@@ -166,7 +124,7 @@ else
                     @if (_user.Order)
                     {
                         <!-- Order Report -->
-                        <DashboardCard Title="Order Report" Description="View order transaction history" Color="cyan"
+                        <ButtonCard Title="Order Report" Description="View order transaction history" Color="cyan"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrder)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -175,10 +133,10 @@ else
                                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Order Item Report -->
-                        <DashboardCard Title="Order Item Report" Description="View detailed order items" Color="sky"
+                        <ButtonCard Title="Order Item Report" Description="View detailed order items" Color="sky"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportOrderItem)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -191,13 +149,13 @@ else
                                     <line x1="10" y1="9" x2="8" y2="9" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
 
                     @if (_user.Sales)
                     {
                         <!-- Sale Report -->
-                        <DashboardCard Title="Sale Report" Description="View sales transaction history" Color="emerald"
+                        <ButtonCard Title="Sale Report" Description="View sales transaction history" Color="emerald"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSale)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -207,10 +165,10 @@ else
                                     <polygon points="22 2 15 22 11 13 2 9 22 2" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Sale Item Report -->
-                        <DashboardCard Title="Sale Item Report" Description="View detailed sale items" Color="teal"
+                        <ButtonCard Title="Sale Item Report" Description="View detailed sale items" Color="teal"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleItem)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -224,10 +182,10 @@ else
                                     <line x1="3" y1="18" x2="3.01" y2="18" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Sale Return Report -->
-                        <DashboardCard Title="Sale Return Report" Description="View sales return records" Color="rose"
+                        <ButtonCard Title="Sale Return Report" Description="View sales return records" Color="rose"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturn)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -237,10 +195,10 @@ else
                                     <polyline points="17 18 23 18 23 12" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Sale Return Item Report -->
-                        <DashboardCard Title="Sale Return Item Report" Description="View detailed sale return items" Color="amber"
+                        <ButtonCard Title="Sale Return Item Report" Description="View detailed sale return items" Color="amber"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportSaleReturnItem)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -252,13 +210,13 @@ else
                                     <line x1="12" y1="9" x2="12.01" y2="9" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
 
                     @if (_user.Sales && _user.LocationId == 1)
                     {
                         <!-- Stock Transfer Report -->
-                        <DashboardCard Title="Stock Transfer Report" Description="View stock transfer records" Color="orange"
+                        <ButtonCard Title="Stock Transfer Report" Description="View stock transfer records" Color="orange"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransfer)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -270,10 +228,10 @@ else
                                     <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Stock Transfer Item Report -->
-                        <DashboardCard Title="Stock Transfer Item Report" Description="View detailed transfer items" Color="violet"
+                        <ButtonCard Title="Stock Transfer Item Report" Description="View detailed transfer items" Color="violet"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportStockTransferItem)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -285,13 +243,13 @@ else
                                     <line x1="14" y1="12" x2="14" y2="21" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
 
                     @if (_user.Inventory && _user.LocationId == 1)
                     {
                         <!-- Product Stock Report -->
-                        <DashboardCard Title="Finished Product Stock" Description="View current product stock levels" Color="indigo"
+                        <ButtonCard Title="Finished Product Stock" Description="View current product stock levels" Color="indigo"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportProductStock)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -302,7 +260,7 @@ else
                                     <line x1="10" y1="12" x2="14" y2="12" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     }
                 </div>
             </div>
@@ -327,7 +285,7 @@ else
                 <div class="section-body">
                     <div class="dashboard-grid">
                         <!-- Finished Product -->
-                        <DashboardCard Title="Finished Product" Description="Manage finished products" Color="emerald"
+                        <ButtonCard Title="Finished Product" Description="Manage finished products" Color="emerald"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminProduct)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -338,10 +296,10 @@ else
                                     <line x1="10" y1="12" x2="14" y2="12" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Product Location -->
-                        <DashboardCard Title="Product Location" Description="Manage product locations" Color="sky"
+                        <ButtonCard Title="Product Location" Description="Manage product locations" Color="sky"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminProductLocation)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -353,10 +311,10 @@ else
                                     <circle cx="12" cy="12" r="2" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Finished Product Category -->
-                        <DashboardCard Title="Finished Product Category" Description="Manage product categories" Color="teal"
+                        <ButtonCard Title="Finished Product Category" Description="Manage product categories" Color="teal"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminProductCategory)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -370,10 +328,10 @@ else
                                     <line x1="3" y1="18" x2="3.01" y2="18" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
 
                         <!-- Tax -->
-                        <DashboardCard Title="Tax" Description="Manage tax rates and types" Color="amber"
+                        <ButtonCard Title="Tax" Description="Manage tax rates and types" Color="amber"
                             OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminTax)">
                             <IconContent>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -383,7 +341,7 @@ else
                                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                 </svg>
                             </IconContent>
-                        </DashboardCard>
+                        </ButtonCard>
                     </div>
                 </div>
             </div>
@@ -396,116 +354,6 @@ else
     * {
         box-sizing: border-box;
     }
-
-    /* Professional Header Section */
-    .page-header {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: #ffffff;
-        border-bottom: 2px solid #e2e8f0;
-        padding: 16px 32px;
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        gap: 24px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-        min-height: 72px;
-    }
-
-    .header-left {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .header-logo {
-        width: 40px;
-        height: 40px;
-        flex-shrink: 0;
-    }
-
-    .header-divider {
-        width: 1px;
-        height: 32px;
-        background: #e2e8f0;
-        flex-shrink: 0;
-    }
-
-    .header-text {
-        display: flex;
-        align-items: center;
-        font-size: 16px;
-        color: #0f172a;
-        font-weight: 600;
-    }
-
-    .app-name {
-        color: #0f172a;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }
-
-    .header-center {
-        text-align: center;
-    }
-
-    .page-title {
-        font-size: 20px;
-        font-weight: 600;
-        color: #0f172a;
-        margin: 0;
-        letter-spacing: -0.3px;
-    }
-
-    .page-subtitle {
-        font-size: 13px;
-        color: #64748b;
-        margin: 4px 0 0 0;
-        font-weight: 400;
-    }
-
-    .header-right {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-    }
-
-    .btn-icon {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e2e8f0;
-        background: #ffffff;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: #64748b;
-    }
-
-        .btn-icon:hover {
-            background: #f8fafc;
-            border-color: #3b82f6;
-            color: #3b82f6;
-        }
-
-        .btn-icon:active {
-            transform: scale(0.95);
-        }
-
-    .btn-icon-logout {
-        color: #ef4444;
-        border-color: #ef4444;
-    }
-
-        .btn-icon-logout:hover {
-            background: #fef2f2;
-            border-color: #dc2626;
-            color: #dc2626;
-        }
 
     /* Dashboard Container */
     .dashboard-container {

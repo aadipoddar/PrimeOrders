@@ -10,36 +10,12 @@
 }
 else
 {
-	<!-- Professional Header Section -->
-	<div class="page-header">
-		<div class="header-left">
-			<img src="images/logo.png" alt="PrimeBakes" class="header-logo" />
-			<div class="header-divider"></div>
-			<div class="header-text">
-				<span class="app-name">Prime Bakes</span>
-			</div>
-		</div>
-		<div class="header-center">
-			<h1 class="page-title">Accounting Dashboard</h1>
-			<p class="page-subtitle">Access all accounting modules and reports</p>
-		</div>
-		<div class="header-right">
-			<button class="btn-icon btn-icon-logout" @onclick="Logout" title="Logout (Ctrl + L)">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
-					<line x1="12" y1="2" x2="12" y2="12" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="NavigateToDashboard" title="Home (Ctrl + D)">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-					<polyline points="9 22 9 12 15 12 15 22" />
-				</svg>
-			</button>
-		</div>
-	</div>
+	<PageHeader Title="Accounting Dashboard"
+				Subtitle="Access all accounting modules and reports"
+				ShowLogout="true"
+				ShowHome="true"
+				OnLogoutClick="Logout"
+				OnHomeClick="NavigateToDashboard" />
 
 	<!-- Main Content Container -->
 	<div class="dashboard-container">
@@ -60,7 +36,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Financial Accounting -->
-					<DashboardCard Title="Financial Accounting" Description="Record journal entries and transactions" Color="blue"
+					<ButtonCard Title="Financial Accounting" Description="Record journal entries and transactions" Color="blue"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.FinancialAccounting)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -70,7 +46,7 @@ else
 								<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 				</div>
 			</div>
 		</div>
@@ -94,7 +70,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Financial Accounting Report -->
-					<DashboardCard Title="Financial Accounting Report" Description="View accounting transaction history" Color="cyan"
+					<ButtonCard Title="Financial Accounting Report" Description="View accounting transaction history" Color="cyan"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportFinancialAccounting)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -103,10 +79,10 @@ else
 								<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Ledger Report -->
-					<DashboardCard Title="Ledger Report" Description="View detailed ledger transactions" Color="emerald"
+					<ButtonCard Title="Ledger Report" Description="View detailed ledger transactions" Color="emerald"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportAccountingLedger)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -116,10 +92,10 @@ else
 								<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Trial Balance -->
-					<DashboardCard Title="Trial Balance" Description="View trial balance summary" Color="sky"
+					<ButtonCard Title="Trial Balance" Description="View trial balance summary" Color="sky"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.ReportTrialBalance)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -131,7 +107,7 @@ else
 								<rect x="3" y="14" width="7" height="7" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 				</div>
 			</div>
 		</div>
@@ -152,7 +128,7 @@ else
 			<div class="section-body">
 				<div class="dashboard-grid">
 					<!-- Group -->
-					<DashboardCard Title="Group" Description="Manage account groups" Color="purple"
+					<ButtonCard Title="Group" Description="Manage account groups" Color="purple"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminGroup)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -164,10 +140,10 @@ else
 								<path d="M16 3.13a4 4 0 0 1 0 7.75" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Account Type -->
-					<DashboardCard Title="Account Type" Description="Manage account types" Color="indigo"
+					<ButtonCard Title="Account Type" Description="Manage account types" Color="indigo"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminAccountType)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -177,10 +153,10 @@ else
 								<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Ledgers -->
-					<DashboardCard Title="Ledgers" Description="Manage ledger accounts" Color="teal"
+					<ButtonCard Title="Ledgers" Description="Manage ledger accounts" Color="teal"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminLedger)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -193,10 +169,10 @@ else
 								<line x1="10" y1="9" x2="8" y2="9" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Voucher -->
-					<DashboardCard Title="Voucher" Description="Manage voucher types" Color="rose"
+					<ButtonCard Title="Voucher" Description="Manage voucher types" Color="rose"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminVoucher)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -208,10 +184,10 @@ else
 								<line x1="9" y1="15" x2="15" y2="15" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Financial Years -->
-					<DashboardCard Title="Financial Years" Description="Manage financial year periods" Color="amber"
+					<ButtonCard Title="Financial Years" Description="Manage financial year periods" Color="amber"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminFinancialYear)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -223,10 +199,10 @@ else
 								<line x1="3" y1="10" x2="21" y2="10" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- States -->
-					<DashboardCard Title="States" Description="Manage state/UT information" Color="violet"
+					<ButtonCard Title="States" Description="Manage state/UT information" Color="violet"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminStateUT)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -238,10 +214,10 @@ else
 									d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Company -->
-					<DashboardCard Title="Company" Description="Manage company settings" Color="green"
+					<ButtonCard Title="Company" Description="Manage company settings" Color="green"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminCompany)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -251,10 +227,10 @@ else
 								<polyline points="9 22 9 12 15 12 15 22" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 
 					<!-- Settings -->
-					<DashboardCard Title="Settings" Description="Manage system settings" Color="blue"
+					<ButtonCard Title="Settings" Description="Manage system settings" Color="blue"
 								   OnClick="() => NavigationManager.NavigateTo(PageRouteNames.AdminSettings)">
 						<IconContent>
 							<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
@@ -263,7 +239,7 @@ else
 								<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
 							</svg>
 						</IconContent>
-					</DashboardCard>
+					</ButtonCard>
 				</div>
 			</div>
 		</div>
@@ -274,116 +250,6 @@ else
 <style>
 	* {
 		box-sizing: border-box;
-	}
-
-	/* Professional Header Section */
-	.page-header {
-		position: sticky;
-		top: 0;
-		z-index: 1000;
-		background: #ffffff;
-		border-bottom: 2px solid #e2e8f0;
-		padding: 16px 32px;
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		align-items: center;
-		gap: 24px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-		min-height: 72px;
-	}
-
-	.header-left {
-		display: flex;
-		align-items: center;
-		gap: 16px;
-	}
-
-	.header-logo {
-		width: 40px;
-		height: 40px;
-		flex-shrink: 0;
-	}
-
-	.header-divider {
-		width: 1px;
-		height: 32px;
-		background: #e2e8f0;
-		flex-shrink: 0;
-	}
-
-	.header-text {
-		display: flex;
-		align-items: center;
-		font-size: 16px;
-		color: #0f172a;
-		font-weight: 600;
-	}
-
-	.app-name {
-		color: #0f172a;
-		font-weight: 600;
-		letter-spacing: 0.5px;
-	}
-
-	.header-center {
-		text-align: center;
-	}
-
-	.page-title {
-		font-size: 20px;
-		font-weight: 600;
-		color: #0f172a;
-		margin: 0;
-		letter-spacing: -0.3px;
-	}
-
-	.page-subtitle {
-		font-size: 13px;
-		color: #64748b;
-		margin: 4px 0 0 0;
-		font-weight: 400;
-	}
-
-	.header-right {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 8px;
-	}
-
-	.btn-icon {
-		width: 40px;
-		height: 40px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		color: #64748b;
-	}
-
-	.btn-icon:hover {
-		background: #f8fafc;
-		border-color: #3b82f6;
-		color: #3b82f6;
-	}
-
-	.btn-icon:active {
-		transform: scale(0.95);
-	}
-
-	.btn-icon-logout {
-		color: #ef4444;
-		border-color: #ef4444;
-	}
-
-	.btn-icon-logout:hover {
-		background: #fef2f2;
-		border-color: #dc2626;
-		color: #dc2626;
 	}
 
 	/* Dashboard Container */
