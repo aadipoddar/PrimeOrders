@@ -15,7 +15,7 @@ else
         OnHomeClick="@(() => NavigationManager.NavigateTo(PageRouteNames.Dashboard))"
         OnBackClick="@(() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard))">
         <RightContent>
-            <button class="btn-icon btn-icon-save" @onclick="SaveSettings" disabled="@_isProcessing" title="Save Settings">
+            <button class="btn-icon btn-icon-save" @onclick="SaveSettings" disabled="@_isProcessing" title="Save Settings (Ctrl + S)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -199,6 +199,15 @@ else
                             FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
                     </div>
 
+                    <!-- Stock Transfer Transaction Prefix -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Stock Transfer Transaction Prefix
+                        </label>
+                        <SfTextBox @bind-Value="_stockTransferTransactionPrefix" Placeholder="e.g., STK"
+                            FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox" />
+                    </div>
+
                     <!-- Order Transaction Prefix -->
                     <div class="form-field">
                         <label class="field-label">
@@ -265,6 +274,21 @@ else
                         </SfAutoComplete>
                     </div>
 
+                    <!-- Stock Transfer Voucher -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Stock Transfer Voucher
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedStockTransferVoucherName" TValue="string" TItem="VoucherModel"
+                            DataSource="@_vouchers" Placeholder="Select stock transfer voucher"
+                            FloatLabelType="FloatLabelType.Never" AllowFiltering="true"
+                            FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains" CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="VoucherModel"
+                                ValueChange="OnStockTransferVoucherChange" />
+                        </SfAutoComplete>
+                    </div>
+
                     <!-- Purchase Voucher -->
                     <div class="form-field">
                         <label class="field-label">
@@ -326,6 +350,20 @@ else
                             CssClass="custom-autocomplete">
                             <AutoCompleteFieldSettings Value="Name" />
                             <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnSaleLedgerChange" />
+                        </SfAutoComplete>
+                    </div>
+
+                    <!-- Stock Transfer Ledger -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Stock Transfer Ledger
+                        </label>
+                        <SfAutoComplete @bind-Value="_selectedStockTransferLedgerName" TValue="string" TItem="LedgerModel"
+                            DataSource="@_ledgers" Placeholder="Select stock transfer ledger" FloatLabelType="FloatLabelType.Never"
+                            AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains"
+                            CssClass="custom-autocomplete">
+                            <AutoCompleteFieldSettings Value="Name" />
+                            <AutoCompleteEvents TValue="string" TItem="LedgerModel" ValueChange="OnStockTransferLedgerChange" />
                         </SfAutoComplete>
                     </div>
 

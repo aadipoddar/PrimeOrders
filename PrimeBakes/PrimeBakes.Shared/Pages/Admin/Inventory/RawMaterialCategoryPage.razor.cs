@@ -11,8 +11,9 @@ using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
 
-public partial class RawMaterialCategoryPage
+public partial class RawMaterialCategoryPage : IAsyncDisposable
 {
+	private HotKeysContext _hotKeysContext;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showDeleted = false;
@@ -56,6 +57,16 @@ public partial class RawMaterialCategoryPage
 
 	private async Task LoadData()
 	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.S, SaveRawMaterialCategory, "Save", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, () => NavigationManager.NavigateTo(PageRouteNames.AdminRawMaterialCategory, true), "New", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, () => NavigationManager.NavigateTo(PageRouteNames.Dashboard), "Dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, () => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard), "Back", Exclude.None)
+			.Add(Code.Insert, EditSelectedItem, "Edit selected", Exclude.None)
+			.Add(Code.Delete, DeleteSelectedItem, "Delete selected", Exclude.None);
+
 		_rawMaterialCategories = await CommonData.LoadTableData<RawMaterialCategoryModel>(TableNames.RawMaterialCategory);
 
 		if (!_showDeleted)
@@ -349,4 +360,28 @@ public partial class RawMaterialCategoryPage
 		}
 	}
 	#endregion
+
+	private async Task EditSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count > 0)
+			OnEditRawMaterialCategory(selectedRecords[0]);
+	}
+
+	private async Task DeleteSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count > 0)
+		{
+			if (selectedRecords[0].Status)
+				ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+			else
+				ShowRecoverConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await _hotKeysContext.DisposeAsync();
+	}
 }

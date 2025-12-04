@@ -16,7 +16,7 @@ else
                 OnBackClick="@(() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard))">
         <RightContent>
             <button class="btn-icon btn-icon-excel" @onclick="ExportExcel" disabled="@_isProcessing"
-                    title="Export to Excel">
+                    title="Export to Excel (Ctrl + E)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -26,7 +26,7 @@ else
                     <polyline points="10 9 9 9 8 9" />
                 </svg>
             </button>
-            <button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF">
+            <button class="btn-icon btn-icon-pdf" @onclick="ExportPdf" disabled="@_isProcessing" title="Export to PDF (Ctrl + P)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -36,7 +36,7 @@ else
                     <line x1="10" y1="9" x2="8" y2="9" />
                 </svg>
             </button>
-            <button class="btn-icon btn-icon-save" @onclick="SaveVoucher" disabled="@_isProcessing" title="Save Voucher">
+            <button class="btn-icon btn-icon-save" @onclick="SaveVoucher" disabled="@_isProcessing" title="Save Voucher (Ctrl + S)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
@@ -44,7 +44,7 @@ else
                     <polyline points="7 3 7 8 15 8" />
                 </svg>
             </button>
-            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminVoucher, true)' title="New Voucher" disabled="@_isProcessing">
+            <button class="btn-icon" @onclick='() => NavigationManager.NavigateTo(PageRouteNames.AdminVoucher, true)' title="New Voucher (Ctrl + N)" disabled="@_isProcessing">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -139,7 +139,7 @@ else
                                         @if (voucher.Status)
                                         {
                                             <button class="btn-grid-action btn-edit" @onclick="() => OnEditVoucher(voucher)"
-                                                    title="Edit">
+                                                    title="Edit (Insert)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                      stroke-linejoin="round">
@@ -149,7 +149,7 @@ else
                                             </button>
 
                                             <button class="btn-grid-action btn-delete"
-                                                    @onclick="() => ShowDeleteConfirmation(voucher.Id, voucher.Name)" title="Delete">
+                                                    @onclick="() => ShowDeleteConfirmation(voucher.Id, voucher.Name)" title="Delete (Delete)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                      stroke-linejoin="round">
@@ -163,7 +163,7 @@ else
                                         else
                                         {
                                             <button class="btn-grid-action btn-recover"
-                                                    @onclick="() => ShowRecoverConfirmation(voucher.Id, voucher.Name)" title="Recover">
+                                                    @onclick="() => ShowRecoverConfirmation(voucher.Id, voucher.Name)" title="Recover (Delete)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                      stroke-linejoin="round">

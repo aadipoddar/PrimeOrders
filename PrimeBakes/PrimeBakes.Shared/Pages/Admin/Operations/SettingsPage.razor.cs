@@ -10,8 +10,10 @@ using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Operations;
 
-public partial class SettingsPage
+public partial class SettingsPage : IAsyncDisposable
 {
+	private HotKeysContext _hotKeysContext;
+
 	#region Fields
 
 	// UI State
@@ -43,6 +45,7 @@ public partial class SettingsPage
 	private string _productStockAdjustmentTransactionPrefix = string.Empty;
 	private string _saleTransactionPrefix = string.Empty;
 	private string _saleReturnTransactionPrefix = string.Empty;
+	private string _stockTransferTransactionPrefix = string.Empty;
 	private string _orderTransactionPrefix = string.Empty;
 	private string _accountingTransactionPrefix = string.Empty;
 
@@ -51,6 +54,8 @@ public partial class SettingsPage
 	private string _selectedSaleVoucherName = string.Empty;
 	private string _saleReturnVoucherId = string.Empty;
 	private string _selectedSaleReturnVoucherName = string.Empty;
+	private string _stockTransferVoucherId = string.Empty;
+	private string _selectedStockTransferVoucherName = string.Empty;
 	private string _purchaseVoucherId = string.Empty;
 	private string _selectedPurchaseVoucherName = string.Empty;
 	private string _purchaseReturnVoucherId = string.Empty;
@@ -60,6 +65,8 @@ public partial class SettingsPage
 	// Ledgers
 	private string _saleLedgerId = string.Empty;
 	private string _selectedSaleLedgerName = string.Empty;
+	private string _stockTransferLedgerId = string.Empty;
+	private string _selectedStockTransferLedgerName = string.Empty;
 	private string _purchaseLedgerId = string.Empty;
 	private string _selectedPurchaseLedgerName = string.Empty;
 	private string _cashLedgerId = string.Empty;
@@ -92,6 +99,11 @@ public partial class SettingsPage
 
 	private async Task LoadData()
 	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.S, SaveSettings, "Save", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, () => NavigationManager.NavigateTo(PageRouteNames.Dashboard), "Dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, () => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard), "Back", Exclude.None);
+
 		try
 		{
 			// Load all settings
@@ -107,7 +119,7 @@ public partial class SettingsPage
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Load Error", $"Failed to load settings: {ex.Message}", "Error");
+			await ShowToast("Load Error", $"Failed to load settings: {ex.Message}", "error");
 		}
 	}
 
@@ -152,6 +164,9 @@ public partial class SettingsPage
 		var saleReturnPrefixSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnTransactionPrefix);
 		_saleReturnTransactionPrefix = saleReturnPrefixSetting?.Value ?? string.Empty;
 
+		var stockTransferPrefixSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferTransactionPrefix);
+		_stockTransferTransactionPrefix = stockTransferPrefixSetting?.Value ?? string.Empty;
+
 		var orderPrefixSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.OrderTransactionPrefix);
 		_orderTransactionPrefix = orderPrefixSetting?.Value ?? string.Empty;
 
@@ -165,6 +180,9 @@ public partial class SettingsPage
 		var saleReturnVoucherSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleReturnVoucherId);
 		_saleReturnVoucherId = saleReturnVoucherSetting?.Value ?? string.Empty;
 
+		var stockTransferVoucherSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferVoucherId);
+		_stockTransferVoucherId = stockTransferVoucherSetting?.Value ?? string.Empty;
+
 		var purchaseVoucherSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
 		_purchaseVoucherId = purchaseVoucherSetting?.Value ?? string.Empty;
 
@@ -174,6 +192,9 @@ public partial class SettingsPage
 		// Ledgers
 		var saleLedgerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleLedgerId);
 		_saleLedgerId = saleLedgerSetting?.Value ?? string.Empty;
+
+		var stockTransferLedgerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferLedgerId);
+		_stockTransferLedgerId = stockTransferLedgerSetting?.Value ?? string.Empty;
 
 		var purchaseLedgerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseLedgerId);
 		_purchaseLedgerId = purchaseLedgerSetting?.Value ?? string.Empty;
@@ -235,6 +256,12 @@ public partial class SettingsPage
 			_selectedSaleReturnVoucherName = voucher?.Name ?? string.Empty;
 		}
 
+		if (!string.IsNullOrEmpty(_stockTransferVoucherId) && long.TryParse(_stockTransferVoucherId, out var stockTransferVoucherId))
+		{
+			var voucher = _vouchers.FirstOrDefault(v => v.Id == stockTransferVoucherId);
+			_selectedStockTransferVoucherName = voucher?.Name ?? string.Empty;
+		}
+
 		if (!string.IsNullOrEmpty(_purchaseVoucherId) && long.TryParse(_purchaseVoucherId, out var purchaseVoucherId))
 		{
 			var voucher = _vouchers.FirstOrDefault(v => v.Id == purchaseVoucherId);
@@ -252,6 +279,12 @@ public partial class SettingsPage
 		{
 			var ledger = _ledgers.FirstOrDefault(l => l.Id == saleLedgerId);
 			_selectedSaleLedgerName = ledger?.Name ?? string.Empty;
+		}
+
+		if (!string.IsNullOrEmpty(_stockTransferLedgerId) && long.TryParse(_stockTransferLedgerId, out var stockTransferLedgerId))
+		{
+			var ledger = _ledgers.FirstOrDefault(l => l.Id == stockTransferLedgerId);
+			_selectedStockTransferLedgerName = ledger?.Name ?? string.Empty;
 		}
 
 		if (!string.IsNullOrEmpty(_purchaseLedgerId) && long.TryParse(_purchaseLedgerId, out var purchaseLedgerId))
@@ -307,6 +340,14 @@ public partial class SettingsPage
 		}
 	}
 
+	private void OnStockTransferVoucherChange(ChangeEventArgs<string, VoucherModel> args)
+	{
+		if (args.ItemData != null)
+		{
+			_stockTransferVoucherId = args.ItemData.Id.ToString();
+		}
+	}
+
 	private void OnPurchaseVoucherChange(ChangeEventArgs<string, VoucherModel> args)
 	{
 		if (args.ItemData != null)
@@ -328,6 +369,14 @@ public partial class SettingsPage
 		if (args.ItemData != null)
 		{
 			_saleLedgerId = args.ItemData.Id.ToString();
+		}
+	}
+
+	private void OnStockTransferLedgerChange(ChangeEventArgs<string, LedgerModel> args)
+	{
+		if (args.ItemData != null)
+		{
+			_stockTransferLedgerId = args.ItemData.Id.ToString();
 		}
 	}
 
@@ -378,7 +427,7 @@ public partial class SettingsPage
 			// Validate required fields
 			if (string.IsNullOrWhiteSpace(_primaryCompanyLinkingId))
 			{
-				await ShowToast("Validation Error", "Primary Company is required.", "Error");
+				await ShowToast("Validation Error", "Primary Company is required.", "error");
 				return;
 			}
 
@@ -398,14 +447,17 @@ public partial class SettingsPage
 			await UpdateSetting(SettingsKeys.ProductStockAdjustmentTransactionPrefix, _productStockAdjustmentTransactionPrefix, settings.FirstOrDefault(_ => _.Key == SettingsKeys.ProductStockAdjustmentTransactionPrefix).Description);
 			await UpdateSetting(SettingsKeys.SaleTransactionPrefix, _saleTransactionPrefix, settings.FirstOrDefault(_ => _.Key == SettingsKeys.SaleTransactionPrefix).Description);
 			await UpdateSetting(SettingsKeys.SaleReturnTransactionPrefix, _saleReturnTransactionPrefix, settings.FirstOrDefault(_ => _.Key == SettingsKeys.SaleReturnTransactionPrefix).Description);
+			await UpdateSetting(SettingsKeys.StockTransferTransactionPrefix, _stockTransferTransactionPrefix, settings.FirstOrDefault(_ => _.Key == SettingsKeys.StockTransferTransactionPrefix).Description);
 			await UpdateSetting(SettingsKeys.OrderTransactionPrefix, _orderTransactionPrefix, settings.FirstOrDefault(_ => _.Key == SettingsKeys.OrderTransactionPrefix).Description);
 			await UpdateSetting(SettingsKeys.AccountingTransactionPrefix, _accountingTransactionPrefix, settings.FirstOrDefault(_ => _.Key == SettingsKeys.AccountingTransactionPrefix).Description);
 
 			await UpdateSetting(SettingsKeys.SaleVoucherId, _saleVoucherId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.SaleVoucherId).Description);
 			await UpdateSetting(SettingsKeys.SaleReturnVoucherId, _saleReturnVoucherId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.SaleReturnVoucherId).Description);
+			await UpdateSetting(SettingsKeys.StockTransferVoucherId, _stockTransferVoucherId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.StockTransferVoucherId).Description);
 			await UpdateSetting(SettingsKeys.PurchaseVoucherId, _purchaseVoucherId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.PurchaseVoucherId).Description);
 			await UpdateSetting(SettingsKeys.PurchaseReturnVoucherId, _purchaseReturnVoucherId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.PurchaseReturnVoucherId).Description);
 			await UpdateSetting(SettingsKeys.SaleLedgerId, _saleLedgerId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.SaleLedgerId).Description);
+			await UpdateSetting(SettingsKeys.StockTransferLedgerId, _stockTransferLedgerId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.StockTransferLedgerId).Description);
 			await UpdateSetting(SettingsKeys.PurchaseLedgerId, _purchaseLedgerId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.PurchaseLedgerId).Description);
 			await UpdateSetting(SettingsKeys.CashLedgerId, _cashLedgerId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.CashLedgerId).Description);
 			await UpdateSetting(SettingsKeys.CashSalesLedgerId, _cashSalesLedgerId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.CashSalesLedgerId).Description);
@@ -413,11 +465,11 @@ public partial class SettingsPage
 			await UpdateSetting(SettingsKeys.UpdateItemMasterRateOnPurchase, _updateItemMasterRateOnPurchase.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.UpdateItemMasterRateOnPurchase).Description);
 			await UpdateSetting(SettingsKeys.UpdateItemMasterUOMOnPurchase, _updateItemMasterUOMOnPurchase.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.UpdateItemMasterUOMOnPurchase).Description);
 
-			await ShowToast("Success", "Settings saved successfully.", "Success");
+			await ShowToast("Success", "Settings saved successfully.", "success");
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Save Error", $"Failed to save settings: {ex.Message}", "Error");
+			await ShowToast("Save Error", $"Failed to save settings: {ex.Message}", "error");
 		}
 		finally
 		{
@@ -464,11 +516,11 @@ public partial class SettingsPage
 			// Reload data
 			await LoadData();
 
-			await ShowToast("Success", "Settings have been reset to default values.", "Success");
+			await ShowToast("Success", "Settings have been reset to default values.", "success");
 		}
 		catch (Exception ex)
 		{
-			await ShowToast("Reset Error", $"Failed to reset settings: {ex.Message}", "Error");
+			await ShowToast("Reset Error", $"Failed to reset settings: {ex.Message}", "error");
 		}
 		finally
 		{
@@ -481,16 +533,16 @@ public partial class SettingsPage
 
 	#region Toast Notifications
 
-	private async Task ShowToast(string title, string content, string type)
+	private async Task ShowToast(string title, string message, string type)
 	{
 		VibrationService.VibrateWithTime(200);
 
-		if (type == "Success")
+		if (type == "success")
 		{
 			await _sfSuccessToast?.ShowAsync(new()
 			{
 				Title = title,
-				Content = content
+				Content = message
 			});
 		}
 		else
@@ -498,10 +550,15 @@ public partial class SettingsPage
 			await _sfErrorToast?.ShowAsync(new()
 			{
 				Title = title,
-				Content = content
+				Content = message
 			});
 		}
 	}
 
 	#endregion
+
+	public async ValueTask DisposeAsync()
+	{
+		await _hotKeysContext.DisposeAsync();
+	}
 }

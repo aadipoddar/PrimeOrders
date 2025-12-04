@@ -12,8 +12,9 @@ using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
 
-public partial class ProductLocationPage
+public partial class ProductLocationPage : IAsyncDisposable
 {
+    private HotKeysContext _hotKeysContext;
     private bool _isLoading = true;
     private bool _isProcessing = false;
 
@@ -58,6 +59,16 @@ public partial class ProductLocationPage
 
     private async Task LoadData()
     {
+        _hotKeysContext = HotKeys.CreateContext()
+            .Add(ModCode.Ctrl, Code.S, SaveProductLocation, "Save", Exclude.None)
+            .Add(ModCode.Ctrl, Code.N, () => NavigationManager.NavigateTo(PageRouteNames.AdminProductLocation, true), "New", Exclude.None)
+            .Add(ModCode.Ctrl, Code.E, ExportExcel, "Export Excel", Exclude.None)
+            .Add(ModCode.Ctrl, Code.P, ExportPdf, "Export PDF", Exclude.None)
+            .Add(ModCode.Ctrl, Code.D, () => NavigationManager.NavigateTo(PageRouteNames.Dashboard), "Dashboard", Exclude.None)
+            .Add(ModCode.Ctrl, Code.B, () => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard), "Back", Exclude.None)
+            .Add(Code.Insert, EditSelectedItem, "Edit selected", Exclude.None)
+            .Add(Code.Delete, DeleteSelectedItem, "Delete selected", Exclude.None);
+
         try
         {
             _productLocations = await CommonData.LoadTableData<ProductLocationModel>(TableNames.ProductLocation);
@@ -79,7 +90,7 @@ public partial class ProductLocationPage
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to load data: {ex.Message}", false);
+            await ShowToast("Error", $"Failed to load data: {ex.Message}", "error");
         }
     }
     #endregion
@@ -193,12 +204,12 @@ public partial class ProductLocationPage
                 await ProductData.InsertProductLocation(productLocation);
 
                 await LoadData();
-                await ShowToast("Success", "Product location deleted successfully", true);
+                await ShowToast("Success", "Product location deleted successfully", "success");
             }
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to delete product location: {ex.Message}", false);
+            await ShowToast("Error", $"Failed to delete product location: {ex.Message}", "error");
         }
         finally
         {
@@ -215,19 +226,19 @@ public partial class ProductLocationPage
     {
         if (_productLocation.LocationId == 0)
         {
-            await ShowToast("Validation Error", "Please select a location", false);
+            await ShowToast("Validation Error", "Please select a location", "error");
             return false;
         }
 
         if (_productLocation.ProductId == 0)
         {
-            await ShowToast("Validation Error", "Please select a product", false);
+            await ShowToast("Validation Error", "Please select a product", "error");
             return false;
         }
 
         if (_productLocation.Rate < 0)
         {
-            await ShowToast("Validation Error", "Rate must be greater than or equal to 0", false);
+            await ShowToast("Validation Error", "Rate must be greater than or equal to 0", "error");
             return false;
         }
 
@@ -257,11 +268,11 @@ public partial class ProductLocationPage
             _selectedProductName = string.Empty;
 
             await LoadData();
-            await ShowToast("Success", "Product location saved successfully", true);
+            await ShowToast("Success", "Product location saved successfully", "success");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to save product location: {ex.Message}", false);
+            await ShowToast("Error", $"Failed to save product location: {ex.Message}", "error");
         }
         finally
         {
@@ -270,19 +281,11 @@ public partial class ProductLocationPage
         }
     }
 
-    private async Task ShowToast(string title, string message, bool isSuccess)
+    private async Task ShowToast(string title, string message, string type)
     {
-        if (isSuccess)
-        {
-            _successTitle = title;
-            _successMessage = message;
-            await _sfSuccessToast.ShowAsync(new()
-            {
-                Title = _successTitle,
-                Content = _successMessage
-            });
-        }
-        else
+        VibrationService.VibrateWithTime(200);
+
+        if (type == "error")
         {
             _errorTitle = title;
             _errorMessage = message;
@@ -293,7 +296,16 @@ public partial class ProductLocationPage
             });
         }
 
-        VibrationService.VibrateWithTime(200);
+        else if (type == "success")
+        {
+            _successTitle = title;
+            _successMessage = message;
+            await _sfSuccessToast.ShowAsync(new()
+            {
+                Title = _successTitle,
+                Content = _successMessage
+            });
+        }
     }
     #endregion
 
@@ -319,11 +331,11 @@ public partial class ProductLocationPage
             var stream = await ProductLocationExcelExport.ExportProductLocation(exportData);
 
             await SaveAndViewService.SaveAndView("Product_Location.xlsx", stream);
-            await ShowToast("Success", "Excel export completed successfully", true);
+            await ShowToast("Success", "Excel export completed successfully", "success");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to export to Excel: {ex.Message}", false);
+            await ShowToast("Error", $"Failed to export to Excel: {ex.Message}", "error");
         }
         finally
         {
@@ -354,11 +366,11 @@ public partial class ProductLocationPage
 
             await SaveAndViewService.SaveAndView("Product_Location.pdf", stream);
 
-            await ShowToast("Success", "PDF export completed successfully", true);
+            await ShowToast("Success", "PDF export completed successfully", "success");
         }
         catch (Exception ex)
         {
-            await ShowToast("Error", $"Failed to export to PDF: {ex.Message}", false);
+            await ShowToast("Error", $"Failed to export to PDF: {ex.Message}", "error");
         }
         finally
         {
@@ -378,4 +390,31 @@ public partial class ProductLocationPage
         return $"{locationName} - {productLocation.Name}";
     }
     #endregion
+
+    private async Task EditSelectedItem()
+    {
+        var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+        if (selectedRecords.Count > 0)
+        {
+            var productLocation = _productLocations.FirstOrDefault(pl => pl.Id == selectedRecords[0].Id);
+            if (productLocation != null)
+                OnEditProductLocation(productLocation);
+        }
+    }
+
+    private async Task DeleteSelectedItem()
+    {
+        var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+        if (selectedRecords.Count > 0)
+        {
+            var productLocation = _productLocations.FirstOrDefault(pl => pl.Id == selectedRecords[0].Id);
+            if (productLocation != null && productLocation.Status)
+                ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _hotKeysContext.DisposeAsync();
+    }
 }

@@ -14,8 +14,9 @@ using PrimeBakesLibrary.Data.Sales.Product;
 
 namespace PrimeBakes.Shared.Pages.Admin.Operations;
 
-public partial class LocationPage
+public partial class LocationPage : IAsyncDisposable
 {
+	private HotKeysContext _hotKeysContext;
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showDeleted = false;
@@ -60,6 +61,16 @@ public partial class LocationPage
 
 	private async Task LoadData()
 	{
+		_hotKeysContext = HotKeys.CreateContext()
+			.Add(ModCode.Ctrl, Code.S, SaveLocation, "Save", Exclude.None)
+			.Add(ModCode.Ctrl, Code.N, () => NavigationManager.NavigateTo(PageRouteNames.AdminLocation, true), "New", Exclude.None)
+			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export Excel", Exclude.None)
+			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export PDF", Exclude.None)
+			.Add(ModCode.Ctrl, Code.D, () => NavigationManager.NavigateTo(PageRouteNames.Dashboard), "Dashboard", Exclude.None)
+			.Add(ModCode.Ctrl, Code.B, () => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard), "Back", Exclude.None)
+			.Add(Code.Insert, EditSelectedItem, "Edit selected", Exclude.None)
+			.Add(Code.Delete, DeleteSelectedItem, "Delete selected", Exclude.None);
+
 		_locations = await CommonData.LoadTableData<LocationModel>(TableNames.Location);
 
 		if (!_showDeleted)
@@ -496,4 +507,28 @@ public partial class LocationPage
 		}
 	}
 	#endregion
+
+	private async Task EditSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count > 0)
+			OnEditLocation(selectedRecords[0]);
+	}
+
+	private async Task DeleteSelectedItem()
+	{
+		var selectedRecords = await _sfGrid.GetSelectedRecordsAsync();
+		if (selectedRecords.Count > 0)
+		{
+			if (selectedRecords[0].Status)
+				ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+			else
+				ShowRecoverConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await _hotKeysContext.DisposeAsync();
+	}
 }
