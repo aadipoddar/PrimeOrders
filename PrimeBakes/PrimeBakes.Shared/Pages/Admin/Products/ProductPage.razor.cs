@@ -319,12 +319,15 @@ public partial class ProductPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
+            StateHasChanged();
 
             if (!await ValidateForm())
             {
                 _isProcessing = false;
                 return;
             }
+
+            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             if (_product.Id == 0)
                 _product.Code = await GenerateCodes.GenerateProductCode();
@@ -373,6 +376,7 @@ public partial class ProductPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to Excel...", "success");
 
             // Enrich data with category and tax names
             var enrichedData = _products.Select(p => new
@@ -418,6 +422,7 @@ public partial class ProductPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to PDF...", "success");
 
             // Enrich data with category and tax names
             var enrichedData = _products.Select(p => new

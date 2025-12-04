@@ -743,6 +743,8 @@ public partial class FinancialAccounting : IAsyncDisposable
 				return;
 			}
 
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+
 			_accounting.Status = true;
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
 			_accounting.TransactionDateTime = DateOnly.FromDateTime(_accounting.TransactionDateTime).ToDateTime(new TimeOnly(currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second));

@@ -253,6 +253,7 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -293,6 +294,7 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -369,6 +371,7 @@ public partial class PurchaseReturnItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
 			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);

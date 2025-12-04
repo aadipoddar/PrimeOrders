@@ -284,12 +284,15 @@ public partial class LocationPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
 
 			if (!await ValidateForm())
 			{
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			var isNewLocation = _location.Id == 0;
 			_location.Id = await LocationData.InsertLocation(_location);
@@ -423,6 +426,7 @@ public partial class LocationPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			// Call the Excel export utility
 			var stream = await LocationExcelExport.ExportLocation(_locations);
@@ -455,6 +459,7 @@ public partial class LocationPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Call the PDF export utility
 			var stream = await LocationPDFExport.ExportLocation(_locations);

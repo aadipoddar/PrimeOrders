@@ -269,6 +269,7 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			// Convert DateTime to DateOnly for Excel export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
@@ -313,6 +314,7 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Convert DateTime to DateOnly for PDF export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
@@ -392,6 +394,7 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
 			var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
@@ -468,6 +471,8 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
+			await ShowToast("Processing", "Deleting transaction...", "success");
+
 			var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, _deleteTransactionId);
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchaseReturn.FinancialYearId);
 			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
@@ -519,6 +524,8 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
+
+			await ShowToast("Processing", "Recovering transaction...", "success");
 
 			var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, _recoverTransactionId);
 

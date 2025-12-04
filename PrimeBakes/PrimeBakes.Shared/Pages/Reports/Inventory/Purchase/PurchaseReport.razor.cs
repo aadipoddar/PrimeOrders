@@ -335,6 +335,7 @@ public partial class PurchaseReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -374,6 +375,7 @@ public partial class PurchaseReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -459,6 +461,7 @@ public partial class PurchaseReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
 			bool isPurchaseReturn = transactionId < 0;
 			int actualId = Math.Abs(transactionId);
@@ -544,6 +547,8 @@ public partial class PurchaseReport : IAsyncDisposable
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
 
+			await ShowToast("Processing", "Deleting transaction...", "success");
+
 			if (_deleteTransactionId < 0)
 				await PurchaseReturnData.DeletePurchaseReturn(Math.Abs(_deleteTransactionId));
 			else
@@ -600,6 +605,8 @@ public partial class PurchaseReport : IAsyncDisposable
 
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
+
+			await ShowToast("Processing", "Recovering transaction...", "success");
 
 			if (_recoverTransactionId == 0)
 			{

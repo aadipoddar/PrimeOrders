@@ -843,7 +843,6 @@ public partial class StockTransferPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await SaveTransactionFile(true);
 
@@ -852,6 +851,8 @@ public partial class StockTransferPage : IAsyncDisposable
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			_stockTransfer.Status = true;
 			var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -902,6 +903,8 @@ public partial class StockTransferPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 			var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(Id.Value);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");

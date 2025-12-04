@@ -395,6 +395,7 @@ public partial class OrderReport : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
             var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(orderId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
@@ -428,7 +429,7 @@ public partial class OrderReport : IAsyncDisposable
         if (_isProcessing)
             return;
 
-        try
+		try
         {
             _isDeleteDialogVisible = false;
             _isProcessing = true;
@@ -436,6 +437,8 @@ public partial class OrderReport : IAsyncDisposable
 
             if (!_user.Admin || _user.LocationId > 1)
                 throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
+
+			await ShowToast("Processing", "Deleting transaction...", "success");
 
             var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _deleteTransactionId);
             if (order.SaleId is not null && order.SaleId > 0)
@@ -483,7 +486,7 @@ public partial class OrderReport : IAsyncDisposable
         if (_isProcessing)
             return;
 
-        try
+		try
         {
             _isRecoverDialogVisible = false;
             _isProcessing = true;
@@ -491,6 +494,8 @@ public partial class OrderReport : IAsyncDisposable
 
             if (!_user.Admin || _user.LocationId > 1)
                 throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
+
+			await ShowToast("Processing", "Recovering transaction...", "success");
 
             var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _recoverTransactionId);
             if (order is null)

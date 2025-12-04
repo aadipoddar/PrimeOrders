@@ -222,6 +222,8 @@ public partial class RecipePage
 
         try
         {
+            _isProcessing = true;
+            StateHasChanged();
 
             if (_selectedProduct is null || _selectedProduct.Id == 0)
             {
@@ -234,6 +236,8 @@ public partial class RecipePage
                 await ShowToast("No Raw Materials Added", "Please add at least one raw material to the recipe", "error");
                 return;
             }
+
+            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             await RecipeData.SaveRecipe(new()
             {

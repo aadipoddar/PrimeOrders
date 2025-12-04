@@ -235,6 +235,7 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -274,6 +275,7 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -396,6 +398,7 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
 			if (type.Equals("purchase", StringComparison.CurrentCultureIgnoreCase))
 			{
@@ -470,6 +473,8 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
+
+			await ShowToast("Processing", "Deleting transaction...", "success");
 
 			var adjustment = _stockDetails.FirstOrDefault(x => x.Id == _deleteAdjustmentId);
 			if (adjustment is null && !adjustment.Type.Equals("adjustment", StringComparison.CurrentCultureIgnoreCase))

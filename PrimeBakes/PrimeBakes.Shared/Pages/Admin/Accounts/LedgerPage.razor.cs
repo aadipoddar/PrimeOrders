@@ -331,12 +331,15 @@ public partial class LedgerPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
 
 			if (!await ValidateForm())
 			{
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			if (_ledger.Id == 0)
 				_ledger.Code = await GenerateCodes.GenerateLedgerCode();
@@ -367,6 +370,7 @@ public partial class LedgerPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			// Call the Excel export utility
 			var stream = await LedgerExcelExport.ExportLedger(_ledgers);
@@ -399,6 +403,7 @@ public partial class LedgerPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Call the PDF export utility
 			var stream = await LedgerPDFExport.ExportLedger(_ledgers);

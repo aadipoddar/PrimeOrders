@@ -305,12 +305,15 @@ public partial class CompanyPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
 
 			if (!await ValidateForm())
 			{
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await CompanyData.InsertCompany(_company);
 
@@ -338,6 +341,7 @@ public partial class CompanyPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			// Call the Excel export utility
 			var stream = await CompanyExcelExport.ExportCompany(_companies);
@@ -370,6 +374,7 @@ public partial class CompanyPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Call the PDF export utility
 			var stream = await CompanyPDFExport.ExportCompany(_companies);

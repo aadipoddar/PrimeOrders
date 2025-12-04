@@ -314,6 +314,7 @@ public partial class ProductLocationPage : IAsyncDisposable
     {
         _isProcessing = true;
         StateHasChanged();
+        await ShowToast("Processing", "Exporting to Excel...", "success");
 
         try
         {
@@ -348,6 +349,7 @@ public partial class ProductLocationPage : IAsyncDisposable
     {
         _isProcessing = true;
         StateHasChanged();
+        await ShowToast("Processing", "Exporting to PDF...", "success");
 
         try
         {

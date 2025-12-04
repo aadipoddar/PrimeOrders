@@ -1,0 +1,101 @@
+@using Syncfusion.Blazor.Notifications
+
+<SfToast @ref="_sfToast" Timeout="5000">
+    <ToastPosition X="Right" Y="Top" />
+    <ToastShowAnimationSettings Effect="ToastEffect.SlideLeftIn" />
+    <ToastHideAnimationSettings Effect="ToastEffect.SlideRightOut" />
+</SfToast>
+
+<style>
+    /* Toast Success Styles */
+    ::deep .e-toast-container .e-toast.e-toast-success {
+        background-color: #10b981 !important;
+        border-left: 4px solid #047857 !important;
+    }
+
+        ::deep .e-toast-container .e-toast.e-toast-success .e-toast-message .e-toast-title {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-success .e-toast-message .e-toast-content {
+            color: #ecfdf5 !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-success .e-toast-close-icon {
+            color: #ffffff !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-success .e-toast-progress {
+            background-color: #047857 !important;
+        }
+
+    /* Toast Error/Danger Styles */
+    ::deep .e-toast-container .e-toast.e-toast-danger {
+        background-color: #ef4444 !important;
+        border-left: 4px solid #b91c1c !important;
+    }
+
+        ::deep .e-toast-container .e-toast.e-toast-danger .e-toast-message .e-toast-title {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-danger .e-toast-message .e-toast-content {
+            color: #fef2f2 !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-danger .e-toast-close-icon {
+            color: #ffffff !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-danger .e-toast-progress {
+            background-color: #b91c1c !important;
+        }
+
+    /* Toast Warning Styles */
+    ::deep .e-toast-container .e-toast.e-toast-warning {
+        background-color: #f59e0b !important;
+        border-left: 4px solid #d97706 !important;
+    }
+
+        ::deep .e-toast-container .e-toast.e-toast-warning .e-toast-message .e-toast-title {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-warning .e-toast-message .e-toast-content {
+            color: #fffbeb !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-warning .e-toast-close-icon {
+            color: #ffffff !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-warning .e-toast-progress {
+            background-color: #d97706 !important;
+        }
+
+    /* Toast Info Styles */
+    ::deep .e-toast-container .e-toast.e-toast-info {
+        background-color: #3b82f6 !important;
+        border-left: 4px solid #2563eb !important;
+    }
+
+        ::deep .e-toast-container .e-toast.e-toast-info .e-toast-message .e-toast-title {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-info .e-toast-message .e-toast-content {
+            color: #eff6ff !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-info .e-toast-close-icon {
+            color: #ffffff !important;
+        }
+
+        ::deep .e-toast-container .e-toast.e-toast-info .e-toast-progress {
+            background-color: #2563eb !important;
+        }
+</style>

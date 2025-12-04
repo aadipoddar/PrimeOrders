@@ -147,6 +147,8 @@ public partial class OrderMobileCartPage
         try
         {
             _isProcessing = true;
+            StateHasChanged();
+            await ShowToast("Processing", "Saving transaction...", "success");
 
             await SaveOrderFile();
 

@@ -670,6 +670,8 @@ public partial class OrderPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
+            StateHasChanged();
+            await ShowToast("Processing", "Saving transaction...", "success");
 
             await SaveOrderFile();
 
@@ -728,6 +730,8 @@ public partial class OrderPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 			var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(Id.Value);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");

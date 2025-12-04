@@ -266,6 +266,7 @@ public partial class KitchenProductionReport
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to Excel...", "success");
 
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -306,6 +307,7 @@ public partial class KitchenProductionReport
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to PDF...", "success");
 
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -381,6 +383,7 @@ public partial class KitchenProductionReport
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Generating invoice...", "success");
 
             var (pdfStream, fileName) = await KitchenProductionData.GenerateAndDownloadInvoice(transactionId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
@@ -423,6 +426,8 @@ public partial class KitchenProductionReport
 
             if (!_user.Admin)
                 throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
+
+            await ShowToast("Processing", "Deleting transaction...", "success");
 
             await KitchenProductionData.DeleteKitchenProduction(_deleteTransactionId);
 
@@ -472,6 +477,8 @@ public partial class KitchenProductionReport
 
             if (!_user.Admin)
                 throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
+
+            await ShowToast("Processing", "Recovering transaction...", "success");
 
             if (_recoverTransactionId == 0)
             {

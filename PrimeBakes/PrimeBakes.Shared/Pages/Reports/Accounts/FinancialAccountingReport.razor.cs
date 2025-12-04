@@ -267,6 +267,7 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -309,6 +310,7 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -386,6 +388,7 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
 			var (pdfStream, fileName) = await AccountingData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
@@ -428,6 +431,8 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to delete this transaction.");
+
+			await ShowToast("Processing", "Deleting transaction...", "success");
 
 			await AccountingData.DeleteAccounting(_deleteTransactionId);
 			
@@ -480,6 +485,8 @@ public partial class FinancialAccountingReport : IAsyncDisposable
 
 			if (!_user.Admin)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
+
+			await ShowToast("Processing", "Recovering transaction...", "success");
 
 			var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, _recoverTransactionId);
 			if (accounting is null)

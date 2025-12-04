@@ -243,12 +243,15 @@ public partial class StateUTPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
+            StateHasChanged();
 
             if (!await ValidateForm())
             {
                 _isProcessing = false;
                 return;
             }
+
+            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             await StateUTData.InsertStateUT(_stateUT);
 
@@ -276,6 +279,7 @@ public partial class StateUTPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to Excel...", "success");
 
             // Call the Excel export utility
             var stream = await StateUTExcelExport.ExportStateUT(_stateUTs);
@@ -308,6 +312,7 @@ public partial class StateUTPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to PDF...", "success");
 
             // Call the PDF export utility
             var stream = await StateUTPDFExport.ExportStateUT(_stateUTs);

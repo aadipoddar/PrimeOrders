@@ -384,7 +384,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-			await ShowToast("Saving Transaction", "Please wait while the transaction is being saved...", "success");
+            StateHasChanged();
 
 			await SaveTransactionFile();
 
@@ -393,6 +393,8 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
                 _isProcessing = false;
                 return;
             }
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             await RawMaterialStockData.SaveRawMaterialStockAdjustment(_transactionDateTime, _cart);
             await DeleteLocalFiles();

@@ -299,12 +299,15 @@ public partial class UserPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
 
 			if (!await ValidateForm())
 			{
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await UserData.InsertUser(_user);
 
@@ -332,6 +335,7 @@ public partial class UserPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			// Call the Excel export utility
 			var stream = await UserExcelExport.ExportUser(_users);
@@ -364,6 +368,7 @@ public partial class UserPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Call the PDF export utility
 			var stream = await UserPDFExport.ExportUser(_users);

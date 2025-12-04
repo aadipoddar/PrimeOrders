@@ -1001,7 +1001,6 @@ public partial class SaleReturnPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await SaveTransactionFile(true);
 
@@ -1010,6 +1009,8 @@ public partial class SaleReturnPage : IAsyncDisposable
                 _isProcessing = false;
                 return;
             }
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             _saleReturn.Status = true;
             var currentDateTime = await CommonData.LoadCurrentDateTime();
@@ -1060,6 +1061,8 @@ public partial class SaleReturnPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 			var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(Id.Value);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			await ShowToast("Invoice Downloaded", "The invoice has been downloaded successfully.", "success");

@@ -329,12 +329,15 @@ public partial class RawMaterialPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
+            StateHasChanged();
 
             if (!await ValidateForm())
             {
                 _isProcessing = false;
                 return;
             }
+
+            await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
             if (_rawMaterial.Id == 0)
                 _rawMaterial.Code = await GenerateCodes.GenerateRawMaterialCode();
@@ -365,6 +368,7 @@ public partial class RawMaterialPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to Excel...", "success");
 
             // Enrich data with category and tax names
             var enrichedData = _rawMaterials.Select(rm => new
@@ -411,6 +415,7 @@ public partial class RawMaterialPage : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await ShowToast("Processing", "Exporting to PDF...", "success");
 
             // Enrich data with category and tax names
             var enrichedData = _rawMaterials.Select(rm => new

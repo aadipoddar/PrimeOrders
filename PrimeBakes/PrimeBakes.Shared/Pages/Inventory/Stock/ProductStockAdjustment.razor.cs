@@ -428,7 +428,7 @@ public partial class ProductStockAdjustment : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			await ShowToast("Saving Transaction", "Please wait while the transaction is being saved...", "success");
+			StateHasChanged();
 
 			await SaveTransactionFile();
 
@@ -437,6 +437,8 @@ public partial class ProductStockAdjustment : IAsyncDisposable
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await ProductStockData.SaveProductStockAdjustment(_transactionDateTime, _selectedLocation.Id, _cart);
 			await DeleteLocalFiles();

@@ -431,6 +431,8 @@ public partial class SettingsPage : IAsyncDisposable
 				return;
 			}
 
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
+
 			// Save all settings
 			var settings = await CommonData.LoadTableData<SettingsModel>(TableNames.Settings);
 
@@ -478,7 +480,7 @@ public partial class SettingsPage : IAsyncDisposable
 		}
 	}
 
-	private async Task UpdateSetting(string key, string value, string description)
+	private static async Task UpdateSetting(string key, string value, string description)
 	{
 		var setting = new SettingsModel
 		{
@@ -510,6 +512,8 @@ public partial class SettingsPage : IAsyncDisposable
 		{
 			_isResetDialogVisible = false;
 			_isProcessing = true;
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await SettingsData.ResetSettings();
 

@@ -267,12 +267,15 @@ public partial class VoucherPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
+			StateHasChanged();
 
 			if (!await ValidateForm())
 			{
 				_isProcessing = false;
 				return;
 			}
+
+			await ShowToast("Processing Transaction", "Please wait while the transaction is being saved...", "success");
 
 			await VoucherData.InsertVoucher(_voucher);
 
@@ -300,6 +303,7 @@ public partial class VoucherPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			// Call the Excel export utility
 			var stream = await VoucherExcelExport.ExportVoucher(_vouchers);
@@ -332,6 +336,7 @@ public partial class VoucherPage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Call the PDF export utility
 			var stream = await VoucherPDFExport.ExportVoucher(_vouchers);

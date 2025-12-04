@@ -302,6 +302,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to Excel...", "success");
 
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -344,6 +345,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Exporting to PDF...", "success");
 
 			// Convert DateTime to DateOnly for PDF export
 			DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
@@ -422,6 +424,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
+			await ShowToast("Processing", "Generating invoice...", "success");
 
 			var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(transactionId);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
@@ -464,6 +467,8 @@ public partial class SaleReturnReport : IAsyncDisposable
 
 			if (!_user.Admin || _user.LocationId > 1)
 				throw new UnauthorizedAccessException("You do not have permission to delete this sale return transaction.");
+
+			await ShowToast("Processing", "Deleting transaction...", "success");
 
 			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, _deleteTransactionId);
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, saleReturn.FinancialYearId);
@@ -519,6 +524,8 @@ public partial class SaleReturnReport : IAsyncDisposable
 
 			if (!_user.Admin || _user.LocationId > 1)
 				throw new UnauthorizedAccessException("You do not have permission to recover this transaction.");
+
+			await ShowToast("Processing", "Recovering transaction...", "success");
 
 			var saleReturn = await CommonData.LoadTableDataById<SaleReturnModel>(TableNames.SaleReturn, _recoverTransactionId);
 
