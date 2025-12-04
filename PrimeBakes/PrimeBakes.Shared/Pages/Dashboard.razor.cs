@@ -60,7 +60,9 @@ public partial class Dashboard : IDisposable
             InvokeAsync(StateHasChanged);
         });
 
-        await UpdateService.UpdateAppAsync("aadipoddar", "PrimeBakes", "com.aadisoft.primebakes", progress);
+        // Use appropriate file name based on platform
+        var setupFileName = Platform.Contains("Windows") ? "PrimeBakesSetup" : "com.aadisoft.primebakes";
+        await UpdateService.UpdateAppAsync("aadipoddar", "PrimeBakes", setupFileName, progress);
 
         _isUpdating = false;
         StateHasChanged();
@@ -78,7 +80,10 @@ public partial class Dashboard : IDisposable
 
         try
         {
-            if (Factor == "Phone" && Platform.Contains("Android"))
+            // Check for updates on Android Phone or Windows Desktop
+            var shouldCheckUpdate = (Factor == "Phone" && Platform.Contains("Android")) || Platform.Contains("Windows");
+            
+            if (shouldCheckUpdate)
             {
                 var hasUpdate = await UpdateService.CheckForUpdatesAsync("aadipoddar", "PrimeBakes", AppVersion);
                 if (hasUpdate)
