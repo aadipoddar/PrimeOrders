@@ -58,7 +58,7 @@ public static class PurchaseData
 		}
 		catch (Exception ex)
 		{
-			throw new InvalidOperationException("Failed to generate and download invoice.", ex);
+			throw new InvalidOperationException("Failed to generate and download invoice." + ex.Message);
 		}
 	}
 
@@ -98,7 +98,7 @@ public static class PurchaseData
 		}
 		catch (Exception ex)
 		{
-			throw new InvalidOperationException("Failed to generate and download Excel invoice.", ex);
+			throw new InvalidOperationException("Failed to generate and download Excel invoice." + ex.Message);
 		}
 	}
 
