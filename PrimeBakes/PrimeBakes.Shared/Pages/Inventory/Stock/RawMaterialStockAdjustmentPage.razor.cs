@@ -11,8 +11,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
-using PrimeBakes.Shared.Components;
-
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;

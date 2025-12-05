@@ -10,7 +10,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Order;
 
-using PrimeBakes.Shared.Components;
 using Syncfusion.Blazor.Grids;
 
 namespace PrimeBakes.Shared.Pages.Reports.Sales.Order;
@@ -18,6 +17,8 @@ namespace PrimeBakes.Shared.Pages.Reports.Sales.Order;
 public partial class OrderItemReport : IAsyncDisposable
 {
 	private HotKeysContext _hotKeysContext;
+	private PeriodicTimer _autoRefreshTimer;
+	private CancellationTokenSource _autoRefreshCts;
 
 	private UserModel _user;
 
@@ -72,6 +73,7 @@ public partial class OrderItemReport : IAsyncDisposable
         await LoadLocations();
         await LoadCompanies();
         await LoadTransactionOverviews();
+        await StartAutoRefresh();
     }
 
     private async Task LoadDates()
@@ -518,8 +520,42 @@ public partial class OrderItemReport : IAsyncDisposable
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
 
+	private async Task StartAutoRefresh()
+	{
+		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
+		var refreshMinutes = int.TryParse(timerSetting?.Value, out var minutes) ? minutes : 5;
+
+		_autoRefreshCts = new CancellationTokenSource();
+		_autoRefreshTimer = new PeriodicTimer(TimeSpan.FromMinutes(refreshMinutes));
+		_ = AutoRefreshLoop(_autoRefreshCts.Token);
+	}
+
+	private async Task AutoRefreshLoop(CancellationToken cancellationToken)
+	{
+		try
+		{
+			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
+				await InvokeAsync(async () =>
+				{
+					await LoadTransactionOverviews();
+				});
+		}
+		catch (OperationCanceledException)
+		{
+			// Timer was cancelled, expected on dispose
+		}
+	}
+
 	public async ValueTask DisposeAsync()
 	{
+		if (_autoRefreshCts is not null)
+		{
+			await _autoRefreshCts.CancelAsync();
+			_autoRefreshCts.Dispose();
+		}
+
+		_autoRefreshTimer?.Dispose();
+
 		if (_hotKeysContext is not null)
 			await _hotKeysContext.DisposeAsync();
 	}

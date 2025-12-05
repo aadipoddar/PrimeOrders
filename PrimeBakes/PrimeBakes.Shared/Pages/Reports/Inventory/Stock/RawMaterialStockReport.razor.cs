@@ -14,8 +14,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
-using PrimeBakes.Shared.Components;
-
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
 
@@ -24,6 +22,8 @@ namespace PrimeBakes.Shared.Pages.Reports.Inventory.Stock;
 public partial class RawMaterialStockReport : IAsyncDisposable
 {
 	private HotKeysContext _hotKeysContext;
+	private PeriodicTimer _autoRefreshTimer;
+	private CancellationTokenSource _autoRefreshCts;
 
 	private UserModel _user;
 
@@ -77,6 +77,7 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 
 		await LoadDates();
 		await LoadStockData();
+		await StartAutoRefresh();
 	}
 
 	private async Task LoadDates()
@@ -526,8 +527,42 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 		StateHasChanged();
 	}
 
+	private async Task StartAutoRefresh()
+	{
+		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
+		var refreshMinutes = int.TryParse(timerSetting?.Value, out var minutes) ? minutes : 5;
+
+		_autoRefreshCts = new CancellationTokenSource();
+		_autoRefreshTimer = new PeriodicTimer(TimeSpan.FromMinutes(refreshMinutes));
+		_ = AutoRefreshLoop(_autoRefreshCts.Token);
+	}
+
+	private async Task AutoRefreshLoop(CancellationToken cancellationToken)
+	{
+		try
+		{
+			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
+				await InvokeAsync(async () =>
+				{
+					await LoadStockData();
+				});
+		}
+		catch (OperationCanceledException)
+		{
+			// Timer was cancelled, expected on dispose
+		}
+	}
+
 	public async ValueTask DisposeAsync()
 	{
+		if (_autoRefreshCts is not null)
+		{
+			await _autoRefreshCts.CancelAsync();
+			_autoRefreshCts.Dispose();
+		}
+
+		_autoRefreshTimer?.Dispose();
+
 		if (_hotKeysContext is not null)
 			await _hotKeysContext.DisposeAsync();
 	}

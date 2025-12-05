@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using PrimeBakes.Shared.Components;
-
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Sale;
@@ -22,6 +20,8 @@ namespace PrimeBakes.Shared.Pages.Reports.Sales.Sale;
 public partial class SaleReport : IAsyncDisposable
 {
 	private HotKeysContext _hotKeysContext;
+	private PeriodicTimer _autoRefreshTimer;
+	private CancellationTokenSource _autoRefreshCts;
 
 	private UserModel _user;
 
@@ -91,6 +91,7 @@ public partial class SaleReport : IAsyncDisposable
 		await LoadCompanies();
 		await LoadParties();
 		await LoadTransactionOverviews();
+		await StartAutoRefresh();
 	}
 
 	private async Task LoadDates()
@@ -875,8 +876,42 @@ public partial class SaleReport : IAsyncDisposable
 		StateHasChanged();
 	}
 
+	private async Task StartAutoRefresh()
+	{
+		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
+		var refreshMinutes = int.TryParse(timerSetting?.Value, out var minutes) ? minutes : 5;
+
+		_autoRefreshCts = new CancellationTokenSource();
+		_autoRefreshTimer = new PeriodicTimer(TimeSpan.FromMinutes(refreshMinutes));
+		_ = AutoRefreshLoop(_autoRefreshCts.Token);
+	}
+
+	private async Task AutoRefreshLoop(CancellationToken cancellationToken)
+	{
+		try
+		{
+			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
+				await InvokeAsync(async () =>
+				{
+					await LoadTransactionOverviews();
+				});
+		}
+		catch (OperationCanceledException)
+		{
+			// Timer was cancelled, expected on dispose
+		}
+	}
+
 	public async ValueTask DisposeAsync()
 	{
+		if (_autoRefreshCts is not null)
+		{
+			await _autoRefreshCts.CancelAsync();
+			_autoRefreshCts.Dispose();
+		}
+
+		_autoRefreshTimer?.Dispose();
+
 		if (_hotKeysContext is not null)
 			await _hotKeysContext.DisposeAsync();
 	}

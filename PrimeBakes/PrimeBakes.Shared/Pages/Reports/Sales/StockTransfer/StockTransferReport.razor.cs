@@ -10,8 +10,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
-using PrimeBakes.Shared.Components;
-
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
 
@@ -20,6 +18,8 @@ namespace PrimeBakes.Shared.Pages.Reports.Sales.StockTransfer;
 public partial class StockTransferReport : IAsyncDisposable
 {
 	private HotKeysContext _hotKeysContext;
+	private PeriodicTimer _autoRefreshTimer;
+	private CancellationTokenSource _autoRefreshCts;
 
 	private UserModel _user;
 
@@ -83,6 +83,7 @@ public partial class StockTransferReport : IAsyncDisposable
 		await LoadLocations();
 		await LoadCompanies();
 		await LoadTransactionOverviews();
+		await StartAutoRefresh();
 	}
 
 	private async Task LoadDates()

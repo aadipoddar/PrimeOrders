@@ -462,6 +462,33 @@ else
             </div>
         </div>
 
+        <!-- Report Settings Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <h2 class="section-title">Report Settings</h2>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-quad">
+                    <!-- Auto Refresh Report Timer -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            Auto Refresh Timer (Minutes)
+                        </label>
+                        <SfNumericTextBox @bind-Value="_autoRefreshReportTimer" TValue="int" Min="1" Max="60"
+                            Placeholder="e.g., 5" FloatLabelType="FloatLabelType.Never" CssClass="custom-numeric" />
+                        <p class="field-description">Interval in minutes for automatic report data refresh</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Reset Confirmation Dialog -->

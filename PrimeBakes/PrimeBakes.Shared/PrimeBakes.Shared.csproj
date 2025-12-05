@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="PrimeBakes.Shared.Components" />
     <Using Include="PrimeBakes.Shared.Services" />
     <Using Include="Toolbelt.Blazor.HotKeys2" />
   </ItemGroup>

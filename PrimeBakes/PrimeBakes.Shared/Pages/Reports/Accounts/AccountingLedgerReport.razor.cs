@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-using PrimeBakes.Shared.Components;
-
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -20,6 +18,8 @@ namespace PrimeBakes.Shared.Pages.Reports.Accounts;
 public partial class AccountingLedgerReport : IAsyncDisposable
 {
 	private HotKeysContext _hotKeysContext;
+	private PeriodicTimer _autoRefreshTimer;
+	private CancellationTokenSource _autoRefreshCts;
 
 	private UserModel _user;
 
@@ -72,6 +72,7 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 		await LoadCompanies();
 		await LoadLedgers();
 		await LoadTransactionOverviews();
+		await StartAutoRefresh();
 	}
 
 	private async Task LoadDates()
@@ -455,8 +456,42 @@ public partial class AccountingLedgerReport : IAsyncDisposable
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.AccountsDashboard);
 
+	private async Task StartAutoRefresh()
+	{
+		var timerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
+		var refreshMinutes = int.TryParse(timerSetting?.Value, out var minutes) ? minutes : 5;
+
+		_autoRefreshCts = new CancellationTokenSource();
+		_autoRefreshTimer = new PeriodicTimer(TimeSpan.FromMinutes(refreshMinutes));
+		_ = AutoRefreshLoop(_autoRefreshCts.Token);
+	}
+
+	private async Task AutoRefreshLoop(CancellationToken cancellationToken)
+	{
+		try
+		{
+			while (await _autoRefreshTimer.WaitForNextTickAsync(cancellationToken))
+				await InvokeAsync(async () =>
+				{
+					await LoadTransactionOverviews();
+				});
+		}
+		catch (OperationCanceledException)
+		{
+			// Timer was cancelled, expected on dispose
+		}
+	}
+
 	public async ValueTask DisposeAsync()
 	{
+		if (_autoRefreshCts is not null)
+		{
+			await _autoRefreshCts.CancelAsync();
+			_autoRefreshCts.Dispose();
+		}
+
+		_autoRefreshTimer?.Dispose();
+
 		if (_hotKeysContext is not null)
 			await _hotKeysContext.DisposeAsync();
 	}

@@ -6,8 +6,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 using PrimeBakesLibrary.Models.Sales.Product;
 
-using PrimeBakes.Shared.Components;
-
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 

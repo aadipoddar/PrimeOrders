@@ -1,4 +1,3 @@
-using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -79,6 +78,9 @@ public partial class SettingsPage : IAsyncDisposable
 	// Purchase Behavior
 	private bool _updateItemMasterRateOnPurchase = false;
 	private bool _updateItemMasterUOMOnPurchase = false;
+
+	// Report Settings
+	private int _autoRefreshReportTimer = 5;
 
 	#endregion
 
@@ -213,6 +215,10 @@ public partial class SettingsPage : IAsyncDisposable
 
 		var updateUOMSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.UpdateItemMasterUOMOnPurchase);
 		_updateItemMasterUOMOnPurchase = bool.TryParse(updateUOMSetting?.Value, out var updateUOM) && updateUOM;
+
+		// Report Settings
+		var autoRefreshTimerSetting = await SettingsData.LoadSettingsByKey(SettingsKeys.AutoRefreshReportTimer);
+		_autoRefreshReportTimer = int.TryParse(autoRefreshTimerSetting?.Value, out var timerMinutes) ? timerMinutes : 5;
 	}
 
 	private async Task LoadCompanies()
@@ -465,6 +471,7 @@ public partial class SettingsPage : IAsyncDisposable
 			await UpdateSetting(SettingsKeys.GSTLedgerId, _gstLedgerId, settings.FirstOrDefault(_ => _.Key == SettingsKeys.GSTLedgerId).Description);
 			await UpdateSetting(SettingsKeys.UpdateItemMasterRateOnPurchase, _updateItemMasterRateOnPurchase.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.UpdateItemMasterRateOnPurchase).Description);
 			await UpdateSetting(SettingsKeys.UpdateItemMasterUOMOnPurchase, _updateItemMasterUOMOnPurchase.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.UpdateItemMasterUOMOnPurchase).Description);
+			await UpdateSetting(SettingsKeys.AutoRefreshReportTimer, _autoRefreshReportTimer.ToString(), settings.FirstOrDefault(_ => _.Key == SettingsKeys.AutoRefreshReportTimer).Description);
 
 			await _toastNotification.ShowAsync("Saved", "Settings saved successfully.", ToastType.Success);
 		}

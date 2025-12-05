@@ -15,7 +15,6 @@ using PrimeBakesLibrary.Models.Sales.Sale;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
-using PrimeBakes.Shared.Components;
 
 namespace PrimeBakes.Shared.Pages.Sales.Sale;
 
