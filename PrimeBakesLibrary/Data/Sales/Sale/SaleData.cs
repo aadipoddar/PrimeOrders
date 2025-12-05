@@ -82,6 +82,66 @@ public static class SaleData
 		}
 	}
 
+	public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int saleId)
+	{
+		try
+		{
+			// Load saved sale details
+			var transaction = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId) ??
+				throw new InvalidOperationException("Transaction not found.");
+
+			// Load sale details from database
+			var transactionDetails = await CommonData.LoadTableDataByMasterId<SaleDetailModel>(TableNames.SaleDetail, saleId);
+			if (transactionDetails is null || transactionDetails.Count == 0)
+				throw new InvalidOperationException("No transaction details found for the transaction.");
+
+			// Load company, location, and party
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, transaction.LocationId);
+
+			// Try to load party (party can be null for cash sales)
+			LedgerModel party = null;
+			if (transaction.PartyId.HasValue && transaction.PartyId.Value > 0)
+				party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId.Value);
+
+			// Try to load customer (customer can be null)
+			CustomerModel customer = null;
+			if (transaction.CustomerId.HasValue && transaction.CustomerId.Value > 0)
+				customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, transaction.CustomerId.Value);
+
+			// Try to load order information if OrderId is present
+			OrderModel order = null;
+			if (transaction.OrderId.HasValue && transaction.OrderId.Value > 0)
+				order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, transaction.OrderId.Value);
+
+			if (company is null)
+				throw new InvalidOperationException("Company information is missing.");
+
+			// Generate invoice Excel
+			var excelStream = await SaleInvoiceExcelExport.ExportSaleInvoice(
+				transaction,
+				transactionDetails,
+				company,
+				party,
+				customer,
+				order?.TransactionNo,
+				order?.TransactionDateTime,
+				null, // logo path - uses default
+				"SALE INVOICE",
+				location?.Name // outlet
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"SALE_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+			return (excelStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException("Failed to generate and download Excel invoice.", ex);
+		}
+	}
+
 	public static async Task DeleteSale(int saleId)
 	{
 		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);

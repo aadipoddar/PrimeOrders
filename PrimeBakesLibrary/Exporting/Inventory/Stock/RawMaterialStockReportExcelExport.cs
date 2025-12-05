@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Inventory.Stock;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 namespace PrimeBakesLibrary.Exporting.Inventory.Stock;
 
@@ -24,7 +25,7 @@ public static class RawMaterialStockReportExcelExport
         IEnumerable<RawMaterialStockDetailsModel> stockDetailsData = null)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [ nameof(RawMaterialStockSummaryModel.RawMaterialId)] = new() { DisplayName = "Material ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
@@ -93,7 +94,7 @@ public static class RawMaterialStockReportExcelExport
 
         // If no details data provided, use the simple single-worksheet export
         if (stockDetailsData == null || !stockDetailsData.Any())
-            return await ExcelExportUtil.ExportToExcel(
+            return await ExcelReportExportUtil.ExportToExcel(
                 stockData,
                 "RAW MATERIAL STOCK REPORT",
                 "Stock Summary",
@@ -122,11 +123,11 @@ public static class RawMaterialStockReportExcelExport
         IEnumerable<RawMaterialStockDetailsModel> stockDetailsData,
         DateOnly? dateRangeStart,
         DateOnly? dateRangeEnd,
-        Dictionary<string, ExcelExportUtil.ColumnSetting> summaryColumnSettings,
+        Dictionary<string, ExcelReportExportUtil.ColumnSetting> summaryColumnSettings,
         List<string> summaryColumnOrder)
     {
         // Create the first worksheet with summary data
-        var summaryStream = await ExcelExportUtil.ExportToExcel(
+        var summaryStream = await ExcelReportExportUtil.ExportToExcel(
             stockData,
             "RAW MATERIAL STOCK REPORT",
             "Stock Summary",
@@ -137,7 +138,7 @@ public static class RawMaterialStockReportExcelExport
         );
 
         // Define column settings for details worksheet
-        var detailsColumnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var detailsColumnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(RawMaterialStockDetailsModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 10 },
@@ -170,7 +171,7 @@ public static class RawMaterialStockReportExcelExport
         };
 
         // Create the details worksheet
-        var detailsStream = await ExcelExportUtil.ExportToExcel(
+        var detailsStream = await ExcelReportExportUtil.ExportToExcel(
             stockDetailsData,
             "RAW MATERIAL STOCK DETAILS",
             "Transaction Details",

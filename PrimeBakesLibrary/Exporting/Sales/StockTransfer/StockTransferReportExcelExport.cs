@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Sales.StockTransfer;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
 namespace PrimeBakesLibrary.Exporting.Sales.StockTransfer;
 
@@ -14,7 +15,7 @@ public static class StockTransferReportExcelExport
         bool showToLocation = false,
         string toLocationName = null)
     {
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             [nameof(StockTransferOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
             [nameof(StockTransferOverviewModel.TransactionDateTime)] = new() { DisplayName = "Trans Date", Format = "dd-MMM-yyyy hh:mm", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter },
@@ -117,7 +118,7 @@ public static class StockTransferReportExcelExport
                 columnOrder.Insert(3, nameof(StockTransferOverviewModel.ToLocationName));
         }
 
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             data,
             "STOCK TRANSFER REPORT",
             "Stock Transfers",

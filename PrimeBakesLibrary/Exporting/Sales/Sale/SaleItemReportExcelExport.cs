@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Sales.Sale;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Sales.Sale;
 
 namespace PrimeBakesLibrary.Exporting.Sales.Sale;
 
@@ -25,7 +26,7 @@ public static class SaleItemReportExcelExport
         string locationName = null)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(SaleItemOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -134,7 +135,7 @@ public static class SaleItemReportExcelExport
             ];
 
         // Export using the generic utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             saleItemData,
             "SALE ITEM REPORT",
             "Sale Item Transactions",

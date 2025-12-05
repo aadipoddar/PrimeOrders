@@ -69,7 +69,8 @@ public partial class KitchenIssuePage : IAsyncDisposable
 			.Add(ModCode.Ctrl, Code.Enter, AddItemToCart, "Add item to cart", Exclude.None)
 			.Add(ModCode.Ctrl, Code.E, () => _sfItemAutoComplete.FocusAsync(), "Focus on item input", Exclude.None)
 			.Add(ModCode.Ctrl, Code.S, SaveTransaction, "Save the transaction", Exclude.None)
-			.Add(ModCode.Ctrl, Code.P, DownloadInvoice, "Download invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadPdfInvoice, "Download PDF invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.E, DownloadExcelInvoice, "Download Excel invoice", Exclude.None)
 			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistoryPage, "Open transaction history", Exclude.None)
 			.Add(ModCode.Ctrl, Code.I, NavigateToItemReport, "Open item report", Exclude.None)
 			.Add(ModCode.Ctrl, Code.N, ResetPage, "Reset the page", Exclude.None)
@@ -706,7 +707,7 @@ public partial class KitchenIssuePage : IAsyncDisposable
 			NavigationManager.NavigateTo(PageRouteNames.ReportKitchenIssueItem);
 	}
 
-	private async Task DownloadInvoice()
+	private async Task DownloadPdfInvoice()
 	{
 		if (!Id.HasValue || Id.Value <= 0)
 		{
@@ -721,10 +722,40 @@ public partial class KitchenIssuePage : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", "Generating PDF invoice...", ToastType.Info);
 			var (pdfStream, fileName) = await KitchenIssueData.GenerateAndDownloadInvoice(Id.Value);
 			await SaveAndViewService.SaveAndView(fileName, pdfStream);
-			await _toastNotification.ShowAsync("Invoice Downloaded", "The invoice has been downloaded successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Invoice Downloaded", "The PDF invoice has been downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("An Error Occurred While Downloading Invoice", ex.Message, ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+		}
+	}
+
+	private async Task DownloadExcelInvoice()
+	{
+		if (!Id.HasValue || Id.Value <= 0)
+		{
+			await _toastNotification.ShowAsync("No Transaction Selected", "Please save the transaction first before downloading the invoice.", ToastType.Warning);
+			return;
+		}
+
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating Excel invoice...", ToastType.Info);
+			var (excelStream, fileName) = await KitchenIssueData.GenerateAndDownloadExcelInvoice(Id.Value);
+			await SaveAndViewService.SaveAndView(fileName, excelStream);
+			await _toastNotification.ShowAsync("Invoice Downloaded", "The Excel invoice has been downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{

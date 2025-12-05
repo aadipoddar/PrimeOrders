@@ -71,7 +71,8 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
 			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
 			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
-			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemPdfInvoice, "Download Selected Transaction PDF Invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.E, DownloadSelectedCartItemExcelInvoice, "Download Selected Transaction Excel Invoice", Exclude.None)
 			.Add(Code.Delete, DeleteSelectedCartItem, "Delete Selected Transaction", Exclude.None);
 
 
@@ -378,16 +379,25 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 		}
 	}
 
-	private async Task DownloadSelectedCartItemInvoice()
+	private async Task DownloadSelectedCartItemPdfInvoice()
 	{
 		if (_sfStockDetailsGrid is null || _sfStockDetailsGrid.SelectedRecords is null || _sfStockDetailsGrid.SelectedRecords.Count == 0)
 			return;
 
 		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.Type, selectedCartItem.TransactionId.Value);
+		await DownloadPdfInvoice(selectedCartItem.Type, selectedCartItem.TransactionId.Value);
 	}
 
-	private async Task DownloadInvoice(string type, int transactionId)
+	private async Task DownloadSelectedCartItemExcelInvoice()
+	{
+		if (_sfStockDetailsGrid is null || _sfStockDetailsGrid.SelectedRecords is null || _sfStockDetailsGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfStockDetailsGrid.SelectedRecords.First();
+		await DownloadExcelInvoice(selectedCartItem.Type, selectedCartItem.TransactionId.Value);
+	}
+
+	private async Task DownloadPdfInvoice(string type, int transactionId)
 	{
 		if (_isProcessing)
 			return;
@@ -396,7 +406,7 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", "Generating PDF invoice...", ToastType.Info);
 
 			if (type.Equals("purchase", StringComparison.CurrentCultureIgnoreCase))
 			{
@@ -434,11 +444,71 @@ public partial class RawMaterialStockReport : IAsyncDisposable
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			await _toastNotification.ShowAsync("Success", "Invoice downloaded successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", "PDF invoice downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while downloading invoice: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"An error occurred while downloading PDF invoice: {ex.Message}", ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task DownloadExcelInvoice(string type, int transactionId)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating Excel invoice...", ToastType.Info);
+
+			if (type.Equals("purchase", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await PurchaseData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (type.Equals("purchasereturn", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await PurchaseReturnData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (type.Equals("sale", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await SaleData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (type.Equals("salereturn", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await SaleReturnData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (type.Equals("kitchenissue", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await KitchenIssueData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (type.Equals("kitchenproduction", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await KitchenProductionData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (type.Equals("stocktransfer", StringComparison.CurrentCultureIgnoreCase))
+			{
+				var (excelStream, fileName) = await StockTransferData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+
+			await _toastNotification.ShowAsync("Success", "Excel invoice downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error", $"An error occurred while downloading Excel invoice: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{

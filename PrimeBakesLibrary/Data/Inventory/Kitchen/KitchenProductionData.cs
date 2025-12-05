@@ -74,6 +74,63 @@ public static class KitchenProductionData
         }
     }
 
+    public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int kitchenProductionId)
+    {
+        try
+        {
+            // Load saved transaction details
+            var transaction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, kitchenProductionId) ??
+                throw new InvalidOperationException("Transaction not found.");
+
+            // Load transaction details from database
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<KitchenProductionDetailModel>(TableNames.KitchenProductionDetail, transaction.Id);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+                throw new InvalidOperationException("No transaction details found for the transaction.");
+
+            // Load company and kitchen
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var kitchen = await CommonData.LoadTableDataById<LocationModel>(TableNames.Kitchen, transaction.KitchenId);
+            if (company is null || kitchen is null)
+                throw new InvalidOperationException("Company or kitchen details not found.");
+
+            // Convert kitchen production details to cart items with product names
+            var products = await CommonData.LoadTableData<ProductModel>(TableNames.Product);
+            var cartItems = new List<KitchenProductionProductCartModel>();
+            foreach (var detail in transactionDetails)
+            {
+                var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
+                cartItems.Add(new KitchenProductionProductCartModel
+                {
+                    ProductId = detail.ProductId,
+                    ProductName = product?.Name ?? "Unknown Product",
+                    Quantity = detail.Quantity,
+                    Rate = detail.Rate,
+                    Total = detail.Total,
+                    Remarks = detail.Remarks
+                });
+            }
+
+            // Generate invoice Excel
+            var excelStream = await KitchenProductionInvoiceExcelExport.ExportKitchenProductionInvoiceWithItems(
+                    transaction,
+                    cartItems,
+                    company,
+                    kitchen,
+                    null,
+                    "KITCHEN PRODUCTION INVOICE"
+                );
+
+            // Generate file name
+            var currentDateTime = await CommonData.LoadCurrentDateTime();
+            string fileName = $"KITCHEN_PRODUCTION_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+            return (excelStream, fileName);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to generate and download Excel invoice.", ex);
+        }
+    }
+
     public static async Task DeleteKitchenProduction(int kitchenProductionId)
     {
         var kitchenProduction = await CommonData.LoadTableDataById<KitchenProductionModel>(TableNames.KitchenProduction, kitchenProductionId);

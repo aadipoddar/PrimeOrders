@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 
 namespace PrimeBakesLibrary.Exporting.Accounts.FinancialAccounting;
 
@@ -13,7 +14,7 @@ public static class TrialBalanceExcelExport
         string accountTypeName = null)
     {
         // Define column settings with proper formatting
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // ID fields - Center aligned
             [nameof(TrialBalanceModel.LedgerId)] = new() { DisplayName = "Ledger ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -71,7 +72,7 @@ public static class TrialBalanceExcelExport
             ];
 
         // Call the generic Excel export utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             trialBalanceData,
             "TRIAL BALANCE REPORT",
             "Trial Balance",

@@ -58,6 +58,46 @@ public static class PurchaseReturnData
         }
     }
 
+    public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int purchaseReturnId)
+    {
+        try
+        {
+            // Load saved purchase return details
+            var transaction = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId) ??
+                throw new InvalidOperationException("Transaction not found.");
+
+            // Load purchase return details from database
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<PurchaseReturnDetailModel>(TableNames.PurchaseReturnDetail, purchaseReturnId);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+                throw new InvalidOperationException("No transaction details found for the transaction.");
+
+            // Load company and party
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId);
+            if (company is null || party is null)
+                throw new InvalidOperationException("Invoice generation skipped - company or party not found.");
+
+            // Generate invoice Excel
+            var excelStream = await PurchaseReturnInvoiceExcelExport.ExportPurchaseReturnInvoice(
+                transaction,
+                transactionDetails,
+                company,
+                party,
+                null, // logo path - uses default
+                "PURCHASE RETURN INVOICE"
+            );
+
+            // Generate file name
+            var currentDateTime = await CommonData.LoadCurrentDateTime();
+            string fileName = $"PURCHASE_RETURN_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+            return (excelStream, fileName);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Excel invoice generation failed: {ex.Message}", ex);
+        }
+    }
+
     public static async Task DeletePurchaseReturn(int purchaseReturnId)
     {
         var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId);

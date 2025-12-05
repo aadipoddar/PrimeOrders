@@ -30,7 +30,17 @@ else
             </button>
             @if (Id.HasValue && Id.Value > 0)
             {
-                <button class="btn-icon btn-icon-pdf" @onclick="DownloadInvoice" title="Download Invoice (Ctrl + P)" disabled="@_isProcessing">
+                <button class="btn-icon btn-icon-excel" @onclick="DownloadExcelInvoice" title="Download Excel Invoice (Alt+E)" disabled="@_isProcessing">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                </button>
+                <button class="btn-icon btn-icon-pdf" @onclick="DownloadPdfInvoice" title="Download PDF Invoice (Alt+P)" disabled="@_isProcessing">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -169,7 +179,7 @@ else
                                     <SfTextBox Value="@_sale.TransactionNo" Readonly="true" Placeholder="No Sale Linked"
                                                FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox readonly-field" />
                                     <div class="order-action-buttons">
-                                        <button class="btn-order-action" title="View Sale"
+                                        <button class="btn-order-action btn-order-action-view" title="View Sale"
                                                 @onclick="NavigateToSelectedSalePage">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -178,13 +188,26 @@ else
                                                 <circle cx="12" cy="12" r="3" />
                                             </svg>
                                         </button>
-                                        <button class="btn-order-action" title="Download Sale" @onclick="DownloadSelectedSale">
+                                        <button class="btn-order-action btn-order-action-excel" title="Download Excel Invoice" @onclick="DownloadSelectedSaleExcel">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                  stroke-linejoin="round">
-                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                <polyline points="7 10 12 15 17 10" />
-                                                <line x1="12" y1="15" x2="12" y2="3" />
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                <polyline points="14 2 14 8 20 8" />
+                                                <line x1="16" y1="13" x2="8" y2="13" />
+                                                <line x1="16" y1="17" x2="8" y2="17" />
+                                                <polyline points="10 9 9 9 8 9" />
+                                            </svg>
+                                        </button>
+                                        <button class="btn-order-action btn-order-action-pdf" title="Download PDF Invoice" @onclick="DownloadSelectedSalePdf">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                 stroke-linejoin="round">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                <polyline points="14 2 14 8 20 8" />
+                                                <line x1="16" y1="13" x2="8" y2="13" />
+                                                <line x1="16" y1="17" x2="8" y2="17" />
+                                                <line x1="10" y1="9" x2="8" y2="9" />
                                             </svg>
                                         </button>
                                     </div>
@@ -413,6 +436,39 @@ else
             cursor: not-allowed;
         }
 
+    .btn-order-action.btn-order-action-view {
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+        .btn-order-action.btn-order-action-view:hover:not(:disabled) {
+            background: #eff6ff;
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+    .btn-order-action.btn-order-action-excel {
+        color: #16a34a;
+        border-color: #16a34a;
+    }
+
+        .btn-order-action.btn-order-action-excel:hover:not(:disabled) {
+            background: #f0fdf4;
+            border-color: #15803d;
+            color: #15803d;
+        }
+
+    .btn-order-action.btn-order-action-pdf {
+        color: #dc2626;
+        border-color: #dc2626;
+    }
+
+        .btn-order-action.btn-order-action-pdf:hover:not(:disabled) {
+            background: #fef2f2;
+            border-color: #b91c1c;
+            color: #b91c1c;
+        }
+
     .btn-icon:hover {
         background: #f8fafc;
         border-color: #3b82f6;
@@ -432,6 +488,17 @@ else
             background: #ecfdf5;
             border-color: #059669;
             color: #059669;
+        }
+
+    .btn-icon-excel {
+        color: #16a34a;
+        border-color: #16a34a;
+    }
+
+        .btn-icon-excel:hover {
+            background: #f0fdf4;
+            border-color: #15803d;
+            color: #15803d;
         }
 
     .btn-icon-pdf {

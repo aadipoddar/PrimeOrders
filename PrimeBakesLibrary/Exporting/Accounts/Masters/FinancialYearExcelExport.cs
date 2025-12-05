@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Accounts.Masters;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Accounts.Masters;
 
 namespace PrimeBakesLibrary.Exporting.Accounts.Masters;
 
@@ -27,7 +28,7 @@ public static class FinancialYearExcelExport
         });
 
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // ID - Center aligned, no totals
             [nameof(FinancialYearModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -62,7 +63,7 @@ public static class FinancialYearExcelExport
 		];
 
         // Call the generic Excel export utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             enrichedData,
             "FINANCIAL YEAR",
             "Financial Year Data",

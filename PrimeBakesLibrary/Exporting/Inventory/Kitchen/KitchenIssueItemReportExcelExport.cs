@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Inventory.Kitchen;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 namespace PrimeBakesLibrary.Exporting.Inventory.Kitchen;
 
@@ -22,7 +23,7 @@ public static class KitchenIssueItemReportExcelExport
         bool showAllColumns = true)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(KitchenIssueItemOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -86,7 +87,7 @@ public static class KitchenIssueItemReportExcelExport
             ];
 
         // Export using the generic utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             kitchenIssueItemData,
             "KITCHEN ISSUE ITEM REPORT",
             "Kitchen Issue Item Transactions",

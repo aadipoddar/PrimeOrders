@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Sales.Product;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Sales.Product;
 
 namespace PrimeBakesLibrary.Exporting.Sales.Product;
 
@@ -28,7 +29,7 @@ public static class ProductLocationExcelExport
 			};
 		});
 
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
 		{
 			[nameof(ProductLocationModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
 			["Location"] = new() { DisplayName = "Location", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft, IncludeInTotal = false },
@@ -48,7 +49,7 @@ public static class ProductLocationExcelExport
 			nameof(ProductLocationModel.Status)
 		];
 
-		return await ExcelExportUtil.ExportToExcel(
+		return await ExcelReportExportUtil.ExportToExcel(
 			enrichedData,
 			"PRODUCT LOCATION MASTER",
 			"Product Location Data",

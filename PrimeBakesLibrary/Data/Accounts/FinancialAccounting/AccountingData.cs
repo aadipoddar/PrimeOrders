@@ -63,6 +63,50 @@ public static class AccountingData
         }
     }
 
+    public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int accountingId)
+    {
+        try
+        {
+            // Load saved accounting details
+            var transaction = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId) ??
+                throw new InvalidOperationException("Transaction not found.");
+
+            // Load accounting details from database
+            var transactionDetails = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, accountingId);
+            if (transactionDetails is null || transactionDetails.Count == 0)
+                throw new InvalidOperationException("No transaction details found for the transaction.");
+
+            // Load company and voucher
+            var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+            var voucher = await CommonData.LoadTableDataById<VoucherModel>(TableNames.Voucher, transaction.VoucherId);
+
+            if (company is null)
+                throw new InvalidOperationException("Invoice generation skipped - company not found.");
+
+            if (voucher is null)
+                throw new InvalidOperationException("Invoice generation skipped - voucher not found.");
+
+            // Generate invoice Excel
+            var excelStream = await AccountingInvoiceExcelExport.ExportAccountingInvoice(
+                transaction,
+                transactionDetails,
+                company,
+                voucher,
+                null,
+                $"{voucher.Name.ToUpper()} VOUCHER"
+            );
+
+            // Generate file name
+            var currentDateTime = await CommonData.LoadCurrentDateTime();
+            string fileName = $"ACCOUNTING_VOUCHER_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+            return (excelStream, fileName);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Excel invoice generation failed: {ex.Message}", ex);
+        }
+    }
+
     public static async Task DeleteAccounting(int accountingId)
     {
         var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId);

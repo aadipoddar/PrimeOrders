@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Sales.Product;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Sales.Product;
 
 namespace PrimeBakesLibrary.Exporting.Sales.Product;
 
@@ -41,7 +42,7 @@ public static class ProductExcelExport
 		});
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
 			[nameof(ProductModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -74,7 +75,7 @@ public static class ProductExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return await ExcelExportUtil.ExportToExcel(
+		return await ExcelReportExportUtil.ExportToExcel(
 			formattedData,
 			"PRODUCT MASTER",
 			"Product Data",

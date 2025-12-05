@@ -6,12 +6,12 @@ using PrimeBakesLibrary.Data.Common;
 using Syncfusion.Drawing;
 using Syncfusion.XlsIO;
 
-namespace PrimeBakesLibrary.Exporting;
+namespace PrimeBakesLibrary.Exporting.Utils;
 
 /// <summary>
 /// Generic Excel exporter for all report types in the Prime Bakes application
 /// </summary>
-public static class ExcelExportUtil
+public static class ExcelReportExportUtil
 {
     #region Public Methods
 

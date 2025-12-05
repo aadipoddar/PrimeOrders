@@ -10,7 +10,7 @@ using Syncfusion.Pdf.Graphics;
 using Syncfusion.Pdf.Grid;
 using PrimeBakesLibrary.Data.Common;
 
-namespace PrimeBakesLibrary.Exporting;
+namespace PrimeBakesLibrary.Exporting.Utils;
 
 /// <summary>
 /// Professional Invoice PDF export utility - SAP-style professional invoices
@@ -545,16 +545,16 @@ public static class PDFInvoiceExportUtil
 
         currentY += boxHeight + 5;
 
-        // Order Details (if present)
+        // Linked Transaction Details (if present) - shows connected order/sale reference
         if (!string.IsNullOrWhiteSpace(invoiceData.OrderTransactionNo))
         {
-            graphics.DrawString($"Order No: {invoiceData.OrderTransactionNo}", valueFont, valueBrush,
+            graphics.DrawString($"Ref. No: {invoiceData.OrderTransactionNo}", valueFont, valueBrush,
                 new PointF(leftMargin, currentY));
             currentY += 12;
 
             if (invoiceData.OrderDateTime.HasValue)
             {
-                graphics.DrawString($"Order Date: {invoiceData.OrderDateTime.Value:dd-MMM-yyyy hh:mm tt}", valueFont, valueBrush,
+                graphics.DrawString($"Ref. Date: {invoiceData.OrderDateTime.Value:dd-MMM-yyyy hh:mm tt}", valueFont, valueBrush,
                     new PointF(leftMargin, currentY));
                 currentY += 12;
             }

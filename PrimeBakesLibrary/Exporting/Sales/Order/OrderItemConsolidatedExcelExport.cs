@@ -1,3 +1,4 @@
+using PrimeBakesLibrary.Exporting.Utils;
 using PrimeBakesLibrary.Models.Sales.Order;
 
 namespace PrimeBakesLibrary.Exporting.Sales.Order;
@@ -46,7 +47,7 @@ public static class OrderItemConsolidatedExcelExport
             .ToList();
 
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // Text fields
             [nameof(ConsolidatedOrderItemModel.ItemName)] = new() { DisplayName = "Item", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignLeft },
@@ -67,7 +68,7 @@ public static class OrderItemConsolidatedExcelExport
         ];
 
         // Export using the generic utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             consolidatedData,
             "CONSOLIDATED ORDER ITEM REPORT",
             "Order Items Grouped by Product",

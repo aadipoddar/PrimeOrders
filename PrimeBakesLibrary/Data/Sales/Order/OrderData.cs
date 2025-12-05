@@ -69,6 +69,57 @@ public static class OrderData
 		}
 	}
 
+	public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int orderId)
+	{
+		try
+		{
+			// Load saved order details
+			var transaction = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId) ??
+				throw new InvalidOperationException("Transaction not found.");
+
+			// Load order details from database
+			var orderDetails = await CommonData.LoadTableDataByMasterId<OrderDetailModel>(TableNames.OrderDetail, orderId);
+			if (orderDetails is null || orderDetails.Count == 0)
+				throw new InvalidOperationException("No transaction details found for the transaction.");
+
+			// Load company and location
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+			var location = await CommonData.LoadTableDataById<LocationModel>(TableNames.Location, transaction.LocationId);
+
+			if (company is null)
+				throw new InvalidOperationException("Invoice generation skipped - company not found.");
+			if (location is null)
+				throw new InvalidOperationException("Invoice generation skipped - location not found.");
+
+			// Try to load sale information if order is converted to sale
+			SaleModel sale = null;
+			if (transaction.SaleId.HasValue && transaction.SaleId.Value > 0)
+				sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, transaction.SaleId.Value);
+
+			// Generate invoice Excel
+			var excelStream = await OrderInvoiceExcelExport.ExportOrderInvoice(
+				transaction,
+				orderDetails,
+				company,
+				location,
+				sale?.TransactionNo,
+				sale?.TransactionDateTime,
+				null, // logoPath
+				"ORDER CONFIRMATION", // invoiceType
+				location?.Name // outlet
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"ORDER_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+			return (excelStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException($"Excel invoice generation failed: {ex.Message}", ex);
+		}
+	}
+
 	public static async Task DeleteOrder(int orderId)
 	{
 		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId);

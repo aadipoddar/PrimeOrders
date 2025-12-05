@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Common;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Common;
 
 namespace PrimeBakesLibrary.Exporting.Operations;
 
@@ -15,7 +16,7 @@ public static class LocationExcelExport
     public static async Task<MemoryStream> ExportLocation(IEnumerable<LocationModel> locationData)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(LocationModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -44,7 +45,7 @@ public static class LocationExcelExport
 		];
 
         // Call the generic Excel export utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             locationData,
             "LOCATION MASTER",
             "Location Data",

@@ -56,6 +56,43 @@ public static class StockTransferData
 		}
 	}
 
+	public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int stockTransferId)
+	{
+		try
+		{
+			// Load saved stock transfer details
+			var transaction = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, stockTransferId) ??
+				throw new InvalidOperationException("Transaction not found.");
+
+			// Load stock transfer details from database
+			var transactionDetails = await CommonData.LoadTableDataByMasterId<StockTransferDetailModel>(TableNames.StockTransferDetail, stockTransferId);
+			if (transactionDetails is null || transactionDetails.Count == 0)
+				throw new InvalidOperationException("No transaction details found for the transaction.");
+
+			// Load company
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId) ??
+				throw new InvalidOperationException("Company information is missing.");
+
+			// Generate invoice Excel with location information from ledger
+			var excelStream = await StockTransferInvoiceExcelExport.ExportStockTransferInvoice(
+				transaction,
+				transactionDetails,
+				company,
+				null, // logo path - uses default
+				"STOCK TRANSFER INVOICE"
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"STOCK_TRANSFER_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+			return (excelStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException("Failed to generate and download Excel invoice.", ex);
+		}
+	}
+
 	public static async Task DeleteStockTransfer(int stockTransferId)
 	{
 		var stockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, stockTransferId);

@@ -1,4 +1,5 @@
 ﻿using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Exporting.Utils;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 namespace PrimeBakesLibrary.Exporting.Accounts.Masters;
@@ -36,7 +37,7 @@ public static class CompanyExcelExport
 		});
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
 			[nameof(CompanyModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -77,7 +78,7 @@ public static class CompanyExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return await ExcelExportUtil.ExportToExcel(
+		return await ExcelReportExportUtil.ExportToExcel(
 			enrichedData,
 			"COMPANY",
 			"Company Data",

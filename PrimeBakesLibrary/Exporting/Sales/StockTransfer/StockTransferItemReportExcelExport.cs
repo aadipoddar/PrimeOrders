@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Sales.StockTransfer;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
 namespace PrimeBakesLibrary.Exporting.Sales.StockTransfer;
 
@@ -29,7 +30,7 @@ public static class StockTransferItemReportExcelExport
 		string toLocationName = null)
 	{
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
 		{
 			// IDs - Center aligned, no totals
 			[nameof(StockTransferItemOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -143,7 +144,7 @@ public static class StockTransferItemReportExcelExport
 		}
 
 		// Export using the generic utility
-		return await ExcelExportUtil.ExportToExcel(
+		return await ExcelReportExportUtil.ExportToExcel(
 			stockTransferItemData,
 			"STOCK TRANSFER ITEM REPORT",
 			"Stock Transfer Item Transactions",

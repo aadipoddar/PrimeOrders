@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Inventory;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Inventory;
 
 namespace PrimeBakesLibrary.Exporting.Inventory.RawMaterial;
 
@@ -24,7 +25,7 @@ public static class RawMaterialCategoryExcelExport
 		});
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
 			[nameof(RawMaterialCategoryModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -47,7 +48,7 @@ public static class RawMaterialCategoryExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return await ExcelExportUtil.ExportToExcel(
+		return await ExcelReportExportUtil.ExportToExcel(
 			enrichedData,
 			"RAW MATERIAL CATEGORY",
 			"Raw Material Category Data",

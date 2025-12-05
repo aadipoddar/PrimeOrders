@@ -72,7 +72,8 @@ public partial class SaleItemReport : IAsyncDisposable
 			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
 			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
 			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
-			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None);
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemPdfInvoice, "Download Selected Transaction PDF Invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.E, DownloadSelectedCartItemExcelInvoice, "Download Selected Transaction Excel Invoice", Exclude.None);
 
 		await LoadDates();
 		await LoadLocations();
@@ -263,7 +264,7 @@ public partial class SaleItemReport : IAsyncDisposable
 		_transactionOverviews.AddRange(_transactionTransferOverviews.Select(pr => new SaleItemOverviewModel
 		{
 			Id = 0,
-			MasterId = pr.MasterId,
+			MasterId = 0,
 			OrderTransactionNo = null,
 			CustomerId = null,
 			CustomerName = null,
@@ -523,9 +524,9 @@ public partial class SaleItemReport : IAsyncDisposable
 			{
 				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
 				if (FormFactor.GetFormFactor() == "Web")
-					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.StockTransfer}/{stockTransfer.Id}", "_blank");
+					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.StockTransfer}/{stockTransfer.MasterId}", "_blank");
 				else
-					NavigationManager.NavigateTo($"{PageRouteNames.StockTransfer}/{stockTransfer.Id}");
+					NavigationManager.NavigateTo($"{PageRouteNames.StockTransfer}/{stockTransfer.MasterId}");
 			}
 			else if (transactionId < 0)
 			{
@@ -548,16 +549,25 @@ public partial class SaleItemReport : IAsyncDisposable
 		}
 	}
 
-	private async Task DownloadSelectedCartItemInvoice()
+	private async Task DownloadSelectedCartItemPdfInvoice()
 	{
 		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.MasterId, selectedCartItem.TransactionNo);
+		await DownloadPdfInvoice(selectedCartItem.MasterId, selectedCartItem.TransactionNo);
 	}
 
-	private async Task DownloadInvoice(int transactionId, string transactionNo)
+	private async Task DownloadSelectedCartItemExcelInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadExcelInvoice(selectedCartItem.MasterId, selectedCartItem.TransactionNo);
+	}
+
+	private async Task DownloadPdfInvoice(int transactionId, string transactionNo)
 	{
 		if (_isProcessing)
 			return;
@@ -566,12 +576,12 @@ public partial class SaleItemReport : IAsyncDisposable
 		{
 			_isProcessing = true;
 			StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", "Generating PDF invoice...", ToastType.Info);
 
 			if (transactionId == 0 && !string.IsNullOrWhiteSpace(transactionNo))
 			{
 				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
-				var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(stockTransfer.Id);
+				var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(stockTransfer.MasterId);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 			else if (transactionId < 0)
@@ -585,11 +595,52 @@ public partial class SaleItemReport : IAsyncDisposable
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			await _toastNotification.ShowAsync("Success", "Invoice downloaded successfully.", ToastType.Success);
+			await _toastNotification.ShowAsync("Success", "PDF invoice downloaded successfully.", ToastType.Success);
 		}
 		catch (Exception ex)
 		{
-			await _toastNotification.ShowAsync("Error", $"An error occurred while generating invoice: {ex.Message}", ToastType.Error);
+			await _toastNotification.ShowAsync("Error", $"An error occurred while generating PDF invoice: {ex.Message}", ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
+
+	private async Task DownloadExcelInvoice(int transactionId, string transactionNo)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating Excel invoice...", ToastType.Info);
+
+			if (transactionId == 0 && !string.IsNullOrWhiteSpace(transactionNo))
+			{
+				var stockTransfer = _transactionTransferOverviews.FirstOrDefault(st => st.TransactionNo == transactionNo);
+				var (excelStream, fileName) = await StockTransferData.GenerateAndDownloadExcelInvoice(stockTransfer.MasterId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else if (transactionId < 0)
+			{
+				var (excelStream, fileName) = await SaleReturnData.GenerateAndDownloadExcelInvoice(Math.Abs(transactionId));
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+			else
+			{
+				var (excelStream, fileName) = await SaleData.GenerateAndDownloadExcelInvoice(transactionId);
+				await SaveAndViewService.SaveAndView(fileName, excelStream);
+			}
+
+			await _toastNotification.ShowAsync("Success", "Excel invoice downloaded successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error", $"An error occurred while generating Excel invoice: {ex.Message}", ToastType.Error);
 		}
 		finally
 		{

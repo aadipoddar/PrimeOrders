@@ -1,3 +1,4 @@
+using PrimeBakesLibrary.Exporting.Utils;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 namespace PrimeBakesLibrary.Exporting.Inventory.Kitchen;
@@ -24,7 +25,7 @@ public static class KitchenExcelExport
         });
 
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // ID - Center aligned, no totals
             [nameof(KitchenModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -47,7 +48,7 @@ public static class KitchenExcelExport
         ];
 
         // Call the generic Excel export utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             enrichedData,
             "KITCHEN MASTER",
             "Kitchen Data",

@@ -76,7 +76,8 @@ public partial class OrderReport : IAsyncDisposable
 			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
 			.Add(ModCode.Ctrl, Code.B, NavigateBack, "Back", Exclude.None)
 			.Add(ModCode.Ctrl, Code.O, ViewSelectedCartItem, "Open Selected Transaction", Exclude.None)
-			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemInvoice, "Download Selected Transaction Invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.P, DownloadSelectedCartItemPdfInvoice, "Download Selected Transaction PDF Invoice", Exclude.None)
+			.Add(ModCode.Alt, Code.E, DownloadSelectedCartItemExcelInvoice, "Download Selected Transaction Excel Invoice", Exclude.None)
 			.Add(Code.Delete, DeleteSelectedCartItem, "Delete Selected Transaction", Exclude.None);
 
 		await LoadDates();
@@ -284,6 +285,7 @@ public partial class OrderReport : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
 
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -325,6 +327,7 @@ public partial class OrderReport : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
+            await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
 
             DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
             DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
@@ -376,16 +379,25 @@ public partial class OrderReport : IAsyncDisposable
             NavigationManager.NavigateTo($"{PageRouteNames.Order}/{orderId}");
     }
 
-	private async Task DownloadSelectedCartItemInvoice()
+	private async Task DownloadSelectedCartItemPdfInvoice()
 	{
 		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
 			return;
 
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
-		await DownloadInvoice(selectedCartItem.Id);
+		await DownloadPdfInvoice(selectedCartItem.Id);
 	}
 
-	private async Task DownloadInvoice(int orderId)
+	private async Task DownloadSelectedCartItemExcelInvoice()
+	{
+		if (_sfGrid is null || _sfGrid.SelectedRecords is null || _sfGrid.SelectedRecords.Count == 0)
+			return;
+
+		var selectedCartItem = _sfGrid.SelectedRecords.First();
+		await DownloadExcelInvoice(selectedCartItem.Id);
+	}
+
+	private async Task DownloadPdfInvoice(int orderId)
     {
         if (_isProcessing)
             return;
@@ -394,10 +406,11 @@ public partial class OrderReport : IAsyncDisposable
         {
             _isProcessing = true;
             StateHasChanged();
-			await _toastNotification.ShowAsync("Processing", "Generating invoice...", ToastType.Info);
+			await _toastNotification.ShowAsync("Processing", "Generating PDF invoice...", ToastType.Info);
 
             var (pdfStream, fileName) = await OrderData.GenerateAndDownloadInvoice(orderId);
             await SaveAndViewService.SaveAndView(fileName, pdfStream);
+			await _toastNotification.ShowAsync("Success", "PDF invoice generated successfully.", ToastType.Success);
         }
         catch (Exception ex)
         {
@@ -409,6 +422,32 @@ public partial class OrderReport : IAsyncDisposable
             StateHasChanged();
         }
     }
+
+	private async Task DownloadExcelInvoice(int orderId)
+	{
+		if (_isProcessing)
+			return;
+
+		try
+		{
+			_isProcessing = true;
+			StateHasChanged();
+			await _toastNotification.ShowAsync("Processing", "Generating Excel invoice...", ToastType.Info);
+
+			var (excelStream, fileName) = await OrderData.GenerateAndDownloadExcelInvoice(orderId);
+			await SaveAndViewService.SaveAndView(fileName, excelStream);
+			await _toastNotification.ShowAsync("Success", "Excel invoice generated successfully.", ToastType.Success);
+		}
+		catch (Exception ex)
+		{
+			await _toastNotification.ShowAsync("Error", $"An error occurred while generating Excel invoice: {ex.Message}", ToastType.Error);
+		}
+		finally
+		{
+			_isProcessing = false;
+			StateHasChanged();
+		}
+	}
 
 	private async Task DeleteSelectedCartItem()
 	{

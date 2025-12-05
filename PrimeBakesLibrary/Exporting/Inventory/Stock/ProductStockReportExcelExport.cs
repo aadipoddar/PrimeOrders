@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Inventory.Stock;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Inventory.Stock;
 
 namespace PrimeBakesLibrary.Exporting.Inventory.Stock;
 
@@ -26,7 +27,7 @@ public static class ProductStockReportExcelExport
         string locationName = null)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(ProductStockSummaryModel.ProductId)] = new() { DisplayName = "Product ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 12 },
@@ -93,7 +94,7 @@ public static class ProductStockReportExcelExport
         // If no details data provided, use the simple single-worksheet export
         if (stockDetailsData == null || !stockDetailsData.Any())
         {
-            return await ExcelExportUtil.ExportToExcel(
+            return await ExcelReportExportUtil.ExportToExcel(
                 stockData,
                 "PRODUCT STOCK REPORT",
                 "Stock Summary",
@@ -125,12 +126,12 @@ public static class ProductStockReportExcelExport
         IEnumerable<ProductStockDetailsModel> stockDetailsData,
         DateOnly? dateRangeStart,
         DateOnly? dateRangeEnd,
-        Dictionary<string, ExcelExportUtil.ColumnSetting> summaryColumnSettings,
+        Dictionary<string, ExcelReportExportUtil.ColumnSetting> summaryColumnSettings,
         List<string> summaryColumnOrder,
         string locationName = null)
     {
         // Create the first worksheet with summary data
-        var summaryStream = await ExcelExportUtil.ExportToExcel(
+        var summaryStream = await ExcelReportExportUtil.ExportToExcel(
             stockData,
             "PRODUCT STOCK REPORT",
             "Stock Summary",
@@ -142,7 +143,7 @@ public static class ProductStockReportExcelExport
         );
 
         // Define column settings for details worksheet
-        var detailsColumnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var detailsColumnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(ProductStockDetailsModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false, Width = 10 },
@@ -177,7 +178,7 @@ public static class ProductStockReportExcelExport
         };
 
         // Create the details worksheet
-        var detailsStream = await ExcelExportUtil.ExportToExcel(
+        var detailsStream = await ExcelReportExportUtil.ExportToExcel(
             stockDetailsData,
             "PRODUCT STOCK DETAILS",
             "Transaction Details",

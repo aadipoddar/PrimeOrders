@@ -62,6 +62,46 @@ public static class PurchaseData
 		}
 	}
 
+	public static async Task<(MemoryStream excelStream, string fileName)> GenerateAndDownloadExcelInvoice(int purchaseId)
+	{
+		try
+		{
+			// Load saved purchase details
+			var transaction = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchaseId) ??
+				throw new InvalidOperationException("Transaction not found.");
+
+			// Load purchase details from database
+			var transactionDetails = await CommonData.LoadTableDataByMasterId<PurchaseDetailModel>(TableNames.PurchaseDetail, transaction.Id);
+			if (transactionDetails is null || transactionDetails.Count == 0)
+				throw new InvalidOperationException("No transaction details found for the transaction.");
+
+			// Load company and party
+			var company = await CommonData.LoadTableDataById<CompanyModel>(TableNames.Company, transaction.CompanyId);
+			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId);
+			if (company is null || party is null)
+				throw new InvalidOperationException("Company or party information is missing.");
+
+			// Generate invoice Excel
+			var excelStream = await PurchaseInvoiceExcelExport.ExportPurchaseInvoice(
+				transaction,
+				transactionDetails,
+				company,
+				party,
+				null, // logo path - uses default
+				"PURCHASE INVOICE"
+			);
+
+			// Generate file name
+			var currentDateTime = await CommonData.LoadCurrentDateTime();
+			string fileName = $"PURCHASE_INVOICE_{transaction.TransactionNo}_{currentDateTime:yyyyMMdd_HHmmss}.xlsx";
+			return (excelStream, fileName);
+		}
+		catch (Exception ex)
+		{
+			throw new InvalidOperationException("Failed to generate and download Excel invoice.", ex);
+		}
+	}
+
 	public static async Task DeletePurchase(int purchaseId)
 	{
 		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchaseId);

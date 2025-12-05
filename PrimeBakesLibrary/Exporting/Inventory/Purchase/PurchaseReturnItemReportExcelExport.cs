@@ -1,3 +1,4 @@
+using PrimeBakesLibrary.Exporting.Utils;
 using PrimeBakesLibrary.Models.Inventory.Purchase;
 
 namespace PrimeBakesLibrary.Exporting.Inventory.Purchase;
@@ -22,7 +23,7 @@ public static class PurchaseReturnItemReportExcelExport
         bool showAllColumns = true)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(PurchaseReturnItemOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -118,7 +119,7 @@ public static class PurchaseReturnItemReportExcelExport
             ];
 
         // Export using the generic utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             purchaseReturnItemData,
             "PURCHASE RETURN ITEM REPORT",
             "Purchase Return Item Transactions",

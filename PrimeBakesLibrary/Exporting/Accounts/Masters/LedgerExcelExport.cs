@@ -1,4 +1,5 @@
 ﻿using PrimeBakesLibrary.Data.Common;
+using PrimeBakesLibrary.Exporting.Utils;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
@@ -45,7 +46,7 @@ public static class LedgerExcelExport
 		});
 
 		// Define custom column settings
-		var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+		var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
 		{
 			// ID - Center aligned, no totals
 			[nameof(LedgerModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -92,7 +93,7 @@ public static class LedgerExcelExport
 		];
 
 		// Call the generic Excel export utility
-		return await ExcelExportUtil.ExportToExcel(
+		return await ExcelReportExportUtil.ExportToExcel(
 			enrichedData,
 			"LEDGER",
 			"Ledger Data",

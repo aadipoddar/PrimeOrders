@@ -1,4 +1,5 @@
-﻿using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
+﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Accounts.FinancialAccounting;
 
 namespace PrimeBakesLibrary.Exporting.Accounts.FinancialAccounting;
 
@@ -28,7 +29,7 @@ public static class AccountingReportExcelExport
         string voucherName = null)
     {
         // Define custom column settings
-        var columnSettings = new Dictionary<string, ExcelExportUtil.ColumnSetting>
+        var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
             // IDs - Center aligned, no totals
             [nameof(AccountingOverviewModel.Id)] = new() { DisplayName = "ID", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false },
@@ -112,7 +113,7 @@ public static class AccountingReportExcelExport
             reportLocation = voucherName;
 
         // Call the generic Excel export utility
-        return await ExcelExportUtil.ExportToExcel(
+        return await ExcelReportExportUtil.ExportToExcel(
             accountingData,
             "FINANCIAL ACCOUNTING REPORT",
             "Accounting Transactions",
