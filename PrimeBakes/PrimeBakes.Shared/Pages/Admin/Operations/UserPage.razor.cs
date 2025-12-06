@@ -1,4 +1,4 @@
-using PrimeBakes.Shared.Components;
+using PrimeBakes.Shared.Components.Dialog;
 
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;

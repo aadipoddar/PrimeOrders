@@ -1,4 +1,8 @@
 @using Microsoft.AspNetCore.Components
+@using PrimeBakes.Shared.Components.Button
+@using static PrimeBakes.Shared.Components.Button.ButtonSize
+@using static PrimeBakes.Shared.Components.Button.ButtonVariant
+@using static PrimeBakes.Shared.Components.Button.IconType
 
 <button class="@GetCssClass()" @onclick="OnClick" title="@Title" disabled="@Disabled">
     @switch (Icon)

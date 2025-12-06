@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Components;
 
-namespace PrimeBakes.Shared.Components;
+namespace PrimeBakes.Shared.Components.Button;
 
-public partial class ToggleReturnsButton
+public partial class ToggleDetailsButton
 {
 	[Parameter]
 	public bool Disabled { get; set; } = false;
 
 	[Parameter]
-	public bool ShowReturns { get; set; } = false;
+	public bool ShowAllColumns { get; set; } = false;
 
 	[Parameter]
 	public EventCallback OnToggle { get; set; }

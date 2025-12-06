@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace PrimeBakes.Shared.Components;
+namespace PrimeBakes.Shared.Components.Button;
 
 public partial class ToggleTransfersButton
 {

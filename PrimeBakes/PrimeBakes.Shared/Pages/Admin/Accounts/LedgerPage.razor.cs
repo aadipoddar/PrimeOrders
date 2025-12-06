@@ -1,5 +1,3 @@
-using PrimeBakes.Shared.Components;
-
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -9,6 +7,7 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
+using PrimeBakes.Shared.Components.Dialog;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 

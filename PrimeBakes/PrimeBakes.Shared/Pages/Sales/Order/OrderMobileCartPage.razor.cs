@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
+using PrimeBakes.Shared.Components.Dialog;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;

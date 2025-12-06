@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 using Syncfusion.Blazor.Notifications;
 
-namespace PrimeBakes.Shared.Components;
+namespace PrimeBakes.Shared.Components.Dialog;
 
 /// <summary>
 /// Defines the types of toast notifications available

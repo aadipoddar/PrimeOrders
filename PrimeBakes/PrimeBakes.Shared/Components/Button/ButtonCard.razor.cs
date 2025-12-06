@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace PrimeBakes.Shared.Components;
+namespace PrimeBakes.Shared.Components.Button;
 
 public partial class ButtonCard
 {

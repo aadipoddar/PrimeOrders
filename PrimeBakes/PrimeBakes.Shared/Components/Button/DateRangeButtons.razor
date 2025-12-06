@@ -1,4 +1,8 @@
+@using PrimeBakes.Shared.Components.Button
 @using PrimeBakesLibrary.Models.Accounts.Masters
+@using static PrimeBakes.Shared.Components.Button.ButtonSize
+@using static PrimeBakes.Shared.Components.Button.ButtonVariant
+@using static PrimeBakes.Shared.Components.Button.IconType
 
 <div class="date-range-buttons">
     <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.Today)" title="Today"

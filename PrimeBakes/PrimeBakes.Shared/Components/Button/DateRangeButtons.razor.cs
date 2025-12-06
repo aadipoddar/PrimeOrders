@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
-namespace PrimeBakes.Shared.Components;
+namespace PrimeBakes.Shared.Components.Button;
 
 public partial class DateRangeButtons
 {

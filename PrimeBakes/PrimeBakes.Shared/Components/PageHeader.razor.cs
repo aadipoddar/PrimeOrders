@@ -1,7 +1,6 @@
 #nullable enable
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace PrimeBakes.Shared.Components;
 

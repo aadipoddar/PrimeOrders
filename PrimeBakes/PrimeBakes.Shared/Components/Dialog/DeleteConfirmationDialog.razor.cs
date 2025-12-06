@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Components;
+
 using Syncfusion.Blazor.Popups;
 
-namespace PrimeBakes.Shared.Components;
+namespace PrimeBakes.Shared.Components.Dialog;
 
 public partial class DeleteConfirmationDialog
 {
