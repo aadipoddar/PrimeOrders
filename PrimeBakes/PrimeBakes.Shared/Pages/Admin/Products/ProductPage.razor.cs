@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
@@ -8,7 +10,6 @@ using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
 
@@ -29,16 +30,14 @@ public partial class ProductPage : IAsyncDisposable
     private string _selectedTaxCode = string.Empty;
 
     private SfGrid<ProductModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
-    private SfDialog _recoverConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
+    private RecoverConfirmationDialog _recoverConfirmationDialog;
 
     private int _deleteProductId = 0;
     private string _deleteProductName = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private int _recoverProductId = 0;
     private string _recoverProductName = string.Empty;
-    private bool _isRecoverDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -133,20 +132,18 @@ public partial class ProductPage : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void ShowDeleteConfirmation(int id, string name)
+    private async Task ShowDeleteConfirmation(int id, string name)
     {
         _deleteProductId = id;
         _deleteProductName = name;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteProductId = 0;
         _deleteProductName = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
     private async Task ConfirmDelete()
@@ -154,7 +151,7 @@ public partial class ProductPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isDeleteDialogVisible = false;
+            await _deleteConfirmationDialog.HideAsync();
 
             var product = _products.FirstOrDefault(p => p.Id == _deleteProductId);
             if (product == null)
@@ -181,20 +178,18 @@ public partial class ProductPage : IAsyncDisposable
         }
     }
 
-    private void ShowRecoverConfirmation(int id, string name)
+    private async Task ShowRecoverConfirmation(int id, string name)
     {
         _recoverProductId = id;
         _recoverProductName = name;
-        _isRecoverDialogVisible = true;
-        StateHasChanged();
+        await _recoverConfirmationDialog.ShowAsync();
     }
 
-    private void CancelRecover()
+    private async Task CancelRecover()
     {
         _recoverProductId = 0;
         _recoverProductName = string.Empty;
-        _isRecoverDialogVisible = false;
-        StateHasChanged();
+        await _recoverConfirmationDialog.HideAsync();
     }
 
     private async Task ToggleDeleted()
@@ -209,7 +204,7 @@ public partial class ProductPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isRecoverDialogVisible = false;
+            await _recoverConfirmationDialog.HideAsync();
 
             var product = _products.FirstOrDefault(p => p.Id == _recoverProductId);
             if (product == null)

@@ -110,26 +110,8 @@ else
                     <h2 class="section-title">Sale Item Transactions</h2>
                 </div>
                 <div class="header-actions">
-                    <button class="btn-toggle-returns @(_showSaleReturns ? "active" : "")" @onclick="ToggleSaleReturns"
-                            title="@(_showSaleReturns ? "Hide Sale Returns" : "Show Sale Returns")" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 14 4 9 9 4" />
-                            <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
-                        </svg>
-                        @(_showSaleReturns ? "Hide Returns" : "Show Returns")
-                    </button>
-                    <button class="btn-toggle-transfers @(_showStockTransfers ? "active" : "")" @onclick="ToggleStockTransfers"
-                            title="@(_showStockTransfers ? "Hide Stock Transfers" : "Show Stock Transfers")" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="17 2 21 6 17 10" />
-                            <path d="M3 14v-2a4 4 0 0 1 4-4h14" />
-                            <polyline points="7 22 3 18 7 14" />
-                            <path d="M21 10v2a4 4 0 0 1-4 4H3" />
-                        </svg>
-                        @(_showStockTransfers ? "Hide Transfers" : "Show Transfers")
-                    </button>
+                    <ToggleReturnsButton Disabled="@_isProcessing" ShowReturns="@_showSaleReturns" OnToggle="ToggleSaleReturns" />
+                    <ToggleTransfersButton Disabled="@_isProcessing" ShowTransfers="@_showStockTransfers" OnToggle="ToggleStockTransfers" />
                     <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
                 </div>
             </div>
@@ -514,102 +496,6 @@ else
         align-items: center;
         gap: 12px;
     }
-
-    /* Toggle Returns Button */
-    .btn-toggle-returns {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        height: 38px;
-        padding: 0 20px;
-        border: 1px solid #e2e8f0;
-        background: #ffffff;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: #64748b;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-        .btn-toggle-returns:hover {
-            background: #fef2f2;
-            border-color: #ef4444;
-            color: #ef4444;
-            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .btn-toggle-returns.active {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border-color: #dc2626;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
-        }
-
-            .btn-toggle-returns.active:hover {
-                background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-            }
-
-        .btn-toggle-returns:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-toggle-returns svg {
-            flex-shrink: 0;
-        }
-
-        /* Toggle Transfers Button */
-        .btn-toggle-transfers {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            height: 38px;
-            padding: 0 20px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #64748b;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-toggle-transfers:hover {
-            background: #f0fdfa;
-            border-color: #0d9488;
-            color: #0d9488;
-            box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .btn-toggle-transfers.active {
-            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-            border-color: #0f766e;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(13, 148, 136, 0.3);
-        }
-
-        .btn-toggle-transfers.active:hover {
-            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
-            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
-        }
-
-        .btn-toggle-transfers:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .btn-toggle-transfers svg {
-            flex-shrink: 0;
-        }
 
     .section-body {
         padding: 24px;

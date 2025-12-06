@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
@@ -7,7 +9,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
@@ -27,16 +28,14 @@ public partial class LedgerPage : IAsyncDisposable
 	private List<LocationModel> _locations = [];
 
 	private SfGrid<LedgerModel> _sfGrid;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteLedgerId = 0;
 	private string _deleteLedgerName = string.Empty;
-	private bool _isDeleteDialogVisible = false;
 
 	private int _recoverLedgerId = 0;
 	private string _recoverLedgerName = string.Empty;
-	private bool _isRecoverDialogVisible = false;
 
 	private ToastNotification _toastNotification;
 
@@ -104,20 +103,18 @@ public partial class LedgerPage : IAsyncDisposable
 		StateHasChanged();
 	}
 
-	private void ShowDeleteConfirmation(int id, string name)
+	private async Task ShowDeleteConfirmation(int id, string name)
 	{
 		_deleteLedgerId = id;
 		_deleteLedgerName = name;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteLedgerId = 0;
 		_deleteLedgerName = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task ConfirmDelete()
@@ -125,7 +122,7 @@ public partial class LedgerPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 
 			var ledger = _ledgers.FirstOrDefault(l => l.Id == _deleteLedgerId);
 			if (ledger == null)
@@ -152,20 +149,18 @@ public partial class LedgerPage : IAsyncDisposable
 		}
 	}
 
-	private void ShowRecoverConfirmation(int id, string name)
+	private async Task ShowRecoverConfirmation(int id, string name)
 	{
 		_recoverLedgerId = id;
 		_recoverLedgerName = name;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverLedgerId = 0;
 		_recoverLedgerName = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()
@@ -180,7 +175,7 @@ public partial class LedgerPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 
 			var ledger = _ledgers.FirstOrDefault(l => l.Id == _recoverLedgerId);
 			if (ledger == null)

@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
@@ -9,7 +11,6 @@ using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
 
@@ -30,16 +31,14 @@ public partial class RawMaterialPage : IAsyncDisposable
     private string _selectedTaxCode = string.Empty;
 
     private SfGrid<RawMaterialModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
-    private SfDialog _recoverConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
+    private RecoverConfirmationDialog _recoverConfirmationDialog;
 
     private int _deleteRawMaterialId = 0;
     private string _deleteRawMaterialName = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private int _recoverRawMaterialId = 0;
     private string _recoverRawMaterialName = string.Empty;
-    private bool _isRecoverDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -135,20 +134,18 @@ public partial class RawMaterialPage : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void ShowDeleteConfirmation(int id, string name)
+    private async Task ShowDeleteConfirmation(int id, string name)
     {
         _deleteRawMaterialId = id;
         _deleteRawMaterialName = name;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteRawMaterialId = 0;
         _deleteRawMaterialName = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
     private async Task ConfirmDelete()
@@ -156,7 +153,7 @@ public partial class RawMaterialPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isDeleteDialogVisible = false;
+            await _deleteConfirmationDialog.HideAsync();
 
             var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == _deleteRawMaterialId);
             if (rawMaterial == null)
@@ -183,20 +180,18 @@ public partial class RawMaterialPage : IAsyncDisposable
         }
     }
 
-    private void ShowRecoverConfirmation(int id, string name)
+    private async Task ShowRecoverConfirmation(int id, string name)
     {
         _recoverRawMaterialId = id;
         _recoverRawMaterialName = name;
-        _isRecoverDialogVisible = true;
-        StateHasChanged();
+        await _recoverConfirmationDialog.ShowAsync();
     }
 
-    private void CancelRecover()
+    private async Task CancelRecover()
     {
         _recoverRawMaterialId = 0;
         _recoverRawMaterialName = string.Empty;
-        _isRecoverDialogVisible = false;
-        StateHasChanged();
+        await _recoverConfirmationDialog.HideAsync();
     }
 
     private async Task ToggleDeleted()
@@ -211,7 +206,7 @@ public partial class RawMaterialPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isRecoverDialogVisible = false;
+            await _recoverConfirmationDialog.HideAsync();
 
             var rawMaterial = _rawMaterials.FirstOrDefault(rm => rm.Id == _recoverRawMaterialId);
             if (rawMaterial == null)

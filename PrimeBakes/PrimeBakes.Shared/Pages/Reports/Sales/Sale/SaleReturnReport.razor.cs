@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Sale;
@@ -11,7 +12,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Sale;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Sales.Sale;
 
@@ -44,15 +44,13 @@ public partial class SaleReturnReport : IAsyncDisposable
 
 	private string _deleteTransactionNo = string.Empty;
 	private int _deleteTransactionId = 0;
-	private bool _isDeleteDialogVisible = false;
 
 	private string _recoverTransactionNo = string.Empty;
 	private int _recoverTransactionId = 0;
-	private bool _isRecoverDialogVisible = false;
 
 	private ToastNotification _toastNotification;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -482,9 +480,9 @@ public partial class SaleReturnReport : IAsyncDisposable
 		var selectedCartItem = _sfGrid.SelectedRecords.First();
 
 		if (!selectedCartItem.Status)
-			ShowRecoverConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
+			await ShowRecoverConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
 		else
-			ShowDeleteConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
+			await ShowDeleteConfirmation(selectedCartItem.Id, selectedCartItem.TransactionNo);
 	}
 
 	private async Task ConfirmDelete()
@@ -494,7 +492,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 
 		try
 		{
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
@@ -551,7 +549,7 @@ public partial class SaleReturnReport : IAsyncDisposable
 
 		try
 		{
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
@@ -610,42 +608,38 @@ public partial class SaleReturnReport : IAsyncDisposable
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.SalesDashboard);
 
-	private void ShowDeleteConfirmation(int id, string transactionNo)
+	private async Task ShowDeleteConfirmation(int id, string transactionNo)
 	{
 		if (_user.LocationId > 1)
 			return;
 
 		_deleteTransactionId = id;
 		_deleteTransactionNo = transactionNo;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
-		_isDeleteDialogVisible = false;
+		await _deleteConfirmationDialog.HideAsync();
 		_deleteTransactionId = 0;
 		_deleteTransactionNo = string.Empty;
-		StateHasChanged();
 	}
 
-	private void ShowRecoverConfirmation(int id, string transactionNo)
+	private async Task ShowRecoverConfirmation(int id, string transactionNo)
 	{
 		if (_user.LocationId > 1)
 			return;
 
 		_recoverTransactionId = id;
 		_recoverTransactionNo = transactionNo;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
-		_isRecoverDialogVisible = false;
+		await _recoverConfirmationDialog.HideAsync();
 		_recoverTransactionId = 0;
 		_recoverTransactionNo = string.Empty;
-		StateHasChanged();
 	}
 
 	private async Task StartAutoRefresh()

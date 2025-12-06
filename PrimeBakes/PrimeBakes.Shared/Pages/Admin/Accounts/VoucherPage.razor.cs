@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
@@ -22,16 +23,14 @@ public partial class VoucherPage : IAsyncDisposable
 	private List<VoucherModel> _vouchers = [];
 
 	private SfGrid<VoucherModel> _sfGrid;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteVoucherId = 0;
 	private string _deleteVoucherName = string.Empty;
-	private bool _isDeleteDialogVisible = false;
 
 	private int _recoverVoucherId = 0;
 	private string _recoverVoucherName = string.Empty;
-	private bool _isRecoverDialogVisible = false;
 
 	ToastNotification _toastNotification;
 
@@ -84,20 +83,18 @@ public partial class VoucherPage : IAsyncDisposable
 		StateHasChanged();
 	}
 
-	private void ShowDeleteConfirmation(int id, string name)
+	private async Task ShowDeleteConfirmation(int id, string name)
 	{
 		_deleteVoucherId = id;
 		_deleteVoucherName = name;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteVoucherId = 0;
 		_deleteVoucherName = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task ConfirmDelete()
@@ -105,7 +102,7 @@ public partial class VoucherPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 
 			var voucher = _vouchers.FirstOrDefault(v => v.Id == _deleteVoucherId);
 			if (voucher == null)
@@ -132,20 +129,18 @@ public partial class VoucherPage : IAsyncDisposable
 		}
 	}
 
-	private void ShowRecoverConfirmation(int id, string name)
+	private async Task ShowRecoverConfirmation(int id, string name)
 	{
 		_recoverVoucherId = id;
 		_recoverVoucherName = name;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverVoucherId = 0;
 		_recoverVoucherName = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()
@@ -160,7 +155,7 @@ public partial class VoucherPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 
 			var voucher = _vouchers.FirstOrDefault(v => v.Id == _recoverVoucherId);
 			if (voucher == null)

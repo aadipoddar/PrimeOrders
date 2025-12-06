@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
@@ -14,7 +15,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Stock;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Stock;
 
@@ -43,10 +43,9 @@ public partial class ProductStockReport : IAsyncDisposable
 	private SfGrid<ProductStockSummaryModel> _sfStockGrid;
 	private SfGrid<ProductStockDetailsModel> _sfStockDetailsGrid;
 
-	private bool _isDeleteDialogVisible = false;
 	private int _deleteAdjustmentId = 0;
 	private string _deleteTransactionNo = string.Empty;
-	private SfDialog _deleteConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
 
 	private ToastNotification _toastNotification;
 
@@ -576,7 +575,7 @@ public partial class ProductStockReport : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 			StateHasChanged();
 
 			if (!_user.Admin)
@@ -621,20 +620,19 @@ public partial class ProductStockReport : IAsyncDisposable
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
 
-	private void ShowDeleteConfirmation(int id, string transactionNo)
+	private async Task ShowDeleteConfirmation(int id, string transactionNo)
 	{
 		_deleteAdjustmentId = id;
 		_deleteTransactionNo = transactionNo ?? "N/A";
-		_isDeleteDialogVisible = true;
 		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteAdjustmentId = 0;
 		_deleteTransactionNo = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task StartAutoRefresh()

@@ -615,118 +615,22 @@ else
 
 <ToastNotification @ref="_toastNotification" />
 
-<SfDialog @ref="_deleteConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-          @bind-Visible="_isDeleteDialogVisible">
-    <DialogTemplates>
-        <Header>
-            <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     style="color: #ef4444;">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span style="font-size: 18px; font-weight: 600; color: #0f172a;">Confirm Delete</span>
-            </div>
-        </Header>
-        <Content>
-            <div style="padding: 24px;">
-                <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
-                    Are you sure you want to delete this transaction?
-                </p>
-                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">
-                        Transaction Details:
-                    </p>
-                    <p style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.5;">
-                        <strong>Transaction No:</strong> @_deleteTransactionNo
-                    </p>
-                </div>
-                <div style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
-                    <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
-                        <strong>Warning:</strong> This action cannot be undone. All associated data will be permanently deleted.
-                    </p>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <button class="dialog-btn dialog-btn-cancel" @onclick="CancelDelete" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                        <span>Cancel</span>
-                    </button>
-                    <button class="dialog-btn dialog-btn-delete" @onclick="ConfirmDelete" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                        </svg>
-                        <span>Delete</span>
-                    </button>
-                </div>
-            </div>
-        </Content>
-    </DialogTemplates>
-</SfDialog>
+<DeleteConfirmationDialog @ref="_deleteConfirmationDialog"
+                          EntityName="Stock Transfer Transaction"
+                          IdentifierLabel="Transaction No"
+                          IdentifierValue="@_deleteTransactionNo"
+                          IsPermanentDelete="true"
+                          Disabled="@_isProcessing"
+                          OnConfirm="ConfirmDelete"
+                          OnCancel="CancelDelete" />
 
-<SfDialog @ref="_recoverConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-          @bind-Visible="_isRecoverDialogVisible">
-    <DialogTemplates>
-        <Header>
-            <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     style="color: #10b981;">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                </svg>
-                <span style="font-size: 18px; font-weight: 600; color: #0f172a;">Confirm Recover</span>
-            </div>
-        </Header>
-        <Content>
-            <div style="padding: 24px;">
-                <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
-                    Are you sure you want to recover this stock transfer transaction?
-                </p>
-                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46; font-weight: 600;">
-                        Transaction Details:
-                    </p>
-                    <p style="margin: 0; font-size: 13px; color: #047857; line-height: 1.5;">
-                        <strong>Transaction No:</strong> @_recoverTransactionNo
-                    </p>
-                </div>
-                <div style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
-                    <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
-                        <strong>Note:</strong> This will restore the transaction and make it active again.
-                    </p>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <button class="dialog-btn dialog-btn-cancel" @onclick="CancelRecover" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                        <span>Cancel</span>
-                    </button>
-                    <button class="dialog-btn dialog-btn-recover" @onclick="ConfirmRecover" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                        </svg>
-                        <span>Recover</span>
-                    </button>
-                </div>
-            </div>
-        </Content>
-    </DialogTemplates>
-</SfDialog>
+<RecoverConfirmationDialog @ref="_recoverConfirmationDialog"
+                           EntityName="Stock Transfer Transaction"
+                           IdentifierLabel="Transaction No"
+                           IdentifierValue="@_recoverTransactionNo"
+                           Disabled="@_isProcessing"
+                           OnConfirm="ConfirmRecover"
+                           OnCancel="CancelRecover" />
 
 <style>
     * {
@@ -964,61 +868,6 @@ else
         color: #1e40af;
         font-size: 14px;
     }
-
-    .dialog-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all .2s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,.08);
-    }
-
-        .dialog-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,.12);
-        }
-
-        .dialog-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,.08);
-        }
-
-    .dialog-btn-cancel {
-        background: #ffffff;
-        color: #64748b;
-        border: 2px solid #e2e8f0;
-    }
-
-        .dialog-btn-cancel:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            color: #475569;
-        }
-
-    .dialog-btn-delete {
-        background: linear-gradient(135deg,#ef4444 0%,#dc2626 100%);
-        color: #fff;
-    }
-
-        .dialog-btn-delete:hover {
-            background: linear-gradient(135deg,#dc2626 0%,#b91c1c 100%);
-        }
-
-    .dialog-btn-recover {
-        background: linear-gradient(135deg,#10b981 0%,#059669 100%);
-        color: #fff;
-    }
-
-        .dialog-btn-recover:hover {
-            background: linear-gradient(135deg,#059669 0%,#047857 100%);
-        }
 
     @@media (max-width:1400px) {
         .filters-grid {

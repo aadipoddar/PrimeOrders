@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
@@ -7,7 +9,6 @@ using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
 
@@ -28,11 +29,10 @@ public partial class ProductLocationPage : IAsyncDisposable
     private string _selectedProductName = string.Empty;
 
     private SfGrid<ProductLocationOverviewModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
 
     private int _deleteProductLocationId = 0;
     private string _deleteProductLocationName = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -164,26 +164,24 @@ public partial class ProductLocationPage : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void ShowDeleteConfirmation(int id, string name)
+    private async Task ShowDeleteConfirmation(int id, string name)
     {
         _deleteProductLocationId = id;
         _deleteProductLocationName = name;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteProductLocationId = 0;
         _deleteProductLocationName = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
-    private async void ConfirmDelete()
+    private async Task ConfirmDelete()
     {
         _isProcessing = true;
-        _isDeleteDialogVisible = false;
+        await _deleteConfirmationDialog.HideAsync();
         StateHasChanged();
 
         try

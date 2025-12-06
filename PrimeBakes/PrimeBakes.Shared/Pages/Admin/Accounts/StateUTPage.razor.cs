@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
@@ -22,16 +23,14 @@ public partial class StateUTPage : IAsyncDisposable
     private List<StateUTModel> _stateUTs = [];
 
     private SfGrid<StateUTModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
-    private SfDialog _recoverConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
+    private RecoverConfirmationDialog _recoverConfirmationDialog;
 
     private int _deleteStateUTId = 0;
     private string _deleteStateUTName = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private int _recoverStateUTId = 0;
     private string _recoverStateUTName = string.Empty;
-    private bool _isRecoverDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -83,20 +82,18 @@ public partial class StateUTPage : IAsyncDisposable
 
         StateHasChanged();
     }
-    private void ShowDeleteConfirmation(int id, string name)
+    private async Task ShowDeleteConfirmation(int id, string name)
     {
         _deleteStateUTId = id;
         _deleteStateUTName = name;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteStateUTId = 0;
         _deleteStateUTName = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
     private async Task ConfirmDelete()
@@ -104,7 +101,7 @@ public partial class StateUTPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isDeleteDialogVisible = false;
+            await _deleteConfirmationDialog.HideAsync();
 
             var stateUT = _stateUTs.FirstOrDefault(g => g.Id == _deleteStateUTId);
             if (stateUT == null)
@@ -131,20 +128,18 @@ public partial class StateUTPage : IAsyncDisposable
         }
     }
 
-    private void ShowRecoverConfirmation(int id, string name)
+    private async Task ShowRecoverConfirmation(int id, string name)
     {
         _recoverStateUTId = id;
         _recoverStateUTName = name;
-        _isRecoverDialogVisible = true;
-        StateHasChanged();
+        await _recoverConfirmationDialog.ShowAsync();
     }
 
-    private void CancelRecover()
+    private async Task CancelRecover()
     {
         _recoverStateUTId = 0;
         _recoverStateUTName = string.Empty;
-        _isRecoverDialogVisible = false;
-        StateHasChanged();
+        await _recoverConfirmationDialog.HideAsync();
     }
 
     private async Task ToggleDeleted()
@@ -159,7 +154,7 @@ public partial class StateUTPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isRecoverDialogVisible = false;
+            await _recoverConfirmationDialog.HideAsync();
 
             var stateUT = _stateUTs.FirstOrDefault(g => g.Id == _recoverStateUTId);
             if (stateUT == null)

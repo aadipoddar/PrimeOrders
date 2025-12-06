@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
@@ -22,16 +23,14 @@ public partial class AccountTypePage : IAsyncDisposable
 	private List<AccountTypeModel> _accountTypes = [];
 
 	private SfGrid<AccountTypeModel> _sfGrid;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteAccountTypeId = 0;
 	private string _deleteAccountTypeName = string.Empty;
-	private bool _isDeleteDialogVisible = false;
 
 	private int _recoverAccountTypeId = 0;
 	private string _recoverAccountTypeName = string.Empty;
-	private bool _isRecoverDialogVisible = false;
 
 	private ToastNotification _toastNotification;
 
@@ -83,20 +82,18 @@ public partial class AccountTypePage : IAsyncDisposable
 		StateHasChanged();
 	}
 
-	private void ShowDeleteConfirmation(int id, string name)
+	private async Task ShowDeleteConfirmation(int id, string name)
 	{
 		_deleteAccountTypeId = id;
 		_deleteAccountTypeName = name;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteAccountTypeId = 0;
 		_deleteAccountTypeName = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task ConfirmDelete()
@@ -104,7 +101,7 @@ public partial class AccountTypePage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 
 			var accountType = _accountTypes.FirstOrDefault(at => at.Id == _deleteAccountTypeId);
 			if (accountType == null)
@@ -131,20 +128,18 @@ public partial class AccountTypePage : IAsyncDisposable
 		}
 	}
 
-	private void ShowRecoverConfirmation(int id, string name)
+	private async Task ShowRecoverConfirmation(int id, string name)
 	{
 		_recoverAccountTypeId = id;
 		_recoverAccountTypeName = name;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverAccountTypeId = 0;
 		_recoverAccountTypeName = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()
@@ -159,7 +154,7 @@ public partial class AccountTypePage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 
 			var accountType = _accountTypes.FirstOrDefault(at => at.Id == _recoverAccountTypeId);
 			if (accountType == null)

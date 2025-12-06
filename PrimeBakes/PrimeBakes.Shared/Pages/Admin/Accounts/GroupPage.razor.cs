@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Accounts.Masters;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
@@ -22,16 +23,14 @@ public partial class GroupPage : IAsyncDisposable
 	private List<GroupModel> _groups = [];
 
 	private SfGrid<GroupModel> _sfGrid;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteGroupId = 0;
 	private string _deleteGroupName = string.Empty;
-	private bool _isDeleteDialogVisible = false;
 
 	private int _recoverGroupId = 0;
 	private string _recoverGroupName = string.Empty;
-	private bool _isRecoverDialogVisible = false;
 
 	private ToastNotification _toastNotification;
 
@@ -83,20 +82,18 @@ public partial class GroupPage : IAsyncDisposable
 		StateHasChanged();
 	}
 
-	private void ShowDeleteConfirmation(int id, string name)
+	private async Task ShowDeleteConfirmation(int id, string name)
 	{
 		_deleteGroupId = id;
 		_deleteGroupName = name;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteGroupId = 0;
 		_deleteGroupName = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task ConfirmDelete()
@@ -104,7 +101,7 @@ public partial class GroupPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 
 			var group = _groups.FirstOrDefault(g => g.Id == _deleteGroupId);
 			if (group == null)
@@ -131,20 +128,18 @@ public partial class GroupPage : IAsyncDisposable
 		}
 	}
 
-	private void ShowRecoverConfirmation(int id, string name)
+	private async Task ShowRecoverConfirmation(int id, string name)
 	{
 		_recoverGroupId = id;
 		_recoverGroupName = name;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverGroupId = 0;
 		_recoverGroupName = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()
@@ -159,7 +154,7 @@ public partial class GroupPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 
 			var group = _groups.FirstOrDefault(g => g.Id == _recoverGroupId);
 			if (group == null)

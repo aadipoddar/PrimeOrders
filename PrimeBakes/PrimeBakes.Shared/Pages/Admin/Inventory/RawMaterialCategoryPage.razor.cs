@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
 
@@ -22,16 +23,14 @@ public partial class RawMaterialCategoryPage : IAsyncDisposable
 	private List<RawMaterialCategoryModel> _rawMaterialCategories = [];
 
 	private SfGrid<RawMaterialCategoryModel> _sfGrid;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteRawMaterialCategoryId = 0;
 	private string _deleteRawMaterialCategoryName = string.Empty;
-	private bool _isDeleteDialogVisible = false;
 
 	private int _recoverRawMaterialCategoryId = 0;
 	private string _recoverRawMaterialCategoryName = string.Empty;
-	private bool _isRecoverDialogVisible = false;
 
 	private ToastNotification _toastNotification;
 
@@ -83,20 +82,18 @@ public partial class RawMaterialCategoryPage : IAsyncDisposable
 		StateHasChanged();
 	}
 
-	private void ShowDeleteConfirmation(int id, string name)
+	private async Task ShowDeleteConfirmation(int id, string name)
 	{
 		_deleteRawMaterialCategoryId = id;
 		_deleteRawMaterialCategoryName = name;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteRawMaterialCategoryId = 0;
 		_deleteRawMaterialCategoryName = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task ConfirmDelete()
@@ -104,7 +101,7 @@ public partial class RawMaterialCategoryPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 
 			var rawMaterialCategory = _rawMaterialCategories.FirstOrDefault(l => l.Id == _deleteRawMaterialCategoryId);
 			if (rawMaterialCategory == null)
@@ -131,20 +128,18 @@ public partial class RawMaterialCategoryPage : IAsyncDisposable
 		}
 	}
 
-	private void ShowRecoverConfirmation(int id, string name)
+	private async Task ShowRecoverConfirmation(int id, string name)
 	{
 		_recoverRawMaterialCategoryId = id;
 		_recoverRawMaterialCategoryName = name;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverRawMaterialCategoryId = 0;
 		_recoverRawMaterialCategoryName = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()
@@ -159,7 +154,7 @@ public partial class RawMaterialCategoryPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 
 			var rawMaterialCategory = _rawMaterialCategories.FirstOrDefault(l => l.Id == _recoverRawMaterialCategoryId);
 			if (rawMaterialCategory == null)

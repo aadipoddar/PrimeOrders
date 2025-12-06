@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Sales.Product;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Sales.Product;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Products;
 
@@ -22,16 +23,14 @@ public partial class TaxPage : IAsyncDisposable
     private List<TaxModel> _taxes = [];
 
     private SfGrid<TaxModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
-    private SfDialog _recoverConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
+    private RecoverConfirmationDialog _recoverConfirmationDialog;
 
     private int _deleteTaxId = 0;
     private string _deleteTaxCode = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private int _recoverTaxId = 0;
     private string _recoverTaxCode = string.Empty;
-    private bool _isRecoverDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -88,20 +87,18 @@ public partial class TaxPage : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void ShowDeleteConfirmation(int id, string code)
+    private async Task ShowDeleteConfirmation(int id, string code)
     {
         _deleteTaxId = id;
         _deleteTaxCode = code;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteTaxId = 0;
         _deleteTaxCode = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
     private async Task ConfirmDelete()
@@ -109,7 +106,7 @@ public partial class TaxPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isDeleteDialogVisible = false;
+            await _deleteConfirmationDialog.HideAsync();
 
             var tax = _taxes.FirstOrDefault(t => t.Id == _deleteTaxId);
             if (tax == null)
@@ -136,20 +133,18 @@ public partial class TaxPage : IAsyncDisposable
         }
     }
 
-    private void ShowRecoverConfirmation(int id, string code)
+    private async Task ShowRecoverConfirmation(int id, string code)
     {
         _recoverTaxId = id;
         _recoverTaxCode = code;
-        _isRecoverDialogVisible = true;
-        StateHasChanged();
+        await _recoverConfirmationDialog.ShowAsync();
     }
 
-    private void CancelRecover()
+    private async Task CancelRecover()
     {
         _recoverTaxId = 0;
         _recoverTaxCode = string.Empty;
-        _isRecoverDialogVisible = false;
-        StateHasChanged();
+        await _recoverConfirmationDialog.HideAsync();
     }
 
     private async Task ToggleDeleted()
@@ -164,7 +159,7 @@ public partial class TaxPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isRecoverDialogVisible = false;
+            await _recoverConfirmationDialog.HideAsync();
 
             var tax = _taxes.FirstOrDefault(t => t.Id == _recoverTaxId);
             if (tax == null)

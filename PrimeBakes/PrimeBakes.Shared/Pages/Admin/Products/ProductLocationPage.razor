@@ -153,64 +153,14 @@ else
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <SfDialog @ref="_deleteConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-              @bind-Visible="_isDeleteDialogVisible">
-        <DialogTemplates>
-            <Header>
-                <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                         style="color: #ef4444;">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                    <span style="font-size: 18px; font-weight: 600; color: #0f172a;">Confirm Delete</span>
-                </div>
-            </Header>
-            <Content>
-                <div style="padding: 24px;">
-                    <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
-                        Are you sure you want to delete this product location?
-                    </p>
-                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                        <p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">
-                            Product Location Details:
-                        </p>
-                        <p style="margin: 0; font-size: 13px; color: #7f1d1d; line-height: 1.5;">
-                            <strong>Name:</strong> @_deleteProductLocationName
-                        </p>
-                    </div>
-                    <div style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
-                        <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
-                            <strong>Note:</strong> This product location will be marked as deleted. You can recover it
-                            later.
-                        </p>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <button class="dialog-btn dialog-btn-cancel" @onclick="CancelDelete" disabled="@_isProcessing">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                            <span>Cancel</span>
-                        </button>
-                        <button class="dialog-btn dialog-btn-delete" @onclick="ConfirmDelete" disabled="@_isProcessing">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                <line x1="10" y1="11" x2="10" y2="17" />
-                                <line x1="14" y1="11" x2="14" y2="17" />
-                            </svg>
-                            <span>Delete</span>
-                        </button>
-                    </div>
-                </div>
-            </Content>
-        </DialogTemplates>
-    </SfDialog>
+    <DeleteConfirmationDialog @ref="_deleteConfirmationDialog"
+                              EntityName="Product Location"
+                              IdentifierLabel="Name"
+                              IdentifierValue="@_deleteProductLocationName"
+                              IsPermanentDelete="false"
+                              Disabled="@_isProcessing"
+                              OnConfirm="ConfirmDelete"
+                              OnCancel="CancelDelete" />
 
     <!-- Toast Notification -->
     <ToastNotification @ref="_toastNotification" />

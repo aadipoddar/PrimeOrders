@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Accounts;
 
@@ -22,16 +23,14 @@ public partial class FinancialYearPage : IAsyncDisposable
     private List<FinancialYearModel> _financialYears = [];
 
     private SfGrid<FinancialYearModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
-    private SfDialog _recoverConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
+    private RecoverConfirmationDialog _recoverConfirmationDialog;
 
     private int _deleteFinancialYearId = 0;
     private string _deleteFinancialYearName = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private int _recoverFinancialYearId = 0;
     private string _recoverFinancialYearName = string.Empty;
-    private bool _isRecoverDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -132,20 +131,18 @@ public partial class FinancialYearPage : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void ShowDeleteConfirmation(int id, string name)
+    private async Task ShowDeleteConfirmation(int id, string name)
     {
         _deleteFinancialYearId = id;
         _deleteFinancialYearName = name;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteFinancialYearId = 0;
         _deleteFinancialYearName = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
     private async Task ConfirmDelete()
@@ -153,7 +150,7 @@ public partial class FinancialYearPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isDeleteDialogVisible = false;
+            await _deleteConfirmationDialog.HideAsync();
 
             var financialYear = _financialYears.FirstOrDefault(g => g.Id == _deleteFinancialYearId);
             if (financialYear == null)
@@ -180,20 +177,18 @@ public partial class FinancialYearPage : IAsyncDisposable
         }
     }
 
-    private void ShowRecoverConfirmation(int id, string name)
+    private async Task ShowRecoverConfirmation(int id, string name)
     {
         _recoverFinancialYearId = id;
         _recoverFinancialYearName = name;
-        _isRecoverDialogVisible = true;
-        StateHasChanged();
+        await _recoverConfirmationDialog.ShowAsync();
     }
 
-    private void CancelRecover()
+    private async Task CancelRecover()
     {
         _recoverFinancialYearId = 0;
         _recoverFinancialYearName = string.Empty;
-        _isRecoverDialogVisible = false;
-        StateHasChanged();
+        await _recoverConfirmationDialog.HideAsync();
     }
 
     private async Task ToggleDeleted()
@@ -208,7 +203,7 @@ public partial class FinancialYearPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isRecoverDialogVisible = false;
+            await _recoverConfirmationDialog.HideAsync();
 
             var financialYear = _financialYears.FirstOrDefault(g => g.Id == _recoverFinancialYearId);
             if (financialYear == null)

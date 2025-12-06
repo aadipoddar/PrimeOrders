@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Kitchen;
 using PrimeBakesLibrary.DataAccess;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Kitchen;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Admin.Inventory;
 
@@ -22,16 +23,14 @@ public partial class KitchenPage : IAsyncDisposable
     private List<KitchenModel> _kitchens = [];
 
     private SfGrid<KitchenModel> _sfGrid;
-    private SfDialog _deleteConfirmationDialog;
-    private SfDialog _recoverConfirmationDialog;
+    private DeleteConfirmationDialog _deleteConfirmationDialog;
+    private RecoverConfirmationDialog _recoverConfirmationDialog;
 
     private int _deleteKitchenId = 0;
     private string _deleteKitchenName = string.Empty;
-    private bool _isDeleteDialogVisible = false;
 
     private int _recoverKitchenId = 0;
     private string _recoverKitchenName = string.Empty;
-    private bool _isRecoverDialogVisible = false;
 
     private ToastNotification _toastNotification;
 
@@ -83,20 +82,18 @@ public partial class KitchenPage : IAsyncDisposable
         StateHasChanged();
     }
 
-    private void ShowDeleteConfirmation(int id, string name)
+    private async Task ShowDeleteConfirmation(int id, string name)
     {
         _deleteKitchenId = id;
         _deleteKitchenName = name;
-        _isDeleteDialogVisible = true;
-        StateHasChanged();
+        await _deleteConfirmationDialog.ShowAsync();
     }
 
-    private void CancelDelete()
+    private async Task CancelDelete()
     {
         _deleteKitchenId = 0;
         _deleteKitchenName = string.Empty;
-        _isDeleteDialogVisible = false;
-        StateHasChanged();
+        await _deleteConfirmationDialog.HideAsync();
     }
 
     private async Task ConfirmDelete()
@@ -104,7 +101,7 @@ public partial class KitchenPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isDeleteDialogVisible = false;
+            await _deleteConfirmationDialog.HideAsync();
 
             var kitchen = _kitchens.FirstOrDefault(k => k.Id == _deleteKitchenId);
             if (kitchen == null)
@@ -131,20 +128,18 @@ public partial class KitchenPage : IAsyncDisposable
         }
     }
 
-    private void ShowRecoverConfirmation(int id, string name)
+    private async Task ShowRecoverConfirmation(int id, string name)
     {
         _recoverKitchenId = id;
         _recoverKitchenName = name;
-        _isRecoverDialogVisible = true;
-        StateHasChanged();
+        await _recoverConfirmationDialog.ShowAsync();
     }
 
-    private void CancelRecover()
+    private async Task CancelRecover()
     {
         _recoverKitchenId = 0;
         _recoverKitchenName = string.Empty;
-        _isRecoverDialogVisible = false;
-        StateHasChanged();
+        await _recoverConfirmationDialog.HideAsync();
     }
 
     private async Task ToggleDeleted()
@@ -159,7 +154,7 @@ public partial class KitchenPage : IAsyncDisposable
         try
         {
             _isProcessing = true;
-            _isRecoverDialogVisible = false;
+            await _recoverConfirmationDialog.HideAsync();
 
             var kitchen = _kitchens.FirstOrDefault(k => k.Id == _recoverKitchenId);
             if (kitchen == null)

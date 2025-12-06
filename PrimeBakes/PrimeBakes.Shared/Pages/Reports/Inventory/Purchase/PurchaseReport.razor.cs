@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
+using PrimeBakes.Shared.Components;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
 using PrimeBakesLibrary.Data.Inventory.Purchase;
@@ -11,7 +12,6 @@ using PrimeBakesLibrary.Models.Common;
 using PrimeBakesLibrary.Models.Inventory.Purchase;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 
 namespace PrimeBakes.Shared.Pages.Reports.Inventory.Purchase;
 
@@ -28,8 +28,6 @@ public partial class PurchaseReport : IAsyncDisposable
 	private bool _showAllColumns = false;
 	private bool _showTransactionReturns = false;
 	private bool _showDeleted = false;
-	private bool _isDeleteDialogVisible = false;
-	private bool _isRecoverDialogVisible = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -50,8 +48,8 @@ public partial class PurchaseReport : IAsyncDisposable
 	private int _recoverTransactionId = 0;
 
 	private ToastNotification _toastNotification;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	#region Load Data
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -587,7 +585,7 @@ public partial class PurchaseReport : IAsyncDisposable
 
 		try
 		{
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
@@ -646,7 +644,7 @@ public partial class PurchaseReport : IAsyncDisposable
 
 		try
 		{
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 			_isProcessing = true;
 			StateHasChanged();
 
@@ -743,36 +741,34 @@ public partial class PurchaseReport : IAsyncDisposable
 	private async Task NavigateBack() =>
 		NavigationManager.NavigateTo(PageRouteNames.InventoryDashboard);
 
-	private void ShowDeleteConfirmation(int id, string transactionNo)
+	private async Task ShowDeleteConfirmation(int id, string transactionNo)
 	{
 		_deleteTransactionId = id;
 		_deleteTransactionNo = transactionNo;
-		_isDeleteDialogVisible = true;
 		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteTransactionId = 0;
 		_deleteTransactionNo = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
-	private void ShowRecoverConfirmation(int id, string transactionNo)
+	private async Task ShowRecoverConfirmation(int id, string transactionNo)
 	{
 		_recoverTransactionId = id;
 		_recoverTransactionNo = transactionNo;
-		_isRecoverDialogVisible = true;
 		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverTransactionId = 0;
 		_recoverTransactionNo = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task StartAutoRefresh()

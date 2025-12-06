@@ -1,3 +1,5 @@
+using PrimeBakes.Shared.Components;
+
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.Masters;
 using PrimeBakesLibrary.Data.Common;
@@ -6,7 +8,6 @@ using PrimeBakesLibrary.Models.Accounts.Masters;
 using PrimeBakesLibrary.Models.Common;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 using PrimeBakesLibrary.Exporting.Operations;
 using PrimeBakesLibrary.Models.Sales.Product;
 using PrimeBakesLibrary.Data.Sales.Product;
@@ -26,16 +27,14 @@ public partial class LocationPage : IAsyncDisposable
 	private List<LocationModel> _locations = [];
 
 	private SfGrid<LocationModel> _sfGrid;
-	private SfDialog _deleteConfirmationDialog;
-	private SfDialog _recoverConfirmationDialog;
+	private DeleteConfirmationDialog _deleteConfirmationDialog;
+	private RecoverConfirmationDialog _recoverConfirmationDialog;
 
 	private int _deleteLocationId = 0;
 	private string _deleteLocationName = string.Empty;
-	private bool _isDeleteDialogVisible = false;
 
 	private int _recoverLocationId = 0;
 	private string _recoverLocationName = string.Empty;
-	private bool _isRecoverDialogVisible = false;
 
 	private ToastNotification _toastNotification;
 
@@ -89,20 +88,18 @@ public partial class LocationPage : IAsyncDisposable
 		StateHasChanged();
 	}
 
-	private void ShowDeleteConfirmation(int id, string name)
+	private async Task ShowDeleteConfirmation(int id, string name)
 	{
 		_deleteLocationId = id;
 		_deleteLocationName = name;
-		_isDeleteDialogVisible = true;
-		StateHasChanged();
+		await _deleteConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelDelete()
+	private async Task CancelDelete()
 	{
 		_deleteLocationId = 0;
 		_deleteLocationName = string.Empty;
-		_isDeleteDialogVisible = false;
-		StateHasChanged();
+		await _deleteConfirmationDialog.HideAsync();
 	}
 
 	private async Task ConfirmDelete()
@@ -110,7 +107,7 @@ public partial class LocationPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isDeleteDialogVisible = false;
+			await _deleteConfirmationDialog.HideAsync();
 
 			var location = _locations.FirstOrDefault(l => l.Id == _deleteLocationId);
 			if (location == null)
@@ -143,20 +140,18 @@ public partial class LocationPage : IAsyncDisposable
 		}
 	}
 
-	private void ShowRecoverConfirmation(int id, string name)
+	private async Task ShowRecoverConfirmation(int id, string name)
 	{
 		_recoverLocationId = id;
 		_recoverLocationName = name;
-		_isRecoverDialogVisible = true;
-		StateHasChanged();
+		await _recoverConfirmationDialog.ShowAsync();
 	}
 
-	private void CancelRecover()
+	private async Task CancelRecover()
 	{
 		_recoverLocationId = 0;
 		_recoverLocationName = string.Empty;
-		_isRecoverDialogVisible = false;
-		StateHasChanged();
+		await _recoverConfirmationDialog.HideAsync();
 	}
 
 	private async Task ToggleDeleted()
@@ -171,7 +166,7 @@ public partial class LocationPage : IAsyncDisposable
 		try
 		{
 			_isProcessing = true;
-			_isRecoverDialogVisible = false;
+			await _recoverConfirmationDialog.HideAsync();
 
 			var location = _locations.FirstOrDefault(l => l.Id == _recoverLocationId);
 			if (location == null)
