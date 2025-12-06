@@ -12,13 +12,19 @@
 }
 else
 {
-    <PageHeader Title="Sale Report" Subtitle="View and analyze sale transactions" ShowHome="true" ShowBack="true" OnHomeClick="NavigateToDashboard" OnBackClick="NavigateBack">
+    <PageHeader Title="Sale Report" Subtitle="View and analyze sale transactions" ShowHome="true" ShowBack="true"
+        OnHomeClick="NavigateToDashboard" OnBackClick="NavigateBack">
         <RightContent>
-            <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Title="Export to Excel (Ctrl + E)" Disabled="_isProcessing" OnClick="ExportExcel" />
-            <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Title="Export to PDF (Ctrl + P)" Disabled="_isProcessing" OnClick="ExportPdf" />
-            <IconButton Icon="IconType.Refresh" Title="Refresh Data (Ctrl + R)" Disabled="_isProcessing" OnClick="LoadTransactionOverviews" />
-            <IconButton Icon="IconType.Report" Title="Item Report (Ctrl + I)" Disabled="_isProcessing" OnClick="NavigateToItemReport" />
-            <IconButton Icon="IconType.New" Title="New Transaction (Ctrl + N)" Disabled="_isProcessing" OnClick="NavigateToTransactionPage" />
+            <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Title="Export to Excel (Ctrl + E)"
+                Disabled="_isProcessing" OnClick="ExportExcel" />
+            <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Title="Export to PDF (Ctrl + P)"
+                Disabled="_isProcessing" OnClick="ExportPdf" />
+            <IconButton Icon="IconType.Refresh" Title="Refresh Data (Ctrl + R)" Disabled="_isProcessing"
+                OnClick="LoadTransactionOverviews" />
+            <IconButton Icon="IconType.Report" Title="Item Report (Ctrl + I)" Disabled="_isProcessing"
+                OnClick="NavigateToItemReport" />
+            <IconButton Icon="IconType.New" Title="New Transaction (Ctrl + N)" Disabled="_isProcessing"
+                OnClick="NavigateToTransactionPage" />
         </RightContent>
     </PageHeader>
 
@@ -30,7 +36,7 @@ else
             <div class="section-header">
                 <div class="section-title-wrapper">
                     <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                     </svg>
                     <h2 class="section-title">Filters</h2>
@@ -43,7 +49,7 @@ else
                         <div class="form-field">
                             <label class="field-label">Date Range</label>
                             <SfDateRangePicker CssClass="custom-daterange" StartDate="_fromDate" EndDate="_toDate"
-                                               TValue="DateTime" Format="dd/MM/yyyy" AllowEdit="true" Placeholder="Select date range">
+                                TValue="DateTime" Format="dd/MM/yyyy" AllowEdit="true" Placeholder="Select date range">
                                 <DateRangePickerEvents TValue="DateTime" ValueChange="OnDateRangeChanged" />
                             </SfDateRangePicker>
                         </div>
@@ -54,10 +60,10 @@ else
                             <div class="form-field">
                                 <label class="field-label">Location</label>
                                 <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedLocation" TValue="LocationModel"
-                                                TItem="LocationModel" DataSource="@_locations" Placeholder="All Locations"
-                                                AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                    TItem="LocationModel" DataSource="@_locations" Placeholder="All Locations"
+                                    AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
                                     <AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
-                                                        ValueChange="OnLocationChanged" />
+                                        ValueChange="OnLocationChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />
                                 </SfAutoComplete>
                             </div>
@@ -66,10 +72,10 @@ else
                             <div class="form-field">
                                 <label class="field-label">Company</label>
                                 <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedCompany" TValue="CompanyModel"
-                                                TItem="CompanyModel" DataSource="@_companies" Placeholder="All Companies"
-                                                AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                    TItem="CompanyModel" DataSource="@_companies" Placeholder="All Companies"
+                                    AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
                                     <AutoCompleteEvents TItem="CompanyModel" TValue="CompanyModel"
-                                                        ValueChange="OnCompanyChanged" />
+                                        ValueChange="OnCompanyChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />
                                 </SfAutoComplete>
                             </div>
@@ -78,8 +84,8 @@ else
                             <div class="form-field">
                                 <label class="field-label">Party</label>
                                 <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedParty" TValue="LedgerModel"
-                                                TItem="LedgerModel" DataSource="@_parties" Placeholder="All Parties" AllowFiltering="true"
-                                                FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
+                                    TItem="LedgerModel" DataSource="@_parties" Placeholder="All Parties" AllowFiltering="true"
+                                    FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
                                     <AutoCompleteEvents TItem="LedgerModel" TValue="LedgerModel" ValueChange="OnPartyChanged" />
                                     <AutoCompleteFieldSettings Value="Name" />
                                 </SfAutoComplete>
@@ -98,7 +104,7 @@ else
             <div class="section-header">
                 <div class="section-title-wrapper">
                     <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="8" y1="6" x2="21" y2="6" />
                         <line x1="8" y1="12" x2="21" y2="12" />
                         <line x1="8" y1="18" x2="21" y2="18" />
@@ -110,9 +116,9 @@ else
                 </div>
                 <div class="header-actions">
                     <button class="btn-toggle-deleted @(_showDeleted ? "active" : "")" @onclick="ToggleDeleted"
-                            title="@(_showDeleted ? "Hide Deleted Items" : "Show Deleted Items")" disabled="@_isProcessing">
+                        title="@(_showDeleted ? "Hide Deleted Items" : "Show Deleted Items")" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6" />
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             <line x1="10" y1="11" x2="10" y2="17" />
@@ -121,18 +127,20 @@ else
                         @(_showDeleted ? "Hide Deleted" : "Show Deleted")
                     </button>
                     <button class="btn-toggle-returns @(_showSaleReturns ? "active" : "")" @onclick="ToggleSaleReturns"
-                            title="@(_showSaleReturns ? "Hide Sale Returns" : "Show Sale Returns")" disabled="@_isProcessing">
+                        title="@(_showSaleReturns ? "Hide Sale Returns" : "Show Sale Returns")" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 14 4 9 9 4" />
                             <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
                         </svg>
                         @(_showSaleReturns ? "Hide Returns" : "Show Returns")
                     </button>
-                    <button class="btn-toggle-transfers @(_showStockTransfers ? "active" : "")" @onclick="ToggleStockTransfers"
-                            title="@(_showStockTransfers ? "Hide Stock Transfers" : "Show Stock Transfers")" disabled="@_isProcessing">
+                    <button class="btn-toggle-transfers @(_showStockTransfers ? "active" : "")"
+                        @onclick="ToggleStockTransfers"
+                        title="@(_showStockTransfers ? "Hide Stock Transfers" : "Show Stock Transfers")"
+                        disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="17 2 21 6 17 10" />
                             <path d="M3 14v-2a4 4 0 0 1 4-4h14" />
                             <polyline points="7 22 3 18 7 14" />
@@ -140,23 +148,25 @@ else
                         </svg>
                         @(_showStockTransfers ? "Hide Transfers" : "Show Transfers")
                     </button>
-                    <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
+                    <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns"
+                        OnToggle="ToggleDetailsView" />
                 </div>
             </div>
             <div class="section-body grid-body">
                 <SfGrid ID="_sfGrid" @ref="_sfGrid" TValue="SaleOverviewModel" DataSource="_transactionOverviews"
-                        AllowTextWrap="true" AllowPaging="true" AllowSorting="true" AllowResizing="true" AllowFiltering="true"
-                        AllowExcelExport="true" AllowPdfExport="true" GridLines="GridLine.Horizontal"
-                        CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
+                    AllowTextWrap="true" AllowPaging="true" AllowSorting="true" AllowResizing="true" AllowFiltering="true"
+                    AllowExcelExport="true" AllowPdfExport="true" AllowGrouping="true" GridLines="GridLine.Horizontal"
+                    CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
 
-                    <GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
+                    <GridGroupSettings ShowDropArea="true" ShowGroupedColumn="true" ShowUngroupButton="true" />
+                    <GridPageSettings PageSize="20" PageSizes="@(new string[] { "10", "20", "50", "100", "All" })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 
                     <GridAggregates>
                         <GridAggregate>
                             <GridAggregateColumns>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.TransactionNo)"
-                                                     Type="AggregateType.Count">
+                                    Type="AggregateType.Count">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
@@ -165,150 +175,358 @@ else
                                             <strong>Total Items: @aggregate.Count</strong>
                                         </div>
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Items: @aggregate.Count</strong>
+                                        </div>
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Items: @aggregate.Count</strong>
+                                        </div>
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalItems)" Type="AggregateType.Sum"
-                                                     Format="N0">
+                                    Format="N0">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalQuantity)"
-                                                     Type="AggregateType.Sum" Format="N2">
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.BaseTotal)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                    Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.ItemDiscountAmount)"
-                                                     Type="AggregateType.Sum" Format="N2">
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
-                                <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalAfterItemDiscount)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalAfterItemDiscount)"
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
-                                <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalInclusiveTaxAmount)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalInclusiveTaxAmount)"
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
-                                <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalExtraTaxAmount)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalExtraTaxAmount)"
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalAfterTax)"
-                                                     Type="AggregateType.Sum" Format="N2">
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.OtherChargesAmount)"
-                                                     Type="AggregateType.Sum" Format="N2">
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.DiscountAmount)"
-                                                     Type="AggregateType.Sum" Format="N2">
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.RoundOffAmount)"
-                                                     Type="AggregateType.Sum" Format="N2">
+                                    Type="AggregateType.Sum" Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.TotalAmount)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                    Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.Cash)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                    Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.Card)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                    Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.UPI)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                    Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(SaleOverviewModel.Credit)" Type="AggregateType.Sum"
-                                                     Format="N2">
+                                    Format="N2">
                                     <FooterTemplate>
                                         @{
                                             var aggregate = (context as AggregateTemplateContext);
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                             </GridAggregateColumns>
                         </GridAggregate>
@@ -323,40 +541,63 @@ else
                                 <div class="grid-actions">
                                     @if (item.Status == false)
                                     {
-                                        <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Size="ButtonSize.Grid" Title="Download Excel Invoice (Alt + E)" Disabled="_isProcessing" OnClick="@(() => DownloadExcelInvoice(item.Id, item.TransactionNo))" />
-                                        <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Size="ButtonSize.Grid" Title="Download PDF Invoice (Alt + P)" Disabled="_isProcessing" OnClick="@(() => DownloadPdfInvoice(item.Id, item.TransactionNo))" />
+                                        <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Size="ButtonSize.Grid"
+                                            Title="Download Excel Invoice (Alt + E)" Disabled="_isProcessing"
+                                            OnClick="@(() => DownloadExcelInvoice(item.Id, item.TransactionNo))" />
+                                        <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Size="ButtonSize.Grid"
+                                            Title="Download PDF Invoice (Alt + P)" Disabled="_isProcessing"
+                                            OnClick="@(() => DownloadPdfInvoice(item.Id, item.TransactionNo))" />
 
                                         @if (_user.Admin && _user.LocationId == 1)
                                         {
-                                            <IconButton Icon="IconType.Recover" Variant="ButtonVariant.Recover" Size="ButtonSize.Grid" Title="Recover Transaction (Delete)" Disabled="_isProcessing" OnClick="@(() => ShowRecoverConfirmation(item.Id, item.TransactionNo))" />
+                                            <IconButton Icon="IconType.Recover" Variant="ButtonVariant.Recover"
+                                                Size="ButtonSize.Grid" Title="Recover Transaction (Delete)" Disabled="_isProcessing"
+                                                OnClick="@(() => ShowRecoverConfirmation(item.Id, item.TransactionNo))" />
                                         }
                                     }
                                     else
                                     {
-                                        <IconButton Icon="IconType.View" Variant="ButtonVariant.View" Size="ButtonSize.Grid" Title="View Transaction (Ctrl + O)" Disabled="_isProcessing" OnClick="@(() => ViewTransaction(item.Id, item.TransactionNo))" />
-                                        <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Size="ButtonSize.Grid" Title="Download Excel Invoice (Alt + E)" Disabled="_isProcessing" OnClick="@(() => DownloadExcelInvoice(item.Id, item.TransactionNo))" />
-                                        <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Size="ButtonSize.Grid" Title="Download PDF Invoice (Alt + P)" Disabled="_isProcessing" OnClick="@(() => DownloadPdfInvoice(item.Id, item.TransactionNo))" />
+                                        <IconButton Icon="IconType.View" Variant="ButtonVariant.View" Size="ButtonSize.Grid"
+                                            Title="View Transaction (Ctrl + O)" Disabled="_isProcessing"
+                                            OnClick="@(() => ViewTransaction(item.Id, item.TransactionNo))" />
+                                        <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Size="ButtonSize.Grid"
+                                            Title="Download Excel Invoice (Alt + E)" Disabled="_isProcessing"
+                                            OnClick="@(() => DownloadExcelInvoice(item.Id, item.TransactionNo))" />
+                                        <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Size="ButtonSize.Grid"
+                                            Title="Download PDF Invoice (Alt + P)" Disabled="_isProcessing"
+                                            OnClick="@(() => DownloadPdfInvoice(item.Id, item.TransactionNo))" />
 
                                         @if (_user.Admin && _user.LocationId == 1)
                                         {
-                                            <IconButton Icon="IconType.Delete" Variant="ButtonVariant.Delete" Size="ButtonSize.Grid" Title="Delete Transaction (Delete)" Disabled="_isProcessing" OnClick="@(() => ShowDeleteConfirmation(item.Id, item.TransactionNo))" />
+                                            <IconButton Icon="IconType.Delete" Variant="ButtonVariant.Delete" Size="ButtonSize.Grid"
+                                                Title="Delete Transaction (Delete)" Disabled="_isProcessing"
+                                                OnClick="@(() => ShowDeleteConfirmation(item.Id, item.TransactionNo))" />
                                         }
                                     }
                                 </div>
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(SaleOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150"
+                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
                         <GridColumn Field="@nameof(SaleOverviewModel.LocationName)" HeaderText="Location" Width="150" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.CompanyName)" HeaderText="Company" Width="180"
+                            Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(SaleOverviewModel.PartyName)" HeaderText="Party" Width="200" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CustomerName)" HeaderText="Customer" Width="180" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.OrderTransactionNo)" HeaderText="Order No" Width="150" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.ItemDiscountAmount)" HeaderText="Disc" Width="130" TextAlign="TextAlign.Right" Visible="_showAllColumns">
+                        <GridColumn Field="@nameof(SaleOverviewModel.CustomerName)" HeaderText="Customer" Width="180"
+                            Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.OrderTransactionNo)" HeaderText="Order No"
+                            Width="150" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150"
+                            Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalItems)" HeaderText="Items" Width="100"
+                            TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120"
+                            Format="N2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130"
+                            Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.ItemDiscountAmount)" HeaderText="Disc" Width="130"
+                            TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -364,14 +605,22 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterItemDiscount)" HeaderText="After Disc" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalExtraTaxAmount)" HeaderText="Extra Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesAmount)" HeaderText="Other Charges" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="130" Format="N2" TextAlign="TextAlign.Center" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountAmount)" HeaderText="Dis" Width="130" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterItemDiscount)" HeaderText="After Disc"
+                            Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl Tax"
+                            Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalExtraTaxAmount)" HeaderText="Extra Tax"
+                            Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="130"
+                            Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %"
+                            Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesAmount)" HeaderText="Other Charges"
+                            Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="130"
+                            Format="N2" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountAmount)" HeaderText="Dis" Width="130"
+                            TextAlign="TextAlign.Right">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -379,8 +628,10 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(SaleOverviewModel.RoundOffAmount)" HeaderText="Round Off" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAmount)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(SaleOverviewModel.RoundOffAmount)" HeaderText="Round Off" Width="120"
+                            Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAmount)" HeaderText="Total" Width="150"
+                            TextAlign="TextAlign.Right">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -389,7 +640,7 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(SaleOverviewModel.Cash)" HeaderText="Cash" Width="120"
-                                    TextAlign="TextAlign.Right" Visible="_showAllColumns">
+                            TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -398,7 +649,7 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(SaleOverviewModel.Card)" HeaderText="Card" Width="120"
-                                    TextAlign="TextAlign.Right" Visible="_showAllColumns">
+                            TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -407,7 +658,7 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(SaleOverviewModel.UPI)" HeaderText="UPI" Width="120"
-                                    TextAlign="TextAlign.Right" Visible="_showAllColumns">
+                            TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -416,7 +667,7 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(SaleOverviewModel.Credit)" HeaderText="Credit" Width="120"
-                                    TextAlign="TextAlign.Right" Visible="_showAllColumns">
+                            TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -424,14 +675,22 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(SaleOverviewModel.PaymentModes)" HeaderText="Payment Modes" Width="180" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160"                                     Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.PaymentModes)" HeaderText="Payment Modes"
+                            Width="180" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.Remarks)" HeaderText="Remarks" Width="200"
+                            Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.CreatedByName)" HeaderText="Created By" Width="150"
+                            Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.CreatedAt)" HeaderText="Created At" Width="160"
+                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform"
+                            Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedByUserName)" HeaderText="Modified By"
+                            Width="150" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160"
+                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedFromPlatform)"
+                            HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
                     </GridColumns>
                 </SfGrid>
             </div>
@@ -440,13 +699,13 @@ else
 }
 
 <SfDialog @ref="_deleteConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-          @bind-Visible="_isDeleteDialogVisible">
+    @bind-Visible="_isDeleteDialogVisible">
     <DialogTemplates>
         <Header>
             <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     style="color: #ef4444;">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="color: #ef4444;">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
                     <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -459,7 +718,8 @@ else
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
                     Are you sure you want to delete this transaction?
                 </p>
-                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <div
+                    style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                     <p style="margin: 0 0 8px 0; font-size: 14px; color: #991b1b; font-weight: 600;">
                         Transaction
                         Details:
@@ -468,7 +728,8 @@ else
                         <strong>Transaction No:</strong> @_deleteTransactionNo
                     </p>
                 </div>
-                <div style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                <div
+                    style="background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.6;">
                         <strong>Warning:</strong> This action cannot be undone. All associated data will be permanently
                         deleted.
@@ -477,7 +738,7 @@ else
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <button class="dialog-btn dialog-btn-cancel" @onclick="CancelDelete" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
@@ -485,7 +746,7 @@ else
                     </button>
                     <button class="dialog-btn dialog-btn-delete" @onclick="ConfirmDelete" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6" />
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             <line x1="10" y1="11" x2="10" y2="17" />
@@ -500,13 +761,13 @@ else
 </SfDialog>
 
 <SfDialog @ref="_recoverConfirmationDialog" Width="500px" IsModal="true" ShowCloseIcon="true"
-          @bind-Visible="_isRecoverDialogVisible">
+    @bind-Visible="_isRecoverDialogVisible">
     <DialogTemplates>
         <Header>
             <div style="display: flex; align-items: center; gap: 12px; padding: 4px 0;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     style="color: #10b981;">
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="color: #10b981;">
                     <polyline points="23 4 23 10 17 10"></polyline>
                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                 </svg>
@@ -518,7 +779,8 @@ else
                 <p style="margin: 0 0 16px 0; font-size: 15px; color: #334155; line-height: 1.6;">
                     Are you sure you want to recover this sale transaction?
                 </p>
-                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <div
+                    style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                     <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46; font-weight: 600;">
                         Transaction
                         Details:
@@ -527,7 +789,8 @@ else
                         <strong>Transaction No:</strong> @_recoverTransactionNo
                     </p>
                 </div>
-                <div style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
+                <div
+                    style="background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px; margin-bottom: 20px;">
                     <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.6;">
                         <strong>Note:</strong> This will restore the transaction and make it active again.
                     </p>
@@ -535,7 +798,7 @@ else
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <button class="dialog-btn dialog-btn-cancel" @onclick="CancelRecover" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                         </svg>
@@ -543,7 +806,7 @@ else
                     </button>
                     <button class="dialog-btn dialog-btn-recover" @onclick="ConfirmRecover" disabled="@_isProcessing">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="23 4 23 10 17 10"></polyline>
                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                         </svg>
@@ -635,82 +898,82 @@ else
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-        .btn-toggle-returns:hover {
-            background: #fef2f2;
-            border-color: #ef4444;
-            color: #ef4444;
-            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-            transform: translateY(-1px);
-        }
+    .btn-toggle-returns:hover {
+        background: #fef2f2;
+        border-color: #ef4444;
+        color: #ef4444;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+        transform: translateY(-1px);
+    }
 
-        .btn-toggle-returns.active {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            border-color: #dc2626;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
-        }
+    .btn-toggle-returns.active {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border-color: #dc2626;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+    }
 
-            .btn-toggle-returns.active:hover {
-                background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-            }
+    .btn-toggle-returns.active:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    }
 
-        .btn-toggle-returns:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+    .btn-toggle-returns:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .btn-toggle-returns svg {
-            flex-shrink: 0;
-        }
+    .btn-toggle-returns svg {
+        flex-shrink: 0;
+    }
 
-        /* Toggle Transfers Button */
-        .btn-toggle-transfers {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            height: 38px;
-            padding: 0 20px;
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #64748b;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+    /* Toggle Transfers Button */
+    .btn-toggle-transfers {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 20px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #64748b;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .btn-toggle-transfers:hover {
-            background: #f0f9ff;
-            border-color: #0ea5e9;
-            color: #0ea5e9;
-            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
-            transform: translateY(-1px);
-        }
+    .btn-toggle-transfers:hover {
+        background: #f0f9ff;
+        border-color: #0ea5e9;
+        color: #0ea5e9;
+        box-shadow: 0 2px 6px rgba(14, 165, 233, 0.2);
+        transform: translateY(-1px);
+    }
 
-        .btn-toggle-transfers.active {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-            border-color: #0284c7;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
-        }
+    .btn-toggle-transfers.active {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        border-color: #0284c7;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
+    }
 
-        .btn-toggle-transfers.active:hover {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
-        }
+    .btn-toggle-transfers.active:hover {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+    }
 
-        .btn-toggle-transfers:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+    .btn-toggle-transfers:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .btn-toggle-transfers svg {
-            flex-shrink: 0;
-        }
+    .btn-toggle-transfers svg {
+        flex-shrink: 0;
+    }
 
     /* Toggle Deleted Button */
     .btn-toggle-deleted {
@@ -731,34 +994,34 @@ else
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-        .btn-toggle-deleted:hover {
-            background: #fef2f2;
-            border-color: #f97316;
-            color: #f97316;
-            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
-            transform: translateY(-1px);
-        }
+    .btn-toggle-deleted:hover {
+        background: #fef2f2;
+        border-color: #f97316;
+        color: #f97316;
+        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
+        transform: translateY(-1px);
+    }
 
-        .btn-toggle-deleted.active {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            border-color: #ea580c;
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
-        }
+    .btn-toggle-deleted.active {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        border-color: #ea580c;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+    }
 
-            .btn-toggle-deleted.active:hover {
-                background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-                box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
-            }
+    .btn-toggle-deleted.active:hover {
+        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+    }
 
-        .btn-toggle-deleted:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+    .btn-toggle-deleted:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .btn-toggle-deleted svg {
-            flex-shrink: 0;
-        }
+    .btn-toggle-deleted svg {
+        flex-shrink: 0;
+    }
 
     .section-body {
         padding: 24px;
@@ -805,111 +1068,111 @@ else
         border: none;
     }
 
-        ::deep .professional-grid .e-gridheader {
-            background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-            border-bottom: 2px solid #e2e8f0;
-        }
+    ::deep .professional-grid .e-gridheader {
+        background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 2px solid #e2e8f0;
+    }
 
-        ::deep .professional-grid .e-headercell {
-            background: transparent;
-            color: #475569;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border-right: 1px solid #e2e8f0;
-            padding: 12px 8px;
-        }
+    ::deep .professional-grid .e-headercell {
+        background: transparent;
+        color: #475569;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-right: 1px solid #e2e8f0;
+        padding: 12px 8px;
+    }
 
-            ::deep .professional-grid .e-headercell:last-child {
-                border-right: none;
-            }
+    ::deep .professional-grid .e-headercell:last-child {
+        border-right: none;
+    }
 
-        ::deep .professional-grid .e-gridcontent {
-            background: #ffffff;
-        }
+    ::deep .professional-grid .e-gridcontent {
+        background: #ffffff;
+    }
 
-        ::deep .professional-grid .e-row {
-            transition: background-color 0.2s ease;
-        }
+    ::deep .professional-grid .e-row {
+        transition: background-color 0.2s ease;
+    }
 
-            ::deep .professional-grid .e-row:hover {
-                background-color: #f8fafc;
-            }
+    ::deep .professional-grid .e-row:hover {
+        background-color: #f8fafc;
+    }
 
-            ::deep .professional-grid .e-row.e-altrow {
-                background-color: #fafbfc;
-            }
+    ::deep .professional-grid .e-row.e-altrow {
+        background-color: #fafbfc;
+    }
 
-                ::deep .professional-grid .e-row.e-altrow:hover {
-                    background-color: #f8fafc;
-                }
+    ::deep .professional-grid .e-row.e-altrow:hover {
+        background-color: #f8fafc;
+    }
 
-        ::deep .professional-grid .e-rowcell {
-            border-right: 1px solid #f1f5f9;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 10px 8px;
-            font-size: 13px;
-            color: #1e293b;
-        }
+    ::deep .professional-grid .e-rowcell {
+        border-right: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 10px 8px;
+        font-size: 13px;
+        color: #1e293b;
+    }
 
-            ::deep .professional-grid .e-rowcell:last-child {
-                border-right: none;
-            }
+    ::deep .professional-grid .e-rowcell:last-child {
+        border-right: none;
+    }
 
-        /* Grid Pager Styling */
-        ::deep .professional-grid .e-gridpager {
-            background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-            border-top: 2px solid #e2e8f0;
-            padding: 12px 16px;
-        }
+    /* Grid Pager Styling */
+    ::deep .professional-grid .e-gridpager {
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+        border-top: 2px solid #e2e8f0;
+        padding: 12px 16px;
+    }
 
-            ::deep .professional-grid .e-gridpager .e-pagercontainer {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
+    ::deep .professional-grid .e-gridpager .e-pagercontainer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-            ::deep .professional-grid .e-gridpager .e-numericitem,
-            ::deep .professional-grid .e-gridpager .e-currentitem {
-                min-width: 32px;
-                height: 32px;
-                border-radius: 6px;
-                margin: 0 4px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 13px;
-                font-weight: 500;
-                transition: all 0.2s ease;
-            }
+    ::deep .professional-grid .e-gridpager .e-numericitem,
+    ::deep .professional-grid .e-gridpager .e-currentitem {
+        min-width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        margin: 0 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
 
-            ::deep .professional-grid .e-gridpager .e-numericitem {
-                background: #ffffff;
-                color: #64748b;
-                border: 1px solid #e2e8f0;
-            }
+    ::deep .professional-grid .e-gridpager .e-numericitem {
+        background: #ffffff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
 
-                ::deep .professional-grid .e-gridpager .e-numericitem:hover {
-                    background: #f8fafc;
-                    color: #3b82f6;
-                    border-color: #3b82f6;
-                }
+    ::deep .professional-grid .e-gridpager .e-numericitem:hover {
+        background: #f8fafc;
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
 
-            ::deep .professional-grid .e-gridpager .e-currentitem {
-                background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-                color: #ffffff;
-                border: none;
-                box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-            }
+    ::deep .professional-grid .e-gridpager .e-currentitem {
+        background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
 
-        /* Empty Grid State */
-        ::deep .professional-grid .e-emptyrow {
-            text-align: center;
-            padding: 48px 24px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
+    /* Empty Grid State */
+    ::deep .professional-grid .e-emptyrow {
+        text-align: center;
+        padding: 48px 24px;
+        color: #94a3b8;
+        font-size: 14px;
+    }
 
     /* Grid Cell Text Coloring */
     .grid-discount {
@@ -936,9 +1199,9 @@ else
         border-right: 1px solid #cbd5e1;
     }
 
-        ::deep .professional-grid .e-summarycell:last-child {
-            border-right: none;
-        }
+    ::deep .professional-grid .e-summarycell:last-child {
+        border-right: none;
+    }
 
     .aggregate-value.aggregate-discount {
         color: #dc2626;
@@ -949,9 +1212,9 @@ else
         font-size: 14px;
     }
 
-        .aggregate-value.aggregate-total strong {
-            font-size: 15px;
-        }
+    .aggregate-value.aggregate-total strong {
+        font-size: 15px;
+    }
 
     /* Dialog Button Styles */
     .dialog-btn {
@@ -969,19 +1232,19 @@ else
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     }
 
-        .dialog-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-        }
+    .dialog-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
 
-        .dialog-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-        }
+    .dialog-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
 
-        .dialog-btn svg {
-            flex-shrink: 0;
-        }
+    .dialog-btn svg {
+        flex-shrink: 0;
+    }
 
     .dialog-btn-cancel {
         background: #ffffff;
@@ -989,29 +1252,29 @@ else
         border: 2px solid #e2e8f0;
     }
 
-        .dialog-btn-cancel:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-            color: #475569;
-        }
+    .dialog-btn-cancel:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
 
     .dialog-btn-delete {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
     }
 
-        .dialog-btn-delete:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-        }
+    .dialog-btn-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
 
     .dialog-btn-recover {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
     }
 
-        .dialog-btn-recover:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
+    .dialog-btn-recover:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
 
     /* Responsive Design */
     @@media (max-width: 1400px) {

@@ -201,10 +201,11 @@ else
                 <SfGrid ID="_sfGrid" @ref="_sfGrid" TValue="AccountingLedgerOverviewModel"
                         DataSource="_transactionOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
                         AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
-                        GridLines="GridLine.Horizontal" CssClass="professional-grid"
+                        GridLines="GridLine.Horizontal" CssClass="professional-grid" AllowGrouping="true"
                         Toolbar="@(new List<string>() { "Search" })">
 
-                    <GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
+                    <GridGroupSettings ShowDropArea="true" ShowGroupedColumn="true" ShowUngroupButton="true" />
+                    <GridPageSettings PageSize="20" PageSizes="@(new string[] { "10", "20", "50", "100", "All" })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 
                     <GridAggregates>
@@ -220,6 +221,22 @@ else
                                             <strong>Total Entries: @aggregate.Count</strong>
                                         </div>
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Entries: @aggregate.Count</strong>
+                                        </div>
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Entries: @aggregate.Count</strong>
+                                        </div>
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.Debit)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -229,6 +246,18 @@ else
                                             <div class="aggregate-value aggregate-debit"><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-debit"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-debit"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.Credit)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -238,6 +267,18 @@ else
                                             <div class="aggregate-value aggregate-credit"><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-credit"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-credit"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(AccountingLedgerOverviewModel.ReferenceAmount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -247,6 +288,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                             </GridAggregateColumns>
                         </GridAggregate>

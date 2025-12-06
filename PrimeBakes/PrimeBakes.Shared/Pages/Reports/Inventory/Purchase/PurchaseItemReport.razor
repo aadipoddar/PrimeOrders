@@ -114,9 +114,10 @@ else
                         DataSource="_transactionOverviews" AllowTextWrap="true" AllowPaging="true" AllowSorting="true"
                         AllowResizing="true" AllowFiltering="true" AllowExcelExport="true" AllowPdfExport="true"
                         GridLines="GridLine.Horizontal" CssClass="professional-grid"
-                        Toolbar="@(new List<string>() { "Search" })">
+                        Toolbar="@(new List<string>() { "Search" })" AllowGrouping="true">
 
-                    <GridPageSettings PageSize="20" PageSizes="new int[] { 10, 20, 50, 100 }" />
+                    <GridGroupSettings ShowDropArea="true" ShowGroupedColumn="true" ShowUngroupButton="true" />
+                    <GridPageSettings PageSize="20" PageSizes="@(new string[] { "10", "20", "50", "100", "All" })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
 
                     <GridAggregates>
@@ -132,6 +133,22 @@ else
                                             <strong>Total Items: @aggregate.Count</strong>
                                         </div>
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Items: @aggregate.Count</strong>
+                                        </div>
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                        }
+                                        <div class="aggregate-label">
+                                            <strong>Total Items: @aggregate.Count</strong>
+                                        </div>
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.Quantity)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -141,6 +158,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.BaseTotal)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -150,6 +179,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.DiscountAmount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -161,6 +202,22 @@ else
                                             </div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-discount">
+                                                <strong>@aggregate.Sum</strong>
+                                            </div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-discount">
+                                                <strong>@aggregate.Sum</strong>
+                                            </div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.AfterDiscount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -170,6 +227,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.SGSTAmount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -179,6 +248,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.CGSTAmount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -188,6 +269,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.IGSTAmount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -197,6 +290,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.TotalTaxAmount)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -206,6 +311,18 @@ else
                                             <div><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.Total)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -215,6 +332,18 @@ else
                                             <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                                 <GridAggregateColumn Field="@nameof(PurchaseItemOverviewModel.NetTotal)"
                                                      Type="AggregateType.Sum" Format="N2">
@@ -224,6 +353,18 @@ else
                                             <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
                                         }
                                     </FooterTemplate>
+                                    <GroupFooterTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupFooterTemplate>
+                                    <GroupCaptionTemplate>
+                                        @{
+                                            var aggregate = (context as AggregateTemplateContext);
+                                            <div class="aggregate-value aggregate-total"><strong>@aggregate.Sum</strong></div>
+                                        }
+                                    </GroupCaptionTemplate>
                                 </GridAggregateColumn>
                             </GridAggregateColumns>
                         </GridAggregate>

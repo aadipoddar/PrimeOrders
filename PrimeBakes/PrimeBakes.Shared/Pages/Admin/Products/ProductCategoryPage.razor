@@ -86,7 +86,7 @@ else
             <div class="section-body grid-body">
                 <SfGrid @ref="_sfGrid" DataSource="@_productCategories" AllowPaging="true" AllowSorting="true" AllowFiltering="true"
                         AllowResizing="true" CssClass="professional-grid" Toolbar="@(new List<string>() { "Search" })">
-                    <GridPageSettings PageSize="20" PageSizes="@(new int[] { 20, 50, 100, 200 })" />
+                    <GridPageSettings PageSize="20" PageSizes="@(new string[] { "20", "50", "100", "200", "All" })" />
                     <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel" />
                     <GridColumns>
                         <GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center" AllowFiltering="false">
