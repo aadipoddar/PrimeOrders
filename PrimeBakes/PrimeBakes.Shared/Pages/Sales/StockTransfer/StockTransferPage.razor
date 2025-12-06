@@ -19,58 +19,15 @@ else
 		OnHomeClick="NavigateToDashboard"
 		OnBackClick="NavigateBack">
 		<RightContent>
-			<button class="btn-icon btn-icon-save" @onclick="SaveTransaction" title="Save Transaction (Ctrl + S)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-					<polyline points="17 21 17 13 7 13 7 21" />
-					<polyline points="7 3 7 8 15 8" />
-				</svg>
-			</button>
+			<IconButton Icon="IconType.Save" Variant="ButtonVariant.Save" Title="Save Transaction (Ctrl + S)" Disabled="_isProcessing" OnClick="SaveTransaction" />
 			@if (Id.HasValue && Id.Value > 0)
 			{
-				<button class="btn-icon btn-icon-excel" @onclick="DownloadExcelInvoice" title="Download Excel Transfer Note (Alt+E)" disabled="@_isProcessing">
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-						 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-						<polyline points="14 2 14 8 20 8" />
-						<line x1="16" y1="13" x2="8" y2="13" />
-						<line x1="16" y1="17" x2="8" y2="17" />
-						<polyline points="10 9 9 9 8 9" />
-					</svg>
-				</button>
-				<button class="btn-icon btn-icon-pdf" @onclick="DownloadPdfInvoice" title="Download PDF Transfer Note (Alt+P)" disabled="@_isProcessing">
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-						 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-						<polyline points="14 2 14 8 20 8" />
-						<line x1="16" y1="13" x2="8" y2="13" />
-						<line x1="16" y1="17" x2="8" y2="17" />
-						<line x1="10" y1="9" x2="8" y2="9" />
-					</svg>
-				</button>
+				<IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Title="Download Excel Transfer Note (Alt+E)" Disabled="_isProcessing" OnClick="DownloadExcelInvoice" />
+				<IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Title="Download PDF Transfer Note (Alt+P)" Disabled="_isProcessing" OnClick="DownloadPdfInvoice" />
 			}
-			<button class="btn-icon" @onclick="NavigateToTransactionHistoryPage" title="Transaction History (Ctrl + H)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="12" cy="12" r="10" />
-					<polyline points="12 6 12 12 16 14" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="NavigateToItemReport" title="Item Report (Ctrl + I)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-					<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="ResetPage" title="New Transaction (Ctrl + N)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="12" y1="5" x2="12" y2="19" />
-					<line x1="5" y1="12" x2="19" y2="12" />
-				</svg>
-			</button>
+			<IconButton Icon="IconType.History" Title="Transaction History (Ctrl + H)" Disabled="_isProcessing" OnClick="NavigateToTransactionHistoryPage" />
+			<IconButton Icon="IconType.Report" Title="Item Report (Ctrl + I)" Disabled="_isProcessing" OnClick="NavigateToItemReport" />
+			<IconButton Icon="IconType.New" Title="New Transaction (Ctrl + N)" Disabled="_isProcessing" OnClick="ResetPage" />
 		</RightContent>
 	</PageHeader>
 
@@ -443,14 +400,7 @@ else
 
 					<!-- Add Button -->
 					<div class="amount-field amount-field-button">
-						<button class="btn-add" @onclick="AddItemToCart">
-							<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-								 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
-							<span>Add</span>
-						</button>
+						<IconButton Icon="IconType.Add" Variant="ButtonVariant.Add" Text="Add" Title="Add to Cart" OnClick="AddItemToCart" />
 					</div>
 				</div>
 			</div>
@@ -597,24 +547,8 @@ else
 								@{
 									var item = (context as dynamic);
 									<div class="grid-actions">
-										<button class="btn-grid-action btn-edit" @onclick="@(() => EditCartItem(item))" title="Edit Item (Insert)">
-											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-												 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-												 stroke-linejoin="round">
-												<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-												<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-											</svg>
-										</button>
-										<button class="btn-grid-action btn-delete" @onclick="@(() => RemoveItemFromCart(item))" title="Remove Item (Del)">
-											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-												 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-												 stroke-linejoin="round">
-												<polyline points="3 6 5 6 21 6" />
-												<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-												<line x1="10" y1="11" x2="10" y2="17" />
-												<line x1="14" y1="11" x2="14" y2="17" />
-											</svg>
-										</button>
+										<IconButton Icon="IconType.Edit" Variant="ButtonVariant.Edit" Size="ButtonSize.Grid" Title="Edit Item (Insert)" OnClick="@(() => EditCartItem(item))" />
+										<IconButton Icon="IconType.Delete" Variant="ButtonVariant.Delete" Size="ButtonSize.Grid" Title="Remove Item (Del)" OnClick="@(() => RemoveItemFromCart(item))" />
 									</div>
 								}
 							</Template>
@@ -670,63 +604,6 @@ else
 	* {
 		box-sizing: border-box;
 	}
-
-	.btn-icon {
-		width: 40px;
-		height: 40px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
-		border-radius: 8px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		color: #64748b;
-	}
-
-	.btn-icon:hover {
-		background: #f8fafc;
-		border-color: #3b82f6;
-		color: #3b82f6;
-	}
-
-	.btn-icon:active {
-		transform: scale(0.95);
-	}
-
-	.btn-icon-save {
-		color: #10b981;
-		border-color: #10b981;
-	}
-
-		.btn-icon-save:hover {
-			background: #ecfdf5;
-			border-color: #059669;
-			color: #059669;
-		}
-
-	.btn-icon-excel {
-		color: #16a34a;
-		border-color: #16a34a;
-	}
-
-		.btn-icon-excel:hover {
-			background: #f0fdf4;
-			border-color: #15803d;
-			color: #15803d;
-		}
-
-	.btn-icon-pdf {
-		color: #ef4444;
-		border-color: #ef4444;
-	}
-
-		.btn-icon-pdf:hover {
-			background: #fef2f2;
-			border-color: #dc2626;
-			color: #dc2626;
-		}
 
 	/* Main Container */
 	.purchase-container {
@@ -1090,38 +967,6 @@ else
 			font-weight: 500;
 			color: #1e293b;
 			padding: 8px 12px;
-		}
-
-	.btn-add {
-		height: 38px;
-		padding: 0 16px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-		color: #ffffff;
-		border: none;
-		border-radius: 6px;
-		font-weight: 600;
-		font-size: 14px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
-		white-space: nowrap;
-	}
-
-		.btn-add:hover {
-			transform: translateY(-1px);
-			box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-		}
-
-		.btn-add:active {
-			transform: scale(0.98);
-		}
-
-		.btn-add svg {
-			flex-shrink: 0;
 		}
 
 	/* Checkbox Wrapper in Cart Row */

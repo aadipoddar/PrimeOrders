@@ -256,7 +256,7 @@ public partial class RecipePage
     #endregion
 
     #region Utilities
-    private async Task ResetPage(Microsoft.AspNetCore.Components.Web.MouseEventArgs args) =>
+    private async Task ResetPage() =>
         NavigationManager.NavigateTo(PageRouteNames.Recipe, true);
     #endregion
 }

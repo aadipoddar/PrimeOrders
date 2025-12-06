@@ -15,22 +15,8 @@ else
         OnHomeClick="@(() => NavigationManager.NavigateTo(PageRouteNames.Dashboard))"
         OnBackClick="@(() => NavigationManager.NavigateTo(PageRouteNames.AdminDashboard))">
         <RightContent>
-            <button class="btn-icon btn-icon-save" @onclick="SaveSettings" disabled="@_isProcessing" title="Save Settings (Ctrl + S)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                    <polyline points="17 21 17 13 7 13 7 21" />
-                    <polyline points="7 3 7 8 15 8" />
-                </svg>
-            </button>
-            <button class="btn-icon btn-icon-reset" @onclick="ShowResetConfirmation" disabled="@_isProcessing"
-                title="Reset to Defaults">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="1 4 1 10 7 10" />
-                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-                </svg>
-            </button>
+            <IconButton Icon="IconType.Save" Variant="ButtonVariant.Save" Title="Save Settings (Ctrl + S)" Disabled="_isProcessing" OnClick="SaveSettings" />
+            <IconButton Icon="IconType.Reset" Title="Reset to Defaults" Disabled="_isProcessing" OnClick="ShowResetConfirmation" />
         </RightContent>
     </PageHeader>
 
@@ -562,63 +548,6 @@ else
         box-sizing: border-box;
     }
 
-    .btn-icon {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e2e8f0;
-        background: #ffffff;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: #64748b;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    }
-
-    .btn-icon:hover {
-        background: #f8fafc;
-        border-color: #3b82f6;
-        color: #3b82f6;
-        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
-        transform: translateY(-1px);
-    }
-
-    .btn-icon:active {
-        transform: scale(0.95);
-    }
-
-    .btn-icon:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .btn-icon-save {
-        color: #10b981;
-        border-color: #10b981;
-    }
-
-    .btn-icon-save:hover {
-        background: #ecfdf5;
-        border-color: #059669;
-        color: #059669;
-        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
-    }
-
-    .btn-icon-reset {
-        color: #f97316;
-        border-color: #f97316;
-    }
-
-    .btn-icon-reset:hover {
-        background: #fff7ed;
-        border-color: #ea580c;
-        color: #ea580c;
-        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.2);
-    }
-
     /* Main Container */
     .purchase-container {
         padding: 24px 32px;
@@ -865,11 +794,6 @@ else
 
         .form-grid-quad {
             grid-template-columns: 1fr;
-        }
-
-        .btn-icon {
-            width: 36px;
-            height: 36px;
         }
     }
 

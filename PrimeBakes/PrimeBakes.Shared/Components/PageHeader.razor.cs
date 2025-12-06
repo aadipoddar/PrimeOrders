@@ -47,19 +47,19 @@ public partial class PageHeader
 	/// Callback when logout button is clicked
 	/// </summary>
 	[Parameter]
-	public EventCallback<MouseEventArgs> OnLogoutClick { get; set; }
+	public EventCallback OnLogoutClick { get; set; }
 
 	/// <summary>
 	/// Callback when home button is clicked
 	/// </summary>
 	[Parameter]
-	public EventCallback<MouseEventArgs> OnHomeClick { get; set; }
+	public EventCallback OnHomeClick { get; set; }
 
 	/// <summary>
 	/// Callback when back button is clicked
 	/// </summary>
 	[Parameter]
-	public EventCallback<MouseEventArgs> OnBackClick { get; set; }
+	public EventCallback OnBackClick { get; set; }
 
 	/// <summary>
 	/// Custom content for the right section of the header (replaces default buttons)

@@ -13,7 +13,6 @@ public partial class Dashboard : IDisposable
     private int _updateProgress = 0;
     private int _timeRemaining = 0;
     private string _updateStatus = "Preparing update...";
-    private System.Timers.Timer _progressTimer;
     private DateTime _updateStartTime;
 
     #region Device Info
@@ -69,8 +68,9 @@ public partial class Dashboard : IDisposable
         StateHasChanged();
     }
 
-    public void Dispose() =>
-        _progressTimer?.Dispose();
+    public void Dispose()
+    {
+    }
     #endregion
 
     #region Load Data

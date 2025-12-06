@@ -14,28 +14,9 @@ else
 {
 	<PageHeader Title="Create Raw Material Stock Adjustment" Subtitle="Create and manage raw material stock adjustments" ShowHome="true" ShowBack="true" OnHomeClick="NavigateToDashboard" OnBackClick="NavigateBack">
 		<RightContent>
-			<button class="btn-icon btn-icon-save" @onclick="SaveTransaction" title="Save Transaction (Ctrl + S)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-					<polyline points="17 21 17 13 7 13 7 21" />
-					<polyline points="7 3 7 8 15 8" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="NavigateToTransactionHistoryPage" title="Transaction History (Ctrl + H)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="12" cy="12" r="10" />
-					<polyline points="12 6 12 12 16 14" />
-				</svg>
-			</button>
-			<button class="btn-icon" @onclick="ResetPage" title="New Transaction (Ctrl + N)" disabled="@_isProcessing">
-				<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-					stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="12" y1="5" x2="12" y2="19" />
-					<line x1="5" y1="12" x2="19" y2="12" />
-				</svg>
-			</button>
+			<IconButton Icon="IconType.Save" Variant="ButtonVariant.Save" Title="Save Transaction (Ctrl + S)" Disabled="_isProcessing" OnClick="SaveTransaction" />
+			<IconButton Icon="IconType.History" Title="Transaction History (Ctrl + H)" Disabled="_isProcessing" OnClick="NavigateToTransactionHistoryPage" />
+			<IconButton Icon="IconType.New" Title="New Transaction (Ctrl + N)" Disabled="_isProcessing" OnClick="ResetPage" />
 		</RightContent>
 	</PageHeader>
 
@@ -157,14 +138,7 @@ else
 					<!-- Add Button -->
 					<div class="form-field form-field-button">
 						<label class="field-label">&nbsp;</label>
-						<button class="btn-add-item" @onclick="AddItemToCart">
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-								stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<line x1="12" y1="5" x2="12" y2="19" />
-								<line x1="5" y1="12" x2="19" y2="12" />
-							</svg>
-							<span>Add to Cart</span>
-						</button>
+						<IconButton Icon="IconType.Add" Variant="ButtonVariant.Add" Text="Add to Cart" Title="Add to Cart" OnClick="AddItemToCart" />
 					</div>
 				</div>
 			</div>
@@ -245,25 +219,8 @@ else
 								@{
 									var item = (context as dynamic);
 									<div class="grid-actions">
-										<button class="btn-grid-action btn-edit" @onclick="@(() => EditCartItem(item))" title="Edit Item (Insert)">
-											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-												stroke-linejoin="round">
-												<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-												<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-											</svg>
-										</button>
-										<button class="btn-grid-action btn-delete" @onclick="@(() => RemoveItemFromCart(item))" title="Remove Item (Del)">
-											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-												fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-												stroke-linejoin="round">
-												<polyline points="3 6 5 6 21 6" />
-												<path
-													d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-												<line x1="10" y1="11" x2="10" y2="17" />
-												<line x1="14" y1="11" x2="14" y2="17" />
-											</svg>
-										</button>
+										<IconButton Icon="IconType.Edit" Variant="ButtonVariant.Edit" Size="ButtonSize.Grid" Title="Edit Item (Insert)" OnClick="@(() => EditCartItem(item))" />
+										<IconButton Icon="IconType.Delete" Variant="ButtonVariant.Delete" Size="ButtonSize.Grid" Title="Remove Item (Del)" OnClick="@(() => RemoveItemFromCart(item))" />
 									</div>
 								}
 							</Template>
@@ -430,41 +387,6 @@ else
 	.stock-value {
 		text-align: right;
 		width: 100%;
-	}
-
-	/* Add Item Button */
-	.btn-add-item {
-		height: 40px;
-		padding: 0 20px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-		color: #ffffff;
-		border: none;
-		border-radius: 8px;
-		font-weight: 600;
-		font-size: 14px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-		white-space: nowrap;
-		width: 100%;
-	}
-
-	.btn-add-item:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-		background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-	}
-
-	.btn-add-item:active {
-		transform: scale(0.98);
-	}
-
-	.btn-add-item svg {
-		flex-shrink: 0;
 	}
 
 	/* Action Buttons */
