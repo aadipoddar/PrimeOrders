@@ -77,3 +77,98 @@ h1:focus {
 	background-color: #3b82f6 !important;
 	color: #ffffff !important;
 }
+
+/* ============================================
+   Grid Action Buttons Container
+   Used in all grid templates for action buttons
+   ============================================ */
+.grid-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* ============================================
+   Syncfusion Component Overrides
+   Common input styling for Syncfusion components
+   ============================================ */
+.custom-numeric .e-input {
+    text-align: right;
+}
+
+.custom-numeric {
+    padding-right: 16px;
+}
+
+.custom-autocomplete,
+.custom-datepicker,
+.custom-textbox,
+.custom-numeric,
+.custom-daterange {
+    width: 100%;
+}
+
+.custom-autocomplete .e-input-group,
+.custom-datepicker .e-input-group,
+.custom-textbox .e-input-group,
+.custom-numeric .e-input-group,
+.custom-daterange .e-input-group {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    height: 40px;
+}
+
+.custom-autocomplete .e-input-group:hover,
+.custom-datepicker .e-input-group:hover,
+.custom-textbox .e-input-group:hover,
+.custom-numeric .e-input-group:not(.e-disabled):hover,
+.custom-daterange .e-input-group:hover {
+    border-color: #94a3b8;
+}
+
+.custom-autocomplete .e-input-group.e-input-focus,
+.custom-datepicker .e-input-group.e-input-focus,
+.custom-textbox .e-input-group.e-input-focus,
+.custom-numeric .e-input-group.e-input-focus,
+.custom-daterange .e-input-group.e-input-focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.custom-autocomplete .e-input-group input,
+.custom-datepicker .e-input-group input,
+.custom-textbox .e-input-group input,
+.custom-textbox .e-input-group textarea,
+.custom-numeric .e-input-group input,
+.custom-daterange .e-input-group input {
+    font-size: 14px;
+    color: #1e293b;
+    padding: 8px 12px;
+}
+
+.custom-numeric .e-input-group input {
+    text-align: right;
+}
+
+.custom-autocomplete .e-input-group input::placeholder,
+.custom-datepicker .e-input-group input::placeholder,
+.custom-textbox .e-input-group input::placeholder,
+.custom-textbox .e-input-group textarea::placeholder,
+.custom-numeric .e-input-group input::placeholder,
+.custom-daterange .e-input-group input::placeholder {
+    color: #94a3b8;
+}
+
+.readonly-field .e-input-group {
+    background: #f8fafc;
+    cursor: not-allowed;
+}
+
+.readonly-field .e-input-group input {
+    color: #64748b;
+    font-weight: 500;
+}

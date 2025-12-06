@@ -89,36 +89,7 @@ else
                     </div>
 
                     <!-- Date Utility Buttons -->
-                    <div class="date-utilities">
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Today)" title="Today"
-                                disabled="@_isProcessing">
-                            <span>Today</span>
-                        </button>
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.Yesterday)"
-                                title="Yesterday" disabled="@_isProcessing">
-                            <span>Yesterday</span>
-                        </button>
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentMonth)"
-                                title="Current Month" disabled="@_isProcessing">
-                            <span>Current Month</span>
-                        </button>
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousMonth)"
-                                title="Previous Month" disabled="@_isProcessing">
-                            <span>Previous Month</span>
-                        </button>
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.CurrentFinancialYear)"
-                                title="Current Financial Year" disabled="@_isProcessing">
-                            <span>Current FY</span>
-                        </button>
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.PreviousFinancialYear)"
-                                title="Previous Financial Year" disabled="@_isProcessing">
-                            <span>Previous FY</span>
-                        </button>
-                        <button class="btn-date-utility" @onclick="() => SetDateRange(DateRangeType.AllTime)"
-                                title="All Time" disabled="@_isProcessing">
-                            <span>All Time</span>
-                        </button>
-                    </div>
+                    <DateRangeButtons Disabled="_isProcessing" OnDateRangeSelected="SetDateRange" />
                 </div>
             </div>
         </div>
@@ -574,46 +545,6 @@ else
         align-items: end;
     }
 
-    /* Date Utilities */
-    .date-utilities {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 12px;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .btn-date-utility {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 6px 12px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        color: #475569;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-    }
-
-        .btn-date-utility:hover {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            border-color: #2563eb;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-date-utility:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-        }
-
     .form-field {
         display: flex;
         flex-direction: column;
@@ -627,50 +558,6 @@ else
         color: #334155;
         letter-spacing: 0.1px;
     }
-
-    /* Syncfusion Component Overrides */
-    ::deep .custom-autocomplete,
-    ::deep .custom-datepicker,
-    ::deep .custom-daterange {
-        width: 100%;
-    }
-
-        ::deep .custom-autocomplete .e-input-group,
-        ::deep .custom-datepicker .e-input-group,
-        ::deep .custom-daterange .e-input-group {
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            background: #ffffff;
-            transition: all 0.2s ease;
-            height: 36px;
-        }
-
-            ::deep .custom-autocomplete .e-input-group:hover,
-            ::deep .custom-datepicker .e-input-group:hover,
-            ::deep .custom-daterange .e-input-group:hover {
-                border-color: #94a3b8;
-            }
-
-            ::deep .custom-autocomplete .e-input-group.e-input-focus,
-            ::deep .custom-datepicker .e-input-group.e-input-focus,
-            ::deep .custom-daterange .e-input-group.e-input-focus {
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            }
-
-            ::deep .custom-autocomplete .e-input-group input,
-            ::deep .custom-datepicker .e-input-group input,
-            ::deep .custom-daterange .e-input-group input {
-                font-size: 14px;
-                color: #1e293b;
-                padding: 8px 12px;
-            }
-
-                ::deep .custom-autocomplete .e-input-group input::placeholder,
-                ::deep .custom-datepicker .e-input-group input::placeholder,
-                ::deep .custom-daterange .e-input-group input::placeholder {
-                    color: #94a3b8;
-                }
 
     /* Professional Grid Styles */
     .e-grid .e-summaryrow .e-summarycell {
@@ -835,22 +722,10 @@ else
         font-size: 14px;
     }
 
-    /* Grid Action Buttons */
-    .grid-actions {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-
     /* Responsive Design */
     @@media (max-width: 1400px) {
         .filters-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-
-        .date-utilities {
-            justify-content: center;
         }
     }
 
@@ -879,15 +754,6 @@ else
 
         .filters-grid {
             grid-template-columns: 1fr;
-        }
-
-        .date-utilities {
-            justify-content: center;
-        }
-
-        .btn-date-utility {
-            flex: 1 1 auto;
-            min-width: 120px;
         }
     }
 </style>

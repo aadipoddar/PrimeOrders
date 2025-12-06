@@ -1,0 +1,112 @@
+@using PrimeBakesLibrary.Models.Accounts.Masters
+
+<div class="date-range-buttons">
+    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.Today)" title="Today"
+        disabled="@Disabled">
+        <span>Today</span>
+    </button>
+    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.Yesterday)"
+        title="Yesterday" disabled="@Disabled">
+        <span>Yesterday</span>
+    </button>
+    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.CurrentMonth)"
+        title="Current Month" disabled="@Disabled">
+        <span>Current Month</span>
+    </button>
+    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.PreviousMonth)"
+        title="Previous Month" disabled="@Disabled">
+        <span>Previous Month</span>
+    </button>
+    <button class="btn-date-utility"
+        @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.CurrentFinancialYear)"
+        title="Current Financial Year" disabled="@Disabled">
+        <span>Current FY</span>
+    </button>
+    <button class="btn-date-utility"
+        @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.PreviousFinancialYear)"
+        title="Previous Financial Year" disabled="@Disabled">
+        <span>Previous FY</span>
+    </button>
+    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.AllTime)"
+        title="All Time" disabled="@Disabled">
+        <span>All Time</span>
+    </button>
+</div>
+
+<style>
+    .date-range-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-date-utility {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .btn-date-utility:hover {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-date-utility:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-date-utility:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-date-utility:disabled:hover {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+
+    /* Responsive adjustments for date range buttons */
+    @@media (max-width: 768px) {
+        .date-range-buttons {
+            gap: 6px;
+            padding: 8px;
+        }
+
+        .btn-date-utility {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .date-range-buttons {
+            justify-content: center;
+        }
+
+        .btn-date-utility {
+            flex: 1 1 auto;
+            min-width: 80px;
+        }
+    }
+</style>
