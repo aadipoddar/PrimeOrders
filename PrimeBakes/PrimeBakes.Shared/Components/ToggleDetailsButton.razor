@@ -1,0 +1,67 @@
+<button class="btn-toggle-details" @onclick="HandleClick"
+        title="@(ShowAllColumns ? "Show Less" : "Show All Details")" disabled="@Disabled">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        @if (ShowAllColumns)
+        {
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
+        }
+        else
+        {
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="9" y1="9" x2="15" y2="9" />
+            <line x1="9" y1="15" x2="15" y2="15" />
+        }
+    </svg>
+    @(ShowAllColumns ? "Show Less" : "Details")
+</button>
+
+<style>
+    .btn-toggle-details {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 20px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #3b82f6;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-toggle-details:hover {
+        background: #eff6ff;
+        border-color: #3b82f6;
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .btn-toggle-details:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-toggle-details:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-toggle-details:disabled:hover {
+        background: #ffffff;
+        border-color: #e2e8f0;
+    }
+
+    .btn-toggle-details svg {
+        flex-shrink: 0;
+    }
+</style>

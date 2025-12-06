@@ -121,25 +121,7 @@ else
                         </svg>
                         @(_showDeleted ? "Hide Deleted" : "Show Deleted")
                     </button>
-                    <button class="btn-toggle-details" @onclick="ToggleDetailsView"
-                            title="@(_showAllColumns ? "Show Less" : "Show All Details")" disabled="@_isProcessing">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            @if (_showAllColumns)
-                            {
-                                <circle cx="12" cy="12" r="1" />
-                                <circle cx="19" cy="12" r="1" />
-                                <circle cx="5" cy="12" r="1" />
-                            }
-                            else
-                            {
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <line x1="9" y1="9" x2="15" y2="9" />
-                                <line x1="9" y1="15" x2="15" y2="15" />
-                            }
-                        </svg>
-                        @(_showAllColumns ? "Show Less" : "Details")
-                    </button>
+                    <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
                 </div>
             </div>
             <div class="section-body grid-body">
@@ -643,17 +625,6 @@ else
                 background: linear-gradient(135deg,#ea580c 0%,#c2410c 100%);
                 box-shadow: 0 2px 8px rgba(249,115,22,.4);
             }
-
-    .btn-toggle-details {
-        color: #3b82f6;
-    }
-
-        .btn-toggle-details:hover {
-            background: #eff6ff;
-            border-color: #3b82f6;
-            box-shadow: 0 2px 6px rgba(59,130,246,.2);
-            transform: translateY(-1px);
-        }
 
     .section-body {
         padding: 24px;
