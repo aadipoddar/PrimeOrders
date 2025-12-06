@@ -55,3 +55,25 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
 	border-color: #929292;
 }
+
+/* ============================================
+   Syncfusion AutoComplete/DropDown Styling
+   Improved visibility for focused/selected items
+   ============================================ */
+.e-popup .e-dropdownbase .e-list-item.e-item-focus,
+.e-popup .e-dropdownbase .e-list-item.e-active,
+.e-popup .e-dropdownbase .e-list-item.e-active.e-hover,
+.e-popup .e-dropdownbase .e-list-item.e-hover,
+.e-dropdownbase .e-list-item.e-item-focus,
+.e-dropdownbase .e-list-item.e-active,
+.e-dropdownbase .e-list-item.e-active.e-hover,
+.e-dropdownbase .e-list-item.e-hover,
+.e-ddl.e-popup .e-list-item.e-item-focus,
+.e-ddl.e-popup .e-list-item.e-active,
+.e-ddl.e-popup .e-list-item.e-hover,
+.e-autocomplete.e-popup .e-list-item.e-item-focus,
+.e-autocomplete.e-popup .e-list-item.e-active,
+.e-autocomplete.e-popup .e-list-item.e-hover {
+	background-color: #3b82f6 !important;
+	color: #ffffff !important;
+}

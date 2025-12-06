@@ -1,4 +1,4 @@
-﻿@page "/report/kitchen-issue"
+@page "/report/kitchen-issue"
 
 @using PrimeBakesLibrary.Models.Common
 @using PrimeBakesLibrary.Models.Accounts.Masters
@@ -63,10 +63,10 @@ else
                         <!-- Kitchen -->
                         <div class="form-field">
                             <label class="field-label">Kitchen</label>
-                            <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedKitchen" TValue="LocationModel"
-                                            TItem="LocationModel" DataSource="@_kitchens" Placeholder="All Kitchens"
+                            <SfAutoComplete CssClass="custom-autocomplete" Value="@_selectedKitchen" TValue="KitchenModel"
+                                            TItem="KitchenModel" DataSource="@_kitchens" Placeholder="All Kitchens"
                                             AllowFiltering="true" FilterType="Syncfusion.Blazor.DropDowns.FilterType.Contains">
-                                <AutoCompleteEvents TItem="LocationModel" TValue="LocationModel"
+                                <AutoCompleteEvents TItem="KitchenModel" TValue="KitchenModel"
                                                     ValueChange="OnKitchenChanged" />
                                 <AutoCompleteFieldSettings Value="Name" />
                             </SfAutoComplete>
@@ -220,79 +220,16 @@ else
                                 <div class="grid-actions">
                                     @if (item.Status == false)
                                     {
-                                        <button class="btn-grid-action btn-grid-action-excel" @onclick="() => DownloadExcelInvoice(item.Id)" title="Download Excel Invoice (Alt + E)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                <polyline points="14 2 14 8 20 8" />
-                                                <line x1="16" y1="13" x2="8" y2="13" />
-                                                <line x1="16" y1="17" x2="8" y2="17" />
-                                                <polyline points="10 9 9 9 8 9" />
-                                            </svg>
-                                        </button>
-                                        <button class="btn-grid-action btn-grid-action-pdf" @onclick="() => DownloadPdfInvoice(item.Id)" title="Download PDF Invoice (Alt + P)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                <polyline points="14 2 14 8 20 8" />
-                                                <line x1="16" y1="13" x2="8" y2="13" />
-                                                <line x1="16" y1="17" x2="8" y2="17" />
-                                                <line x1="10" y1="9" x2="8" y2="9" />
-                                            </svg>
-                                        </button>
-                                        <button class="btn-grid-action btn-recover" @onclick="() => ShowRecoverConfirmation(item.Id, item.TransactionNo)" title="Recover Transaction (Delete)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <polyline points="23 4 23 10 17 10"></polyline>
-                                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                                            </svg>
-                                        </button>
+                                        <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Size="ButtonSize.Grid" Title="Download Excel Invoice (Alt + E)" Disabled="_isProcessing" OnClick="@(() => DownloadExcelInvoice(item.Id))" />
+                                        <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Size="ButtonSize.Grid" Title="Download PDF Invoice (Alt + P)" Disabled="_isProcessing" OnClick="@(() => DownloadPdfInvoice(item.Id))" />
+                                        <IconButton Icon="IconType.Recover" Variant="ButtonVariant.Recover" Size="ButtonSize.Grid" Title="Recover Transaction (Delete)" Disabled="_isProcessing" OnClick="@(() => ShowRecoverConfirmation(item.Id, item.TransactionNo))" />
                                     }
                                     else
                                     {
-                                        <button class="btn-grid-action btn-view" @onclick="() => ViewTransaction(item.Id)" title="View Transaction (Ctrl + O)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                <circle cx="12" cy="12" r="3" />
-                                            </svg>
-                                        </button>
-                                        <button class="btn-grid-action btn-grid-action-excel" @onclick="() => DownloadExcelInvoice(item.Id)" title="Download Excel Invoice (Alt + E)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                <polyline points="14 2 14 8 20 8" />
-                                                <line x1="16" y1="13" x2="8" y2="13" />
-                                                <line x1="16" y1="17" x2="8" y2="17" />
-                                                <polyline points="10 9 9 9 8 9" />
-                                            </svg>
-                                        </button>
-                                        <button class="btn-grid-action btn-grid-action-pdf" @onclick="() => DownloadPdfInvoice(item.Id)" title="Download PDF Invoice (Alt + P)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                <polyline points="14 2 14 8 20 8" />
-                                                <line x1="16" y1="13" x2="8" y2="13" />
-                                                <line x1="16" y1="17" x2="8" y2="17" />
-                                                <line x1="10" y1="9" x2="8" y2="9" />
-                                            </svg>
-                                        </button>
-                                        <button class="btn-grid-action btn-delete" @onclick="() => ShowDeleteConfirmation(item.Id, item.TransactionNo)" title="Delete Transaction (Delete)" disabled="@_isProcessing">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                 stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6" />
-                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                                <line x1="10" y1="11" x2="10" y2="17" />
-                                                <line x1="14" y1="11" x2="14" y2="17" />
-                                            </svg>
-                                        </button>
+                                        <IconButton Icon="IconType.View" Variant="ButtonVariant.View" Size="ButtonSize.Grid" Title="View Transaction (Ctrl + O)" Disabled="_isProcessing" OnClick="@(() => ViewTransaction(item.Id))" />
+                                        <IconButton Icon="IconType.Excel" Variant="ButtonVariant.Excel" Size="ButtonSize.Grid" Title="Download Excel Invoice (Alt + E)" Disabled="_isProcessing" OnClick="@(() => DownloadExcelInvoice(item.Id))" />
+                                        <IconButton Icon="IconType.Pdf" Variant="ButtonVariant.Pdf" Size="ButtonSize.Grid" Title="Download PDF Invoice (Alt + P)" Disabled="_isProcessing" OnClick="@(() => DownloadPdfInvoice(item.Id))" />
+                                        <IconButton Icon="IconType.Delete" Variant="ButtonVariant.Delete" Size="ButtonSize.Grid" Title="Delete Transaction (Delete)" Disabled="_isProcessing" OnClick="@(() => ShowDeleteConfirmation(item.Id, item.TransactionNo))" />
                                     }
                                 </div>
                             </Template>
@@ -861,94 +798,6 @@ else
         justify-content: center;
         gap: 8px;
     }
-
-    .btn-grid-action {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e2e8f0;
-        background: #ffffff;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        padding: 0;
-    }
-
-        .btn-grid-action:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        .btn-grid-action:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-grid-action:not(:disabled):active {
-            transform: scale(0.95);
-        }
-
-        .btn-grid-action.btn-view {
-            color: #3b82f6;
-            border-color: #3b82f6;
-        }
-
-            .btn-grid-action.btn-view:not(:disabled):hover {
-                background: #eff6ff;
-                box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-            }
-
-        .btn-grid-action.btn-grid-action-excel {
-            color: #16a34a;
-            border-color: #16a34a;
-        }
-
-            .btn-grid-action.btn-grid-action-excel:not(:disabled):hover {
-                background: #f0fdf4;
-                box-shadow: 0 4px 8px rgba(22, 163, 74, 0.3);
-            }
-
-        .btn-grid-action.btn-grid-action-pdf {
-            color: #dc2626;
-            border-color: #dc2626;
-        }
-
-            .btn-grid-action.btn-grid-action-pdf:not(:disabled):hover {
-                background: #fef2f2;
-                box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
-            }
-
-        .btn-grid-action.btn-invoice {
-            color: #10b981;
-            border-color: #10b981;
-        }
-
-            .btn-grid-action.btn-invoice:not(:disabled):hover {
-                background: #ecfdf5;
-                box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-            }
-
-        .btn-grid-action.btn-delete {
-            color: #ef4444;
-            border-color: #ef4444;
-        }
-
-            .btn-grid-action.btn-delete:not(:disabled):hover {
-                background: #fef2f2;
-                box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
-            }
-
-        .btn-grid-action.btn-recover {
-            color: #ef4444;
-            border-color: #ef4444;
-        }
-
-            .btn-grid-action.btn-recover:not(:disabled):hover {
-                background: #fef2f2;
-                box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
-            }
 
     /* Dialog Button Styles */
     .dialog-btn {

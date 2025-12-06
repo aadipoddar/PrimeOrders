@@ -28,10 +28,10 @@ public partial class KitchenIssueItemReport : IAsyncDisposable
 	private DateTime _toDate = DateTime.Now.Date;
 
 	private CompanyModel _selectedCompany = new();
-	private LocationModel _selectedKitchen = new();
+	private KitchenModel _selectedKitchen = new();
 
 	private List<CompanyModel> _companies = [];
-	private List<LocationModel> _kitchens = [];
+	private List<KitchenModel> _kitchens = [];
 	private List<KitchenIssueItemOverviewModel> _transactionOverviews = [];
 
 	private SfGrid<KitchenIssueItemOverviewModel> _sfGrid;
@@ -92,7 +92,7 @@ public partial class KitchenIssueItemReport : IAsyncDisposable
 
 	private async Task LoadKitchens()
 	{
-		_kitchens = await CommonData.LoadTableDataByStatus<LocationModel>(TableNames.Location);
+		_kitchens = await CommonData.LoadTableDataByStatus<KitchenModel>(TableNames.Kitchen);
 		_kitchens.Add(new()
 		{
 			Id = 0,
@@ -154,7 +154,7 @@ public partial class KitchenIssueItemReport : IAsyncDisposable
 		await LoadTransactionOverviews();
 	}
 
-	private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<LocationModel, LocationModel> args)
+	private async Task OnKitchenChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<KitchenModel, KitchenModel> args)
 	{
 		_selectedKitchen = args.Value;
 		await LoadTransactionOverviews();
