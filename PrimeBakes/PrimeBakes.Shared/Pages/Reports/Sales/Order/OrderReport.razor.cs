@@ -374,6 +374,7 @@ public partial class OrderReport : IAsyncDisposable
 	private async Task ViewTransaction(int orderId)
     {
         if (FormFactor.GetFormFactor() == "Web")
+            await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Order}/{orderId}", "_blank");
         else
             NavigationManager.NavigateTo($"{PageRouteNames.Order}/{orderId}");
     }
