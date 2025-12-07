@@ -99,6 +99,7 @@ else
                     <h2 class="section-title">Kitchen Issue Transactions</h2>
                 </div>
                 <div class="header-actions">
+                    <ToggleSummaryButton Disabled="@_isProcessing" ShowSummary="@_showSummary" OnToggle="ToggleSummary" />
                     <ToggleDeletedButton Disabled="@_isProcessing" ShowDeleted="@_showDeleted" OnToggle="ToggleDeleted" />
                     <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
                 </div>
@@ -212,7 +213,7 @@ else
                     </GridAggregates>
 
                     <GridColumns>
-                        <GridColumn HeaderText="Actions" Width="160" TextAlign="TextAlign.Center">
+                        <GridColumn HeaderText="Actions" Width="160" TextAlign="TextAlign.Center" Visible="@(!_showSummary)">
                             <Template>
                                 @{
                                     var item = (context as KitchenIssueOverviewModel);
@@ -234,11 +235,11 @@ else
                                 </div>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(KitchenIssueOverviewModel.KitchenName)" HeaderText="Kitchen" Width="200" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(KitchenIssueOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(KitchenIssueOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
                         <GridColumn Field="@nameof(KitchenIssueOverviewModel.TotalAmount)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
@@ -249,13 +250,13 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(KitchenIssueOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
                     </GridColumns>
                 </SfGrid>
             </div>

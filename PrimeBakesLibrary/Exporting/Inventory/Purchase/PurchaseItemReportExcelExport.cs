@@ -15,12 +15,14 @@ public static class PurchaseItemReportExcelExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportPurchaseItemReport(
         IEnumerable<PurchaseItemOverviewModel> purchaseItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -71,11 +73,31 @@ public static class PurchaseItemReportExcelExport
             [nameof(PurchaseItemOverviewModel.InclusiveTax)] = new() { DisplayName = "Incl Tax", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
         };
 
-        // Define column order based on showAllColumns flag
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+        {
+            columnOrder =
+            [
+                nameof(PurchaseItemOverviewModel.ItemName),
+                nameof(PurchaseItemOverviewModel.ItemCode),
+                nameof(PurchaseItemOverviewModel.ItemCategoryName),
+                nameof(PurchaseItemOverviewModel.Quantity),
+                nameof(PurchaseItemOverviewModel.BaseTotal),
+                nameof(PurchaseItemOverviewModel.DiscountAmount),
+                nameof(PurchaseItemOverviewModel.AfterDiscount),
+                nameof(PurchaseItemOverviewModel.SGSTAmount),
+                nameof(PurchaseItemOverviewModel.CGSTAmount),
+                nameof(PurchaseItemOverviewModel.IGSTAmount),
+                nameof(PurchaseItemOverviewModel.TotalTaxAmount),
+                nameof(PurchaseItemOverviewModel.Total),
+                nameof(PurchaseItemOverviewModel.NetTotal)
+            ];
+        }
         // All columns in logical order
-        if (showAllColumns)
+        else if (showAllColumns)
             columnOrder =
             [
 				nameof(PurchaseItemOverviewModel.ItemName),

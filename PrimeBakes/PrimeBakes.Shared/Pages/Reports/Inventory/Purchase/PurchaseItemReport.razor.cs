@@ -28,6 +28,7 @@ public partial class PurchaseItemReport : IAsyncDisposable
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
 	private bool _showTransactionReturns = false;
+	private bool _showSummary = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -134,6 +135,27 @@ public partial class PurchaseItemReport : IAsyncDisposable
 
 			if (_showTransactionReturns)
 				await LoadTransactionReturnOverviews();
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.ItemName)
+					.Select(g => new PurchaseItemOverviewModel
+					{
+						ItemName = g.Key,
+						ItemCode = g.First().ItemCode,
+						ItemCategoryName = g.First().ItemCategoryName,
+						Quantity = g.Sum(t => t.Quantity),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						DiscountAmount = g.Sum(t => t.DiscountAmount),
+						AfterDiscount = g.Sum(t => t.AfterDiscount),
+						SGSTAmount = g.Sum(t => t.SGSTAmount),
+						CGSTAmount = g.Sum(t => t.CGSTAmount),
+						IGSTAmount = g.Sum(t => t.IGSTAmount),
+						TotalTaxAmount = g.Sum(t => t.TotalTaxAmount),
+						Total = g.Sum(t => t.Total),
+						NetTotal = g.Sum(t => t.NetTotal)
+					})
+					.OrderBy(t => t.ItemName)];
 		}
 		catch (Exception ex)
 		{
@@ -325,7 +347,8 @@ public partial class PurchaseItemReport : IAsyncDisposable
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_showSummary
 				);
 
 			string fileName = $"PURCHASE_ITEM_REPORT";
@@ -365,7 +388,8 @@ public partial class PurchaseItemReport : IAsyncDisposable
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_showSummary
 				);
 
 			string fileName = $"PURCHASE_ITEM_REPORT";
@@ -530,6 +554,12 @@ public partial class PurchaseItemReport : IAsyncDisposable
 	private async Task ToggleTransactionReturns()
 	{
 		_showTransactionReturns = !_showTransactionReturns;
+		await LoadTransactionOverviews();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
 		await LoadTransactionOverviews();
 	}
 	#endregion

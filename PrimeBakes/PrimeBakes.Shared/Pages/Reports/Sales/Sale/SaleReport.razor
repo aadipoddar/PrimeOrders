@@ -119,6 +119,10 @@ else
                     <h2 class="section-title">Sale Transactions</h2>
                 </div>
                 <div class="header-actions">
+                    @if (_user.LocationId == 1)
+                    {
+                        <ToggleSummaryButton Disabled="@_isProcessing" ShowSummary="@_showSummary" OnToggle="ToggleSummary" />
+                    }
                     <ToggleDeletedButton Disabled="@_isProcessing" ShowDeleted="@_showDeleted" OnToggle="ToggleDeleted" />
                     <ToggleReturnsButton Disabled="@_isProcessing" ShowReturns="@_showSaleReturns" OnToggle="ToggleSaleReturns" />
                     <ToggleTransfersButton Disabled="@_isProcessing" ShowTransfers="@_showStockTransfers" OnToggle="ToggleStockTransfers" />
@@ -507,7 +511,7 @@ else
                     </GridAggregates>
 
                     <GridColumns>
-                        <GridColumn HeaderText="Actions" Width="200" TextAlign="TextAlign.Center">
+                        <GridColumn HeaderText="Actions" Width="200" TextAlign="TextAlign.Center" Visible="@(!_showSummary)">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -551,27 +555,18 @@ else
                                 </div>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(SaleOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150"
-                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.LocationName)" HeaderText="Location" Width="150" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CompanyName)" HeaderText="Company" Width="180"
-                            Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.PartyName)" HeaderText="Party" Width="200" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.CustomerName)" HeaderText="Customer" Width="180"
-                            Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.OrderTransactionNo)" HeaderText="Order No"
-                            Width="150" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150"
-                            Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalItems)" HeaderText="Items" Width="100"
-                            TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120"
-                            Format="N2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130"
-                            Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.ItemDiscountAmount)" HeaderText="Disc" Width="130"
-                            TextAlign="TextAlign.Right" Visible="_showAllColumns">
+                        <GridColumn Field="@nameof(SaleOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.PartyName)" HeaderText="Party" Width="200" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.CustomerName)" HeaderText="Customer" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.OrderTransactionNo)" HeaderText="Order No" Width="150" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.ItemDiscountAmount)" HeaderText="Disc" Width="130" TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -579,22 +574,14 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterItemDiscount)" HeaderText="After Disc"
-                            Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl Tax"
-                            Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalExtraTaxAmount)" HeaderText="Extra Tax"
-                            Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="130"
-                            Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %"
-                            Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesAmount)" HeaderText="Other Charges"
-                            Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="130"
-                            Format="N2" TextAlign="TextAlign.Center" />
-                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountAmount)" HeaderText="Dis" Width="130"
-                            TextAlign="TextAlign.Right">
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterItemDiscount)" HeaderText="After Disc" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalExtraTaxAmount)" HeaderText="Extra Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.OtherChargesAmount)" HeaderText="Other Charges" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="130" Format="N2" TextAlign="TextAlign.Center" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(SaleOverviewModel.DiscountAmount)" HeaderText="Dis" Width="130" TextAlign="TextAlign.Right">
                             <Template>
                                 @{
                                     var item = (context as SaleOverviewModel);
@@ -650,21 +637,21 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(SaleOverviewModel.PaymentModes)" HeaderText="Payment Modes"
-                            Width="180" />
+                            Width="180" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.Remarks)" HeaderText="Remarks" Width="200"
-                            Visible="_showAllColumns" />
+                            Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.CreatedByName)" HeaderText="Created By" Width="150"
-                            Visible="_showAllColumns" />
+                            Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.CreatedAt)" HeaderText="Created At" Width="160"
-                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform"
-                            Width="200" Visible="_showAllColumns" />
+                            Width="200" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedByUserName)" HeaderText="Modified By"
-                            Width="150" Visible="_showAllColumns" />
+                            Width="150" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160"
-                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
+                            Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(SaleOverviewModel.LastModifiedFromPlatform)"
-                            HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+                            HeaderText="Modified Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
                     </GridColumns>
                 </SfGrid>
             </div>

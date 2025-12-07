@@ -15,12 +15,15 @@ public static class KitchenIssueReportExcelExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="kitchenName">Optional kitchen name to display in header</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportKitchenIssueReport(
         IEnumerable<KitchenIssueOverviewModel> kitchenIssueData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        string kitchenName = null,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -60,14 +63,24 @@ public static class KitchenIssueReportExcelExport
         // Define column order based on showAllColumns flag
         List<string> columnOrder;
 
+        // Summary view - grouped by location with totals
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(KitchenIssueOverviewModel.KitchenName),
+                nameof(KitchenIssueOverviewModel.TotalItems),
+                nameof(KitchenIssueOverviewModel.TotalQuantity),
+                nameof(KitchenIssueOverviewModel.TotalAmount)
+            ];
+
         // All columns in logical order
-        if (showAllColumns)
+        else if (showAllColumns)
+        {
             columnOrder =
             [
                 nameof(KitchenIssueOverviewModel.TransactionNo),
                 nameof(KitchenIssueOverviewModel.TransactionDateTime),
                 nameof(KitchenIssueOverviewModel.CompanyName),
-                nameof(KitchenIssueOverviewModel.KitchenName),
                 nameof(KitchenIssueOverviewModel.FinancialYear),
                 nameof(KitchenIssueOverviewModel.TotalItems),
                 nameof(KitchenIssueOverviewModel.TotalQuantity),
@@ -81,26 +94,37 @@ public static class KitchenIssueReportExcelExport
                 nameof(KitchenIssueOverviewModel.LastModifiedFromPlatform)
             ];
 
+            // Add kitchen column only if not filtering by kitchen
+            if (string.IsNullOrEmpty(kitchenName))
+                columnOrder.Insert(3, nameof(KitchenIssueOverviewModel.KitchenName));
+        }
+
         // Summary columns only
         else
+        {
             columnOrder =
             [
                 nameof(KitchenIssueOverviewModel.TransactionNo),
                 nameof(KitchenIssueOverviewModel.TransactionDateTime),
-                nameof(KitchenIssueOverviewModel.KitchenName),
                 nameof(KitchenIssueOverviewModel.TotalQuantity),
                 nameof(KitchenIssueOverviewModel.TotalAmount)
             ];
 
+            // Add kitchen column only if not filtering by kitchen
+            if (string.IsNullOrEmpty(kitchenName))
+                columnOrder.Insert(2, nameof(KitchenIssueOverviewModel.KitchenName));
+        }
+
         // Export using the generic utility
         return await ExcelReportExportUtil.ExportToExcel(
-            kitchenIssueData,
-            "KITCHEN ISSUE REPORT",
-            "Kitchen Issue Transactions",
-            dateRangeStart,
-            dateRangeEnd,
-            columnSettings,
-            columnOrder
-        );
+        kitchenIssueData,
+        "KITCHEN ISSUE REPORT",
+        "Kitchen Issue Transactions",
+        dateRangeStart,
+        dateRangeEnd,
+        columnSettings,
+        columnOrder,
+        partyName: kitchenName
+    );
     }
 }

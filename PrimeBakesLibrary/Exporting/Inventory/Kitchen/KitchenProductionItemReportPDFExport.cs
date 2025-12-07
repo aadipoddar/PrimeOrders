@@ -14,21 +14,34 @@ public static class KitchenProductionItemReportPDFExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <returns>MemoryStream containing the PDF file</returns>
     public static async Task<MemoryStream> ExportKitchenProductionItemReport(
         IEnumerable<KitchenProductionItemOverviewModel> kitchenProductionItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        bool showSummary = false)
     {
         // Define custom column settings matching Excel export
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
 
-        // Define column order based on visibility setting (matching Excel export)
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(KitchenProductionItemOverviewModel.ItemName),
+                nameof(KitchenProductionItemOverviewModel.ItemCode),
+                nameof(KitchenProductionItemOverviewModel.ItemCategoryName),
+                nameof(KitchenProductionItemOverviewModel.Quantity),
+                nameof(KitchenProductionItemOverviewModel.Total)
+            ];
+
         // All columns - detailed view (matching Excel export)
-        if (showAllColumns)
+        else if (showAllColumns)
             columnOrder =
             [
                 nameof(KitchenProductionItemOverviewModel.ItemName),
@@ -111,7 +124,7 @@ public static class KitchenProductionItemReportPDFExport
             dateRangeEnd,
             columnSettings,
             columnOrder,
-            useLandscape: showAllColumns  // Use landscape when showing all columns
+            useLandscape: showAllColumns && !showSummary  // Use landscape when showing all columns
         );
     }
 }

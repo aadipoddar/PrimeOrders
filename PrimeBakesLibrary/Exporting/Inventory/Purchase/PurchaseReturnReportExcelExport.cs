@@ -15,12 +15,16 @@ public static class PurchaseReturnReportExcelExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="partyName">Optional party name to display in header</param>
+    /// <param name="showSummary">Whether to show summary view with grouped data</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportPurchaseReturnReport(
         IEnumerable<PurchaseReturnOverviewModel> purchaseReturnData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        string partyName = null,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -74,7 +78,45 @@ public static class PurchaseReturnReportExcelExport
         // Define column order based on visibility setting
         List<string> columnOrder;
 
-        if (showAllColumns)
+        // Summary view - grouped by party with totals
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(PurchaseReturnOverviewModel.PartyName),
+                nameof(PurchaseReturnOverviewModel.TotalItems),
+                nameof(PurchaseReturnOverviewModel.TotalQuantity),
+                nameof(PurchaseReturnOverviewModel.BaseTotal),
+                nameof(PurchaseReturnOverviewModel.ItemDiscountAmount),
+                nameof(PurchaseReturnOverviewModel.TotalAfterItemDiscount),
+                nameof(PurchaseReturnOverviewModel.TotalInclusiveTaxAmount),
+                nameof(PurchaseReturnOverviewModel.TotalExtraTaxAmount),
+                nameof(PurchaseReturnOverviewModel.TotalAfterTax),
+                nameof(PurchaseReturnOverviewModel.CashDiscountAmount),
+                nameof(PurchaseReturnOverviewModel.OtherChargesAmount),
+                nameof(PurchaseReturnOverviewModel.RoundOffAmount),
+                nameof(PurchaseReturnOverviewModel.TotalAmount)
+            ];
+
+        // Summary view - grouped by party with totals
+        else if (showSummary)
+            columnOrder =
+            [
+                nameof(PurchaseReturnOverviewModel.PartyName),
+                nameof(PurchaseReturnOverviewModel.TotalItems),
+                nameof(PurchaseReturnOverviewModel.TotalQuantity),
+                nameof(PurchaseReturnOverviewModel.BaseTotal),
+                nameof(PurchaseReturnOverviewModel.ItemDiscountAmount),
+                nameof(PurchaseReturnOverviewModel.TotalAfterItemDiscount),
+                nameof(PurchaseReturnOverviewModel.TotalInclusiveTaxAmount),
+                nameof(PurchaseReturnOverviewModel.TotalExtraTaxAmount),
+                nameof(PurchaseReturnOverviewModel.TotalAfterTax),
+                nameof(PurchaseReturnOverviewModel.CashDiscountAmount),
+                nameof(PurchaseReturnOverviewModel.OtherChargesAmount),
+                nameof(PurchaseReturnOverviewModel.RoundOffAmount),
+                nameof(PurchaseReturnOverviewModel.TotalAmount)
+            ];
+
+        else if (showAllColumns)
         {
             // All columns - detailed view
             columnOrder =
@@ -82,7 +124,6 @@ public static class PurchaseReturnReportExcelExport
                 nameof(PurchaseReturnOverviewModel.TransactionNo),
                 nameof(PurchaseReturnOverviewModel.TransactionDateTime),
                 nameof(PurchaseReturnOverviewModel.CompanyName),
-                nameof(PurchaseReturnOverviewModel.PartyName),
                 nameof(PurchaseReturnOverviewModel.FinancialYear),
                 nameof(PurchaseReturnOverviewModel.TotalItems),
                 nameof(PurchaseReturnOverviewModel.TotalQuantity),
@@ -106,6 +147,10 @@ public static class PurchaseReturnReportExcelExport
                 nameof(PurchaseReturnOverviewModel.LastModifiedAt),
                 nameof(PurchaseReturnOverviewModel.LastModifiedFromPlatform)
             ];
+
+            // Add party column only if not filtering by party
+            if (string.IsNullOrEmpty(partyName))
+                columnOrder.Insert(3, nameof(PurchaseReturnOverviewModel.PartyName));
         }
         else
         {
@@ -114,13 +159,16 @@ public static class PurchaseReturnReportExcelExport
             [
                 nameof(PurchaseReturnOverviewModel.TransactionNo),
                 nameof(PurchaseReturnOverviewModel.TransactionDateTime),
-                nameof(PurchaseReturnOverviewModel.PartyName),
                 nameof(PurchaseReturnOverviewModel.TotalQuantity),
                 nameof(PurchaseReturnOverviewModel.TotalAfterTax),
                 nameof(PurchaseReturnOverviewModel.OtherChargesPercent),
                 nameof(PurchaseReturnOverviewModel.CashDiscountPercent),
                 nameof(PurchaseReturnOverviewModel.TotalAmount)
             ];
+
+            // Add party column only if not filtering by party
+            if (string.IsNullOrEmpty(partyName))
+                columnOrder.Insert(2, nameof(PurchaseReturnOverviewModel.PartyName));
         }
 
         // Call the generic Excel export utility
@@ -131,7 +179,8 @@ public static class PurchaseReturnReportExcelExport
             dateRangeStart,
             dateRangeEnd,
             columnSettings,
-            columnOrder
+            columnOrder,
+            partyName: partyName
         );
     }
 }

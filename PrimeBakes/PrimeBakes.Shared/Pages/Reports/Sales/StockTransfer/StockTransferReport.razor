@@ -114,6 +114,10 @@ else
                     <h2 class="section-title">Stock Transfers</h2>
                 </div>
                 <div class="header-actions">
+                    @if (_user.LocationId == 1)
+                    {
+                        <ToggleSummaryButton Disabled="@_isProcessing" ShowSummary="@_showSummary" OnToggle="ToggleSummary" />
+                    }
                     <ToggleDeletedButton Disabled="@_isProcessing" ShowDeleted="@_showDeleted" OnToggle="ToggleDeleted" />
                     <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
                 </div>
@@ -499,7 +503,7 @@ else
                     </GridAggregates>
 
                     <GridColumns>
-                        <GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center">
+                        <GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center" Visible="@(!_showSummary)">
                             <Template>
                                 @{
                                     var item = (context as StockTransferOverviewModel);
@@ -525,12 +529,12 @@ else
                                 </div>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.LocationName)" HeaderText="From Location" Width="160" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.LocationName)" HeaderText="From Location" Width="160" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.ToLocationName)" HeaderText="To Location" Width="160" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.TotalQuantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
@@ -543,12 +547,12 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(StockTransferOverviewModel.TotalAfterItemDiscount)" HeaderText="After Disc" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.TotalInclusiveTaxAmount)" HeaderText="Incl Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.TotalExtraTaxAmount)" HeaderText="Extra Tax" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.TotalAfterTax)" HeaderText="Sub Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.OtherChargesPercent)" HeaderText="Other Charges %" Width="150" Format="N2" TextAlign="TextAlign.Center" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.OtherChargesAmount)" HeaderText="Other Charges" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="130" Format="N2" TextAlign="TextAlign.Center" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="130" Format="N2" TextAlign="TextAlign.Center" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferOverviewModel.DiscountAmount)" HeaderText="Disc" Width="130" TextAlign="TextAlign.Right">
                             <Template>
                                 @{
@@ -602,14 +606,14 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.PaymentModes)" HeaderText="Payment Modes" Width="180" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.PaymentModes)" HeaderText="Payment Modes" Width="180" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
                     </GridColumns>
                 </SfGrid>
             </div>

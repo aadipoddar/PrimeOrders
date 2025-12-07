@@ -16,6 +16,8 @@ public static class SaleItemReportExcelExport
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="showLocation">Whether to include location column (for location ID 1 users)</param>
+    /// <param name="locationName">Name of the location for header</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportSaleItemReport(
         IEnumerable<SaleItemOverviewModel> saleItemData,
@@ -23,7 +25,8 @@ public static class SaleItemReportExcelExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         bool showLocation = false,
-        string locationName = null)
+        string locationName = null,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -75,11 +78,30 @@ public static class SaleItemReportExcelExport
             [nameof(SaleItemOverviewModel.InclusiveTax)] = new() { DisplayName = "Incl Tax", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignCenter, IncludeInTotal = false }
         };
 
-        // Define column order based on showAllColumns flag
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(SaleItemOverviewModel.ItemName),
+                nameof(SaleItemOverviewModel.ItemCode),
+                nameof(SaleItemOverviewModel.ItemCategoryName),
+                nameof(SaleItemOverviewModel.Quantity),
+                nameof(SaleItemOverviewModel.BaseTotal),
+                nameof(SaleItemOverviewModel.DiscountAmount),
+                nameof(SaleItemOverviewModel.AfterDiscount),
+                nameof(SaleItemOverviewModel.SGSTAmount),
+                nameof(SaleItemOverviewModel.CGSTAmount),
+                nameof(SaleItemOverviewModel.IGSTAmount),
+                nameof(SaleItemOverviewModel.TotalTaxAmount),
+                nameof(SaleItemOverviewModel.Total),
+                nameof(SaleItemOverviewModel.NetTotal)
+            ];
+
         // All columns in logical order
-        if (showAllColumns)
+        else if (showAllColumns)
         {
             List<string> columns =
             [

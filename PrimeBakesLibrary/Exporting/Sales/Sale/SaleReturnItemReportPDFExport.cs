@@ -14,6 +14,7 @@ public static class SaleReturnItemReportPDFExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <param name="showLocation">Whether to include location column (for location ID 1 users)</param>
     /// <returns>MemoryStream containing the PDF file</returns>
     public static async Task<MemoryStream> ExportSaleReturnItemReport(
@@ -21,16 +22,36 @@ public static class SaleReturnItemReportPDFExport
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
+        bool showSummary = false,
         bool showLocation = false,
         string locationName = null)
     {
         // Define custom column settings matching Excel export
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
 
-        // Define column order based on visibility setting (matching Excel export)
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
-        if (showAllColumns)
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(SaleReturnItemOverviewModel.ItemName),
+                nameof(SaleReturnItemOverviewModel.ItemCode),
+                nameof(SaleReturnItemOverviewModel.ItemCategoryName),
+                nameof(SaleReturnItemOverviewModel.Quantity),
+                nameof(SaleReturnItemOverviewModel.BaseTotal),
+                nameof(SaleReturnItemOverviewModel.DiscountAmount),
+                nameof(SaleReturnItemOverviewModel.AfterDiscount),
+                nameof(SaleReturnItemOverviewModel.SGSTAmount),
+                nameof(SaleReturnItemOverviewModel.CGSTAmount),
+                nameof(SaleReturnItemOverviewModel.IGSTAmount),
+                nameof(SaleReturnItemOverviewModel.TotalTaxAmount),
+                nameof(SaleReturnItemOverviewModel.Total),
+                nameof(SaleReturnItemOverviewModel.NetTotal)
+            ];
+
+        else if (showAllColumns)
         {
             // All columns - detailed view (matching Excel export)
             List<string> columns =
@@ -298,7 +319,7 @@ public static class SaleReturnItemReportPDFExport
             dateRangeEnd,
             columnSettings,
             columnOrder,
-            useLandscape: showAllColumns,  // Use landscape when showing all columns
+            useLandscape: showAllColumns || showSummary,  // Use landscape when showing all columns
             locationName: locationName
         );
     }

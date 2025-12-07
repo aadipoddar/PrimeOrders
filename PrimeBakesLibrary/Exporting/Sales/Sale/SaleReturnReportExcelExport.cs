@@ -17,15 +17,17 @@ public static class SaleReturnReportExcelExport
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="showLocation">Whether to include location column</param>
     /// <param name="locationName">Name of the location for report header</param>
+    /// <param name="partyName">Name of the party for report header</param>
+    /// <param name="showSummary">Whether to show summary view with grouped data</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportSaleReturnReport(
         IEnumerable<SaleReturnOverviewModel> saleReturnData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
-        bool showLocation = false,
         string locationName = null,
-        string partyName = null)
+        string partyName = null,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -87,7 +89,30 @@ public static class SaleReturnReportExcelExport
         // Define column order based on visibility setting
         List<string> columnOrder;
 
-        if (showAllColumns)
+        // Summary view - grouped by party with totals
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(SaleReturnOverviewModel.PartyName),
+                nameof(SaleReturnOverviewModel.TotalItems),
+                nameof(SaleReturnOverviewModel.TotalQuantity),
+                nameof(SaleReturnOverviewModel.BaseTotal),
+                nameof(SaleReturnOverviewModel.ItemDiscountAmount),
+                nameof(SaleReturnOverviewModel.TotalAfterItemDiscount),
+                nameof(SaleReturnOverviewModel.TotalInclusiveTaxAmount),
+                nameof(SaleReturnOverviewModel.TotalExtraTaxAmount),
+                nameof(SaleReturnOverviewModel.TotalAfterTax),
+                nameof(SaleReturnOverviewModel.OtherChargesAmount),
+                nameof(SaleReturnOverviewModel.DiscountAmount),
+                nameof(SaleReturnOverviewModel.RoundOffAmount),
+                nameof(SaleReturnOverviewModel.TotalAmount),
+                nameof(SaleReturnOverviewModel.Cash),
+                nameof(SaleReturnOverviewModel.Card),
+                nameof(SaleReturnOverviewModel.UPI),
+                nameof(SaleReturnOverviewModel.Credit)
+            ];
+
+        else if (showAllColumns)
         {
             // All columns - detailed view
             columnOrder =
@@ -96,14 +121,16 @@ public static class SaleReturnReportExcelExport
                 nameof(SaleReturnOverviewModel.CompanyName)
             ];
 
-            // Add location columns if showLocation is true
-            if (showLocation)
-                columnOrder.Add(nameof(SaleReturnOverviewModel.LocationName));
+			// Add location columns if showLocation is true
+			if (string.IsNullOrEmpty(locationName))
+				columnOrder.Add(nameof(SaleReturnOverviewModel.LocationName));
 
-            // Continue with remaining columns
-            columnOrder.AddRange(
+            if (string.IsNullOrEmpty(partyName))
+                columnOrder.Add(nameof(SaleReturnOverviewModel.PartyName));
+
+			// Continue with remaining columns
+			columnOrder.AddRange(
             [
-                nameof(SaleReturnOverviewModel.PartyName),
                 nameof(SaleReturnOverviewModel.CustomerName),
                 nameof(SaleReturnOverviewModel.TransactionDateTime),
                 nameof(SaleReturnOverviewModel.FinancialYear),
@@ -150,14 +177,14 @@ public static class SaleReturnReportExcelExport
                 nameof(SaleReturnOverviewModel.PaymentModes)
             ];
 
-            // Add location column only if not showing location in header
-            if (!showLocation)
-                columnOrder.Insert(3, nameof(SaleReturnOverviewModel.LocationName));
+			// Add location column only if not showing location in header
+			if (string.IsNullOrEmpty(locationName))
+				columnOrder.Insert(3, nameof(SaleReturnOverviewModel.LocationName));
 
             // Add party column only if not showing party in header
             if (string.IsNullOrEmpty(partyName))
             {
-                int insertIndex = showLocation ? 3 : 4;
+                int insertIndex = string.IsNullOrEmpty(locationName) ? 3 : 4;
                 columnOrder.Insert(insertIndex, nameof(SaleReturnOverviewModel.PartyName));
             }
         }

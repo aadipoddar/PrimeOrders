@@ -16,6 +16,7 @@ public static class OrderReportPdfExport
 	/// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
 	/// <param name="showLocation">Whether to include location column</param>
 	/// <param name="locationName">Name of the location for report header</param>
+	/// <param name="showSummary">Whether to show summary view with grouped data</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
 	public static async Task<MemoryStream> ExportOrderReport(
 		IEnumerable<OrderOverviewModel> orderData,
@@ -23,7 +24,8 @@ public static class OrderReportPdfExport
 		DateOnly? dateRangeEnd = null,
 		bool showAllColumns = true,
 		bool showLocation = false,
-		string locationName = null)
+		string locationName = null,
+		bool showSummary = false)
 	{
 		// Define custom column settings matching Excel export
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -31,7 +33,16 @@ public static class OrderReportPdfExport
 		// Define column order based on visibility setting (matching Excel export)
 		List<string> columnOrder;
 
-		if (showAllColumns)
+		// Summary view - grouped by location with totals
+		if (showSummary)
+			columnOrder =
+			[
+				nameof(OrderOverviewModel.LocationName),
+				nameof(OrderOverviewModel.TotalItems),
+				nameof(OrderOverviewModel.TotalQuantity)
+			];
+
+		else if (showAllColumns)
 		{
 			// All columns - detailed view (matching Excel export)
 			columnOrder =
@@ -64,15 +75,19 @@ public static class OrderReportPdfExport
 		}
 		// Summary columns - key fields only (matching Excel export)
 		else
+		{
 			columnOrder =
 			[
 				nameof(OrderOverviewModel.TransactionNo),
 				nameof(OrderOverviewModel.SaleTransactionNo),
 				nameof(OrderOverviewModel.TransactionDateTime),
-				nameof(OrderOverviewModel.LocationName),
 				nameof(OrderOverviewModel.TotalItems),
 				nameof(OrderOverviewModel.TotalQuantity),
 			];
+
+			if (showLocation)
+				columnOrder.Insert(2, nameof(OrderOverviewModel.LocationName));
+		}
 
 		// Customize specific columns for PDF display (matching Excel column names)
 		columnSettings[nameof(OrderOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
@@ -120,7 +135,7 @@ public static class OrderReportPdfExport
 			dateRangeEnd,
 			columnSettings,
 			columnOrder,
-			useLandscape: showAllColumns,  // Use landscape when showing all columns
+			useLandscape: showAllColumns && !showSummary,  // Use landscape when showing all columns
 			locationName: locationName
 		);
 	}

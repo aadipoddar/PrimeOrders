@@ -14,17 +14,18 @@ public static class SaleReportPdfExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
-    /// <param name="showLocation">Whether to include location column</param>
     /// <param name="locationName">Name of the location for report header</param>
+    /// <param name="partyName">Name of the party for report header</param>
+    /// <param name="showSummary">Whether to show summary view with grouped data</param>
     /// <returns>MemoryStream containing the PDF file</returns>
     public static async Task<MemoryStream> ExportSaleReport(
         IEnumerable<SaleOverviewModel> saleData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
-        bool showLocation = false,
         string locationName = null,
-        string partyName = null)
+        string partyName = null,
+        bool showSummary = false)
     {
         // Define custom column settings matching Excel export
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -32,7 +33,30 @@ public static class SaleReportPdfExport
         // Define column order based on visibility setting (matching Excel export)
         List<string> columnOrder;
 
-        if (showAllColumns)
+        // Summary view - grouped by location with totals
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(SaleOverviewModel.LocationName),
+                nameof(SaleOverviewModel.TotalItems),
+                nameof(SaleOverviewModel.TotalQuantity),
+                nameof(SaleOverviewModel.BaseTotal),
+                nameof(SaleOverviewModel.ItemDiscountAmount),
+                nameof(SaleOverviewModel.TotalAfterItemDiscount),
+                nameof(SaleOverviewModel.TotalInclusiveTaxAmount),
+                nameof(SaleOverviewModel.TotalExtraTaxAmount),
+                nameof(SaleOverviewModel.TotalAfterTax),
+                nameof(SaleOverviewModel.OtherChargesAmount),
+                nameof(SaleOverviewModel.DiscountAmount),
+                nameof(SaleOverviewModel.RoundOffAmount),
+                nameof(SaleOverviewModel.TotalAmount),
+                nameof(SaleOverviewModel.Cash),
+                nameof(SaleOverviewModel.Card),
+                nameof(SaleOverviewModel.UPI),
+                nameof(SaleOverviewModel.Credit)
+            ];
+
+        else if (showAllColumns)
         {
             // All columns - detailed view (matching Excel export)
             columnOrder =
@@ -43,13 +67,15 @@ public static class SaleReportPdfExport
             ];
 
             // Add location columns if showLocation is true
-            if (showLocation)
+            if (string.IsNullOrEmpty(locationName))
                 columnOrder.Add(nameof(SaleOverviewModel.LocationName));
 
-            // Continue with remaining columns
-            columnOrder.AddRange(
+            if (string.IsNullOrEmpty(partyName))
+                columnOrder.Add(nameof(SaleOverviewModel.PartyName));
+
+			// Continue with remaining columns
+			columnOrder.AddRange(
             [
-                nameof(SaleOverviewModel.PartyName),
                 nameof(SaleOverviewModel.CustomerName),
                 nameof(SaleOverviewModel.TransactionDateTime),
                 nameof(SaleOverviewModel.FinancialYear),
@@ -97,14 +123,14 @@ public static class SaleReportPdfExport
                 nameof(SaleOverviewModel.PaymentModes)
             ];
 
-            // Add location column only if not showing location in header
-            if (!showLocation)
-                columnOrder.Insert(3, nameof(SaleOverviewModel.LocationName));
+			// Add location column only if not showing location in header
+			if (string.IsNullOrEmpty(locationName))
+				columnOrder.Insert(3, nameof(SaleOverviewModel.LocationName));
 
             // Add party column only if not showing party in header
             if (string.IsNullOrEmpty(partyName))
             {
-                int insertIndex = showLocation ? 3 : 4;
+                int insertIndex = string.IsNullOrEmpty(locationName) ? 3 : 4;
                 columnOrder.Insert(insertIndex, nameof(SaleOverviewModel.PartyName));
             }
         }
@@ -341,7 +367,7 @@ public static class SaleReportPdfExport
             dateRangeEnd,
             columnSettings,
             columnOrder,
-            useLandscape: showAllColumns,  // Use landscape when showing all columns
+            useLandscape: showAllColumns || showSummary,  // Use landscape when showing all columns
             locationName: locationName,
             partyName: partyName
         );

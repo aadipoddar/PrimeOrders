@@ -15,6 +15,8 @@ public static class SaleItemReportPDFExport
 	/// <param name="dateRangeEnd">End date of the report</param>
 	/// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
 	/// <param name="showLocation">Whether to include location column (for location ID 1 users)</param>
+	/// <param name="locationName">Name of the location for header</param>
+	/// <param name="showSummary">Whether to show summary grouped by item</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
 	public static async Task<MemoryStream> ExportSaleItemReport(
 		IEnumerable<SaleItemOverviewModel> saleItemData,
@@ -22,7 +24,8 @@ public static class SaleItemReportPDFExport
 		DateOnly? dateRangeEnd = null,
 		bool showAllColumns = true,
 		bool showLocation = false,
-		string locationName = null)
+		string locationName = null,
+		bool showSummary = false)
 	{
 		// Define custom column settings matching Excel export
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -30,7 +33,26 @@ public static class SaleItemReportPDFExport
 		// Define column order based on visibility setting (matching Excel export)
 		List<string> columnOrder;
 
-		if (showAllColumns)
+		// Summary mode - grouped by item with aggregated values
+		if (showSummary)
+			columnOrder =
+			[
+				nameof(SaleItemOverviewModel.ItemName),
+				nameof(SaleItemOverviewModel.ItemCode),
+				nameof(SaleItemOverviewModel.ItemCategoryName),
+				nameof(SaleItemOverviewModel.Quantity),
+				nameof(SaleItemOverviewModel.BaseTotal),
+				nameof(SaleItemOverviewModel.DiscountAmount),
+				nameof(SaleItemOverviewModel.AfterDiscount),
+				nameof(SaleItemOverviewModel.SGSTAmount),
+				nameof(SaleItemOverviewModel.CGSTAmount),
+				nameof(SaleItemOverviewModel.IGSTAmount),
+				nameof(SaleItemOverviewModel.TotalTaxAmount),
+				nameof(SaleItemOverviewModel.Total),
+				nameof(SaleItemOverviewModel.NetTotal)
+			];
+
+		else if (showAllColumns)
 		{
 			// All columns - detailed view (matching Excel export)
 			List<string> columns =
@@ -299,7 +321,7 @@ public static class SaleItemReportPDFExport
 			dateRangeEnd,
 			columnSettings,
 			columnOrder,
-			useLandscape: showAllColumns,  // Use landscape when showing all columns
+			useLandscape: showAllColumns || showSummary,  // Use landscape when showing all columns
 			locationName: locationName
 		);
 	}

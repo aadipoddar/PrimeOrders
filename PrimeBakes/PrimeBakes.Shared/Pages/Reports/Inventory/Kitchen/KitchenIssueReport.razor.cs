@@ -27,6 +27,7 @@ public partial class KitchenIssueReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 	private bool _showDeleted = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
@@ -141,6 +142,17 @@ public partial class KitchenIssueReport : IAsyncDisposable
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.KitchenName)
+					.Select(g => new KitchenIssueOverviewModel
+					{
+						KitchenName = g.Key,
+						TotalItems = g.Sum(t => t.TotalItems),
+						TotalQuantity = g.Sum(t => t.TotalQuantity),
+						TotalAmount = g.Sum(t => t.TotalAmount)
+					})];
 		}
 		catch (Exception ex)
 		{
@@ -271,10 +283,12 @@ public partial class KitchenIssueReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await KitchenIssueReportExcelExport.ExportKitchenIssueReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_selectedKitchen?.Id > 0 ? _selectedKitchen?.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"KITCHEN_ISSUE_REPORT";
@@ -312,10 +326,12 @@ public partial class KitchenIssueReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await KitchenIssueReportPDFExport.ExportKitchenIssueReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_selectedKitchen?.Id > 0 ? _selectedKitchen?.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"KITCHEN_ISSUE_REPORT";
@@ -496,6 +512,12 @@ public partial class KitchenIssueReport : IAsyncDisposable
 		_showDeleted = !_showDeleted;
 		await LoadTransactionOverviews();
 		StateHasChanged();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
+		await LoadTransactionOverviews();
 	}
 
 	private async Task ConfirmRecover()

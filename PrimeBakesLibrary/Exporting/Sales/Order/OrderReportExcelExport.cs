@@ -17,6 +17,7 @@ public static class OrderReportExcelExport
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
     /// <param name="showLocation">Whether to include location column</param>
     /// <param name="locationName">Name of the location for report header</param>
+    /// <param name="showSummary">Whether to show summary view with grouped data</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportOrderReport(
         IEnumerable<OrderOverviewModel> orderData,
@@ -24,7 +25,8 @@ public static class OrderReportExcelExport
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
         bool showLocation = false,
-        string locationName = null)
+        string locationName = null,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -64,7 +66,16 @@ public static class OrderReportExcelExport
         // Define column order based on visibility setting
         List<string> columnOrder;
 
-        if (showAllColumns)
+		// Summary view - grouped by location with totals
+		if (showSummary)
+			columnOrder =
+			[
+				nameof(OrderOverviewModel.LocationName),
+				nameof(OrderOverviewModel.TotalItems),
+				nameof(OrderOverviewModel.TotalQuantity)
+			];
+
+		else if (showAllColumns)
         {
             // All columns - detailed view
             columnOrder =
@@ -103,10 +114,12 @@ public static class OrderReportExcelExport
                 nameof(OrderOverviewModel.TransactionNo),       
                 nameof(OrderOverviewModel.SaleTransactionNo),
                 nameof(OrderOverviewModel.TransactionDateTime),
-                nameof(OrderOverviewModel.LocationName),
                 nameof(OrderOverviewModel.TotalItems),
 				nameof(OrderOverviewModel.TotalQuantity)
             ];
+
+            if (showLocation)
+                columnOrder.Insert(2, nameof(OrderOverviewModel.LocationName));
         }
 
         // Call the generic Excel export utility

@@ -1,4 +1,5 @@
 ﻿using PrimeBakesLibrary.Exporting.Utils;
+using PrimeBakesLibrary.Models.Sales.Sale;
 using PrimeBakesLibrary.Models.Sales.StockTransfer;
 
 namespace PrimeBakesLibrary.Exporting.Sales.StockTransfer;
@@ -13,7 +14,8 @@ public static class StockTransferReportExcelExport
         bool showLocation = false,
         string locationName = null,
         bool showToLocation = false,
-        string toLocationName = null)
+        string toLocationName = null,
+        bool showSummary = false)
     {
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
         {
@@ -53,7 +55,30 @@ public static class StockTransferReportExcelExport
 
         List<string> columnOrder;
 
-        if (showAllColumns)
+		// Summary view - grouped by party with totals
+		if (showSummary)
+			columnOrder =
+			[
+				nameof(StockTransferOverviewModel.ToLocationName),
+				nameof(StockTransferOverviewModel.TotalItems),
+				nameof(StockTransferOverviewModel.TotalQuantity),
+				nameof(StockTransferOverviewModel.BaseTotal),
+				nameof(StockTransferOverviewModel.ItemDiscountAmount),
+				nameof(StockTransferOverviewModel.TotalAfterItemDiscount),
+				nameof(StockTransferOverviewModel.TotalInclusiveTaxAmount),
+				nameof(StockTransferOverviewModel.TotalExtraTaxAmount),
+				nameof(StockTransferOverviewModel.TotalAfterTax),
+				nameof(StockTransferOverviewModel.OtherChargesAmount),
+				nameof(StockTransferOverviewModel.DiscountAmount),
+				nameof(StockTransferOverviewModel.RoundOffAmount),
+				nameof(StockTransferOverviewModel.TotalAmount),
+				nameof(StockTransferOverviewModel.Cash),
+				nameof(StockTransferOverviewModel.Card),
+				nameof(StockTransferOverviewModel.UPI),
+				nameof(StockTransferOverviewModel.Credit)
+			];
+
+		else if (showAllColumns)
         {
             columnOrder =
             [

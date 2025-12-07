@@ -14,12 +14,16 @@ public static class PurchaseReportPDFExport
 	/// <param name="dateRangeStart">Start date of the report</param>
 	/// <param name="dateRangeEnd">End date of the report</param>
 	/// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+	/// <param name="partyName">Optional party name to display in header</param>
+	/// <param name="showSummary">Whether to show summary view with grouped data</param>
 	/// <returns>MemoryStream containing the PDF file</returns>
 	public static async Task<MemoryStream> ExportPurchaseReport(
 		IEnumerable<PurchaseOverviewModel> purchaseData,
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
-		bool showAllColumns = true)
+		bool showAllColumns = true,
+		string partyName = null,
+		bool showSummary = false)
 	{
 		// Define custom column settings matching Excel export
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
@@ -27,14 +31,33 @@ public static class PurchaseReportPDFExport
 		// Define column order based on visibility setting (matching Excel export)
 		List<string> columnOrder;
 
+		// Summary view - grouped by party with totals
+		if (showSummary)
+			columnOrder =
+			[
+				nameof(PurchaseOverviewModel.PartyName),
+				nameof(PurchaseOverviewModel.TotalItems),
+				nameof(PurchaseOverviewModel.TotalQuantity),
+				nameof(PurchaseOverviewModel.BaseTotal),
+				nameof(PurchaseOverviewModel.ItemDiscountAmount),
+				nameof(PurchaseOverviewModel.TotalAfterItemDiscount),
+				nameof(PurchaseOverviewModel.TotalInclusiveTaxAmount),
+				nameof(PurchaseOverviewModel.TotalExtraTaxAmount),
+				nameof(PurchaseOverviewModel.TotalAfterTax),
+				nameof(PurchaseOverviewModel.CashDiscountAmount),
+				nameof(PurchaseOverviewModel.OtherChargesAmount),
+				nameof(PurchaseOverviewModel.RoundOffAmount),
+				nameof(PurchaseOverviewModel.TotalAmount)
+			];
+
 		// All columns - detailed view (matching Excel export)
-		if (showAllColumns)
+		else if (showAllColumns)
+		{
 			columnOrder =
 			[
 				nameof(PurchaseOverviewModel.TransactionNo),
 				nameof(PurchaseOverviewModel.TransactionDateTime),
 				nameof(PurchaseOverviewModel.CompanyName),
-				nameof(PurchaseOverviewModel.PartyName),
 				nameof(PurchaseOverviewModel.FinancialYear),
 				nameof(PurchaseOverviewModel.TotalItems),
 				nameof(PurchaseOverviewModel.TotalQuantity),
@@ -58,19 +81,29 @@ public static class PurchaseReportPDFExport
 				nameof(PurchaseOverviewModel.LastModifiedAt),
 				nameof(PurchaseOverviewModel.LastModifiedFromPlatform)
 			];
+
+			// Add party column only if not filtering by party
+			if (string.IsNullOrEmpty(partyName))
+				columnOrder.Insert(3, nameof(PurchaseOverviewModel.PartyName));
+		}
 		// Summary columns - key fields only (matching Excel export)
 		else
+		{
 			columnOrder =
 			[
 				nameof(PurchaseOverviewModel.TransactionNo),
 				nameof(PurchaseOverviewModel.TransactionDateTime),
-				nameof(PurchaseOverviewModel.PartyName),
 				nameof(PurchaseOverviewModel.TotalQuantity),
 				nameof(PurchaseOverviewModel.TotalAfterTax),
 				nameof(PurchaseOverviewModel.OtherChargesPercent),
 				nameof(PurchaseOverviewModel.CashDiscountPercent),
 				nameof(PurchaseOverviewModel.TotalAmount)
 			];
+
+			// Add party column only if not filtering by party
+			if (string.IsNullOrEmpty(partyName))
+				columnOrder.Insert(2, nameof(PurchaseOverviewModel.PartyName));
+		}
 
 		// Customize specific columns for PDF display (matching Excel column names)
 		columnSettings[nameof(PurchaseOverviewModel.TransactionNo)] = new() { DisplayName = "Trans No", IncludeInTotal = false };
@@ -260,7 +293,8 @@ public static class PurchaseReportPDFExport
 			dateRangeEnd,
 			columnSettings,
 			columnOrder,
-			useLandscape: showAllColumns  // Use landscape when showing all columns
+			useLandscape: showAllColumns || showSummary,  // Use landscape when showing all columns
+			partyName: partyName
 		);
 	}
 }

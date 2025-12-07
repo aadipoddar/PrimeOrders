@@ -14,6 +14,7 @@ public static class StockTransferItemReportPdfExport
 	/// <param name="dateRangeStart">Start date of the report</param>
 	/// <param name="dateRangeEnd">End date of the report</param>
 	/// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+	/// <param name="showSummary">Whether to show summary grouped by item</param>
 	/// <param name="showLocation">Whether to include location column (for location ID 1 users)</param>
 	/// <param name="locationName">Name of the location for report header</param>
 	/// <param name="toLocationName">Name of the to-location for report header</param>
@@ -23,6 +24,7 @@ public static class StockTransferItemReportPdfExport
 		DateOnly? dateRangeStart = null,
 		DateOnly? dateRangeEnd = null,
 		bool showAllColumns = true,
+		bool showSummary = false,
 		bool showLocation = false,
 		string locationName = null,
         bool showToLocation = false,
@@ -31,10 +33,29 @@ public static class StockTransferItemReportPdfExport
 		// Define custom column settings matching Excel export
 		var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
 
-		// Define column order based on visibility setting (matching Excel export)
+		// Define column order based on showAllColumns and showSummary flags
 		List<string> columnOrder;
 
-		if (showAllColumns)
+		// Summary mode - grouped by item with aggregated values
+		if (showSummary)
+			columnOrder =
+			[
+				nameof(StockTransferItemOverviewModel.ItemName),
+				nameof(StockTransferItemOverviewModel.ItemCode),
+				nameof(StockTransferItemOverviewModel.ItemCategoryName),
+				nameof(StockTransferItemOverviewModel.Quantity),
+				nameof(StockTransferItemOverviewModel.BaseTotal),
+				nameof(StockTransferItemOverviewModel.DiscountAmount),
+				nameof(StockTransferItemOverviewModel.AfterDiscount),
+				nameof(StockTransferItemOverviewModel.SGSTAmount),
+				nameof(StockTransferItemOverviewModel.CGSTAmount),
+				nameof(StockTransferItemOverviewModel.IGSTAmount),
+				nameof(StockTransferItemOverviewModel.TotalTaxAmount),
+				nameof(StockTransferItemOverviewModel.Total),
+				nameof(StockTransferItemOverviewModel.NetTotal)
+			];
+
+		else if (showAllColumns)
 		{
 			// All columns - detailed view (matching Excel export)
 			List<string> columns =
@@ -299,7 +320,7 @@ public static class StockTransferItemReportPdfExport
 			dateRangeEnd,
 			columnSettings,
 			columnOrder,
-			useLandscape: showAllColumns,  // Use landscape when showing all columns
+			useLandscape: showAllColumns || showSummary,  // Use landscape when showing all columns
 			locationName: locationName,
 			partyName: showToLocation ? toLocationName : null
 		);

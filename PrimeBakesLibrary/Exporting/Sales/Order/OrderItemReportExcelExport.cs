@@ -15,6 +15,7 @@ public static class OrderItemReportExcelExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <param name="showLocation">Whether to include location column (for location ID 1 users)</param>
     /// <param name="locationName">Name of the location for report header</param>
     /// <returns>MemoryStream containing the Excel file</returns>
@@ -23,6 +24,7 @@ public static class OrderItemReportExcelExport
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
         bool showAllColumns = true,
+        bool showSummary = false,
         bool showLocation = false,
         string locationName = null)
     {
@@ -55,11 +57,22 @@ public static class OrderItemReportExcelExport
             [nameof(OrderItemOverviewModel.Quantity)] = new() { DisplayName = "Qty", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
         };
 
-        // Define column order based on showAllColumns flag
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+        {
+            columnOrder =
+            [
+                nameof(OrderItemOverviewModel.ItemName),
+                nameof(OrderItemOverviewModel.ItemCode),
+                nameof(OrderItemOverviewModel.ItemCategoryName),
+                nameof(OrderItemOverviewModel.Quantity)
+            ];
+        }
         // All columns in logical order
-        if (showAllColumns)
+        else if (showAllColumns)
         {
             List<string> columns =
             [

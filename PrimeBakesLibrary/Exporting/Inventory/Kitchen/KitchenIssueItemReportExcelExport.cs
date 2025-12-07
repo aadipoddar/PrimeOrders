@@ -15,12 +15,14 @@ public static class KitchenIssueItemReportExcelExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportKitchenIssueItemReport(
         IEnumerable<KitchenIssueItemOverviewModel> kitchenIssueItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -51,11 +53,22 @@ public static class KitchenIssueItemReportExcelExport
             [nameof(KitchenIssueItemOverviewModel.Total)] = new() { DisplayName = "Total", Format = "#,##0.00", Alignment = Syncfusion.XlsIO.ExcelHAlign.HAlignRight, IncludeInTotal = true }
         };
 
-        // Define column order based on showAllColumns flag
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(KitchenIssueItemOverviewModel.ItemName),
+                nameof(KitchenIssueItemOverviewModel.ItemCode),
+                nameof(KitchenIssueItemOverviewModel.ItemCategoryName),
+                nameof(KitchenIssueItemOverviewModel.Quantity),
+                nameof(KitchenIssueItemOverviewModel.Total)
+            ];
+
         // All columns in logical order
-        if (showAllColumns)
+        else if (showAllColumns)
             columnOrder =
             [
                 nameof(KitchenIssueItemOverviewModel.ItemName),

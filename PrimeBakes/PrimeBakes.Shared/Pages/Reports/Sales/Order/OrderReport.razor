@@ -112,6 +112,10 @@ else
                     <h2 class="section-title">Order Transactions</h2>
                 </div>
                 <div class="header-actions">
+                    @if (_user.LocationId == 1)
+                    {
+                        <ToggleSummaryButton Disabled="@_isProcessing" ShowSummary="@_showSummary" OnToggle="ToggleSummary" />
+                    }
                     <ToggleDeletedButton Disabled="@_isProcessing" ShowDeleted="@_showDeleted" OnToggle="ToggleDeleted" />
                     <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
                 </div>
@@ -200,7 +204,7 @@ else
                     </GridAggregates>
 
                     <GridColumns>
-                        <GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center">
+                        <GridColumn HeaderText="Actions" Width="180" TextAlign="TextAlign.Center" Visible="@(!_showSummary)">
                             <Template>
                                 @{
                                     var item = (context as OrderOverviewModel);
@@ -230,13 +234,13 @@ else
                                 </div>
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(OrderOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(OrderOverviewModel.LocationName)" HeaderText="Location" Width="150" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.SaleTransactionNo)" HeaderText="Sale No" Width="150" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.SaleTransactionNo)" HeaderText="Sale No" Width="150" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.FinancialYear)" HeaderText="Financial Year" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.TotalItems)" HeaderText="Items" Width="100" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(OrderOverviewModel.TotalQuantity)" HeaderText="Quantity" Width="120" Format="N2" TextAlign="TextAlign.Right">
                             <Template>
                                 @{
@@ -245,13 +249,13 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(OrderOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(OrderOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.Remarks)" HeaderText="Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.CreatedByName)" HeaderText="Created By" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.CreatedAt)" HeaderText="Created At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.CreatedFromPlatform)" HeaderText="Created Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.LastModifiedByUserName)" HeaderText="Modified By" Width="150" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.LastModifiedAt)" HeaderText="Modified At" Width="160" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(OrderOverviewModel.LastModifiedFromPlatform)" HeaderText="Modified Platform" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
                     </GridColumns>
                 </SfGrid>
             </div>

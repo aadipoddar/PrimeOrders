@@ -15,12 +15,16 @@ public static class PurchaseReportExcelExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="partyName">Optional party name to display in header</param>
+    /// <param name="showSummary">Whether to show summary view with grouped data</param>
     /// <returns>MemoryStream containing the Excel file</returns>
     public static async Task<MemoryStream> ExportPurchaseReport(
         IEnumerable<PurchaseOverviewModel> purchaseData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        string partyName = null,
+        bool showSummary = false)
     {
         // Define custom column settings
         var columnSettings = new Dictionary<string, ExcelReportExportUtil.ColumnSetting>
@@ -74,14 +78,33 @@ public static class PurchaseReportExcelExport
         // Define column order based on showAllColumns flag
         List<string> columnOrder;
 
+        // Summary view - grouped by party with totals
+        if (showSummary)
+            columnOrder =
+            [
+                nameof(PurchaseOverviewModel.PartyName),
+                nameof(PurchaseOverviewModel.TotalItems),
+                nameof(PurchaseOverviewModel.TotalQuantity),
+                nameof(PurchaseOverviewModel.BaseTotal),
+                nameof(PurchaseOverviewModel.ItemDiscountAmount),
+                nameof(PurchaseOverviewModel.TotalAfterItemDiscount),
+                nameof(PurchaseOverviewModel.TotalInclusiveTaxAmount),
+                nameof(PurchaseOverviewModel.TotalExtraTaxAmount),
+                nameof(PurchaseOverviewModel.TotalAfterTax),
+                nameof(PurchaseOverviewModel.CashDiscountAmount),
+                nameof(PurchaseOverviewModel.OtherChargesAmount),
+                nameof(PurchaseOverviewModel.RoundOffAmount),
+                nameof(PurchaseOverviewModel.TotalAmount)
+            ];
+
         // All columns in logical order
-        if (showAllColumns)
+        else if (showAllColumns)
+        {
             columnOrder =
             [
                 nameof(PurchaseOverviewModel.TransactionNo),
                 nameof(PurchaseOverviewModel.TransactionDateTime),
                 nameof(PurchaseOverviewModel.CompanyName),
-                nameof(PurchaseOverviewModel.PartyName),
                 nameof(PurchaseOverviewModel.FinancialYear),
                 nameof(PurchaseOverviewModel.TotalItems),
                 nameof(PurchaseOverviewModel.TotalQuantity),
@@ -106,19 +129,29 @@ public static class PurchaseReportExcelExport
                 nameof(PurchaseOverviewModel.LastModifiedFromPlatform)
             ];
 
+            // Add party column only if not filtering by party
+            if (string.IsNullOrEmpty(partyName))
+                columnOrder.Insert(3, nameof(PurchaseOverviewModel.PartyName));
+        }
+
         // Summary columns only
         else
+        {
             columnOrder =
             [
                 nameof(PurchaseOverviewModel.TransactionNo),
 				nameof(PurchaseOverviewModel.TransactionDateTime),
-                nameof(PurchaseOverviewModel.PartyName),
                 nameof(PurchaseOverviewModel.TotalQuantity),
                 nameof(PurchaseOverviewModel.TotalAfterTax),
                 nameof(PurchaseOverviewModel.OtherChargesPercent),
                 nameof(PurchaseOverviewModel.CashDiscountPercent),
                 nameof(PurchaseOverviewModel.TotalAmount)
             ];
+
+            // Add party column only if not filtering by party
+            if (string.IsNullOrEmpty(partyName))
+                columnOrder.Insert(2, nameof(PurchaseOverviewModel.PartyName));
+        }
 
         // Export using the generic utility
         return await ExcelReportExportUtil.ExportToExcel(
@@ -128,7 +161,8 @@ public static class PurchaseReportExcelExport
             dateRangeStart,
             dateRangeEnd,
             columnSettings,
-            columnOrder
+            columnOrder,
+            partyName: partyName
         );
     }
 }

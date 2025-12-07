@@ -14,20 +14,42 @@ public static class PurchaseReturnItemReportPDFExport
     /// <param name="dateRangeStart">Start date of the report</param>
     /// <param name="dateRangeEnd">End date of the report</param>
     /// <param name="showAllColumns">Whether to include all columns or just summary columns</param>
+    /// <param name="showSummary">Whether to show summary grouped by item</param>
     /// <returns>MemoryStream containing the PDF file</returns>
     public static async Task<MemoryStream> ExportPurchaseReturnItemReport(
         IEnumerable<PurchaseReturnItemOverviewModel> purchaseReturnItemData,
         DateOnly? dateRangeStart = null,
         DateOnly? dateRangeEnd = null,
-        bool showAllColumns = true)
+        bool showAllColumns = true,
+        bool showSummary = false)
     {
         // Define custom column settings matching Excel export
         var columnSettings = new Dictionary<string, PDFReportExportUtil.ColumnSetting>();
 
-        // Define column order based on visibility setting (matching Excel export)
+        // Define column order based on showAllColumns and showSummary flags
         List<string> columnOrder;
 
-        if (showAllColumns)
+        // Summary mode - grouped by item with aggregated values
+        if (showSummary)
+        {
+            columnOrder =
+            [
+                nameof(PurchaseReturnItemOverviewModel.ItemName),
+                nameof(PurchaseReturnItemOverviewModel.ItemCode),
+                nameof(PurchaseReturnItemOverviewModel.ItemCategoryName),
+                nameof(PurchaseReturnItemOverviewModel.Quantity),
+                nameof(PurchaseReturnItemOverviewModel.BaseTotal),
+                nameof(PurchaseReturnItemOverviewModel.DiscountAmount),
+                nameof(PurchaseReturnItemOverviewModel.AfterDiscount),
+                nameof(PurchaseReturnItemOverviewModel.SGSTAmount),
+                nameof(PurchaseReturnItemOverviewModel.CGSTAmount),
+                nameof(PurchaseReturnItemOverviewModel.IGSTAmount),
+                nameof(PurchaseReturnItemOverviewModel.TotalTaxAmount),
+                nameof(PurchaseReturnItemOverviewModel.Total),
+                nameof(PurchaseReturnItemOverviewModel.NetTotal)
+            ];
+        }
+        else if (showAllColumns)
         {
             // All columns - detailed view (matching Excel export)
             columnOrder =
@@ -288,7 +310,7 @@ public static class PurchaseReturnItemReportPDFExport
             dateRangeEnd,
             columnSettings,
             columnOrder,
-            useLandscape: showAllColumns  // Use landscape when showing all columns
+            useLandscape: showAllColumns || showSummary  // Use landscape when showing all columns
         );
     }
 }

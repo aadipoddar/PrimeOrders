@@ -27,6 +27,7 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -147,6 +148,27 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.ItemName)
+					.Select(g => new SaleReturnItemOverviewModel
+					{
+						ItemName = g.Key,
+						ItemCode = g.First().ItemCode,
+						ItemCategoryName = g.First().ItemCategoryName,
+						Quantity = g.Sum(t => t.Quantity),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						DiscountAmount = g.Sum(t => t.DiscountAmount),
+						AfterDiscount = g.Sum(t => t.AfterDiscount),
+						SGSTAmount = g.Sum(t => t.SGSTAmount),
+						CGSTAmount = g.Sum(t => t.CGSTAmount),
+						IGSTAmount = g.Sum(t => t.IGSTAmount),
+						TotalTaxAmount = g.Sum(t => t.TotalTaxAmount),
+						Total = g.Sum(t => t.Total),
+						NetTotal = g.Sum(t => t.NetTotal)
+					})
+					.OrderBy(t => t.ItemName)];
 		}
 		catch (Exception ex)
 		{
@@ -296,8 +318,9 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.LocationId == 1,
-					_selectedLocation?.Id > 0 ? _selectedLocation.Name : null
+					_selectedLocation?.Id > 0,
+					_selectedLocation?.Id > 0 ? _selectedLocation.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"SALE_RETURN_ITEM_REPORT";
@@ -338,7 +361,8 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.LocationId == 1,
+					_showSummary,
+					_selectedLocation?.Id > 0,
 					_selectedLocation?.Name
 				);
 
@@ -474,6 +498,12 @@ public partial class SaleReturnItemReport : IAsyncDisposable
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
+		await LoadTransactionOverviews();
 	}
 	#endregion
 

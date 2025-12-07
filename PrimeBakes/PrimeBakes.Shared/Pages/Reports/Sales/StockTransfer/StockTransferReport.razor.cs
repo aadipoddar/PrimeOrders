@@ -27,6 +27,7 @@ public partial class StockTransferReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 	private bool _showDeleted = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
@@ -146,6 +147,30 @@ public partial class StockTransferReport : IAsyncDisposable
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.ToLocationName)
+					.Select(g => new StockTransferOverviewModel
+					{
+						ToLocationName = g.Key,
+						TotalItems = g.Sum(t => t.TotalItems),
+						TotalQuantity = g.Sum(t => t.TotalQuantity),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						ItemDiscountAmount = g.Sum(t => t.ItemDiscountAmount),
+						TotalAfterItemDiscount = g.Sum(t => t.TotalAfterItemDiscount),
+						TotalInclusiveTaxAmount = g.Sum(t => t.TotalInclusiveTaxAmount),
+						TotalExtraTaxAmount = g.Sum(t => t.TotalExtraTaxAmount),
+						TotalAfterTax = g.Sum(t => t.TotalAfterTax),
+						OtherChargesAmount = g.Sum(t => t.OtherChargesAmount),
+						DiscountAmount = g.Sum(t => t.DiscountAmount),
+						RoundOffAmount = g.Sum(t => t.RoundOffAmount),
+						TotalAmount = g.Sum(t => t.TotalAmount),
+						Cash = g.Sum(t => t.Cash),
+						Card = g.Sum(t => t.Card),
+						UPI = g.Sum(t => t.UPI),
+						Credit = g.Sum(t => t.Credit)
+					})];
 		}
 		catch (Exception ex)
 		{
@@ -282,14 +307,15 @@ public partial class StockTransferReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await StockTransferReportExcelExport.ExportStockTransferReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_selectedLocation?.Id > 0,
 					_selectedLocation?.Name,
 					_selectedToLocation?.Id > 0,
-					_selectedToLocation?.Name
+					_selectedToLocation?.Name,
+					_showSummary
 				);
 
 			string fileName = $"STOCK_TRANSFER_REPORT";
@@ -326,14 +352,15 @@ public partial class StockTransferReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await StockTransferReportPdfExport.ExportStockTransferReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
 					_selectedLocation?.Id > 0,
 					_selectedLocation?.Name,
 					_selectedToLocation?.Id > 0,
-					_selectedToLocation?.Name
+					_selectedToLocation?.Name,
+					_showSummary
 				);
 
 			string fileName = $"STOCK_TRANSFER_REPORT";
@@ -513,6 +540,15 @@ public partial class StockTransferReport : IAsyncDisposable
 			return;
 
 		_showDeleted = !_showDeleted;
+		await LoadTransactionOverviews();
+	}
+
+	private async Task ToggleSummary()
+	{
+		if (_user.LocationId > 1)
+			return;
+
+		_showSummary = !_showSummary;
 		await LoadTransactionOverviews();
 	}
 

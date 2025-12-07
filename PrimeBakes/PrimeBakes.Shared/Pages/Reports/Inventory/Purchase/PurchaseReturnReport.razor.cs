@@ -27,6 +27,7 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 	private bool _showDeleted = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
@@ -142,6 +143,26 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.PartyId == _selectedParty.Id)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.PartyName)
+					.Select(g => new PurchaseReturnOverviewModel
+					{
+						PartyName = g.Key,
+						TotalItems = g.Sum(t => t.TotalItems),
+						TotalQuantity = g.Sum(t => t.TotalQuantity),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						ItemDiscountAmount = g.Sum(t => t.ItemDiscountAmount),
+						TotalAfterItemDiscount = g.Sum(t => t.TotalAfterItemDiscount),
+						TotalInclusiveTaxAmount = g.Sum(t => t.TotalInclusiveTaxAmount),
+						TotalExtraTaxAmount = g.Sum(t => t.TotalExtraTaxAmount),
+						TotalAfterTax = g.Sum(t => t.TotalAfterTax),
+						CashDiscountAmount = g.Sum(t => t.CashDiscountAmount),
+						OtherChargesAmount = g.Sum(t => t.OtherChargesAmount),
+						RoundOffAmount = g.Sum(t => t.RoundOffAmount),
+						TotalAmount = g.Sum(t => t.TotalAmount)
+					})];
 		}
 		catch (Exception ex)
 		{
@@ -274,10 +295,12 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 
 			// Call the Excel export utility
 			var stream = await PurchaseReturnReportExcelExport.ExportPurchaseReturnReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null,
+					_showSummary
 				);
 
 			// Generate file name with date range
@@ -319,10 +342,12 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 
 			// Call the PDF export utility
 			var stream = await PurchaseReturnReportPdfExport.ExportPurchaseReturnReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null,
+					_showSummary
 				);
 			
 			// Generate file name with date range
@@ -541,6 +566,12 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 	private async Task ToggleDeleted()
 	{
 		_showDeleted = !_showDeleted;
+		await LoadTransactionOverviews();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
 		await LoadTransactionOverviews();
 	}
 

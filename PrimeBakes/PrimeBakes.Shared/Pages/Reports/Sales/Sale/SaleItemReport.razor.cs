@@ -31,6 +31,7 @@ public partial class SaleItemReport : IAsyncDisposable
 	private bool _showAllColumns = false;
 	private bool _showSaleReturns = false;
 	private bool _showStockTransfers = false;
+	private bool _showSummary = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -159,6 +160,27 @@ public partial class SaleItemReport : IAsyncDisposable
 
 			if (_showStockTransfers)
 				await LoadTransactionTransferOverviews();
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.ItemName)
+					.Select(g => new SaleItemOverviewModel
+					{
+						ItemName = g.Key,
+						ItemCode = g.First().ItemCode,
+						ItemCategoryName = g.First().ItemCategoryName,
+						Quantity = g.Sum(t => t.Quantity),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						DiscountAmount = g.Sum(t => t.DiscountAmount),
+						AfterDiscount = g.Sum(t => t.AfterDiscount),
+						SGSTAmount = g.Sum(t => t.SGSTAmount),
+						CGSTAmount = g.Sum(t => t.CGSTAmount),
+						IGSTAmount = g.Sum(t => t.IGSTAmount),
+						TotalTaxAmount = g.Sum(t => t.TotalTaxAmount),
+						Total = g.Sum(t => t.Total),
+						NetTotal = g.Sum(t => t.NetTotal)
+					})
+					.OrderBy(t => t.ItemName)];
 		}
 		catch (Exception ex)
 		{
@@ -442,8 +464,9 @@ public partial class SaleItemReport : IAsyncDisposable
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.LocationId == 1,
-					_selectedLocation?.Name
+					_selectedLocation?.Id > 0,
+					_selectedLocation?.Name,
+					_showSummary
 				);
 
 			string fileName = $"SALE_ITEM_REPORT";
@@ -484,8 +507,9 @@ public partial class SaleItemReport : IAsyncDisposable
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.LocationId == 1,
-					_selectedLocation?.Name
+					_selectedLocation?.Id > 0,
+					_selectedLocation?.Name,
+					_showSummary
 				);
 
 			string fileName = $"SALE_ITEM_REPORT";
@@ -669,6 +693,12 @@ public partial class SaleItemReport : IAsyncDisposable
 	private async Task ToggleStockTransfers()
 	{
 		_showStockTransfers = !_showStockTransfers;
+		await LoadTransactionOverviews();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
 		await LoadTransactionOverviews();
 	}
 	#endregion

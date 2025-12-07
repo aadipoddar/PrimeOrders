@@ -114,6 +114,7 @@ else
                     <h2 class="section-title">Stock Transfer Item Transactions</h2>
                 </div>
                 <div class="header-actions">
+                    <ToggleSummaryButton Disabled="@_isProcessing" ShowSummary="@_showSummary" OnToggle="ToggleSummary" />
                     <ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
                 </div>
             </div>
@@ -379,7 +380,7 @@ else
                     </GridAggregates>
 
                     <GridColumns>
-                        <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
+                        <GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center" Visible="@(!_showSummary)">
                             <Template>
                                 @{
                                     var item = (context as StockTransferItemOverviewModel);
@@ -392,17 +393,17 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.ItemName)" HeaderText="Item" Width="200" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.ItemCode)" HeaderText="Code" Width="130" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.ItemCategoryName)" HeaderText="Category" Width="150" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.LocationName)" HeaderText="From Location" Width="180" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.ToLocationName)" HeaderText="To Location" Width="180" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.ItemCode)" HeaderText="Code" Width="130" Visible="@_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.ItemCategoryName)" HeaderText="Category" Width="150" Visible="@_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.LocationName)" HeaderText="From Location" Width="180" Visible="@(!_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.ToLocationName)" HeaderText="To Location" Width="180" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.Quantity)" HeaderText="Qty" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.BaseTotal)" HeaderText="Base Total" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.DiscountPercent)" HeaderText="Disc %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.DiscountAmount)" HeaderText="Disc" Width="130" TextAlign="TextAlign.Right" Visible="_showAllColumns">
                             <Template>
                                 @{
@@ -412,15 +413,15 @@ else
                             </Template>
                         </GridColumn>
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.AfterDiscount)" HeaderText="After Disc" Width="140" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.SGSTPercent)" HeaderText="SGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.SGSTPercent)" HeaderText="SGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.SGSTAmount)" HeaderText="SGST" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.CGSTPercent)" HeaderText="CGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.CGSTPercent)" HeaderText="CGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.CGSTAmount)" HeaderText="CGST" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.IGSTPercent)" HeaderText="IGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.IGSTPercent)" HeaderText="IGST %" Width="120" Format="N2" TextAlign="TextAlign.Center" Visible="@(_showAllColumns && !_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.IGSTAmount)" HeaderText="IGST" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.TotalTaxAmount)" HeaderText="Tax Amt" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.Total)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.NetRate)" HeaderText="Net Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.NetRate)" HeaderText="Net Rate" Width="130" Format="N2" TextAlign="TextAlign.Right" Visible="@(!_showSummary)" />
                         <GridColumn Field="@nameof(StockTransferItemOverviewModel.NetTotal)" HeaderText="Net Total" Width="150" TextAlign="TextAlign.Right">
                             <Template>
                                 @{
@@ -429,8 +430,8 @@ else
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.StockTransferRemarks)" HeaderText="Transfer Remarks" Width="200" Visible="_showAllColumns" />
-                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.Remarks)" HeaderText="Item Remarks" Width="200" Visible="_showAllColumns" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.StockTransferRemarks)" HeaderText="Transfer Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+                        <GridColumn Field="@nameof(StockTransferItemOverviewModel.Remarks)" HeaderText="Item Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
                     </GridColumns>
                 </SfGrid>
             </div>

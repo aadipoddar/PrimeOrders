@@ -27,6 +27,7 @@ public partial class PurchaseReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 	private bool _showTransactionReturns = false;
 	private bool _showDeleted = false;
 
@@ -146,6 +147,26 @@ public partial class PurchaseReport : IAsyncDisposable
 
 			if (_showTransactionReturns)
 				await LoadTransactionReturnOverviews();
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.PartyName)
+					.Select(g => new PurchaseOverviewModel
+					{
+						PartyName = g.Key,
+						TotalItems = g.Sum(t => t.TotalItems),
+						TotalQuantity = g.Sum(t => t.TotalQuantity),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						ItemDiscountAmount = g.Sum(t => t.ItemDiscountAmount),
+						TotalAfterItemDiscount = g.Sum(t => t.TotalAfterItemDiscount),
+						TotalInclusiveTaxAmount = g.Sum(t => t.TotalInclusiveTaxAmount),
+						TotalExtraTaxAmount = g.Sum(t => t.TotalExtraTaxAmount),
+						TotalAfterTax = g.Sum(t => t.TotalAfterTax),
+						CashDiscountAmount = g.Sum(t => t.CashDiscountAmount),
+						OtherChargesAmount = g.Sum(t => t.OtherChargesAmount),
+						RoundOffAmount = g.Sum(t => t.RoundOffAmount),
+						TotalAmount = g.Sum(t => t.TotalAmount)
+					})];
 		}
 		catch (Exception ex)
 		{
@@ -340,10 +361,12 @@ public partial class PurchaseReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await PurchaseReportExcelExport.ExportPurchaseReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"PURCHASE_REPORT";
@@ -380,10 +403,12 @@ public partial class PurchaseReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await PurchaseReportPDFExport.ExportPurchaseReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"PURCHASE_REPORT";
@@ -635,6 +660,12 @@ public partial class PurchaseReport : IAsyncDisposable
 	private async Task ToggleDeleted()
 	{
 		_showDeleted = !_showDeleted;
+		await LoadTransactionOverviews();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
 		await LoadTransactionOverviews();
 	}
 

@@ -29,6 +29,7 @@ public partial class SaleReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 	private bool _showSaleReturns = false;
 	private bool _showStockTransfers = false;
 	private bool _showDeleted = false;
@@ -171,6 +172,30 @@ public partial class SaleReport : IAsyncDisposable
 
 			if (_showStockTransfers)
 				await LoadTransactionTransferOverviews();
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.LocationName)
+					.Select(g => new SaleOverviewModel
+					{
+						LocationName = g.Key,
+						TotalAmount = g.Sum(t => t.TotalAmount),
+						TotalAfterItemDiscount = g.Sum(t => t.TotalAfterItemDiscount),
+						TotalAfterTax = g.Sum(t => t.TotalAfterTax),
+						BaseTotal = g.Sum(t => t.BaseTotal),
+						TotalInclusiveTaxAmount = g.Sum(t => t.TotalInclusiveTaxAmount),
+						TotalExtraTaxAmount = g.Sum(t => t.TotalExtraTaxAmount),
+						DiscountAmount = g.Sum(t => t.DiscountAmount),
+						ItemDiscountAmount = g.Sum(t => t.ItemDiscountAmount),
+						OtherChargesAmount = g.Sum(t => t.OtherChargesAmount),
+						RoundOffAmount = g.Sum(t => t.RoundOffAmount),
+						Card = g.Sum(t => t.Card),
+						Credit = g.Sum(t => t.Credit),
+						Cash = g.Sum(t => t.Cash),
+						UPI = g.Sum(t => t.UPI),
+						TotalQuantity = g.Sum(t => t.TotalQuantity),
+						TotalItems = g.Sum(t => t.TotalItems)
+					})];
 		}
 		catch (Exception ex)
 		{
@@ -472,13 +497,13 @@ public partial class SaleReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await SaleReportExcelExport.ExportSaleReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.LocationId == 1,
-					_selectedLocation?.Name,
-					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
+					_selectedLocation?.Id > 0 ? _selectedLocation?.Name : null,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"SALE_REPORT";
@@ -515,13 +540,13 @@ public partial class SaleReport : IAsyncDisposable
 			DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
 
 			var stream = await SaleReportPdfExport.ExportSaleReport(
-					_transactionOverviews.Where(_ => _.Status),
+					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
 					_showAllColumns,
-					_user.LocationId == 1,
-					_selectedLocation?.Name,
-					_selectedParty?.Id > 0 ? _selectedParty?.Name : null
+					_selectedLocation?.Id > 0 ? _selectedLocation?.Name : null,
+					_selectedParty?.Id > 0 ? _selectedParty?.Name : null,
+					_showSummary
 				);
 
 			string fileName = $"SALE_REPORT";
@@ -770,6 +795,15 @@ public partial class SaleReport : IAsyncDisposable
 			return;
 
 		_showDeleted = !_showDeleted;
+		await LoadTransactionOverviews();
+	}
+
+	private async Task ToggleSummary()
+	{
+		if (_user.LocationId > 1)
+			return;
+
+		_showSummary = !_showSummary;
 		await LoadTransactionOverviews();
 	}
 

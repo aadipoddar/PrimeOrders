@@ -99,6 +99,7 @@ else
 					<h2 class="section-title">Kitchen Issue Item Transactions</h2>
 				</div>
 				<div class="header-actions">
+					<ToggleSummaryButton Disabled="@_isProcessing" ShowSummary="@_showSummary" OnToggle="ToggleSummary" />
 					<ToggleDetailsButton Disabled="@_isProcessing" ShowAllColumns="@_showAllColumns" OnToggle="ToggleDetailsView" />
 				</div>
 			</div>
@@ -190,7 +191,7 @@ else
 					</GridAggregates>
 
 					<GridColumns>
-						<GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center">
+						<GridColumn HeaderText="Actions" Width="150" TextAlign="TextAlign.Center" Visible="@(!_showSummary)">
 							<Template>
 								@{
 									var item = (context as KitchenIssueItemOverviewModel);
@@ -203,14 +204,14 @@ else
 							</Template>
 						</GridColumn>
 						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemName)" HeaderText="Item" Width="200" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCode)" HeaderText="Code" Width="130" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCategoryName)" HeaderText="Category" Width="150" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenName)" HeaderText="Kitchen" Width="200" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCode)" HeaderText="Code" Width="130" Visible="@_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.ItemCategoryName)" HeaderText="Category" Width="150" Visible="@_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionNo)" HeaderText="Trans No" Width="170" Visible="@(!_showSummary)" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.TransactionDateTime)" HeaderText="Date" Width="150" Format="dd/MM/yy hh:mm tt" Type="ColumnType.DateTime" Visible="@(!_showSummary)" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.CompanyName)" HeaderText="Company" Width="180" Visible="@(_showAllColumns && !_showSummary)" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenName)" HeaderText="Kitchen" Width="200" Visible="@(!_showSummary)" />
 						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Quantity)" HeaderText="Quantity" Width="120" Format="N2" TextAlign="TextAlign.Right" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Rate)" HeaderText="Rate" Width="120" Format="N2" TextAlign="TextAlign.Right" Visible="@(!_showSummary)" />
 						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Total)" HeaderText="Total" Width="150" TextAlign="TextAlign.Right">
 							<Template>
 								@{
@@ -219,8 +220,8 @@ else
 								}
 							</Template>
 						</GridColumn>
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenIssueRemarks)" HeaderText="Issue Remarks" Width="200" Visible="_showAllColumns" />
-						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Remarks)" HeaderText="Item Remarks" Width="200" Visible="_showAllColumns" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.KitchenIssueRemarks)" HeaderText="Issue Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
+						<GridColumn Field="@nameof(KitchenIssueItemOverviewModel.Remarks)" HeaderText="Item Remarks" Width="200" Visible="@(_showAllColumns && !_showSummary)" />
 					</GridColumns>
 				</SfGrid>
 			</div>

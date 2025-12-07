@@ -27,6 +27,7 @@ public partial class OrderItemReport : IAsyncDisposable
     private bool _isLoading = true;
     private bool _isProcessing = false;
     private bool _showAllColumns = false;
+    private bool _showSummary = false;
 
     private DateTime _fromDate = DateTime.Now.Date;
     private DateTime _toDate = DateTime.Now.Date;
@@ -62,8 +63,6 @@ public partial class OrderItemReport : IAsyncDisposable
 			.Add(Code.F5, LoadTransactionOverviews, "Refresh Data", Exclude.None)
 			.Add(ModCode.Ctrl, Code.E, ExportExcel, "Export to Excel", Exclude.None)
 			.Add(ModCode.Ctrl, Code.P, ExportPdf, "Export to PDF", Exclude.None)
-            .Add(ModCode.Ctrl | ModCode.Shift, Code.E, ExportConsolidatedExcel, "Export Consolidated to Excel", Exclude.None)
-            .Add(ModCode.Ctrl | ModCode.Shift, Code.P, ExportConsolidatedPdf, "Export Consolidated to PDF", Exclude.None)
 			.Add(ModCode.Ctrl, Code.H, NavigateToTransactionHistory, "Open transaction history", Exclude.None)
 			.Add(ModCode.Ctrl, Code.N, NavigateToTransactionPage, "New Transaction", Exclude.None)
 			.Add(ModCode.Ctrl, Code.D, NavigateToDashboard, "Go to dashboard", Exclude.None)
@@ -138,6 +137,18 @@ public partial class OrderItemReport : IAsyncDisposable
                 _transactionOverviews = [.. _transactionOverviews.Where(_ => _.SaleId != null)];
 
             _transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+            if (_showSummary)
+                _transactionOverviews = [.. _transactionOverviews
+                    .GroupBy(t => t.ItemName)
+                    .Select(g => new OrderItemOverviewModel
+                    {
+                        ItemName = g.Key,
+                        ItemCode = g.First().ItemCode,
+                        ItemCategoryName = g.First().ItemCategoryName,
+                        Quantity = g.Sum(t => t.Quantity)
+                    })
+                    .OrderBy(t => t.ItemName)];
         }
         catch (Exception ex)
         {
@@ -284,7 +295,8 @@ public partial class OrderItemReport : IAsyncDisposable
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns,
-                    _user.LocationId == 1,
+                    _showSummary,
+                    _selectedLocation?.Id > 0,
                     _selectedLocation?.Name
                 );
 
@@ -326,7 +338,8 @@ public partial class OrderItemReport : IAsyncDisposable
                     dateRangeStart,
                     dateRangeEnd,
                     _showAllColumns,
-                    _user.LocationId == 1,
+                    _showSummary,
+                    _selectedLocation?.Id > 0,
                     _selectedLocation?.Name
                 );
 
@@ -341,86 +354,6 @@ public partial class OrderItemReport : IAsyncDisposable
         catch (Exception ex)
         {
             await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
-        }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task ExportConsolidatedExcel()
-    {
-        if (_isProcessing)
-            return;
-
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
-			await _toastNotification.ShowAsync("Exporting", "Generating Excel file...", ToastType.Info);
-
-            DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
-            DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
-
-            var stream = await OrderItemConsolidatedExcelExport.ExportConsolidatedOrderItemReport(
-                    _transactionOverviews,
-                    dateRangeStart,
-                    dateRangeEnd,
-                    _selectedLocation?.Name
-                );
-
-            string fileName = $"ORDER_ITEM_CONSOLIDATED_REPORT";
-            if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-                fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            fileName += ".xlsx";
-
-            await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Exported", "Excel file downloaded successfully.", ToastType.Success);
-        }
-        catch (Exception ex)
-        {
-			await _toastNotification.ShowAsync("Error", $"Excel export failed: {ex.Message}", ToastType.Error);
-		}
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task ExportConsolidatedPdf()
-    {
-        if (_isProcessing)
-            return;
-
-        try
-        {
-            _isProcessing = true;
-            StateHasChanged();
-			await _toastNotification.ShowAsync("Exporting", "Generating PDF file...", ToastType.Info);
-
-            DateOnly? dateRangeStart = _fromDate != default ? DateOnly.FromDateTime(_fromDate) : null;
-            DateOnly? dateRangeEnd = _toDate != default ? DateOnly.FromDateTime(_toDate) : null;
-
-            var stream = await OrderItemConsolidatedPdfExport.ExportConsolidatedOrderItemReport(
-                    _transactionOverviews,
-                    dateRangeStart,
-                    dateRangeEnd,
-                    _selectedLocation?.Name
-                );
-
-            string fileName = $"ORDER_ITEM_CONSOLIDATED_REPORT";
-            if (dateRangeStart.HasValue || dateRangeEnd.HasValue)
-                fileName += $"_{dateRangeStart?.ToString("yyyyMMdd") ?? "START"}_to_{dateRangeEnd?.ToString("yyyyMMdd") ?? "END"}";
-            fileName += ".pdf";
-
-            await SaveAndViewService.SaveAndView(fileName, stream);
-			await _toastNotification.ShowAsync("Exported", "PDF file downloaded successfully.", ToastType.Success);
-        }
-        catch (Exception ex)
-        {
-			await _toastNotification.ShowAsync("Error", $"PDF export failed: {ex.Message}", ToastType.Error);
         }
         finally
         {
@@ -532,6 +465,12 @@ public partial class OrderItemReport : IAsyncDisposable
 
         if (_sfGrid is not null)
             await _sfGrid.Refresh();
+    }
+
+    private async Task ToggleSummary()
+    {
+        _showSummary = !_showSummary;
+        await LoadTransactionOverviews();
     }
     #endregion
 

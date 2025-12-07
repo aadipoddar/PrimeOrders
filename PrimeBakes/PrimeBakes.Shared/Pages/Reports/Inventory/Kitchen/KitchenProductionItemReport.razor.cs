@@ -25,6 +25,7 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 	private bool _isLoading = true;
 	private bool _isProcessing = false;
 	private bool _showAllColumns = false;
+	private bool _showSummary = false;
 
 	private DateTime _fromDate = DateTime.Now.Date;
 	private DateTime _toDate = DateTime.Now.Date;
@@ -127,6 +128,19 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 				_transactionOverviews = [.. _transactionOverviews.Where(_ => _.KitchenId == _selectedKitchen.Id)];
 
 			_transactionOverviews = [.. _transactionOverviews.OrderBy(_ => _.TransactionDateTime)];
+
+			if (_showSummary)
+				_transactionOverviews = [.. _transactionOverviews
+					.GroupBy(t => t.ItemName)
+					.Select(g => new KitchenProductionItemOverviewModel
+					{
+						ItemName = g.Key,
+						ItemCode = g.First().ItemCode,
+						ItemCategoryName = g.First().ItemCategoryName,
+						Quantity = g.Sum(t => t.Quantity),
+						Total = g.Sum(t => t.Total)
+					})
+					.OrderBy(t => t.ItemName)];
 		}
 		catch (Exception ex)
 		{
@@ -260,7 +274,8 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_showSummary
 				);
 
 			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
@@ -301,7 +316,8 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 					_transactionOverviews,
 					dateRangeStart,
 					dateRangeEnd,
-					_showAllColumns
+					_showAllColumns,
+					_showSummary
 				);
 
 			string fileName = $"KITCHEN_PRODUCTION_ITEM_REPORT";
@@ -427,6 +443,12 @@ public partial class KitchenProductionItemReport : IAsyncDisposable
 
 		if (_sfGrid is not null)
 			await _sfGrid.Refresh();
+	}
+
+	private async Task ToggleSummary()
+	{
+		_showSummary = !_showSummary;
+		await LoadTransactionOverviews();
 	}
 	#endregion
 
