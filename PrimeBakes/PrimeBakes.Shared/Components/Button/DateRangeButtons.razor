@@ -5,34 +5,34 @@
 @using static PrimeBakes.Shared.Components.Button.IconType
 
 <div class="date-range-buttons">
-    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.Today)" title="Today"
-        disabled="@Disabled">
+    <button class="btn-date-utility" @onclick="() => HandleDateRangeClick(DateRangeType.Today)" title="Today"
+        disabled="@(Disabled || _isProcessing)">
         <span>Today</span>
     </button>
-    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.Yesterday)"
-        title="Yesterday" disabled="@Disabled">
+    <button class="btn-date-utility" @onclick="() => HandleDateRangeClick(DateRangeType.Yesterday)"
+        title="Yesterday" disabled="@(Disabled || _isProcessing)">
         <span>Yesterday</span>
     </button>
-    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.CurrentMonth)"
-        title="Current Month" disabled="@Disabled">
+    <button class="btn-date-utility" @onclick="() => HandleDateRangeClick(DateRangeType.CurrentMonth)"
+        title="Current Month" disabled="@(Disabled || _isProcessing)">
         <span>Current Month</span>
     </button>
-    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.PreviousMonth)"
-        title="Previous Month" disabled="@Disabled">
+    <button class="btn-date-utility" @onclick="() => HandleDateRangeClick(DateRangeType.PreviousMonth)"
+        title="Previous Month" disabled="@(Disabled || _isProcessing)">
         <span>Previous Month</span>
     </button>
     <button class="btn-date-utility"
-        @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.CurrentFinancialYear)"
-        title="Current Financial Year" disabled="@Disabled">
+        @onclick="() => HandleDateRangeClick(DateRangeType.CurrentFinancialYear)"
+        title="Current Financial Year" disabled="@(Disabled || _isProcessing)">
         <span>Current FY</span>
     </button>
     <button class="btn-date-utility"
-        @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.PreviousFinancialYear)"
-        title="Previous Financial Year" disabled="@Disabled">
+        @onclick="() => HandleDateRangeClick(DateRangeType.PreviousFinancialYear)"
+        title="Previous Financial Year" disabled="@(Disabled || _isProcessing)">
         <span>Previous FY</span>
     </button>
-    <button class="btn-date-utility" @onclick="() => OnDateRangeSelected.InvokeAsync(DateRangeType.AllTime)"
-        title="All Time" disabled="@Disabled">
+    <button class="btn-date-utility" @onclick="() => HandleDateRangeClick(DateRangeType.AllTime)"
+        title="All Time" disabled="@(Disabled || _isProcessing)">
         <span>All Time</span>
     </button>
 </div>

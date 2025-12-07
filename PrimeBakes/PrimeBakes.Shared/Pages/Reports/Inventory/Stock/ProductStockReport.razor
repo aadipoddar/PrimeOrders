@@ -65,7 +65,8 @@ else
                     </div>
 
                     <!-- Date Utility Buttons -->
-                    <DateRangeButtons Disabled="_isProcessing" OnDateRangeSelected="SetDateRange" />
+                    <DateRangeButtons Disabled="_isProcessing" FromDate="_fromDate" ToDate="_toDate" 
+                        OnDatesChanged="HandleDatesChanged" ToastNotification="_toastNotification" />
                 </div>
             </div>
         </div>

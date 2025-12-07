@@ -402,82 +402,11 @@ public partial class SaleReport : IAsyncDisposable
 		await LoadTransactionOverviews();
 	}
 
-	private async Task SetDateRange(DateRangeType rangeType)
+	private async Task HandleDatesChanged((DateTime FromDate, DateTime ToDate) dates)
 	{
-		if (_isProcessing)
-			return;
-
-		try
-		{
-			_isProcessing = true;
-			StateHasChanged();
-
-			var today = await CommonData.LoadCurrentDateTime();
-			var currentYear = today.Year;
-			var currentMonth = today.Month;
-
-			switch (rangeType)
-			{
-				case DateRangeType.Today:
-					_fromDate = today;
-					_toDate = today;
-					break;
-
-				case DateRangeType.Yesterday:
-					_fromDate = today.AddDays(-1);
-					_toDate = today.AddDays(-1);
-					break;
-
-				case DateRangeType.CurrentMonth:
-					_fromDate = new DateTime(currentYear, currentMonth, 1);
-					_toDate = _fromDate.AddMonths(1).AddDays(-1);
-					break;
-
-				case DateRangeType.PreviousMonth:
-					_fromDate = new DateTime(_fromDate.Year, _fromDate.Month, 1).AddMonths(-1);
-					_toDate = _fromDate.AddMonths(1).AddDays(-1);
-					break;
-
-				case DateRangeType.CurrentFinancialYear:
-					var currentFY = await FinancialYearData.LoadFinancialYearByDateTime(today);
-					_fromDate = currentFY.StartDate.ToDateTime(TimeOnly.MinValue);
-					_toDate = currentFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-					break;
-
-				case DateRangeType.PreviousFinancialYear:
-					currentFY = await FinancialYearData.LoadFinancialYearByDateTime(_fromDate);
-					var financialYears = await CommonData.LoadTableDataByStatus<FinancialYearModel>(TableNames.FinancialYear);
-					var previousFY = financialYears
-						.Where(fy => fy.Id != currentFY.Id)
-						.OrderByDescending(fy => fy.StartDate)
-						.FirstOrDefault();
-
-					if (previousFY == null)
-					{
-						await _toastNotification.ShowAsync("Warning", "No previous financial year available.", ToastType.Warning);
-						return;
-					}
-
-					_fromDate = previousFY.StartDate.ToDateTime(TimeOnly.MinValue);
-					_toDate = previousFY.EndDate.ToDateTime(TimeOnly.MaxValue);
-					break;
-
-				case DateRangeType.AllTime:
-					_fromDate = new DateTime(2000, 1, 1);
-					_toDate = today;
-					break;
-			}
-		}
-		catch (Exception ex)
-		{
-			await _toastNotification.ShowAsync("Error", $"Failed to set date range: {ex.Message}", ToastType.Error);
-		}
-		finally
-		{
-			_isProcessing = false;
-			await LoadTransactionOverviews();
-			StateHasChanged();
-		}
+		_fromDate = dates.FromDate;
+		_toDate = dates.ToDate;
+		await LoadTransactionOverviews();
 	}
 	#endregion
 
