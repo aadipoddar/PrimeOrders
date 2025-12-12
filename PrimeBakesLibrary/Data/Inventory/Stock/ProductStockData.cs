@@ -22,7 +22,7 @@ public static class ProductStockData
             return;
 
         var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(stock.TransactionDate.ToDateTime(TimeOnly.MinValue));
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new Exception("Cannot delete stock entry as the financial year is locked.");
 
         await SqlDataAccess.SaveData(StoredProcedureNames.DeleteProductStockById, new { Id });
@@ -34,7 +34,7 @@ public static class ProductStockData
         var stockSummary = await LoadProductStockSummaryByDateLocationId(transactionDateTime, transactionDateTime, locationId);
 
         var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(transactionDateTime);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new Exception("Cannot delete stock entry as the financial year is locked.");
 
         foreach (var item in cart)
@@ -54,7 +54,7 @@ public static class ProductStockData
                     ProductId = item.ProductId,
                     Quantity = adjustmentQuantity,
                     NetRate = null,
-                    Type = StockType.Adjustment.ToString(),
+                    Type = nameof(StockType.Adjustment),
                     TransactionNo = transactionNo,
                     TransactionDate = DateOnly.FromDateTime(transactionDateTime),
                     LocationId = locationId

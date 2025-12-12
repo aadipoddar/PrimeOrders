@@ -304,7 +304,7 @@ public partial class SaleReport : IAsyncDisposable
 		if (_selectedCompany?.Id > 0)
 			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.CompanyId == _selectedCompany.Id)];
 
-		if (_selectedParty?.Id > 0 && _selectedParty?.LocationId > 0)
+		if (_selectedParty is { Id: > 0, LocationId: > 0 })
 			_transactionTransferOverviews = [.. _transactionTransferOverviews.Where(_ => _.ToLocationId == _selectedParty.LocationId)];
 
 		_transactionReturnOverviews = [.. _transactionReturnOverviews.OrderBy(_ => _.TransactionDateTime)];

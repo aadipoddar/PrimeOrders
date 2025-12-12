@@ -84,105 +84,7 @@ else
                 </div>
             </div>
         </div>
-
-        <!-- Trial Balance Summary Section (Shown when Ledger is selected) -->
-        @if (_selectedLedger?.Id > 0 && _selectedTrialBalance != null)
-        {
-            <div class="section-card trial-balance-summary">
-                <div class="section-header">
-                    <div class="section-title-wrapper">
-                        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                            <line x1="8" y1="21" x2="16" y2="21" />
-                            <line x1="12" y1="17" x2="12" y2="21" />
-                            <line x1="7" y1="7" x2="7" y2="11" />
-                            <line x1="12" y1="7" x2="12" y2="11" />
-                            <line x1="17" y1="7" x2="17" y2="11" />
-                        </svg>
-                        <div class="section-title-with-details">
-                            <h2 class="section-title">@_selectedTrialBalance.LedgerName</h2>
-                            <div class="ledger-badges">
-                                <span class="badge badge-group">@_selectedTrialBalance.GroupName</span>
-                                <span class="badge badge-account">@_selectedTrialBalance.AccountTypeName</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="section-body">
-                    <div class="trial-balance-grid">
-                        <!-- Opening Balance Card -->
-                        <div class="balance-info-card opening-card">
-                            <div class="card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                </svg>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-label">Opening Balance</div>
-                                <div class="card-value">₹@_selectedTrialBalance.OpeningBalance.ToString("N2")</div>
-                                <div class="card-breakdown">
-                                    <span class="breakdown-item">Dr: ₹@_selectedTrialBalance.OpeningDebit.ToString("N2")</span>
-                                    <span class="breakdown-item">Cr: ₹@_selectedTrialBalance.OpeningCredit.ToString("N2")</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Period Debit Card -->
-                        <div class="balance-info-card debit-card">
-                            <div class="card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19" />
-                                    <polyline points="19 12 12 19 5 12" />
-                                </svg>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-label">Period Debit</div>
-                                <div class="card-value debit-amount">₹@_selectedTrialBalance.Debit.ToString("N2")</div>
-                            </div>
-                        </div>
-
-                        <!-- Period Credit Card -->
-                        <div class="balance-info-card credit-card">
-                            <div class="card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="19" x2="12" y2="5" />
-                                    <polyline points="5 12 12 5 19 12" />
-                                </svg>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-label">Period Credit</div>
-                                <div class="card-value credit-amount">₹@_selectedTrialBalance.Credit.ToString("N2")</div>
-                            </div>
-                        </div>
-
-                        <!-- Closing Balance Card -->
-                        <div class="balance-info-card closing-card">
-                            <div class="card-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                                    <line x1="1" y1="10" x2="23" y2="10" />
-                                </svg>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-label">Closing Balance</div>
-                                <div class="card-value">₹@_selectedTrialBalance.ClosingBalance.ToString("N2")</div>
-                                <div class="card-breakdown">
-                                    <span class="breakdown-item">Dr: ₹@_selectedTrialBalance.ClosingDebit.ToString("N2")</span>
-                                    <span class="breakdown-item">Cr: ₹@_selectedTrialBalance.ClosingCredit.ToString("N2")</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-
+        
         <!-- Report Grid Section -->
         <div class="section-card">
             <div class="section-header">
@@ -357,6 +259,106 @@ else
                 </SfGrid>
             </div>
         </div>
+    
+        <!-- Trial Balance Summary Section (Shown when Ledger is selected) -->
+        @if (_selectedLedger?.Id > 0 && _selectedTrialBalance != null)
+        {
+            <div class="section-card trial-balance-summary">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                            <line x1="7" y1="7" x2="7" y2="11" />
+                            <line x1="12" y1="7" x2="12" y2="11" />
+                            <line x1="17" y1="7" x2="17" y2="11" />
+                        </svg>
+                        <div class="section-title-with-details">
+                            <h2 class="section-title">@_selectedTrialBalance.LedgerName</h2>
+                            <div class="ledger-badges">
+                                <span class="badge badge-group">@_selectedTrialBalance.GroupName</span>
+                                <span class="badge badge-account">@_selectedTrialBalance.AccountTypeName</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="trial-balance-grid">
+                        <!-- Opening Balance Card -->
+                        <div class="balance-info-card opening-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Opening Balance</div>
+                                <div class="card-value">₹@_selectedTrialBalance.OpeningBalance.ToString("N2")</div>
+                                <div class="card-breakdown">
+                                    <span class="breakdown-item">Dr: ₹@_selectedTrialBalance.OpeningDebit.ToString("N2")</span>
+                                    <span class="breakdown-item">Cr: ₹@_selectedTrialBalance.OpeningCredit.ToString("N2")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Period Debit Card -->
+                        <div class="balance-info-card debit-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <polyline points="19 12 12 19 5 12" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Period Debit</div>
+                                <div class="card-value debit-amount">₹@_selectedTrialBalance.Debit.ToString("N2")</div>
+                            </div>
+                        </div>
+
+                        <!-- Period Credit Card -->
+                        <div class="balance-info-card credit-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="19" x2="12" y2="5" />
+                                    <polyline points="5 12 12 5 19 12" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Period Credit</div>
+                                <div class="card-value credit-amount">₹@_selectedTrialBalance.Credit.ToString("N2")</div>
+                            </div>
+                        </div>
+
+                        <!-- Closing Balance Card -->
+                        <div class="balance-info-card closing-card">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                    <line x1="1" y1="10" x2="23" y2="10" />
+                                </svg>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-label">Closing Balance</div>
+                                <div class="card-value">₹@_selectedTrialBalance.ClosingBalance.ToString("N2")</div>
+                                <div class="card-breakdown">
+                                    <span class="breakdown-item">Dr: ₹@_selectedTrialBalance.ClosingDebit.ToString("N2")</span>
+                                    <span class="breakdown-item">Cr: ₹@_selectedTrialBalance.ClosingCredit.ToString("N2")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    
     </div>
 }
 

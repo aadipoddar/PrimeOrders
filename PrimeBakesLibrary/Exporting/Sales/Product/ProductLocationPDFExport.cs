@@ -26,7 +26,7 @@ public static class ProductLocationPDFExport
                 ProductCode = productCode,
                 ProductName = productName,
                 Rate = rate is decimal rateVal ? $"{rateVal:N2}" : "0.00",
-                Status = status is bool statusBool && statusBool ? "Active" : "Deleted"
+                Status = status is bool and true ? "Active" : "Deleted"
             };
         });
 

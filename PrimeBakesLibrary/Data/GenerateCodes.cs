@@ -15,17 +15,6 @@ namespace PrimeBakesLibrary.Data;
 
 public static class GenerateCodes
 {
-    private static int GetNumberOfDigits(this int number) =>
-        number switch
-        {
-            < 10 => 1,
-            < 100 => 2,
-            < 1000 => 3,
-            < 10000 => 4,
-            < 100000 => 5,
-            _ => 6
-        };
-
     public enum CodeType
     {
         Purchase,

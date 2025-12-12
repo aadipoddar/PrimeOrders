@@ -372,7 +372,7 @@ public partial class ProductLocationPage : IAsyncDisposable
         if (selectedRecords.Count > 0)
         {
             var productLocation = _productLocations.FirstOrDefault(pl => pl.Id == selectedRecords[0].Id);
-            if (productLocation != null && productLocation.Status)
+            if (productLocation is { Status: true })
                 ShowDeleteConfirmation(selectedRecords[0].Id, selectedRecords[0].Name);
         }
     }

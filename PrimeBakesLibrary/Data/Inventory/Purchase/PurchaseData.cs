@@ -106,14 +106,14 @@ public static class PurchaseData
 	{
 		var purchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchaseId);
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchase.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
 		if (purchase is not null)
 		{
 			purchase.Status = false;
 			await InsertPurchase(purchase);
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Purchase.ToString(), purchase.Id);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.Purchase), purchase.Id);
 
 			var purchaseVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseVoucherId);
 			var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(purchaseVoucher.Value), purchase.Id, purchase.TransactionNo);
@@ -166,12 +166,12 @@ public static class PurchaseData
 		{
 			var existingPurchase = await CommonData.LoadTableDataById<PurchaseModel>(TableNames.Purchase, purchase.Id);
 			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchase.FinancialYearId);
-			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+			if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 		}
 
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchase.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 		purchase.Id = await InsertPurchase(purchase);
@@ -226,7 +226,7 @@ public static class PurchaseData
 	private static async Task SaveRawMaterialStock(PurchaseModel purchase, List<PurchaseItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Purchase.ToString(), purchase.Id);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.Purchase), purchase.Id);
 
 		foreach (var item in cart)
 			await RawMaterialStockData.InsertRawMaterialStock(new()
@@ -235,7 +235,7 @@ public static class PurchaseData
 				RawMaterialId = item.ItemId,
 				Quantity = item.Quantity,
 				NetRate = item.NetRate,
-				Type = StockType.Purchase.ToString(),
+				Type = nameof(StockType.Purchase),
 				TransactionId = purchase.Id,
 				TransactionNo = purchase.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(purchase.TransactionDateTime)
@@ -268,7 +268,7 @@ public static class PurchaseData
 			accountingCart.Add(new()
 			{
 				ReferenceId = purchaseOverview.Id,
-				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				ReferenceType = nameof(ReferenceTypes.Purchase),
 				ReferenceNo = purchaseOverview.TransactionNo,
 				LedgerId = purchaseOverview.PartyId,
 				Debit = null,
@@ -282,7 +282,7 @@ public static class PurchaseData
 			accountingCart.Add(new()
 			{
 				ReferenceId = purchaseOverview.Id,
-				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				ReferenceType = nameof(ReferenceTypes.Purchase),
 				ReferenceNo = purchaseOverview.TransactionNo,
 				LedgerId = int.Parse(purchaseLedger.Value),
 				Debit = purchaseOverview.TotalAmount - purchaseOverview.TotalExtraTaxAmount,
@@ -297,7 +297,7 @@ public static class PurchaseData
 			accountingCart.Add(new()
 			{
 				ReferenceId = purchaseOverview.Id,
-				ReferenceType = ReferenceTypes.Purchase.ToString(),
+				ReferenceType = nameof(ReferenceTypes.Purchase),
 				ReferenceNo = purchaseOverview.TransactionNo,
 				LedgerId = int.Parse(gstLedger.Value),
 				Debit = purchaseOverview.TotalExtraTaxAmount,

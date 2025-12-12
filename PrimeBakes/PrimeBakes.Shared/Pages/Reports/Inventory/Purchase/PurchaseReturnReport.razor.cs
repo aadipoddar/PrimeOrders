@@ -462,7 +462,7 @@ public partial class PurchaseReturnReport : IAsyncDisposable
 
 			var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, _deleteTransactionId);
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchaseReturn.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			if (financialYear is null || financialYear.Locked || !financialYear.Status)
 				throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
 			await PurchaseReturnData.DeletePurchaseReturn(_deleteTransactionId);

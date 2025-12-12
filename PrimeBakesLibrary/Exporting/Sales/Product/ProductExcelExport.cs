@@ -37,7 +37,7 @@ public static class ProductExcelExport
 				Rate = rate,
 				Tax = tax,
 				Remarks = remarks,
-				Status = status is bool statusBool && statusBool ? "Active" : "Deleted"
+				Status = status is bool and true ? "Active" : "Deleted"
 			};
 		});
 

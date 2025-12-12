@@ -261,7 +261,7 @@ public partial class LedgerPage : IAsyncDisposable
 		if (string.IsNullOrWhiteSpace(_ledger.Remarks)) _ledger.Remarks = null;
 
 		// Validate location uniqueness if location is selected
-		if (_ledger.LocationId.HasValue && _ledger.LocationId.Value > 0)
+		if (_ledger.LocationId is > 0)
 		{
 			if (_ledger.Id > 0)
 			{

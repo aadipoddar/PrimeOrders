@@ -17,7 +17,7 @@ public class NotificationService(INotificationRegistrationService notificationRe
 
     public async Task ShowLocalNotification(int id, string title, string subTitle, string description)
     {
-        if (await LocalNotificationCenter.Current.AreNotificationsEnabled() == false)
+        if (!await LocalNotificationCenter.Current.AreNotificationsEnabled())
             await LocalNotificationCenter.Current.RequestNotificationPermission();
 
         var request = new NotificationRequest

@@ -8,40 +8,52 @@ public static class TableNames
     public static string StateUT => "StateUT";
     public static string Settings => "Settings";
     public static string Tax => "Tax";
-    public static string ProductCategory => "ProductCategory";
+	public static string Ledger => "Ledger";
+	public static string Group => "Group";
+	public static string AccountType => "AccountType";
+	public static string Voucher => "Voucher";
+	public static string FinancialYear => "FinancialYear";
+
+	public static string Accounting => "Accounting";
+	public static string AccountingDetail => "AccountingDetail";
+
+	public static string ProductCategory => "ProductCategory";
     public static string Product => "Product";
     public static string ProductLocation => "ProductLocation";
+    
     public static string RawMaterialCategory => "RawMaterialCategory";
     public static string RawMaterial => "RawMaterial";
+    
     public static string Recipe => "Recipe";
     public static string RecipeDetail => "RecipeDetail";
+    
     public static string Purchase => "Purchase";
     public static string PurchaseDetail => "PurchaseDetail";
     public static string PurchaseReturn => "PurchaseReturn";
     public static string PurchaseReturnDetail => "PurchaseReturnDetail";
+    
     public static string ProductStock => "ProductStock";
     public static string RawMaterialStock => "RawMaterialStock";
+    
     public static string Order => "Order";
     public static string OrderDetail => "OrderDetail";
+    
     public static string Customer => "Customer";
+    
     public static string Sale => "Sale";
     public static string SaleDetail => "SaleDetail";
     public static string SaleReturn => "SaleReturn";
     public static string SaleReturnDetail => "SaleReturnDetail";
+    
     public static string StockTransfer => "StockTransfer";
     public static string StockTransferDetail => "StockTransferDetail";
-	public static string Kitchen => "Kitchen";
+	
+    public static string Kitchen => "Kitchen";
+    
     public static string KitchenIssue => "KitchenIssue";
     public static string KitchenIssueDetail => "KitchenIssueDetail";
     public static string KitchenProduction => "KitchenProduction";
     public static string KitchenProductionDetail => "KitchenProductionDetail";
-    public static string Ledger => "Ledger";
-    public static string Group => "Group";
-    public static string AccountType => "AccountType";
-    public static string Voucher => "Voucher";
-    public static string FinancialYear => "FinancialYear";
-    public static string Accounting => "Accounting";
-    public static string AccountingDetail => "AccountingDetail";
 }
 
 public static class StoredProcedureNames
@@ -88,8 +100,6 @@ public static class StoredProcedureNames
     public static string UpdateSettings => "Update_Settings";
     public static string InsertLocation => "Insert_Location";
     public static string InsertCustomer => "Insert_Customer";
-    public static string InsertStateUT => "Insert_StateUT";
-    public static string InsertCompany => "Insert_Company";
     public static string InsertTax => "Insert_Tax";
 
     public static string InsertProductCategory => "Insert_ProductCategory";
@@ -127,7 +137,9 @@ public static class StoredProcedureNames
 	public static string InsertOrder => "Insert_Order";
     public static string InsertOrderDetail => "Insert_OrderDetail";
 
-    public static string InsertLedger => "Insert_Ledger";
+	public static string InsertStateUT => "Insert_StateUT";
+	public static string InsertCompany => "Insert_Company";
+	public static string InsertLedger => "Insert_Ledger";
     public static string InsertGroup => "Insert_Group";
     public static string InsertAccountType => "Insert_AccountType";
     public static string InsertVoucher => "Insert_Voucher";
@@ -169,7 +181,6 @@ public static class ViewNames
     public static string OrderItemOverview => "Order_Item_Overview";
 
     public static string ProductLocationOverview => "ProductLocation_Overview";
-
 
     public static string AccountingOverview => "Accounting_Overview";
     public static string AccountingLedgerOverview => "Accounting_Ledger_Overview";

@@ -51,12 +51,12 @@ public static class SendNotification
     {
         var sale = await CommonData.LoadTableDataById<SaleOverviewModel>(ViewNames.SaleOverview, saleId);
 
-        if (sale.PartyId is null || sale.PartyId <= 0)
+        if (sale.PartyId is null or <= 0)
             return;
 
         var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
 
-        if (party.LocationId is null || party.LocationId <= 0)
+        if (party.LocationId is null or <= 0)
             return;
 
         var users = await CommonData.LoadTableDataByStatus<UserModel>(TableNames.User);

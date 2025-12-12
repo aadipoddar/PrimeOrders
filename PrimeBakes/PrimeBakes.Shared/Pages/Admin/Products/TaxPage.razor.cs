@@ -202,19 +202,19 @@ public partial class TaxPage : IAsyncDisposable
             return false;
         }
 
-        if (_tax.CGST < 0 || _tax.CGST > 100)
+        if (_tax.CGST is < 0 or > 100)
         {
             await _toastNotification.ShowAsync("Validation", "CGST must be between 0 and 100.", ToastType.Warning);
             return false;
         }
 
-        if (_tax.SGST < 0 || _tax.SGST > 100)
+        if (_tax.SGST is < 0 or > 100)
         {
             await _toastNotification.ShowAsync("Validation", "SGST must be between 0 and 100.", ToastType.Warning);
             return false;
         }
 
-        if (_tax.IGST < 0 || _tax.IGST > 100)
+        if (_tax.IGST is < 0 or > 100)
         {
             await _toastNotification.ShowAsync("Validation", "IGST must be between 0 and 100.", ToastType.Warning);
             return false;

@@ -38,7 +38,7 @@ public static class RawMaterialPDFExport
                 UnitOfMeasurement = unit,
                 Tax = tax,
                 Remarks = remarks,
-                Status = status is bool statusBool && statusBool ? "Active" : "Deleted"
+                Status = status is bool and true ? "Active" : "Deleted"
             };
         });
 

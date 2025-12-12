@@ -579,7 +579,7 @@ public partial class KitchenIssuePage : IAsyncDisposable
 			return false;
 		}
 
-		if (_selectedFinancialYear.Status == false)
+		if (!_selectedFinancialYear.Status)
 		{
 			await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
 			return false;
@@ -613,7 +613,7 @@ public partial class KitchenIssuePage : IAsyncDisposable
 		{
 			var existingKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, _kitchenIssue.Id);
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, _kitchenIssue.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			{
 				await _toastNotification.ShowAsync("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", ToastType.Error);
 				return false;

@@ -253,7 +253,7 @@ public partial class LocationPage : IAsyncDisposable
 			}
 		}
 
-		if (_location.Discount < 0 || _location.Discount > 100)
+		if (_location.Discount is < 0 or > 100)
 		{
 			await _toastNotification.ShowAsync("Validation", "Discount must be between 0% and 100%.", ToastType.Warning);
 			return false;

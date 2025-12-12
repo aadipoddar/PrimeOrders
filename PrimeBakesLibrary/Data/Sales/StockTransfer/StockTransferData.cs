@@ -13,10 +13,10 @@ namespace PrimeBakesLibrary.Data.Sales.StockTransfer;
 
 public static class StockTransferData
 {
-	public static async Task<int> InsertStockTransfer(StockTransferModel stockTransfer) =>
+	private static async Task<int> InsertStockTransfer(StockTransferModel stockTransfer) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertStockTransfer, stockTransfer)).FirstOrDefault();
 
-	public static async Task<int> InsertStockTransferDetail(StockTransferDetailModel stockTransferDetail) =>
+	private static async Task<int> InsertStockTransferDetail(StockTransferDetailModel stockTransferDetail) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertStockTransferDetail, stockTransferDetail)).FirstOrDefault();
 
 	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int stockTransferId)
@@ -97,15 +97,15 @@ public static class StockTransferData
 	{
 		var stockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, stockTransferId);
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, stockTransfer.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
 		stockTransfer.Status = false;
 		await InsertStockTransfer(stockTransfer);
 
-		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.StockTransfer.ToString(), stockTransfer.Id, stockTransfer.LocationId);
-		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.StockTransfer.ToString(), stockTransfer.Id, stockTransfer.ToLocationId);
-		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.StockTransfer.ToString(), stockTransfer.Id);
+		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.StockTransfer), stockTransfer.Id, stockTransfer.LocationId);
+		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.StockTransfer), stockTransfer.Id, stockTransfer.ToLocationId);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.StockTransfer), stockTransfer.Id);
 
 		var stockTransferVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.StockTransferVoucherId);
 		var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(stockTransferVoucher.Value), stockTransfer.Id, stockTransfer.TransactionNo);
@@ -156,7 +156,7 @@ public static class StockTransferData
 		{
 			var existingStockTransfer = await CommonData.LoadTableDataById<StockTransferModel>(TableNames.StockTransfer, stockTransfer.Id);
 			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingStockTransfer.FinancialYearId);
-			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+			if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 			stockTransfer.TransactionNo = existingStockTransfer.TransactionNo;
@@ -165,7 +165,7 @@ public static class StockTransferData
 			stockTransfer.TransactionNo = await GenerateCodes.GenerateStockTransferTransactionNo(stockTransfer);
 
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, stockTransfer.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 		stockTransfer.Id = await InsertStockTransfer(stockTransfer);
@@ -220,8 +220,8 @@ public static class StockTransferData
 	{
 		if (update)
 		{
-			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.StockTransfer.ToString(), stockTransfer.Id, stockTransfer.ToLocationId);
-			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.StockTransfer.ToString(), stockTransfer.Id, stockTransfer.LocationId);
+			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.StockTransfer), stockTransfer.Id, stockTransfer.ToLocationId);
+			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.StockTransfer), stockTransfer.Id, stockTransfer.LocationId);
 		}
 
 		// From Location Stock Update
@@ -233,7 +233,7 @@ public static class StockTransferData
 				Quantity = -item.Quantity,
 				NetRate = item.NetRate,
 				TransactionId = stockTransfer.Id,
-				Type = StockType.StockTransfer.ToString(),
+				Type = nameof(StockType.StockTransfer),
 				TransactionNo = stockTransfer.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(stockTransfer.TransactionDateTime),
 				LocationId = stockTransfer.LocationId
@@ -248,7 +248,7 @@ public static class StockTransferData
 				Quantity = item.Quantity,
 				NetRate = item.NetRate,
 				TransactionId = stockTransfer.Id,
-				Type = StockType.StockTransfer.ToString(),
+				Type = nameof(StockType.StockTransfer),
 				TransactionNo = stockTransfer.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(stockTransfer.TransactionDateTime),
 				LocationId = stockTransfer.ToLocationId
@@ -258,7 +258,7 @@ public static class StockTransferData
 	private static async Task SaveRawMaterialStockByRecipe(StockTransferModel stockTransfer, List<StockTransferItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.StockTransfer.ToString(), stockTransfer.Id);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.StockTransfer), stockTransfer.Id);
 
 		if (stockTransfer.LocationId != 1 && stockTransfer.ToLocationId != 1)
 			return;
@@ -277,7 +277,7 @@ public static class StockTransferData
 					NetRate = product.NetRate / recipeItem.Quantity,
 					TransactionId = stockTransfer.Id,
 					TransactionNo = stockTransfer.TransactionNo,
-					Type = StockType.StockTransfer.ToString(),
+					Type = nameof(StockType.StockTransfer),
 					TransactionDate = DateOnly.FromDateTime(stockTransfer.TransactionDateTime)
 				});
 		}
@@ -314,7 +314,7 @@ public static class StockTransferData
 			accountingCart.Add(new()
 			{
 				ReferenceId = stockTransferOverview.Id,
-				ReferenceType = ReferenceTypes.StockTransfer.ToString(),
+				ReferenceType = nameof(ReferenceTypes.StockTransfer),
 				ReferenceNo = stockTransferOverview.TransactionNo,
 				LedgerId = int.Parse(cashLedger.Value),
 				Debit = stockTransferOverview.LocationId == 1 ? stockTransferOverview.Cash + stockTransferOverview.UPI + stockTransferOverview.Card : null,
@@ -329,7 +329,7 @@ public static class StockTransferData
 			accountingCart.Add(new()
 			{
 				ReferenceId = stockTransferOverview.Id,
-				ReferenceType = ReferenceTypes.StockTransfer.ToString(),
+				ReferenceType = nameof(ReferenceTypes.StockTransfer),
 				ReferenceNo = stockTransferOverview.TransactionNo,
 				LedgerId = ledger.Id,
 				Debit = stockTransferOverview.LocationId == 1 ? stockTransferOverview.Credit : null,
@@ -344,7 +344,7 @@ public static class StockTransferData
 			accountingCart.Add(new()
 			{
 				ReferenceId = stockTransferOverview.Id,
-				ReferenceType = ReferenceTypes.StockTransfer.ToString(),
+				ReferenceType = nameof(ReferenceTypes.StockTransfer),
 				ReferenceNo = stockTransferOverview.TransactionNo,
 				LedgerId = int.Parse(stockTransferLedger.Value),
 				Debit = stockTransferOverview.ToLocationId == 1 ? stockTransferOverview.TotalAmount - stockTransferOverview.TotalExtraTaxAmount : null,
@@ -359,7 +359,7 @@ public static class StockTransferData
 			accountingCart.Add(new()
 			{
 				ReferenceId = stockTransferOverview.Id,
-				ReferenceType = ReferenceTypes.StockTransfer.ToString(),
+				ReferenceType = nameof(ReferenceTypes.StockTransfer),
 				ReferenceNo = stockTransferOverview.TransactionNo,
 				LedgerId = int.Parse(gstLedger.Value),
 				Debit = stockTransferOverview.ToLocationId == 1 ? stockTransferOverview.TotalExtraTaxAmount : null,

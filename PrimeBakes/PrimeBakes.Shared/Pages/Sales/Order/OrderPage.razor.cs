@@ -601,7 +601,7 @@ public partial class OrderPage : IAsyncDisposable
             return false;
         }
 
-        if (_selectedFinancialYear.Status == false)
+        if (!_selectedFinancialYear.Status)
         {
             await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
             return false;
@@ -629,7 +629,7 @@ public partial class OrderPage : IAsyncDisposable
         {
             var existingOrder = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, _order.Id);
             var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingOrder.FinancialYearId);
-            if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+            if (financialYear is null || financialYear.Locked || !financialYear.Status)
             {
                 await _toastNotification.ShowAsync("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", ToastType.Error);
                 return false;
@@ -795,7 +795,7 @@ public partial class OrderPage : IAsyncDisposable
 
     private async Task NavigateToSelectedSalePage()
     {
-        if (_order.SaleId is null || _order.SaleId <= 0)
+        if (_order.SaleId is null or <= 0)
         {
             await _toastNotification.ShowAsync("No Sale Linked", "There is no sale linked to this order to view.", ToastType.Error);
             return;
@@ -809,7 +809,7 @@ public partial class OrderPage : IAsyncDisposable
 
     private async Task DownloadSelectedSalePdf()
     {
-        if (_order.SaleId is null || _order.SaleId <= 0)
+        if (_order.SaleId is null or <= 0)
         {
             await _toastNotification.ShowAsync("No Sale Linked", "There is no sale linked to this order to download.", ToastType.Error);
             return;
@@ -839,7 +839,7 @@ public partial class OrderPage : IAsyncDisposable
 
     private async Task DownloadSelectedSaleExcel()
     {
-        if (_order.SaleId is null || _order.SaleId <= 0)
+        if (_order.SaleId is null or <= 0)
         {
             await _toastNotification.ShowAsync("No Sale Linked", "There is no sale linked to this order to download.", ToastType.Error);
             return;

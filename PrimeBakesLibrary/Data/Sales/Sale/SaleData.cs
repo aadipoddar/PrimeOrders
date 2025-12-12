@@ -16,10 +16,10 @@ namespace PrimeBakesLibrary.Data.Sales.Sale;
 
 public static class SaleData
 {
-	public static async Task<int> InsertSale(SaleModel sale) =>
+	private static async Task<int> InsertSale(SaleModel sale) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertSale, sale)).FirstOrDefault();
 
-	public static async Task<int> InsertSaleDetail(SaleDetailModel saleDetail) =>
+	private static async Task<int> InsertSaleDetail(SaleDetailModel saleDetail) =>
 		(await SqlDataAccess.LoadData<int, dynamic>(StoredProcedureNames.InsertSaleDetail, saleDetail)).FirstOrDefault();
 
 	public static async Task<(MemoryStream pdfStream, string fileName)> GenerateAndDownloadInvoice(int saleId)
@@ -41,17 +41,17 @@ public static class SaleData
 
 			// Try to load party (party can be null for cash sales)
 			LedgerModel party = null;
-			if (transaction.PartyId.HasValue && transaction.PartyId.Value > 0)
+			if (transaction.PartyId is > 0)
 				party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId.Value);
 
 			// Try to load customer (customer can be null)
 			CustomerModel customer = null;
-			if (transaction.CustomerId.HasValue && transaction.CustomerId.Value > 0)
+			if (transaction.CustomerId is > 0)
 				customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, transaction.CustomerId.Value);
 
 			// Try to load order information if OrderId is present
 			OrderModel order = null;
-			if (transaction.OrderId.HasValue && transaction.OrderId.Value > 0)
+			if (transaction.OrderId is > 0)
 				order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, transaction.OrderId.Value);
 
 			if (company is null)
@@ -101,17 +101,17 @@ public static class SaleData
 
 			// Try to load party (party can be null for cash sales)
 			LedgerModel party = null;
-			if (transaction.PartyId.HasValue && transaction.PartyId.Value > 0)
+			if (transaction.PartyId is > 0)
 				party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, transaction.PartyId.Value);
 
 			// Try to load customer (customer can be null)
 			CustomerModel customer = null;
-			if (transaction.CustomerId.HasValue && transaction.CustomerId.Value > 0)
+			if (transaction.CustomerId is > 0)
 				customer = await CommonData.LoadTableDataById<CustomerModel>(TableNames.Customer, transaction.CustomerId.Value);
 
 			// Try to load order information if OrderId is present
 			OrderModel order = null;
-			if (transaction.OrderId.HasValue && transaction.OrderId.Value > 0)
+			if (transaction.OrderId is > 0)
 				order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, transaction.OrderId.Value);
 
 			if (company is null)
@@ -146,7 +146,7 @@ public static class SaleData
 	{
 		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, sale.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
 		if (sale.OrderId is not null && sale.OrderId > 0)
@@ -156,14 +156,14 @@ public static class SaleData
 		sale.Status = false;
 		await InsertSale(sale);
 
-		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Sale.ToString(), sale.Id, sale.LocationId);
-		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+		await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.Sale), sale.Id, sale.LocationId);
+		await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.Sale), sale.Id);
 
-		if (sale.PartyId is not null || sale.PartyId > 0)
+		if (sale.PartyId is not null or > 0)
 		{
 			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
-			if (party.LocationId.HasValue && party.LocationId.Value > 0)
-				await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Purchase.ToString(), sale.Id, party.LocationId.Value);
+			if (party.LocationId is > 0)
+				await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.Purchase), sale.Id, party.LocationId.Value);
 		}
 
 		var saleVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.SaleVoucherId);
@@ -179,30 +179,28 @@ public static class SaleData
 	{
 		var transactionDetails = await CommonData.LoadTableDataByMasterId<SaleDetailModel>(TableNames.SaleDetail, sale.Id);
 		List<SaleItemCartModel> transactionItemCarts = [];
-
-		foreach (var item in transactionDetails)
-			transactionItemCarts.Add(new()
-			{
-				ItemId = item.ProductId,
-				ItemName = "",
-				Quantity = item.Quantity,
-				Rate = item.Rate,
-				BaseTotal = item.BaseTotal,
-				DiscountPercent = item.DiscountPercent,
-				DiscountAmount = item.DiscountAmount,
-				AfterDiscount = item.AfterDiscount,
-				CGSTPercent = item.CGSTPercent,
-				CGSTAmount = item.CGSTAmount,
-				SGSTPercent = item.SGSTPercent,
-				SGSTAmount = item.SGSTAmount,
-				IGSTPercent = item.IGSTPercent,
-				IGSTAmount = item.IGSTAmount,
-				InclusiveTax = item.InclusiveTax,
-				TotalTaxAmount = item.TotalTaxAmount,
-				Total = item.Total,
-				NetRate = item.NetRate,
-				Remarks = item.Remarks
-			});
+		transactionItemCarts.AddRange(transactionDetails.Select(item => new SaleItemCartModel()
+		{
+			ItemId = item.ProductId,
+			ItemName = "",
+			Quantity = item.Quantity,
+			Rate = item.Rate,
+			BaseTotal = item.BaseTotal,
+			DiscountPercent = item.DiscountPercent,
+			DiscountAmount = item.DiscountAmount,
+			AfterDiscount = item.AfterDiscount,
+			CGSTPercent = item.CGSTPercent,
+			CGSTAmount = item.CGSTAmount,
+			SGSTPercent = item.SGSTPercent,
+			SGSTAmount = item.SGSTAmount,
+			IGSTPercent = item.IGSTPercent,
+			IGSTAmount = item.IGSTAmount,
+			InclusiveTax = item.InclusiveTax,
+			TotalTaxAmount = item.TotalTaxAmount,
+			Total = item.Total,
+			NetRate = item.NetRate,
+			Remarks = item.Remarks
+		}));
 
 		await SaveSaleTransaction(sale, transactionItemCarts);
 	}
@@ -211,7 +209,7 @@ public static class SaleData
 	{
 		var sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, saleId);
 
-		if (sale.OrderId is null || sale.OrderId <= 0)
+		if (sale.OrderId is null or <= 0)
 			return;
 
 		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, sale.OrderId.Value);
@@ -230,7 +228,7 @@ public static class SaleData
 		{
 			var existingSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, sale.Id);
 			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingSale.FinancialYearId);
-			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+			if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 			sale.TransactionNo = existingSale.TransactionNo;
@@ -239,7 +237,7 @@ public static class SaleData
 			sale.TransactionNo = await GenerateCodes.GenerateSaleTransactionNo(sale);
 
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, sale.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 		sale.Id = await InsertSale(sale);
@@ -295,13 +293,13 @@ public static class SaleData
 	{
 		if (update)
 		{
-			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Sale.ToString(), sale.Id, sale.LocationId);
+			await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.Sale), sale.Id, sale.LocationId);
 
-			if (sale.PartyId is not null || sale.PartyId > 0)
+			if (sale.PartyId is not null or > 0)
 			{
 				var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
-				if (party.LocationId.HasValue && party.LocationId.Value > 0)
-					await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(StockType.Purchase.ToString(), sale.Id, party.LocationId.Value);
+				if (party.LocationId is > 0)
+					await ProductStockData.DeleteProductStockByTypeTransactionIdLocationId(nameof(StockType.Purchase), sale.Id, party.LocationId.Value);
 			}
 		}
 
@@ -314,17 +312,17 @@ public static class SaleData
 				Quantity = -item.Quantity,
 				NetRate = item.NetRate,
 				TransactionId = sale.Id,
-				Type = StockType.Sale.ToString(),
+				Type = nameof(StockType.Sale),
 				TransactionNo = sale.TransactionNo,
 				TransactionDate = DateOnly.FromDateTime(sale.TransactionDateTime),
 				LocationId = sale.LocationId
 			});
 
 		// Party Location Stock Update
-		if (sale.PartyId is not null || sale.PartyId > 0)
+		if (sale.PartyId is not null or > 0)
 		{
 			var party = await CommonData.LoadTableDataById<LedgerModel>(TableNames.Ledger, sale.PartyId.Value);
-			if (party.LocationId.HasValue && party.LocationId.Value > 0)
+			if (party.LocationId is > 0)
 				foreach (var item in cart)
 					await ProductStockData.InsertProductStock(new()
 					{
@@ -333,7 +331,7 @@ public static class SaleData
 						Quantity = item.Quantity,
 						NetRate = item.NetRate,
 						TransactionId = sale.Id,
-						Type = StockType.Purchase.ToString(),
+						Type = nameof(StockType.Purchase),
 						TransactionNo = sale.TransactionNo,
 						TransactionDate = DateOnly.FromDateTime(sale.TransactionDateTime),
 						LocationId = party.LocationId.Value
@@ -344,7 +342,7 @@ public static class SaleData
 	private static async Task SaveRawMaterialStockByRecipe(SaleModel sale, List<SaleItemCartModel> cart, bool update)
 	{
 		if (update)
-			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.Sale.ToString(), sale.Id);
+			await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.Sale), sale.Id);
 
 		if (sale.LocationId != 1)
 			return;
@@ -363,7 +361,7 @@ public static class SaleData
 					NetRate = product.NetRate / recipeItem.Quantity,
 					TransactionId = sale.Id,
 					TransactionNo = sale.TransactionNo,
-					Type = StockType.Sale.ToString(),
+					Type = nameof(StockType.Sale),
 					TransactionDate = DateOnly.FromDateTime(sale.TransactionDateTime)
 				});
 		}
@@ -398,8 +396,6 @@ public static class SaleData
 			}
 		}
 
-		if (sale.LocationId != 1)
-			return;
 
 		var saleOverview = await CommonData.LoadTableDataById<SaleOverviewModel>(ViewNames.SaleOverview, sale.Id);
 		if (saleOverview is null)
@@ -410,32 +406,53 @@ public static class SaleData
 
 		var accountingCart = new List<AccountingItemCartModel>();
 
-		if (saleOverview.Cash + saleOverview.UPI + saleOverview.Card > 0)
+		if (sale.LocationId == 1)
 		{
-			var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashSalesLedgerId);
-			accountingCart.Add(new()
+			if (saleOverview.Cash + saleOverview.UPI + saleOverview.Card > 0)
 			{
-				ReferenceId = saleOverview.Id,
-				ReferenceType = ReferenceTypes.Sale.ToString(),
-				ReferenceNo = saleOverview.TransactionNo,
-				LedgerId = int.Parse(cashLedger.Value),
-				Debit = saleOverview.Cash + saleOverview.UPI + saleOverview.Card,
-				Credit = null,
-				Remarks = $"Cash Account Posting For Sale Bill {saleOverview.TransactionNo}",
-			});
+				var cashLedger = await SettingsData.LoadSettingsByKey(SettingsKeys.CashSalesLedgerId);
+				accountingCart.Add(new()
+				{
+					ReferenceId = saleOverview.Id,
+					ReferenceType = nameof(ReferenceTypes.Sale),
+					ReferenceNo = saleOverview.TransactionNo,
+					LedgerId = int.Parse(cashLedger.Value),
+					Debit = saleOverview.Cash + saleOverview.UPI + saleOverview.Card,
+					Credit = null,
+					Remarks = $"Cash Account Posting For Sale Bill {saleOverview.TransactionNo}",
+				});
+			}
+
+			if (saleOverview.Credit > 0)
+				accountingCart.Add(new()
+				{
+					ReferenceId = saleOverview.Id,
+					ReferenceType = nameof(ReferenceTypes.Sale),
+					ReferenceNo = saleOverview.TransactionNo,
+					LedgerId = saleOverview.PartyId.Value,
+					Debit = saleOverview.Credit,
+					Credit = null,
+					Remarks = $"Party Account Posting For Sale Bill {saleOverview.TransactionNo}",
+				});
 		}
 
-		if (saleOverview.Credit > 0)
-			accountingCart.Add(new()
+		else
+		{
+			if (saleOverview.Cash + saleOverview.UPI + saleOverview.Card + saleOverview.Credit > 0)
 			{
-				ReferenceId = saleOverview.Id,
-				ReferenceType = ReferenceTypes.Sale.ToString(),
-				ReferenceNo = saleOverview.TransactionNo,
-				LedgerId = saleOverview.PartyId.Value,
-				Debit = saleOverview.Credit,
-				Credit = null,
-				Remarks = $"Party Account Posting For Sale Bill {saleOverview.TransactionNo}",
-			});
+				var ledger = await LedgerData.LoadLedgerByLocation(sale.LocationId);
+				accountingCart.Add(new()
+				{
+					ReferenceId = saleOverview.Id,
+					ReferenceType = nameof(ReferenceTypes.Sale),
+					ReferenceNo = saleOverview.TransactionNo,
+					LedgerId = ledger.Id,
+					Debit = saleOverview.Cash + saleOverview.UPI + saleOverview.Card + saleOverview.Credit,
+					Credit = null,
+					Remarks = $"Location Account Posting For Sale Bill {saleOverview.TransactionNo}",
+				});
+			}
+		}
 
 		if (saleOverview.TotalAmount - saleOverview.TotalExtraTaxAmount > 0)
 		{
@@ -443,7 +460,7 @@ public static class SaleData
 			accountingCart.Add(new()
 			{
 				ReferenceId = saleOverview.Id,
-				ReferenceType = ReferenceTypes.Sale.ToString(),
+				ReferenceType = nameof(ReferenceTypes.Sale),
 				ReferenceNo = saleOverview.TransactionNo,
 				LedgerId = int.Parse(saleLedger.Value),
 				Debit = null,
@@ -458,7 +475,7 @@ public static class SaleData
 			accountingCart.Add(new()
 			{
 				ReferenceId = saleOverview.Id,
-				ReferenceType = ReferenceTypes.Sale.ToString(),
+				ReferenceType = nameof(ReferenceTypes.Sale),
 				ReferenceNo = saleOverview.TransactionNo,
 				LedgerId = int.Parse(gstLedger.Value),
 				Debit = null,

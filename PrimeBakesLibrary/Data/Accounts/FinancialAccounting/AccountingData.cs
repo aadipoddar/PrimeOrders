@@ -111,7 +111,7 @@ public static class AccountingData
     {
         var accounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accountingId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, accounting.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         accounting.Status = false;
@@ -147,7 +147,7 @@ public static class AccountingData
         {
             var existingAccounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, accounting.Id);
             var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingAccounting.FinancialYearId);
-            if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+            if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
                 throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
             accounting.TransactionNo = existingAccounting.TransactionNo;
@@ -156,7 +156,7 @@ public static class AccountingData
             accounting.TransactionNo = await GenerateCodes.GenerateAccountingTransactionNo(accounting);
 
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, accounting.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
         accounting.Id = await InsertAccounting(accounting);

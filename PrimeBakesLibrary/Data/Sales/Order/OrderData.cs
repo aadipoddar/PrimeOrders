@@ -42,7 +42,7 @@ public static class OrderData
 
 			// Try to load sale information if order is converted to sale
 			SaleModel sale = null;
-			if (transaction.SaleId.HasValue && transaction.SaleId.Value > 0)
+			if (transaction.SaleId is > 0)
 				sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, transaction.SaleId.Value);
 
 			// Generate invoice PDF
@@ -93,7 +93,7 @@ public static class OrderData
 
 			// Try to load sale information if order is converted to sale
 			SaleModel sale = null;
-			if (transaction.SaleId.HasValue && transaction.SaleId.Value > 0)
+			if (transaction.SaleId is > 0)
 				sale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, transaction.SaleId.Value);
 
 			// Generate invoice Excel
@@ -124,7 +124,7 @@ public static class OrderData
 	{
 		var order = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, orderId);
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
 		if (order.SaleId is not null && order.SaleId > 0)
@@ -159,7 +159,7 @@ public static class OrderData
 		{
 			var existingOrder = await CommonData.LoadTableDataById<OrderModel>(TableNames.Order, order.Id);
 			var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingOrder.FinancialYearId);
-			if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+			if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
 				throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 			if (existingOrder.SaleId is not null && existingOrder.SaleId > 0)
@@ -171,7 +171,7 @@ public static class OrderData
 			order.TransactionNo = await GenerateCodes.GenerateOrderTransactionNo(order);
 
 		var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, order.FinancialYearId);
-		if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+		if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
 		order.Id = await InsertOrder(order);

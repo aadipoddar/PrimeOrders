@@ -102,14 +102,14 @@ public static class PurchaseReturnData
     {
         var purchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturnId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchaseReturn.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (purchaseReturn is not null)
         {
             purchaseReturn.Status = false;
             await InsertPurchaseReturn(purchaseReturn);
-            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.PurchaseReturn.ToString(), purchaseReturn.Id);
+            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.PurchaseReturn), purchaseReturn.Id);
 
             var purchaseReturnVoucher = await SettingsData.LoadSettingsByKey(SettingsKeys.PurchaseReturnVoucherId);
             var existingAccounting = await AccountingData.LoadAccountingByVoucherReference(int.Parse(purchaseReturnVoucher.Value), purchaseReturn.Id, purchaseReturn.TransactionNo);
@@ -162,12 +162,12 @@ public static class PurchaseReturnData
         {
             var existingPurchaseReturn = await CommonData.LoadTableDataById<PurchaseReturnModel>(TableNames.PurchaseReturn, purchaseReturn.Id);
             var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingPurchaseReturn.FinancialYearId);
-            if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+            if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
                 throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
         }
 
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, purchaseReturn.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
         purchaseReturn.Id = await InsertPurchaseReturn(purchaseReturn);
@@ -221,7 +221,7 @@ public static class PurchaseReturnData
     private static async Task SaveRawMaterialStock(PurchaseReturnModel purchaseReturn, List<PurchaseReturnItemCartModel> cart, bool update)
     {
         if (update)
-            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.PurchaseReturn.ToString(), purchaseReturn.Id);
+            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.PurchaseReturn), purchaseReturn.Id);
 
         foreach (var item in cart)
             await RawMaterialStockData.InsertRawMaterialStock(new()
@@ -231,7 +231,7 @@ public static class PurchaseReturnData
                 Quantity = -item.Quantity,
                 NetRate = item.NetRate,
                 TransactionId = purchaseReturn.Id,
-                Type = StockType.PurchaseReturn.ToString(),
+                Type = nameof(StockType.PurchaseReturn),
                 TransactionNo = purchaseReturn.TransactionNo,
                 TransactionDate = DateOnly.FromDateTime(purchaseReturn.TransactionDateTime)
             });
@@ -263,7 +263,7 @@ public static class PurchaseReturnData
             accountingCart.Add(new()
             {
                 ReferenceId = purchaseReturnOverview.Id,
-                ReferenceType = ReferenceTypes.PurchaseReturn.ToString(),
+                ReferenceType = nameof(ReferenceTypes.PurchaseReturn),
                 ReferenceNo = purchaseReturnOverview.TransactionNo,
                 LedgerId = purchaseReturnOverview.PartyId,
                 Debit = purchaseReturnOverview.TotalAmount,
@@ -277,7 +277,7 @@ public static class PurchaseReturnData
             accountingCart.Add(new()
             {
                 ReferenceId = purchaseReturnOverview.Id,
-                ReferenceType = ReferenceTypes.PurchaseReturn.ToString(),
+                ReferenceType = nameof(ReferenceTypes.PurchaseReturn),
                 ReferenceNo = purchaseReturnOverview.TransactionNo,
                 LedgerId = int.Parse(purchaseLedger.Value),
                 Debit = null,
@@ -292,7 +292,7 @@ public static class PurchaseReturnData
             accountingCart.Add(new()
             {
                 ReferenceId = purchaseReturnOverview.Id,
-                ReferenceType = ReferenceTypes.PurchaseReturn.ToString(),
+                ReferenceType = nameof(ReferenceTypes.PurchaseReturn),
                 ReferenceNo = purchaseReturnOverview.TransactionNo,
                 LedgerId = int.Parse(gstLedger.Value),
                 Debit = null,

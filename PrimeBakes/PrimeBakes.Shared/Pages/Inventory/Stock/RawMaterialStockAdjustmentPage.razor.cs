@@ -290,7 +290,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
 
         #region Financial Year
         _selectedFinancialYear = await FinancialYearData.LoadFinancialYearByDateTime(_transactionDateTime);
-        if (_selectedFinancialYear is null || _selectedFinancialYear.Locked || _selectedFinancialYear.Status == false)
+        if (_selectedFinancialYear is null || _selectedFinancialYear.Locked || !_selectedFinancialYear.Status)
         {
             await _toastNotification.ShowAsync("Invalid Transaction Date", "The selected transaction date does not fall within an active financial year.", ToastType.Error);
             _transactionDateTime = await CommonData.LoadCurrentDateTime();
@@ -361,7 +361,7 @@ public partial class RawMaterialStockAdjustmentPage : IAsyncDisposable
             return false;
         }
 
-        if (_selectedFinancialYear.Status == false)
+        if (!_selectedFinancialYear.Status)
         {
             await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
             return false;

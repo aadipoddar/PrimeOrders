@@ -110,7 +110,7 @@ else
                                     productLocation.Id);
 
                                     <div class="grid-actions">
-                                        @if (actualProductLocation != null && actualProductLocation.Status)
+                                        @if (actualProductLocation is { Status: true })
                                         {
                                             <IconButton Icon="IconType.Edit" Variant="ButtonVariant.Edit" Size="ButtonSize.Grid" Title="Edit (Insert)" OnClick="@(() => OnEditProductLocation(actualProductLocation))" />
                                             <IconButton Icon="IconType.Delete" Variant="ButtonVariant.Delete" Size="ButtonSize.Grid" Title="Delete (Delete)" OnClick="@(() => ShowDeleteConfirmation(actualProductLocation.Id, GetDisplayName(productLocation)))" />

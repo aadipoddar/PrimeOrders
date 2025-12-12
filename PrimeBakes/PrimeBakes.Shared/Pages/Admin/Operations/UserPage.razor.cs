@@ -218,7 +218,7 @@ public partial class UserPage : IAsyncDisposable
 			return false;
 		}
 
-		if (_user.Admin == false && _user.Sales == false && _user.Inventory == false && _user.Accounts == false && _user.Order == false)
+		if (!_user.Admin && !_user.Sales && !_user.Inventory && !_user.Accounts && !_user.Order)
 		{
 			await _toastNotification.ShowAsync("Validation", "At least one role must be assigned.", ToastType.Warning);
 			return false;

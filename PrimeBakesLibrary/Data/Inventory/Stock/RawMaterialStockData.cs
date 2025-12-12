@@ -22,7 +22,7 @@ public static class RawMaterialStockData
             return;
 
         var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(stock.TransactionDate.ToDateTime(TimeOnly.MinValue));
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new Exception("Cannot delete stock entry as the financial year is locked.");
 
         await SqlDataAccess.SaveData(StoredProcedureNames.DeleteRawMaterialStockById, new { Id });
@@ -34,7 +34,7 @@ public static class RawMaterialStockData
         var stockSummary = await LoadRawMaterialStockSummaryByDate(transactionDateTime, transactionDateTime);
 
         var financialYear = await FinancialYearData.LoadFinancialYearByDateTime(transactionDateTime);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new Exception("Cannot delete stock entry as the financial year is locked.");
 
         foreach (var item in cart)
@@ -55,7 +55,7 @@ public static class RawMaterialStockData
                     Quantity = adjustmentQuantity,
                     NetRate = null,
                     TransactionId = null,
-                    Type = StockType.Adjustment.ToString(),
+                    Type = nameof(StockType.Adjustment),
                     TransactionNo = transactionNo,
                     TransactionDate = DateOnly.FromDateTime(transactionDateTime)
                 });

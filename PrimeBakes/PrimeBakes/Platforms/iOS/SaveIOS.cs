@@ -29,7 +29,7 @@ public partial class SaveService
         if (exception == string.Empty)
         {
             UIWindow window = GetKeyWindow();
-            if (window != null && window.RootViewController != null)
+            if (window is { RootViewController: not null })
             {
                 UIViewController uiViewController = window.RootViewController;
                 if (uiViewController != null)

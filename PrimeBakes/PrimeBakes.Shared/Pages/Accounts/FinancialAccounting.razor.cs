@@ -665,7 +665,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 			return false;
 		}
 
-		if (_selectedFinancialYear.Status == false)
+		if (!_selectedFinancialYear.Status)
 		{
 			await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
 			return false;
@@ -699,7 +699,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 		{
 			var existingAccounting = await CommonData.LoadTableDataById<AccountingModel>(TableNames.Accounting, _accounting.Id);
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingAccounting.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			{
 				await _toastNotification.ShowAsync("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", ToastType.Error);
 				return false;
@@ -865,7 +865,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 	private async Task ViewReferenceInvoice()
 	{
-		if (_accounting.ReferenceId is null || _accounting.ReferenceId <= 0)
+		if (_accounting.ReferenceId is null or <= 0)
 		{
 			await _toastNotification.ShowAsync("Invalid Reference", "No reference transaction found.", ToastType.Error);
 			return;
@@ -930,7 +930,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 	private async Task DownloadReferenceInvoice()
 	{
-		if (_accounting.ReferenceId is null || _accounting.ReferenceId <= 0)
+		if (_accounting.ReferenceId is null or <= 0)
 		{
 			await _toastNotification.ShowAsync("Invalid Reference", "No reference transaction found.", ToastType.Error);
 			return;
@@ -998,7 +998,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 		try
 		{
-			if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.Sale.ToString())
+			if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.Sale))
 			{
 				if (FormFactor.GetFormFactor() == "Web")
 					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Sale}/{_selectedAccountingLedger.ReferenceId.Value}", "_blank");
@@ -1006,7 +1006,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 					NavigationManager.NavigateTo($"{PageRouteNames.Sale}/{_selectedAccountingLedger.ReferenceId.Value}");
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.SaleReturn.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.SaleReturn))
 			{
 				if (FormFactor.GetFormFactor() == "Web")
 					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.SaleReturn}/{_selectedAccountingLedger.ReferenceId.Value}", "_blank");
@@ -1014,7 +1014,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 					NavigationManager.NavigateTo($"{PageRouteNames.SaleReturn}/{_selectedAccountingLedger.ReferenceId.Value}");
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.Purchase.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.Purchase))
 			{
 				if (FormFactor.GetFormFactor() == "Web")
 					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.Purchase}/{_selectedAccountingLedger.ReferenceId.Value}", "_blank");
@@ -1022,7 +1022,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 					NavigationManager.NavigateTo($"{PageRouteNames.Purchase}/{_selectedAccountingLedger.ReferenceId.Value}");
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.PurchaseReturn.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.PurchaseReturn))
 			{
 				if (FormFactor.GetFormFactor() == "Web")
 					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.PurchaseReturn}/{_selectedAccountingLedger.ReferenceId.Value}", "_blank");
@@ -1030,7 +1030,7 @@ public partial class FinancialAccounting : IAsyncDisposable
 					NavigationManager.NavigateTo($"{PageRouteNames.PurchaseReturn}/{_selectedAccountingLedger.ReferenceId.Value}");
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.StockTransfer.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.StockTransfer))
 			{
 				if (FormFactor.GetFormFactor() == "Web")
 					await JSRuntime.InvokeVoidAsync("open", $"{PageRouteNames.StockTransfer}/{_selectedAccountingLedger.ReferenceId.Value}", "_blank");
@@ -1057,31 +1057,31 @@ public partial class FinancialAccounting : IAsyncDisposable
 
 		try
 		{
-			if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.Sale.ToString())
+			if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.Sale))
 			{
 				var (pdfStream, fileName) = await SaleData.GenerateAndDownloadInvoice(_selectedAccountingLedger.ReferenceId.Value);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.SaleReturn.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.SaleReturn))
 			{
 				var (pdfStream, fileName) = await SaleReturnData.GenerateAndDownloadInvoice(_selectedAccountingLedger.ReferenceId.Value);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.Purchase.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.Purchase))
 			{
 				var (pdfStream, fileName) = await PurchaseData.GenerateAndDownloadInvoice(_selectedAccountingLedger.ReferenceId.Value);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.PurchaseReturn.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.PurchaseReturn))
 			{
 				var (pdfStream, fileName) = await PurchaseReturnData.GenerateAndDownloadInvoice(_selectedAccountingLedger.ReferenceId.Value);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);
 			}
 
-			else if (_selectedAccountingLedger.ReferenceType.ToString() == ReferenceTypes.StockTransfer.ToString())
+			else if (_selectedAccountingLedger.ReferenceType.ToString() == nameof(ReferenceTypes.StockTransfer))
 			{
 				var (pdfStream, fileName) = await StockTransferData.GenerateAndDownloadInvoice(_selectedAccountingLedger.ReferenceId.Value);
 				await SaveAndViewService.SaveAndView(fileName, pdfStream);

@@ -25,7 +25,7 @@ public static class ProductLocationExcelExport
 				ProductCode = productCode,
 				ProductName = productName,
 				Rate = rate,
-				Status = status is bool statusBool && statusBool ? "Active" : "Deleted"
+				Status = status is bool and true ? "Active" : "Deleted"
 			};
 		});
 

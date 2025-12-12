@@ -160,7 +160,7 @@ public partial class OrderMobilePage
     {
         await SaveOrderFile();
 
-        if (_cart.Sum(x => x.Quantity) <= 0 || await DataStorageService.LocalExists(StorageFileNames.OrderMobileCartDataFileName) == false)
+        if (_cart.Sum(x => x.Quantity) <= 0 || !await DataStorageService.LocalExists(StorageFileNames.OrderMobileCartDataFileName))
             return;
 
         VibrationService.VibrateWithTime(500);

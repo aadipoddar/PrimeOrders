@@ -137,14 +137,14 @@ public static class KitchenIssueData
     {
         var kitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssueId);
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenIssue.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new InvalidOperationException("Cannot delete transaction as the financial year is locked.");
 
         if (kitchenIssue is not null)
         {
             kitchenIssue.Status = false;
             await InsertKitchenIssue(kitchenIssue);
-            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.KitchenIssue.ToString(), kitchenIssue.Id);
+            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.KitchenIssue), kitchenIssue.Id);
         }
     }
 
@@ -176,7 +176,7 @@ public static class KitchenIssueData
         {
             var existingKitchenIssue = await CommonData.LoadTableDataById<KitchenIssueModel>(TableNames.KitchenIssue, kitchenIssue.Id);
             var updateFinancialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingKitchenIssue.FinancialYearId);
-            if (updateFinancialYear is null || updateFinancialYear.Locked || updateFinancialYear.Status == false)
+            if (updateFinancialYear is null || updateFinancialYear.Locked || !updateFinancialYear.Status)
                 throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
             kitchenIssue.TransactionNo = existingKitchenIssue.TransactionNo;
@@ -185,7 +185,7 @@ public static class KitchenIssueData
             kitchenIssue.TransactionNo = await GenerateCodes.GenerateKitchenIssueTransactionNo(kitchenIssue);
 
         var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, kitchenIssue.FinancialYearId);
-        if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+        if (financialYear is null || financialYear.Locked || !financialYear.Status)
             throw new InvalidOperationException("Cannot update transaction as the financial year is locked.");
 
         kitchenIssue.Id = await InsertKitchenIssue(kitchenIssue);
@@ -225,7 +225,7 @@ public static class KitchenIssueData
     private static async Task SaveRawMaterialStock(KitchenIssueModel kitchenIssue, List<KitchenIssueItemCartModel> cart, bool update)
     {
         if (update)
-            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(StockType.KitchenIssue.ToString(), kitchenIssue.Id);
+            await RawMaterialStockData.DeleteRawMaterialStockByTypeTransactionId(nameof(StockType.KitchenIssue), kitchenIssue.Id);
 
         foreach (var item in cart)
             await RawMaterialStockData.InsertRawMaterialStock(new()
@@ -234,7 +234,7 @@ public static class KitchenIssueData
                 RawMaterialId = item.ItemId,
                 Quantity = -item.Quantity,
                 NetRate = null,
-                Type = StockType.KitchenIssue.ToString(),
+                Type = nameof(StockType.KitchenIssue),
                 TransactionId = kitchenIssue.Id,
                 TransactionNo = kitchenIssue.TransactionNo,
                 TransactionDate = DateOnly.FromDateTime(kitchenIssue.TransactionDateTime)

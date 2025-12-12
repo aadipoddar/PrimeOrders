@@ -808,14 +808,14 @@ public static class ExcelInvoiceExportUtil
 			}
 
 			// Debit
-			if (item.Debit.HasValue && item.Debit.Value > 0)
+			if (item.Debit is > 0)
 				worksheet.Range[currentRow, c].Number = (double)item.Debit.Value;
 			else
 				worksheet.Range[currentRow, c].Text = "-";
 			c++;
 
 			// Credit
-			if (item.Credit.HasValue && item.Credit.Value > 0)
+			if (item.Credit is > 0)
 				worksheet.Range[currentRow, c].Number = (double)item.Credit.Value;
 			else
 				worksheet.Range[currentRow, c].Text = "-";

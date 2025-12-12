@@ -1015,7 +1015,7 @@ public partial class SalePage : IAsyncDisposable
 			return false;
 		}
 
-		if (_selectedFinancialYear.Status == false)
+		if (!_selectedFinancialYear.Status)
 		{
 			await _toastNotification.ShowAsync("Financial Year Inactive", "The financial year for the selected transaction date is inactive. Please select a different date.", ToastType.Error);
 			return false;
@@ -1049,7 +1049,7 @@ public partial class SalePage : IAsyncDisposable
 		{
 			var existingSale = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, _sale.Id);
 			var financialYear = await CommonData.LoadTableDataById<FinancialYearModel>(TableNames.FinancialYear, existingSale.FinancialYearId);
-			if (financialYear is null || financialYear.Locked || financialYear.Status == false)
+			if (financialYear is null || financialYear.Locked || !financialYear.Status)
 			{
 				await _toastNotification.ShowAsync("Financial Year Locked or Inactive", "The financial year for the selected transaction date is either locked or inactive. Please select a different date.", ToastType.Error);
 				return false;

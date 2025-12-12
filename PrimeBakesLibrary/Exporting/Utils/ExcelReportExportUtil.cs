@@ -345,7 +345,7 @@ public static class ExcelReportExportUtil
                         break;
                     }
                     // For non-numeric types, if it's not null, it has a value
-                    else if (!(value is decimal || value is double || value is float || value is int || value is long))
+                    else if (!(value is decimal or double or float or int or long))
                     {
                         // For strings, check if not empty
                         if (value is string strValue)
@@ -722,7 +722,7 @@ public static class ExcelReportExportUtil
         }
 
         // Add custom summary fields if provided
-        if (customSummaryFields != null && customSummaryFields.Count > 0)
+        if (customSummaryFields is { Count: > 0 })
         {
             rowIndex += 1; // Add spacing
 

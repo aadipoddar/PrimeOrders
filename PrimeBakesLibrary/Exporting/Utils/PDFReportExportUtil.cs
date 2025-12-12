@@ -219,7 +219,7 @@ public static class PDFReportExportUtil
         Dictionary<string, ColumnSetting> columnSettings,
         List<string> columnOrder)
     {
-        if (columnOrder != null && columnOrder.Count > 0)
+        if (columnOrder is { Count: > 0 })
         {
             return columnOrder;
         }
@@ -295,7 +295,7 @@ public static class PDFReportExportUtil
                         break;
                     }
                     // For non-numeric types, if it's not null, it has a value
-                    else if (!(value is decimal || value is double || value is float || value is int || value is long))
+                    else if (!(value is decimal or double or float or int or long))
                     {
                         // For strings, check if not empty
                         if (value is string strValue)
@@ -716,7 +716,7 @@ public static class PDFReportExportUtil
                     grandTotal = columnTotal;
             }
         }       // Draw custom summary fields first (if any)
-        if (customSummaryFields != null && customSummaryFields.Count > 0)
+        if (customSummaryFields is { Count: > 0 })
         {
             PdfStandardFont customFont = new(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
             PdfBrush customBrush = new PdfSolidBrush(new PdfColor(59, 130, 246));
@@ -905,7 +905,7 @@ public static class PDFReportExportUtil
             {
                 return dateOnly.ToString(format);
             }
-            else if (value is decimal || value is double || value is float || value is int || value is long)
+            else if (value is decimal or double or float or int or long)
             {
                 if (decimal.TryParse(value.ToString(), out decimal numValue))
                 {
