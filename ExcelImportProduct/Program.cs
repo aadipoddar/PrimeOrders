@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml;
+﻿
+using OfficeOpenXml;
 
 using PrimeBakesLibrary.Data;
 using PrimeBakesLibrary.Data.Accounts.FinancialAccounting;
@@ -69,9 +70,11 @@ using Syncfusion.XlsIO;
 
 // await FixLedgers();
 
-await RecalculateTransactions();
+// await RecalculateTransactions();
 
 // await UpdateAccounts();
+
+// await InsertSaleAccounting();
 
 Console.WriteLine("Finished importing Items.");
 Console.ReadLine();
@@ -1499,6 +1502,25 @@ Console.ReadLine();
 //	}
 //}
 
+//static async Task RecalculateTransactions()
+//{
+//	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+
+//	var accounts = await CommonData.LoadTableData<AccountingModel>(TableNames.Accounting);
+//	foreach (var p in accounts)
+//	{
+//		Console.WriteLine("Recalculating Transaction: " + p.Id);
+//		var details = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, p.Id);
+
+//		p.TotalCreditAmount = details.Sum(x => x.Credit ?? 0);
+//		p.TotalDebitAmount = details.Sum(x => x.Debit ?? 0);
+//		p.TotalCreditLedgers = details.Count(x => (x.Credit ?? 0) > 0);
+//		p.TotalDebitLedgers = details.Count(x => (x.Debit ?? 0) > 0);
+
+//		await AccountingData.InsertAccounting(p);
+//	}
+//}
+
 //class PurchaseModelOld
 //{
 //	public int Id { get; set; }
@@ -1671,21 +1693,17 @@ Console.ReadLine();
 //}
 #endregion
 
-static async Task RecalculateTransactions()
-{
-	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+//static async Task InsertSaleAccounting()
+//{
+//	Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+//	var sales = await CommonData.LoadTableDataByStatus<SaleOverviewModel>(ViewNames.SaleOverview);
+//	sales = [.. sales.Where(s => s.LocationId != 1)];
 
-	var accounts = await CommonData.LoadTableData<AccountingModel>(TableNames.Accounting);
-	foreach (var p in accounts)
-	{
-		Console.WriteLine("Recalculating Transaction: " + p.Id);
-		var details = await CommonData.LoadTableDataByMasterId<AccountingDetailModel>(TableNames.AccountingDetail, p.Id);
+//	foreach (var sale in sales)
+//	{
+//		Console.WriteLine("Inserting Accounting for Sale Id: " + sale.Id);
 
-		p.TotalCreditAmount = details.Sum(x => x.Credit ?? 0);
-		p.TotalDebitAmount = details.Sum(x => x.Debit ?? 0);
-		p.TotalCreditLedgers = details.Count(x => (x.Credit ?? 0) > 0);
-		p.TotalDebitLedgers = details.Count(x => (x.Debit ?? 0) > 0);
-
-		await AccountingData.InsertAccounting(p);
-	}
-}
+//		var s = await CommonData.LoadTableDataById<SaleModel>(TableNames.Sale, sale.Id);
+//		await SaleData.SaveAccounting(s, false);
+//	}
+//}

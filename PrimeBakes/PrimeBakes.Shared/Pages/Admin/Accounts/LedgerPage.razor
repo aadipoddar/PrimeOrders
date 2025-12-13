@@ -100,11 +100,11 @@ else
                     <!-- Location (Autocomplete) -->
                     <div class="form-field">
                         <label class="field-label">Location</label>
-                        <SfAutoComplete TValue="int?" TItem="LocationModel" Placeholder="Search location (optional)"
+                        <SfDropDownList TValue="int?" TItem="LocationModel" Placeholder="Search location (optional)"
                                         DataSource="@_locations" @bind-Value="_ledger.LocationId"
                                         FloatLabelType="FloatLabelType.Never" CssClass="custom-textbox">
-                            <AutoCompleteFieldSettings Value="Id" Text="Name" />
-                        </SfAutoComplete>
+                            <DropDownListFieldSettings Value="Id" Text="Name" />
+                        </SfDropDownList>
                     </div>
 
                     <!-- GST No -->
